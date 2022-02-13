@@ -916,23 +916,6 @@ public class SecurityLog {
             throws IOException;
 
     /**
-     * Write a log entry to the security log, with a string payload.
-     *
-     * <p>Security log is part of Android's device management capability that tracks
-     * security-sensitive events for auditing purposes.
-     *
-     * @param tag the tag ID of the security event
-     * @param payload the string payload associated with the tag. Each tag dictates the expected
-     *                meaning of this string.
-     *
-     * @see DevicePolicyManager#setSecurityLoggingEnabled(ComponentName, boolean)
-     * @hide
-     */
-    // TODO(b/218658622): enforce WRITE_SECURITY_LOG in logd.
-    @RequiresPermission(Manifest.permission.WRITE_SECURITY_LOG)
-    public static native int writeEvent(@SecurityLogTag int tag, @NonNull String payload);
-
-    /**
      * Write a log entry to the underlying storage, with several payloads.
      * Supported types of payload are: integer, long, float, string plus array of supported types.
      *

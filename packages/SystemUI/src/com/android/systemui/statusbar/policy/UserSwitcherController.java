@@ -25,7 +25,6 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,7 +38,6 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -78,10 +76,13 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
 import com.android.systemui.util.settings.SecureSettings;
+
+import dagger.Lazy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -125,10 +126,10 @@ public class UserSwitcherController implements Dumpable {
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final TelephonyListenerManager mTelephonyListenerManager;
-    private final IActivityTaskManager mActivityTaskManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final Lazy<ShadeController> mShadeController;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -149,6 +150,7 @@ public class UserSwitcherController implements Dumpable {
     private final UiEventLogger mUiEventLogger;
     private final IActivityManager mActivityManager;
     private final Executor mBgExecutor;
+    private final Executor mUiExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
@@ -170,19 +172,19 @@ public class UserSwitcherController implements Dumpable {
             UiEventLogger uiEventLogger,
             FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
-            IActivityTaskManager activityTaskManager,
             SecureSettings secureSettings,
             @Background Executor bgExecutor,
+            @Main Executor uiExecutor,
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker,
             DumpManager dumpManager,
+            Lazy<ShadeController> shadeController,
             DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mTelephonyListenerManager = telephonyListenerManager;
-        mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
         mFalsingManager = falsingManager;
         mInteractionJankMonitor = interactionJankMonitor;
@@ -190,6 +192,7 @@ public class UserSwitcherController implements Dumpable {
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
         mBgExecutor = bgExecutor;
+        mUiExecutor = uiExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
@@ -204,6 +207,7 @@ public class UserSwitcherController implements Dumpable {
         mActivityStarter = activityStarter;
         mUserManager = userManager;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mShadeController = shadeController;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -289,109 +293,100 @@ public class UserSwitcherController implements Dumpable {
         mForcePictureLoadForUserId.clear();
 
         final boolean addUsersWhenLocked = mAddUsersFromLockScreen;
-        new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            protected ArrayList<UserRecord> doInBackground(SparseArray<Bitmap>... params) {
-                final SparseArray<Bitmap> bitmaps = params[0];
-                List<UserInfo> infos = mUserManager.getAliveUsers();
-                if (infos == null) {
-                    return null;
-                }
-                ArrayList<UserRecord> records = new ArrayList<>(infos.size());
-                int currentId = mUserTracker.getUserId();
-                // Check user switchability of the foreground user since SystemUI is running in
-                // User 0
-                boolean canSwitchUsers = mUserManager.getUserSwitchability(
-                        UserHandle.of(mUserTracker.getUserId())) == SWITCHABILITY_STATUS_OK;
-                UserRecord guestRecord = null;
+        mBgExecutor.execute(() ->  {
+            List<UserInfo> infos = mUserManager.getAliveUsers();
+            if (infos == null) {
+                return;
+            }
+            ArrayList<UserRecord> records = new ArrayList<>(infos.size());
+            int currentId = mUserTracker.getUserId();
+            // Check user switchability of the foreground user since SystemUI is running in
+            // User 0
+            boolean canSwitchUsers = mUserManager.getUserSwitchability(
+                    UserHandle.of(mUserTracker.getUserId())) == SWITCHABILITY_STATUS_OK;
+            UserRecord guestRecord = null;
 
-                for (UserInfo info : infos) {
-                    boolean isCurrent = currentId == info.id;
-                    boolean switchToEnabled = canSwitchUsers || isCurrent;
-                    if (info.isEnabled()) {
-                        if (info.isGuest()) {
-                            // Tapping guest icon triggers remove and a user switch therefore
-                            // the icon shouldn't be enabled even if the user is current
-                            guestRecord = new UserRecord(info, null /* picture */,
-                                    true /* isGuest */, isCurrent, false /* isAddUser */,
-                                    false /* isRestricted */, canSwitchUsers,
-                                    false /* isAddSupervisedUser */);
-                        } else if (info.supportsSwitchToByUser()) {
-                            Bitmap picture = bitmaps.get(info.id);
-                            if (picture == null) {
-                                picture = mUserManager.getUserIcon(info.id);
-
-                                if (picture != null) {
-                                    int avatarSize = mContext.getResources()
-                                            .getDimensionPixelSize(R.dimen.max_avatar_size);
-                                    picture = Bitmap.createScaledBitmap(
-                                            picture, avatarSize, avatarSize, true);
-                                }
-                            }
-                            records.add(new UserRecord(info, picture, false /* isGuest */,
-                                    isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                    switchToEnabled, false /* isAddSupervisedUser */));
-                        }
-                    }
-                }
-                if (records.size() > 1 || guestRecord != null) {
-                    Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
-                }
-
-                if (guestRecord == null) {
-                    if (mGuestUserAutoCreated) {
-                        // If mGuestIsResetting=true, the switch should be disabled since
-                        // we will just use it as an indicator for "Resetting guest...".
-                        // Otherwise, default to canSwitchUsers.
-                        boolean isSwitchToGuestEnabled =
-                                !mGuestIsResetting.get() && canSwitchUsers;
-                        guestRecord = new UserRecord(null /* info */, null /* picture */,
-                                true /* isGuest */, false /* isCurrent */,
-                                false /* isAddUser */, false /* isRestricted */,
-                                isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
-                        checkIfAddUserDisallowedByAdminOnly(guestRecord);
-                        records.add(guestRecord);
-                    } else if (canCreateGuest(guestRecord != null)) {
-                        guestRecord = new UserRecord(null /* info */, null /* picture */,
-                                true /* isGuest */, false /* isCurrent */,
-                                false /* isAddUser */, createIsRestricted(), canSwitchUsers,
+            for (UserInfo info : infos) {
+                boolean isCurrent = currentId == info.id;
+                boolean switchToEnabled = canSwitchUsers || isCurrent;
+                if (info.isEnabled()) {
+                    if (info.isGuest()) {
+                        // Tapping guest icon triggers remove and a user switch therefore
+                        // the icon shouldn't be enabled even if the user is current
+                        guestRecord = new UserRecord(info, null /* picture */,
+                                true /* isGuest */, isCurrent, false /* isAddUser */,
+                                false /* isRestricted */, canSwitchUsers,
                                 false /* isAddSupervisedUser */);
-                        checkIfAddUserDisallowedByAdminOnly(guestRecord);
-                        records.add(guestRecord);
+                    } else if (info.supportsSwitchToByUser()) {
+                        Bitmap picture = bitmaps.get(info.id);
+                        if (picture == null) {
+                            picture = mUserManager.getUserIcon(info.id);
+
+                            if (picture != null) {
+                                int avatarSize = mContext.getResources()
+                                        .getDimensionPixelSize(R.dimen.max_avatar_size);
+                                picture = Bitmap.createScaledBitmap(
+                                        picture, avatarSize, avatarSize, true);
+                            }
+                        }
+                        records.add(new UserRecord(info, picture, false /* isGuest */,
+                                isCurrent, false /* isAddUser */, false /* isRestricted */,
+                                switchToEnabled, false /* isAddSupervisedUser */));
                     }
-                } else {
+                }
+            }
+            if (records.size() > 1 || guestRecord != null) {
+                Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
+            }
+
+            if (guestRecord == null) {
+                if (mGuestUserAutoCreated) {
+                    // If mGuestIsResetting=true, the switch should be disabled since
+                    // we will just use it as an indicator for "Resetting guest...".
+                    // Otherwise, default to canSwitchUsers.
+                    boolean isSwitchToGuestEnabled = !mGuestIsResetting.get() && canSwitchUsers;
+                    guestRecord = new UserRecord(null /* info */, null /* picture */,
+                            true /* isGuest */, false /* isCurrent */,
+                            false /* isAddUser */, false /* isRestricted */,
+                            isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
+                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    records.add(guestRecord);
+                } else if (canCreateGuest(guestRecord != null)) {
+                    guestRecord = new UserRecord(null /* info */, null /* picture */,
+                            true /* isGuest */, false /* isCurrent */,
+                            false /* isAddUser */, createIsRestricted(), canSwitchUsers,
+                            false /* isAddSupervisedUser */);
+                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
                     records.add(guestRecord);
                 }
-
-                if (canCreateUser()) {
-                    UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                            false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted(), canSwitchUsers,
-                            false /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(addUserRecord);
-                    records.add(addUserRecord);
-                }
-
-                if (canCreateSupervisedUser()) {
-                    UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                            false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
-                            createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
-                    checkIfAddUserDisallowedByAdminOnly(addUserRecord);
-                    records.add(addUserRecord);
-                }
-
-                return records;
+            } else {
+                records.add(guestRecord);
             }
 
-            @Override
-            protected void onPostExecute(ArrayList<UserRecord> userRecords) {
-                if (userRecords != null) {
-                    mUsers = userRecords;
+            if (canCreateUser()) {
+                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
+                        false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
+                        createIsRestricted(), canSwitchUsers,
+                        false /* isAddSupervisedUser */);
+                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                records.add(addUserRecord);
+            }
+
+            if (canCreateSupervisedUser()) {
+                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
+                        false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
+                        createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
+                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                records.add(addUserRecord);
+            }
+
+            mUiExecutor.execute(() -> {
+                if (records != null) {
+                    mUsers = records;
                     notifyAdapters();
                 }
-            }
-        }.execute((SparseArray) bitmaps);
+            });
+        });
     }
 
     boolean systemCanCreateUsers() {
@@ -1159,7 +1154,7 @@ public class UserSwitcherController implements Dumpable {
                     context.getString(mGuestUserAutoCreated
                             ? com.android.settingslib.R.string.guest_reset_guest_confirm_button
                             : R.string.guest_exit_guest_dialog_remove), this);
-            SystemUIDialog.setWindowOnTop(this);
+            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
             mTargetId = targetId;
@@ -1194,7 +1189,7 @@ public class UserSwitcherController implements Dumpable {
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(android.R.string.ok), this);
-            SystemUIDialog.setWindowOnTop(this);
+            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
         }
 
         @Override
@@ -1211,33 +1206,8 @@ public class UserSwitcherController implements Dumpable {
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }
-                Intent intent = CreateUserActivity.createIntentForStart(getContext());
-
-                // There are some differences between ActivityStarter and ActivityTaskManager in
-                // terms of how they start an activity. ActivityStarter hides the notification bar
-                // before starting the activity to make sure nothing is in front of the new
-                // activity. ActivityStarter also tries to unlock the device if it's locked.
-                // When locked with PIN/pattern/password then it shows the prompt, if there are no
-                // security steps then it dismisses the keyguard and then starts the activity.
-                // ActivityTaskManager doesn't hide the notification bar or unlocks the device, but
-                // it can start an activity on top of the locked screen.
-                if (!mKeyguardStateController.isUnlocked()
-                        && !mKeyguardStateController.canDismissLockScreen()) {
-                    // Device is locked and can't be unlocked without a PIN/pattern/password so we
-                    // need to use ActivityTaskManager to start the activity on top of the locked
-                    // screen.
-                    try {
-                        mActivityTaskManager.startActivity(null,
-                                mContext.getBasePackageName(), mContext.getAttributionTag(), intent,
-                                intent.resolveTypeIfNeeded(mContext.getContentResolver()), null,
-                                null, 0, 0, null, null);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Couldn't start create user activity", e);
-                    }
-                } else {
-                    mActivityStarter.startActivity(intent, true);
-                }
+                mShadeController.get().collapsePanel();
+                getContext().startActivity(CreateUserActivity.createIntentForStart(getContext()));
             }
         }
     }

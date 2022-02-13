@@ -591,7 +591,7 @@ public class KeyguardManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean isDeviceLocked(int userId) {
         try {
-            return mTrustManager.isDeviceLocked(userId);
+            return mTrustManager.isDeviceLocked(userId, mContext.getAssociatedDisplayId());
         } catch (RemoteException e) {
             return false;
         }
@@ -617,7 +617,7 @@ public class KeyguardManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isDeviceSecure(int userId) {
         try {
-            return mTrustManager.isDeviceSecure(userId);
+            return mTrustManager.isDeviceSecure(userId, mContext.getAssociatedDisplayId());
         } catch (RemoteException e) {
             return false;
         }

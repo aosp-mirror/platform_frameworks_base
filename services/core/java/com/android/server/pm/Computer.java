@@ -640,4 +640,12 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @Nullable
     Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId);
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @Nullable
+    SharedUserApi getSharedUser(int sharedUserAppIde);
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @NonNull
+    ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId);
 }

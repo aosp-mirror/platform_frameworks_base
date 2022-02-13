@@ -86,7 +86,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
 import static com.android.server.pm.PackageManagerServiceUtils.deriveAbiOverride;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
-import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -254,15 +253,21 @@ final class InstallPackageHelper {
         final String realPkgName = request.mRealPkgName;
         final List<String> changedAbiCodePath = result.mChangedAbiCodePath;
         final PackageSetting pkgSetting;
-        if (request.mPkgSetting != null && request.mPkgSetting.getSharedUser() != null
-                && request.mPkgSetting.getSharedUser() != result.mPkgSetting.getSharedUser()) {
-            // shared user changed, remove from old shared user
-            final SharedUserSetting sus = request.mPkgSetting.getSharedUser();
-            sus.removePackage(request.mPkgSetting);
-            // Prune unused SharedUserSetting
-            if (mPm.mSettings.checkAndPruneSharedUserLPw(sus, false)) {
-                // Set the app ID in removed info for UID_REMOVED broadcasts
-                reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId = sus.userId;
+        if (request.mPkgSetting != null) {
+            SharedUserSetting requestSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
+                    request.mPkgSetting);
+            SharedUserSetting resultSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
+                    result.mPkgSetting);
+            if (requestSharedUserSetting != null
+                    && requestSharedUserSetting != resultSharedUserSetting) {
+                // shared user changed, remove from old shared user
+                requestSharedUserSetting.removePackage(request.mPkgSetting);
+                // Prune unused SharedUserSetting
+                if (mPm.mSettings.checkAndPruneSharedUserLPw(requestSharedUserSetting, false)) {
+                    // Set the app ID in removed info for UID_REMOVED broadcasts
+                    reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
+                            requestSharedUserSetting.mAppId;
+                }
             }
         }
         if (result.mExistingSettingCopied) {
@@ -279,8 +284,9 @@ final class InstallPackageHelper {
                 mPm.mSettings.removeRenamedPackageLPw(parsedPackage.getPackageName());
             }
         }
-        if (pkgSetting.getSharedUser() != null) {
-            pkgSetting.getSharedUser().addPackage(pkgSetting);
+        SharedUserSetting sharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(pkgSetting);
+        if (sharedUserSetting != null) {
+            sharedUserSetting.addPackage(pkgSetting);
         }
         if (reconciledPkg.mInstallArgs != null
                 && reconciledPkg.mInstallArgs.mForceQueryableOverride) {
@@ -327,8 +333,8 @@ final class InstallPackageHelper {
             ksms.removeAppKeySetDataLPw(pkg.getPackageName());
         }
         if (reconciledPkg.mSharedUserSignaturesChanged) {
-            pkgSetting.getSharedUser().signaturesChanged = Boolean.TRUE;
-            pkgSetting.getSharedUser().signatures.mSigningDetails = reconciledPkg.mSigningDetails;
+            sharedUserSetting.signaturesChanged = Boolean.TRUE;
+            sharedUserSetting.signatures.mSigningDetails = reconciledPkg.mSigningDetails;
         }
         pkgSetting.setSigningDetails(reconciledPkg.mSigningDetails);
 
@@ -963,7 +969,7 @@ final class InstallPackageHelper {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
                     reconciledPackages = ReconcilePackageUtils.reconcilePackages(
                             reconcileRequest, mSharedLibraries,
-                            mPm.mSettings.getKeySetManagerService());
+                            mPm.mSettings.getKeySetManagerService(), mPm.mSettings);
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.mInstallResult.setError("Reconciliation failed...", e);
@@ -1242,7 +1248,10 @@ final class InstallPackageHelper {
                 // we'll check this again later when scanning, but we want to
                 // bail early here before tripping over redefined permissions.
                 final KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
-                if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+                final SharedUserSetting signatureCheckSus = mPm.mSettings.getSharedUserSettingLPr(
+                        signatureCheckPs);
+                if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, signatureCheckSus,
+                        scanFlags)) {
                     if (!ksms.checkUpgradeKeySetLocked(signatureCheckPs, parsedPackage)) {
                         throw new PrepareFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
                                 + parsedPackage.getPackageName() + " upgrade keys do not match the "
@@ -1257,7 +1266,9 @@ final class InstallPackageHelper {
                                 ReconcilePackageUtils.isRecoverSignatureUpdateNeeded(
                                         mPm.getSettingsVersionForPackage(parsedPackage));
                         // We don't care about disabledPkgSetting on install for now.
-                        final boolean compatMatch = verifySignatures(signatureCheckPs, null,
+                        final boolean compatMatch =
+                                PackageManagerServiceUtils.verifySignatures(signatureCheckPs,
+                                        signatureCheckSus, null,
                                 parsedPackage.getSigningDetails(), compareCompat, compareRecover,
                                 isRollback);
                         // The new KeySets will be re-added later in the scanning process.
@@ -1496,6 +1507,7 @@ final class InstallPackageHelper {
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
+            final SharedUserSetting sharedUserSetting;
             if (replace) {
                 final String pkgName11 = parsedPackage.getPackageName();
                 synchronized (mPm.mLock) {
@@ -1527,10 +1539,11 @@ final class InstallPackageHelper {
 
                     ps = mPm.mSettings.getPackageLPr(pkgName11);
                     disabledPs = mPm.mSettings.getDisabledSystemPkgLPr(ps);
+                    sharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(ps);
 
                     // verify signatures are valid
                     final KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
-                    if (ksms.shouldCheckUpgradeKeySetLocked(ps, scanFlags)) {
+                    if (ksms.shouldCheckUpgradeKeySetLocked(ps, sharedUserSetting, scanFlags)) {
                         if (!ksms.checkUpgradeKeySetLocked(ps, parsedPackage)) {
                             throw new PrepareFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                     "New package not signed by keys specified by upgrade-keysets: "
@@ -1743,16 +1756,18 @@ final class InstallPackageHelper {
 
         final PackageSetting sourcePackageSetting;
         final KeySetManagerService ksms;
+        final SharedUserSetting sharedUserSetting;
         synchronized (mPm.mLock) {
             sourcePackageSetting = mPm.mSettings.getPackageLPr(sourcePackageName);
             ksms = mPm.mSettings.getKeySetManagerService();
+            sharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(sourcePackageSetting);
         }
 
         final SigningDetails sourceSigningDetails = (sourcePackageSetting == null
                 ? SigningDetails.UNKNOWN : sourcePackageSetting.getSigningDetails());
         if (sourcePackageName.equals(parsedPackage.getPackageName())
                 && (ksms.shouldCheckUpgradeKeySetLocked(
-                sourcePackageSetting, scanFlags))) {
+                        sourcePackageSetting, sharedUserSetting, scanFlags))) {
             return ksms.checkUpgradeKeySetLocked(sourcePackageSetting, parsedPackage);
         } else {
 
@@ -3574,7 +3589,8 @@ final class InstallPackageHelper {
                                     mPm.getSettingsVersionForPackage(parsedPackage)));
                     final Map<String, ReconciledPackage> reconcileResult =
                             ReconcilePackageUtils.reconcilePackages(reconcileRequest,
-                                    mSharedLibraries, mPm.mSettings.getKeySetManagerService());
+                                    mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
+                                    mPm.mSettings);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
                     commitReconciledScanResultLocked(reconcileResult.get(pkgName),
                             mPm.mUserManager.getUserIds());
@@ -3658,6 +3674,7 @@ final class InstallPackageHelper {
         final PackageSetting installedPkgSetting;
         final PackageSetting originalPkgSetting;
         final SharedUserSetting sharedUserSetting;
+        SharedUserSetting oldSharedUserSetting = null;
 
         synchronized (mPm.mLock) {
             platformPackage = mPm.getPlatformPackage();
@@ -3683,17 +3700,21 @@ final class InstallPackageHelper {
                     && (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0
                     && sharedUserSetting != null) {
                 Log.d(TAG, "Shared UserID " + parsedPackage.getSharedUserId()
-                        + " (uid=" + sharedUserSetting.userId + "):"
+                        + " (uid=" + sharedUserSetting.mAppId + "):"
                         + " packages=" + sharedUserSetting.packages);
+            }
+            if (installedPkgSetting != null) {
+                oldSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(installedPkgSetting);
             }
         }
 
         final boolean isPlatformPackage = platformPackage != null
                 && platformPackage.getPackageName().equals(parsedPackage.getPackageName());
 
-        return new ScanRequest(parsedPackage, sharedUserSetting,
+        return new ScanRequest(parsedPackage, oldSharedUserSetting,
                 installedPkgSetting == null ? null : installedPkgSetting.getPkg() /* oldPkg */,
                 installedPkgSetting /* packageSetting */,
+                sharedUserSetting,
                 disabledPkgSetting /* disabledPackageSetting */,
                 originalPkgSetting  /* originalPkgSetting */,
                 realPkgName, parseFlags, scanFlags, isPlatformPackage, user, cpuAbiOverride);
@@ -3703,8 +3724,8 @@ final class InstallPackageHelper {
     private ScanResult scanPackageNewLI(@NonNull ParsedPackage parsedPackage,
             final @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags, long currentTime,
-            @Nullable UserHandle user, String cpuAbiOverride) throws PackageManagerException {
-
+            @Nullable UserHandle user, String cpuAbiOverride)
+            throws PackageManagerException {
         final ScanRequest initialScanRequest = prepareInitialScanRequest(parsedPackage, parseFlags,
                 scanFlags, user, cpuAbiOverride);
         final PackageSetting installedPkgSetting = initialScanRequest.mPkgSetting;
@@ -3725,8 +3746,9 @@ final class InstallPackageHelper {
         synchronized (mPm.mLock) {
             assertPackageIsValid(parsedPackage, parseFlags, newScanFlags);
             final ScanRequest request = new ScanRequest(parsedPackage,
-                    initialScanRequest.mSharedUserSetting,
-                    initialScanRequest.mOldPkg, installedPkgSetting, disabledPkgSetting,
+                    initialScanRequest.mOldSharedUserSetting,
+                    initialScanRequest.mOldPkg, installedPkgSetting,
+                    initialScanRequest.mSharedUserSetting, disabledPkgSetting,
                     initialScanRequest.mOriginalPkgSetting, initialScanRequest.mRealPkgName,
                     parseFlags, scanFlags, initialScanRequest.mIsPlatformPackage, user,
                     cpuAbiOverride);
@@ -3775,8 +3797,9 @@ final class InstallPackageHelper {
             if (scanSystemPartition && isSystemPkgUpdated) {
                 // we're updating the disabled package, so, scan it as the package setting
                 final ScanRequest request = new ScanRequest(parsedPackage,
-                        initialScanRequest.mSharedUserSetting,
+                        mPm.mSettings.getSharedUserSettingLPr(disabledPkgSetting),
                         null, disabledPkgSetting /* pkgSetting */,
+                        initialScanRequest.mSharedUserSetting,
                         null /* disabledPkgSetting */, null /* originalPkgSetting */,
                         null, parseFlags, scanFlags,
                         initialScanRequest.mIsPlatformPackage, user, null);
@@ -3994,12 +4017,14 @@ final class InstallPackageHelper {
                 if (!verifyPackageUpdateLPr(originalPs, pkg)) {
                     // the new package is incompatible with the original
                     continue;
-                } else if (originalPs.getSharedUser() != null) {
-                    if (!originalPs.getSharedUser().name.equals(pkg.getSharedUserId())) {
+                } else if (mPm.mSettings.getSharedUserSettingLPr(originalPs) != null) {
+                    final String sharedUserSettingsName =
+                            mPm.mSettings.getSharedUserSettingLPr(originalPs).name;
+                    if (!sharedUserSettingsName.equals(pkg.getSharedUserId())) {
                         // the shared user id is incompatible with the original
                         Slog.w(TAG, "Unable to migrate data from " + originalPs.getPackageName()
-                                + " to " + pkg.getPackageName() + ": old uid "
-                                + originalPs.getSharedUser().name
+                                + " to " + pkg.getPackageName() + ": old shared user settings name "
+                                + sharedUserSettingsName
                                 + " differs from " + pkg.getSharedUserId());
                         continue;
                     }

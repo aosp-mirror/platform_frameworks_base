@@ -3278,6 +3278,7 @@
     <public name="windowSplashScreenBehavior" />
     <public name="allowUntrustedActivityEmbedding" />
     <public name="knownActivityEmbeddingCerts" />
+    <public name="intro" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

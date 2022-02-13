@@ -467,13 +467,14 @@ final class DeletePackageHelper {
     private void clearPackageStateForUserLIF(PackageSetting ps, int userId,
             PackageRemovedInfo outInfo, int flags) {
         final AndroidPackage pkg;
+        final SharedUserSetting sus;
         synchronized (mPm.mLock) {
             pkg = mPm.mPackages.get(ps.getPackageName());
+            sus = mPm.mSettings.getSharedUserSettingLPr(ps);
         }
 
         mAppDataHelper.destroyAppProfilesLIF(pkg);
 
-        final SharedUserSetting sus = ps.getSharedUser();
         final List<AndroidPackage> sharedUserPkgs =
                 sus != null ? sus.getPackages() : Collections.emptyList();
         final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm);

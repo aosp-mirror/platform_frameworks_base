@@ -249,11 +249,13 @@ public final class BroadcastQueue {
     }
 
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
+        r.enqueueClockTime = System.currentTimeMillis();
         mParallelBroadcasts.add(r);
         enqueueBroadcastHelper(r);
     }
 
     public void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
+        r.enqueueClockTime = System.currentTimeMillis();
         mDispatcher.enqueueOrderedBroadcastLocked(r);
         enqueueBroadcastHelper(r);
     }
@@ -263,8 +265,6 @@ public final class BroadcastQueue {
      * enqueueOrderedBroadcastLocked.
      */
     private void enqueueBroadcastHelper(BroadcastRecord r) {
-        r.enqueueClockTime = System.currentTimeMillis();
-
         if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_PENDING),
@@ -366,6 +366,15 @@ public final class BroadcastQueue {
         if (app.isKilled()) {
             throw new RemoteException("app gets killed during broadcasting");
         }
+    }
+
+    /**
+     * Called by ActivityManagerService to notify that the uid has process started, if there is any
+     * deferred BOOT_COMPLETED broadcast, the BroadcastDispatcher can dispatch the broadcast now.
+     * @param uid
+     */
+    public void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
+        mDispatcher.updateUidReadyForBootCompletedBroadcastLocked(uid);
     }
 
     public boolean sendPendingBroadcastsLocked(ProcessRecord app) {
@@ -1858,8 +1867,6 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // TODO (206518114): Only allow apps with ACCESS_PACKAGE_USAGE_STATS to set
-        // getIdForResponseEvent.
         // TODO (217251579): Temporarily use temp-allowlist reason to identify
         // push messages and record response events.
         useTemporaryAllowlistReasonAsSignal(r);

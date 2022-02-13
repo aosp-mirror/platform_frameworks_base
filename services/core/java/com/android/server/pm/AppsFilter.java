@@ -33,11 +33,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
@@ -62,6 +57,11 @@ import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Snapshots;
@@ -158,6 +158,7 @@ public class AppsFilter implements Watchable, Snappable {
     private final FeatureConfig mFeatureConfig;
     private final OverlayReferenceMapper mOverlayReferenceMapper;
     private final StateProvider mStateProvider;
+    private final PackageManagerInternal mPmInternal;
 
     private SigningDetails mSystemSigningDetails;
     private Set<String> mProtectedBroadcasts = new ArraySet<>();
@@ -250,13 +251,15 @@ public class AppsFilter implements Watchable, Snappable {
             String[] forceQueryableList,
             boolean systemAppsQueryable,
             @Nullable OverlayReferenceMapper.Provider overlayProvider,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor,
+            PackageManagerInternal pmInternal) {
         mFeatureConfig = featureConfig;
         mForceQueryableByDevicePackageNames = forceQueryableList;
         mSystemAppsQueryable = systemAppsQueryable;
         mOverlayReferenceMapper = new OverlayReferenceMapper(true /*deferRebuild*/,
                 overlayProvider);
         mStateProvider = stateProvider;
+        mPmInternal = pmInternal;
         mBackgroundExecutor = backgroundExecutor;
         mSnapshot = makeCache();
     }
@@ -289,6 +292,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
 
         mBackgroundExecutor = null;
+        mPmInternal = null;
         mSnapshot = new SnapshotCache.Sealed<>();
     }
 
@@ -508,7 +512,7 @@ public class AppsFilter implements Watchable, Snappable {
         };
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,
                 forcedQueryablePackageNames, forceSystemAppsQueryable, null,
-                injector.getBackgroundExecutor());
+                injector.getBackgroundExecutor(), pms);
         featureConfig.setAppsFilter(appsFilter);
         return appsFilter;
     }
@@ -1236,9 +1240,9 @@ public class AppsFilter implements Watchable, Snappable {
             // shared user members to re-establish visibility between them and other packages.
             // NOTE: this must come after all removals from data structures but before we update the
             //       cache
-            if (setting.getSharedUser() != null) {
-                final ArraySet<? extends PackageStateInternal> sharedUserPackages =
-                        setting.getSharedUser().getPackageStates();
+            if (setting.hasSharedUser()) {
+                final ArraySet<PackageStateInternal> sharedUserPackages =
+                        mPmInternal.getSharedUserPackages(setting.getSharedUserAppId());
                 for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
                     if (sharedUserPackages.valueAt(i) == setting) {
                         continue;
@@ -1250,9 +1254,9 @@ public class AppsFilter implements Watchable, Snappable {
 
             synchronized (mCacheLock) {
                 removeAppIdFromVisibilityCache(setting.getAppId());
-                if (mShouldFilterCache != null && setting.getSharedUser() != null) {
-                    final ArraySet<? extends PackageStateInternal> sharedUserPackages =
-                            setting.getSharedUser().getPackageStates();
+                if (mShouldFilterCache != null && setting.hasSharedUser()) {
+                    final ArraySet<PackageStateInternal> sharedUserPackages =
+                            mPmInternal.getSharedUserPackages(setting.getSharedUserAppId());
                     for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
                         PackageStateInternal siblingSetting =
                                 sharedUserPackages.valueAt(i);
@@ -1367,13 +1371,14 @@ public class AppsFilter implements Watchable, Snappable {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingSetting instanceof");
             }
             if (callingSetting instanceof PackageStateInternal) {
-                if (((PackageStateInternal) callingSetting).getSharedUser() == null) {
-                    callingPkgSetting = (PackageStateInternal) callingSetting;
-                    callingSharedPkgSettings = null;
-                } else {
+                final PackageStateInternal packageState = (PackageStateInternal) callingSetting;
+                if (packageState.hasSharedUser()) {
                     callingPkgSetting = null;
-                    callingSharedPkgSettings = ((PackageStateInternal) callingSetting)
-                            .getSharedUser().getPackageStates();
+                    callingSharedPkgSettings = mPmInternal.getSharedUserPackages(
+                            packageState.getSharedUserAppId());
+                } else {
+                    callingPkgSetting = packageState;
+                    callingSharedPkgSettings = null;
                 }
             } else {
                 callingPkgSetting = null;

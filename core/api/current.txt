@@ -866,6 +866,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interactiveUiTimeout = 16844181; // 0x1010595
     field public static final int interpolator = 16843073; // 0x1010141
+    field public static final int intro;
     field public static final int isAccessibilityTool = 16844353; // 0x1010641
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
@@ -3247,6 +3248,7 @@ package android.accessibilityservice {
     method @Nullable public String getTileServiceClassName();
     method public boolean isAccessibilityTool();
     method public String loadDescription(android.content.pm.PackageManager);
+    method @Nullable public CharSequence loadIntro(@NonNull android.content.pm.PackageManager);
     method public CharSequence loadSummary(android.content.pm.PackageManager);
     method public void setInteractiveUiTimeoutMillis(@IntRange(from=0) int);
     method public void setNonInteractiveUiTimeoutMillis(@IntRange(from=0) int);
@@ -6634,6 +6636,7 @@ package android.app {
     method public android.app.PictureInPictureParams.Builder setActions(java.util.List<android.app.RemoteAction>);
     method public android.app.PictureInPictureParams.Builder setAspectRatio(android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setAutoEnterEnabled(boolean);
+    method @NonNull public android.app.PictureInPictureParams.Builder setExpandedAspectRatio(@Nullable android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);
   }
@@ -7046,6 +7049,7 @@ package android.app {
   public final class VoiceInteractor {
     method public android.app.VoiceInteractor.Request getActiveRequest(String);
     method public android.app.VoiceInteractor.Request[] getActiveRequests();
+    method @NonNull public String getPackageName();
     method public boolean isDestroyed();
     method public void notifyDirectActionsChanged();
     method public boolean registerOnDestroyedCallback(@NonNull java.util.concurrent.Executor, @NonNull Runnable);
@@ -11864,6 +11868,7 @@ package android.content.pm {
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
     field public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
     field public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
+    field public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE = "android.software.expanded_picture_in_picture";
     field public static final String FEATURE_FACE = "android.hardware.biometrics.face";
     field public static final String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
@@ -17375,6 +17380,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_PREVIEW_STABILIZATION_OUTPUT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_USE_CASE_STREAM_COMBINATIONS;
@@ -24373,6 +24379,17 @@ package android.media.effect {
 
 package android.media.metrics {
 
+  public final class BundleSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
+    method public void reportBundleMetrics(@NonNull android.os.PersistableBundle);
+  }
+
+  public final class EditingSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
+  }
+
   public abstract class Event {
     method @NonNull public android.os.Bundle getMetricsBundle();
     method @IntRange(from=0xffffffff) public long getTimeSinceCreatedMillis();
@@ -24384,8 +24401,11 @@ package android.media.metrics {
   }
 
   public final class MediaMetricsManager {
+    method @NonNull public android.media.metrics.BundleSession createBundleSession();
+    method @NonNull public android.media.metrics.EditingSession createEditingSession();
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
+    method @NonNull public android.media.metrics.TranscodingSession createTranscodingSession();
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
@@ -24631,6 +24651,11 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackState(int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setVideoFrameRate(@FloatRange(from=0xffffffff, to=java.lang.Float.MAX_VALUE) float);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setWidth(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+  }
+
+  public final class TranscodingSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
   }
 
 }

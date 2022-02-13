@@ -199,7 +199,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             holder.init(dialog);
             SystemUIDialog.setShowForAllUsers(dialog, true);
             SystemUIDialog.registerDismissListener(dialog);
-            SystemUIDialog.setWindowOnTop(dialog);
+            SystemUIDialog.setWindowOnTop(dialog, mKeyguard.isShowing());
 
             mUiHandler.post(() -> {
                 if (view != null) {

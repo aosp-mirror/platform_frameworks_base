@@ -195,6 +195,21 @@ public class ConditionMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void addCallback_withMultipleInstancesOfTheSameCallback_registerOnlyOne() {
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(), null /*callbacks*/);
+        final Monitor.Callback callback = mock(Monitor.Callback.class);
+
+        // Adds the same instance multiple times.
+        monitor.addCallback(callback);
+        monitor.addCallback(callback);
+        monitor.addCallback(callback);
+        mExecutor.runAllReady();
+
+        // Callback should only be triggered once.
+        verify(callback, times(1)).onConditionsChanged(true);
+    }
+
+    @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
         final Condition condition = mock(Condition.class);
         final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)),

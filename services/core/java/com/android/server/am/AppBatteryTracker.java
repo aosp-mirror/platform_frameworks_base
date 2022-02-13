@@ -325,7 +325,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 final int uid = uidConsumers.keyAt(i);
                 final ImmutableBatteryUsage actualUsage = uidConsumers.valueAt(i);
                 final ImmutableBatteryUsage exemptedUsage = mAppRestrictionController
-                        .getUidBatteryExemptedUsageSince(uid, since, now);
+                        .getUidBatteryExemptedUsageSince(uid, since, now,
+                                bgPolicy.mBgCurrentDrainExemptedTypes);
                 // It's possible the exemptedUsage could be larger than actualUsage,
                 // as the former one is an approximate value.
                 final BatteryUsage bgUsage = actualUsage.mutate()
@@ -656,7 +657,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     final BatteryUsage bgUsage = uidConsumers.valueAt(i)
                             .calcPercentage(uid, bgPolicy);
                     final BatteryUsage exemptedUsage = mAppRestrictionController
-                            .getUidBatteryExemptedUsageSince(uid, since, now)
+                            .getUidBatteryExemptedUsageSince(uid, since, now,
+                                    bgPolicy.mBgCurrentDrainExemptedTypes)
                             .calcPercentage(uid, bgPolicy);
                     final BatteryUsage reportedUsage = new BatteryUsage(bgUsage)
                             .subtract(exemptedUsage)
@@ -1027,6 +1029,21 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_power_components";
 
         /**
+         * The types of state where we'll exempt its battery usage when it's in that state.
+         * The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_exempted_types";
+
+        /**
+         * The behavior when an app has the permission ACCESS_BACKGROUND_LOCATION granted,
+         * whether or not the system will use a higher threshold towards its background battery
+         * usage because of it.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_high_threshold_by_bg_location";
+
+        /**
          * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
@@ -1089,6 +1106,16 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final int mDefaultBgCurrentDrainPowerComponent;
 
         /**
+         * Default value to {@link #mBgCurrentDrainExmptedTypes}.
+         **/
+        final int mDefaultBgCurrentDrainExemptedTypes;
+
+        /**
+         * Default value to {@link #mBgCurrentDrainHighThresholdByBgLocation}.
+         */
+        final boolean mDefaultBgCurrentDrainHighThresholdByBgLocation;
+
+        /**
          * The index to {@link #mBgCurrentDrainRestrictedBucketThreshold}
          * and {@link #mBgCurrentDrainBgRestrictedThreshold}.
          */
@@ -1146,6 +1173,16 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         volatile Dimensions[] mBatteryDimensions;
 
         /**
+         * @see #KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES.
+         */
+        volatile int mBgCurrentDrainExemptedTypes;
+
+        /**
+         * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION.
+         */
+        volatile boolean mBgCurrentDrainHighThresholdByBgLocation;
+
+        /**
          * The capacity of the battery when fully charged in mAh.
          */
         private int mBatteryFullChargeMah;
@@ -1201,6 +1238,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     R.integer.config_bg_current_drain_types_to_bg_restricted);
             mDefaultBgCurrentDrainPowerComponent = resources.getInteger(
                     R.integer.config_bg_current_drain_power_components);
+            mDefaultBgCurrentDrainExemptedTypes = resources.getInteger(
+                    R.integer.config_bg_current_drain_exempted_types);
+            mDefaultBgCurrentDrainHighThresholdByBgLocation = resources.getBoolean(
+                    R.bool.config_bg_current_drain_high_threshold_by_bg_location);
             mBgCurrentDrainRestrictedBucketThreshold[0] =
                     mDefaultBgCurrentDrainRestrictedBucket;
             mBgCurrentDrainRestrictedBucketThreshold[1] =
@@ -1230,6 +1271,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             switch (name) {
                 case KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET:
                 case KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED:
+                case KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION:
                 case KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET:
                 case KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED:
                 case KEY_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET:
@@ -1248,6 +1290,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     break;
                 case KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED:
                     updateCurrentDrainEventDurationBasedThresholdEnabled();
+                    break;
+                case KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES:
+                    updateCurrentDrainExemptedTypes();
                     break;
                 default:
                     super.onPropertiesChanged(name);
@@ -1305,6 +1350,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     mBatteryDimensions[i] = new Dimensions(mBgCurrentDrainPowerComponents, i);
                 }
             }
+            mBgCurrentDrainHighThresholdByBgLocation =
+                    DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION,
+                    mDefaultBgCurrentDrainHighThresholdByBgLocation);
         }
 
         private void updateCurrentDrainWindow() {
@@ -1335,6 +1384,13 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled);
         }
 
+        private void updateCurrentDrainExemptedTypes() {
+            mBgCurrentDrainExemptedTypes = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES,
+                    mDefaultBgCurrentDrainExemptedTypes);
+        }
+
         @Override
         public void onSystemReady() {
             mBatteryFullChargeMah =
@@ -1345,6 +1401,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             updateCurrentDrainMediaPlaybackMinDuration();
             updateCurrentDrainLocationMinDuration();
             updateCurrentDrainEventDurationBasedThresholdEnabled();
+            updateCurrentDrainExemptedTypes();
         }
 
         @Override
@@ -1454,16 +1511,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         notifyController = true;
                     } else {
                         excessive = true;
-                        if (brPercentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]) {
+                        if (brPercentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]
+                                && curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
                             // If we're in the restricted standby bucket but still seeing high
                             // current drains, tell the controller again.
-                            if (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
-                                    && ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0) {
-                                if (now > ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
-                                        + mBgCurrentDrainWindowMs) {
-                                    ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
-                                    notifyController = true;
-                                }
+                            final long lastResbucket = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET];
+                            final long lastBgRes = ts[TIME_STAMP_INDEX_BG_RESTRICTED];
+                            // If it has been a while since restricting the app and since the last
+                            // time we notify the controller, notify it again.
+                            if ((now >= lastResbucket + mBgCurrentDrainWindowMs) && (lastBgRes == 0
+                                    || (now >= lastBgRes + mBgCurrentDrainWindowMs))) {
+                                ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
+                                notifyController = true;
                             }
                         }
                     }
@@ -1505,6 +1564,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         }
 
         private boolean hasLocation(int uid, long now, long window) {
+            if (!mBgCurrentDrainHighThresholdByBgLocation) {
+                return false;
+            }
             final AppRestrictionController controller = mTracker.mAppRestrictionController;
             if (mInjector.getPermissionManagerServiceInternal().checkUidPermission(
                     uid, ACCESS_BACKGROUND_LOCATION) == PERMISSION_GRANTED) {
@@ -1618,6 +1680,14 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 pw.print(KEY_BG_CURRENT_DRAIN_POWER_COMPONENTS);
                 pw.print('=');
                 pw.println(mBgCurrentDrainPowerComponents);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_EXEMPTED_TYPES);
+                pw.print('=');
+                pw.println(BaseAppStateTracker.stateTypesToString(mBgCurrentDrainExemptedTypes));
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_BY_BG_LOCATION);
+                pw.print('=');
+                pw.println(mBgCurrentDrainHighThresholdByBgLocation);
 
                 pw.print(prefix);
                 pw.println("Excessive current drain detected:");

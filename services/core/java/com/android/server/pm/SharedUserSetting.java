@@ -19,9 +19,6 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SigningDetails;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -29,8 +26,12 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedProcess;
+import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.utils.SnapshotCache;
 
 import libcore.util.EmptyArray;
@@ -46,7 +47,7 @@ import java.util.Map;
 public final class SharedUserSetting extends SettingBase implements SharedUserApi {
     final String name;
 
-    int userId;
+    int mAppId;
 
     /** @see SharedUserApi#getUidFlags() **/
     int uidFlags;
@@ -98,7 +99,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     private SharedUserSetting(SharedUserSetting orig) {
         super(orig);
         name = orig.name;
-        userId = orig.userId;
+        mAppId = orig.mAppId;
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
         packages = new ArraySet<>(orig.packages);
@@ -133,12 +134,12 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     @Override
     public String toString() {
         return "SharedUserSetting{" + Integer.toHexString(System.identityHashCode(this)) + " "
-                + name + "/" + userId + "}";
+                + name + "/" + mAppId + "}";
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(PackageServiceDumpProto.SharedUserProto.UID, userId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.UID, mAppId);
         proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
         proto.end(token);
     }
@@ -286,7 +287,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     /** Updates all fields in this shared user setting from another. */
     public SharedUserSetting updateFrom(SharedUserSetting sharedUser) {
         super.copySettingBase(sharedUser);
-        this.userId = sharedUser.userId;
+        this.mAppId = sharedUser.mAppId;
         this.uidFlags = sharedUser.uidFlags;
         this.uidPrivateFlags = sharedUser.uidPrivateFlags;
         this.seInfoTargetSdkVersion = sharedUser.seInfoTargetSdkVersion;
@@ -315,8 +316,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     }
 
     @Override
-    public int getUserId() {
-        return userId;
+    public int getAppId() {
+        return mAppId;
     }
 
     @Override
@@ -362,5 +363,11 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     @Override
     public ArrayMap<String, ParsedProcess> getProcesses() {
         return processes;
+    }
+
+    @NonNull
+    @Override
+    public LegacyPermissionState getSharedUserLegacyPermissionState() {
+        return super.getLegacyPermissionState();
     }
 }

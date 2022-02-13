@@ -159,12 +159,18 @@ public interface PackageState {
     String getSecondaryCpuAbi();
 
     /**
-     * Retrieves the shared user ID. Note that the actual shared user data is not available here and
-     * must be queried separately.
-     *
-     * @return the shared user this package is a part of, or -1 if it's not part of a shared user.
+     * Whether the package shares the same user ID as other packages
      */
-    int getSharedUserId();
+    boolean hasSharedUser();
+
+    /**
+     * Retrieves the shared user app ID. Note that the actual shared user data is not available here
+     * and must be queried separately.
+     *
+     * @return the app ID of the shared user that this package is a part of, or -1 if it's not part
+     * of a shared user.
+     */
+    int getSharedUserAppId();
 
     @NonNull
     SigningInfo getSigningInfo();

@@ -352,6 +352,7 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
+    method public float getExpandedAspectRatio();
     method public android.graphics.Rect getSourceRectHint();
     method public boolean isSeamlessResizeEnabled();
   }
@@ -1967,6 +1968,7 @@ package android.os.storage {
     method public long computeStorageCacheBytes(@NonNull java.io.File);
     method @NonNull public static java.util.UUID convert(@NonNull String);
     method @NonNull public static String convert(@NonNull java.util.UUID);
+    method @Nullable public String getCloudMediaProvider();
     method public boolean isAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public static boolean isUserKeyUnlocked(int);
     field public static final String CACHE_RESERVE_PERCENT_HIGH_KEY = "cache_reserve_percent_high";

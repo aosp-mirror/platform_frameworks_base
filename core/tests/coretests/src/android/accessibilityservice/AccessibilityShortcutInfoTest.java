@@ -89,6 +89,16 @@ public class AccessibilityShortcutInfoTest {
     }
 
     @Test
+    public void testIntro() {
+        final String intro = mTargetContext.getResources()
+                .getString(R.string.accessibility_shortcut_intro);
+
+        assertNotNull("Can't find intro string", intro);
+        assertThat("Intro is not correct",
+                mShortcutInfo.loadIntro(mPackageManager), is(intro));
+    }
+
+    @Test
     public void testAnimatedImageRes() {
         assertThat("Animated image resource id is not correct",
                 mShortcutInfo.getAnimatedImageRes(), is(R.drawable.bitmap_drawable));
