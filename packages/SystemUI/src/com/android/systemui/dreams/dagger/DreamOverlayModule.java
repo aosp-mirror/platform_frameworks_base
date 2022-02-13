@@ -17,7 +17,6 @@
 package com.android.systemui.dreams.dagger;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -28,7 +27,6 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.util.Preconditions;
-import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
@@ -148,11 +146,5 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
         return lifecycleOwner.getLifecycle();
-    }
-
-    @Provides
-    @DreamOverlayComponent.DreamOverlayScope
-    static DreamBackend providesDreamBackend(Context context) {
-        return DreamBackend.getInstance(context);
     }
 }
