@@ -32,6 +32,7 @@ import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.utils.WatchedArrayMap;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -354,9 +355,10 @@ public class KeySetManagerService {
         return mKeySets.get(id) != null;
     }
 
-    public boolean shouldCheckUpgradeKeySetLocked(PackageStateInternal oldPs, int scanFlags) {
+    public boolean shouldCheckUpgradeKeySetLocked(PackageStateInternal oldPs,
+            SharedUserApi sharedUserSetting, int scanFlags) {
         // Can't rotate keys during boot or if sharedUser.
-        if (oldPs == null || (scanFlags&SCAN_INITIAL) != 0 || (oldPs.getSharedUser() != null)
+        if (oldPs == null || (scanFlags & SCAN_INITIAL) != 0 || (sharedUserSetting != null)
                 || !oldPs.getKeySetData().isUsingUpgradeKeySets()) {
             return false;
         }

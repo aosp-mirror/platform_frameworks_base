@@ -230,7 +230,7 @@ class SharedLibrariesImplTest {
         val pair = createBasicAndroidPackage(STATIC_LIB_PACKAGE_NAME + "_" + 10, 10L,
             staticLibrary = STATIC_LIB_NAME, staticLibraryVersion = 10L)
         val parsedPackage = pair.second as ParsedPackage
-        val scanRequest = ScanRequest(parsedPackage, null, null, null,
+        val scanRequest = ScanRequest(parsedPackage, null, null, null, null,
             null, null, null, 0, 0, false, null, null)
         val scanResult = ScanResult(scanRequest, true, null, null, false, 0, null, null, null)
 
@@ -329,7 +329,7 @@ class SharedLibrariesImplTest {
         val packageSetting = mRule.system()
             .createBasicSettingBuilder(pair.first.parentFile, parsedPackage.hideAsFinal())
             .setPkgFlags(ApplicationInfo.FLAG_SYSTEM).build()
-        val scanRequest = ScanRequest(parsedPackage, null, null, null,
+        val scanRequest = ScanRequest(parsedPackage, null, null, null, null,
             null, null, null, 0, 0, false, null, null)
         val scanResult = ScanResult(scanRequest, true, packageSetting, null,
             false, 0, null, null, listOf(testInfo))

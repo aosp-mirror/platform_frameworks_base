@@ -1794,6 +1794,98 @@ public class QuotaControllerTest {
         }
     }
 
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when allowed time equals the bucket window size.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_EdgeOfWindow_AllowedEqualsWindow() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS),
+                        mQcConstants.MAX_EXECUTION_TIME_MS - 10 * MINUTE_IN_MILLIS, 5),
+                false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (10 * MINUTE_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5),
+                false);
+
+        setDeviceConfigLong(QcConstants.KEY_ALLOWED_TIME_PER_PERIOD_EXEMPTED_MS,
+                10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_EXEMPTED_MS, 10 * MINUTE_IN_MILLIS);
+        // window size = allowed time, so jobs can essentially run non-stop until they reach the
+        // max execution time.
+        setStandbyBucket(EXEMPTED_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(0,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 10 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+    }
+
+    /**
+     * Test getTimeUntilQuotaConsumedLocked when the determination is based within the bucket
+     * window and the session is rolling out of the window.
+     */
+    @Test
+    public void testGetTimeUntilQuotaConsumedLocked_EdgeOfWindow_BucketWindow() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (24 * HOUR_IN_MILLIS),
+                        10 * MINUTE_IN_MILLIS, 5), false);
+        setStandbyBucket(RARE_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(0,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(10 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (8 * HOUR_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5), false);
+        setStandbyBucket(FREQUENT_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(0,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(10 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (2 * HOUR_IN_MILLIS),
+                        10 * MINUTE_IN_MILLIS, 5), false);
+        setStandbyBucket(WORKING_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(0,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(10 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (10 * MINUTE_IN_MILLIS), 10 * MINUTE_IN_MILLIS, 5),
+                false);
+        // ACTIVE window = allowed time, so jobs can essentially run non-stop until they reach the
+        // max execution time.
+        setStandbyBucket(ACTIVE_INDEX);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(0,
+                    mQuotaController.getRemainingExecutionTimeLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE));
+            assertEquals(mQcConstants.MAX_EXECUTION_TIME_MS - 30 * MINUTE_IN_MILLIS,
+                    mQuotaController.getTimeUntilQuotaConsumedLocked(
+                            SOURCE_USER_ID, SOURCE_PACKAGE, PRIORITY_DEFAULT));
+        }
+    }
+
     @Test
     public void testIsWithinQuotaLocked_NeverApp() {
         synchronized (mQuotaController.mLock) {

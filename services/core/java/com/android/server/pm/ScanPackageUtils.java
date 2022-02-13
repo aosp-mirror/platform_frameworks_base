@@ -125,6 +125,7 @@ final class ScanPackageUtils {
         final @ParsingPackageUtils.ParseFlags int parseFlags = request.mParseFlags;
         final @PackageManagerService.ScanFlags int scanFlags = request.mScanFlags;
         final String realPkgName = request.mRealPkgName;
+        final SharedUserSetting oldSharedUserSetting = request.mOldSharedUserSetting;
         final SharedUserSetting sharedUserSetting = request.mSharedUserSetting;
         final UserHandle user = request.mUser;
         final boolean isPlatformPackage = request.mIsPlatformPackage;
@@ -165,18 +166,18 @@ final class ScanPackageUtils {
 
         int previousAppId = Process.INVALID_UID;
 
-        if (pkgSetting != null && pkgSetting.getSharedUser() != sharedUserSetting) {
-            if (pkgSetting.getSharedUser() != null && sharedUserSetting == null) {
+        if (pkgSetting != null && oldSharedUserSetting != sharedUserSetting) {
+            if (oldSharedUserSetting != null && sharedUserSetting == null) {
                 previousAppId = pkgSetting.getAppId();
                 // Log that something is leaving shareduid and keep going
                 Slog.i(TAG,
                         "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + pkgSetting.getSharedUser().name + " to " + "<nothing>.");
+                                + oldSharedUserSetting.name + " to " + "<nothing>.");
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + (pkgSetting.getSharedUser() != null
-                                ? pkgSetting.getSharedUser().name : "<nothing>")
+                                + (oldSharedUserSetting != null
+                                ? oldSharedUserSetting.name : "<nothing>")
                                 + " to "
                                 + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
                                 + "; replacing with new");
@@ -234,8 +235,8 @@ final class ScanPackageUtils {
             // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
             // secondaryCpuAbi are not known at this point so we always update them
             // to null here, only to reset them at a later point.
-            Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, sharedUserSetting,
-                    destCodeFile, parsedPackage.getNativeLibraryDir(),
+            Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, oldSharedUserSetting,
+                    sharedUserSetting, destCodeFile, parsedPackage.getNativeLibraryDir(),
                     AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
                     AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
                     PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
@@ -390,16 +391,16 @@ final class ScanPackageUtils {
                     + " abiOverride=" + pkgSetting.getCpuAbiOverride());
         }
 
-        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.getSharedUser() != null) {
+        if ((scanFlags & SCAN_BOOTING) == 0 && oldSharedUserSetting != null) {
             // We don't do this here during boot because we can do it all
             // at once after scanning all existing packages.
             //
             // We also do this *before* we perform dexopt on this package, so that
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
-            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.getSharedUser(),
+            changedAbiCodePath = applyAdjustedAbiToSharedUser(oldSharedUserSetting,
                     parsedPackage, packageAbiHelper.getAdjustedAbiForSharedUser(
-                            pkgSetting.getSharedUser().packages, parsedPackage));
+                            oldSharedUserSetting.packages, parsedPackage));
         }
 
         parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()

@@ -1515,7 +1515,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
                 AndroidPackage pkg = packageState.getPkg();
-                SharedUserApi sharedUser = packageState.getSharedUser();
+                SharedUserApi sharedUser = m.mComputer.getSharedUser(
+                        packageState.getSharedUserAppId());
                 String oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
 
                 if (pkg == null) {
@@ -7865,6 +7866,18 @@ public class PackageManagerService extends IPackageManager.Stub
                 boolean migrateAppsData) {
             PackageManagerService.this.mAppDataHelper.reconcileAppsData(userId, flags,
                     migrateAppsData);
+        }
+
+        @Override
+        @NonNull
+        public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
+            return PackageManagerService.this.mComputer.getSharedUserPackages(sharedUserAppId);
+        }
+
+        @Override
+        @Nullable
+        public SharedUserApi getSharedUserApi(int sharedUserAppId) {
+            return mComputer.getSharedUser(sharedUserAppId);
         }
 
         @NonNull

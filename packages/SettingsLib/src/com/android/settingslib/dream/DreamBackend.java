@@ -444,7 +444,8 @@ public class DreamBackend {
         }
         final Intent intent = new Intent()
                 .setComponent(dreamInfo.settingsComponentName)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                .addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         uiContext.startActivity(intent);
     }
 

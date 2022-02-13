@@ -134,6 +134,7 @@ import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -190,6 +191,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -470,6 +472,9 @@ class StorageManagerService extends IStorageManager.Stub
     private IPackageMoveObserver mMoveCallback;
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
+
+    @GuardedBy("mCloudMediaProviders")
+    private final SparseArray<String> mCloudMediaProviders = new SparseArray<>();
 
     private volatile int mMediaStoreAuthorityAppId = -1;
 
@@ -752,6 +757,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_BOOT_COMPLETED = 13;
     private static final int H_COMPLETE_UNLOCK_USER = 14;
     private static final int H_VOLUME_STATE_CHANGED = 15;
+    private static final int H_CLOUD_MEDIA_PROVIDER_CHANGED = 16;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -879,6 +885,17 @@ class StorageManagerService extends IStorageManager.Stub
                     final SomeArgs args = (SomeArgs) msg.obj;
                     onVolumeStateChangedAsync((VolumeInfo) args.arg1, args.argi1, args.argi2);
                     args.recycle();
+                    break;
+                }
+                case H_CLOUD_MEDIA_PROVIDER_CHANGED: {
+                    final Object listener = msg.obj;
+                    if (listener instanceof StorageManagerInternal.CloudProviderChangeListener) {
+                        notifyCloudMediaProviderChangedAsync(
+                                (StorageManagerInternal.CloudProviderChangeListener) listener);
+                    } else {
+                        onCloudMediaProviderChangedAsync(msg.arg1);
+                    }
+                    break;
                 }
             }
         }
@@ -1697,7 +1714,6 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-
     private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
             if (newState != VolumeInfo.STATE_MOUNTED) {
@@ -1833,6 +1849,27 @@ class StorageManagerService extends IStorageManager.Stub
                         OBB_FLUSH_MOUNT_STATE, vol.path));
             }
             maybeLogMediaMount(vol, newState);
+        }
+    }
+
+    private void notifyCloudMediaProviderChangedAsync(
+            @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
+        synchronized (mCloudMediaProviders) {
+            for (int i = mCloudMediaProviders.size() - 1; i >= 0; --i) {
+                listener.onCloudProviderChanged(
+                        mCloudMediaProviders.keyAt(i), mCloudMediaProviders.valueAt(i));
+            }
+        }
+    }
+
+    private void onCloudMediaProviderChangedAsync(int userId) {
+        final String authority;
+        synchronized (mCloudMediaProviders) {
+            authority = mCloudMediaProviders.get(userId);
+        }
+        for (StorageManagerInternal.CloudProviderChangeListener listener :
+                mStorageManagerInternal.mCloudProviderChangeListeners) {
+            listener.onCloudProviderChanged(userId, authority);
         }
     }
 
@@ -3773,7 +3810,7 @@ class StorageManagerService extends IStorageManager.Stub
             Binder.restoreCallingIdentity(token);
         }
     }
-    
+
     @Override
     public void notifyAppIoBlocked(String volumeUuid, int uid, int tid, int reason) {
         enforceExternalStorageService();
@@ -3794,9 +3831,44 @@ class StorageManagerService extends IStorageManager.Stub
         return isAppIoBlocked(uid);
     }
 
-
     private boolean isAppIoBlocked(int uid) {
         return mStorageSessionController.isAppIoBlocked(uid);
+    }
+
+    @Override
+    public void setCloudMediaProvider(@Nullable String authority) {
+        enforceExternalStorageService();
+
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mCloudMediaProviders) {
+            final String oldAuthority = mCloudMediaProviders.get(userId);
+            if (!Objects.equals(authority, oldAuthority)) {
+                mCloudMediaProviders.put(userId, authority);
+                mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, userId, 0, authority)
+                        .sendToTarget();
+            }
+        }
+    }
+
+    @Override
+    @Nullable
+    public String getCloudMediaProvider() {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        final String authority;
+        synchronized (mCloudMediaProviders) {
+            authority = mCloudMediaProviders.get(userId);
+        }
+        if (authority == null) {
+            return null;
+        }
+        final ProviderInfo pi = mPmInternal.resolveContentProvider(
+                authority, 0, userId, callingUid);
+        if (pi == null
+                || mPmInternal.filterAppAccess(pi.packageName, callingUid, userId)) {
+            return null;
+        }
+        return authority;
     }
 
     /**
@@ -4951,6 +5023,12 @@ class StorageManagerService extends IStorageManager.Stub
             pw.decreaseIndent();
         }
 
+        synchronized (mCloudMediaProviders) {
+            pw.println();
+            pw.print("Media cloud providers: ");
+            pw.println(mCloudMediaProviders);
+        }
+
         pw.println();
         pw.print("Last maintenance: ");
         pw.println(TimeUtils.formatForLogging(mLastMaintenance));
@@ -4970,6 +5048,9 @@ class StorageManagerService extends IStorageManager.Stub
         @GuardedBy("mResetListeners")
         private final List<StorageManagerInternal.ResetListener> mResetListeners =
                 new ArrayList<>();
+
+        private final CopyOnWriteArraySet<StorageManagerInternal.CloudProviderChangeListener>
+                mCloudProviderChangeListeners = new CopyOnWriteArraySet<>();
 
         @Override
         public boolean isFuseMounted(int userId) {
@@ -5192,6 +5273,13 @@ class StorageManagerService extends IStorageManager.Stub
             synchronized (mLock) {
                 return mCeStoragePreparedUsers.contains(userId);
             }
+        }
+
+        @Override
+        public void registerCloudProviderChangeListener(
+                @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
+            mCloudProviderChangeListeners.add(listener);
+            mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener);
         }
     }
 }

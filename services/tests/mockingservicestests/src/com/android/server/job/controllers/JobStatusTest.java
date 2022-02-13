@@ -43,6 +43,7 @@ import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
@@ -137,7 +138,7 @@ public class JobStatusTest {
                 .setOverrideDeadline(12)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
     }
 
@@ -146,7 +147,7 @@ public class JobStatusTest {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
     }
 
@@ -155,7 +156,7 @@ public class JobStatusTest {
         final JobInfo networkJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(networkJob), false);
     }
 
@@ -165,7 +166,8 @@ public class JobStatusTest {
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn("not.test.package");
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0)))
+                .thenReturn("not.test.package");
         assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
     }
 
@@ -178,13 +180,25 @@ public class JobStatusTest {
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(nonEligibleUri, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
     }
 
     @Test
+    public void testMediaBackupExemption_lowPriorityJobs() {
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
+        final JobInfo.Builder jobBuilder = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        assertEffectiveBucketForMediaExemption(
+                createJobStatus(jobBuilder.setPriority(JobInfo.PRIORITY_LOW).build()), false);
+        assertEffectiveBucketForMediaExemption(
+                createJobStatus(jobBuilder.setPriority(JobInfo.PRIORITY_MIN).build()), false);
+    }
+
+    @Test
     public void testMediaBackupExemptionGranted() {
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         final JobInfo imageUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)

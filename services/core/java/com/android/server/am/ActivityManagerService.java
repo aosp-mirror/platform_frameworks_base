@@ -4856,6 +4856,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        if (!badApp) {
+            updateUidReadyForBootCompletedBroadcastLocked(app.uid);
+        }
+
         // Check if a next-broadcast receiver is in this process...
         if (!badApp && isPendingBroadcastProcessLocked(pid)) {
             try {
@@ -6482,7 +6486,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return isBackgroundRestrictedNoCheck(callingUid, packageName);
     }
 
-    boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
+    @VisibleForTesting
+    public boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
         final int mode = getAppOpsManager().checkOpNoThrow(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
                 uid, packageName);
         return mode != AppOpsManager.MODE_ALLOWED;
@@ -12764,6 +12769,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         return didSomething;
     }
 
+    void updateUidReadyForBootCompletedBroadcastLocked(int uid) {
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.updateUidReadyForBootCompletedBroadcastLocked(uid);
+            queue.scheduleBroadcastsLocked();
+        }
+    }
+
     /**
      * @deprecated Use {@link #registerReceiverWithFeature}
      */
@@ -13389,10 +13401,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            // TODO (206518114): We need to use the "real" package name which sent the broadcast,
-            // in case the broadcast is sent via PendingIntent.
             if (brOptions.getIdForResponseEvent() > 0) {
-                enforceUsageStatsPermission(callerPackage, realCallingUid, realCallingPid,
+                enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
                         "recordResponseEventWhileInBackground()");
             }
         }

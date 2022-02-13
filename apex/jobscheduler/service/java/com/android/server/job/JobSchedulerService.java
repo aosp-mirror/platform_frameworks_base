@@ -52,6 +52,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -70,6 +71,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -86,10 +88,10 @@ import android.util.SparseSetArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -237,6 +239,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_UID_ACTIVE = 6;
     static final int MSG_UID_IDLE = 7;
     static final int MSG_CHECK_CHANGED_JOB_LIST = 8;
+    static final int MSG_CHECK_MEDIA_EXEMPTION = 9;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -271,8 +274,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     @GuardedBy("mLock")
     private final BatteryStateTracker mBatteryStateTracker;
 
-    @NonNull
-    private final String mSystemGalleryPackage;
+    @GuardedBy("mLock")
+    private final SparseArray<String> mCloudMediaProviderPackages = new SparseArray<>();
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
@@ -1783,9 +1786,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         mJobRestrictions = new ArrayList<>();
         mJobRestrictions.add(new ThermalStatusRestriction(this));
 
-        mSystemGalleryPackage = Objects.requireNonNull(
-                context.getString(R.string.config_systemGallery));
-
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
         if (!mJobs.jobTimesInflatedValid()) {
@@ -1854,6 +1854,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
+
+            LocalServices.getService(StorageManagerInternal.class)
+                    .registerCloudProviderChangeListener(new CloudProviderChangeListener());
 
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
@@ -2353,6 +2356,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                         break;
                     }
 
+                    case MSG_CHECK_MEDIA_EXEMPTION: {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        synchronized (mLock) {
+                            updateMediaBackupExemptionLocked(
+                                    args.argi1, (String) args.arg1, (String) args.arg2);
+                        }
+                        args.recycle();
+                        break;
+                    }
                 }
                 maybeRunPendingJobsLocked();
             }
@@ -2649,10 +2661,29 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "Check changed jobs...");
         }
+        if (mChangedJobList.size() == 0) {
+            return;
+        }
 
         mChangedJobList.forEach(mMaybeQueueFunctor);
         mMaybeQueueFunctor.postProcessLocked();
         mChangedJobList.clear();
+    }
+
+    @GuardedBy("mLock")
+    private void updateMediaBackupExemptionLocked(int userId, @Nullable String oldPkg,
+            @Nullable String newPkg) {
+        final Predicate<JobStatus> shouldProcessJob =
+                (job) -> job.getSourceUserId() == userId
+                        && (job.getSourcePackageName().equals(oldPkg)
+                        || job.getSourcePackageName().equals(newPkg));
+        mJobs.forEachJob(shouldProcessJob,
+                (job) -> {
+                    if (job.updateMediaBackupExemptionStatus()) {
+                        mChangedJobList.add(job);
+                    }
+                });
+        mHandler.sendEmptyMessage(MSG_CHECK_CHANGED_JOB_LIST);
     }
 
     /** Returns true if both the calling and source users for the job are started. */
@@ -3050,8 +3081,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public String getMediaBackupPackage() {
-            return mSystemGalleryPackage;
+        public String getCloudMediaProviderPackage(int userId) {
+            return mCloudMediaProviderPackages.get(userId);
         }
 
         @Override
@@ -3157,6 +3188,35 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slog.v(TAG, packageName + "/" + userId + " standby bucket index: " + bucket);
         }
         return bucket;
+    }
+
+    private class CloudProviderChangeListener implements
+            StorageManagerInternal.CloudProviderChangeListener {
+
+        @Override
+        public void onCloudProviderChanged(int userId, @Nullable String authority) {
+            final PackageManager pm = getContext()
+                    .createContextAsUser(UserHandle.of(userId), 0)
+                    .getPackageManager();
+            final ProviderInfo pi = pm.resolveContentProvider(
+                    authority, PackageManager.ComponentInfoFlags.of(0));
+            final String newPkg = (pi == null) ? null : pi.packageName;
+            synchronized (mLock) {
+                final String oldPkg = mCloudMediaProviderPackages.get(userId);
+                if (!Objects.equals(oldPkg, newPkg)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Cloud provider of user " + userId + " changed from " + oldPkg
+                                + " to " + newPkg);
+                    }
+                    mCloudMediaProviderPackages.put(userId, newPkg);
+                    SomeArgs args = SomeArgs.obtain();
+                    args.argi1 = userId;
+                    args.arg1 = oldPkg;
+                    args.arg2 = newPkg;
+                    mHandler.obtainMessage(MSG_CHECK_MEDIA_EXEMPTION, args).sendToTarget();
+                }
+            }
+        }
     }
 
     /**
@@ -3799,6 +3859,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
 
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
+            pw.println();
+
+            pw.print("Media Cloud Providers: ");
+            pw.println(mCloudMediaProviderPackages);
+            pw.println();
+
             pw.print("Registered ");
             pw.print(mJobs.size());
             pw.println(" jobs:");
