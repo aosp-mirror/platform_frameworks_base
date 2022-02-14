@@ -2142,20 +2142,24 @@ public final class Settings implements Watchable, Snappable {
                         serializer.endTag(null, TAG_SUSPEND_PARAMS);
                     }
                 }
-                if (!ArrayUtils.isEmpty(ustate.getEnabledComponentsNoCopy())) {
+                final ArraySet<String> enabledComponents = ustate.getEnabledComponents();
+                if (enabledComponents != null && enabledComponents.size() > 0) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
-                    for (final String name : ustate.getEnabledComponentsNoCopy()) {
+                    for (int i = 0; i < enabledComponents.size(); i++) {
                         serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.attribute(null, ATTR_NAME,
+                                enabledComponents.valueAt(i));
                         serializer.endTag(null, TAG_ITEM);
                     }
                     serializer.endTag(null, TAG_ENABLED_COMPONENTS);
                 }
-                if (!ArrayUtils.isEmpty(ustate.getDisabledComponentsNoCopy())) {
+                final ArraySet<String> disabledComponents = ustate.getDisabledComponents();
+                if (disabledComponents != null && disabledComponents.size() > 0) {
                     serializer.startTag(null, TAG_DISABLED_COMPONENTS);
-                    for (final String name : ustate.getDisabledComponentsNoCopy()) {
+                    for (int i = 0; i < disabledComponents.size(); i++) {
                         serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.attribute(null, ATTR_NAME,
+                                disabledComponents.valueAt(i));
                         serializer.endTag(null, TAG_ITEM);
                     }
                     serializer.endTag(null, TAG_DISABLED_COMPONENTS);
@@ -4987,18 +4991,18 @@ public final class Settings implements Watchable, Snappable {
             }
 
             if (permissionNames == null) {
-                Set<String> cmp = userState.getDisabledComponents();
+                WatchedArraySet<String> cmp = userState.getDisabledComponentsNoCopy();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    disabledComponents:");
-                    for (String s : cmp) {
-                        pw.print(prefix); pw.print("      "); pw.println(s);
+                    for (int i = 0; i < cmp.size(); i++) {
+                        pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
-                cmp = userState.getEnabledComponents();
+                cmp = userState.getEnabledComponentsNoCopy();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    enabledComponents:");
-                    for (String s : cmp) {
-                        pw.print(prefix); pw.print("      "); pw.println(s);
+                    for (int i = 0; i < cmp.size(); i++) {
+                        pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
             }

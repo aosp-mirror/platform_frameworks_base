@@ -52,6 +52,7 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
+import com.android.server.utils.WatchedArrayMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -145,7 +146,7 @@ public final class SuspendPackageHelper {
                     continue;
                 }
 
-                final ArrayMap<String, SuspendParams> suspendParamsMap =
+                final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
                         packageState.getUserStateOrDefault(userId).getSuspendParams();
                 final SuspendParams suspendParams = suspendParamsMap == null
                         ? null : suspendParamsMap.get(packageName);
@@ -297,7 +298,8 @@ public final class SuspendPackageHelper {
                     continue;
                 }
 
-                ArrayMap<String, SuspendParams> suspendParamsMap = packageUserState.getSuspendParams();
+                WatchedArrayMap<String, SuspendParams> suspendParamsMap =
+                        packageUserState.getSuspendParams();
                 int countRemoved = 0;
                 for (int index = 0; index < suspendParamsMap.size(); index++) {
                     String suspendingPackage = suspendParamsMap.keyAt(index);
@@ -440,7 +442,8 @@ public final class SuspendPackageHelper {
             return null;
         }
 
-        final ArrayMap<String, SuspendParams> suspendParamsMap = userState.getSuspendParams();
+        final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
+                userState.getSuspendParams();
         if (suspendParamsMap == null) {
             return null;
         }

@@ -24,6 +24,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.content.pm.overlay.OverlayPaths;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.util.DataClass;
@@ -329,11 +330,11 @@ public class PackageStateImpl implements PackageState {
 
         private final long mCeDataInode;
         @NonNull
-        private final Set<String> mDisabledComponents;
+        private final ArraySet<String> mDisabledComponents;
         @PackageManager.DistractionRestriction
         private final int mDistractionFlags;
         @NonNull
-        private final Set<String> mEnabledComponents;
+        private final ArraySet<String> mEnabledComponents;
         private final int mEnabledState;
         @Nullable
         private final String mHarmfulAppWarning;
@@ -460,7 +461,8 @@ public class PackageStateImpl implements PackageState {
         }
 
         @DataClass.Generated.Member
-        public @NonNull Set<String> getDisabledComponents() {
+        public @NonNull
+        ArraySet<String> getDisabledComponents() {
             return mDisabledComponents;
         }
 
@@ -470,7 +472,7 @@ public class PackageStateImpl implements PackageState {
         }
 
         @DataClass.Generated.Member
-        public @NonNull Set<String> getEnabledComponents() {
+        public @NonNull ArraySet<String> getEnabledComponents() {
             return mEnabledComponents;
         }
 
