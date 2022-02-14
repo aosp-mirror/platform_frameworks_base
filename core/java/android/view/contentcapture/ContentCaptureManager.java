@@ -218,6 +218,7 @@ public final class ContentCaptureManager {
     public static final boolean DEBUG = false;
 
     /** @hide */
+    @TestApi
     public static final String DUMPABLE_NAME = "ContentCaptureManager";
 
     /** Error happened during the data sharing session. */
