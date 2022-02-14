@@ -31,10 +31,8 @@ import androidx.lifecycle.ViewModelStore;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
-import com.android.systemui.dreams.complication.ComplicationUtils;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 
@@ -59,7 +57,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // content area).
     private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final DreamBackend mDreamBackend;
 
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
@@ -112,7 +109,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         setCurrentState(Lifecycle.State.CREATED);
         mLifecycleRegistry = component.getLifecycleRegistry();
         mDreamOverlayTouchMonitor = component.getDreamOverlayTouchMonitor();
-        mDreamBackend = component.getDreamBackend();
         mDreamOverlayTouchMonitor.init();
     }
 
@@ -136,9 +132,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
         setCurrentState(Lifecycle.State.STARTED);
         mExecutor.execute(() -> {
-            mStateController.setAvailableComplicationTypes(
-                    ComplicationUtils.convertComplicationTypes(
-                            mDreamBackend.getEnabledComplications()));
             addOverlayWindowLocked(layoutParams);
             setCurrentState(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);
