@@ -50,6 +50,7 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
             holder.seekBar.setProgress(0)
             holder.elapsedTimeView.setText("")
             holder.totalTimeView.setText("")
+            holder.seekBar.contentDescription = ""
             return
         }
 
@@ -61,16 +62,22 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
             setVerticalPadding(seekBarEnabledVerticalPadding)
         }
 
-        data.duration?.let {
-            holder.seekBar.setMax(it)
-            holder.totalTimeView.setText(DateUtils.formatElapsedTime(
-                    it / DateUtils.SECOND_IN_MILLIS))
-        }
+        holder.seekBar.setMax(data.duration)
+        val totalTimeString = DateUtils.formatElapsedTime(
+            data.duration / DateUtils.SECOND_IN_MILLIS)
+        holder.totalTimeView.setText(totalTimeString)
 
         data.elapsedTime?.let {
             holder.seekBar.setProgress(it)
-            holder.elapsedTimeView.setText(DateUtils.formatElapsedTime(
-                    it / DateUtils.SECOND_IN_MILLIS))
+            val elapsedTimeString = DateUtils.formatElapsedTime(
+                it / DateUtils.SECOND_IN_MILLIS)
+            holder.elapsedTimeView.setText(elapsedTimeString)
+
+            holder.seekBar.contentDescription = holder.seekBar.context.getString(
+                R.string.controls_media_seekbar_description,
+                elapsedTimeString,
+                totalTimeString
+            )
         }
     }
 

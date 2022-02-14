@@ -22,7 +22,7 @@ import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController

@@ -3682,14 +3682,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     if (!mEdgeGlowBottom.isFinished()) {
                                         mEdgeGlowBottom.onRelease();
                                     }
-                                    invalidateTopGlow();
+                                    invalidateEdgeEffects();
                                 } else if (incrementalDeltaY < 0) {
                                     mEdgeGlowBottom.onPullDistance((float) overscroll / getHeight(),
                                             1.f - (float) x / getWidth());
                                     if (!mEdgeGlowTop.isFinished()) {
                                         mEdgeGlowTop.onRelease();
                                     }
-                                    invalidateBottomGlow();
+                                    invalidateEdgeEffects();
                                 }
                             }
                         }
@@ -3729,7 +3729,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                            invalidateTopGlow();
+                            invalidateEdgeEffects();
                         } else if (rawDeltaY < 0) {
                             mEdgeGlowBottom.onPullDistance(
                                     (float) -overScrollDistance / getHeight(),
@@ -3737,7 +3737,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
-                            invalidateBottomGlow();
+                            invalidateEdgeEffects();
                         }
                     }
                 }
@@ -3783,17 +3783,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // First allow releasing existing overscroll effect:
         float consumed = 0;
         if (mEdgeGlowTop.getDistance() != 0) {
-            consumed = mEdgeGlowTop.onPullDistance((float) deltaY / getHeight(),
-                    (float) x / getWidth());
-            if (consumed != 0f) {
-                invalidateTopGlow();
+            if (canScrollUp()) {
+                mEdgeGlowTop.onRelease();
+            } else {
+                consumed = mEdgeGlowTop.onPullDistance((float) deltaY / getHeight(),
+                        (float) x / getWidth());
             }
+            invalidateEdgeEffects();
         } else if (mEdgeGlowBottom.getDistance() != 0) {
-            consumed = -mEdgeGlowBottom.onPullDistance((float) -deltaY / getHeight(),
-                    1f - (float) x / getWidth());
-            if (consumed != 0f) {
-                invalidateBottomGlow();
+            if (canScrollDown()) {
+                mEdgeGlowBottom.onRelease();
+            } else {
+                consumed = -mEdgeGlowBottom.onPullDistance((float) -deltaY / getHeight(),
+                        1f - (float) x / getWidth());
             }
+            invalidateEdgeEffects();
         }
         int pixelsConsumed = Math.round(consumed * getHeight());
         return deltaY - pixelsConsumed;
@@ -3803,30 +3807,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return <code>true</code> if either the top or bottom edge glow is currently active or
      * <code>false</code> if it has no value to release.
      */
-    private boolean isGlowActive() {
-        return mEdgeGlowBottom.getDistance() != 0 || mEdgeGlowTop.getDistance() != 0;
+    private boolean doesTouchStopStretch() {
+        return (mEdgeGlowBottom.getDistance() != 0 && !canScrollDown())
+                || (mEdgeGlowTop.getDistance() != 0 && !canScrollUp());
     }
 
-    private void invalidateTopGlow() {
+    private void invalidateEdgeEffects() {
         if (!shouldDisplayEdgeEffects()) {
             return;
         }
-        final boolean clipToPadding = getClipToPadding();
-        final int top = clipToPadding ? mPaddingTop : 0;
-        final int left = clipToPadding ? mPaddingLeft : 0;
-        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
-        invalidate(left, top, right, top + mEdgeGlowTop.getMaxHeight());
-    }
-
-    private void invalidateBottomGlow() {
-        if (!shouldDisplayEdgeEffects()) {
-            return;
-        }
-        final boolean clipToPadding = getClipToPadding();
-        final int bottom = clipToPadding ? getHeight() - mPaddingBottom : getHeight();
-        final int left = clipToPadding ? mPaddingLeft : 0;
-        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
-        invalidate(left, bottom - mEdgeGlowBottom.getMaxHeight(), right, bottom);
+        invalidate();
     }
 
     @Override
@@ -4469,7 +4459,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess) + translateY;
                 canvas.translate(translateX, edgeY);
                 if (mEdgeGlowTop.draw(canvas)) {
-                    invalidateTopGlow();
+                    invalidateEdgeEffects();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -4483,7 +4473,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);
                 if (mEdgeGlowBottom.draw(canvas)) {
-                    invalidateBottomGlow();
+                    invalidateEdgeEffects();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -4573,7 +4563,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mActivePointerId = ev.getPointerId(0);
 
                 int motionPosition = findMotionRow(y);
-                if (isGlowActive()) {
+                if (doesTouchStopStretch()) {
                     // Pressed during edge effect, so this is considered the same as a fling catch.
                     touchMode = mTouchMode = TOUCH_MODE_FLING;
                 } else if (touchMode != TOUCH_MODE_FLING && motionPosition >= 0) {
@@ -6579,7 +6569,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setBottomEdgeEffectColor(@ColorInt int color) {
         mEdgeGlowBottom.setColor(color);
-        invalidateBottomGlow();
+        invalidateEdgeEffects();
     }
 
     /**
@@ -6593,7 +6583,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setTopEdgeEffectColor(@ColorInt int color) {
         mEdgeGlowTop.setColor(color);
-        invalidateTopGlow();
+        invalidateEdgeEffects();
     }
 
     /**

@@ -205,7 +205,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(false)
                     .build());
         }
-        mCompatConfig.addOverrides(new CompatibilityOverrideConfig(overridesMap), packageName);
+        mCompatConfig.addPackageOverrides(new CompatibilityOverrideConfig(overridesMap),
+                packageName, /* skipUnknownChangeIds */ false);
         killPackage(packageName);
     }
 
@@ -220,7 +221,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(false)
                     .build());
         }
-        mCompatConfig.addOverrides(new CompatibilityOverrideConfig(overridesMap), packageName);
+        mCompatConfig.addPackageOverrides(new CompatibilityOverrideConfig(overridesMap),
+                packageName, /* skipUnknownChangeIds */ false);
     }
 
     @Override
@@ -229,7 +231,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
-        mCompatConfig.addOverrides(overrides, packageName);
+        mCompatConfig.addPackageOverrides(overrides, packageName, /* skipUnknownChangeIds= */ true);
     }
 
     @Override
@@ -435,7 +437,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private void checkAllCompatOverridesAreOverridable(Collection<Long> changeIds) {
         for (Long changeId : changeIds) {
-            if (!mCompatConfig.isOverridable(changeId)) {
+            if (isKnownChangeId(changeId) && !mCompatConfig.isOverridable(changeId)) {
                 throw new SecurityException("Only change ids marked as Overridable can be "
                         + "overridden.");
             }

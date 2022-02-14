@@ -118,6 +118,6 @@ interface IAccessibilityServiceConnection {
 
     void setFocusAppearance(int strokeWidth, int color);
 
-    oneway void logTrace(long timestamp, String where, String callingParams, int processId,
-        long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
+    oneway void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
+        int processId, long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
 }

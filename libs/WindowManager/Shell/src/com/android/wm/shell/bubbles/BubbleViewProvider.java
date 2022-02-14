@@ -29,12 +29,6 @@ public interface BubbleViewProvider {
     @Nullable BubbleExpandedView getExpandedView();
 
     /**
-     * Sets the alpha of the expanded view content. This will be applied to both the expanded view
-     * container itself (the manage button, etc.) as well as the TaskView within it.
-     */
-    void setExpandedContentAlpha(float alpha);
-
-    /**
      * Sets whether the contents of the bubble's TaskView should be visible.
      */
     void setTaskViewVisibility(boolean visible);

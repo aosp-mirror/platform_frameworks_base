@@ -244,6 +244,8 @@ public final class OneHandedSettingsUtil {
         pw.println(TAG);
         pw.print(innerPrefix + "isOneHandedModeEnable=");
         pw.println(getSettingsOneHandedModeEnabled(resolver, userId));
+        pw.print(innerPrefix + "isSwipeToNotificationEnabled=");
+        pw.println(getSettingsSwipeToNotificationEnabled(resolver, userId));
         pw.print(innerPrefix + "oneHandedTimeOut=");
         pw.println(getSettingsOneHandedModeTimeout(resolver, userId));
         pw.print(innerPrefix + "tapsAppToExit=");

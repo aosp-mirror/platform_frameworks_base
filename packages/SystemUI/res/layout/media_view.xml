@@ -134,6 +134,7 @@
         android:background="@drawable/qs_media_light_source"
         android:forceHasOverlappingRendering="false">
         <LinearLayout
+            android:id="@+id/media_seamless_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="@dimen/qs_seamless_height"

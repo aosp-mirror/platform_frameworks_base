@@ -1319,24 +1319,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return IExternalVibratorService.SCALE_MUTE;
             }
 
-            int mode = checkAppOpModeLocked(vib.getUid(), vib.getPackage(),
-                    vib.getVibrationAttributes());
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
-                vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
-                if (mode == AppOpsManager.MODE_ERRORED) {
-                    Slog.w(TAG, "Would be an error: external vibrate from uid " + vib.getUid());
-                    endVibrationLocked(vibHolder, Vibration.Status.IGNORED_ERROR_APP_OPS);
-                } else {
-                    endVibrationLocked(vibHolder, Vibration.Status.IGNORED_APP_OPS);
-                }
-                return vibHolder.scale;
-            }
-
             ExternalVibrationHolder cancelingExternalVibration = null;
             VibrationThread cancelingVibration = null;
             int scale;
             synchronized (mLock) {
+                Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
+                        vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
+                if (ignoreStatus != null) {
+                    ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
+                    vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
+                    endVibrationLocked(vibHolder, ignoreStatus);
+                    return vibHolder.scale;
+                }
                 if (mCurrentExternalVibration != null
                         && mCurrentExternalVibration.externalVibration.equals(vib)) {
                     // We are already playing this external vibration, so we can return the same

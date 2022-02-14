@@ -77,7 +77,7 @@
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
     <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#ffffff</color> <!-- 100% white -->
+    <color name="udfps_enroll_icon">#7DA7F1</color>
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>

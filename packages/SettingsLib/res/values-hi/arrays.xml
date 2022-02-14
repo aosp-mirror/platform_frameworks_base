@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"कभी भी HDCP जाँच का उपयोग न करें"</item>
-    <item msgid="8254225038262324761">"HDCP जांच का उपयोग सिर्फ़ डीआरएम कॉन्टेंट के लिए करें"</item>
+    <item msgid="8254225038262324761">"एचडीसीपी जाँच का उपयोग केवल डीआरएम सामग्री के लिए करें"</item>
     <item msgid="6421717003037072581">"हमेशा HDCP जाँच का उपयोग करें"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">

@@ -254,6 +254,15 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_IME_ENTER}. -->
   <item type="id" name="accessibilityActionImeEnter" />
 
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_START}. -->
+  <item type="id" name="accessibilityActionDragStart" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_DROP}. -->
+  <item type="id" name="accessibilityActionDragDrop" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL}. -->
+  <item type="id" name="accessibilityActionDragCancel" />
+
   <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
   <item type="id" name="remote_views_next_child" />
 

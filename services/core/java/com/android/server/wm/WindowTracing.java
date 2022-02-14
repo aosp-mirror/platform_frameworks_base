@@ -54,7 +54,8 @@ class WindowTracing {
     private static final int BUFFER_CAPACITY_CRITICAL = 512 * 1024;
     private static final int BUFFER_CAPACITY_TRIM = 2048 * 1024;
     private static final int BUFFER_CAPACITY_ALL = 4096 * 1024;
-    private static final String TRACE_FILENAME = "/data/misc/wmtrace/wm_trace.pb";
+    static final String WINSCOPE_EXT = ".winscope";
+    private static final String TRACE_FILENAME = "/data/misc/wmtrace/wm_trace" + WINSCOPE_EXT;
     private static final String TAG = "WindowTracing";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 

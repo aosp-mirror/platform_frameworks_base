@@ -110,4 +110,7 @@
     <dimen name="immersive_mode_cling_width">380dp</dimen>
 
     <dimen name="floating_toolbar_preferred_width">544dp</dimen>
+
+    <dimen name="chooser_width">624dp</dimen>
+
 </resources>

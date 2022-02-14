@@ -24,7 +24,6 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-
 import com.android.internal.annotations.GuardedBy
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.R
@@ -44,7 +43,6 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
 
-import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -71,9 +69,6 @@ class PrivacyDotViewController @Inject constructor(
     private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler
 ) {
-    private var sbHeightPortrait = 0
-    private var sbHeightLandscape = 0
-
     private lateinit var tl: View
     private lateinit var tr: View
     private lateinit var bl: View
@@ -156,16 +151,12 @@ class PrivacyDotViewController @Inject constructor(
 
         val newCorner = selectDesignatedCorner(rot, isRtl)
         val index = newCorner.cornerIndex()
+        val paddingTop = contentInsetsProvider.getStatusBarPaddingTop(rot)
 
-        val h = when (rot) {
-            0, 2 -> sbHeightPortrait
-            1, 3 -> sbHeightLandscape
-            else -> 0
-        }
         synchronized(lock) {
             nextViewState = nextViewState.copy(
                     rotation = rot,
-                    height = h,
+                    paddingTop = paddingTop,
                     designatedCorner = newCorner,
                     cornerIndex = index)
         }
@@ -203,26 +194,17 @@ class PrivacyDotViewController @Inject constructor(
         }
     }
 
-    @UiThread
-    private fun updateHeights(rot: Int) {
-        val height = when (rot) {
-            0, 2 -> sbHeightPortrait
-            1, 3 -> sbHeightLandscape
-            else -> 0
-        }
-
-        views.forEach { it.layoutParams.height = height }
-    }
-
     // Update the gravity and margins of the privacy views
     @UiThread
-    private fun updateRotations(rotation: Int) {
+    private fun updateRotations(rotation: Int, paddingTop: Int) {
         // To keep a view in the corner, its gravity is always the description of its current corner
         // Therefore, just figure out which view is in which corner. This turns out to be something
         // like (myCorner - rot) mod 4, where topLeft = 0, topRight = 1, etc. and portrait = 0, and
         // rotating the device counter-clockwise increments rotation by 1
 
         views.forEach { corner ->
+            corner.setPadding(0, paddingTop, 0, 0)
+
             val rotatedCorner = rotatedCorner(cornerForView(corner), rotation)
             (corner.layoutParams as FrameLayout.LayoutParams).apply {
                 gravity = rotatedCorner.toGravity()
@@ -265,6 +247,7 @@ class PrivacyDotViewController @Inject constructor(
 
         var rot = activeRotationForCorner(tl, rtl)
         var contentInsets = state.contentRectForRotation(rot)
+        tl.setPadding(0, state.paddingTop, 0, 0)
         (tl.layoutParams as FrameLayout.LayoutParams).apply {
             height = contentInsets.height()
             if (rtl) {
@@ -276,6 +259,7 @@ class PrivacyDotViewController @Inject constructor(
 
         rot = activeRotationForCorner(tr, rtl)
         contentInsets = state.contentRectForRotation(rot)
+        tr.setPadding(0, state.paddingTop, 0, 0)
         (tr.layoutParams as FrameLayout.LayoutParams).apply {
             height = contentInsets.height()
             if (rtl) {
@@ -287,6 +271,7 @@ class PrivacyDotViewController @Inject constructor(
 
         rot = activeRotationForCorner(br, rtl)
         contentInsets = state.contentRectForRotation(rot)
+        br.setPadding(0, state.paddingTop, 0, 0)
         (br.layoutParams as FrameLayout.LayoutParams).apply {
             height = contentInsets.height()
             if (rtl) {
@@ -298,6 +283,7 @@ class PrivacyDotViewController @Inject constructor(
 
         rot = activeRotationForCorner(bl, rtl)
         contentInsets = state.contentRectForRotation(rot)
+        bl.setPadding(0, state.paddingTop, 0, 0)
         (bl.layoutParams as FrameLayout.LayoutParams).apply {
             height = contentInsets.height()
             if (rtl) {
@@ -407,11 +393,12 @@ class PrivacyDotViewController @Inject constructor(
             animationScheduler.addCallback(systemStatusAnimationCallback)
         }
 
-        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
-        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
-        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val left = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_LANDSCAPE)
         val bottom = contentInsetsProvider
-                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+                .getStatusBarContentAreaForRotation(ROTATION_UPSIDE_DOWN)
+        val paddingTop = contentInsetsProvider.getStatusBarPaddingTop()
 
         synchronized(lock) {
             nextViewState = nextViewState.copy(
@@ -422,18 +409,10 @@ class PrivacyDotViewController @Inject constructor(
                     portraitRect = top,
                     landscapeRect = right,
                     upsideDownRect = bottom,
+                    paddingTop = paddingTop,
                     layoutRtl = rtl
             )
         }
-    }
-
-    /**
-     * Set the status bar height in portrait and landscape, in pixels. If they are the same you can
-     * pass the same value twice
-     */
-    fun setStatusBarHeights(portrait: Int, landscape: Int) {
-        sbHeightPortrait = portrait
-        sbHeightLandscape = landscape
     }
 
     private fun updateStatusBarState() {
@@ -488,7 +467,7 @@ class PrivacyDotViewController @Inject constructor(
 
         if (state.rotation != currentViewState.rotation) {
             // A rotation has started, hide the views to avoid flicker
-            updateRotations(state.rotation)
+            updateRotations(state.rotation, state.paddingTop)
         }
 
         if (state.needsLayout(currentViewState)) {
@@ -549,11 +528,11 @@ class PrivacyDotViewController @Inject constructor(
 
     // Returns [left, top, right, bottom] aka [seascape, none, landscape, upside-down]
     private fun getLayoutRects(): List<Rect> {
-        val left = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_SEASCAPE)
-        val top = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_NONE)
-        val right = contentInsetsProvider.getStatusBarContentInsetsForRotation(ROTATION_LANDSCAPE)
+        val left = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_SEASCAPE)
+        val top = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val right = contentInsetsProvider.getStatusBarContentAreaForRotation(ROTATION_LANDSCAPE)
         val bottom = contentInsetsProvider
-                .getStatusBarContentInsetsForRotation(ROTATION_UPSIDE_DOWN)
+                .getStatusBarContentAreaForRotation(ROTATION_UPSIDE_DOWN)
 
         return listOf(left, top, right, bottom)
     }
@@ -627,7 +606,7 @@ private data class ViewState(
     val layoutRtl: Boolean = false,
 
     val rotation: Int = 0,
-    val height: Int = 0,
+    val paddingTop: Int = 0,
     val cornerIndex: Int = -1,
     val designatedCorner: View? = null,
 

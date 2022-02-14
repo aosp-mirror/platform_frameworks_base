@@ -22,9 +22,15 @@ Copyright (C) 2016 The Android Open Source Project
 
     <path
         android:pathData="M 42 42 L 58 42 L 58 58 L 42 58 L 42 42 Z" />
-    <path
-        android:fillColor="#1A73E8"
-        android:pathData="M55.33,46H52.67V44.67a1.33,1.33,0,0,0-1.33-1.33H48.67a1.33,1.33,0,0,0-1.33,1.33V46H44.67a1.32,1.32,0,0,0-1.33,1.33v7.33A1.33,1.33,0,0,0,44.67,56H55.33a1.33,1.33,0,0,0,1.33-1.33V47.33A1.33,1.33,0,0,0,55.33,46ZM50,52a1.33,1.33,0,1,1,1.33-1.33A1.34,1.34,0,0,1,50,52Zm1.33-6H48.67V44.67h2.67Z" />
+    <group
+        android:scaleX=".66"
+        android:scaleY=".66"
+        android:translateX="42"
+        android:translateY="42">
+        <path
+            android:pathData="@string/config_work_badge_path_24"
+            android:fillColor="#1A73E8"/>
+    </group>
     <path
         android:pathData="M 0 0 H 64 V 64 H 0 V 0 Z" />
 </vector>

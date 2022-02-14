@@ -17,14 +17,15 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.graphics.Region
+import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.traces.common.FlickerComponentName
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    component: ComponentName
+    component: FlickerComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, component) {
     fun getPrimaryBounds(dividerBounds: Region): android.graphics.Region {
         val primaryAppBounds = Region(0, 0, dividerBounds.bounds.right,
@@ -43,5 +44,17 @@ class AppPairsHelper(
     companion object {
         const val TEST_REPETITIONS = 1
         const val TIMEOUT_MS = 3_000L
+
+        fun Flicker.waitAppsShown(app1: SplitScreenHelper?, app2: SplitScreenHelper?) {
+            wmHelper.waitFor("primaryAndSecondaryAppsVisible") { dump ->
+                val primaryAppVisible = app1?.let {
+                    dump.wmState.isWindowSurfaceShown(app1.defaultWindowName)
+                } ?: false
+                val secondaryAppVisible = app2?.let {
+                    dump.wmState.isWindowSurfaceShown(app2.defaultWindowName)
+                } ?: false
+                primaryAppVisible && secondaryAppVisible
+            }
+        }
     }
 }

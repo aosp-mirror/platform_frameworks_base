@@ -22,18 +22,17 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
-import com.android.server.wm.flicker.appWindowBecomesVisible
+import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
-import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -49,7 +48,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
+@Group4
 class EnterSplitScreenLaunchToSide(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
@@ -62,22 +61,22 @@ class EnterSplitScreenLaunchToSide(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-            secondaryApp.defaultWindowName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<FlickerComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, splitScreenApp.component,
+            secondaryApp.component, FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisible() =
-        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
-            splitScreenApp.defaultWindowName)
+    fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+            splitScreenApp.component)
 
     @Presubmit
     @Test
-    fun dockedStackSecondaryBoundsIsVisible() =
-        testSpec.dockedStackSecondaryBoundsIsVisible(testSpec.config.startRotation,
-            secondaryApp.defaultWindowName)
+    fun dockedStackSecondaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+            secondaryApp.component)
 
     @Presubmit
     @Test
@@ -85,15 +84,35 @@ class EnterSplitScreenLaunchToSide(
 
     @Presubmit
     @Test
-    fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp.defaultWindowName)
+    fun appWindowBecomesVisible() {
+        testSpec.assertWm {
+            // when the app is launched, first the activity becomes visible, then the
+            // SnapshotStartingWindow appears and then the app window becomes visible.
+            // Because we log WM once per frame, sometimes the activity and the window
+            // become visible in the same entry, sometimes not, thus it is not possible to
+            // assert the visibility of the activity here
+            this.isAppWindowInvisible(secondaryApp.component)
+                    .then()
+                    // during re-parenting, the window may disappear and reappear from the
+                    // trace, this occurs because we log only 1x per frame
+                    .notContains(secondaryApp.component, isOptional = true)
+                    .then()
+                    .isAppWindowVisible(secondaryApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

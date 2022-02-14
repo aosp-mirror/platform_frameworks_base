@@ -152,7 +152,7 @@ public class HeadsUpController {
             // Also we should not defer the removal if reordering isn't allowed since otherwise
             // some notifications can't disappear before the panel is closed.
             boolean ignoreEarliestRemovalTime =
-                    mRemoteInputManager.getController().isSpinning(key)
+                    mRemoteInputManager.isSpinning(key)
                             && !FORCE_REMOTE_INPUT_HISTORY
                             || !mVisualStabilityManager.isReorderingAllowed();
             mHeadsUpManager.removeNotification(key, ignoreEarliestRemovalTime);

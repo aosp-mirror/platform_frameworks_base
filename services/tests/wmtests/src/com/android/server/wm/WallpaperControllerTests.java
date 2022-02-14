@@ -316,7 +316,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final IBinder mockBinder = mock(IBinder.class);
         final ITransitionPlayer mockPlayer = mock(ITransitionPlayer.class);
         doReturn(mockBinder).when(mockPlayer).asBinder();
-        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer);
+        mWm.mAtmService.getTransitionController().registerTransitionPlayer(mockPlayer,
+                null /* appThread */);
 
         Transition transit =
                 mWm.mAtmService.getTransitionController().createTransition(TRANSIT_OPEN);

@@ -16,10 +16,11 @@
 
 package com.android.keyguard.clock;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 
 /**
@@ -40,11 +41,11 @@ class SmallClockPosition {
      */
     private float mDarkAmount;
 
-    SmallClockPosition(Resources res) {
-        this(res.getDimensionPixelSize(R.dimen.status_bar_height),
-                res.getDimensionPixelSize(R.dimen.keyguard_lock_padding),
-                res.getDimensionPixelSize(R.dimen.keyguard_lock_height),
-                res.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
+    SmallClockPosition(Context context) {
+        this(SystemBarUtils.getStatusBarHeight(context),
+                context.getResources().getDimensionPixelSize(R.dimen.keyguard_lock_padding),
+                context.getResources().getDimensionPixelSize(R.dimen.keyguard_lock_height),
+                context.getResources().getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
         );
     }
 

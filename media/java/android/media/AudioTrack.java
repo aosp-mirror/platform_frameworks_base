@@ -1613,7 +1613,9 @@ public class AudioTrack extends PlayerBase
             AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT |
             AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER |
             AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT |
-            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2;
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2 |
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT |
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT;
 
     // Returns a boolean whether the attributes, format, bufferSizeInBytes, mode allow
     // power saving to be automatically enabled for an AudioTrack. Returns false if
@@ -1787,6 +1789,8 @@ public class AudioTrack extends PlayerBase
                 | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
         put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
                 | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
+        put("front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
     }};
 
     /**
@@ -1801,9 +1805,15 @@ public class AudioTrack extends PlayerBase
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        final int channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
-                ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
-                : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        final int channelCountLimit;
+        try {
+            channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
+                    ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
+                    : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        } catch (IllegalArgumentException iae) {
+            loge("Unsupported encoding " + iae);
+            return false;
+        }
         if (channelCount > channelCountLimit) {
             loge("Channel configuration contains too many channels for encoding "
                     + encoding + "(" + channelCount + " > " + channelCountLimit + ")");

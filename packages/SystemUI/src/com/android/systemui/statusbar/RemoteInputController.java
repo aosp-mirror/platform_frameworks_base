@@ -25,7 +25,6 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Pair;
 
-import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -245,6 +244,10 @@ public class RemoteInputController {
         mCallbacks.add(callback);
     }
 
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
     public void remoteInputSent(NotificationEntry entry) {
         int N = mCallbacks.size();
         for (int i = 0; i < N; i++) {
@@ -296,6 +299,9 @@ public class RemoteInputController {
         default void onRemoteInputSent(NotificationEntry entry) {}
     }
 
+    /**
+     * This is a delegate which implements some view controller pieces of the remote input process
+     */
     public interface Delegate {
         /**
          * Activate remote input if necessary.

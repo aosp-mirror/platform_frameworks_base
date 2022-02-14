@@ -58,9 +58,6 @@ class UdfpsHapticsSimulator @Inject constructor(
                 "start" -> {
                     udfpsController?.playStartHaptic()
                 }
-                "acquired" -> {
-                    keyguardUpdateMonitor.playAcquiredHaptic()
-                }
                 "success" -> {
                     // needs to be kept up to date with AcquisitionClient#SUCCESS_VIBRATION_EFFECT
                     vibrator?.vibrate(
@@ -82,7 +79,6 @@ class UdfpsHapticsSimulator @Inject constructor(
         pw.println("Usage: adb shell cmd statusbar udfps-haptic <haptic>")
         pw.println("Available commands:")
         pw.println("  start")
-        pw.println("  acquired")
         pw.println("  success, always plays CLICK haptic")
         pw.println("  error, always plays DOUBLE_CLICK haptic")
     }

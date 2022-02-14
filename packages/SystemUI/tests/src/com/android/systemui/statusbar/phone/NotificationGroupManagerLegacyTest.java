@@ -33,6 +33,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -76,7 +77,8 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
                 () -> mPeopleNotificationIdentifier,
-                Optional.of(mock(Bubbles.class)));
+                Optional.of(mock(Bubbles.class)),
+                mock(DumpManager.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 

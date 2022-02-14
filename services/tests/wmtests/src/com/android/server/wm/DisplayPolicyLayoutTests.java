@@ -24,7 +24,7 @@ import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -50,13 +50,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
 
 import android.graphics.Insets;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
@@ -65,11 +65,11 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -109,18 +109,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow = spy(createWindow(null, TYPE_APPLICATION, "window"));
         // We only test window frames set by DisplayPolicy, so here prevents computeFrameLw from
         // changing those frames.
-        doNothing().when(mWindow).computeFrame();
-
-        final WindowManager.LayoutParams attrs = mWindow.mAttrs;
-        attrs.width = MATCH_PARENT;
-        attrs.height = MATCH_PARENT;
-        attrs.format = PixelFormat.TRANSLUCENT;
+        doNothing().when(mWindow).computeFrame(any());
 
         spyOn(mStatusBarWindow);
         spyOn(mNavBarWindow);
 
         // Disabling this call for most tests since it can override the systemUiFlags when called.
-        doReturn(false).when(mDisplayPolicy).updateSystemUiVisibilityLw();
+        doNothing().when(mDisplayPolicy).updateSystemBarAttributes();
 
         updateDisplayFrames();
     }
@@ -219,7 +214,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
-    public void addingWindow_ignoresInsetsTypes_InWindowTypeWithPredefinedInsets() {
+    public void addingWindow_InWindowTypeWithPredefinedInsets() {
         mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
         WindowState win = createWindow(null, TYPE_STATUS_BAR, "StatusBar");
         win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
@@ -230,7 +225,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         InsetsSourceProvider provider =
                 mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR);
-        assertNotEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            // In the new flexible insets setup, the insets frame should always respect the window
+            // layout result.
+            assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
+        } else {
+            assertNotEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
+        }
     }
 
     @Test
@@ -478,9 +479,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        mWindow.setRequestedVisibilities(requestedVisibilities);
         addWindowWithRawInsetsState(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
@@ -498,9 +499,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mWindow.updateRequestedVisibility(requestedState);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
+        mWindow.setRequestedVisibilities(requestedVisibilities);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
@@ -733,10 +734,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void testFixedRotationInsetsSourceFrame() {
+        mDisplayContent.mBaseDisplayHeight = DISPLAY_HEIGHT;
+        mDisplayContent.mBaseDisplayWidth = DISPLAY_WIDTH;
         doReturn((mDisplayContent.getRotation() + 1) % 4).when(mDisplayContent)
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
-        mWindow.mAboveInsetsState.addSource(mDisplayContent.getInsetsStateController()
-                .getRawInsetsState().peekSource(ITYPE_STATUS_BAR));
+        mWindow.mAboveInsetsState.set(
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
         final Rect frame = mDisplayPolicy.getInsetsPolicy().getInsetsForWindow(mWindow)
                 .getSource(ITYPE_STATUS_BAR).getFrame();
         mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);

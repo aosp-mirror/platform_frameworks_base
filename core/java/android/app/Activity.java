@@ -140,7 +140,6 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.SplashScreen;
-import android.window.SplashScreenView;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -969,7 +968,6 @@ public class Activity extends ContextThemeWrapper
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
-    private SplashScreenView mSplashScreenView;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1538,6 +1536,17 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityPostDestroyed(this);
     }
 
+    private void dispatchActivityConfigurationChanged() {
+        getApplication().dispatchActivityConfigurationChanged(this);
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((Application.ActivityLifecycleCallbacks) callbacks[i])
+                        .onActivityConfigurationChanged(this);
+            }
+        }
+    }
+
     private Object[] collectActivityLifecycleCallbacks() {
         Object[] callbacks = null;
         synchronized (mActivityLifecycleCallbacks) {
@@ -1627,16 +1636,6 @@ public class Activity extends ContextThemeWrapper
             }
             return mSplashScreen;
         }
-    }
-
-    /** @hide */
-    public void setSplashScreenView(SplashScreenView v) {
-        mSplashScreenView = v;
-    }
-
-    /** @hide */
-    SplashScreenView getSplashScreenView() {
-        return mSplashScreenView;
     }
 
     /**
@@ -1922,10 +1921,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or
-     * {@link #onPause}, for your activity to start interacting with the user. This is an indicator
-     * that the activity became active and ready to receive input. It is on top of an activity stack
-     * and visible to user.
+     * Called after {@link #onRestoreInstanceState}, {@link #onRestart}, or {@link #onPause}. This
+     * is usually a hint for your activity to start interacting with the user, which is a good
+     * indicator that the activity became active and ready to receive input. This sometimes could
+     * also be a transit state toward another resting state. For instance, an activity may be
+     * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
+     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * called before {@link #onPause} in this case which honors the activity lifecycle policy and
+     * the activity eventually rests in {@link #onPause}.
      *
      * <p>On platform versions prior to {@link android.os.Build.VERSION_CODES#Q} this is also a good
      * place to try to open exclusive-access devices or to get access to singleton resources.
@@ -2491,12 +2494,11 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>To get the voice interactor you need to call {@link #getVoiceInteractor()}
      * which would return non <code>null</code> only if there is an ongoing voice
-     * interaction session. You an also detect when the voice interactor is no
+     * interaction session. You can also detect when the voice interactor is no
      * longer valid because the voice interaction session that is backing is finished
      * by calling {@link VoiceInteractor#registerOnDestroyedCallback(Executor, Runnable)}.
      *
-     * <p>This method will be called only after {@link #onStart()} is being called and
-     * before {@link #onStop()} is being called.
+     * <p>This method will be called only after {@link #onStart()} and before {@link #onStop()}.
      *
      * <p>You should pass to the callback the currently supported direct actions which
      * cannot be <code>null</code> or contain <code>null</code> elements.
@@ -3027,6 +3029,8 @@ public class Activity extends ContextThemeWrapper
             // view changes from above.
             mActionBar.onConfigurationChanged(newConfig);
         }
+
+        dispatchActivityConfigurationChanged();
     }
 
     /**

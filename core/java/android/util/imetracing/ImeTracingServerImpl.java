@@ -41,9 +41,9 @@ import java.io.PrintWriter;
  */
 class ImeTracingServerImpl extends ImeTracing {
     private static final String TRACE_DIRNAME = "/data/misc/wmtrace/";
-    private static final String TRACE_FILENAME_CLIENTS = "ime_trace_clients.pb";
-    private static final String TRACE_FILENAME_IMS = "ime_trace_service.pb";
-    private static final String TRACE_FILENAME_IMMS = "ime_trace_managerservice.pb";
+    private static final String TRACE_FILENAME_CLIENTS = "ime_trace_clients.winscope";
+    private static final String TRACE_FILENAME_IMS = "ime_trace_service.winscope";
+    private static final String TRACE_FILENAME_IMMS = "ime_trace_managerservice.winscope";
     private static final int BUFFER_CAPACITY = 4096 * 1024;
 
     // Needed for winscope to auto-detect the dump type. Explained further in

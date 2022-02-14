@@ -28,16 +28,20 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.app.WindowConfigurationProto.WINDOWING_MODE;
+import static android.content.ConfigurationProto.WINDOW_CONFIGURATION;
 
 import static com.android.server.wm.ConfigurationContainerProto.FULL_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.MERGED_OVERRIDE_CONFIGURATION;
 import static com.android.server.wm.ConfigurationContainerProto.OVERRIDE_CONFIGURATION;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.LocaleList;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,6 +115,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * This method should be used for getting settings applied in each particular level of the
      * hierarchy.
      */
+    @NonNull
     public Configuration getConfiguration() {
         return mFullConfiguration;
     }
@@ -170,11 +175,13 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /** Returns requested override configuration applied to this configuration container. */
+    @NonNull
     public Configuration getRequestedOverrideConfiguration() {
         return mRequestedOverrideConfiguration;
     }
 
     /** Returns the resolved override configuration. */
+    @NonNull
     Configuration getResolvedOverrideConfiguration() {
         return mResolvedOverrideConfiguration;
     }
@@ -203,6 +210,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * Get merged override configuration from the top of the hierarchy down to this particular
      * instance. This should be reported to client as override config.
      */
+    @NonNull
     public Configuration getMergedOverrideConfiguration() {
         return mMergedOverrideConfiguration;
     }
@@ -507,7 +515,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FREEFORM;
     }
 
-    /** Returns the activity type associated with the the configuration container. */
+    /** Returns the activity type associated with the configuration container. */
     /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
         return mFullConfiguration.windowConfiguration.getActivityType();
@@ -541,20 +549,48 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
+     * Applies app-specific nightMode and {@link LocaleList} on requested configuration.
+     * @return true if any of the requested configuration has been updated.
+     */
+    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales) {
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        boolean newNightModeSet = (nightMode != null) && setOverrideNightMode(mRequestsTmpConfig,
+                nightMode);
+        boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
+                locales);
+        if (newNightModeSet || newLocalesSet) {
+            onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
+        }
+        return newNightModeSet || newLocalesSet;
+    }
+
+    /**
      * Overrides the night mode applied to this ConfigurationContainer.
      * @return true if the nightMode has been changed.
      */
-    public boolean setOverrideNightMode(int nightMode) {
+    private boolean setOverrideNightMode(Configuration requestsTmpConfig, int nightMode) {
         final int currentUiMode = mRequestedOverrideConfiguration.uiMode;
         final int currentNightMode = currentUiMode & Configuration.UI_MODE_NIGHT_MASK;
         final int validNightMode = nightMode & Configuration.UI_MODE_NIGHT_MASK;
         if (currentNightMode == validNightMode) {
             return false;
         }
-        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mRequestsTmpConfig.uiMode = validNightMode
+        requestsTmpConfig.uiMode = validNightMode
                 | (currentUiMode & ~Configuration.UI_MODE_NIGHT_MASK);
-        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
+        return true;
+    }
+
+    /**
+     * Overrides the locales applied to this ConfigurationContainer.
+     * @return true if the LocaleList has been changed.
+     */
+    private boolean setOverrideLocales(Configuration requestsTmpConfig,
+            @NonNull LocaleList overrideLocales) {
+        if (mRequestedOverrideConfiguration.getLocales().equals(overrideLocales)) {
+            return false;
+        }
+        requestsTmpConfig.setLocales(overrideLocales);
+        requestsTmpConfig.userSetLocale = true;
         return true;
     }
 
@@ -661,20 +697,38 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     @CallSuper
     protected void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
-        // Critical log level logs only visible elements to mitigate performance overheard
-        if (logLevel != WindowTraceLogLevel.ALL && !mHasOverrideConfiguration) {
-            return;
+        final long token = proto.start(fieldId);
+
+        if (logLevel == WindowTraceLogLevel.ALL || mHasOverrideConfiguration) {
+            mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
+                    logLevel == WindowTraceLogLevel.CRITICAL);
         }
 
-        final long token = proto.start(fieldId);
-        mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
-                logLevel == WindowTraceLogLevel.CRITICAL);
+        // Unless trace level is set to `WindowTraceLogLevel.ALL` don't dump anything that isn't
+        // required to mitigate performance overhead
         if (logLevel == WindowTraceLogLevel.ALL) {
             mFullConfiguration.dumpDebug(proto, FULL_CONFIGURATION, false /* critical */);
             mMergedOverrideConfiguration.dumpDebug(proto, MERGED_OVERRIDE_CONFIGURATION,
                     false /* critical */);
         }
+
+        if (logLevel == WindowTraceLogLevel.TRIM) {
+            // Required for Fass to automatically detect pip transitions in Winscope traces
+            dumpDebugWindowingMode(proto);
+        }
+
         proto.end(token);
+    }
+
+    private void dumpDebugWindowingMode(ProtoOutputStream proto) {
+        final long fullConfigToken = proto.start(FULL_CONFIGURATION);
+        final long windowConfigToken = proto.start(WINDOW_CONFIGURATION);
+
+        int windowingMode = mFullConfiguration.windowConfiguration.getWindowingMode();
+        proto.write(WINDOWING_MODE, windowingMode);
+
+        proto.end(windowConfigToken);
+        proto.end(fullConfigToken);
     }
 
     /**

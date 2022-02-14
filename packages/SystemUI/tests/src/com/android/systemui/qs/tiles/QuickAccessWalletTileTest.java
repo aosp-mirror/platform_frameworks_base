@@ -228,7 +228,9 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true) /* dismissShade */,
+                (ActivityLaunchAnimator.Controller) eq(null),
+                eq(true) /* showOverLockscreenWhenLocked */);
 
         Intent nextStartedIntent = mIntentCaptor.getValue();
         String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
@@ -246,7 +248,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true) /* dismissShade */,
-                (ActivityLaunchAnimator.Controller) eq(null));
+                (ActivityLaunchAnimator.Controller) eq(null),
+                eq(true) /* showOverLockscreenWhenLocked */);
 
         Intent nextStartedIntent = mIntentCaptor.getValue();
         String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";

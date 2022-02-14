@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDFରେ ସେଭ୍‍ କରନ୍ତୁ"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ବଡ଼ କରାଯାଇଛି"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ଛୋଟ କରାଯାଇଛି"</string>
-    <string name="search" msgid="5421724265322228497">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="search" msgid="5421724265322228497">"Search"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"ସେବା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ସର୍ଚ୍ଚ ବକ୍ସ ଦେଖାଯାଇଛି"</string>
@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"ବିଫଳ ହୋଇଥିବା ପ୍ରିଣ୍ଟ ଜବ୍‌"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ଫାଇଲ୍‍ ତିଆରି କରିହେଲା ନାହିଁ"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"କିଛି ପ୍ରିଣ୍ଟ ସର୍ଭିସ୍‌କୁ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟରକୁ ସନ୍ଧାନ କରାଯାଉଛି"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"ପ୍ରିଣ୍ଟର୍‌ ଖୋଜାଯାଉଛି"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"କୌଣସି ପ୍ରିଣ୍ଟ ସେବା ସକ୍ଷମ କରାଯାଇନାହିଁ"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"କୌଣସି ପ୍ରିଣ୍ଟର୍‍ ମିଳିଲା ନାହିଁ"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"ପ୍ରିଣ୍ଟର ଯୋଡ଼ିହେବ ନାହିଁ"</string>
@@ -83,7 +83,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ବାତିଲ୍‍ କରାଯାଉଛି"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ପ୍ରିଣ୍ଟର୍‍ ତ୍ରୁଟି"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ପ୍ରିଣ୍ଟର୍‍ ଦ୍ୱାରା ରୋକାଯାଇଥିବା <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <string name="cancel" msgid="4373674107267141885">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <string name="cancel" msgid="4373674107267141885">"ବାତିଲ୍‍"</string>
     <string name="restart" msgid="2472034227037808749">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ପ୍ରିଣ୍ଟର୍‍କୁ କୌଣସି ସଂଯୋଗ ନାହିଁ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"ଅଜଣା"</string>

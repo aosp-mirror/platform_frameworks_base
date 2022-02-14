@@ -20,7 +20,13 @@ import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
 
-import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -29,6 +35,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -603,7 +610,8 @@ public final class BroadcastQueue {
                     synchronized (mService) {
                         Slog.w(TAG, "Can't deliver broadcast to " + app.processName
                                 + " (pid " + app.getPid() + "). Crashing it.");
-                        app.scheduleCrashLocked("can't deliver broadcast");
+                        app.scheduleCrashLocked("can't deliver broadcast",
+                                CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
                     }
                     throw ex;
                 }

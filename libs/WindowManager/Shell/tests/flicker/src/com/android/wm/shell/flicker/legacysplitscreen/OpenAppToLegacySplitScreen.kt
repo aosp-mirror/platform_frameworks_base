@@ -24,15 +24,11 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.focusChanges
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.statusBarLayerIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -62,22 +58,28 @@ class OpenAppToLegacySplitScreen(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-            WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<FlickerComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, splitScreenApp.component,
+            FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @FlakyTest
     @Test
-    fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(splitScreenApp.getPackage())
-
-    @FlakyTest
-    @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
+    fun appWindowBecomesVisible() {
+        testSpec.assertWm {
+            this.isAppWindowInvisible(splitScreenApp.component)
+                    .then()
+                    .isAppWindowVisible(splitScreenApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
+
+    @Presubmit
+    @Test
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Presubmit
     @Test
@@ -85,12 +87,27 @@ class OpenAppToLegacySplitScreen(
 
     @FlakyTest
     @Test
-    fun layerBecomesVisible() = testSpec.layerBecomesVisible(splitScreenApp.getPackage())
+    fun layerBecomesVisible() {
+        testSpec.assertLayers {
+            this.isInvisible(splitScreenApp.component)
+                    .then()
+                    .isVisible(splitScreenApp.component)
+        }
+    }
 
-    @FlakyTest(bugId = 151179149)
+    @Presubmit
     @Test
-    fun focusChanges() = testSpec.focusChanges(splitScreenApp.`package`,
-        "recents_animation_input_consumer", "NexusLauncherActivity")
+    fun focusChanges() {
+        testSpec.assertEventLog {
+            this.focusChanges(splitScreenApp.`package`,
+                    "recents_animation_input_consumer", "NexusLauncherActivity")
+        }
+    }
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

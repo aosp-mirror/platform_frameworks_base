@@ -341,10 +341,8 @@ open class AndroidPackageParsingTestBase {
             launchToken=${this.launchToken}
             lockTaskLaunchMode=${this.lockTaskLaunchMode}
             logo=${this.logo}
-            maxAspectRatio=${this.maxAspectRatio}
             maxRecents=${this.maxRecents}
             metaData=${this.metaData.dumpToString()}
-            minAspectRatio=${this.minAspectRatio}
             name=${this.name}
             nonLocalizedLabel=${
                 // Per b/184574333, v1 mistakenly trimmed the label. v2 fixed this, but for test

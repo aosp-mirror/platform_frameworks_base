@@ -34,6 +34,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.gestures.MultiTap;
 import com.android.server.accessibility.gestures.MultiTapAndHold;
@@ -89,9 +90,10 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     public WindowMagnificationGestureHandler(@UiContext Context context,
             WindowMagnificationManager windowMagnificationMgr,
+            AccessibilityTraceManager trace,
             Callback callback,
             boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, callback);
+        super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Slog.i(mLogTag,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");

@@ -25,7 +25,7 @@
     <LinearLayout
         android:id="@+id/wifi_list"
         style="@style/InternetDialog.Network"
-        android:layout_height="72dp"
+        android:layout_height="@dimen/internet_dialog_wifi_network_height"
         android:paddingStart="20dp"
         android:paddingEnd="24dp">
         <FrameLayout
@@ -45,7 +45,7 @@
             android:orientation="vertical"
             android:clickable="false"
             android:layout_width="wrap_content"
-            android:layout_height="72dp"
+            android:layout_height="@dimen/internet_dialog_wifi_network_height"
             android:layout_marginEnd="30dp"
             android:layout_weight="1"
             android:gravity="start|center_vertical">

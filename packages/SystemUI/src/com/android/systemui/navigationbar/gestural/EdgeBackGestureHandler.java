@@ -15,6 +15,8 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
+
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 
 import android.app.ActivityManager;
@@ -101,7 +103,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private static final int MAX_NUM_LOGGED_PREDICTIONS = 10;
     private static final int MAX_NUM_LOGGED_GESTURES = 10;
 
-    // Temporary log until b/176302696 is resolved
     static final boolean DEBUG_MISSING_GESTURE = false;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
@@ -384,7 +385,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void onNavigationSettingsChanged() {
         boolean wasBackAllowed = isHandlingGestures();
         updateCurrentUserResources();
-        if (wasBackAllowed != isHandlingGestures()) {
+        if (mStateChangeCallback != null && wasBackAllowed != isHandlingGestures()) {
             mStateChangeCallback.run();
         }
     }
@@ -549,7 +550,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         layoutParams.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
         layoutParams.windowAnimations = 0;
         layoutParams.privateFlags |=
-                WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+                (WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
+                | PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION);
         layoutParams.setTitle(TAG + mContext.getDisplayId());
         layoutParams.setFitInsetsTypes(0 /* types */);
         layoutParams.setTrustedOverlay();

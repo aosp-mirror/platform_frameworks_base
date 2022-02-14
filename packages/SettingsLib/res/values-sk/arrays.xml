@@ -59,7 +59,7 @@
     <item msgid="6421717003037072581">"Vždy používať kontrolu HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"Vypnuté"</item>
+    <item msgid="695678520785580527">"Deaktivované"</item>
     <item msgid="6336372935919715515">"Aktivované filtrované"</item>
     <item msgid="2779123106632690576">"Aktivované"</item>
   </string-array>
@@ -171,10 +171,10 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Vypnuté"</item>
-    <item msgid="4195153527464162486">"64 kB na vyrovnávaciu pamäť denníka"</item>
-    <item msgid="7464037639415220106">"256 kB na vyrovnávaciu pamäť denníka"</item>
+    <item msgid="4195153527464162486">"64 kB na vyrov. pamäť denníka"</item>
+    <item msgid="7464037639415220106">"256 kB na vyrov. pamäť denníka"</item>
     <item msgid="8539423820514360724">"1 MB na vyrov. pam. denníka"</item>
-    <item msgid="1984761927103140651">"4 MB na vyrovnávaciu pamäť denníka"</item>
+    <item msgid="1984761927103140651">"4 MB na vyrov. pamäť denníka"</item>
     <item msgid="2983219471251787208">"8 MB na vyrovnávaciu pamäť denníka"</item>
   </string-array>
   <string-array name="select_logpersist_titles">

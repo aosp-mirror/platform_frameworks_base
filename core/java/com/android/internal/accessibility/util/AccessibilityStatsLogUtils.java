@@ -17,6 +17,7 @@
 package com.android.internal.accessibility.util;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
@@ -30,6 +31,7 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON_LONG_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
@@ -152,19 +154,29 @@ public final class AccessibilityStatsLogUtils {
                 convertToLoggingMagnificationMode(mode));
     }
 
-    private static boolean isFloatingMenuEnabled(Context context) {
+    private static boolean isAccessibilityFloatingMenuEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE, /* def= */ -1)
                 == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+    }
+
+    private static boolean isAccessibilityGestureEnabled(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, /* def= */ -1)
+                == ACCESSIBILITY_BUTTON_MODE_GESTURE;
     }
 
     private static int convertToLoggingShortcutType(Context context,
             @ShortcutType int shortcutType) {
         switch (shortcutType) {
             case ACCESSIBILITY_BUTTON:
-                return isFloatingMenuEnabled(context)
-                        ? ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU
-                        : ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                if (isAccessibilityFloatingMenuEnabled(context)) {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+                } else if (isAccessibilityGestureEnabled(context)) {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+                } else {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                }
             case ACCESSIBILITY_SHORTCUT_KEY:
                 return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
         }

@@ -52,6 +52,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -72,6 +73,8 @@ public class WindowMagnificationManagerTest {
     @Mock
     private Context mContext;
     @Mock
+    private AccessibilityTraceManager mMockTrace;
+    @Mock
     private StatusBarManagerInternal mMockStatusBarManagerInternal;
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
@@ -88,7 +91,7 @@ public class WindowMagnificationManagerTest {
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID,
-                mMockCallback);
+                mMockCallback, mMockTrace);
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
         doAnswer((InvocationOnMock invocation) -> {

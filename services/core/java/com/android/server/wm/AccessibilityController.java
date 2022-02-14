@@ -16,13 +16,15 @@
 
 package com.android.server.wm;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CALLBACK;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK;
 import static android.os.Build.IS_USER;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
@@ -34,17 +36,21 @@ import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_P
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PKG;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_STACKS;
 import static com.android.server.accessibility.AccessibilityTraceProto.ELAPSED_REALTIME_NANOS;
+import static com.android.server.accessibility.AccessibilityTraceProto.LOGGING_TYPE;
 import static com.android.server.accessibility.AccessibilityTraceProto.PROCESS_NAME;
 import static com.android.server.accessibility.AccessibilityTraceProto.THREAD_ID_NAME;
 import static com.android.server.accessibility.AccessibilityTraceProto.WHERE;
 import static com.android.server.accessibility.AccessibilityTraceProto.WINDOW_MANAGER_SERVICE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowTracing.WINSCOPE_EXT;
 import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
+import android.accessibilityservice.AccessibilityTrace;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
@@ -84,12 +90,14 @@ import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.WindowInfo;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.TraceBuffer;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal;
@@ -99,8 +107,6 @@ import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallba
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,32 +122,36 @@ final class AccessibilityController {
     private static final String TAG = AccessibilityController.class.getSimpleName();
 
     private static final Object STATIC_LOCK = new Object();
-    static AccessibilityControllerInternal
+    static AccessibilityControllerInternalImpl
             getAccessibilityControllerInternal(WindowManagerService service) {
         return AccessibilityControllerInternalImpl.getInstance(service);
     }
 
-    private final AccessibilityTracing mAccessibilityTracing;
+    private final AccessibilityControllerInternalImpl mAccessibilityTracing;
     private final WindowManagerService mService;
     private static final Rect EMPTY_RECT = new Rect();
     private static final float[] sTempFloats = new float[9];
 
-    AccessibilityController(WindowManagerService service) {
-        mService = service;
-        mAccessibilityTracing = AccessibilityTracing.getInstance(service);
-    }
-
     private SparseArray<DisplayMagnifier> mDisplayMagnifiers = new SparseArray<>();
     private SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
+    private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
+    private int mFocusedDisplay = -1;
 
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
 
+    AccessibilityController(WindowManagerService service) {
+        mService = service;
+        mAccessibilityTracing =
+                AccessibilityController.getAccessibilityControllerInternal(service);
+    }
+
     boolean setMagnificationCallbacks(int displayId, MagnificationCallbacks callbacks) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(
                     TAG + ".setMagnificationCallbacks",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId + "; callbacks={" + callbacks + "}");
         }
         boolean result = false;
@@ -172,25 +182,31 @@ final class AccessibilityController {
 
     /**
      * Sets a callback for observing which windows are touchable for the purposes
-     * of accessibility on specified display.
+     * of accessibility on specified display. When a display is reparented and becomes
+     * an embedded one, the {@link WindowsForAccessibilityCallback#onDisplayReparented(int)}
+     * will notify the accessibility framework to remove the un-used window observer of
+     * this embedded display.
      *
      * @param displayId The logical display id.
      * @param callback The callback.
-     * @return {@code false} if display id is not valid or an embedded display.
+     * @return {@code false} if display id is not valid or an embedded display when the callback
+     * isn't null.
      */
     boolean setWindowsForAccessibilityCallback(int displayId,
             WindowsForAccessibilityCallback callback) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(
                     TAG + ".setWindowsForAccessibilityCallback",
+                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayId=" + displayId + "; callback={" + callback + "}");
-        }
-        final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-        if (dc == null) {
-            return false;
         }
 
         if (callback != null) {
+            final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                return false;
+            }
+
             WindowsForAccessibilityObserver observer =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (isEmbeddedDisplay(dc)) {
@@ -209,21 +225,13 @@ final class AccessibilityController {
                 if (Build.IS_DEBUGGABLE) {
                     throw new IllegalStateException(errorMessage);
                 }
-                removeObserverOfEmbeddedDisplay(observer);
+                removeObserversForEmbeddedChildDisplays(observer);
                 mWindowsForAccessibilityObserver.remove(displayId);
             }
             observer = new WindowsForAccessibilityObserver(mService, displayId, callback);
             mWindowsForAccessibilityObserver.put(displayId, observer);
             mAllObserversInitialized &= observer.mInitialized;
         } else {
-            if (isEmbeddedDisplay(dc)) {
-                // If this display is an embedded one, its window observer should be removed along
-                // with the window observer of its parent display removed because the window
-                // observer of the embedded display and its parent display is the same, and would
-                // be removed together when stopping the window tracking of its parent display. So
-                // here don't need to do removing window observer of the embedded display again.
-                return true;
-            }
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
             if (windowsForA11yObserver == null) {
@@ -234,16 +242,17 @@ final class AccessibilityController {
                     throw new IllegalStateException(errorMessage);
                 }
             }
-            removeObserverOfEmbeddedDisplay(windowsForA11yObserver);
+            removeObserversForEmbeddedChildDisplays(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
         }
         return true;
     }
 
     void performComputeChangedWindowsNot(int displayId, boolean forceSend) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(
                     TAG + ".performComputeChangedWindowsNot",
+                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayId=" + displayId + "; forceSend=" + forceSend);
         }
         WindowsForAccessibilityObserver observer = null;
@@ -260,8 +269,10 @@ final class AccessibilityController {
     }
 
     void setMagnificationSpec(int displayId, MagnificationSpec spec) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".setMagnificationSpec",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".setMagnificationSpec",
+                    FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayId=" + displayId + "; spec={" + spec + "}");
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
@@ -276,8 +287,9 @@ final class AccessibilityController {
     }
 
     void getMagnificationRegion(int displayId, Region outMagnificationRegion) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".getMagnificationRegion",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".getMagnificationRegion",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId + "; outMagnificationRegion={" + outMagnificationRegion
                             + "}");
         }
@@ -288,9 +300,10 @@ final class AccessibilityController {
     }
 
     void onRectangleOnScreenRequested(int displayId, Rect rectangle) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(
                     TAG + ".onRectangleOnScreenRequested",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId + "; rectangle={" + rectangle + "}");
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
@@ -301,9 +314,11 @@ final class AccessibilityController {
     }
 
     void onWindowLayersChanged(int displayId) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
-                    TAG + ".onWindowLayersChanged", "displayId=" + displayId);
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onWindowLayersChanged",
+                    FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
+                    "displayId=" + displayId);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
@@ -316,15 +331,18 @@ final class AccessibilityController {
         }
     }
 
-    void onRotationChanged(DisplayContent displayContent) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".onRotationChanged",
+    void onDisplaySizeChanged(DisplayContent displayContent) {
+
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onRotationChanged",
+                    FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayContent={" + displayContent + "}");
         }
         final int displayId = displayContent.getDisplayId();
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.onRotationChanged(displayContent);
+            displayMagnifier.onDisplaySizeChanged(displayContent);
         }
         final WindowsForAccessibilityObserver windowsForA11yObserver =
                 mWindowsForAccessibilityObserver.get(displayId);
@@ -334,8 +352,9 @@ final class AccessibilityController {
     }
 
     void onAppWindowTransition(int displayId, int transition) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".onAppWindowTransition",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onAppWindowTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId + "; transition=" + transition);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
@@ -346,8 +365,10 @@ final class AccessibilityController {
     }
 
     void onWindowTransition(WindowState windowState, int transition) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".onWindowTransition",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onWindowTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "windowState={" + windowState + "}; transition=" + transition);
         }
         final int displayId = windowState.getDisplayId();
@@ -364,9 +385,9 @@ final class AccessibilityController {
 
     void onWindowFocusChangedNot(int displayId) {
         // Not relevant for the display magnifier.
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
-                    TAG + ".onWindowFocusChangedNot", "displayId=" + displayId);
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onWindowFocusChangedNot",
+                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK, "displayId=" + displayId);
         }
         WindowsForAccessibilityObserver observer = null;
         synchronized (mService.mGlobalLock) {
@@ -426,12 +447,10 @@ final class AccessibilityController {
     }
 
     void onSomeWindowResizedOrMovedWithCallingUid(int callingUid, int... displayIds) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
-                    TAG + ".onSomeWindowResizedOrMoved",
-                    "displayIds={" + displayIds.toString() + "}",
-                    "".getBytes(),
-                    callingUid);
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onSomeWindowResizedOrMoved",
+                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
+                    "displayIds={" + displayIds.toString() + "}", "".getBytes(), callingUid);
         }
         // Not relevant for the display magnifier.
         for (int i = 0; i < displayIds.length; i++) {
@@ -444,9 +463,10 @@ final class AccessibilityController {
     }
 
     void drawMagnifiedRegionBorderIfNeeded(int displayId, SurfaceControl.Transaction t) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(
                     TAG + ".drawMagnifiedRegionBorderIfNeeded",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "displayId=" + displayId + "; transaction={" + t + "}");
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
@@ -457,8 +477,9 @@ final class AccessibilityController {
     }
 
     MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".getMagnificationSpecForWindow",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForWindow",
+                    FLAGS_MAGNIFICATION_CALLBACK,
                     "windowState={" + windowState + "}");
         }
         final int displayId = windowState.getDisplayId();
@@ -470,17 +491,19 @@ final class AccessibilityController {
     }
 
     boolean hasCallbacks() {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".hasCallbacks");
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
+                | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".hasCallbacks",
+                    FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK);
         }
         return (mDisplayMagnifiers.size() > 0
                 || mWindowsForAccessibilityObserver.size() > 0);
     }
 
     void setForceShowMagnifiableBounds(int displayId, boolean show) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".setForceShowMagnifiableBounds",
-                    "displayId=" + displayId + "; show=" + show);
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".setForceShowMagnifiableBounds",
+                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; show=" + show);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
@@ -497,39 +520,50 @@ final class AccessibilityController {
 
     void handleWindowObserverOfEmbeddedDisplay(
             int embeddedDisplayId, WindowState parentWindow, int callingUid) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".handleWindowObserverOfEmbeddedDisplay",
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".handleWindowObserverOfEmbeddedDisplay",
+                    FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "embeddedDisplayId=" + embeddedDisplayId + "; parentWindowState={"
-                    + parentWindow + "}",
-                    "".getBytes(),
-                    callingUid);
+                    + parentWindow + "}", "".getBytes(), callingUid);
         }
         if (embeddedDisplayId == Display.DEFAULT_DISPLAY || parentWindow == null) {
             return;
         }
-        // Finds the parent display of this embedded display
-        final int parentDisplayId;
-        WindowState candidate = parentWindow;
-        while (candidate != null) {
-            parentWindow = candidate;
-            candidate = parentWindow.getDisplayContent().getParentWindow();
+        mService.mH.sendMessage(PooledLambda.obtainMessage(
+                AccessibilityController::updateWindowObserverOfEmbeddedDisplay,
+                this, embeddedDisplayId, parentWindow));
+    }
+
+    private void updateWindowObserverOfEmbeddedDisplay(int embeddedDisplayId,
+            WindowState parentWindow) {
+        final WindowsForAccessibilityObserver windowsForA11yObserver;
+
+        synchronized (mService.mGlobalLock) {
+            // Finds the parent display of this embedded display
+            WindowState candidate = parentWindow;
+            while (candidate != null) {
+                parentWindow = candidate;
+                candidate = parentWindow.getDisplayContent().getParentWindow();
+            }
+            final int parentDisplayId = parentWindow.getDisplayId();
+            // Uses the observer of parent display
+            windowsForA11yObserver = mWindowsForAccessibilityObserver.get(parentDisplayId);
         }
-        parentDisplayId = parentWindow.getDisplayId();
-        // Uses the observer of parent display
-        final WindowsForAccessibilityObserver windowsForA11yObserver =
-                mWindowsForAccessibilityObserver.get(parentDisplayId);
 
         if (windowsForA11yObserver != null) {
+            windowsForA11yObserver.notifyDisplayReparented(embeddedDisplayId);
             windowsForA11yObserver.addEmbeddedDisplay(embeddedDisplayId);
-            // Replaces the observer of embedded display to the one of parent display
-            mWindowsForAccessibilityObserver.put(embeddedDisplayId, windowsForA11yObserver);
+            synchronized (mService.mGlobalLock) {
+                // Replaces the observer of embedded display to the one of parent display
+                mWindowsForAccessibilityObserver.put(embeddedDisplayId, windowsForA11yObserver);
+            }
         }
     }
 
     void onImeSurfaceShownChanged(WindowState windowState, boolean shown) {
-        if (mAccessibilityTracing.isEnabled()) {
-            mAccessibilityTracing.logState(TAG + ".onImeSurfaceShownChanged",
-                    "windowState=" + windowState + "; shown=" + shown);
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onImeSurfaceShownChanged",
+                    FLAGS_MAGNIFICATION_CALLBACK, "windowState=" + windowState + ";shown=" + shown);
         }
         final int displayId = windowState.getDisplayId();
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
@@ -555,7 +589,7 @@ final class AccessibilityController {
                 + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
     }
 
-    private void removeObserverOfEmbeddedDisplay(WindowsForAccessibilityObserver
+    private void removeObserversForEmbeddedChildDisplays(WindowsForAccessibilityObserver
             observerOfParentDisplay) {
         final IntArray embeddedDisplayIdList =
                 observerOfParentDisplay.getAndClearEmbeddedDisplayIdList();
@@ -572,6 +606,29 @@ final class AccessibilityController {
         return display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null;
     }
 
+    void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {
+        if (lastTarget != null) {
+            mFocusedWindow.remove(lastTarget.getDisplayId());
+        }
+        if (newTarget != null) {
+            int displayId = newTarget.getDisplayId();
+            IBinder clientBinder = newTarget.getIWindow().asBinder();
+            mFocusedWindow.put(displayId, clientBinder);
+        }
+    }
+
+    public void onDisplayRemoved(int displayId) {
+        mFocusedWindow.remove(displayId);
+    }
+
+    public void setFocusedDisplay(int focusedDisplayId) {
+        mFocusedDisplay = focusedDisplayId;
+    }
+
+    @Nullable IBinder getFocusedWindowToken() {
+        return mFocusedWindow.get(mFocusedDisplay);
+    }
+
     /**
      * This class encapsulates the functionality related to display magnification.
      */
@@ -580,7 +637,7 @@ final class AccessibilityController {
         private static final String LOG_TAG = TAG_WITH_CLASS_NAME ? "DisplayMagnifier" : TAG_WM;
 
         private static final boolean DEBUG_WINDOW_TRANSITIONS = false;
-        private static final boolean DEBUG_ROTATION = false;
+        private static final boolean DEBUG_DISPLAY_SIZE = false;
         private static final boolean DEBUG_LAYERS = false;
         private static final boolean DEBUG_RECTANGLE_REQUESTED = false;
         private static final boolean DEBUG_VIEWPORT_WINDOW = false;
@@ -599,7 +656,7 @@ final class AccessibilityController {
         private final Handler mHandler;
         private final DisplayContent mDisplayContent;
         private final Display mDisplay;
-        private final AccessibilityTracing mAccessibilityTracing;
+        private final AccessibilityControllerInternalImpl mAccessibilityTracing;
 
         private final MagnificationCallbacks mCallbacks;
 
@@ -618,11 +675,13 @@ final class AccessibilityController {
             mDisplay = display;
             mHandler = new MyHandler(mService.mH.getLooper());
             mMagnifedViewport = new MagnifiedViewport();
-            mAccessibilityTracing = AccessibilityTracing.getInstance(mService);
+            mAccessibilityTracing =
+                    AccessibilityController.getAccessibilityControllerInternal(mService);
             mLongAnimationDuration = mDisplayContext.getResources().getInteger(
                     com.android.internal.R.integer.config_longAnimTime);
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".DisplayMagnifier.constructor",
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".DisplayMagnifier.constructor",
+                        FLAGS_MAGNIFICATION_CALLBACK,
                         "windowManagerService={" + windowManagerService + "}; displayContent={"
                                 + displayContent + "}; display={" + display + "}; callbacks={"
                                 + callbacks + "}");
@@ -630,9 +689,9 @@ final class AccessibilityController {
         }
 
         void setMagnificationSpec(MagnificationSpec spec) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".setMagnificationSpec", "spec={" + spec + "}");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".setMagnificationSpec",
+                        FLAGS_MAGNIFICATION_CALLBACK, "spec={" + spec + "}");
             }
             mMagnifedViewport.updateMagnificationSpec(spec);
             mMagnifedViewport.recomputeBounds();
@@ -642,25 +701,26 @@ final class AccessibilityController {
         }
 
         void setForceShowMagnifiableBounds(boolean show) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".setForceShowMagnifiableBounds", "show=" + show);
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".setForceShowMagnifiableBounds",
+                        FLAGS_MAGNIFICATION_CALLBACK, "show=" + show);
             }
             mForceShowMagnifiableBounds = show;
             mMagnifedViewport.setMagnifiedRegionBorderShown(show, true);
         }
 
         boolean isForceShowingMagnifiableBounds() {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".isForceShowingMagnifiableBounds");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".isForceShowingMagnifiableBounds",
+                        FLAGS_MAGNIFICATION_CALLBACK);
             }
             return mForceShowMagnifiableBounds;
         }
 
         void onRectangleOnScreenRequested(Rect rectangle) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".onRectangleOnScreenRequested", "rectangle={" + rectangle + "}");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onRectangleOnScreenRequested",
+                        FLAGS_MAGNIFICATION_CALLBACK, "rectangle={" + rectangle + "}");
             }
             if (DEBUG_RECTANGLE_REQUESTED) {
                 Slog.i(LOG_TAG, "Rectangle on screen requested: " + rectangle);
@@ -683,8 +743,9 @@ final class AccessibilityController {
         }
 
         void onWindowLayersChanged() {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".onWindowLayersChanged");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(
+                        LOG_TAG + ".onWindowLayersChanged", FLAGS_MAGNIFICATION_CALLBACK);
             }
             if (DEBUG_LAYERS) {
                 Slog.i(LOG_TAG, "Layers changed.");
@@ -693,23 +754,24 @@ final class AccessibilityController {
             mService.scheduleAnimationLocked();
         }
 
-        void onRotationChanged(DisplayContent displayContent) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".onRotationChanged", "displayContent={" + displayContent + "}");
+        void onDisplaySizeChanged(DisplayContent displayContent) {
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onDisplaySizeChanged",
+                        FLAGS_MAGNIFICATION_CALLBACK, "displayContent={" + displayContent + "}");
             }
-            if (DEBUG_ROTATION) {
+            if (DEBUG_DISPLAY_SIZE) {
                 final int rotation = displayContent.getRotation();
                 Slog.i(LOG_TAG, "Rotation: " + Surface.rotationToString(rotation)
                         + " displayId: " + displayContent.getDisplayId());
             }
-            mMagnifedViewport.onRotationChanged();
-            mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_ROTATION_CHANGED);
+            mMagnifedViewport.onDisplaySizeChanged();
+            mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED);
         }
 
         void onAppWindowTransition(int displayId, int transition) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".onAppWindowTransition",
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onAppWindowTransition",
+                        FLAGS_MAGNIFICATION_CALLBACK,
                         "displayId=" + displayId + "; transition=" + transition);
             }
             if (DEBUG_WINDOW_TRANSITIONS) {
@@ -721,6 +783,7 @@ final class AccessibilityController {
             if (magnifying) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
+                    case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_TO_FRONT:
                     case WindowManager.TRANSIT_OLD_WALLPAPER_OPEN:
@@ -733,8 +796,9 @@ final class AccessibilityController {
         }
 
         void onWindowTransition(WindowState windowState, int transition) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".onWindowTransition",
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onWindowTransition",
+                        FLAGS_MAGNIFICATION_CALLBACK,
                         "windowState={" + windowState + "}; transition=" + transition);
             }
             if (DEBUG_WINDOW_TRANSITIONS) {
@@ -791,18 +855,18 @@ final class AccessibilityController {
         }
 
         void onImeSurfaceShownChanged(boolean shown) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".onImeSurfaceShownChanged", "shown=" + shown);
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onImeSurfaceShownChanged",
+                        FLAGS_MAGNIFICATION_CALLBACK, "shown=" + shown);
             }
             mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED,
                     shown ? 1 : 0, 0).sendToTarget();
         }
 
         MagnificationSpec getMagnificationSpecForWindow(WindowState windowState) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".getMagnificationSpecForWindow",
-                        "windowState={" + windowState + "}");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpecForWindow",
+                        FLAGS_MAGNIFICATION_CALLBACK, "windowState={" + windowState + "}");
             }
             MagnificationSpec spec = mMagnifedViewport.getMagnificationSpec();
             if (spec != null && !spec.isNop()) {
@@ -814,8 +878,9 @@ final class AccessibilityController {
         }
 
         void getMagnificationRegion(Region outMagnificationRegion) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".getMagnificationRegion",
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationRegion",
+                        FLAGS_MAGNIFICATION_CALLBACK,
                         "outMagnificationRegion={" + outMagnificationRegion + "}");
             }
             // Make sure we're working with the most current bounds
@@ -824,25 +889,26 @@ final class AccessibilityController {
         }
 
         void destroy() {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".destroy");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".destroy", FLAGS_MAGNIFICATION_CALLBACK);
             }
             mMagnifedViewport.destroyWindow();
         }
 
         // Can be called outside of a surface transaction
         void showMagnificationBoundsIfNeeded() {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".showMagnificationBoundsIfNeeded");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".showMagnificationBoundsIfNeeded",
+                        FLAGS_MAGNIFICATION_CALLBACK);
             }
             mHandler.obtainMessage(MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)
                     .sendToTarget();
         }
 
         void drawMagnifiedRegionBorderIfNeeded(SurfaceControl.Transaction t) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
-                        "transition={" + t + "}");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
+                        FLAGS_MAGNIFICATION_CALLBACK, "transition={" + t + "}");
             }
             mMagnifedViewport.drawWindowIfNeeded(t);
         }
@@ -887,7 +953,8 @@ final class AccessibilityController {
 
                 if (mDisplayContext.getResources().getConfiguration().isScreenRound()) {
                     mCircularPath = new Path();
-                    mDisplay.getRealSize(mScreenSize);
+
+                    getDisplaySizeLocked(mScreenSize);
                     final int centerXY = mScreenSize.x / 2;
                     mCircularPath.addCircle(centerXY, centerXY, centerXY, Path.Direction.CW);
                 } else {
@@ -917,7 +984,7 @@ final class AccessibilityController {
             }
 
             void recomputeBounds() {
-                mDisplay.getRealSize(mScreenSize);
+                getDisplaySizeLocked(mScreenSize);
                 final int screenWidth = mScreenSize.x;
                 final int screenHeight = mScreenSize.y;
 
@@ -941,6 +1008,8 @@ final class AccessibilityController {
                     WindowState windowState = visibleWindows.valueAt(i);
                     final int windowType = windowState.mAttrs.type;
                     if (isExcludedWindowType(windowType)
+                            || ((windowState.mAttrs.privateFlags
+                            & PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION) != 0)
                             || ((windowState.mAttrs.privateFlags
                             & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
@@ -1006,7 +1075,6 @@ final class AccessibilityController {
                         }
                     }
                 }
-
                 visibleWindows.clear();
 
                 mMagnificationRegion.op(mDrawBorderInset, mDrawBorderInset,
@@ -1043,18 +1111,16 @@ final class AccessibilityController {
 
             private boolean isExcludedWindowType(int windowType) {
                 return windowType == TYPE_MAGNIFICATION_OVERLAY
-                        // Omit the touch region to avoid the cut out of the magnification
-                        // bounds because nav bar panel is unmagnifiable.
-                        || windowType == TYPE_NAVIGATION_BAR_PANEL
                         // Omit the touch region of window magnification to avoid the cut out of the
                         // magnification and the magnified center of window magnification could be
                         // in the bounds
                         || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
             }
 
-            void onRotationChanged() {
+            void onDisplaySizeChanged() {
                 // If we are showing the magnification border, hide it immediately so
-                // the user does not see strange artifacts during rotation. The screenshot
+                // the user does not see strange artifacts during display size changed caused by
+                // rotation or folding/unfolding the device. In the rotation case, the screenshot
                 // used for rotation already has the border. After the rotation is complete
                 // we will show the border.
                 if (isMagnifying() || isForceShowingMagnifiableBounds()) {
@@ -1112,6 +1178,12 @@ final class AccessibilityController {
                 }, false /* traverseTopToBottom */ );
             }
 
+            private void getDisplaySizeLocked(Point outSize) {
+                final Rect bounds =
+                        mDisplayContent.getConfiguration().windowConfiguration.getBounds();
+                outSize.set(bounds.width(), bounds.height());
+            }
+
             void dump(PrintWriter pw, String prefix) {
                 mWindow.dump(pw, prefix);
             }
@@ -1155,7 +1227,7 @@ final class AccessibilityController {
                     final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
                     final int layer =
                             mService.mPolicy.getWindowLayerFromTypeLw(TYPE_MAGNIFICATION_OVERLAY) *
-                                    WindowManagerService.TYPE_LAYER_MULTIPLIER;
+                                    WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
                     t.setLayer(mSurfaceControl, layer).setPosition(mSurfaceControl, 0, 0);
                     InputMonitor.setTrustedOverlayInputInfo(mSurfaceControl, t,
                             mDisplayContent.getDisplayId(), "Magnification Overlay");
@@ -1226,7 +1298,7 @@ final class AccessibilityController {
 
                 void updateSize() {
                     synchronized (mService.mGlobalLock) {
-                        mDisplay.getRealSize(mScreenSize);
+                        getDisplaySizeLocked(mScreenSize);
                         mBlastBufferQueue.update(mSurfaceControl, mScreenSize.x, mScreenSize.y,
                                 PixelFormat.RGBA_8888);
                         invalidate(mDirtyRect);
@@ -1365,7 +1437,7 @@ final class AccessibilityController {
             public static final int MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED = 1;
             public static final int MESSAGE_NOTIFY_RECTANGLE_ON_SCREEN_REQUESTED = 2;
             public static final int MESSAGE_NOTIFY_USER_CONTEXT_CHANGED = 3;
-            public static final int MESSAGE_NOTIFY_ROTATION_CHANGED = 4;
+            public static final int MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED = 4;
             public static final int MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED = 5;
             public static final int MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED = 6;
 
@@ -1397,9 +1469,8 @@ final class AccessibilityController {
                         mCallbacks.onUserContextChanged();
                     } break;
 
-                    case MESSAGE_NOTIFY_ROTATION_CHANGED: {
-                        final int rotation = message.arg1;
-                        mCallbacks.onRotationChanged(rotation);
+                    case MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED: {
+                        mCallbacks.onDisplaySizeChanged();
                     } break;
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
@@ -1482,7 +1553,7 @@ final class AccessibilityController {
 
         private final Handler mHandler;
 
-        private final AccessibilityTracing mAccessibilityTracing;
+        private final AccessibilityControllerInternalImpl mAccessibilityTracing;
 
         private final WindowsForAccessibilityCallback mCallback;
 
@@ -1502,24 +1573,26 @@ final class AccessibilityController {
             mCallback = callback;
             mDisplayId = displayId;
             mHandler = new MyHandler(mService.mH.getLooper());
-            mAccessibilityTracing = AccessibilityTracing.getInstance(mService);
+            mAccessibilityTracing =
+                    AccessibilityController.getAccessibilityControllerInternal(mService);
             mRecurringAccessibilityEventsIntervalMillis = ViewConfiguration
                     .getSendRecurringAccessibilityEventsInterval();
             computeChangedWindows(true);
         }
 
         void performComputeChangedWindows(boolean forceSend) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".performComputeChangedWindows",
-                        "forceSend=" + forceSend);
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".performComputeChangedWindows",
+                        FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK, "forceSend=" + forceSend);
             }
             mHandler.removeMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS);
             computeChangedWindows(forceSend);
         }
 
         void scheduleComputeChangedWindows() {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(LOG_TAG + ".scheduleComputeChangedWindows");
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".scheduleComputeChangedWindows",
+                        FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK);
             }
             if (!mHandler.hasMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS)) {
                 mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS,
@@ -1540,6 +1613,13 @@ final class AccessibilityController {
                 return;
             }
             mEmbeddedDisplayIdList.add(displayId);
+        }
+
+        void notifyDisplayReparented(int embeddedDisplayId) {
+            // Notifies the A11y framework the display is reparented and
+            // becomes an embedded display for removing the un-used
+            // displayWindowObserver of this embedded one.
+            mCallback.onDisplayReparented(embeddedDisplayId);
         }
 
         boolean shellRootIsAbove(WindowState windowState, ShellRoot shellRoot) {
@@ -1594,9 +1674,9 @@ final class AccessibilityController {
          * @param forceSend Send the windows the accessibility even if they haven't changed.
          */
         void computeChangedWindows(boolean forceSend) {
-            if (mAccessibilityTracing.isEnabled()) {
-                mAccessibilityTracing.logState(
-                        LOG_TAG + ".computeChangedWindows", "forceSend=" + forceSend);
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".computeChangedWindows",
+                        FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK, "forceSend=" + forceSend);
             }
             if (DEBUG) {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
@@ -1645,7 +1725,7 @@ final class AccessibilityController {
                 boolean focusedWindowAdded = false;
 
                 final int visibleWindowCount = visibleWindows.size();
-                HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments = new ArrayList<>();
 
                 ArrayList<ShellRoot> shellRoots = getSortedShellRoots(dc.mShellRoots);
 
@@ -1667,10 +1747,10 @@ final class AccessibilityController {
                     computeWindowRegionInScreen(windowState, regionInScreen);
 
                     if (windowMattersToAccessibility(windowState, regionInScreen, unaccountedSpace,
-                            skipRemainingWindowsForTasks)) {
+                            skipRemainingWindowsForTaskFragments)) {
                         addPopulatedWindowInfo(windowState, regionInScreen, windows, addedWindows);
                         updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
-                                skipRemainingWindowsForTasks);
+                                skipRemainingWindowsForTaskFragments);
                         focusedWindowAdded |= windowState.isFocused();
                     } else if (isUntouchableNavigationBar(windowState, mTempRegion1)) {
                         // If this widow is navigation bar without touchable region, accounting the
@@ -1726,7 +1806,7 @@ final class AccessibilityController {
 
         private boolean windowMattersToAccessibility(WindowState windowState,
                 Region regionInScreen, Region unaccountedSpace,
-                HashSet<Integer> skipRemainingWindowsForTasks) {
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
             final RecentsAnimationController controller = mService.getRecentsAnimationController();
             if (controller != null && controller.shouldIgnoreForAccessibility(windowState)) {
                 return false;
@@ -1737,8 +1817,9 @@ final class AccessibilityController {
             }
 
             // If the window is part of a task that we're finished with - ignore.
-            final Task task = windowState.getTask();
-            if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
+            final TaskFragment taskFragment = windowState.getTaskFragment();
+            if (taskFragment != null
+                    && skipRemainingWindowsForTaskFragments.contains(taskFragment)) {
                 return false;
             }
 
@@ -1764,7 +1845,8 @@ final class AccessibilityController {
         }
 
         private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
-                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+                Region unaccountedSpace,
+                ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
             if (windowState.mAttrs.type
                     != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
 
@@ -1794,11 +1876,11 @@ final class AccessibilityController {
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 
-                    final Task task = windowState.getTask();
-                    if (task != null) {
+                    final TaskFragment taskFragment = windowState.getTaskFragment();
+                    if (taskFragment != null) {
                         // If the window is associated with a particular task, we can skip the
                         // rest of the windows for that task.
-                        skipRemainingWindowsForTasks.add(task.mTaskId);
+                        skipRemainingWindowsForTaskFragments.add(taskFragment);
                     } else if (!windowState.hasTapExcludeRegion()) {
                         // If the window is not associated with a particular task, then it is
                         // globally modal. In this case we can skip all remaining windows when
@@ -1945,8 +2027,8 @@ final class AccessibilityController {
     private static final class AccessibilityControllerInternalImpl
             implements AccessibilityControllerInternal {
 
-        private static AccessibilityControllerInternal sInstance;
-        static AccessibilityControllerInternal getInstance(WindowManagerService service) {
+        private static AccessibilityControllerInternalImpl sInstance;
+        static AccessibilityControllerInternalImpl getInstance(WindowManagerService service) {
             synchronized (STATIC_LOCK) {
                 if (sInstance == null) {
                     sInstance = new AccessibilityControllerInternalImpl(service);
@@ -1956,18 +2038,23 @@ final class AccessibilityController {
         }
 
         private final AccessibilityTracing mTracing;
+        private volatile long mEnabledTracingFlags;
+
         private AccessibilityControllerInternalImpl(WindowManagerService service) {
             mTracing = AccessibilityTracing.getInstance(service);
+            mEnabledTracingFlags = 0L;
         }
 
         @Override
-        public void startTrace() {
+        public void startTrace(long loggingTypes) {
+            mEnabledTracingFlags = loggingTypes;
             mTracing.startTrace();
         }
 
         @Override
         public void stopTrace() {
             mTracing.stopTrace();
+            mEnabledTracingFlags = 0L;
         }
 
         @Override
@@ -1975,19 +2062,37 @@ final class AccessibilityController {
             return mTracing.isEnabled();
         }
 
-        @Override
-        public void logTrace(
-                String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace) {
-            mTracing.logState(where, callingParams, a11yDump, callingUid, stackTrace);
+        boolean isTracingEnabled(long flags) {
+            return (flags & mEnabledTracingFlags) != 0L;
+        }
+
+        void logTrace(String where, long loggingTypes) {
+            logTrace(where, loggingTypes, "");
+        }
+
+        void logTrace(String where, long loggingTypes, String callingParams) {
+            logTrace(where, loggingTypes, callingParams, "".getBytes(), Binder.getCallingUid());
+        }
+
+        void logTrace(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid) {
+            mTracing.logState(where, loggingTypes, callingParams, a11yDump, callingUid,
+                    new HashSet<String>(Arrays.asList("logTrace")));
         }
 
         @Override
-        public void logTrace(
-                String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callStack, long timeStamp, int processId, long threadId) {
-            mTracing.logState(where, callingParams, a11yDump, callingUid, callStack, timeStamp,
-                    processId, threadId);
+        public void logTrace(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] stackTrace, Set<String> ignoreStackEntries) {
+            mTracing.logState(where, loggingTypes, callingParams, a11yDump, callingUid, stackTrace,
+                    ignoreStackEntries);
+        }
+
+        @Override
+        public void logTrace(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] callStack, long timeStamp, int processId,
+                long threadId, Set<String> ignoreStackEntries) {
+            mTracing.logState(where, loggingTypes, callingParams, a11yDump, callingUid, callStack,
+                    timeStamp, processId, threadId, ignoreStackEntries);
         }
     }
 
@@ -2003,8 +2108,7 @@ final class AccessibilityController {
         }
 
         private static final int BUFFER_CAPACITY = 1024 * 1024 * 12;
-        private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace.pb";
-        private static final String TRACE_DIRECTORY = "/data/misc/a11ytrace/";
+        private static final String TRACE_FILENAME = "/data/misc/a11ytrace/a11y_trace" + WINSCOPE_EXT;
         private static final String TAG = "AccessibilityTracing";
         private static final long MAGIC_NUMBER_VALUE =
                 ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
@@ -2034,13 +2138,6 @@ final class AccessibilityController {
                 return;
             }
             synchronized (mLock) {
-                try {
-                    Files.createDirectories(Paths.get(TRACE_DIRECTORY));
-                    mTraceFile.createNewFile();
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error: Failed to create trace file.");
-                    return;
-                }
                 mEnabled = true;
                 mBuffer.resetBuffer();
             }
@@ -2071,86 +2168,127 @@ final class AccessibilityController {
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(String where) {
+        void logState(String where, long loggingTypes) {
             if (!mEnabled) {
                 return;
             }
-            logState(where, "");
+            logState(where, loggingTypes, "");
         }
 
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(String where, String callingParams) {
+        void logState(String where, long loggingTypes, String callingParams) {
             if (!mEnabled) {
                 return;
             }
-            logState(where, callingParams, "".getBytes());
+            logState(where, loggingTypes, callingParams, "".getBytes());
         }
 
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(String where, String callingParams, byte[] a11yDump) {
+        void logState(String where, long loggingTypes, String callingParams, byte[] a11yDump) {
             if (!mEnabled) {
                 return;
             }
-            logState(where, callingParams, a11yDump, Binder.getCallingUid());
+            logState(where, loggingTypes, callingParams, a11yDump, Binder.getCallingUid(),
+                    new HashSet<String>(Arrays.asList("logState")));
         }
 
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(
-                String where, String callingParams, byte[] a11yDump, int callingUid) {
+        void logState(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, Set<String> ignoreStackEntries) {
             if (!mEnabled) {
                 return;
             }
             StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-
-            logState(where, callingParams, a11yDump, callingUid, stackTraceElements);
+            ignoreStackEntries.add("logState");
+            logState(where, loggingTypes, callingParams, a11yDump, callingUid, stackTraceElements,
+                    ignoreStackEntries);
         }
 
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] stackTrace) {
+        void logState(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] stackTrace, Set<String> ignoreStackEntries) {
             if (!mEnabled) {
                 return;
             }
-
-            log(where, callingParams, a11yDump, callingUid, stackTrace,
+            log(where, loggingTypes, callingParams, a11yDump, callingUid, stackTrace,
                     SystemClock.elapsedRealtimeNanos(),
                     Process.myPid() + ":" + Application.getProcessName(),
-                    Thread.currentThread().getId() + ":" + Thread.currentThread().getName());
+                    Thread.currentThread().getId() + ":" + Thread.currentThread().getName(),
+                    ignoreStackEntries);
         }
 
         /**
          * Write an accessibility trace log entry.
          */
-        void logState(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callingStack, long timeStamp, int processId, long threadId) {
+        void logState(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] callingStack, long timeStamp, int processId,
+                long threadId, Set<String> ignoreStackEntries) {
             if (!mEnabled) {
                 return;
             }
-            log(where, callingParams, a11yDump, callingUid, callingStack, timeStamp,
-                    String.valueOf(processId), String.valueOf(threadId));
+            log(where, loggingTypes, callingParams, a11yDump, callingUid, callingStack, timeStamp,
+                    String.valueOf(processId), String.valueOf(threadId), ignoreStackEntries);
         }
 
-        private  String toStackTraceString(StackTraceElement[] stackTraceElements) {
+        private  String toStackTraceString(StackTraceElement[] stackTraceElements,
+                Set<String> ignoreStackEntries) {
+
             if (stackTraceElements == null) {
                 return "";
             }
+
             StringBuilder stringBuilder = new StringBuilder();
-            boolean skip = true;
-            for (int i = 0; i < stackTraceElements.length; i++) {
-                if (stackTraceElements[i].toString().contains(
-                            AccessibilityTracing.class.getSimpleName())) {
-                    skip = false;
-                } else if (!skip) {
-                    stringBuilder.append(stackTraceElements[i].toString()).append("\n");
+            int i = 0;
+
+            // Skip the first a few elements until after any ignoreStackEntries
+            int firstMatch = -1;
+            while (i < stackTraceElements.length) {
+                for (String ele : ignoreStackEntries) {
+                    if (stackTraceElements[i].toString().contains(ele)) {
+                        // found the first stack element containing the ignorable stack entries
+                        firstMatch = i;
+                        break;
+                    }
                 }
+                if (firstMatch < 0) {
+                    // Haven't found the first match yet, continue
+                    i++;
+                } else {
+                    break;
+                }
+            }
+            int lastMatch = firstMatch;
+            if (i < stackTraceElements.length) {
+                i++;
+                // Found the first match. Now look for the last match.
+                while (i < stackTraceElements.length) {
+                    for (String ele : ignoreStackEntries) {
+                        if (stackTraceElements[i].toString().contains(ele)) {
+                            // This is a match. Look at the next stack element.
+                            lastMatch = i;
+                            break;
+                        }
+                    }
+                    if (lastMatch != i) {
+                        // Found a no-match.
+                        break;
+                    }
+                    i++;
+                }
+            }
+
+            i = lastMatch + 1;
+            while (i < stackTraceElements.length) {
+                stringBuilder.append(stackTraceElements[i].toString()).append("\n");
+                i++;
             }
             return stringBuilder.toString();
         }
@@ -2158,19 +2296,22 @@ final class AccessibilityController {
         /**
          * Write the current state to the buffer
          */
-        private void log(String where, String callingParams, byte[] a11yDump, int callingUid,
-                StackTraceElement[] callingStack, long timeStamp, String processName,
-                String threadName) {
+        private void log(String where, long loggingTypes, String callingParams, byte[] a11yDump,
+                int callingUid, StackTraceElement[] callingStack, long timeStamp,
+                String processName, String threadName, Set<String> ignoreStackEntries) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = timeStamp;
-            args.arg2 = where;
-            args.arg3 = processName;
-            args.arg4 = threadName;
-            args.arg5 = callingUid;
-            args.arg6 = callingParams;
-            args.arg7 = callingStack;
-            args.arg8 = a11yDump;
-            mHandler.obtainMessage(LogHandler.MESSAGE_LOG_TRACE_ENTRY, args).sendToTarget();
+            args.arg2 = loggingTypes;
+            args.arg3 = where;
+            args.arg4 = processName;
+            args.arg5 = threadName;
+            args.arg6 = ignoreStackEntries;
+            args.arg7 = callingParams;
+            args.arg8 = callingStack;
+            args.arg9 = a11yDump;
+
+            mHandler.obtainMessage(
+                    LogHandler.MESSAGE_LOG_TRACE_ENTRY, callingUid, 0, args).sendToTarget();
         }
 
         /**
@@ -2199,8 +2340,6 @@ final class AccessibilityController {
                                     LocalServices.getService(PackageManagerInternal.class);
 
                             long tokenOuter = os.start(ENTRY);
-                            String callingStack =
-                                    toStackTraceString((StackTraceElement[]) args.arg7);
 
                             long reportedTimeStampNanos = (long) args.arg1;
                             long currentElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
@@ -2213,13 +2352,25 @@ final class AccessibilityController {
 
                             os.write(ELAPSED_REALTIME_NANOS, reportedTimeStampNanos);
                             os.write(CALENDAR_TIME, fm.format(reportedTimeMillis).toString());
-                            os.write(WHERE, (String) args.arg2);
-                            os.write(PROCESS_NAME, (String) args.arg3);
-                            os.write(THREAD_ID_NAME, (String) args.arg4);
-                            os.write(CALLING_PKG, pmInternal.getNameForUid((int) args.arg5));
-                            os.write(CALLING_PARAMS, (String) args.arg6);
+
+                            long loggingTypes = (long) args.arg2;
+                            List<String> loggingTypeNames =
+                                    AccessibilityTrace.getNamesOfLoggingTypes(loggingTypes);
+
+                            for (String type : loggingTypeNames) {
+                                os.write(LOGGING_TYPE, type);
+                            }
+                            os.write(WHERE, (String) args.arg3);
+                            os.write(PROCESS_NAME, (String) args.arg4);
+                            os.write(THREAD_ID_NAME, (String) args.arg5);
+                            os.write(CALLING_PKG, pmInternal.getNameForUid(message.arg1));
+                            os.write(CALLING_PARAMS, (String) args.arg7);
+
+                            String callingStack = toStackTraceString(
+                                    (StackTraceElement[]) args.arg8, (Set<String>) args.arg6);
+
                             os.write(CALLING_STACKS, callingStack);
-                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg8);
+                            os.write(ACCESSIBILITY_SERVICE, (byte[]) args.arg9);
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {

@@ -22,6 +22,7 @@ import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -82,6 +83,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
     private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var uniqueObjectHostView: UniqueObjectHostView
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -94,6 +97,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        context.getOrCreateTestableResources().addOverride(
+                R.bool.config_use_split_notification_shade, false)
         mediaFrame = FrameLayout(context)
         `when`(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         mediaHiearchyManager = MediaHierarchyManager(
@@ -124,7 +129,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private fun setupHost(host: MediaHost, location: Int) {
         `when`(host.location).thenReturn(location)
         `when`(host.currentBounds).thenReturn(Rect())
-        `when`(host.hostView).thenReturn(UniqueObjectHostView(context))
+        `when`(host.hostView).thenReturn(uniqueObjectHostView)
         `when`(host.visible).thenReturn(true)
         mediaHiearchyManager.register(host)
     }

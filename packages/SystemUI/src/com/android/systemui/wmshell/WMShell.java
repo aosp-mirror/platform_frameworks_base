@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
@@ -55,6 +56,8 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.compatui.CompatUI;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
@@ -64,6 +67,7 @@ import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -100,14 +104,18 @@ public final class WMShell extends SystemUI
                     | SYSUI_STATE_BOUNCER_SHOWING
                     | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
                     | SYSUI_STATE_BUBBLES_EXPANDED
+                    | SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
                     | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 
     // Shell interfaces
     private final Optional<Pip> mPipOptional;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
+    private final Optional<CompatUI> mCompatUIOptional;
+    private final Optional<DragAndDrop> mDragAndDropOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -120,18 +128,23 @@ public final class WMShell extends SystemUI
     private final Executor mSysUiMainExecutor;
 
     private boolean mIsSysUiStateValid;
+    private KeyguardUpdateMonitorCallback mLegacySplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mCompatUIKeyguardCallback;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
     @Inject
     public WMShell(Context context,
             Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             Optional<ShellCommandHandler> shellCommandHandler,
+            Optional<CompatUI> sizeCompatUIOptional,
+            Optional<DragAndDrop> dragAndDropOptional,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -149,12 +162,15 @@ public final class WMShell extends SystemUI
         mScreenLifecycle = screenLifecycle;
         mSysUiState = sysUiState;
         mPipOptional = pipOptional;
+        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mProtoTracer = protoTracer;
         mShellCommandHandler = shellCommandHandler;
+        mCompatUIOptional = sizeCompatUIOptional;
+        mDragAndDropOptional = dragAndDropOptional;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -165,9 +181,12 @@ public final class WMShell extends SystemUI
         mProtoTracer.add(this);
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);
+        mLegacySplitScreenOptional.ifPresent(this::initLegacySplitScreen);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
+        mCompatUIOptional.ifPresent(this::initCompatUi);
+        mDragAndDropOptional.ifPresent(this::initDragAndDrop);
     }
 
     @VisibleForTesting
@@ -206,7 +225,7 @@ public final class WMShell extends SystemUI
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 pip.onOverlayChanged();
             }
         });
@@ -218,8 +237,8 @@ public final class WMShell extends SystemUI
     }
 
     @VisibleForTesting
-    void initSplitScreen(LegacySplitScreen legacySplitScreen) {
-        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+    void initLegacySplitScreen(LegacySplitScreen legacySplitScreen) {
+        mLegacySplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
                 // Hide the divider when keyguard is showing. Even though keyguard/statusbar is
@@ -229,7 +248,35 @@ public final class WMShell extends SystemUI
                 legacySplitScreen.onKeyguardVisibilityChanged(showing);
             }
         };
+        mKeyguardUpdateMonitor.registerCallback(mLegacySplitScreenKeyguardCallback);
+    }
+
+    @VisibleForTesting
+    void initSplitScreen(SplitScreen splitScreen) {
+        mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                splitScreen.onKeyguardVisibilityChanged(showing);
+            }
+
+            @Override
+            public void onKeyguardOccludedChanged(boolean occluded) {
+                splitScreen.onKeyguardOccludedChanged(occluded);
+            }
+        };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);
+
+        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
+            @Override
+            public void onFinishedWakingUp() {
+                splitScreen.onFinishedWakingUp();
+            }
+
+            @Override
+            public void onFinishedGoingToSleep() {
+                splitScreen.onFinishedGoingToSleep();
+            }
+        });
     }
 
     @VisibleForTesting
@@ -339,6 +386,31 @@ public final class WMShell extends SystemUI
             @Override
             public void onConfigChanged(Configuration newConfig) {
                 hideDisplayCutout.onConfigurationChanged(newConfig);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void initCompatUi(CompatUI sizeCompatUI) {
+        mCompatUIKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardOccludedChanged(boolean occluded) {
+                sizeCompatUI.onKeyguardOccludedChanged(occluded);
+            }
+        };
+        mKeyguardUpdateMonitor.registerCallback(mCompatUIKeyguardCallback);
+    }
+
+    void initDragAndDrop(DragAndDrop dragAndDrop) {
+        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onConfigChanged(Configuration newConfig) {
+                dragAndDrop.onConfigChanged(newConfig);
+            }
+
+            @Override
+            public void onThemeChanged() {
+                dragAndDrop.onThemeChanged();
             }
         });
     }

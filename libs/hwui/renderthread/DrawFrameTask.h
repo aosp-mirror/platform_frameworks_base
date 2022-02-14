@@ -81,7 +81,11 @@ public:
         mFrameCallback = std::move(callback);
     }
 
-    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+    void setFrameCommitCallback(std::function<void(bool)>&& callback) {
+        mFrameCommitCallback = std::move(callback);
+    }
+
+    void setFrameCompleteCallback(std::function<void()>&& callback) {
         mFrameCompleteCallback = std::move(callback);
     }
 
@@ -123,7 +127,8 @@ private:
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
     std::function<void(int64_t)> mFrameCallback;
-    std::function<void(int64_t)> mFrameCompleteCallback;
+    std::function<void(bool)> mFrameCommitCallback;
+    std::function<void()> mFrameCompleteCallback;
 
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mLastTargetWorkDuration = 0;

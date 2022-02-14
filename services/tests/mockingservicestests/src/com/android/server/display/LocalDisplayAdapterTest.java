@@ -134,6 +134,20 @@ public class LocalDisplayAdapterTest {
         when(mMockedResources.getFloat(com.android.internal.R.dimen
                 .config_screenBrightnessSettingMaximumFloat))
                 .thenReturn(BACKLIGHT_RANGE_ZERO_TO_ONE[1]);
+        when(mMockedResources.getStringArray(R.array.config_displayUniqueIdArray))
+                .thenReturn(new String[]{});
+        TypedArray mockArray = mock(TypedArray.class);
+        when(mockArray.length()).thenReturn(0);
+        when(mMockedResources.obtainTypedArray(R.array.config_maskBuiltInDisplayCutoutArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_waterfallCutoutArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerRadiusArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerTopRadiusArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerBottomRadiusArray))
+                .thenReturn(mockArray);
     }
 
     @After

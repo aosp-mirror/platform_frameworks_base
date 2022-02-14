@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Build;
 import android.os.UserHandle;
@@ -141,11 +142,12 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
                 : mAnimationViewController.getPaddingX();
         int paddingY = mAnimationViewController == null ? 0
                 : mAnimationViewController.getPaddingY();
+        final SensorLocationInternal location = mSensorProps.getLocation();
         mSensorRect.set(
                 paddingX,
                 paddingY,
-                2 * mSensorProps.sensorRadius + paddingX,
-                2 * mSensorProps.sensorRadius + paddingY);
+                2 * location.sensorRadius + paddingX,
+                2 * location.sensorRadius + paddingY);
 
         if (mAnimationViewController != null) {
             mAnimationViewController.onSensorRectUpdated(new RectF(mSensorRect));

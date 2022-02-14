@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
@@ -46,6 +47,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.frameworks.coretests.R;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -240,6 +243,12 @@ public class WindowContextTest {
 
         // Add a window with sub-window type.
         mInstrumentation.runOnMainSync(() -> wm.addView(subWindow, subWindowAttrs));
+    }
+
+    @Test
+    public void testGetCustomDrawable() {
+        assertNotNull(mWindowContext.getResources().getDrawable(R.drawable.custom_drawable,
+                null /* theme */));
     }
 
     private WindowContext createWindowContext() {

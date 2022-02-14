@@ -50,7 +50,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,11 +60,10 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
@@ -80,7 +78,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -118,7 +115,6 @@ public class BubblesManager implements Dumpable {
     private final NotifPipeline mNotifPipeline;
     private final Executor mSysuiMainExecutor;
 
-    private ScrimView mBubbleScrim;
     private final Bubbles.SysuiProxy mSysuiProxy;
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
@@ -192,12 +188,6 @@ public class BubblesManager implements Dumpable {
                 ? IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE))
                 : statusBarService;
-
-        mBubbleScrim = new ScrimView(mContext);
-        mBubbleScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        mBubbles.setBubbleScrim(mBubbleScrim, (executor, looper) -> {
-            mBubbleScrim.setExecutor(executor, looper);
-        });
 
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             setupNotifPipeline();
@@ -387,8 +377,22 @@ public class BubblesManager implements Dumpable {
                 sysuiMainExecutor.execute(() -> {
                     sysUiState.setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
                             .commitUpdate(mContext.getDisplayId());
+                    if (!shouldExpand) {
+                        sysUiState.setFlag(
+                                QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                                false).commitUpdate(mContext.getDisplayId());
+                    }
                 });
             }
+
+            @Override
+            public void onManageMenuExpandChanged(boolean menuExpanded) {
+                sysuiMainExecutor.execute(() -> {
+                    sysUiState.setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                            menuExpanded).commitUpdate(mContext.getDisplayId());
+                });
+            }
+
 
             @Override
             public void onUnbubbleConversation(String key) {
@@ -600,15 +604,6 @@ public class BubblesManager implements Dumpable {
                         mNotificationEntryManager.getActiveNotificationsCount(),
                         isVisible,
                         NotificationLogger.getNotificationLocation(entry)));
-    }
-
-    /**
-     * Returns the scrim drawn behind the bubble stack. This is managed by {@link ScrimController}
-     * since we want the scrim's appearance and behavior to be identical to that of the notification
-     * shade scrim.
-     */
-    public ScrimView getScrimForBubble() {
-        return mBubbleScrim;
     }
 
     /**

@@ -489,9 +489,9 @@ public class LocalMediaManager implements BluetoothCallback {
         @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
+                Collections.sort(devices, COMPARATOR);
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                Collections.sort(devices, COMPARATOR);
                 // Add disconnected bluetooth devices only when phone output device is available.
                 for (MediaDevice device : devices) {
                     final int type = device.getDeviceType();

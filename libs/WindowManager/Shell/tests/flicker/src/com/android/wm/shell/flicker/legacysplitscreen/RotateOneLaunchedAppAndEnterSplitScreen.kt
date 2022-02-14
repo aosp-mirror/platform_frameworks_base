@@ -24,18 +24,16 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -66,38 +64,44 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisible() =
-        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
-            splitScreenApp.defaultWindowName)
-
-    @FlakyTest(bugId = 169271943)
-    @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
-
-    @FlakyTest(bugId = 169271943)
-    @Test
-    fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
+    fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+            splitScreenApp.component)
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @FlakyTest
     @Test
-    fun appWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(splitScreenApp.defaultWindowName)
+    fun appWindowBecomesVisible() {
+        testSpec.assertWm {
+            this.isAppWindowInvisible(splitScreenApp.component)
+                    .then()
+                    .isAppWindowVisible(splitScreenApp.component)
+        }
+    }
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

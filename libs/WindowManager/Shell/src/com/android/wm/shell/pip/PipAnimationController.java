@@ -38,6 +38,7 @@ import android.view.SurfaceSession;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -593,10 +594,10 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 initialSourceValue, bounds, insets);
                         if (shouldApplyCornerRadius()) {
-                            final Rect destinationBounds = new Rect(bounds);
-                            destinationBounds.inset(insets);
+                            final Rect sourceBounds = new Rect(initialContainerRect);
+                            sourceBounds.inset(insets);
                             getSurfaceTransactionHelper().round(tx, leash,
-                                    initialContainerRect, destinationBounds);
+                                    sourceBounds, bounds);
                         }
                     }
                     if (!handlePipTransaction(leash, tx, bounds)) {
@@ -617,20 +618,36 @@ public class PipAnimationController {
                     setCurrentValue(bounds);
                     final Rect insets = computeInsets(fraction);
                     final float degree, x, y;
-                    if (rotationDelta == ROTATION_90) {
-                        degree = 90 * fraction;
-                        x = fraction * (end.right - start.left) + start.left;
-                        y = fraction * (end.top - start.top) + start.top;
+                    if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                        if (rotationDelta == ROTATION_90) {
+                            degree = 90 * (1 - fraction);
+                            x = fraction * (end.left - start.left)
+                                    + start.left + start.right * (1 - fraction);
+                            y = fraction * (end.top - start.top) + start.top;
+                        } else {
+                            degree = -90 * (1 - fraction);
+                            x = fraction * (end.left - start.left) + start.left;
+                            y = fraction * (end.top - start.top)
+                                    + start.top + start.bottom * (1 - fraction);
+                        }
                     } else {
-                        degree = -90 * fraction;
-                        x = fraction * (end.left - start.left) + start.left;
-                        y = fraction * (end.bottom - start.top) + start.top;
+                        if (rotationDelta == ROTATION_90) {
+                            degree = 90 * fraction;
+                            x = fraction * (end.right - start.left) + start.left;
+                            y = fraction * (end.top - start.top) + start.top;
+                        } else {
+                            degree = -90 * fraction;
+                            x = fraction * (end.left - start.left) + start.left;
+                            y = fraction * (end.bottom - start.top) + start.top;
+                        }
                     }
+                    final Rect sourceBounds = new Rect(initialContainerRect);
+                    sourceBounds.inset(insets);
                     getSurfaceTransactionHelper()
                             .rotateAndScaleWithCrop(tx, leash, initialContainerRect, bounds,
                                     insets, degree, x, y, isOutPipDirection,
                                     rotationDelta == ROTATION_270 /* clockwise */)
-                            .round(tx, leash, initialContainerRect, bounds);
+                            .round(tx, leash, sourceBounds, bounds);
                     tx.apply();
                 }
 

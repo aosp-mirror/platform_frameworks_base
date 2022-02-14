@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -53,6 +54,7 @@ public class FingerprintStartUserClient extends StartUserClient<IFingerprint, IS
         try {
             final ISession newSession = getFreshDaemon().createSession(getSensorId(),
                     getTargetUserId(), mSessionCallback);
+            Binder.allowBlocking(newSession.asBinder());
             mUserStartedCallback.onUserStarted(getTargetUserId(), newSession);
             getCallback().onClientFinished(this, true /* success */);
         } catch (RemoteException e) {

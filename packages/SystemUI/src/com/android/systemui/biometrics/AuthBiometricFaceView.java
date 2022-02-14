@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -30,6 +29,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -163,6 +163,18 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     }
 
     @Nullable @VisibleForTesting IconController mFaceIconController;
+    @NonNull private final OnAttachStateChangeListener mOnAttachStateChangeListener =
+            new OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(View v) {
+
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            mFaceIconController.deactivate();
+        }
+    };
 
     public AuthBiometricFaceView(Context context) {
         this(context, null);
@@ -181,6 +193,8 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mFaceIconController = new IconController(mContext, mIconView, mIndicatorView);
+
+        addOnAttachStateChangeListener(mOnAttachStateChangeListener);
     }
 
     @Override

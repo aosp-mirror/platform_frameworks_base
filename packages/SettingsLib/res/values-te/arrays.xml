@@ -25,7 +25,7 @@
     <item msgid="3288373008277313483">"స్కాన్ చేస్తోంది…"</item>
     <item msgid="6050951078202663628">"కనెక్ట్ చేస్తోంది..."</item>
     <item msgid="8356618438494652335">"ప్రామాణీకరిస్తోంది…"</item>
-    <item msgid="2837871868181677206">"IP అడ్రస్‌ను పొందుతోంది…"</item>
+    <item msgid="2837871868181677206">"IP చిరునామాను పొందుతోంది…"</item>
     <item msgid="4613015005934755724">"కనెక్ట్ చేయబడింది"</item>
     <item msgid="3763530049995655072">"తాత్కాలికంగా రద్దు చేయబడింది"</item>
     <item msgid="7852381437933824454">"డిస్‌కనెక్ట్ చేస్తోంది..."</item>
@@ -39,7 +39,7 @@
     <item msgid="1818677602615822316">"స్కాన్ చేస్తోంది…"</item>
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>కి కనెక్ట్ చేస్తోంది…"</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>తో ప్రామాణీకరిస్తోంది…"</item>
-    <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి IP అడ్రస్‌ను పొందుతోంది…"</item>
+    <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి IP చిరునామాను పొందుతోంది…"</item>
     <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</item>
     <item msgid="7445993821842009653">"తాత్కాలికంగా రద్దు చేయబడింది"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> నుండి డిస్‌కనెక్ట్ చేస్తోంది…"</item>
@@ -55,11 +55,11 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించవద్దు"</item>
-    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP చెకింగ్‌ను ఉపయోగించండి"</item>
+    <item msgid="8254225038262324761">"DRM కంటెంట్‌కు మాత్రమే HDCP తనిఖీని ఉపయోగించండి"</item>
     <item msgid="6421717003037072581">"ఎప్పటికీ HDCP తనిఖీని ఉపయోగించు"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"డిజేబుల్ చేయబడింది"</item>
+    <item msgid="695678520785580527">"నిలిపివేయబడింది"</item>
     <item msgid="6336372935919715515">"ప్రారంభించబడింది ఫిల్టర్ చేయబడింది"</item>
     <item msgid="2779123106632690576">"ప్రారంభించబడింది"</item>
   </string-array>
@@ -76,7 +76,7 @@
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"MAP 1.2 (ఆటోమేటిక్)"</item>
+    <item msgid="8786402640610987099">"MAP 1.2 (డిఫాల్ట్)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>
@@ -138,15 +138,15 @@
     <item msgid="1333279807604675720">"స్టీరియో"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"ఆడియో క్వాలిటీ (990kbps/909kbps) కోసం అనుకూలీకరించబడింది"</item>
-    <item msgid="3523665555859696539">"సమతుల్య ఆడియో మరియు కనెక్షన్ క్వాలిటీ (660kbps/606kbps)"</item>
-    <item msgid="886408010459747589">"కనెక్షన్ క్వాలిటీ (330kbps/303kbps) కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="1241278021345116816">"ఆడియో నాణ్యత (990kbps/909kbps) కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="3523665555859696539">"సమతుల్య ఆడియో మరియు కనెక్షన్ నాణ్యత (660kbps/606kbps)"</item>
+    <item msgid="886408010459747589">"కనెక్షన్ నాణ్యత (330kbps/303kbps) కోసం అనుకూలీకరించబడింది"</item>
     <item msgid="3808414041654351577">"ఉత్తమ కృషి (అనుకూల బిట్ రేట్)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"ఆడియో క్వాలిటీ కోసం అనుకూలీకరించబడింది"</item>
-    <item msgid="7451422070435297462">"సమతుల్య ఆడియో మరియు కనెక్షన్ క్వాలిటీ"</item>
-    <item msgid="6173114545795428901">"కనెక్షన్ క్వాలిటీ కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="804499336721569838">"ఆడియో నాణ్యత కోసం అనుకూలీకరించబడింది"</item>
+    <item msgid="7451422070435297462">"సమతుల్య ఆడియో మరియు కనెక్షన్ నాణ్యత"</item>
+    <item msgid="6173114545795428901">"కనెక్షన్ నాణ్యత కోసం అనుకూలీకరించబడింది"</item>
     <item msgid="4349908264188040530">"ఉత్తమ కృషి (అనుకూల బిట్ రేట్)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">

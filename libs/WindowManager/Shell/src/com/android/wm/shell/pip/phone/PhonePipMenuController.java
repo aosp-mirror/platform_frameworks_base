@@ -19,6 +19,7 @@ package com.android.wm.shell.pip.phone;
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -43,10 +44,12 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipMenuController;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Manages the PiP menu view which can show menu options or a scrim.
@@ -60,8 +63,7 @@ public class PhonePipMenuController implements PipMenuController {
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
-    public static final int MENU_STATE_CLOSE = 1;
-    public static final int MENU_STATE_FULL = 2;
+    public static final int MENU_STATE_FULL = 1;
 
     /**
      * A listener interface to receive notification on changes in PIP.
@@ -96,6 +98,11 @@ public class PhonePipMenuController implements PipMenuController {
          * Called when the PIP requested to show the menu.
          */
         void onPipShowMenu();
+
+        /**
+         * Called when the PIP requested to enter Split.
+         */
+        void onEnterSplit();
     }
 
     private final Matrix mMoveTransform = new Matrix();
@@ -110,6 +117,7 @@ public class PhonePipMenuController implements PipMenuController {
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
+    private final Optional<SplitScreenController> mSplitScreenController;
     private ParceledListSlice<RemoteAction> mAppActions;
     private ParceledListSlice<RemoteAction> mMediaActions;
     private SyncRtSurfaceTransactionApplier mApplier;
@@ -141,6 +149,7 @@ public class PhonePipMenuController implements PipMenuController {
 
     public PhonePipMenuController(Context context, PipBoundsState pipBoundsState,
             PipMediaController mediaController, SystemWindows systemWindows,
+            Optional<SplitScreenController> splitScreenOptional,
             ShellExecutor mainExecutor, Handler mainHandler) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
@@ -148,6 +157,7 @@ public class PhonePipMenuController implements PipMenuController {
         mSystemWindows = systemWindows;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mSplitScreenController = splitScreenOptional;
     }
 
     public boolean isMenuVisible() {
@@ -176,10 +186,12 @@ public class PhonePipMenuController implements PipMenuController {
         if (mPipMenuView != null) {
             detachPipMenuView();
         }
-        mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler);
+        mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler,
+                mSplitScreenController);
         mSystemWindows.addView(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
+        setShellRootAccessibilityWindow();
     }
 
     private void detachPipMenuView() {
@@ -203,6 +215,13 @@ public class PhonePipMenuController implements PipMenuController {
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
         updateMenuLayout(destinationBounds);
+    }
+
+    @Override
+    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mPipMenuView != null) {
+            mPipMenuView.onFocusTaskChanged(taskInfo);
+        }
     }
 
     /**
@@ -459,6 +478,10 @@ public class PhonePipMenuController implements PipMenuController {
         mListeners.forEach(Listener::onPipDismiss);
     }
 
+    void onEnterSplit() {
+        mListeners.forEach(Listener::onEnterSplit);
+    }
+
     /**
      * @return the best set of actions to show in the PiP menu.
      */
@@ -524,6 +547,10 @@ public class PhonePipMenuController implements PipMenuController {
             mListeners.forEach(l -> l.onPipMenuStateChangeFinish(menuState));
         }
         mMenuState = menuState;
+        setShellRootAccessibilityWindow();
+    }
+
+    private void setShellRootAccessibilityWindow() {
         switch (mMenuState) {
             case MENU_STATE_NONE:
                 mSystemWindows.setShellRootAccessibilityWindow(0, SHELL_ROOT_LAYER_PIP, null);

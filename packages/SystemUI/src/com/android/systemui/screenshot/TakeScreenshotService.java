@@ -186,20 +186,22 @@ public class TakeScreenshotService extends Service {
         ScreenshotHelper.ScreenshotRequest screenshotRequest =
                 (ScreenshotHelper.ScreenshotRequest) msg.obj;
 
-        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()));
+        ComponentName topComponent = screenshotRequest.getTopComponent();
+        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()), 0,
+                topComponent == null ? "" : topComponent.getPackageName());
 
         switch (msg.what) {
             case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_FULLSCREEN");
                 }
-                mScreenshot.takeScreenshotFullscreen(uriConsumer, requestCallback);
+                mScreenshot.takeScreenshotFullscreen(topComponent, uriConsumer, requestCallback);
                 break;
             case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_SELECTED_REGION");
                 }
-                mScreenshot.takeScreenshotPartial(uriConsumer, requestCallback);
+                mScreenshot.takeScreenshotPartial(topComponent, uriConsumer, requestCallback);
                 break;
             case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
                 if (DEBUG_SERVICE) {
@@ -211,7 +213,6 @@ public class TakeScreenshotService extends Service {
                 Insets insets = screenshotRequest.getInsets();
                 int taskId = screenshotRequest.getTaskId();
                 int userId = screenshotRequest.getUserId();
-                ComponentName topComponent = screenshotRequest.getTopComponent();
 
                 if (screenshot == null) {
                     Log.e(TAG, "Got null bitmap from screenshot message");

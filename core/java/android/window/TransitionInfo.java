@@ -16,13 +16,23 @@
 
 package android.window;
 
+import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.TransitionFlags;
+import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 
 import android.annotation.IntDef;
@@ -31,11 +41,11 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,8 +90,22 @@ public final class TransitionInfo implements Parcelable {
     /** The container has voice session. */
     public static final int FLAG_IS_VOICE_INTERACTION = 1 << 4;
 
+    /** The container is the display. */
+    public static final int FLAG_IS_DISPLAY = 1 << 5;
+
+    /** The container can show on top of lock screen. */
+    public static final int FLAG_OCCLUDES_KEYGUARD = 1 << 6;
+
+    /**
+     * Only for IS_DISPLAY containers. Is set if the display has system alert windows. This is
+     * used to prevent seamless rotation.
+     * TODO(b/194540864): Once we can include all windows in transition, then replace this with
+     *         something like FLAG_IS_SYSTEM_ALERT instead. Then we can do mixed rotations.
+     */
+    public static final int FLAG_DISPLAY_HAS_ALERT_WINDOWS = 1 << 7;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 5;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 8;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -91,20 +115,24 @@ public final class TransitionInfo implements Parcelable {
             FLAG_TRANSLUCENT,
             FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT,
             FLAG_IS_VOICE_INTERACTION,
+            FLAG_IS_DISPLAY,
+            FLAG_OCCLUDES_KEYGUARD,
+            FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
-    private final @WindowManager.TransitionOldType int mType;
-    private final @WindowManager.TransitionFlags int mFlags;
+    private final @TransitionType int mType;
+    private final @TransitionFlags int mFlags;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
     private SurfaceControl mRootLeash;
     private final Point mRootOffset = new Point();
 
+    private AnimationOptions mOptions;
+
     /** @hide */
-    public TransitionInfo(@WindowManager.TransitionOldType int type,
-            @WindowManager.TransitionFlags int flags) {
+    public TransitionInfo(@TransitionType int type, @TransitionFlags int flags) {
         mType = type;
         mFlags = flags;
     }
@@ -112,10 +140,11 @@ public final class TransitionInfo implements Parcelable {
     private TransitionInfo(Parcel in) {
         mType = in.readInt();
         mFlags = in.readInt();
-        in.readList(mChanges, null /* classLoader */);
+        in.readTypedList(mChanges, Change.CREATOR);
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
         mRootOffset.readFromParcel(in);
+        mOptions = in.readTypedObject(AnimationOptions.CREATOR);
     }
 
     @Override
@@ -123,9 +152,10 @@ public final class TransitionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
         dest.writeInt(mFlags);
-        dest.writeList(mChanges);
+        dest.writeTypedList(mChanges);
         mRootLeash.writeToParcel(dest, flags);
         mRootOffset.writeToParcel(dest, flags);
+        dest.writeTypedObject(mOptions, flags);
     }
 
     @NonNull
@@ -154,7 +184,11 @@ public final class TransitionInfo implements Parcelable {
         mRootOffset.set(offsetLeft, offsetTop);
     }
 
-    public int getType() {
+    public void setAnimationOptions(AnimationOptions options) {
+        mOptions = options;
+    }
+
+    public @TransitionType int getType() {
         return mType;
     }
 
@@ -182,6 +216,14 @@ public final class TransitionInfo implements Parcelable {
         return mRootOffset;
     }
 
+    public AnimationOptions getAnimationOptions() {
+        return mOptions;
+    }
+
+    /**
+     * @return the list of {@link Change}s in this transition. The list is sorted top-to-bottom
+     *         in Z (meaning index 0 is the top-most container).
+     */
     @NonNull
     public List<Change> getChanges() {
         return mChanges;
@@ -208,10 +250,17 @@ public final class TransitionInfo implements Parcelable {
         mChanges.add(change);
     }
 
+    /**
+     * Whether this transition includes keyguard going away.
+     */
+    public boolean isKeyguardGoingAway() {
+        return (mFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + transitTypeToString(mType) + " f=" + Integer.toHexString(mFlags)
+        sb.append("{t=" + transitTypeToString(mType) + " f=0x" + Integer.toHexString(mFlags)
                 + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
@@ -256,6 +305,15 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_VOICE_INTERACTION) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "IS_VOICE_INTERACTION");
+        }
+        if ((flags & FLAG_IS_DISPLAY) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "IS_DISPLAY");
+        }
+        if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "OCCLUDES_KEYGUARD");
+        }
+        if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "DISPLAY_HAS_ALERT_WINDOWS");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");
@@ -302,8 +360,10 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
+        private boolean mAllowEnterPip;
         private int mStartRotation = ROTATION_UNDEFINED;
         private int mEndRotation = ROTATION_UNDEFINED;
+        private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -321,8 +381,10 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+            mAllowEnterPip = in.readBoolean();
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
+            mRotationAnimation = in.readInt();
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -363,10 +425,23 @@ public final class TransitionInfo implements Parcelable {
             mTaskInfo = taskInfo;
         }
 
+        /** Sets the allowEnterPip flag which represents AppOpsManager check on PiP permission */
+        public void setAllowEnterPip(boolean allowEnterPip) {
+            mAllowEnterPip = allowEnterPip;
+        }
+
         /** Sets the start and end rotation of this container. */
         public void setRotation(@Surface.Rotation int start, @Surface.Rotation int end) {
             mStartRotation = start;
             mEndRotation = end;
+        }
+
+        /**
+         * Sets the app-requested animation type for rotation. Will be one of the
+         * ROTATION_ANIMATION_ values in {@link android.view.WindowManager.LayoutParams};
+         */
+        public void setRotationAnimation(int anim) {
+            mRotationAnimation = anim;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -432,12 +507,21 @@ public final class TransitionInfo implements Parcelable {
             return mTaskInfo;
         }
 
+        public boolean getAllowEnterPip() {
+            return mAllowEnterPip;
+        }
+
         public int getStartRotation() {
             return mStartRotation;
         }
 
         public int getEndRotation() {
             return mEndRotation;
+        }
+
+        /** @return the rotation animation. */
+        public int getRotationAnimation() {
+            return mRotationAnimation;
         }
 
         /** @hide */
@@ -452,8 +536,10 @@ public final class TransitionInfo implements Parcelable {
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
+            dest.writeBoolean(mAllowEnterPip);
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
+            dest.writeInt(mRotationAnimation);
         }
 
         @NonNull
@@ -481,7 +567,149 @@ public final class TransitionInfo implements Parcelable {
             return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
                     + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
                     + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
-                    + mStartRotation + "->" + mEndRotation + "}";
+                    + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation + "}";
+        }
+    }
+
+    /** Represents animation options during a transition */
+    public static final class AnimationOptions implements Parcelable {
+
+        private int mType;
+        private int mEnterResId;
+        private int mExitResId;
+        private boolean mOverrideTaskTransition;
+        private String mPackageName;
+        private final Rect mTransitionBounds = new Rect();
+        private HardwareBuffer mThumbnail;
+
+        private AnimationOptions(int type) {
+            mType = type;
+        }
+
+        public AnimationOptions(Parcel in) {
+            mType = in.readInt();
+            mEnterResId = in.readInt();
+            mExitResId = in.readInt();
+            mOverrideTaskTransition = in.readBoolean();
+            mPackageName = in.readString();
+            mTransitionBounds.readFromParcel(in);
+            mThumbnail = in.readTypedObject(HardwareBuffer.CREATOR);
+        }
+
+        public static AnimationOptions makeCustomAnimOptions(String packageName, int enterResId,
+                int exitResId, boolean overrideTaskTransition) {
+            AnimationOptions options = new AnimationOptions(ANIM_CUSTOM);
+            options.mPackageName = packageName;
+            options.mEnterResId = enterResId;
+            options.mExitResId = exitResId;
+            options.mOverrideTaskTransition = overrideTaskTransition;
+            return options;
+        }
+
+        public static AnimationOptions makeClipRevealAnimOptions(int startX, int startY, int width,
+                int height) {
+            AnimationOptions options = new AnimationOptions(ANIM_CLIP_REVEAL);
+            options.mTransitionBounds.set(startX, startY, startX + width, startY + height);
+            return options;
+        }
+
+        public static AnimationOptions makeScaleUpAnimOptions(int startX, int startY, int width,
+                int height) {
+            AnimationOptions options = new AnimationOptions(ANIM_SCALE_UP);
+            options.mTransitionBounds.set(startX, startY, startX + width, startY + height);
+            return options;
+        }
+
+        public static AnimationOptions makeThumnbnailAnimOptions(HardwareBuffer srcThumb,
+                int startX, int startY, boolean scaleUp) {
+            AnimationOptions options = new AnimationOptions(
+                    scaleUp ? ANIM_THUMBNAIL_SCALE_UP : ANIM_THUMBNAIL_SCALE_DOWN);
+            options.mTransitionBounds.set(startX, startY, startX, startY);
+            options.mThumbnail = srcThumb;
+            return options;
+        }
+
+        public static AnimationOptions makeCrossProfileAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public int getType() {
+            return mType;
+        }
+
+        public int getEnterResId() {
+            return mEnterResId;
+        }
+
+        public int getExitResId() {
+            return mExitResId;
+        }
+
+        public boolean getOverrideTaskTransition() {
+            return mOverrideTaskTransition;
+        }
+
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        public Rect getTransitionBounds() {
+            return mTransitionBounds;
+        }
+
+        public HardwareBuffer getThumbnail() {
+            return mThumbnail;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mType);
+            dest.writeInt(mEnterResId);
+            dest.writeInt(mExitResId);
+            dest.writeBoolean(mOverrideTaskTransition);
+            dest.writeString(mPackageName);
+            mTransitionBounds.writeToParcel(dest, flags);
+            dest.writeTypedObject(mThumbnail, flags);
+        }
+
+        @NonNull
+        public static final Creator<AnimationOptions> CREATOR =
+                new Creator<AnimationOptions>() {
+                    @Override
+                    public AnimationOptions createFromParcel(Parcel in) {
+                        return new AnimationOptions(in);
+                    }
+
+                    @Override
+                    public AnimationOptions[] newArray(int size) {
+                        return new AnimationOptions[size];
+                    }
+                };
+
+        /** @hide */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @NonNull
+        private static String typeToString(int mode) {
+            switch(mode) {
+                case ANIM_CUSTOM: return "ANIM_CUSTOM";
+                case ANIM_CLIP_REVEAL: return "ANIM_CLIP_REVEAL";
+                case ANIM_SCALE_UP: return "ANIM_SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_UP: return "ANIM_THUMBNAIL_SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_DOWN: return "ANIM_THUMBNAIL_SCALE_DOWN";
+                case ANIM_OPEN_CROSS_PROFILE_APPS: return "ANIM_OPEN_CROSS_PROFILE_APPS";
+                default: return "<unknown:" + mode + ">";
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "{ AnimationOtions type= " + typeToString(mType) + " package=" + mPackageName
+                    + " override=" + mOverrideTaskTransition + " b=" + mTransitionBounds + "}";
         }
     }
 }

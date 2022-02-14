@@ -50,13 +50,36 @@ java_library {
     srcs: ["src/com/android/systemui/EventLogTags.logtags"],
 }
 
+filegroup {
+    name: "ReleaseJavaFiles",
+    srcs: [
+        "src-release/**/*.kt",
+        "src-release/**/*.java",
+    ],
+}
+
+filegroup {
+    name: "DebugJavaFiles",
+    srcs: [
+        "src-debug/**/*.kt",
+        "src-debug/**/*.java",
+    ],
+}
+
 android_library {
     name: "SystemUI-core",
     srcs: [
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
     ],
+    product_variables: {
+        debuggable: {
+            srcs: [":DebugJavaFiles"],
+            exclude_srcs: [":ReleaseJavaFiles"],
+        },
+    },
     resource_dirs: [
         "res-product",
         "res-keyguard",
@@ -92,6 +115,7 @@ android_library {
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
+        "monet",
         "dagger2",
         "jsr330",
         "lottie",
@@ -142,6 +166,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
     ],
     static_libs: [
         "SystemUIAnimationLib",
@@ -179,6 +204,7 @@ android_library {
         "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",
+        "monet",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",

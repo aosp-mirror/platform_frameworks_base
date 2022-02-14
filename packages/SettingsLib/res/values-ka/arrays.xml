@@ -231,7 +231,7 @@
     <item msgid="7346816300608639624">"720p, 1080p (ორმაგი ეკრანი)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="4433736508877934305">"არცერთი"</item>
+    <item msgid="4433736508877934305">"არც ერთი"</item>
     <item msgid="9140053004929079158">"Logcat"</item>
     <item msgid="3866871644917859262">"Systrace (გრაფიკა)"</item>
     <item msgid="7345673972166571060">"გამოძახებების სია glGetError-ზე"</item>

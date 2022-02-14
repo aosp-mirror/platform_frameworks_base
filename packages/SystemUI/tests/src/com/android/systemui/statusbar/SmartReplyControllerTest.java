@@ -38,6 +38,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -50,6 +52,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -83,19 +87,26 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class,
                 mNotificationEntryManager);
 
-        mSmartReplyController = new SmartReplyController(mNotificationEntryManager,
-                mIStatusBarService, mClickNotifier);
+        mSmartReplyController = new SmartReplyController(
+                mock(DumpManager.class),
+                mNotificationEntryManager,
+                mIStatusBarService,
+                mClickNotifier);
         mDependency.injectTestDependency(SmartReplyController.class,
                 mSmartReplyController);
 
         mRemoteInputManager = new NotificationRemoteInputManager(mContext,
+                mock(FeatureFlags.class),
                 mock(NotificationLockscreenUserManager.class), mSmartReplyController,
-                mNotificationEntryManager, () -> mock(StatusBar.class),
+                mNotificationEntryManager,
+                new RemoteInputNotificationRebuilder(mContext),
+                () -> Optional.of(mock(StatusBar.class)),
                 mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
                 mClickNotifier,
-                mock(ActionClickLogger.class));
+                mock(ActionClickLogger.class),
+                mock(DumpManager.class));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)

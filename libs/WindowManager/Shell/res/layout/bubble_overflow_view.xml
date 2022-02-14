@@ -32,7 +32,7 @@
         android:id="@+id/bubble_view_name"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
         android:textSize="13sp"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/bubble_name_width"
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:lines="2"

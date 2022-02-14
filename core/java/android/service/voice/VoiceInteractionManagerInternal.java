@@ -22,7 +22,6 @@ import android.os.IBinder;
 
 import com.android.internal.annotations.Immutable;
 
-
 /**
  * @hide
  * Private interface to the VoiceInteractionManagerService for use by ActivityManagerService.

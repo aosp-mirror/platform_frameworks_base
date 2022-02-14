@@ -35,7 +35,7 @@ import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
-import com.android.server.biometrics.sensors.fingerprint.SidefpsHelper;
+import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
@@ -49,8 +49,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     private static final String TAG = "FingerprintEnrollClient";
 
-    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
-    @Nullable private final ISidefpsController mSidefpsController;
+    @NonNull private final SensorOverlays mSensorOverlays;
     private final @FingerprintManager.EnrollReason int mEnrollReason;
     private boolean mIsPointerDown;
 
@@ -65,8 +64,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 true /* shouldVibrate */);
-        mUdfpsOverlayController = udfpsOverlayController;
-        mSidefpsController = sidefpsController;
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
@@ -95,10 +93,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(),
-                UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
-                mUdfpsOverlayController, this);
-        SidefpsHelper.showOverlay(mSidefpsController);
+        mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason), this);
+
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
@@ -107,16 +103,15 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-            SidefpsHelper.hideOverlay(mSidefpsController);
+            mSensorOverlays.hide(getSensorId());
             mCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-        SidefpsHelper.hideOverlay(mSidefpsController);
+        mSensorOverlays.hide(getSensorId());
+
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {
@@ -131,11 +126,11 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         super.onEnrollResult(identifier, remaining);
 
-        UdfpsHelper.onEnrollmentProgress(getSensorId(), remaining, mUdfpsOverlayController);
+        mSensorOverlays.ifUdfps(
+                controller -> controller.onEnrollmentProgress(getSensorId(), remaining));
 
         if (remaining == 0) {
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-            SidefpsHelper.hideOverlay(mSidefpsController);
+            mSensorOverlays.hide(getSensorId());
         }
     }
 
@@ -143,17 +138,18 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     public void onAcquired(int acquiredInfo, int vendorCode) {
         super.onAcquired(acquiredInfo, vendorCode);
 
-        if (UdfpsHelper.isValidAcquisitionMessage(getContext(), acquiredInfo, vendorCode)) {
-            UdfpsHelper.onEnrollmentHelp(getSensorId(), mUdfpsOverlayController);
-        }
+        mSensorOverlays.ifUdfps(controller -> {
+            if (UdfpsHelper.isValidAcquisitionMessage(getContext(), acquiredInfo, vendorCode)) {
+                controller.onEnrollmentHelp(getSensorId());
+            }
+        });
     }
 
     @Override
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
 
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
-        SidefpsHelper.hideOverlay(mSidefpsController);
+        mSensorOverlays.hide(getSensorId());
     }
 
     @Override

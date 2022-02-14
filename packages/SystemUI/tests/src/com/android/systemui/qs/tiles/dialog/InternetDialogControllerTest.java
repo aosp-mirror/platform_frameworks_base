@@ -1,5 +1,7 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
 
@@ -19,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -37,7 +38,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -45,13 +45,12 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -70,7 +69,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -78,8 +76,6 @@ import java.util.concurrent.Executor;
 public class InternetDialogControllerTest extends SysuiTestCase {
 
     private static final int SUB_ID = 1;
-    private static final String CONNECTED_TITLE = "Connected Wi-Fi Title";
-    private static final String CONNECTED_SUMMARY = "Connected Wi-Fi Summary";
 
     //SystemUIToast
     private static final int GRAVITY_FLAGS = Gravity.FILL_HORIZONTAL | Gravity.FILL_VERTICAL;
@@ -103,7 +99,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private NetworkController.AccessPointController mAccessPointController;
+    private AccessPointController mAccessPointController;
     @Mock
     private WifiEntry mConnectedEntry;
     @Mock
@@ -138,9 +134,11 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private CarrierConfigTracker mCarrierConfigTracker;
     @Mock
     private LocationController mLocationController;
+    @Mock
+    private DialogLaunchAnimator mDialogLaunchAnimator;
 
     private TestableResources mTestableResources;
-    private MockInternetDialogController mInternetDialogController;
+    private InternetDialogController mInternetDialogController;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private List<WifiEntry> mAccessPoints = new ArrayList<>();
     private List<WifiEntry> mWifiEntries = new ArrayList<>();
@@ -161,20 +159,19 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mAccessPoints.add(mWifiEntry1);
         when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
-        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
         when(mSystemUIToast.getGravity()).thenReturn(GRAVITY_FLAGS);
         when(mSystemUIToast.getInAnimation()).thenReturn(mAnimator);
 
-        mInternetDialogController = new MockInternetDialogController(mContext,
+        mInternetDialogController = new InternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController);
+                mLocationController, mDialogLaunchAnimator);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -223,7 +220,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getDialogTitleText_withAirplaneModeOn_returnAirplaneMode() {
-        mInternetDialogController.setAirplaneModeEnabled(true);
+        fakeAirplaneModeEnabled(true);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getDialogTitleText(),
                 getResourcesString("airplane_mode")));
@@ -231,22 +228,30 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getDialogTitleText_withAirplaneModeOff_returnInternet() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
 
         assertTrue(TextUtils.equals(mInternetDialogController.getDialogTitleText(),
                 getResourcesString("quick_settings_internet_label")));
     }
 
     @Test
-    public void getSubtitleText_withAirplaneModeOn_returnNull() {
-        mInternetDialogController.setAirplaneModeEnabled(true);
+    public void getSubtitleText_withApmOnAndWifiOff_returnWifiIsOff() {
+        fakeAirplaneModeEnabled(true);
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
 
-        assertThat(mInternetDialogController.getSubtitleText(false)).isNull();
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("wifi_is_off"));
+
+        // if the Wi-Fi disallow config, then don't return Wi-Fi related string.
+        mInternetDialogController.mCanConfigWifi = false;
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isNotEqualTo(getResourcesString("wifi_is_off"));
     }
 
     @Test
     public void getSubtitleText_withWifiOff_returnWifiIsOff() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(false);
 
         assertThat(mInternetDialogController.getSubtitleText(false))
@@ -261,7 +266,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_withNoWifiEntry_returnSearchWifi() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
@@ -278,7 +283,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Test
     public void getSubtitleText_withWifiEntry_returnTapToConnect() {
         // The preconditions WiFi Entries is already in setUp()
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
 
         assertThat(mInternetDialogController.getSubtitleText(false))
@@ -293,7 +298,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_deviceLockedWithWifiOn_returnUnlockToViewNetworks() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
 
@@ -303,7 +308,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_withNoService_returnNoNetworksAvailable() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
@@ -317,7 +322,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_withMobileDataDisabled_returnNoOtherAvailable() {
-        mInternetDialogController.setAirplaneModeEnabled(false);
+        fakeAirplaneModeEnabled(false);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
@@ -334,6 +339,17 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         assertThat(mInternetDialogController.getSubtitleText(false))
                 .isNotEqualTo(getResourcesString("non_carrier_network_unavailable"));
+    }
+
+    @Test
+    public void getSubtitleText_withCarrierNetworkActiveOnly_returnNoOtherAvailable() {
+        fakeAirplaneModeEnabled(false);
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
+        when(mMergedCarrierEntry.isDefaultNetwork()).thenReturn(true);
+
+        assertThat(mInternetDialogController.getSubtitleText(false))
+                .isEqualTo(getResourcesString("non_carrier_network_unavailable"));
     }
 
     @Test
@@ -402,7 +418,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
-        verify(mInternetDialogCallback, never()).onAccessPointsChanged(any(), any());
+        verify(mInternetDialogCallback, never()).onAccessPointsChanged(any(), any(), anyBoolean());
     }
 
     @Test
@@ -411,27 +427,26 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mInternetDialogController.onAccessPointsChanged(null /* accessPoints */);
 
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(null /* wifiEntries */, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(null /* wifiEntries */,
+                null /* connectedEntry */, false /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_oneConnectedEntry_callbackConnectedEntryOnly() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mConnectedEntry);
 
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
         mWifiEntries.clear();
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_noConnectedEntryAndOneOther_callbackWifiEntriesOnly() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mWifiEntry1);
 
@@ -439,14 +454,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, false /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_oneConnectedEntryAndOneOther_callbackCorrectly() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mConnectedEntry);
         mAccessPoints.add(mWifiEntry1);
@@ -455,13 +469,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_oneConnectedEntryAndTwoOthers_callbackCorrectly() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mConnectedEntry);
         mAccessPoints.add(mWifiEntry1);
@@ -472,13 +486,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                false /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_oneConnectedEntryAndThreeOthers_callbackCutMore() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mConnectedEntry);
         mAccessPoints.add(mWifiEntry1);
@@ -490,52 +504,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.clear();
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
-        mWifiEntries.add(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
-
-        // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
-        reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(false);
-
-        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
-
-        mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
-    }
-
-    @Test
-    public void onAccessPointsChanged_oneConnectedEntryAndFourOthers_callbackCutMore() {
-        reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
-        mAccessPoints.clear();
-        mAccessPoints.add(mConnectedEntry);
-        mAccessPoints.add(mWifiEntry1);
-        mAccessPoints.add(mWifiEntry2);
-        mAccessPoints.add(mWifiEntry3);
-        mAccessPoints.add(mWifiEntry4);
-
-        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
-
-        mWifiEntries.clear();
-        mWifiEntries.add(mWifiEntry1);
-        mWifiEntries.add(mWifiEntry2);
-        mWifiEntries.add(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
-
-        // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
-        reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(false);
-
-        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
-
-        mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry,
+                true /* hasMoreEntry */);
     }
 
     @Test
     public void onAccessPointsChanged_fourWifiEntries_callbackCutMore() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(true);
         mAccessPoints.clear();
         mAccessPoints.add(mWifiEntry1);
         mAccessPoints.add(mWifiEntry2);
@@ -548,29 +523,56 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mWifiEntries.add(mWifiEntry1);
         mWifiEntries.add(mWifiEntry2);
         mWifiEntries.add(mWifiEntry3);
-        mWifiEntries.add(mWifiEntry4);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, true /* hasMoreEntry */);
+    }
 
-        // If the Ethernet exists, then Wi-Fi entries will cut last one.
+    @Test
+    public void onAccessPointsChanged_wifiIsDefaultButNoInternetAccess_putIntoWifiEntries() {
         reset(mInternetDialogCallback);
-        mInternetDialogController.mHasEthernet = true;
+        mAccessPoints.clear();
+        when(mWifiEntry1.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry1.isDefaultNetwork()).thenReturn(true);
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(false);
+        mAccessPoints.add(mWifiEntry1);
 
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
-        mWifiEntries.remove(mWifiEntry4);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        mWifiEntries.clear();
+        mWifiEntries.add(mWifiEntry1);
+        verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries,
+                null /* connectedEntry */, false /* hasMoreEntry */);
+    }
 
-        // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
-        reset(mInternetDialogCallback);
-        mInternetDialogController.setAirplaneModeEnabled(false);
+    @Test
+    public void onAccessPointsChanged_connectedWifiNoInternetAccess_shouldSetListener() {
+        reset(mWifiEntry1);
+        mAccessPoints.clear();
+        when(mWifiEntry1.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry1.isDefaultNetwork()).thenReturn(true);
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(false);
+        mAccessPoints.add(mWifiEntry1);
 
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
 
-        mWifiEntries.remove(mWifiEntry3);
-        verify(mInternetDialogCallback)
-                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+        verify(mWifiEntry1).setListener(mInternetDialogController.mConnectedWifiInternetMonitor);
+    }
+
+    @Test
+    public void onUpdated_connectedWifiHasInternetAccess_shouldScanWifiAccessPoints() {
+        reset(mAccessPointController);
+        when(mWifiEntry1.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_CONNECTED);
+        when(mWifiEntry1.isDefaultNetwork()).thenReturn(true);
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(false);
+        InternetDialogController.ConnectedWifiInternetMonitor mConnectedWifiInternetMonitor =
+                mInternetDialogController.mConnectedWifiInternetMonitor;
+        mConnectedWifiInternetMonitor.registerCallbackIfNeed(mWifiEntry1);
+
+        // When the hasInternetAccess() changed to true, and call back the onUpdated() function.
+        when(mWifiEntry1.hasInternetAccess()).thenReturn(true);
+        mConnectedWifiInternetMonitor.onUpdated();
+
+        verify(mAccessPointController).scanForAccessPoints();
     }
 
     @Test
@@ -639,37 +641,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mContext.getPackageName());
     }
 
-    private class MockInternetDialogController extends InternetDialogController {
-
-        private GlobalSettings mGlobalSettings;
-        private boolean mIsAirplaneModeOn;
-
-        MockInternetDialogController(Context context, UiEventLogger uiEventLogger,
-                ActivityStarter starter, AccessPointController accessPointController,
-                SubscriptionManager subscriptionManager, TelephonyManager telephonyManager,
-                @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
-                @Main Handler handler, @Main Executor mainExecutor,
-                BroadcastDispatcher broadcastDispatcher,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
-                KeyguardStateController keyguardStateController, WindowManager windowManager,
-                ToastFactory toastFactory, Handler workerHandler,
-                CarrierConfigTracker carrierConfigTracker,
-                LocationController locationController) {
-            super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
-                    telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
-                    broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
-                    keyguardStateController, windowManager, toastFactory, workerHandler,
-                    carrierConfigTracker, locationController);
-            mGlobalSettings = globalSettings;
-        }
-
-        @Override
-        boolean isAirplaneModeEnabled() {
-            return mIsAirplaneModeOn;
-        }
-
-        public void setAirplaneModeEnabled(boolean enabled) {
-            mIsAirplaneModeOn = enabled;
-        }
+    private void fakeAirplaneModeEnabled(boolean enabled) {
+        when(mGlobalSettings.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(enabled ? 1 : 0);
     }
 }

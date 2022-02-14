@@ -52,7 +52,7 @@
     <string name="add_print_service_label" msgid="5356702546188981940">"Үйлчилгээ нэмэх"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Хайлтын нүдийг гаргах"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Хайлтын нүдийг далдлах"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"Хэвлэгч нэмэх"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Принтер нэмэх"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Принтер сонгох"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Принтерийг мартах"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"Хэвлэж чадсангүй"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Файл үүсгэж чадсангүй"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Зарим хэвлэх үйлчилгээг идэвхгүй болгосон байна"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"Хэвлэгч хайж байна"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Принтер хайж байна"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"Хэвлэх үйлчилгээг идэвхжүүлээгүй"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Принтер олдсонгүй"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Хэвлэгч нэмэх боломжгүй байна"</string>

@@ -17,16 +17,7 @@
 -->
 <resources>
 
-    <!-- ======================================== -->
-    <!-- The following resources were recently moved from sw600dp; there may
-         be situations where they don't sync up perfectly with PhoneStatusBar. -->
-    <!-- ======================================== -->
-
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">1dp</dimen>
-    <!-- The minimum height of the notification panel window -->
-    <dimen name="notification_panel_min_height">770dp</dimen>
-    <!-- Bottom margin (from display edge) for status bar panels -->
-    <dimen name="panel_float">56dp</dimen>
 </resources>
 

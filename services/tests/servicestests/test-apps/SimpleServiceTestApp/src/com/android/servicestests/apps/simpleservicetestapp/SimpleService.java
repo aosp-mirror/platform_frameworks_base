@@ -17,8 +17,10 @@ package com.android.servicestests.apps.simpleservicetestapp;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -32,6 +34,9 @@ public class SimpleService extends Service {
 
     private static final String TEST_CLASS =
             "com.android.servicestests.apps.simpleservicetestapp.SimpleService";
+
+    private static final String ACTION_SERVICE_WITH_DEP_PKG =
+            "com.android.servicestests.apps.simpleservicetestapp.ACTION_SERVICE_WITH_DEP_PKG";
 
     private static final String EXTRA_CALLBACK = "callback";
     private static final String EXTRA_COMMAND = "command";
@@ -118,6 +123,21 @@ public class SimpleService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (ACTION_SERVICE_WITH_DEP_PKG.equals(intent.getAction())) {
+            final String targetPkg = intent.getStringExtra(EXTRA_TARGET_PACKAGE);
+            Log.i(TAG, "SimpleService.onBind: " + ACTION_SERVICE_WITH_DEP_PKG + " " + targetPkg);
+            if (targetPkg != null) {
+                Context pkgContext = null;
+                try {
+                    pkgContext = createPackageContext(targetPkg,
+                            Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(TAG, "Unable to create package context for " + pkgContext, e);
+                }
+                // This effectively loads the target package as a dependency.
+                pkgContext.getClassLoader();
+            }
+        }
         return mBinder;
     }
 }

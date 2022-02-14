@@ -253,7 +253,7 @@ class DragState {
                 mTransaction.reparent(mSurfaceControl, null).apply();
             } else {
                 mDragDropController.sendTimeoutMessage(MSG_REMOVE_DRAG_SURFACE_TIMEOUT,
-                        mSurfaceControl);
+                        mSurfaceControl, DragDropController.DRAG_TIMEOUT_MS);
             }
             mSurfaceControl = null;
         }
@@ -276,9 +276,9 @@ class DragState {
      * Notify the drop target and tells it about the data. If the drop event is not sent to the
      * target, invokes {@code endDragLocked} immediately.
      */
-    void reportDropWindowLock(IBinder token, float x, float y) {
+    boolean reportDropWindowLock(IBinder token, float x, float y) {
         if (mAnimator != null) {
-            return;
+            return false;
         }
 
         final WindowState touchedWin = mService.mInputToWindowMap.get(token);
@@ -288,7 +288,7 @@ class DragState {
             mDragResult = false;
             endDragLocked();
             if (DEBUG_DRAG) Slog.d(TAG_WM, "Drop outside a valid window " + touchedWin);
-            return;
+            return false;
         }
 
         if (DEBUG_DRAG) Slog.d(TAG_WM, "sending DROP to " + touchedWin);
@@ -322,16 +322,19 @@ class DragState {
             touchedWin.mClient.dispatchDragEvent(event);
 
             // 5 second timeout for this window to respond to the drop
-            mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, clientToken);
+            mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, clientToken,
+                    DragDropController.DRAG_TIMEOUT_MS);
         } catch (RemoteException e) {
             Slog.w(TAG_WM, "can't send drop notification to win " + touchedWin);
             endDragLocked();
+            return false;
         } finally {
             if (myPid != touchedWin.mSession.mPid) {
                 event.recycle();
             }
         }
         mToken = clientToken;
+        return true;
     }
 
     class InputInterceptor {
@@ -553,7 +556,7 @@ class DragState {
         }
     }
 
-    private boolean isWindowNotified(WindowState newWin) {
+    boolean isWindowNotified(WindowState newWin) {
         for (WindowState ws : mNotifiedWindows) {
             if (ws == newWin) {
                 return true;
@@ -567,8 +570,10 @@ class DragState {
             return;
         }
         if (!mDragResult) {
-            mAnimator = createReturnAnimationLocked();
-            return;  // Will call closeLocked() when the animation is done.
+            if (!isAccessibilityDragDrop()) {
+                mAnimator = createReturnAnimationLocked();
+                return;  // Will call closeLocked() when the animation is done.
+            }
         }
         closeLocked();
     }
@@ -577,7 +582,7 @@ class DragState {
         if (mAnimator != null) {
             return;
         }
-        if (!mDragInProgress || skipAnimation) {
+        if (!mDragInProgress || skipAnimation || isAccessibilityDragDrop()) {
             // mDragInProgress is false if an app invokes Session#cancelDragAndDrop before
             // Session#performDrag. Reset the drag state without playing the cancel animation
             // because H.DRAG_START_TIMEOUT may be sent to WindowManagerService, which will cause
@@ -721,5 +726,9 @@ class DragState {
             // AnimationThread.
             mDragDropController.sendHandlerMessage(MSG_ANIMATION_END, null);
         }
+    }
+
+    boolean isAccessibilityDragDrop() {
+        return (mFlags & View.DRAG_FLAG_ACCESSIBILITY_ACTION) != 0;
     }
 }

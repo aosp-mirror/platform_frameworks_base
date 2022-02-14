@@ -15,6 +15,10 @@
     limitations under the License.
 -->
 <resources>
+    <!-- Determines whether the shell features all run on another thread. This is to be overrided
+         by the resources of the app using the Shell library. -->
+    <bool name="config_enableShellMainThread">false</bool>
+
     <!-- Animation duration for PIP when entering. -->
     <integer name="config_pipEnterAnimationDuration">425</integer>
 

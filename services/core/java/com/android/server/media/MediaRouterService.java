@@ -100,6 +100,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // State guarded by mLock.
     private final Object mLock = new Object();
+
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
     private int mCurrentUserId = -1;
@@ -331,6 +332,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 return mAudioPlayerStateMonitor.isPlaybackActive(clientRecord.mUid);
             }
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Binder call
+    @Override
+    public void setBluetoothA2dpOn(IMediaRouterClient client, boolean on) {
+        if (client == null) {
+            throw new IllegalArgumentException("client must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mAudioService.setBluetoothA2dpOn(on);
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn. on=" + on);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -903,8 +921,26 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 synchronized (mLock) {
+                    boolean wasA2dpOn = mGlobalBluetoothA2dpOn;
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
+                    if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
+                        Slog.d(TAG, "GlobalBluetoothA2dpOn is changed to '"
+                                + mGlobalBluetoothA2dpOn + "'");
+                        UserRecord userRecord = mUserRecords.get(mCurrentUserId);
+                        if (userRecord != null) {
+                            for (ClientRecord cr : userRecord.mClientRecords) {
+                                // mSelectedRouteId will be null for BT and phone speaker.
+                                if (cr.mSelectedRouteId == null) {
+                                    try {
+                                        cr.mClient.onGlobalA2dpChanged(mGlobalBluetoothA2dpOn);
+                                    } catch (RemoteException e) {
+                                        // Ignore exception
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

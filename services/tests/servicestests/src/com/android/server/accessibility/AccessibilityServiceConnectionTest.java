@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
