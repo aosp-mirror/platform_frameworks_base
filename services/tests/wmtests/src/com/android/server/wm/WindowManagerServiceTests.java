@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -283,5 +284,33 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testSetInTouchMode_instrumentedProcessGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
+        when(mWm.mAtmService.isInstrumenting(callingPid)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true);
+    }
+
+    @Test
+    public void testSetInTouchMode_nonInstrumentedProcessDontGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString());
+        when(mWm.mAtmService.isInstrumenting(callingPid)).thenReturn(false);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
     }
 }
