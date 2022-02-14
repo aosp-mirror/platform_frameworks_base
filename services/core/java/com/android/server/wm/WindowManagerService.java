@@ -200,6 +200,7 @@ import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteCallback;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -288,6 +289,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.ProtoLogImpl;
@@ -457,6 +459,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
+
+    private final RemoteCallbackList<IKeyguardLockedStateListener> mKeyguardLockedStateListeners =
+            new RemoteCallbackList<>();
+    private boolean mDispatchedKeyguardLockedState = false;
 
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
@@ -3027,6 +3033,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void onKeyguardShowingAndNotOccludedChanged() {
         mH.sendEmptyMessage(H.RECOMPUTE_FOCUS);
+        dispatchKeyguardLockedStateState();
     }
 
     @Override
@@ -3214,6 +3221,50 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             mPolicy.dismissKeyguardLw(callback, message);
         }
+    }
+
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
+    @Override
+    public void addKeyguardLockedStateListener(IKeyguardLockedStateListener listener) {
+        enforceSubscribeToKeyguardLockedStatePermission();
+        boolean registered = mKeyguardLockedStateListeners.register(listener);
+        if (!registered) {
+            Slog.w(TAG, "Failed to register listener: " + listener);
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
+    @Override
+    public void removeKeyguardLockedStateListener(IKeyguardLockedStateListener listener) {
+        enforceSubscribeToKeyguardLockedStatePermission();
+        mKeyguardLockedStateListeners.unregister(listener);
+    }
+
+    private void enforceSubscribeToKeyguardLockedStatePermission() {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE,
+                Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE
+                        + " permission required to read keyguard visibility");
+    }
+
+    private void dispatchKeyguardLockedStateState() {
+        mH.post(() -> {
+            final boolean isKeyguardLocked = mPolicy.isKeyguardShowing();
+            if (mDispatchedKeyguardLockedState == isKeyguardLocked) {
+                return;
+            }
+            final int n = mKeyguardLockedStateListeners.beginBroadcast();
+            for (int i = 0; i < n; i++) {
+                try {
+                    mKeyguardLockedStateListeners.getBroadcastItem(i).onKeyguardLockedStateChanged(
+                            isKeyguardLocked);
+                } catch (RemoteException e) {
+                    // Handled by the RemoteCallbackList.
+                }
+            }
+            mKeyguardLockedStateListeners.finishBroadcast();
+            mDispatchedKeyguardLockedState = isKeyguardLocked;
+        });
     }
 
     @Override
