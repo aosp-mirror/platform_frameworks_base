@@ -5332,7 +5332,7 @@ public class CarrierConfigManager {
             defaults.putPersistableBundle(
                     KEY_RCS_REQUIRES_PROVISIONING_BUNDLE, rcs_requires_provisioning_int_array);
 
-            defaults.putBoolean(KEY_GRUU_ENABLED_BOOL, true);
+            defaults.putBoolean(KEY_GRUU_ENABLED_BOOL, false);
             defaults.putBoolean(KEY_SIP_OVER_IPSEC_ENABLED_BOOL, true);
             defaults.putBoolean(KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL, false);
             defaults.putBoolean(KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL, true);
@@ -5347,7 +5347,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_SIP_TIMER_H_MILLIS_INT, 128000);
             defaults.putInt(KEY_SIP_TIMER_J_MILLIS_INT, 128000);
             defaults.putInt(KEY_SIP_SERVER_PORT_NUMBER_INT, 5060);
-            defaults.putInt(KEY_REQUEST_URI_TYPE_INT, REQUEST_URI_FORMAT_SIP);
+            defaults.putInt(KEY_REQUEST_URI_TYPE_INT, REQUEST_URI_FORMAT_TEL);
             defaults.putInt(KEY_SIP_PREFERRED_TRANSPORT_INT, PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP);
             defaults.putInt(KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT, 1500);
             defaults.putInt(KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT, 1500);
@@ -6368,11 +6368,11 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_MULTIENDPOINT_SUPPORTED_BOOL, false);
             defaults.putBoolean(KEY_SESSION_TIMER_SUPPORTED_BOOL, true);
             defaults.putBoolean(KEY_OIP_SOURCE_FROM_HEADER_BOOL, false);
-            defaults.putBoolean(KEY_PRACK_SUPPORTED_FOR_18X_BOOL, true);
+            defaults.putBoolean(KEY_PRACK_SUPPORTED_FOR_18X_BOOL, false);
             defaults.putBoolean(KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL, true);
             defaults.putBoolean(KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL, false);
 
-            defaults.putInt(KEY_SESSION_REFRESHER_TYPE_INT, SESSION_REFRESHER_TYPE_UNKNOWN);
+            defaults.putInt(KEY_SESSION_REFRESHER_TYPE_INT, SESSION_REFRESHER_TYPE_UAC);
             defaults.putInt(KEY_SESSION_PRIVACY_TYPE_INT, SESSION_PRIVACY_TYPE_HEADER);
             defaults.putInt(KEY_SESSION_REFRESH_METHOD_INT,
                             SESSION_REFRESH_METHOD_UPDATE_PREFERRED);
@@ -6394,7 +6394,9 @@ public class CarrierConfigManager {
                     KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
                     new int[] {
                         Ims.RTCP_INACTIVITY_ON_CONNECTED,
-                        Ims.RTP_INACTIVITY_ON_CONNECTED
+                        Ims.RTP_INACTIVITY_ON_CONNECTED,
+                        Ims.E911_RTCP_INACTIVITY_ON_CONNECTED,
+                        Ims.RTCP_INACTIVITY_ON_HOLD
                     });
 
             defaults.putIntArray(
@@ -6758,7 +6760,7 @@ public class CarrierConfigManager {
                         AccessNetworkType.IWLAN
                     });
 
-            defaults.putInt(KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT, 20000);
+            defaults.putInt(KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT, 10000);
             defaults.putInt(KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT, 5000);
 
             return defaults;
@@ -7431,7 +7433,7 @@ public class CarrierConfigManager {
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
-            defaults.putBoolean(KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL, true);
+            defaults.putBoolean(KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL, false);
             defaults.putBoolean(KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL, true);
             defaults.putBoolean(KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL, true);
             defaults.putBoolean(KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL, true);
