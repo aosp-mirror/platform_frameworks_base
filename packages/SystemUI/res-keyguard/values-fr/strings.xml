@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Veuillez saisir le mot de passe pour renforcer la sécurité"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Appareil verrouillé par l\'administrateur"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Appareil verrouillé manuellement"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Non reconnu"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non reconnu"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Pour utiliser Face Unlock, activez "<b>"Accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
