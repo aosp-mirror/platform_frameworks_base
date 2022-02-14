@@ -354,6 +354,7 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
+    method @Nullable public android.app.RemoteAction getCloseAction();
     method public float getExpandedAspectRatio();
     method public android.graphics.Rect getSourceRectHint();
     method @Nullable public CharSequence getSubtitle();

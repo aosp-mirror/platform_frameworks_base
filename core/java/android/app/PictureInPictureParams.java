@@ -51,6 +51,9 @@ public final class PictureInPictureParams implements Parcelable {
         private List<RemoteAction> mUserActions;
 
         @Nullable
+        private RemoteAction mCloseAction;
+
+        @Nullable
         private Rect mSourceRectHint;
 
         private Boolean mAutoEnterEnabled;
@@ -110,6 +113,25 @@ public final class PictureInPictureParams implements Parcelable {
             if (actions != null) {
                 mUserActions = new ArrayList<>(actions);
             }
+            return this;
+        }
+
+        /**
+         * Sets a close action that should be invoked before the default close PiP action. The
+         * custom action must close the activity quickly using {@link Activity#finish()}.
+         * Otherwise, the system will forcibly close the PiP as if no custom close action was
+         * provided.
+         *
+         * If the action matches one set via {@link PictureInPictureParams.Builder#setActions(List)}
+         * it may be shown in place of that custom action in the menu.
+         *
+         * @param action to replace the system close action
+         * @return this builder instance.
+         * @see RemoteAction
+         */
+        @NonNull
+        public Builder setCloseAction(@Nullable RemoteAction action) {
+            mCloseAction = action;
             return this;
         }
 
@@ -209,8 +231,8 @@ public final class PictureInPictureParams implements Parcelable {
          */
         public PictureInPictureParams build() {
             PictureInPictureParams params = new PictureInPictureParams(mAspectRatio,
-                    mExpandedAspectRatio, mUserActions,
-                    mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
+                    mExpandedAspectRatio, mUserActions, mCloseAction, mSourceRectHint,
+                    mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
             return params;
         }
     }
@@ -232,6 +254,12 @@ public final class PictureInPictureParams implements Parcelable {
      */
     @Nullable
     private List<RemoteAction> mUserActions;
+
+    /**
+     * Action to replace the system close action.
+     */
+    @Nullable
+    private RemoteAction mCloseAction;
 
     /**
      * The source bounds hint used when entering picture-in-picture, relative to the window bounds.
@@ -278,6 +306,7 @@ public final class PictureInPictureParams implements Parcelable {
             mUserActions = new ArrayList<>();
             in.readTypedList(mUserActions, RemoteAction.CREATOR);
         }
+        mCloseAction = in.readTypedObject(RemoteAction.CREATOR);
         if (in.readInt() != 0) {
             mSourceRectHint = Rect.CREATOR.createFromParcel(in);
         }
@@ -297,11 +326,13 @@ public final class PictureInPictureParams implements Parcelable {
 
     /** {@hide} */
     PictureInPictureParams(Rational aspectRatio, Rational expandedAspectRatio,
-            List<RemoteAction> actions, Rect sourceRectHint, Boolean autoEnterEnabled,
-            Boolean seamlessResizeEnabled, CharSequence title, CharSequence subtitle) {
+            List<RemoteAction> actions, RemoteAction closeAction, Rect sourceRectHint,
+            Boolean autoEnterEnabled, Boolean seamlessResizeEnabled, CharSequence title,
+            CharSequence subtitle) {
         mAspectRatio = aspectRatio;
         mExpandedAspectRatio = expandedAspectRatio;
         mUserActions = actions;
+        mCloseAction = closeAction;
         mSourceRectHint = sourceRectHint;
         mAutoEnterEnabled = autoEnterEnabled;
         mSeamlessResizeEnabled = seamlessResizeEnabled;
@@ -314,7 +345,7 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     public PictureInPictureParams(PictureInPictureParams other) {
-        this(other.mAspectRatio, other.mExpandedAspectRatio, other.mUserActions,
+        this(other.mAspectRatio, other.mExpandedAspectRatio, other.mUserActions, other.mCloseAction,
                 other.hasSourceBoundsHint() ? new Rect(other.getSourceRectHint()) : null,
                 other.mAutoEnterEnabled, other.mSeamlessResizeEnabled, other.mTitle,
                 other.mSubtitle);
@@ -334,6 +365,9 @@ public final class PictureInPictureParams implements Parcelable {
 
         if (otherArgs.hasSetActions()) {
             mUserActions = otherArgs.mUserActions;
+        }
+        if (otherArgs.hasSetCloseAction()) {
+            mCloseAction = otherArgs.mCloseAction;
         }
         if (otherArgs.hasSourceBoundsHint()) {
             mSourceRectHint = new Rect(otherArgs.getSourceRectHint());
@@ -415,7 +449,26 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
+     * @return the close action.
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public RemoteAction getCloseAction() {
+        return mCloseAction;
+    }
+
+    /**
+     * @return whether the close action was set.
+     * @hide
+     */
+    public boolean hasSetCloseAction() {
+        return mCloseAction != null;
+    }
+
+    /**
      * Truncates the set of actions to the given {@param size}.
+     *
      * @hide
      */
     public void truncateActions(int size) {
@@ -499,8 +552,8 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     public boolean empty() {
-        return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
-                && !hasSetExpandedAspectRatio() && mAutoEnterEnabled != null
+        return !hasSourceBoundsHint() && !hasSetActions() && !hasSetCloseAction()
+                && !hasSetAspectRatio() && !hasSetExpandedAspectRatio() && mAutoEnterEnabled != null
                 && mSeamlessResizeEnabled != null && !hasSetTitle()
                 && !hasSetSubtitle();
     }
@@ -515,6 +568,7 @@ public final class PictureInPictureParams implements Parcelable {
                 && Objects.equals(mAspectRatio, that.mAspectRatio)
                 && Objects.equals(mExpandedAspectRatio, that.mExpandedAspectRatio)
                 && Objects.equals(mUserActions, that.mUserActions)
+                && Objects.equals(mCloseAction, that.mCloseAction)
                 && Objects.equals(mSourceRectHint, that.mSourceRectHint)
                 && Objects.equals(mTitle, that.mTitle)
                 && Objects.equals(mSubtitle, that.mSubtitle);
@@ -522,8 +576,8 @@ public final class PictureInPictureParams implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAspectRatio, mExpandedAspectRatio, mUserActions, mSourceRectHint,
-                mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
+        return Objects.hash(mAspectRatio, mExpandedAspectRatio, mUserActions, mCloseAction,
+                mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
     }
 
     @Override
@@ -541,6 +595,9 @@ public final class PictureInPictureParams implements Parcelable {
         } else {
             out.writeInt(0);
         }
+
+        out.writeTypedObject(mCloseAction, 0);
+
         if (mSourceRectHint != null) {
             out.writeInt(1);
             mSourceRectHint.writeToParcel(out, 0);
@@ -597,6 +654,7 @@ public final class PictureInPictureParams implements Parcelable {
                 + " expandedAspectRatio=" + mExpandedAspectRatio
                 + " sourceRectHint=" + getSourceRectHint()
                 + " hasSetActions=" + hasSetActions()
+                + " hasSetCloseAction=" + hasSetCloseAction()
                 + " isAutoPipEnabled=" + isAutoEnterEnabled()
                 + " isSeamlessResizeEnabled=" + isSeamlessResizeEnabled()
                 + " title=" + getTitle()
