@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -2128,7 +2127,7 @@ public final class Settings {
     /**
      * Intent extra: The id of a setting restricted by supervisors.
      * <p>
-     * Type: String with a value from the SupervisorVerificationSetting annotation below.
+     * Type: Integer with a value from the SupervisorVerificationSetting annotation below.
      * <ul>
      * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_UNKNOWN}
      * <li>{@link #SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS}
@@ -2141,20 +2140,19 @@ public final class Settings {
     /**
      * Unknown setting.
      */
-    public static final String SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = "";
+    public static final int SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = 0;
 
     /**
      * Biometric settings for supervisors.
      */
-    public static final String SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS =
-            "supervisor_restricted_biometrics_controller";
+    public static final int SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = 1;
 
     /**
      * Keys for {@link #EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY}.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(prefix = { "SUPERVISOR_VERIFICATION_SETTING_" }, value = {
+    @IntDef(prefix = { "SUPERVISOR_VERIFICATION_SETTING_" }, value = {
             SUPERVISOR_VERIFICATION_SETTING_UNKNOWN,
             SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
     })
