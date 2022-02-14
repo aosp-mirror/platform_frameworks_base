@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ମେସେଜ୍‍ ପଠାନ୍ତୁ ଓ ଦେଖନ୍ତୁ"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକ"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ମ୍ୟୁଜିକ ଓ ଅନ୍ୟ ଅଡିଓ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଅଡିଓ ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକ"</string>
@@ -588,8 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍ ଲକ୍ ଏଣ୍ଟର୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"ସେନ୍ସରକୁ ସଫା କରନ୍ତୁ"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"ଟିକିଏ ଅଧିକ ସମୟ ଧରି ରଖନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
@@ -597,6 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ସ୍ଥାନ ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା ନାହିଁ"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ଟିପଚିହ୍ନ ପ୍ରମାଣିତ ହେଲା"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
@@ -1500,7 +1501,8 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ଛାଡ଼ିଦିଅନ୍ତୁ"</string>
     <string name="no_matches" msgid="6472699895759164599">"କୌଣସି ମେଳକ ନାହିଁ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ପୃଷ୍ଠାରେ ଖୋଜନ୍ତୁ"</string>
-    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{#ଟି ମେଳ{total}ର }other{#ଟି ମେଳ}} }"</string>
+    <!-- no translation found for matches_found (2296462299979507689) -->
+    <skip />
     <string name="action_mode_done" msgid="2536182504764803222">"ହୋଇଗଲା"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"ସେୟାର୍‍ ହୋଇଥିବା ଷ୍ଟୋରେଜ୍‍ ଲିଭାଉଛି…"</string>
     <string name="share" msgid="4157615043345227321">"ସେୟାର୍‍"</string>
@@ -1928,6 +1930,10 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବର୍ତ୍ତମାନ ଉପଲବ୍ଧ ନାହିଁ।"</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପ୍‌କୁ Androidର ପୁରୁଣା ଭର୍ସନ୍ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏହାପାଇଁ ଅପଡେଟ୍‌ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପର୍‌ଙ୍କ ସହିତ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
@@ -2017,16 +2023,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ଅନଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"କୌଣସିମତେ ଖୋଲନ୍ତୁ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ହାନିକାରକ ଆପ୍‌ ଚିହ୍ନଟ ହୋଇଛି"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"ସିଷ୍ଟମ ଲଗକୁ ଆକ୍ସେସ କରିବାର ଅନୁରୋଧ"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"କେବଳ ଏହି ଥର"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ଫଙ୍କସନାଲ ଡିବଗିଂ ପାଇଁ ସିଷ୍ଟମ ଲଗଗୁଡ଼ିକର ଅନୁରୋଧ କରୁଛି। ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଆପ ଏବଂ ସେବାଗୁଡ଼ିକ ଲେଖିଥିବା ସୂଚନା ଏହି ଲଗଗୁଡ଼ିକରେ ଥାଇପାରେ।"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ ଚାହେଁ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ଏଡିଟ୍ କରନ୍ତୁ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଭାଇବ୍ରେଟ୍ ହେବ"</string>
@@ -2089,22 +2090,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ପାୱାର ଡାୟଲଗ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ସ୍କ୍ରିନ୍ ଲକ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ସ୍କ୍ରି‍ନ୍‍ସଟ୍ ନିଅନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
-    <skip />
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"ହେଡସେଟ ହୁକ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ଅନ୍-ସ୍କ୍ରିନ୍ ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ଅନ୍-ସ୍କ୍ରିନ୍ ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍ ବାଛିବା ସୁବିଧା"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ବିଜ୍ଞପ୍ତି ସେଡକୁ ଖାରଜ କରନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
-    <skip />
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ଉପର"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ତଳ"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ବାମ"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad ଡାହାଣ"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad କେନ୍ଦ୍ର"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2125,10 +2120,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ଚାଲୁ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"କୌଣସି ୱାର୍କ ଆପ୍ ନାହିଁ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"କୌଣସି ବ୍ୟକ୍ତିଗତ ଆପ୍ ନାହିଁ"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g>କୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ଖୋଲିବେ?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g>କୁ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଖୋଲିବେ?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ବ୍ୟକ୍ତିଗତ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ୱାର୍କ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ନେଟୱାର୍କ ଅନଲକ୍ PIN"</string>
@@ -2263,4 +2256,6 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ପୃଷ୍ଠପଟରେ ଚାଲୁଛି ଏବଂ ବ୍ୟାଟେରୀର ଚାର୍ଜ ସମାପ୍ତ ହେଉଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ଦୀର୍ଘ ସମୟ ଧରି ପୃଷ୍ଠପଟରେ ଚାଲୁଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <skip />
 </resources>
