@@ -850,7 +850,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
      */
-    private IOnBackInvokedCallback mOnBackInvokedCallback;
+    private IOnBackInvokedCallback mApplicationOnBackInvokedCallback;
+    private IOnBackInvokedCallback mSystemOnBackInvokedCallback;
 
     @Override
     WindowState asWindowState() {
@@ -1073,15 +1074,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * called when a back navigation action is initiated.
      * @see BackNavigationController
      */
-    void setOnBackInvokedCallback(@Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+    void setOnBackInvokedCallback(
+            @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
                 this, onBackInvokedCallback);
-        mOnBackInvokedCallback = onBackInvokedCallback;
+        if (priority >= 0) {
+            mApplicationOnBackInvokedCallback = onBackInvokedCallback;
+        } else {
+            mSystemOnBackInvokedCallback = onBackInvokedCallback;
+        }
     }
 
     @Nullable
-    IOnBackInvokedCallback getOnBackInvokedCallback() {
-        return mOnBackInvokedCallback;
+    IOnBackInvokedCallback getApplicationOnBackInvokedCallback() {
+        return mApplicationOnBackInvokedCallback;
+    }
+
+    @Nullable
+    IOnBackInvokedCallback getSystemOnBackInvokedCallback() {
+        return mSystemOnBackInvokedCallback;
     }
 
     interface PowerManagerWrapper {
@@ -2385,7 +2396,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
-        mOnBackInvokedCallback = null;
+        mSystemOnBackInvokedCallback = null;
+        mApplicationOnBackInvokedCallback = null;
 
         mSession.windowRemovedLocked();
         try {
@@ -2439,7 +2451,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             disposeInputChannel();
-            mOnBackInvokedCallback = null;
+            mSystemOnBackInvokedCallback = null;
+            mApplicationOnBackInvokedCallback = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
