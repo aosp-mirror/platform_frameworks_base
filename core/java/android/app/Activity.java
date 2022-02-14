@@ -7348,43 +7348,67 @@ public class Activity extends ContextThemeWrapper
     public void dumpInternal(@NonNull String prefix,
             @SuppressLint("UseParcelFileDescriptor") @Nullable FileDescriptor fd,
             @NonNull PrintWriter writer, @Nullable String[] args) {
-        if (args != null && args.length > 0
-                && CompatChanges.isChangeEnabled(DUMP_IGNORES_SPECIAL_ARGS)) {
+
+        // Lazy-load mDumpableContainer with Dumpables activity might already have a reference to
+        if (mAutofillClientController != null) {
+            addDumpable(mAutofillClientController);
+        }
+        if (mUiTranslationController != null) {
+            addDumpable(mUiTranslationController);
+        }
+        if (mContentCaptureManager != null) {
+            mContentCaptureManager.addDumpable(this);
+        }
+
+        boolean dumpInternalState = true;
+        String arg = null;
+        if (args != null && args.length > 0) {
+            arg = args[0];
+            boolean isSpecialCase = true;
             // Handle special cases
-            switch (args[0]) {
+            switch (arg) {
                 case "--autofill":
                     dumpAutofillManager(prefix, writer, args);
-                    return;
+                    break;
                 case "--contentcapture":
                     dumpContentCaptureManager(prefix, writer);
-                    return;
+                    break;
                 case "--translation":
                     dumpUiTranslation(prefix, writer);
-                    return;
+                    break;
                 case "--list-dumpables":
                     if (mDumpableContainer == null) {
                         writer.print(prefix); writer.println("No dumpables");
-                        return;
+                    } else {
+                        mDumpableContainer.listDumpables(prefix, writer);
                     }
-                    mDumpableContainer.listDumpables(prefix, writer);
-                    return;
+                    break;
                 case "--dump-dumpable":
                     if (args.length == 1) {
                         writer.println("--dump-dumpable requires the dumpable name");
-                        return;
-                    }
-                    if (mDumpableContainer == null) {
+                    } else if (mDumpableContainer == null) {
                         writer.println("no dumpables");
-                        return;
+                    } else {
+                        // Strips --dump-dumpable NAME
+                        String[] prunedArgs = new String[args.length - 2];
+                        System.arraycopy(args, 2, prunedArgs, 0, prunedArgs.length);
+                        mDumpableContainer.dumpOneDumpable(prefix, writer, args[1], prunedArgs);
                     }
-                    // Strips --dump-dumpable NAME
-                    String[] prunedArgs = new String[args.length - 2];
-                    System.arraycopy(args, 2, prunedArgs, 0, prunedArgs.length);
-                    mDumpableContainer.dumpOneDumpable(prefix, writer, args[1], prunedArgs);
-                    return;
+                    break;
+                default:
+                    isSpecialCase = false;
+                    break;
+            }
+            if (isSpecialCase) {
+                dumpInternalState = !CompatChanges.isChangeEnabled(DUMP_IGNORES_SPECIAL_ARGS);
             }
         }
-        dump(prefix, fd, writer, args);
+
+        if (dumpInternalState) {
+            dump(prefix, fd, writer, args);
+        } else {
+            Log.i(TAG, "Not calling dump() on " + this + " because of special argument " + arg);
+        }
     }
 
     void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
@@ -7429,7 +7453,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     private void dumpContentCaptureManager(String prefix, PrintWriter writer) {
-        getContentCaptureManager();
         dumpLegacyDumpable(prefix, writer, ContentCaptureManager.DUMPABLE_NAME, /* args= */ null);
     }
 
