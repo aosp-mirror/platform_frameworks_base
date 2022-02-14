@@ -2507,9 +2507,10 @@ package android.app.time {
 package android.app.usage {
 
   public final class BroadcastResponseStats implements android.os.Parcelable {
-    ctor public BroadcastResponseStats(@NonNull String);
+    ctor public BroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
     method public int describeContents();
     method @IntRange(from=0) public int getBroadcastsDispatchedCount();
+    method @IntRange(from=1) public long getId();
     method @IntRange(from=0) public int getNotificationsCancelledCount();
     method @IntRange(from=0) public int getNotificationsPostedCount();
     method @IntRange(from=0) public int getNotificationsUpdatedCount();
@@ -2566,13 +2567,13 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long getLastTimeAnyComponentUsed(@NonNull String);
     method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public android.app.usage.BroadcastResponseStats queryBroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
