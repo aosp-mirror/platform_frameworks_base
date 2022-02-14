@@ -384,9 +384,9 @@ public class NotificationGroupManagerLegacy implements
         // * Only necessary when all notifications in the group use GROUP_ALERT_SUMMARY
         // * Only necessary when at least one notification in the group is on a priority channel
         if (group.summary.getSbn().getNotification().getGroupAlertBehavior()
-                != Notification.GROUP_ALERT_SUMMARY) {
+                == Notification.GROUP_ALERT_CHILDREN) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: summary != GROUP_ALERT_SUMMARY");
+                Log.d(TAG, "getPriorityConversationAlertOverride: summary == GROUP_ALERT_CHILDREN");
             }
             return null;
         }
@@ -529,8 +529,10 @@ public class NotificationGroupManagerLegacy implements
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
             if (groupKeysChanged) {
                 updateSuppression(mGroupMap.get(oldGroupKey));
-                updateSuppression(mGroupMap.get(newGroupKey));
             }
+            // Always update the suppression of the group from which you're isolated, in case
+            // this entry was or now is the alertOverride for that group.
+            updateSuppression(mGroupMap.get(newGroupKey));
         } else if (!wasGroupChild && isGroupChild) {
             onEntryBecomingChild(entry);
         }
