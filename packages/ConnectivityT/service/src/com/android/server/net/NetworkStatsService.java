@@ -2127,15 +2127,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
 
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES_FIELD_NUMBER,
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES,
                 mActiveIfaces);
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES_FIELD_NUMBER,
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES,
                 mActiveUidIfaces);
-        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS_FIELD_NUMBER);
-        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS_FIELD_NUMBER);
-        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS_FIELD_NUMBER);
+        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
+        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
+        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
         mUidTagRecorder.dumpDebugLocked(proto,
-                NetworkStatsServiceDumpProto.UID_TAG_STATS_FIELD_NUMBER);
+                NetworkStatsServiceDumpProto.UID_TAG_STATS);
 
         proto.flush();
     }
@@ -2145,8 +2145,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         for (int i = 0; i < ifaces.size(); i++) {
             final long start = proto.start(tag);
 
-            proto.write(NetworkInterfaceProto.INTERFACE_FIELD_NUMBER, ifaces.keyAt(i));
-            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES_FIELD_NUMBER);
+            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
+            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES);
 
             proto.end(start);
         }

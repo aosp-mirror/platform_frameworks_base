@@ -184,14 +184,14 @@ public class NetworkIdentity {
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
-        proto.write(NetworkIdentityProto.TYPE_FIELD_NUMBER, mType);
+        proto.write(NetworkIdentityProto.TYPE, mType);
 
         // TODO: dump mRatType as well.
 
-        proto.write(NetworkIdentityProto.ROAMING_FIELD_NUMBER, mRoaming);
-        proto.write(NetworkIdentityProto.METERED_FIELD_NUMBER, mMetered);
-        proto.write(NetworkIdentityProto.DEFAULT_NETWORK_FIELD_NUMBER, mDefaultNetwork);
-        proto.write(NetworkIdentityProto.OEM_MANAGED_NETWORK_FIELD_NUMBER, mOemManaged);
+        proto.write(NetworkIdentityProto.ROAMING, mRoaming);
+        proto.write(NetworkIdentityProto.METERED, mMetered);
+        proto.write(NetworkIdentityProto.DEFAULT_NETWORK, mDefaultNetwork);
+        proto.write(NetworkIdentityProto.OEM_MANAGED_NETWORK, mOemManaged);
 
         proto.end(start);
     }
