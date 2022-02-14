@@ -29,42 +29,47 @@ import java.util.Objects;
  * Holds all the relevant data needed to render a Smartspace card with the combined-card Ui
  * Template.
  *
- * We only support 1 sub-list card combined with 1 carousel card. And we may expand our supported
- * combinations in the future.
+ * We only support adding a 1 sub-list card combined with 1 sub-card card (may expand our supported
+ * combinations in the future) within the default-template card:
+ *
+ * <ul>
+ *     <li> sub-list card, sub-card card </li>
+ * </ul>
  *
  * @hide
  */
 @SystemApi
-public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefaultUiTemplateData {
+public final class CombinedCardsTemplateData extends BaseTemplateData {
 
     /** A list of secondary cards. */
     @NonNull
-    private final List<SmartspaceDefaultUiTemplateData> mCombinedCardDataList;
+    private final List<BaseTemplateData> mCombinedCardDataList;
 
-    SmartspaceCombinedCardsUiTemplateData(@NonNull Parcel in) {
+    CombinedCardsTemplateData(@NonNull Parcel in) {
         super(in);
-        mCombinedCardDataList = in.createTypedArrayList(SmartspaceDefaultUiTemplateData.CREATOR);
+        mCombinedCardDataList = in.createTypedArrayList(BaseTemplateData.CREATOR);
     }
 
-    private SmartspaceCombinedCardsUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable SmartspaceText titleText,
-            @Nullable SmartspaceIcon titleIcon,
-            @Nullable SmartspaceText subtitleText,
-            @Nullable SmartspaceIcon subTitleIcon,
-            @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable SmartspaceText supplementalSubtitleText,
-            @Nullable SmartspaceIcon supplementalSubtitleIcon,
-            @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable SmartspaceText supplementalAlarmText,
-            @NonNull List<SmartspaceDefaultUiTemplateData> combinedCardDataList) {
+    private CombinedCardsTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
+            @Nullable Text titleText,
+            @Nullable Icon titleIcon,
+            @Nullable Text subtitleText,
+            @Nullable Icon subTitleIcon,
+            @Nullable TapAction primaryTapAction,
+            @Nullable Text supplementalSubtitleText,
+            @Nullable Icon supplementalSubtitleIcon,
+            @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable Text supplementalAlarmText,
+            @NonNull List<BaseTemplateData> combinedCardDataList) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
                 supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
                 supplementalAlarmText);
         mCombinedCardDataList = combinedCardDataList;
     }
 
+    /** Returns the list of secondary cards. Can be null if not being set. */
     @NonNull
-    public List<SmartspaceDefaultUiTemplateData> getCombinedCardDataList() {
+    public List<BaseTemplateData> getCombinedCardDataList() {
         return mCombinedCardDataList;
     }
 
@@ -72,16 +77,16 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
      * @see Parcelable.Creator
      */
     @NonNull
-    public static final Creator<SmartspaceCombinedCardsUiTemplateData> CREATOR =
-            new Creator<SmartspaceCombinedCardsUiTemplateData>() {
+    public static final Creator<CombinedCardsTemplateData> CREATOR =
+            new Creator<CombinedCardsTemplateData>() {
                 @Override
-                public SmartspaceCombinedCardsUiTemplateData createFromParcel(Parcel in) {
-                    return new SmartspaceCombinedCardsUiTemplateData(in);
+                public CombinedCardsTemplateData createFromParcel(Parcel in) {
+                    return new CombinedCardsTemplateData(in);
                 }
 
                 @Override
-                public SmartspaceCombinedCardsUiTemplateData[] newArray(int size) {
-                    return new SmartspaceCombinedCardsUiTemplateData[size];
+                public CombinedCardsTemplateData[] newArray(int size) {
+                    return new CombinedCardsTemplateData[size];
                 }
             };
 
@@ -99,9 +104,9 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceCombinedCardsUiTemplateData)) return false;
+        if (!(o instanceof CombinedCardsTemplateData)) return false;
         if (!super.equals(o)) return false;
-        SmartspaceCombinedCardsUiTemplateData that = (SmartspaceCombinedCardsUiTemplateData) o;
+        CombinedCardsTemplateData that = (CombinedCardsTemplateData) o;
         return mCombinedCardDataList.equals(that.mCombinedCardDataList);
     }
 
@@ -118,19 +123,19 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
     }
 
     /**
-     * A builder for {@link SmartspaceCombinedCardsUiTemplateData} object.
+     * A builder for {@link CombinedCardsTemplateData} object.
      *
      * @hide
      */
     @SystemApi
-    public static final class Builder extends SmartspaceDefaultUiTemplateData.Builder {
+    public static final class Builder extends BaseTemplateData.Builder {
 
-        private final List<SmartspaceDefaultUiTemplateData> mCombinedCardDataList;
+        private final List<BaseTemplateData> mCombinedCardDataList;
 
         /**
-         * A builder for {@link SmartspaceCombinedCardsUiTemplateData}.
+         * A builder for {@link CombinedCardsTemplateData}.
          */
-        public Builder(@NonNull List<SmartspaceDefaultUiTemplateData> combinedCardDataList) {
+        public Builder(@NonNull List<BaseTemplateData> combinedCardDataList) {
             super(SmartspaceTarget.UI_TEMPLATE_COMBINED_CARDS);
             mCombinedCardDataList = Objects.requireNonNull(combinedCardDataList);
         }
@@ -141,11 +146,11 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
          * @throws IllegalStateException if any required non-null field is null
          */
         @NonNull
-        public SmartspaceCombinedCardsUiTemplateData build() {
+        public CombinedCardsTemplateData build() {
             if (mCombinedCardDataList == null) {
                 throw new IllegalStateException("Please assign a value to all @NonNull args.");
             }
-            return new SmartspaceCombinedCardsUiTemplateData(getTemplateType(), getTitleText(),
+            return new CombinedCardsTemplateData(getTemplateType(), getTitleText(),
                     getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),

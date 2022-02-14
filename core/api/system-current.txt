@@ -2164,7 +2164,7 @@ package android.app.smartspace {
     method @Nullable public android.net.Uri getSliceUri();
     method @NonNull public String getSmartspaceTargetId();
     method @Nullable public String getSourceNotificationKey();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData getTemplateData();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData getTemplateData();
     method @NonNull public android.os.UserHandle getUserHandle();
     method @Nullable public android.appwidget.AppWidgetProviderInfo getWidget();
     method public boolean isSensitive();
@@ -2221,7 +2221,7 @@ package android.app.smartspace {
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setShouldShowExpanded(boolean);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSliceUri(@NonNull android.net.Uri);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSourceNotificationKey(@NonNull String);
-    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setTemplateData(@Nullable android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setTemplateData(@Nullable android.app.smartspace.uitemplatedata.BaseTemplateData);
     method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setWidget(@NonNull android.appwidget.AppWidgetProviderInfo);
   }
 
@@ -2252,156 +2252,156 @@ package android.app.smartspace {
 
 package android.app.smartspace.uitemplatedata {
 
-  public final class SmartspaceCarouselUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getCarouselAction();
-    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem> getCarouselItems();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData> CREATOR;
-  }
-
-  public static final class SmartspaceCarouselUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceCarouselUiTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem>);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.Builder setCarouselAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-  }
-
-  public static final class SmartspaceCarouselUiTemplateData.CarouselItem implements android.os.Parcelable {
+  public class BaseTemplateData implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getImage();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getLowerText();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getUpperText();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem> CREATOR;
-  }
-
-  public static final class SmartspaceCarouselUiTemplateData.CarouselItem.Builder {
-    ctor public SmartspaceCarouselUiTemplateData.CarouselItem.Builder();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem.Builder setImage(@Nullable android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem.Builder setLowerText(@Nullable android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem.Builder setTapAction(@Nullable android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCarouselUiTemplateData.CarouselItem.Builder setUpperText(@Nullable android.app.smartspace.uitemplatedata.SmartspaceText);
-  }
-
-  public final class SmartspaceCombinedCardsUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData> getCombinedCardDataList();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceCombinedCardsUiTemplateData> CREATOR;
-  }
-
-  public static final class SmartspaceCombinedCardsUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceCombinedCardsUiTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData>);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceCombinedCardsUiTemplateData build();
-  }
-
-  public class SmartspaceDefaultUiTemplateData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getPrimaryTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getSubtitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getSubtitleText();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getSupplementalAlarmText();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getSupplementalSubtitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getSupplementalSubtitleTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getSupplementalSubtitleText();
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getPrimaryTapAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSubtitleIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getSubtitleText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalAlarmText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSupplementalSubtitleIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSupplementalSubtitleTapAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalSubtitleText();
     method public int getTemplateType();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getTitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getTitleText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getTitleIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getTitleText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.BaseTemplateData> CREATOR;
   }
 
-  public static class SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceDefaultUiTemplateData.Builder(int);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setPrimaryTapAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSubtitleText(@NonNull android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSupplementalAlarmText(@NonNull android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSupplementalSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSupplementalSubtitleTapAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setSupplementalSubtitleText(@NonNull android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setTitleIcon(@NonNull android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder setTitleText(@NonNull android.app.smartspace.uitemplatedata.SmartspaceText);
+  public static class BaseTemplateData.Builder {
+    ctor public BaseTemplateData.Builder(int);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalAlarmText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
   }
 
-  public final class SmartspaceHeadToHeadUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getHeadToHeadAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getHeadToHeadFirstCompetitorIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getHeadToHeadFirstCompetitorText();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getHeadToHeadSecondCompetitorIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getHeadToHeadSecondCompetitorText();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getHeadToHeadTitle();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData> CREATOR;
+  public final class CarouselTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getCarouselAction();
+    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem> getCarouselItems();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.CarouselTemplateData> CREATOR;
   }
 
-  public static final class SmartspaceHeadToHeadUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceHeadToHeadUiTemplateData.Builder();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadAction(@Nullable android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadFirstCompetitorIcon(@Nullable android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadFirstCompetitorText(@Nullable android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadSecondCompetitorIcon(@Nullable android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadSecondCompetitorText(@Nullable android.app.smartspace.uitemplatedata.SmartspaceText);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceHeadToHeadUiTemplateData.Builder setHeadToHeadTitle(@Nullable android.app.smartspace.uitemplatedata.SmartspaceText);
+  public static final class CarouselTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public CarouselTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem>);
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.Builder setCarouselAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
   }
 
-  public final class SmartspaceIcon implements android.os.Parcelable {
+  public static final class CarouselTemplateData.CarouselItem implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getImage();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getLowerText();
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getTapAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getUpperText();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem> CREATOR;
+  }
+
+  public static final class CarouselTemplateData.CarouselItem.Builder {
+    ctor public CarouselTemplateData.CarouselItem.Builder();
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem build();
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem.Builder setImage(@Nullable android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem.Builder setLowerText(@Nullable android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem.Builder setTapAction(@Nullable android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.CarouselTemplateData.CarouselItem.Builder setUpperText(@Nullable android.app.smartspace.uitemplatedata.Text);
+  }
+
+  public final class CombinedCardsTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.BaseTemplateData> getCombinedCardDataList();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.CombinedCardsTemplateData> CREATOR;
+  }
+
+  public static final class CombinedCardsTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public CombinedCardsTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.BaseTemplateData>);
+    method @NonNull public android.app.smartspace.uitemplatedata.CombinedCardsTemplateData build();
+  }
+
+  public final class HeadToHeadTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getHeadToHeadAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getHeadToHeadFirstCompetitorIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getHeadToHeadFirstCompetitorText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getHeadToHeadSecondCompetitorIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getHeadToHeadSecondCompetitorText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getHeadToHeadTitle();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.HeadToHeadTemplateData> CREATOR;
+  }
+
+  public static final class HeadToHeadTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public HeadToHeadTemplateData.Builder();
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadAction(@Nullable android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadFirstCompetitorIcon(@Nullable android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadFirstCompetitorText(@Nullable android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadSecondCompetitorIcon(@Nullable android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadSecondCompetitorText(@Nullable android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.HeadToHeadTemplateData.Builder setHeadToHeadTitle(@Nullable android.app.smartspace.uitemplatedata.Text);
+  }
+
+  public final class Icon implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public CharSequence getContentDescription();
     method @NonNull public android.graphics.drawable.Icon getIcon();
     method public boolean shouldTint();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceIcon> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.Icon> CREATOR;
   }
 
-  public static final class SmartspaceIcon.Builder {
-    ctor public SmartspaceIcon.Builder(@NonNull android.graphics.drawable.Icon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceIcon build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceIcon.Builder setContentDescription(@NonNull CharSequence);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceIcon.Builder setShouldTint(boolean);
+  public static final class Icon.Builder {
+    ctor public Icon.Builder(@NonNull android.graphics.drawable.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.Icon build();
+    method @NonNull public android.app.smartspace.uitemplatedata.Icon.Builder setContentDescription(@NonNull CharSequence);
+    method @NonNull public android.app.smartspace.uitemplatedata.Icon.Builder setShouldTint(boolean);
   }
 
-  public final class SmartspaceSubCardUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getSubCardAction();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceIcon getSubCardIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceText getSubCardText();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceSubCardUiTemplateData> CREATOR;
+  public final class SubCardTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSubCardAction();
+    method @NonNull public android.app.smartspace.uitemplatedata.Icon getSubCardIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getSubCardText();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SubCardTemplateData> CREATOR;
   }
 
-  public static final class SmartspaceSubCardUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceSubCardUiTemplateData.Builder(@NonNull android.app.smartspace.uitemplatedata.SmartspaceIcon);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubCardUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubCardUiTemplateData.Builder setSubCardAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubCardUiTemplateData.Builder setSubCardText(@NonNull android.app.smartspace.uitemplatedata.SmartspaceText);
+  public static final class SubCardTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public SubCardTemplateData.Builder(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.SubCardTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.SubCardTemplateData.Builder setSubCardAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.SubCardTemplateData.Builder setSubCardText(@NonNull android.app.smartspace.uitemplatedata.Text);
   }
 
-  public final class SmartspaceSubImageUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getSubImageAction();
-    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.SmartspaceText> getSubImageTexts();
-    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.SmartspaceIcon> getSubImages();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceSubImageUiTemplateData> CREATOR;
+  public final class SubImageTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSubImageAction();
+    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.Text> getSubImageTexts();
+    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.Icon> getSubImages();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SubImageTemplateData> CREATOR;
   }
 
-  public static final class SmartspaceSubImageUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceSubImageUiTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.SmartspaceText>, @NonNull java.util.List<android.app.smartspace.uitemplatedata.SmartspaceIcon>);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubImageUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubImageUiTemplateData.Builder setSubImageAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
+  public static final class SubImageTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public SubImageTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.Text>, @NonNull java.util.List<android.app.smartspace.uitemplatedata.Icon>);
+    method @NonNull public android.app.smartspace.uitemplatedata.SubImageTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.SubImageTemplateData.Builder setSubImageAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
   }
 
-  public final class SmartspaceSubListUiTemplateData extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData {
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceTapAction getSubListAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.SmartspaceIcon getSubListIcon();
-    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.SmartspaceText> getSubListTexts();
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceSubListUiTemplateData> CREATOR;
+  public final class SubListTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSubListAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSubListIcon();
+    method @NonNull public java.util.List<android.app.smartspace.uitemplatedata.Text> getSubListTexts();
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SubListTemplateData> CREATOR;
   }
 
-  public static final class SmartspaceSubListUiTemplateData.Builder extends android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData.Builder {
-    ctor public SmartspaceSubListUiTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.SmartspaceText>);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubListUiTemplateData build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubListUiTemplateData.Builder setSubListAction(@NonNull android.app.smartspace.uitemplatedata.SmartspaceTapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceSubListUiTemplateData.Builder setSubListIcon(@NonNull android.app.smartspace.uitemplatedata.SmartspaceIcon);
+  public static final class SubListTemplateData.Builder extends android.app.smartspace.uitemplatedata.BaseTemplateData.Builder {
+    ctor public SubListTemplateData.Builder(@NonNull java.util.List<android.app.smartspace.uitemplatedata.Text>);
+    method @NonNull public android.app.smartspace.uitemplatedata.SubListTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.SubListTemplateData.Builder setSubListAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.SubListTemplateData.Builder setSubListIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
   }
 
-  public final class SmartspaceTapAction implements android.os.Parcelable {
+  public final class TapAction implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.os.Bundle getExtras();
     method @Nullable public CharSequence getId();
@@ -2409,31 +2409,33 @@ package android.app.smartspace.uitemplatedata {
     method @Nullable public android.app.PendingIntent getPendingIntent();
     method @Nullable public android.os.UserHandle getUserHandle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceTapAction> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.TapAction> CREATOR;
   }
 
-  public static final class SmartspaceTapAction.Builder {
-    ctor public SmartspaceTapAction.Builder(@NonNull CharSequence);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceTapAction build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceTapAction.Builder setExtras(@NonNull android.os.Bundle);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceTapAction.Builder setIntent(@NonNull android.content.Intent);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceTapAction.Builder setPendingIntent(@NonNull android.app.PendingIntent);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceTapAction.Builder setUserHandle(@Nullable android.os.UserHandle);
+  public static final class TapAction.Builder {
+    ctor public TapAction.Builder(@NonNull CharSequence);
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction build();
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setIntent(@NonNull android.content.Intent);
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setPendingIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setUserHandle(@Nullable android.os.UserHandle);
   }
 
-  public final class SmartspaceText implements android.os.Parcelable {
+  public final class Text implements android.os.Parcelable {
     method public int describeContents();
+    method public int getMaxLines();
     method @NonNull public CharSequence getText();
     method @NonNull public android.text.TextUtils.TruncateAt getTruncateAtType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.SmartspaceText> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.Text> CREATOR;
   }
 
-  public static final class SmartspaceText.Builder {
-    ctor public SmartspaceText.Builder(@NonNull CharSequence);
-    ctor public SmartspaceText.Builder(@NonNull CharSequence, @NonNull android.text.TextUtils.TruncateAt);
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceText build();
-    method @NonNull public android.app.smartspace.uitemplatedata.SmartspaceText.Builder setTruncateAtType(@NonNull android.text.TextUtils.TruncateAt);
+  public static final class Text.Builder {
+    ctor public Text.Builder(@NonNull CharSequence);
+    ctor public Text.Builder(@NonNull CharSequence, @NonNull android.text.TextUtils.TruncateAt);
+    method @NonNull public android.app.smartspace.uitemplatedata.Text build();
+    method @NonNull public android.app.smartspace.uitemplatedata.Text.Builder setMaxLines(int);
+    method @NonNull public android.app.smartspace.uitemplatedata.Text.Builder setTruncateAtType(@NonNull android.text.TextUtils.TruncateAt);
   }
 
 }
