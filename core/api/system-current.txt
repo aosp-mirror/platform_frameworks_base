@@ -3726,13 +3726,25 @@ package android.hardware {
   public final class SensorPrivacyManager {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(int, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean areAnySensorPrivacyTogglesEnabled(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int, int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(int, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, boolean);
   }
 
   public static interface SensorPrivacyManager.OnSensorPrivacyChangedListener {
-    method public void onSensorPrivacyChanged(int, boolean);
+    method public default void onSensorPrivacyChanged(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener.SensorPrivacyChangedParams);
+    method @Deprecated public void onSensorPrivacyChanged(int, boolean);
+  }
+
+  public static class SensorPrivacyManager.OnSensorPrivacyChangedListener.SensorPrivacyChangedParams {
+    method public int getSensor();
+    method public int getToggleType();
+    method public boolean isEnabled();
   }
 
 }

@@ -17117,6 +17117,9 @@ package android.hardware {
 
   public final class SensorPrivacyManager {
     method public boolean supportsSensorToggle(int);
+    method public boolean supportsSensorToggle(int, int);
+    field public static final int TOGGLE_TYPE_HARDWARE = 2; // 0x2
+    field public static final int TOGGLE_TYPE_SOFTWARE = 1; // 0x1
   }
 
   public static class SensorPrivacyManager.Sensors {
