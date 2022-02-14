@@ -38,6 +38,7 @@ public class AdbManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING)
     public static final String WIRELESS_DEBUG_STATE_CHANGED_ACTION =
             "com.android.server.adb.WIRELESS_DEBUG_STATUS";
 
@@ -46,6 +47,7 @@ public class AdbManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING)
     public static final String WIRELESS_DEBUG_PAIRED_DEVICES_ACTION =
             "com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES";
 
@@ -59,6 +61,7 @@ public class AdbManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING)
     public static final String WIRELESS_DEBUG_PAIRING_RESULT_ACTION =
             "com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT";
 
