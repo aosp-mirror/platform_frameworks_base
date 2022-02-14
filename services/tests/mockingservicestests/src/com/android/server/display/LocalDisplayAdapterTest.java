@@ -177,7 +177,7 @@ public class LocalDisplayAdapterTest {
         // This should be public
         assertDisplayPrivateFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
                 PORT_A, false);
-        // This should be public
+        // This should be private
         assertDisplayPrivateFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
                 PORT_B, true);
         // This should be public
