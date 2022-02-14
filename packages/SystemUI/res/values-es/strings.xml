@@ -46,14 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuración USB no permitida"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"El usuario con el que se ha iniciado sesión en este dispositivo no puede activar la depuración USB. Para utilizar esta función, inicia sesión con la cuenta de usuario principal."</string>
-    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
-    <skip />
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"¿Quieres cambiar el idioma del sistema a <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Otro dispositivo ha solicitado un cambio en el idioma del sistema"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Cambiar idioma"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Seguir en este idioma"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"¿Permitir la depuración inalámbrica en esta red?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nombre de la red (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nDirección Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir siempre en esta red"</string>
@@ -240,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de color"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Más ajustes"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ajustes de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -464,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
@@ -643,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Has iniciado sesión como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"elegir un usuario"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Sin Internet"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Abrir detalles."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Abrir ajustes de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Cambiar el orden de los ajustes."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de encendido"</string>
@@ -884,13 +877,23 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplicaciones activas</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicación activa</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicaciones activas"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Copiar"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copiado"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Cerrar la interfaz de copia"</string>
+    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
+    <skip />
+    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
+    <skip />
+    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
+    <skip />
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>
