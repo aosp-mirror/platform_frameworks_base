@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -167,7 +166,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      * Checks that the focus changes between the [pipApp] window and the launcher when
      * closing the pip window
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun focusChanges() {
         testSpec.assertEventLog {
