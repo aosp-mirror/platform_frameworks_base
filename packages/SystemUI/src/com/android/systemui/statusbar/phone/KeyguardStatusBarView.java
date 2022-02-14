@@ -50,7 +50,6 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * The header group on Keyguard.
@@ -61,7 +60,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private static final int LAYOUT_CUTOUT = 1;
     private static final int LAYOUT_NO_CUTOUT = 2;
 
-    private final ArrayList<Rect> mEmptyTintRect = new ArrayList<>();
+    private final Rect mEmptyRect = new Rect(0, 0, 0, 0);
 
     private boolean mShowPercentAvailable;
     private boolean mBatteryCharging;
@@ -477,14 +476,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
             iconManager.setTint(iconColor);
         }
 
-        applyDarkness(R.id.battery, mEmptyTintRect, intensity, iconColor);
-        applyDarkness(R.id.clock, mEmptyTintRect, intensity, iconColor);
+        applyDarkness(R.id.battery, mEmptyRect, intensity, iconColor);
+        applyDarkness(R.id.clock, mEmptyRect, intensity, iconColor);
     }
 
-    private void applyDarkness(int id, ArrayList<Rect> tintAreas, float intensity, int color) {
+    private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
         View v = findViewById(id);
         if (v instanceof DarkReceiver) {
-            ((DarkReceiver) v).onDarkChanged(tintAreas, intensity, color);
+            ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
         }
     }
 
