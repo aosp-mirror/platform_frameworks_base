@@ -34,6 +34,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -3346,7 +3347,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
-            pw.println("  --autofill: dump just the autofill-related state of an activity");
+            pw.printf("  %s: dump just the DUMPABLE-related state of an activity. Use the %s "
+                    + "option to list the supported DUMPABLEs\n", Activity.DUMP_ARG_DUMP_DUMPABLE,
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
+            pw.printf("  %s: show the available dumpables in an activity\n",
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
