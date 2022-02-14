@@ -1077,7 +1077,7 @@
     <!-- Subtitle for the accessibility preference to configure display color space correction. [CHAR LIMIT=NONE] -->
     <string name="accessibility_display_daltonizer_preference_subtitle">
         <![CDATA[
-        Adjust how colors display on your device. This can be helpful when you want to:<br/><br/>
+        Color correction can be helpful when you want to:<br/>
         <ol>
             <li>&nbsp;See colors more accurately</li>
             <li>&nbsp;Remove colors to help you focus</li>
