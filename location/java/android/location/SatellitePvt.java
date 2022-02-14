@@ -144,8 +144,8 @@ public final class SatellitePvt implements Parcelable {
     private final ClockInfo mClockInfo;
     private final double mIonoDelayMeters;
     private final double mTropoDelayMeters;
-    private final int mTimeOfClock;
-    private final int mTimeOfEphemeris;
+    private final long mTimeOfClock;
+    private final long mTimeOfEphemeris;
     private final int mIssueOfDataClock;
     private final int mIssueOfDataEphemeris;
     @EphemerisSource
@@ -457,8 +457,8 @@ public final class SatellitePvt implements Parcelable {
             @Nullable ClockInfo clockInfo,
             double ionoDelayMeters,
             double tropoDelayMeters,
-            int timeOfClock,
-            int timeOfEphemeris,
+            long timeOfClock,
+            long timeOfEphemeris,
             int issueOfDataClock,
             int issueOfDataEphemeris,
             @EphemerisSource int ephemerisSource) {
@@ -547,26 +547,28 @@ public final class SatellitePvt implements Parcelable {
     /**
      * Time of Clock.
      *
-     * <p>This is defined in GPS ICD200 documentation (e.g.,
-     * <a href="https://www.gps.gov/technical/icwg/IS-GPS-200H.pdf"></a>).
+     * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+     *
+     * <p>The value is not encoded as in GPS ICD200 documentation.
      *
      * <p>This field is valid if {@link #hasTimeOfClock()} is true.
      */
-    @IntRange(from = 0, to = 604784)
-    public int getTimeOfClock() {
+    @IntRange(from = 0)
+    public long getTimeOfClock() {
         return mTimeOfClock;
     }
 
     /**
      * Time of ephemeris.
      *
-     * <p>This is defined in GPS ICD200 documentation (e.g.,
-     * <a href="https://www.gps.gov/technical/icwg/IS-GPS-200H.pdf"></a>).
+     * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+     *
+     * <p>The value is not encoded as in GPS ICD200 documentation.
      *
      * <p>This field is valid if {@link #hasTimeOfEphemeris()} is true.
      */
-    @IntRange(from = 0, to = 604784)
-    public int getTimeOfEphemeris() {
+    @IntRange(from = 0)
+    public long getTimeOfEphemeris() {
         return mTimeOfEphemeris;
     }
 
@@ -630,8 +632,8 @@ public final class SatellitePvt implements Parcelable {
                             android.location.SatellitePvt.ClockInfo.class);
                     double ionoDelayMeters = in.readDouble();
                     double tropoDelayMeters = in.readDouble();
-                    int toc = in.readInt();
-                    int toe = in.readInt();
+                    long toc = in.readLong();
+                    long toe = in.readLong();
                     int iodc = in.readInt();
                     int iode = in.readInt();
                     int ephemerisSource = in.readInt();
@@ -669,8 +671,8 @@ public final class SatellitePvt implements Parcelable {
         parcel.writeParcelable(mClockInfo, flags);
         parcel.writeDouble(mIonoDelayMeters);
         parcel.writeDouble(mTropoDelayMeters);
-        parcel.writeInt(mTimeOfClock);
-        parcel.writeInt(mTimeOfEphemeris);
+        parcel.writeLong(mTimeOfClock);
+        parcel.writeLong(mTimeOfEphemeris);
         parcel.writeInt(mIssueOfDataClock);
         parcel.writeInt(mIssueOfDataEphemeris);
         parcel.writeInt(mEphemerisSource);
@@ -707,8 +709,8 @@ public final class SatellitePvt implements Parcelable {
         @Nullable private ClockInfo mClockInfo;
         private double mIonoDelayMeters;
         private double mTropoDelayMeters;
-        private int mTimeOfClock;
-        private int mTimeOfEphemeris;
+        private long mTimeOfClock;
+        private long mTimeOfEphemeris;
         private int mIssueOfDataClock;
         private int mIssueOfDataEphemeris;
         @EphemerisSource
@@ -721,8 +723,7 @@ public final class SatellitePvt implements Parcelable {
          * @return builder object
          */
         @NonNull
-        public Builder setPositionEcef(
-                @NonNull PositionEcef positionEcef) {
+        public Builder setPositionEcef(@NonNull PositionEcef positionEcef) {
             mPositionEcef = positionEcef;
             updateFlags();
             return this;
@@ -735,8 +736,7 @@ public final class SatellitePvt implements Parcelable {
          * @return builder object
          */
         @NonNull
-        public Builder setVelocityEcef(
-                @NonNull VelocityEcef velocityEcef) {
+        public Builder setVelocityEcef(@NonNull VelocityEcef velocityEcef) {
             mVelocityEcef = velocityEcef;
             updateFlags();
             return this;
@@ -749,8 +749,7 @@ public final class SatellitePvt implements Parcelable {
          * @return builder object
          */
         @NonNull
-        public Builder setClockInfo(
-                @NonNull ClockInfo clockInfo) {
+        public Builder setClockInfo(@NonNull ClockInfo clockInfo) {
             mClockInfo = clockInfo;
             updateFlags();
             return this;
@@ -793,12 +792,16 @@ public final class SatellitePvt implements Parcelable {
         /**
          * Set time of clock in seconds.
          *
+         * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+         *
+         * <p>The value is not encoded as in GPS ICD200 documentation.
+         *
          * @param timeOfClock time of clock (seconds)
          * @return builder object
          */
         @NonNull
-        public Builder setTimeOfClock(@IntRange(from = 0, to = 604784) int timeOfClock) {
-            Preconditions.checkArgumentInRange(timeOfClock, 0, 604784, "timeOfClock");
+        public Builder setTimeOfClock(@IntRange(from = 0) long timeOfClock) {
+            Preconditions.checkArgumentNonnegative(timeOfClock);
             mTimeOfClock = timeOfClock;
             mFlags = (byte) (mFlags | HAS_TIME_OF_CLOCK);
             return this;
@@ -807,12 +810,16 @@ public final class SatellitePvt implements Parcelable {
         /**
          * Set time of ephemeris in seconds.
          *
+         * <p>The value is in seconds since GPS epoch, regardless of the constellation.
+         *
+         * <p>The value is not encoded as in GPS ICD200 documentation.
+         *
          * @param timeOfEphemeris time of ephemeris (seconds)
          * @return builder object
          */
         @NonNull
-        public Builder setTimeOfEphemeris(@IntRange(from = 0, to = 604784) int timeOfEphemeris) {
-            Preconditions.checkArgumentInRange(timeOfEphemeris, 0, 604784, "timeOfEphemeris");
+        public Builder setTimeOfEphemeris(@IntRange(from = 0) int timeOfEphemeris) {
+            Preconditions.checkArgumentNonnegative(timeOfEphemeris);
             mTimeOfEphemeris = timeOfEphemeris;
             mFlags = (byte) (mFlags | HAS_TIME_OF_EPHEMERIS);
             return this;
