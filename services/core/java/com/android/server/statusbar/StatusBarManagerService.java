@@ -1433,6 +1433,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
+    /**
+     * Allows the status bar to restart android (vs a full reboot).
+     */
+    @Override
+    public void restart() {
+        enforceStatusBarService();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mHandler.post(() -> {
+                mActivityManagerInternal.restart();
+            });
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @Override
     public void onGlobalActionsShown() {
         enforceStatusBarService();
