@@ -3288,7 +3288,7 @@
     <public name="removed_accessibilityActionSwipeRight" />
     <public name="removed_accessibilityActionSwipeUp" />
     <public name="removed_accessibilityActionSwipeDown" />
-    <public name="accessibilityActionShowSuggestions" />
+    <public name="accessibilityActionShowTextSuggestions" />
     <public name="inputExtractAction" />
     <public name="inputExtractAccessories" />
   </staging-public-group>
