@@ -24,11 +24,14 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -36,6 +39,8 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
 
 public class ZenModeFiltering {
@@ -64,13 +69,22 @@ public class ZenModeFiltering {
         pw.print(prefix); pw.print("RepeatCallers.mThresholdMinutes=");
         pw.println(REPEAT_CALLERS.mThresholdMinutes);
         synchronized (REPEAT_CALLERS) {
-            if (!REPEAT_CALLERS.mCalls.isEmpty()) {
-                pw.print(prefix); pw.println("RepeatCallers.mCalls=");
-                for (int i = 0; i < REPEAT_CALLERS.mCalls.size(); i++) {
+            if (!REPEAT_CALLERS.mTelCalls.isEmpty()) {
+                pw.print(prefix); pw.println("RepeatCallers.mTelCalls=");
+                for (int i = 0; i < REPEAT_CALLERS.mTelCalls.size(); i++) {
                     pw.print(prefix); pw.print("  ");
-                    pw.print(REPEAT_CALLERS.mCalls.keyAt(i));
+                    pw.print(REPEAT_CALLERS.mTelCalls.keyAt(i));
                     pw.print(" at ");
-                    pw.println(ts(REPEAT_CALLERS.mCalls.valueAt(i)));
+                    pw.println(ts(REPEAT_CALLERS.mTelCalls.valueAt(i)));
+                }
+            }
+            if (!REPEAT_CALLERS.mOtherCalls.isEmpty()) {
+                pw.print(prefix); pw.println("RepeatCallers.mOtherCalls=");
+                for (int i = 0; i < REPEAT_CALLERS.mOtherCalls.size(); i++) {
+                    pw.print(prefix); pw.print("  ");
+                    pw.print(REPEAT_CALLERS.mOtherCalls.keyAt(i));
+                    pw.print(" at ");
+                    pw.println(ts(REPEAT_CALLERS.mOtherCalls.valueAt(i)));
                 }
             }
         }
@@ -312,34 +326,39 @@ public class ZenModeFiltering {
     }
 
     private static class RepeatCallers {
-        // Person : time
-        private final ArrayMap<String, Long> mCalls = new ArrayMap<>();
+        // We keep a separate map per uri scheme to do more generous number-matching
+        // handling on telephone numbers specifically. For other inputs, we
+        // simply match directly on the string.
+        private final ArrayMap<String, Long> mTelCalls = new ArrayMap<>();
+        private final ArrayMap<String, Long> mOtherCalls = new ArrayMap<>();
         private int mThresholdMinutes;
 
         private synchronized void recordCall(Context context, Bundle extras) {
             setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return;
-            final String peopleString = peopleString(extras);
-            if (peopleString == null) return;
+            final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
+            if (extraPeople == null || extraPeople.length == 0) return;
             final long now = System.currentTimeMillis();
-            cleanUp(mCalls, now);
-            mCalls.put(peopleString, now);
+            cleanUp(mTelCalls, now);
+            cleanUp(mOtherCalls, now);
+            recordCallers(extraPeople, now);
         }
 
         private synchronized boolean isRepeat(Context context, Bundle extras) {
             setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return false;
-            final String peopleString = peopleString(extras);
-            if (peopleString == null) return false;
+            final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
+            if (extraPeople == null || extraPeople.length == 0) return false;
             final long now = System.currentTimeMillis();
-            cleanUp(mCalls, now);
-            return mCalls.containsKey(peopleString);
+            cleanUp(mTelCalls, now);
+            cleanUp(mOtherCalls, now);
+            return checkCallers(context, extraPeople);
         }
 
         private synchronized void cleanUp(ArrayMap<String, Long> calls, long now) {
             final int N = calls.size();
             for (int i = N - 1; i >= 0; i--) {
-                final long time = mCalls.valueAt(i);
+                final long time = calls.valueAt(i);
                 if (time > now || (now - time) > mThresholdMinutes * 1000 * 60) {
                     calls.removeAt(i);
                 }
@@ -353,21 +372,65 @@ public class ZenModeFiltering {
             }
         }
 
-        private static String peopleString(Bundle extras) {
-            final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
-            if (extraPeople == null || extraPeople.length == 0) return null;
-            final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < extraPeople.length; i++) {
-                String extraPerson = extraPeople[i];
-                if (extraPerson == null) continue;
-                extraPerson = extraPerson.trim();
-                if (extraPerson.isEmpty()) continue;
-                if (sb.length() > 0) {
-                    sb.append('|');
+        private synchronized void recordCallers(String[] people, long now) {
+            for (int i = 0; i < people.length; i++) {
+                String person = people[i];
+                if (person == null) continue;
+                final Uri uri = Uri.parse(person);
+                if ("tel".equals(uri.getScheme())) {
+                    String tel = uri.getSchemeSpecificPart();
+                    // while ideally we should not need to do this, sometimes we have seen tel
+                    // numbers given in a url-encoded format
+                    try {
+                        tel = URLDecoder.decode(tel, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        // ignore, keep the original tel string
+                        Slog.w(TAG, "unsupported encoding in tel: uri input");
+                    }
+                    mTelCalls.put(tel, now);
+                } else {
+                    // for non-tel calls, store the entire string, uri-component and all
+                    mOtherCalls.put(person, now);
                 }
-                sb.append(extraPerson);
             }
-            return sb.length() == 0 ? null : sb.toString();
+        }
+
+        private synchronized boolean checkCallers(Context context, String[] people) {
+            // get the default country code for checking telephone numbers
+            final String defaultCountryCode =
+                    context.getSystemService(TelephonyManager.class).getNetworkCountryIso();
+            for (int i = 0; i < people.length; i++) {
+                String person = people[i];
+                if (person == null) continue;
+                final Uri uri = Uri.parse(person);
+                if ("tel".equals(uri.getScheme())) {
+                    String number = uri.getSchemeSpecificPart();
+                    if (mTelCalls.containsKey(number)) {
+                        // check directly via map first
+                        return true;
+                    } else {
+                        // see if a number that matches via areSameNumber exists
+                        String numberToCheck = number;
+                        try {
+                            numberToCheck = URLDecoder.decode(number, "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            // ignore, continue to use the original string
+                            Slog.w(TAG, "unsupported encoding in tel: uri input");
+                        }
+                        for (String prev : mTelCalls.keySet()) {
+                            if (PhoneNumberUtils.areSamePhoneNumber(
+                                    numberToCheck, prev, defaultCountryCode)) {
+                                return true;
+                            }
+                        }
+                    }
+                } else {
+                    if (mOtherCalls.containsKey(person)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
