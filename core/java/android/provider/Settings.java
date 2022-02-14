@@ -16865,6 +16865,14 @@ public final class Settings {
                 "system_server_watchdog_timeout_ms";
 
         /**
+         * Whether to enable managed device provisioning via the role holder.
+         *
+         * @hide
+         */
+        public static final String MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER =
+                "managed_provisioning_defer_provisioning_to_role_holder";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
