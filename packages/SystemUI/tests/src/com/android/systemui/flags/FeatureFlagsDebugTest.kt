@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
-import androidx.test.filters.SmallTest
+import android.test.suitebuilder.annotation.SmallTest
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -35,6 +35,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -57,6 +59,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Mock private lateinit var mFlagManager: FlagManager
     @Mock private lateinit var mMockContext: Context
     @Mock private lateinit var mSecureSettings: SecureSettings
+    @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mDumpManager: DumpManager
     @Mock private lateinit var mBarService: IStatusBarService
@@ -71,12 +74,13 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             mFlagManager,
             mMockContext,
             mSecureSettings,
+            mSystemProperties,
             mResources,
             mDumpManager,
             { mFlagMap },
             mBarService
         )
-        verify(mFlagManager).restartAction = any()
+        verify(mFlagManager).onSettingsChangedAction = any()
         mBroadcastReceiver = withArgCaptor {
             verify(mMockContext).registerReceiver(capture(), any(), nullable(), nullable(),
                 any())
@@ -120,6 +124,22 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         Assert.assertThrows(NameNotFoundException::class.java) {
             mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(5, 1005))
         }
+    }
+
+    @Test
+    fun testReadSysPropBooleanFlag() {
+        whenever(mSystemProperties.getBoolean(anyString(), anyBoolean())).thenAnswer {
+            if ("b".equals(it.getArgument<String?>(0))) {
+                return@thenAnswer true
+            }
+            return@thenAnswer it.getArgument(1)
+        }
+
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(1, "a"))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(2, "b"))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(3, "c", true))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(4, "d", false))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(5, "e"))).isFalse()
     }
 
     @Test
@@ -259,7 +279,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             verify(mFlagManager, times(numReads)).readFlagValue(eq(id), any<FlagSerializer<*>>())
             verify(mFlagManager).idToSettingsKey(eq(id))
             verify(mSecureSettings).putString(eq("key-$id"), eq(data))
-            verify(mFlagManager).dispatchListenersAndMaybeRestart(eq(id))
+            verify(mFlagManager).dispatchListenersAndMaybeRestart(eq(id), any())
         }.verifyNoMoreInteractions()
         verifyNoMoreInteractions(mFlagManager, mSecureSettings)
     }
