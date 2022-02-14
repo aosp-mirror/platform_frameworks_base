@@ -6639,6 +6639,8 @@ package android.app {
     method @NonNull public android.app.PictureInPictureParams.Builder setExpandedAspectRatio(@Nullable android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);
+    method @NonNull public android.app.PictureInPictureParams.Builder setSubtitle(@Nullable CharSequence);
+    method @NonNull public android.app.PictureInPictureParams.Builder setTitle(@Nullable CharSequence);
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
