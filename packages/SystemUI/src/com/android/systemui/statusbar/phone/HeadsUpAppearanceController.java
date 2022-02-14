@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.ViewController;
 
 import java.util.Optional;
-import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -370,8 +369,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     }
 
     @Override
-    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
-        mView.onDarkChanged(areas, darkIntensity, tint);
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        mView.onDarkChanged(area, darkIntensity, tint);
     }
 
     public void onStateChanged() {
