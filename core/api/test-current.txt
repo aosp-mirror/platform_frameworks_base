@@ -1200,7 +1200,6 @@ package android.hardware.display {
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
-    field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
   }
 
 }
