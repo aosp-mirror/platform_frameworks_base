@@ -964,7 +964,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"बैटरी"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य संदेश"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"जगह"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"संकेत"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>

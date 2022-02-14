@@ -182,10 +182,10 @@ public interface NotificationShadeWindowController extends RemoteInputController
     default void setFaceAuthDisplayBrightness(float brightness) {}
 
     /**
-     * How much {@link LightRevealScrim} obscures the UI.
-     * @param amount 0 when opaque, 1 when not transparent
+     * If {@link LightRevealScrim} obscures the UI.
+     * @param opaque if the scrim is opaque
      */
-    default void setLightRevealScrimAmount(float amount) {}
+    default void setLightRevealScrimOpaque(boolean opaque) {}
 
     /**
      * Custom listener to pipe data back to plugins about whether or not the status bar would be

@@ -87,7 +87,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ithebulethi yakho nedatha yomuntu siqu zisengcupheni kakhulu ekuhlaselweni izinhlelo zokusebenza ezingaziwa. Ngokufaka lolu hlelo lokusebenza, uyavuma ukuthi unesibopho sanoma ikuphi ukonakala kuthebulethi yakho noma ukulahleka kwedatha okungabangelwa ukusetshenziswa kwayo."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Idatha yakho ye-TV neyomuntu siqu isengcupheni kakhulu ekuhlaselweni izinhlelo zokusebenza ezingaziwa. Ngokufaka lolu hlelo lokusebenza, uyavuma ukuthi unesibopho sanoma ikuphi ukonakala ku-TV yakho noma ukulahlekelwa kwedatha okungabangelwa ukusetshenziswa kwayo."</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Qhubeka"</string>
-    <string name="external_sources_settings" msgid="4046964413071713807">"Izilungiselelo"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Amasethingi"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Ifaka/ikhipha izinhlelo zokusebenza ze-wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Isaziso sokufakwa kohlelo lokusebenza"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Ifakwe ngempumelelo"</string>

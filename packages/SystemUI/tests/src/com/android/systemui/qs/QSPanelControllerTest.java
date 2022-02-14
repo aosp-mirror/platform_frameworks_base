@@ -23,6 +23,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -98,6 +100,10 @@ public class QSPanelControllerTest extends SysuiTestCase {
     FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     @Mock
     FeatureFlags mFeatureFlags;
+    @Mock
+    Resources mResources;
+    @Mock
+    Configuration mConfiguration;
 
     private QSPanelController mController;
 
@@ -109,6 +115,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
         when(mQSPanel.getOrCreateTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSPanel.getResources()).thenReturn(mResources);
+        when(mResources.getConfiguration()).thenReturn(mConfiguration);
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(any(), eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mToggleSliderViewControllerFactory.create(any(), any()))

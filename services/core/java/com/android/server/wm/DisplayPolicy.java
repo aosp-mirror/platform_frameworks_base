@@ -56,7 +56,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -125,6 +124,7 @@ import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.gui.DropInputMode;
 import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.IBinder;
@@ -847,20 +847,6 @@ public class DisplayPolicy {
     }
 
     /**
-     * Only trusted overlays are allowed to use FLAG_SLIPPERY.
-     */
-    static int sanitizeFlagSlippery(int flags, int privateFlags, String name) {
-        if ((flags & FLAG_SLIPPERY) == 0) {
-            return flags;
-        }
-        if ((privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
-            return flags;
-        }
-        Slog.w(TAG, "Removing FLAG_SLIPPERY for non-trusted overlay " + name);
-        return flags & ~FLAG_SLIPPERY;
-    }
-
-    /**
      * Sanitize the layout parameters coming from a client.  Allows the policy
      * to do things like ensure that windows of a specific type can't take
      * input focus.
@@ -940,8 +926,20 @@ public class DisplayPolicy {
         if (mExtraNavBarAlt == win) {
             mExtraNavBarAltPosition = getAltBarPosition(attrs);
         }
+    }
 
-        attrs.flags = sanitizeFlagSlippery(attrs.flags, attrs.privateFlags, win.getName());
+    /**
+     * Add additional policy if needed to ensure the window or its children should not receive any
+     * input.
+     */
+    public void setDropInputModePolicy(WindowState win, LayoutParams attrs) {
+        if (attrs.type == TYPE_TOAST
+                && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+            // Toasts should not receive input. These windows should not have any children, so
+            // force this hierarchy of windows to drop all input.
+            mService.mTransactionFactory.get()
+                    .setDropInputMode(win.getSurfaceControl(), DropInputMode.ALL).apply();
+        }
     }
 
     /**
