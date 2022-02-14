@@ -25,15 +25,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
-import android.content.Context;
+import android.content.res.Resources;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,14 +52,14 @@ import java.io.StringWriter;
 public class FeatureFlagManagerTest extends SysuiTestCase {
     FeatureFlagManager mFeatureFlagManager;
 
-    @Mock private Context mContext;
     @Mock private DumpManager mDumpManager;
+    @Mock private Resources mResources;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagManager = new FeatureFlagManager(mDumpManager);
+        mFeatureFlagManager = new FeatureFlagManager(mDumpManager, mResources);
     }
 
     @After
@@ -68,6 +67,24 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
         // The dump manager should be registered with even for the release version, but that's it.
         verify(mDumpManager).registerDumpable(anyString(), any());
         verifyNoMoreInteractions(mDumpManager);
+    }
+
+
+    @Test
+    public void testSimpleFlag() {
+        BooleanFlag flagA = new BooleanFlag(100, false);
+        BooleanFlag flagB = new BooleanFlag(200, true);
+
+        assertThat(mFeatureFlagManager.isEnabled(flagA)).isFalse();
+        assertThat(mFeatureFlagManager.isEnabled(flagB)).isTrue();
+    }
+
+    @Test
+    public void testResourceOverride() {
+        when(mResources.getBoolean(1)).thenReturn(true);
+        BooleanFlag flag = new BooleanFlag(100, false, 1);
+
+        assertThat(mFeatureFlagManager.isEnabled(flag)).isTrue();
     }
 
     @Test
