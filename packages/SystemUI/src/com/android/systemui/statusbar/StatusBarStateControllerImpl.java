@@ -507,6 +507,10 @@ public class StatusBarStateControllerImpl implements
         pw.println(" mLeaveOpenOnKeyguardHide=" + mLeaveOpenOnKeyguardHide);
         pw.println(" mKeyguardRequested=" + mKeyguardRequested);
         pw.println(" mIsDozing=" + mIsDozing);
+        pw.println(" mListeners{" + mListeners.size() + "}=");
+        for (RankedListener rl : mListeners) {
+            pw.println("    " + rl.mListener);
+        }
         pw.println(" Historical states:");
         // Ignore records without a timestamp
         int size = 0;
