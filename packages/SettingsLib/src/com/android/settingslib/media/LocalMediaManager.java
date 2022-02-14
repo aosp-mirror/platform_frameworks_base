@@ -197,6 +197,14 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Returns if the media session is available for volume control.
+     * @return True if this media session is available for colume control, false otherwise.
+     */
+    public boolean isMediaSessionAvailableForVolumeControl() {
+        return mInfoMediaManager.isRoutingSessionAvailableForVolumeControl();
+    }
+
+    /**
      * Start scan connected MediaDevice
      */
     public void startScan() {
