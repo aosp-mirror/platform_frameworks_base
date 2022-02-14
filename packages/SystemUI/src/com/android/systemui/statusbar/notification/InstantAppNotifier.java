@@ -234,7 +234,7 @@ public class InstantAppNotifier extends CoreStartable
                 ApplicationInfo appInfo =
                         pm.getApplicationInfo(
                                 pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES, info.userId);
-                if (appInfo.isInstantApp()) {
+                if (appInfo != null && appInfo.isInstantApp()) {
                     postInstantAppNotif(
                             pkg,
                             info.userId,
