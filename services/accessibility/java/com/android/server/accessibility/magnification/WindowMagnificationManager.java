@@ -177,6 +177,9 @@ public class WindowMagnificationManager implements
      * @param connection {@link IWindowMagnificationConnection}
      */
     public void setConnection(@Nullable IWindowMagnificationConnection connection) {
+        if (DBG) {
+            Slog.d(TAG, "setConnection :" + connection);
+        }
         synchronized (mLock) {
             // Reset connectionWrapper.
             if (mConnectionWrapper != null) {
@@ -223,6 +226,9 @@ public class WindowMagnificationManager implements
      * @return {@code true} if {@link IWindowMagnificationConnection} state is going to change.
      */
     public boolean requestConnection(boolean connect) {
+        if (DBG) {
+            Slog.d(TAG, "requestConnection :" + connect);
+        }
         synchronized (mLock) {
             if (connect == isConnected()) {
                 return false;
@@ -485,10 +491,6 @@ public class WindowMagnificationManager implements
         final boolean enabled;
         boolean previousEnabled;
         synchronized (mLock) {
-            if (mConnectionWrapper == null) {
-                Slog.w(TAG, "enableWindowMagnification failed: connection null");
-                return false;
-            }
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
                 magnifier = createWindowMagnifier(displayId);
@@ -528,10 +530,10 @@ public class WindowMagnificationManager implements
         final boolean disabled;
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
-            if (magnifier == null || mConnectionWrapper == null) {
-                Slog.w(TAG, "disableWindowMagnification failed: connection " + mConnectionWrapper);
+            if (magnifier == null) {
                 return false;
             }
+
             disabled = magnifier.disableWindowMagnificationInternal(animationCallback);
             if (clear) {
                 mWindowMagnifiers.delete(displayId);
@@ -1018,25 +1020,33 @@ public class WindowMagnificationManager implements
         }
     }
 
+    @GuardedBy("mLock")
     private boolean enableWindowMagnificationInternal(int displayId, float scale, float centerX,
             float centerY, float magnificationFrameOffsetRatioX,
             float magnificationFrameOffsetRatioY,
             MagnificationAnimationCallback animationCallback) {
-        synchronized (mLock) {
-            return mConnectionWrapper != null && mConnectionWrapper.enableWindowMagnification(
-                    displayId, scale, centerX, centerY,
-                    magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY,
-                    animationCallback);
+        if (mConnectionWrapper == null) {
+            Slog.w(TAG, "enableWindowMagnificationInternal mConnectionWrapper is null");
+            return false;
         }
+        return  mConnectionWrapper.enableWindowMagnification(
+                displayId, scale, centerX, centerY,
+                magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY,
+                animationCallback);
     }
 
     private boolean setScaleInternal(int displayId, float scale) {
         return mConnectionWrapper != null && mConnectionWrapper.setScale(displayId, scale);
     }
 
+    @GuardedBy("mLock")
     private boolean disableWindowMagnificationInternal(int displayId,
             MagnificationAnimationCallback animationCallback) {
-        return mConnectionWrapper != null && mConnectionWrapper.disableWindowMagnification(
+        if (mConnectionWrapper == null) {
+            Slog.w(TAG, "mConnectionWrapper is null");
+            return false;
+        }
+        return mConnectionWrapper.disableWindowMagnification(
                 displayId, animationCallback);
     }
 
