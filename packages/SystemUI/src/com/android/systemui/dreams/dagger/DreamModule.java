@@ -16,10 +16,14 @@
 
 package com.android.systemui.dreams.dagger;
 
+import android.content.Context;
+
+import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
 
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Dagger Module providing Communal-related functionality.
@@ -32,4 +36,11 @@ import dagger.Module;
             DreamOverlayComponent.class,
         })
 public interface DreamModule {
+    /**
+     * Provides an instance of the dream backend.
+     */
+    @Provides
+    static DreamBackend providesDreamBackend(Context context) {
+        return DreamBackend.getInstance(context);
+    }
 }

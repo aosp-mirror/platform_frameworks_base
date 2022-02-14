@@ -1867,7 +1867,7 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // TODO (217251579): Temporarily use temp-allowlist reason to identify
+        // STOPSHIP (217251579): Temporarily use temp-allowlist reason to identify
         // push messages and record response events.
         useTemporaryAllowlistReasonAsSignal(r);
         if (r.options == null || r.options.getIdForResponseEvent() <= 0) {

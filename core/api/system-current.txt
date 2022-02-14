@@ -12402,7 +12402,7 @@ package android.telephony {
     method public int getNumRtpPacketsReceived();
     method public int getNumRtpPacketsTransmitted();
     method public int getNumRtpPacketsTransmittedLost();
-    method public int getNumRtpSidPacketsRx();
+    method public int getNumRtpSidPacketsReceived();
     method public int getNumVoiceFrames();
     method public int getUplinkCallQualityLevel();
     method public boolean isIncomingSilenceDetectedAtCallSetup();
@@ -12422,8 +12422,8 @@ package android.telephony {
     ctor public CallQuality.Builder();
     method @NonNull public android.telephony.CallQuality build();
     method @NonNull public android.telephony.CallQuality.Builder setAverageRelativeJitter(int);
-    method @NonNull public android.telephony.CallQuality.Builder setAverageRoundTripTime(int);
-    method @NonNull public android.telephony.CallQuality.Builder setCallDuration(int);
+    method @NonNull public android.telephony.CallQuality.Builder setAverageRoundTripTimeMillis(int);
+    method @NonNull public android.telephony.CallQuality.Builder setCallDurationMillis(int);
     method @NonNull public android.telephony.CallQuality.Builder setCodecType(int);
     method @NonNull public android.telephony.CallQuality.Builder setDownlinkCallQualityLevel(int);
     method @NonNull public android.telephony.CallQuality.Builder setIncomingSilenceDetectedAtCallSetup(boolean);
@@ -12437,7 +12437,7 @@ package android.telephony {
     method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsReceived(int);
     method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsTransmitted(int);
     method @NonNull public android.telephony.CallQuality.Builder setNumRtpPacketsTransmittedLost(int);
-    method @NonNull public android.telephony.CallQuality.Builder setNumRtpSidPacketsRx(int);
+    method @NonNull public android.telephony.CallQuality.Builder setNumRtpSidPacketsReceived(int);
     method @NonNull public android.telephony.CallQuality.Builder setNumVoiceFrames(int);
     method @NonNull public android.telephony.CallQuality.Builder setOutgoingSilenceDetectedAtCallSetup(boolean);
     method @NonNull public android.telephony.CallQuality.Builder setRtpInactivityDetected(boolean);
