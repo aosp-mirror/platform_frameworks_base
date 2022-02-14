@@ -43,6 +43,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.Handler;
@@ -160,6 +161,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
     private static final int MSG_MEDIA_TRANSFER_SENDER_STATE = 64 << MSG_SHIFT;
     private static final int MSG_MEDIA_TRANSFER_RECEIVER_STATE = 65 << MSG_SHIFT;
+    private static final int MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 66 << MSG_SHIFT;
+    private static final int MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 67 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -456,6 +459,18 @@ public class CommandQueue extends IStatusBar.Stub implements
                 @NonNull MediaRoute2Info routeInfo,
                 @Nullable Icon appIcon,
                 @Nullable CharSequence appName) {}
+
+        /**
+         * @see IStatusBar#registerNearbyMediaDevicesProvider
+         */
+        default void registerNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
+
+        /**
+         * @see IStatusBar#unregisterNearbyMediaDevicesProvider
+         */
+        default void unregisterNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
     }
 
     public CommandQueue(Context context) {
@@ -1221,6 +1236,18 @@ public class CommandQueue extends IStatusBar.Stub implements
         mHandler.obtainMessage(MSG_MEDIA_TRANSFER_RECEIVER_STATE, args).sendToTarget();
     }
 
+    @Override
+    public void registerNearbyMediaDevicesProvider(@NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider).sendToTarget();
+    }
+
+    @Override
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider)
+                .sendToTarget();
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1642,6 +1669,18 @@ public class CommandQueue extends IStatusBar.Stub implements
                                 receiverDisplayState, receiverRouteInfo, appIcon, appName);
                     }
                     args.recycle();
+                    break;
+                case MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    INearbyMediaDevicesProvider provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).registerNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
+                case MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).unregisterNearbyMediaDevicesProvider(provider);
+                    }
                     break;
             }
         }
