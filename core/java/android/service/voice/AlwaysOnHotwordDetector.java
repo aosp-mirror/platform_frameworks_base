@@ -1439,16 +1439,16 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
             notifyStateChangedLocked();
-
-            if (mSupportHotwordDetectionService) {
-                try {
-                    mModelManagementService.shutdownHotwordDetectionService();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
         }
         super.destroy();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUsingHotwordDetectionService() {
+        return mSupportHotwordDetectionService;
     }
 
     /**
@@ -1821,6 +1821,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     }
 
     /** @hide */
+    @Override
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             pw.print(prefix); pw.print("Text="); pw.println(mText);

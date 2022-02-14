@@ -124,13 +124,15 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             Log.i(TAG, "failed to stopRecognition in destroy", e);
         }
         maybeCloseExistingSession();
-
-        try {
-            mManagerService.shutdownHotwordDetectionService();
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
-        }
         super.destroy();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUsingHotwordDetectionService() {
+        return true;
     }
 
     private void maybeCloseExistingSession() {
@@ -240,6 +242,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     }
 
     /** @hide */
+    @Override
     public void dump(String prefix, PrintWriter pw) {
         // TODO: implement this
     }
