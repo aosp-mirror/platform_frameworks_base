@@ -208,6 +208,7 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
+import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -671,7 +672,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * start/stop the dream. It is set to true shortly  before the {@link DreamService} is started.
      * It is set to false after the {@link DreamService} is stopped.
      */
-    private boolean mDreaming = false;
+    private volatile boolean mDreaming;
 
     /**
      * The process state used for processes that are running the top activities.
@@ -1399,10 +1400,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean isDreaming() {
+        return mDreaming;
+    }
+
+    boolean canLaunchDreamActivity(String packageName) {
+        if (!mDreaming || packageName == null) {
+            return false;
+        }
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+        // Verify that the package is the current active dream or doze component. The
+        // getActiveDreamComponent() call path does not acquire the DreamManager lock and thus
+        // is safe to use.
+        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
+        if (activeDream != null && packageName.equals(activeDream.getPackageName())) {
+            return true;
+        }
+        final ComponentName activeDoze = dreamManager.getActiveDreamComponent(true /* doze */);
+        if (activeDoze != null && packageName.equals(activeDoze.getPackageName())) {
+            return true;
+        }
+        return false;
+    }
+
     private void enforceCallerIsDream(String callerPackageName) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            if (!ActivityRecord.canLaunchDreamActivity(callerPackageName)) {
+            if (!canLaunchDreamActivity(callerPackageName)) {
                 throw new SecurityException("The dream activity can be started only when the device"
                         + " is dreaming and only by the active dream package.");
             }
@@ -3049,7 +3074,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * SecurityException} or returns false with a logcat message depending on whether the app
      * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
      */
-    private boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
+    boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
         final WindowProcessController process;
         synchronized (mGlobalLock) {
             process = mProcessMap.getProcess(pid);
@@ -3177,8 +3202,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 permission, pid, uid, owningUid, exported);
     }
 
+    boolean isCallerRecents(int callingUid) {
+        return mRecentTasks.isCallerRecents(callingUid);
+    }
+
     boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
-        if (getRecentTasks().isCallerRecents(callingUid)) {
+        if (isCallerRecents(callingUid)) {
             // Always allow the recents component to get tasks
             return true;
         }
@@ -5127,11 +5156,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
-     * the allowlist
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
      */
-    String getPendingTempAllowlistTagForUidLocked(int uid) {
-        return mPendingTempAllowlist.get(uid);
+    void saveANRState(String reason) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+        pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
+        if (reason != null) {
+            pw.println("  Reason: " + reason);
+        }
+        pw.println();
+        getActivityStartController().dump(pw, "  ", null);
+        pw.println();
+        pw.println("-------------------------------------------------------------------"
+                + "------------");
+        dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
+                true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
+                "" /* header */);
+        pw.println();
+        pw.close();
+
+        mLastANRState = sw.toString();
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -5514,7 +5560,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isCallerRecents(int callingUid) {
-            return getRecentTasks().isCallerRecents(callingUid);
+            return ActivityTaskManagerService.this.isCallerRecents(callingUid);
         }
 
         @Override
@@ -5639,13 +5685,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
                         mHeavyWeightProcess);
-            }
-        }
-
-        @Override
-        public boolean isDreaming() {
-            synchronized (mGlobalLock) {
-                return mDreaming;
             }
         }
 
@@ -6145,37 +6184,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // The output proto of "activity --proto activities"
                 mRootWindowContainer.dumpDebug(
                         proto, ROOT_WINDOW_CONTAINER, WindowTraceLogLevel.ALL);
-            }
-        }
-
-        @Override
-        public void saveANRState(String reason) {
-            synchronized (mGlobalLock) {
-                final StringWriter sw = new StringWriter();
-                final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
-                if (reason != null) {
-                    pw.println("  Reason: " + reason);
-                }
-                pw.println();
-                getActivityStartController().dump(pw, "  ", null);
-                pw.println();
-                pw.println("-------------------------------------------------------------------"
-                        + "------------");
-                dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
-                        true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
-                        "" /* header */);
-                pw.println();
-                pw.close();
-
-                mLastANRState = sw.toString();
-            }
-        }
-
-        @Override
-        public void clearSavedANRState() {
-            synchronized (mGlobalLock) {
-                mLastANRState = null;
             }
         }
 
