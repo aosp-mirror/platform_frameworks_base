@@ -4189,7 +4189,8 @@ public class TelephonyManager {
      * {@link UiccSlotMapping} which consist of both physical slot index and port index.
      * Logical slot is the slot that is seen by modem. Physical slot is the actual physical slot.
      * Port index is the index (enumerated value) for the associated port available on the SIM.
-     * Each physical slot can have multiple ports if multi-enabled profile(MEP) is supported.
+     * Each physical slot can have multiple ports if
+     * {@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP} is supported.
      *
      * Example: no. of logical slots 1 and physical slots 2 do not support MEP, each physical slot
      * has one port:
@@ -4285,11 +4286,11 @@ public class TelephonyManager {
     /**
      * Get the mapping from logical slots to physical sim slots and port indexes. Initially the
      * logical slot index was mapped to physical slot index, but with support for multi-enabled
-     * profile(MEP) logical slot is now mapped to port index.
+     * profile(MEP){@link PackageManager#FEATURE_TELEPHONY_EUICC_MEP},logical slot is now mapped to
+     * port index.
      *
      * @return a collection of {@link UiccSlotMapping} which indicates the mapping from logical
      *         slots to ports and physical slots.
-     *
      * @hide
      */
     @SystemApi
