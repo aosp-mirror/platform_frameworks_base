@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -370,13 +369,10 @@ public class BinaryTransparencyService extends SystemService {
 
         // we are only interested in doing things at PHASE_BOOT_COMPLETED
         if (phase == PHASE_BOOT_COMPLETED) {
+            // due to potentially long computation that holds up boot time, apex sha computations
+            // are deferred to first call
             Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
             getVBMetaDigestInformation();
-
-            // due to potentially long computation that may hold up boot time, SHA256 computations
-            // for APEXs and Modules will be executed via threads.
-            Slog.i(TAG, "Executing APEX & Module digest computations");
-            computeApexAndModuleDigests();
         }
     }
 
@@ -384,12 +380,6 @@ public class BinaryTransparencyService extends SystemService {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
-    }
-
-    private void computeApexAndModuleDigests() {
-        // using Executors will allow the computations to be done asynchronously, thus not holding
-        // up boot time.
-        Executors.defaultThreadFactory().newThread(() -> updateBinaryMeasurements()).start();
     }
 
     @NonNull
