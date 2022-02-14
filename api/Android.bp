@@ -116,6 +116,7 @@ combined_apis {
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
+        "framework-ondevicepersonalization",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
