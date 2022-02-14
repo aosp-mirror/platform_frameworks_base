@@ -40,6 +40,7 @@ import android.compat.annotation.Disabled;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -339,7 +340,7 @@ public abstract class PermissionControllerService extends Service {
      * @param permissions List of permissions to be revoked.
      * @param callback Callback waiting for operation to be complete.
      *
-     * @see PermissionManager#revokeOwnPermissionsOnKill(java.util.Collection)
+     * @see android.content.Context#revokeOwnPermissionsOnKill(java.util.Collection)
      */
     @BinderThread
     public void onRevokeOwnPermissionsOnKill(@NonNull String packageName,
@@ -706,9 +707,15 @@ public abstract class PermissionControllerService extends Service {
             public void revokeOwnPermissionsOnKill(@NonNull String packageName,
                     @NonNull List<String> permissions, @NonNull AndroidFuture callback) {
                 try {
-                    enforceSomePermissionsGrantedToCaller(
-                            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
                     Objects.requireNonNull(callback);
+
+                    final int callingUid = Binder.getCallingUid();
+                    int targetPackageUid = getPackageManager().getPackageUid(packageName,
+                            PackageManager.PackageInfoFlags.of(0));
+                    if (targetPackageUid != callingUid) {
+                        enforceSomePermissionsGrantedToCaller(
+                                Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
+                    }
                     onRevokeOwnPermissionsOnKill(packageName, permissions,
                             () -> callback.complete(null));
                 } catch (Throwable t) {
