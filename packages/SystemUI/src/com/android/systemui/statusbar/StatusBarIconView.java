@@ -61,7 +61,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
@@ -966,8 +965,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     @Override
-    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
-        int areaTint = getTint(areas, this, tint);
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        int areaTint = getTint(area, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         setImageTintList(color);
         setDecorColor(areaTint);

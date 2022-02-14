@@ -25,7 +25,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.view.InsetsFlags;
 import android.view.ViewDebug;
 import android.view.WindowInsetsController.Appearance;
@@ -42,7 +41,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -216,23 +214,27 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private void updateStatus() {
         final int numStacks = mAppearanceRegions.length;
-        final ArrayList<Rect> lightBarBounds = new ArrayList<>();
+        int numLightStacks = 0;
+
+        // We can only have maximum one light stack.
+        int indexLightStack = -1;
 
         for (int i = 0; i < numStacks; i++) {
-            final AppearanceRegion ar = mAppearanceRegions[i];
-            if (isLight(ar.getAppearance(), mStatusBarMode, APPEARANCE_LIGHT_STATUS_BARS)) {
-                lightBarBounds.add(ar.getBounds());
+            if (isLight(mAppearanceRegions[i].getAppearance(), mStatusBarMode,
+                    APPEARANCE_LIGHT_STATUS_BARS)) {
+                numLightStacks++;
+                indexLightStack = i;
             }
         }
 
         // If no one is light, all icons become white.
-        if (lightBarBounds.isEmpty()) {
+        if (numLightStacks == 0) {
             mStatusBarIconController.getTransitionsController().setIconsDark(
                     false, animateChange());
         }
 
         // If all stacks are light, all icons get dark.
-        else if (lightBarBounds.size() == numStacks) {
+        else if (numLightStacks == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
 
@@ -240,7 +242,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
         // Not the same for every stack, magic!
         else {
-            mStatusBarIconController.setIconsDarkArea(lightBarBounds);
+            mStatusBarIconController.setIconsDarkArea(
+                    mAppearanceRegions[indexLightStack].getBounds());
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
         }
     }
