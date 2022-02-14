@@ -998,15 +998,6 @@ public class InputMethodService extends AbstractInputMethodService {
         public void setCurrentShowInputToken(IBinder showInputToken) {
             mCurShowInputToken = showInputToken;
         }
-
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @Override
-        public void setCurrentHideInputToken(IBinder hideInputToken) {
-            mCurHideInputToken = hideInputToken;
-        }
     }
 
     /**
