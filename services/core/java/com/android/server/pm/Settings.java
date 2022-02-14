@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
@@ -1117,6 +1118,9 @@ public final class Settings implements Watchable, Snappable {
                         "Updating application package " + pkgName + " failed");
             }
             pkgSetting.setSharedUserAppId(sharedUser.mAppId);
+        } else {
+            // migrating off shared user
+            pkgSetting.setSharedUserAppId(INVALID_UID);
         }
 
         if (!pkgSetting.getPath().equals(codePath)) {
