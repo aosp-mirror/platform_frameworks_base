@@ -33,5 +33,11 @@
 
     <!-- Button to move picture-in-picture (PIP) via DPAD in the PIP menu [CHAR LIMIT=30] -->
     <string name="pip_move">Move PIP</string>
+
+    <!-- Button to expand the picture-in-picture (PIP) window [CHAR LIMIT=30] -->
+    <string name="pip_expand">Expand PIP</string>
+
+    <!-- Button to collapse/shrink the picture-in-picture (PIP) window [CHAR LIMIT=30] -->
+    <string name="pip_collapse">Collapse PIP</string>
 </resources>
 

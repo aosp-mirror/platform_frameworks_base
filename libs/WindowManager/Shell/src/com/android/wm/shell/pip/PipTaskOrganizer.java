@@ -369,11 +369,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return mLeash;
     }
 
-    private void setBoundsStateForEntry(ComponentName componentName, PictureInPictureParams params,
-            ActivityInfo activityInfo) {
-        mPipBoundsState.setBoundsStateForEntry(componentName,
-                mPipBoundsAlgorithm.getAspectRatioOrDefault(params),
-                mPipBoundsAlgorithm.getMinimalSize(activityInfo));
+    private void setBoundsStateForEntry(ComponentName componentName,
+            PictureInPictureParams params, ActivityInfo activityInfo) {
+        mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, params,
+                mPipBoundsAlgorithm);
     }
 
     /**

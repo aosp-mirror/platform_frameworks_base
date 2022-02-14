@@ -6013,9 +6013,9 @@ class Task extends TaskFragment {
     }
 
     /**
-     * Sets the current picture-in-picture aspect ratio.
+     * Sets the current picture-in-picture aspect ratios.
      */
-    void setPictureInPictureAspectRatio(float aspectRatio) {
+    void setPictureInPictureAspectRatio(float aspectRatio, float expandedAspectRatio) {
         if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return;
         }
@@ -6032,16 +6032,21 @@ class Task extends TaskFragment {
         final PinnedTaskController pinnedTaskController =
                 getDisplayContent().getPinnedTaskController();
 
-        if (Float.compare(aspectRatio, pinnedTaskController.getAspectRatio()) == 0) {
-            return;
-        }
-
         // Notify the pinned stack controller about aspect ratio change.
         // This would result a callback delivered from SystemUI to WM to start animation,
         // if the bounds are ought to be altered due to aspect ratio change.
-        pinnedTaskController.setAspectRatio(
-                pinnedTaskController.isValidPictureInPictureAspectRatio(aspectRatio)
-                        ? aspectRatio : -1f);
+        if (Float.compare(aspectRatio, pinnedTaskController.getAspectRatio()) != 0) {
+            pinnedTaskController.setAspectRatio(
+                    pinnedTaskController.isValidPictureInPictureAspectRatio(aspectRatio)
+                            ? aspectRatio : -1f);
+        }
+
+        if (mWmService.mAtmService.mSupportsExpandedPictureInPicture && Float.compare(
+                expandedAspectRatio, pinnedTaskController.getExpandedAspectRatio()) != 0) {
+            pinnedTaskController.setExpandedAspectRatio(pinnedTaskController
+                    .isValidExpandedPictureInPictureAspectRatio(expandedAspectRatio)
+                    ? expandedAspectRatio : 0f);
+        }
     }
 
     /**
