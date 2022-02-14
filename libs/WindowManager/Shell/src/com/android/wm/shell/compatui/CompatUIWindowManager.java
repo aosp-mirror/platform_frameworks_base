@@ -189,15 +189,18 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     @Override
-    protected void updateSurfacePosition(Rect taskBounds, Rect stableBounds) {
+    @VisibleForTesting
+    public void updateSurfacePosition() {
         if (mLayout == null) {
             return;
         }
         // Position of the button in the container coordinate.
+        final Rect taskBounds = getTaskBounds();
+        final Rect taskStableBounds = getTaskStableBounds();
         final int positionX = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                ? stableBounds.left - taskBounds.left
-                : stableBounds.right - taskBounds.left - mLayout.getMeasuredWidth();
-        final int positionY = stableBounds.bottom - taskBounds.top
+                ? taskStableBounds.left - taskBounds.left
+                : taskStableBounds.right - taskBounds.left - mLayout.getMeasuredWidth();
+        final int positionY = taskStableBounds.bottom - taskBounds.top
                 - mLayout.getMeasuredHeight();
 
         updateSurfacePosition(positionX, positionY);
