@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
@@ -823,6 +824,21 @@ public class SensorEvent {
      * time base as {@link android.os.SystemClock#elapsedRealtimeNanos()}.
      */
     public long timestamp;
+
+    /**
+     * Set to true when this is the first sensor event after a discontinuity.
+     *
+     * The exact meaning of discontinuity depends on the sensor type. For
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}, this means that
+     * the reference frame has suddenly and significantly changed, for example if the head tracking
+     * device was removed then put back.
+     *
+     * Note that this concept is either not relevant to or not supported by most sensor types,
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER} being the notable
+     * exception.
+     */
+    @SuppressLint("MutableBareField")
+    public boolean firstEventAfterDiscontinuity;
 
     @UnsupportedAppUsage
     SensorEvent(int valueSize) {
