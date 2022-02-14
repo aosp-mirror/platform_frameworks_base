@@ -9807,4 +9807,12 @@
         of the supported locale. {@link android.app.LocaleConfig} -->
         <attr name="name" />
     </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="CachingIconView">
+        <!-- Maximum width of displayed drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableWidth" format="dimension"/>
+        <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
+        <attr name="maxDrawableHeight" format="dimension"/>
+    </declare-styleable>
     </resources>
