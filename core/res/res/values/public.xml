@@ -3283,7 +3283,7 @@
     <public name="accessibilityActionSwipeRight" />
     <public name="accessibilityActionSwipeUp" />
     <public name="accessibilityActionSwipeDown" />
-    <public name="accessibilityActionShowSuggestions" />
+    <public name="accessibilityActionShowTextSuggestions" />
     <public name="inputExtractAction" />
     <public name="inputExtractAccessories" />
   </staging-public-group>
