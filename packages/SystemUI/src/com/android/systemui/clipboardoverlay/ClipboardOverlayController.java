@@ -151,11 +151,7 @@ public class ClipboardOverlayController {
         mWindow = FloatingWindowUtil.getFloatingWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
 
-        if (!mAccessibilityManager.isTouchExplorationEnabled()) {
-            setWindowFocusable(true);
-        } else {
-            setWindowFocusable(false);
-        }
+        setWindowFocusable(false);
 
         mContainer = (FrameLayout)
                 LayoutInflater.from(mContext).inflate(R.layout.clipboard_overlay, null);
