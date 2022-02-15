@@ -635,6 +635,8 @@ final class UiModeManagerService extends SystemService {
                         + "permission ENTER_CAR_MODE_PRIORITIZED");
             }
 
+            assertLegit(callingPackage);
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -675,6 +677,9 @@ final class UiModeManagerService extends SystemService {
             // mode flag to be specified; this is so that the user can disable car mode at all
             // priorities using the persistent notification.
             boolean isSystemCaller = mInjector.getCallingUid() == Process.SYSTEM_UID;
+            if (!isSystemCaller) {
+                assertLegit(callingPackage);
+            }
             final int carModeFlags =
                     isSystemCaller ? flags : flags & ~UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES;
 
