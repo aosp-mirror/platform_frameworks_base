@@ -631,6 +631,7 @@ package android {
     field public static final int elevation = 16843840; // 0x1010440
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
+    field public static final int enableOnBackInvokedCallback;
     field public static final int enableVrMode = 16844069; // 0x1010525
     field public static final int enabled = 16842766; // 0x101000e
     field public static final int end = 16843996; // 0x10104dc
