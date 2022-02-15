@@ -61,6 +61,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
+@FlakyTest(bugId = 219757170)
 class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
@@ -87,7 +88,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
-                wmHelper.waitImeShown()
+                require(wmHelper.waitImeShown()) { "IME didn't show in time" }
             }
             teardown {
                 test {
