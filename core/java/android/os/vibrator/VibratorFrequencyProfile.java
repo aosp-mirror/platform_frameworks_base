@@ -61,8 +61,7 @@ public final class VibratorFrequencyProfile {
      * <p>The returned list will not be empty, and will have entries representing frequencies from
      * {@link #getMinFrequency()} to {@link #getMaxFrequency()}, inclusive.
      *
-     * @return Array of maximum relative amplitude measurements, each value is between 0 and 1,
-     * inclusive.
+     * @return Array of maximum relative amplitude measurements.
      */
     @NonNull
     @FloatRange(from = 0, to = 1)

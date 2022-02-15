@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * A class to encapsulate a collection of attributes describing information about a vibration
+ * Encapsulates a collection of attributes describing information about a vibration.
  */
 public final class VibrationAttributes implements Parcelable {
     private static final String TAG = "VibrationAttributes";
@@ -174,7 +174,7 @@ public final class VibrationAttributes implements Parcelable {
             FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
-    public static @NonNull VibrationAttributes createForUsage(int usage) {
+    public static @NonNull VibrationAttributes createForUsage(@Usage int usage) {
         return new VibrationAttributes.Builder().setUsage(usage).build();
     }
 
