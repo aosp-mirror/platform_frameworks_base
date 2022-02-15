@@ -472,7 +472,8 @@ public class TaskInfo {
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
                 && isSleeping == that.isSleeping
-                && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId);
+                && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
+                && parentTaskId == that.parentTaskId;
     }
 
     /**

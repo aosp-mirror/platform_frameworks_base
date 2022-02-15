@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -157,7 +156,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
-                    .setLayer(mBackgroundLeash, SPLIT_DIVIDER_LAYER - 1);
+                    .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
         if (mIcon == null && resizingTask.topActivityInfo != null) {
@@ -170,7 +169,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             lp.width = mIcon.getIntrinsicWidth();
             lp.height = mIcon.getIntrinsicHeight();
             mViewHost.relayout(lp);
-            t.setLayer(mIconLeash, SPLIT_DIVIDER_LAYER);
+            t.setLayer(mIconLeash, Integer.MAX_VALUE);
         }
         t.setPosition(mIconLeash,
                 newBounds.width() / 2 - mIcon.getIntrinsicWidth() / 2,
