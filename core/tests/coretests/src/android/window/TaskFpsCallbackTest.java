@@ -53,14 +53,15 @@ public class TaskFpsCallbackTest {
     @Test
     public void testRegisterAndUnregister() {
 
-        final TaskFpsCallback.OnFpsCallbackListener listener = fps -> {
-            // Ignore
+        final TaskFpsCallback callback = new TaskFpsCallback() {
+            @Override
+            public void onFpsReported(float fps) {
+                // Ignore
+            }
         };
-        final TaskFpsCallback callback = new TaskFpsCallback(Runnable::run, listener);
-
         final List<ActivityManager.RunningTaskInfo> tasks = mActivityTaskManager.getTasks(1);
         assertEquals(tasks.size(), 1);
-        mWindowManager.registerTaskFpsCallback(tasks.get(0).taskId, callback);
+        mWindowManager.registerTaskFpsCallback(tasks.get(0).taskId, Runnable::run, callback);
         mWindowManager.unregisterTaskFpsCallback(callback);
     }
 }
