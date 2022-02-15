@@ -46,7 +46,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setWidgetLayoutResource(R.layout.restricted_switch_widget);
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs,
@@ -106,15 +105,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                     ? R.string.enabled_by_admin : R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
-        }
-
-        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
-        final View switchWidget = holder.findViewById(android.R.id.switch_widget);
-        if (restrictedIcon != null) {
-            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
-        }
-        if (switchWidget != null) {
-            switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
         }
 
         final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
