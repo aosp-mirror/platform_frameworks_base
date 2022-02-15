@@ -7647,7 +7647,7 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * TODO: remove this one. use {@link #rebootModem()} for reset type 1 and
-     * {@link #resetRadioConfig()} for reset type 3
+     * {@link #resetRadioConfig()} for reset type 3 (b/116476729)
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
