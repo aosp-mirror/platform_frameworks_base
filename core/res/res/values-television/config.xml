@@ -37,6 +37,14 @@
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 
+    <!-- The maximum height of the expanded horizontal picture-in-picture window -->
+    <item name="config_pictureInPictureExpandedHorizontalHeight"
+          format="dimension" type="dimen">110dp</item>
+
+    <!-- The maximum width of the expanded vertical picture-in-picture window -->
+    <item name="config_pictureInPictureExpandedVerticalWidth"
+          format="dimension" type="dimen">110dp</item>
+
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">false</bool>
 

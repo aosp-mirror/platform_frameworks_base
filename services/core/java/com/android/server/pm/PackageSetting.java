@@ -52,6 +52,7 @@ import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.WatchedArraySet;
 
 import libcore.util.EmptyArray;
 
@@ -249,7 +250,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     PackageSetting(@NonNull PackageSetting original, boolean sealedSnapshot)  {
         super(original);
-        copyPackageSetting(original);
+        copyPackageSetting(original, sealedSnapshot);
         if (sealedSnapshot) {
             mSnapshot = new SnapshotCache.Sealed();
         } else {
@@ -515,7 +516,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     /** Updates all fields in the current setting from another. */
     public void updateFrom(PackageSetting other) {
-        copyPackageSetting(other);
+        copyPackageSetting(other, false /* sealedSnapshot */);
 
         Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
         updateMimeGroups(mimeGroupNames);
@@ -608,7 +609,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    public void copyPackageSetting(PackageSetting other) {
+    public void copyPackageSetting(PackageSetting other, boolean sealedSnapshot) {
         super.copySettingBase(other);
         mSharedUserAppId = other.mSharedUserAppId;
         mLoadingProgress = other.mLoadingProgress;
@@ -650,8 +651,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 other.usesStaticLibrariesVersions.length) : null;
         mUserStates.clear();
         for (int i = 0; i < other.mUserStates.size(); i++) {
-            mUserStates.put(other.mUserStates.keyAt(i),
-                    new PackageUserStateImpl(this, other.mUserStates.valueAt(i)));
+            if (sealedSnapshot) {
+                mUserStates.put(other.mUserStates.keyAt(i),
+                        other.mUserStates.valueAt(i).snapshot());
+            } else {
+                mUserStates.put(other.mUserStates.keyAt(i), other.mUserStates.valueAt(i));
+            }
         }
 
         if (mOldCodePaths != null) {
@@ -871,42 +876,48 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         setUserState(userId, otherState.getCeDataInode(), otherState.getEnabledState(),
                 otherState.isInstalled(), otherState.isStopped(), otherState.isNotLaunched(),
                 otherState.isHidden(), otherState.getDistractionFlags(),
-                otherState.getSuspendParams(), otherState.isInstantApp(),
+                otherState.getSuspendParams() == null
+                        ? null : otherState.getSuspendParams().untrackedStorage(),
+                otherState.isInstantApp(),
                 otherState.isVirtualPreload(), otherState.getLastDisableAppCaller(),
-                new ArraySet<>(otherState.getEnabledComponentsNoCopy()),
-                new ArraySet<>(otherState.getDisabledComponentsNoCopy()),
+                otherState.getEnabledComponentsNoCopy() == null
+                        ? null : otherState.getEnabledComponentsNoCopy().untrackedStorage(),
+                otherState.getDisabledComponentsNoCopy() == null
+                        ? null : otherState.getDisabledComponentsNoCopy().untrackedStorage(),
                 otherState.getInstallReason(), otherState.getUninstallReason(),
                 otherState.getHarmfulAppWarning(), otherState.getSplashScreenTheme(),
                 otherState.getFirstInstallTime());
     }
 
-    ArraySet<String> getEnabledComponents(int userId) {
+    WatchedArraySet<String> getEnabledComponents(int userId) {
         return readUserState(userId).getEnabledComponentsNoCopy();
     }
 
-    ArraySet<String> getDisabledComponents(int userId) {
+    WatchedArraySet<String> getDisabledComponents(int userId) {
         return readUserState(userId).getDisabledComponentsNoCopy();
     }
 
-    void setEnabledComponents(ArraySet<String> components, int userId) {
+    /** Test only */
+    void setEnabledComponents(WatchedArraySet<String> components, int userId) {
         modifyUserState(userId).setEnabledComponents(components);
         onChanged();
     }
 
-    void setDisabledComponents(ArraySet<String> components, int userId) {
+    /** Test only */
+    void setDisabledComponents(WatchedArraySet<String> components, int userId) {
         modifyUserState(userId).setDisabledComponents(components);
         onChanged();
     }
 
-    void setEnabledComponentsCopy(ArraySet<String> components, int userId) {
+    void setEnabledComponentsCopy(WatchedArraySet<String> components, int userId) {
         modifyUserState(userId).setEnabledComponents(components != null
-                ? new ArraySet<String>(components) : null);
+                ? components.untrackedStorage() : null);
         onChanged();
     }
 
-    void setDisabledComponentsCopy(ArraySet<String> components, int userId) {
+    void setDisabledComponentsCopy(WatchedArraySet<String> components, int userId) {
         modifyUserState(userId).setDisabledComponents(components != null
-                ? new ArraySet<String>(components) : null);
+                ? components.untrackedStorage() : null);
         onChanged();
     }
 

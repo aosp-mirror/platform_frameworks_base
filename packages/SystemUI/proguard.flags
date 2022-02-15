@@ -1,22 +1,16 @@
 # Preserve line number information for debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
 
--keep class com.android.systemui.recents.OverviewProxyRecentsImpl
--keep class com.android.systemui.statusbar.car.CarStatusBar
--keep class com.android.systemui.statusbar.phone.StatusBar
--keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
 -keep class com.android.systemui.tv.TvSystemUIFactory
--keep class * extends com.android.systemui.CoreStartable
--keep class * implements com.android.systemui.CoreStartable$Injector
 
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
 }
 
 -keep class ** extends androidx.preference.PreferenceFragment
--keep class com.android.systemui.tuner.*
+
 -keep class com.android.systemui.plugins.** {
     *;
 }
@@ -25,21 +19,12 @@
 }
 -keep class androidx.core.app.CoreComponentFactory
 
--keep public class * extends com.android.systemui.CoreStartable {
-    public <init>(android.content.Context);
-}
-
 # Keep the wm shell lib
 -keep class com.android.wm.shell.*
 # Keep the protolog group methods that are called by the generated code
 -keepclassmembers class com.android.wm.shell.protolog.ShellProtoLogGroup {
     *;
 }
-
--keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent { !synthetic *; }
--keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.GlobalRootComponent$SysUIComponentImpl { !synthetic *; }
--keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.Dagger** { !synthetic *; }
--keep,allowoptimization,allowaccessmodification class com.android.systemui.tv.Dagger** { !synthetic *; }
 
 # Allows proguard to make private and protected methods and fields public as
 # part of optimization. This lets proguard inline trivial getter/setter methods.

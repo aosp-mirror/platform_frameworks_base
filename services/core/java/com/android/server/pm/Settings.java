@@ -923,11 +923,30 @@ public final class Settings implements Watchable, Snappable {
                 removeKeys.add(entry.getKey());
                 continue;
             }
+            boolean changed = false;
             // remove packages that are no longer installed
-            sus.packages.removeIf(ps -> mPackages.get(ps.getPackageName()) == null);
-            sus.mDisabledPackages.removeIf(
-                    ps -> mDisabledSysPackages.get(ps.getPackageName()) == null);
-            if (sus.packages.isEmpty() && sus.mDisabledPackages.isEmpty()) {
+            WatchedArraySet<PackageSetting> sharedUserPackageSettings = sus.getPackageSettings();
+            for (int i = sharedUserPackageSettings.size() - 1; i >= 0; i--) {
+                PackageSetting ps = sharedUserPackageSettings.valueAt(i);
+                if (mPackages.get(ps.getPackageName()) == null) {
+                    sharedUserPackageSettings.removeAt(i);
+                    changed = true;
+                }
+            }
+            WatchedArraySet<PackageSetting> sharedUserDisabledPackageSettings =
+                    sus.getDisabledPackageSettings();
+            for (int i = sharedUserDisabledPackageSettings.size() - 1; i >= 0; i--) {
+                PackageSetting ps = sharedUserDisabledPackageSettings.valueAt(i);
+                if (mDisabledSysPackages.get(ps.getPackageName()) == null) {
+                    sharedUserDisabledPackageSettings.removeAt(i);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                sus.onChanged();
+            }
+            if (sharedUserPackageSettings.isEmpty()
+                    && sharedUserDisabledPackageSettings.isEmpty()) {
                 removeValues.add(sus);
             }
         }
@@ -1289,7 +1308,8 @@ public final class Settings implements Watchable, Snappable {
     }
 
     boolean checkAndPruneSharedUserLPw(SharedUserSetting s, boolean skipCheck) {
-        if (skipCheck || (s.packages.isEmpty() && s.mDisabledPackages.isEmpty())) {
+        if (skipCheck || (s.getPackageStates().isEmpty()
+                && s.getDisabledPackageStates().isEmpty())) {
             if (mSharedUsers.remove(s.name) != null) {
                 removeAppIdLPw(s.mAppId);
                 return true;
@@ -2142,20 +2162,24 @@ public final class Settings implements Watchable, Snappable {
                         serializer.endTag(null, TAG_SUSPEND_PARAMS);
                     }
                 }
-                if (!ArrayUtils.isEmpty(ustate.getEnabledComponentsNoCopy())) {
+                final ArraySet<String> enabledComponents = ustate.getEnabledComponents();
+                if (enabledComponents != null && enabledComponents.size() > 0) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
-                    for (final String name : ustate.getEnabledComponentsNoCopy()) {
+                    for (int i = 0; i < enabledComponents.size(); i++) {
                         serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.attribute(null, ATTR_NAME,
+                                enabledComponents.valueAt(i));
                         serializer.endTag(null, TAG_ITEM);
                     }
                     serializer.endTag(null, TAG_ENABLED_COMPONENTS);
                 }
-                if (!ArrayUtils.isEmpty(ustate.getDisabledComponentsNoCopy())) {
+                final ArraySet<String> disabledComponents = ustate.getDisabledComponents();
+                if (disabledComponents != null && disabledComponents.size() > 0) {
                     serializer.startTag(null, TAG_DISABLED_COMPONENTS);
-                    for (final String name : ustate.getDisabledComponentsNoCopy()) {
+                    for (int i = 0; i < disabledComponents.size(); i++) {
                         serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME, name);
+                        serializer.attribute(null, ATTR_NAME,
+                                disabledComponents.valueAt(i));
                         serializer.endTag(null, TAG_ITEM);
                     }
                     serializer.endTag(null, TAG_DISABLED_COMPONENTS);
@@ -4987,18 +5011,18 @@ public final class Settings implements Watchable, Snappable {
             }
 
             if (permissionNames == null) {
-                Set<String> cmp = userState.getDisabledComponents();
+                WatchedArraySet<String> cmp = userState.getDisabledComponentsNoCopy();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    disabledComponents:");
-                    for (String s : cmp) {
-                        pw.print(prefix); pw.print("      "); pw.println(s);
+                    for (int i = 0; i < cmp.size(); i++) {
+                        pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
-                cmp = userState.getEnabledComponents();
+                cmp = userState.getEnabledComponentsNoCopy();
                 if (cmp != null && cmp.size() > 0) {
                     pw.print(prefix); pw.println("    enabledComponents:");
-                    for (String s : cmp) {
-                        pw.print(prefix); pw.print("      "); pw.println(s);
+                    for (int i = 0; i < cmp.size(); i++) {
+                        pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
             }
@@ -5132,11 +5156,13 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(prefix); pw.print("userId="); pw.println(su.mAppId);
 
                 pw.print(prefix); pw.println("Packages");
-                final int numPackages = su.packages.size();
+                final ArraySet<PackageStateInternal> susPackageStates =
+                        (ArraySet<PackageStateInternal>) su.getPackageStates();
+                final int numPackages = susPackageStates.size();
                 for (int i = 0; i < numPackages; i++) {
-                    final PackageSetting ps = su.packages.valueAt(i);
+                    final PackageStateInternal ps = susPackageStates.valueAt(i);
                     if (ps != null) {
-                        pw.print(prefix + "  "); pw.println(ps.toString());
+                        pw.print(prefix + "  "); pw.println(ps);
                     } else {
                         pw.print(prefix + "  "); pw.println("NULL?!");
                     }

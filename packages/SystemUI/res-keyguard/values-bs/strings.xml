@@ -91,7 +91,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Lozinka je potrebna radi dodatne sigurnosti"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Uređaj je zaključao administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Nije prepoznato"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznato"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Da koristite otključavanje licem, uključite "<b>"Pristup kameri"</b>" u meniju Postavke &gt; Privatnost"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

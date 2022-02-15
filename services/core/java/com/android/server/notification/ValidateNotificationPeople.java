@@ -70,10 +70,14 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             "validate_notification_people_enabled";
     private static final String[] LOOKUP_PROJECTION = { Contacts._ID, Contacts.LOOKUP_KEY,
             Contacts.STARRED, Contacts.HAS_PHONE_NUMBER };
-    private static final String[] PHONE_LOOKUP_PROJECTION =
-            { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER };
     private static final int MAX_PEOPLE = 10;
     private static final int PEOPLE_CACHE_SIZE = 200;
+
+    /** Columns used to look up phone numbers for contacts. */
+    @VisibleForTesting
+    static final String[] PHONE_LOOKUP_PROJECTION =
+            { ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
+                    ContactsContract.CommonDataKinds.Phone.NUMBER };
 
     /** Indicates that the notification does not reference any valid contacts. */
     static final float NONE = 0f;
@@ -548,14 +552,21 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return mPhoneLookupKey;
         }
 
-        // Merge phone number found in this lookup and store it in mPhoneNumbers.
+        // Merge phone numbers found in this lookup and store them in mPhoneNumbers.
         public void mergePhoneNumber(Cursor cursor) {
-            final int phoneNumIdx = cursor.getColumnIndex(
+            final int normalizedNumIdx = cursor.getColumnIndex(
                     ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER);
-            if (phoneNumIdx >= 0) {
-                mPhoneNumbers.add(cursor.getString(phoneNumIdx));
+            if (normalizedNumIdx >= 0) {
+                mPhoneNumbers.add(cursor.getString(normalizedNumIdx));
             } else {
-                if (DEBUG) Slog.d(TAG, "invalid cursor: no NORMALIZED_NUMBER");
+                if (DEBUG) Slog.d(TAG, "cursor data not found: no NORMALIZED_NUMBER");
+            }
+
+            final int numIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            if (numIdx >= 0) {
+                mPhoneNumbers.add(cursor.getString(numIdx));
+            } else {
+                if (DEBUG) Slog.d(TAG, "cursor data not found: no NUMBER");
             }
         }
 

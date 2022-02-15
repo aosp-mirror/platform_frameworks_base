@@ -34,6 +34,7 @@ import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.StagedApexInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
@@ -78,6 +79,8 @@ public class StagedInstallInternalTest {
     private static final TestApp TEST_APEX_CLASSPATH = new TestApp("TestApex",
             TEST_APEX_PACKAGE_NAME, 1, /*isApex=*/true,
             "apex.apexd_test_classpath.apex");
+
+    private static final String TEST_APEX_SYSTEM_SERVER_PACKAGE_NAME = "test_com.android.server";
 
     private File mTestStateFile = new File(
             InstrumentationRegistry.getInstrumentation().getContext().getFilesDir(),
@@ -478,6 +481,16 @@ public class StagedInstallInternalTest {
         assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
         assertThat(result.hasClassPathJars).isTrue();
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
+    }
+
+    @Test
+    public void testGetAppInfo_flagTestOnlyIsSet() throws Exception {
+        final PackageManager pm =
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+        final ApplicationInfo info = pm.getApplicationInfo(TEST_APEX_SYSTEM_SERVER_PACKAGE_NAME,
+                ApplicationInfoFlags.of(PackageManager.MATCH_APEX));
+        assertThat(info).isNotNull();
+        assertThat((info.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0).isTrue();
     }
 
     public static class MockStagedApexObserver extends IStagedApexObserver.Stub {

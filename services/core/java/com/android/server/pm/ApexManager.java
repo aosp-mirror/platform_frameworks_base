@@ -582,6 +582,8 @@ public abstract class ApexManager {
                 ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
 
                 if (throwable == null) {
+                    // Calling hideAsFinal to assign derived fields for the app info flags.
+                    parseResult.parsedPackage.hideAsFinal();
                     final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
                             parseResult.parsedPackage, ai, flags);
                     if (packageInfo == null) {

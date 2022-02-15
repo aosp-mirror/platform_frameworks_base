@@ -588,8 +588,12 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ඉදිරියට යාමට ඔබගේ තිර අගුල ඇතුළත් කරන්න"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"අර්ධ ඇඟිලි සලකුණක් අනාවරණය කරන ලදි"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"සංවේදකය පිරිසිදු කරන්න"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"තව ටිකක් වැඩිපුර අල්ලාගෙන සිටින්න"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"තවත් ඇඟිලි සලකුණක් උත්සාහ කරන්න"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"දීප්තිය වැඩියි"</string>
@@ -597,6 +601,10 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"එක් එක් අවස්ථාවේ ඔබගේ ඇඟිල්ලේ පිහිටීම මදක් වෙනස් කරන්න"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
+    <skip />
+    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ඇඟිලි සලකුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"මුහුණ සත්‍යාපනය කරන ලදී"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"මුහුණ සත්‍යාපනය කරන ලදී, කරුණාකර තහවුරු කරන්න ඔබන්න"</string>
@@ -1500,7 +1508,8 @@
     <string name="skip_button_label" msgid="3566599811326688389">"මඟ හරින්න"</string>
     <string name="no_matches" msgid="6472699895759164599">"ගැලපීම් නැත"</string>
     <string name="find_on_page" msgid="5400537367077438198">"පිටුවෙහි සෙවීම"</string>
-    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# තරඟ {total}}one{# {total}}other{# }} }"</string>
+    <!-- no translation found for matches_found (2296462299979507689) -->
+    <skip />
     <string name="action_mode_done" msgid="2536182504764803222">"හරි"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"බෙදා ගත් ගබඩාව මකා දමමින්…"</string>
     <string name="share" msgid="4157615043345227321">"බෙදාගන්න"</string>
@@ -1928,6 +1937,10 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ Android TV උපාංගයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ ටැබ්ලටයෙහි උත්සාහ කරන්න."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"මේ අවස්ථාවේදී මෙයට ඔබගේ <xliff:g id="DEVICE">%1$s</xliff:g> හි ප්‍රවේශ විය නොහැකිය. ඒ වෙනුවට ඔබගේ දුරකථනයෙහි උත්සාහ කරන්න."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"මෙම යෙදුම Android හි පැරණි අනුවාදයක් සඳහා තනා ඇති අතර නිසියාකාරව ක්‍රියා නොකරනු ඇත. යාවත්කාලීන සඳහා පරික්ෂා කිරීම උත්සාහ කරන්න, නැතහොත් සංවර්ධක අමතන්න."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ඔබට නව පණිවිඩ තිබේ"</string>
@@ -2017,16 +2030,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"අස්ථාපනය කරන්න"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"කෙසේ වුවත් විවෘත කරන්න"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"පද්ධති ලොග ප්‍රවේශ ඉල්ලීම"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"මෙම වතාවේ පමණි"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ඉඩ නොදෙන්න"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ක්‍රියාකාරී නිදොස් කිරීම සඳහා පද්ධති ලොග ඉල්ලයි. මෙම ලොගවල ඔබගේ උපාංගයේ යෙදුම් සහ සේවා ලියා ඇති තොරතුරු අඩංගු විය හැකිය."</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"නැවත නොපෙන්වන්න"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"සංස්කරණය"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
@@ -2089,22 +2097,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"බල සංවාදය"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"අගුලු තිරය"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"තිර රුව"</string>
-    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
-    <skip />
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"හෙඩ්සෙට් කොක්ක"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමග"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමං තෝරනය"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ප්‍රවේශ්‍යතා කෙටිමඟ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"දැනුම්දීම් සෙවන ඉවත ලන්න"</string>
-    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
-    <skip />
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad ඉහළ"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad පහළ"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad වම"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad දකුණ"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad මැද"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> හි සිරස්තල තීරුව."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2125,10 +2127,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ක්‍රියාත්මක කිරීමට තට්ටු කරන්න"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"කාර්යාල යෙදුම් නැත"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"පුද්ගලික යෙදුම් නැත"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> ඔබගේ පුද්ගලික පැතිකඩ තුළ විවෘත කරන්නද?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> ඔබගේ කාර්යාල පැතිකඩ තුළ විවෘත කරන්නද?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"පුද්ගලික බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"කාර්යාල බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ජාල අගුලු හැරීමේ PIN"</string>
@@ -2263,4 +2263,6 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> පසුබිමේ ධාවනය වන අතර බැටරිය බැස යයි. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> දිගු වේලාවක් පසුබිමේ ධාවනය වේ. සමාලෝචනය කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"සක්‍රිය යෙදුම් පරීක්ෂා කරන්න"</string>
+    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <skip />
 </resources>

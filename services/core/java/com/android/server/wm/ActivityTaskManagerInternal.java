@@ -316,7 +316,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
-    public abstract boolean isDreaming();
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
     public abstract boolean shuttingDown(boolean booted, int timeout);
@@ -455,15 +454,6 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Writes current activity states to the proto stream. */
     public abstract void writeActivitiesToProto(ProtoOutputStream proto);
-
-    /**
-     * Saves the current activity manager state and includes the saved state in the next dump of
-     * activity manager.
-     */
-    public abstract void saveANRState(String reason);
-
-    /** Clears the previously saved activity manager ANR state. */
-    public abstract void clearSavedANRState();
 
     /** Dump the current state based on the command. */
     public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,

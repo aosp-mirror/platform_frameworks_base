@@ -47,8 +47,10 @@ public final class DumpableContainerImpl implements DumpableContainer {
         Objects.requireNonNull(name, () -> "name of" + dumpable);
 
         if (mDumpables.containsKey(name)) {
-            Log.e(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
-                    + " with that name (" + name + "): " + mDumpables.get(name));
+            if (DEBUG) {
+                Log.d(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
+                        + " with that name (" + name + "): " + mDumpables.get(name));
+            }
             return false;
         }
 

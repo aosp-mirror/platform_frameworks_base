@@ -97,7 +97,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         BackNavigationInfo backNavigationInfo =
                 mBackNavigationController.startBackNavigation(task, new StubTransaction());
         assertThat(backNavigationInfo).isNotNull();
-        assertThat(backNavigationInfo.getDepartingWindowContainer()).isNotNull();
+        assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
         assertThat(backNavigationInfo.getScreenshotSurface()).isNotNull();
         assertThat(backNavigationInfo.getScreenshotHardwareBuffer()).isNotNull();
         assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
