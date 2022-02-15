@@ -14,6 +14,7 @@ namespace android {
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
+extern int register_android_graphics_Paint(JNIEnv* env);
 
 #define REG_JNI(name) \
     { name }
@@ -26,6 +27,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_database_SQLiteConnection),
         REG_JNI(register_android_graphics_Matrix),
         REG_JNI(register_android_graphics_Graphics),
+        REG_JNI(register_android_graphics_Paint),
 };
 
 JNIEnv* AndroidRuntime::getJNIEnv() {
