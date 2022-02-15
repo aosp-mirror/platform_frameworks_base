@@ -76,6 +76,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private Consumer<Boolean> mMediaVisibilityChangedListener;
     private int mLastOrientation;
     private String mCachedSpecs = "";
+    @Nullable
     private QSTileRevealController mQsTileRevealController;
     private float mRevealExpansion;
 
@@ -185,6 +186,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mDumpManager.unregisterDumpable(mView.getDumpableTag());
     }
 
+    @Nullable
     protected QSTileRevealController createTileRevealController() {
         return null;
     }
@@ -250,6 +252,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return !mRecords.isEmpty();
     }
 
+    @Nullable
     QSTileView getTileView(QSTile tile) {
         for (QSPanelControllerBase.TileRecord r : mRecords) {
             if (r.tile == tile) {
@@ -411,6 +414,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUsingHorizontalLayoutChangedListener = listener;
     }
 
+    @Nullable
     public View getBrightnessView() {
         return mView.getBrightnessView();
     }
@@ -425,6 +429,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         public QSTile tile;
         public com.android.systemui.plugins.qs.QSTileView tileView;
         public boolean scanState;
+        @Nullable
         public QSTile.Callback callback;
     }
 }
