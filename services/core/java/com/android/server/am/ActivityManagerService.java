@@ -5614,21 +5614,42 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (mProcLock) {
             synchronized (mPidsSelfLocked) {
+                int newestTimeIndex = -1;
+                long newestTime = Long.MIN_VALUE;
                 for (int i = 0; i < pids.length; i++) {
                     ProcessRecord pr = mPidsSelfLocked.get(pids[i]);
                     if (pr != null) {
-                        final boolean isPendingTop =
-                                mPendingStartActivityUids.isPendingTopPid(pr.uid, pids[i]);
-                        states[i] = isPendingTop ? PROCESS_STATE_TOP : pr.mState.getCurProcState();
-                        if (scores != null) {
-                            scores[i] = isPendingTop
-                                    ? (ProcessList.FOREGROUND_APP_ADJ - 1) : pr.mState.getCurAdj();
+                        final long pendingTopTime =
+                                mPendingStartActivityUids.getPendingTopPidTime(pr.uid, pids[i]);
+                        if (pendingTopTime != PendingStartActivityUids.INVALID_TIME) {
+                            // The uid in mPendingStartActivityUids gets the TOP process state.
+                            states[i] = PROCESS_STATE_TOP;
+                            if (scores != null) {
+                                // The uid in mPendingStartActivityUids gets a better score.
+                                scores[i] = ProcessList.FOREGROUND_APP_ADJ - 1;
+                            }
+                            if (pendingTopTime > newestTime) {
+                                newestTimeIndex = i;
+                                newestTime = pendingTopTime;
+                            }
+                        } else {
+                            states[i] = pr.mState.getCurProcState();
+                            if (scores != null) {
+                                scores[i] = pr.mState.getCurAdj();
+                            }
                         }
                     } else {
                         states[i] = PROCESS_STATE_NONEXISTENT;
                         if (scores != null) {
                             scores[i] = ProcessList.INVALID_ADJ;
                         }
+                    }
+                }
+                // The uid with the newest timestamp in mPendingStartActivityUids gets the best
+                // score.
+                if (newestTimeIndex != -1) {
+                    if (scores != null) {
+                        scores[newestTimeIndex] = ProcessList.FOREGROUND_APP_ADJ - 2;
                     }
                 }
             }
