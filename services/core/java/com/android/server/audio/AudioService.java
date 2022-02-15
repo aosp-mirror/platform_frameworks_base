@@ -3249,6 +3249,13 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private void enforceAccessUltrasoundPermission() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing ACCESS_ULTRASOUND permission");
+        }
+    }
+
     private void enforceQueryStatePermission() {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.QUERY_AUDIO_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -3379,6 +3386,12 @@ public class AudioService extends IAudioService.Stub
                 index/*val1*/, flags/*val2*/, callingPackage));
         setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
                 attributionTag, Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission());
+    }
+
+    /** @see AudioManager#isUltrasoundSupported() */
+    public boolean isUltrasoundSupported() {
+        enforceAccessUltrasoundPermission();
+        return AudioSystem.isUltrasoundSupported();
     }
 
     private boolean canChangeAccessibilityVolume() {

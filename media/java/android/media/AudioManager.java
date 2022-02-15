@@ -7293,8 +7293,13 @@ public class AudioManager {
      * Ultrasound playback and capture, false otherwise.
      */
     @SystemApi
-    public static boolean isUltrasoundSupported() {
-        return AudioSystem.isUltrasoundSupported();
+    @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
+    public boolean isUltrasoundSupported() {
+        try {
+            return getService().isUltrasoundSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
