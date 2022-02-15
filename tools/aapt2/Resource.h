@@ -128,10 +128,12 @@ std::optional<ResourceNamedTypeRef> ParseResourceNamedType(const android::String
  */
 struct ResourceName {
   std::string package;
-  ResourceType type = ResourceType::kRaw;
+  ResourceNamedType type;
   std::string entry;
 
   ResourceName() = default;
+  ResourceName(const android::StringPiece& p, const ResourceNamedTypeRef& t,
+               const android::StringPiece& e);
   ResourceName(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
 
   int compare(const ResourceName& other) const;
@@ -148,13 +150,15 @@ struct ResourceName {
  */
 struct ResourceNameRef {
   android::StringPiece package;
-  ResourceType type = ResourceType::kRaw;
+  ResourceNamedTypeRef type;
   android::StringPiece entry;
 
   ResourceNameRef() = default;
   ResourceNameRef(const ResourceNameRef&) = default;
   ResourceNameRef(ResourceNameRef&&) = default;
   ResourceNameRef(const ResourceName& rhs);  // NOLINT(google-explicit-constructor)
+  ResourceNameRef(const android::StringPiece& p, const ResourceNamedTypeRef& t,
+                  const android::StringPiece& e);
   ResourceNameRef(const android::StringPiece& p, ResourceType t, const android::StringPiece& e);
   ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
@@ -418,14 +422,20 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNamedTypeRe
 // ResourceName implementation.
 //
 
+inline ResourceName::ResourceName(const android::StringPiece& p, const ResourceNamedTypeRef& t,
+                                  const android::StringPiece& e)
+    : package(p.to_string()), type(t.ToResourceNamedType()), entry(e.to_string()) {
+}
+
 inline ResourceName::ResourceName(const android::StringPiece& p, ResourceType t,
                                   const android::StringPiece& e)
-    : package(p.to_string()), type(t), entry(e.to_string()) {}
+    : ResourceName(p, ResourceNamedTypeWithDefaultName(t), e) {
+}
 
 inline int ResourceName::compare(const ResourceName& other) const {
   int cmp = package.compare(other.package);
   if (cmp != 0) return cmp;
-  cmp = static_cast<int>(type) - static_cast<int>(other.type);
+  cmp = type.compare(other.type);
   if (cmp != 0) return cmp;
   cmp = entry.compare(other.entry);
   return cmp;
@@ -461,9 +471,16 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name)
 inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs)
     : package(rhs.package), type(rhs.type), entry(rhs.entry) {}
 
+inline ResourceNameRef::ResourceNameRef(const android::StringPiece& p,
+                                        const ResourceNamedTypeRef& t,
+                                        const android::StringPiece& e)
+    : package(p), type(t), entry(e) {
+}
+
 inline ResourceNameRef::ResourceNameRef(const android::StringPiece& p, ResourceType t,
                                         const android::StringPiece& e)
-    : package(p), type(t), entry(e) {}
+    : ResourceNameRef(p, ResourceNamedTypeWithDefaultName(t), e) {
+}
 
 inline ResourceNameRef& ResourceNameRef::operator=(const ResourceName& rhs) {
   package = rhs.package;
@@ -520,7 +537,7 @@ struct hash<aapt::ResourceName> {
   size_t operator()(const aapt::ResourceName& name) const {
     android::hash_t h = 0;
     h = android::JenkinsHashMix(h, static_cast<uint32_t>(hash<string>()(name.package)));
-    h = android::JenkinsHashMix(h, static_cast<uint32_t>(name.type));
+    h = android::JenkinsHashMix(h, static_cast<uint32_t>(hash<string>()(name.type.name)));
     h = android::JenkinsHashMix(h, static_cast<uint32_t>(hash<string>()(name.entry)));
     return static_cast<size_t>(h);
   }
