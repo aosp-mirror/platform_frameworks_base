@@ -128,6 +128,7 @@ import com.android.server.pm.UserManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -309,11 +310,11 @@ public final class SensorPrivacyService extends SystemService {
             // Reset sensor privacy when restriction is added
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(userId, OTHER, CAMERA, false);
+                setToggleSensorPrivacyUnchecked(SOFTWARE, userId, OTHER, CAMERA, false);
             }
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(userId, OTHER, MICROPHONE, false);
+                setToggleSensorPrivacyUnchecked(SOFTWARE, userId, OTHER, MICROPHONE, false);
             }
         }
 
@@ -361,7 +362,7 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void onSensorUseStarted(int uid, String packageName, int sensor) {
             UserHandle user = UserHandle.of(mCurrentUser);
-            if (!isToggleSensorPrivacyEnabled(SOFTWARE, sensor)) {
+            if (!isCombinedToggleSensorPrivacyEnabled(sensor)) {
                 return;
             }
 
@@ -405,8 +406,8 @@ public final class SensorPrivacyService extends SystemService {
                         }
 
                         tasksOfPackageUsingSensor.add(task);
-                    } else if (task.topActivity.flattenToString().equals(mContext.getResources()
-                            .getString(R.string.config_sensorUseStartedActivity))
+                    } else if (task.topActivity.flattenToString().equals(
+                            getSensorUseActivityName(new ArraySet<>(Arrays.asList(sensor))))
                             && task.isFocused) {
                         enqueueSensorUseReminderDialogAsync(task.taskId, user, packageName,
                                 sensor);
@@ -533,9 +534,8 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
             Intent dialogIntent = new Intent();
-            dialogIntent.setComponent(ComponentName.unflattenFromString(
-                    mContext.getResources().getString(
-                            R.string.config_sensorUseStartedActivity)));
+            dialogIntent.setComponent(
+                    ComponentName.unflattenFromString(getSensorUseActivityName(sensors)));
 
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchTaskId(info.mTaskId);
@@ -556,6 +556,21 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
             mContext.startActivityAsUser(dialogIntent, options.toBundle(), info.mUser);
+        }
+
+        /**
+         * Get the activity component based on which privacy toggles are enabled.
+         * @param sensors
+         * @return component name to launch
+         */
+        private String getSensorUseActivityName(ArraySet<Integer> sensors) {
+            for (Integer sensor : sensors) {
+                if (isToggleSensorPrivacyEnabled(HARDWARE, sensor)) {
+                    return mContext.getResources().getString(
+                            R.string.config_sensorUseStartedActivity_hwToggle);
+                }
+            }
+            return mContext.getResources().getString(R.string.config_sensorUseStartedActivity);
         }
 
         /**
@@ -676,18 +691,18 @@ public final class SensorPrivacyService extends SystemService {
                 return;
             }
 
-            setToggleSensorPrivacyUnchecked(userId, source, sensor, enable);
+            setToggleSensorPrivacyUnchecked(SOFTWARE, userId, source, sensor, enable);
         }
 
-        private void setToggleSensorPrivacyUnchecked(int userId, int source, int sensor,
-                boolean enable) {
+        private void setToggleSensorPrivacyUnchecked(int toggleType, int userId, int source,
+                int sensor, boolean enable) {
             final long[] lastChange = new long[1];
             mSensorPrivacyStateController.atomic(() -> {
                 SensorState sensorState = mSensorPrivacyStateController
-                        .getState(SOFTWARE, userId, sensor);
+                        .getState(toggleType, userId, sensor);
                 lastChange[0] = sensorState.getLastChange();
                 mSensorPrivacyStateController.setState(
-                        SOFTWARE, userId, sensor, enable, mHandler,
+                        toggleType, userId, sensor, enable, mHandler,
                         changeSuccessful -> {
                             if (changeSuccessful) {
                                 if (userId == mUserManagerInternal.getProfileParentId(userId)) {
@@ -972,7 +987,7 @@ public final class SensorPrivacyService extends SystemService {
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Can only be called by the system uid");
             }
-            if (!isToggleSensorPrivacyEnabled(SOFTWARE, sensor)) {
+            if (!isCombinedToggleSensorPrivacyEnabled(sensor)) {
                 return;
             }
             enqueueSensorUseReminderDialogAsync(
@@ -980,24 +995,46 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         private void userSwitching(int from, int to) {
-            final boolean[] micState = new boolean[1];
-            final boolean[] camState = new boolean[1];
-            final boolean[] prevMicState = new boolean[1];
-            final boolean[] prevCamState = new boolean[1];
+            final boolean[] micState = new boolean[2];
+            final boolean[] camState = new boolean[2];
+            final boolean[] prevMicState = new boolean[2];
+            final boolean[] prevCamState = new boolean[2];
+            final int swToggleIdx = 0;
+            final int hwToggleIdx = 1;
+            // Get SW toggles state
             mSensorPrivacyStateController.atomic(() -> {
-                prevMicState[0] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE, MICROPHONE);
-                prevCamState[0] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE, CAMERA);
-                micState[0] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE, MICROPHONE);
-                camState[0] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE, CAMERA);
+                prevMicState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE,
+                        MICROPHONE);
+                prevCamState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, SOFTWARE,
+                        CAMERA);
+                micState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE,
+                        MICROPHONE);
+                camState[swToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, SOFTWARE, CAMERA);
             });
-            if (from == USER_NULL || prevMicState[0] != micState[0]) {
-                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, MICROPHONE, micState[0]);
-                setGlobalRestriction(MICROPHONE, micState[0]);
+            // Get HW toggles state
+            mSensorPrivacyStateController.atomic(() -> {
+                prevMicState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, HARDWARE,
+                        MICROPHONE);
+                prevCamState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(from, HARDWARE,
+                        CAMERA);
+                micState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, HARDWARE,
+                        MICROPHONE);
+                camState[hwToggleIdx] = isToggleSensorPrivacyEnabledInternal(to, HARDWARE, CAMERA);
+            });
+
+            if (from == USER_NULL || prevMicState[swToggleIdx] != micState[swToggleIdx]
+                    || prevMicState[hwToggleIdx] != micState[hwToggleIdx]) {
+                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, MICROPHONE,
+                        micState[swToggleIdx]);
+                mHandler.handleSensorPrivacyChanged(to, HARDWARE, MICROPHONE,
+                        micState[hwToggleIdx]);
+                setGlobalRestriction(MICROPHONE, micState[swToggleIdx] || micState[hwToggleIdx]);
             }
-            if (from == USER_NULL || prevCamState[0] != camState[0]) {
-                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, CAMERA,
-                        camState[0]);
-                setGlobalRestriction(CAMERA, camState[0]);
+            if (from == USER_NULL || prevCamState[swToggleIdx] != camState[swToggleIdx]
+                    || prevCamState[hwToggleIdx] != camState[hwToggleIdx]) {
+                mHandler.handleSensorPrivacyChanged(to, SOFTWARE, CAMERA, camState[swToggleIdx]);
+                mHandler.handleSensorPrivacyChanged(to, HARDWARE, CAMERA, camState[hwToggleIdx]);
+                setGlobalRestriction(CAMERA, camState[swToggleIdx] || camState[hwToggleIdx]);
             }
         }
 
@@ -1265,7 +1302,8 @@ public final class SensorPrivacyService extends SystemService {
             mSensorPrivacyManagerInternal.dispatch(userId, sensor, enabled);
 
             if (userId == mCurrentUser) {
-                mSensorPrivacyServiceImpl.setGlobalRestriction(sensor, enabled);
+                mSensorPrivacyServiceImpl.setGlobalRestriction(sensor,
+                        mSensorPrivacyServiceImpl.isCombinedToggleSensorPrivacyEnabled(sensor));
             }
 
             if (userId != mCurrentUser) {
@@ -1438,6 +1476,23 @@ public final class SensorPrivacyService extends SystemService {
                 sensorListeners.add(listener);
             }
         }
+
+        @Override
+        public void setPhysicalToggleSensorPrivacy(int userId, int sensor, boolean enable) {
+            final SensorPrivacyServiceImpl sps =
+                    SensorPrivacyService.this.mSensorPrivacyServiceImpl;
+
+            // Convert userId to actual user Id. mCurrentUser is USER_NULL if toggle state is set
+            // before onUserStarting.
+            userId = (userId == UserHandle.USER_CURRENT ? mCurrentUser : userId);
+            final int realUserId = (userId == UserHandle.USER_NULL ? mContext.getUserId() : userId);
+
+            sps.setToggleSensorPrivacyUnchecked(HARDWARE, realUserId, OTHER, sensor, enable);
+            // Also disable the SW toggle when disabling the HW toggle
+            if (!enable) {
+                sps.setToggleSensorPrivacyUnchecked(SOFTWARE, realUserId, OTHER, sensor, enable);
+            }
+        }
     }
 
     private class CallStateHelper {
@@ -1493,7 +1548,7 @@ public final class SensorPrivacyService extends SystemService {
                     if (mSensorPrivacyServiceImpl
                             .isToggleSensorPrivacyEnabled(SOFTWARE, MICROPHONE)) {
                         mSensorPrivacyServiceImpl.setToggleSensorPrivacyUnchecked(
-                                mCurrentUser, OTHER, MICROPHONE, false);
+                                SOFTWARE, mCurrentUser, OTHER, MICROPHONE, false);
                         mMicUnmutedForEmergencyCall = true;
                     } else {
                         mMicUnmutedForEmergencyCall = false;
@@ -1519,7 +1574,7 @@ public final class SensorPrivacyService extends SystemService {
                     mIsInEmergencyCall = false;
                     if (mMicUnmutedForEmergencyCall) {
                         mSensorPrivacyServiceImpl.setToggleSensorPrivacyUnchecked(
-                                mCurrentUser, OTHER, MICROPHONE, true);
+                                SOFTWARE, mCurrentUser, OTHER, MICROPHONE, true);
                         mMicUnmutedForEmergencyCall = false;
                     }
                 }
