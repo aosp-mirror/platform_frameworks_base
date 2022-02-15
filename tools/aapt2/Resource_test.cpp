@@ -18,6 +18,9 @@
 
 #include "test/Test.h"
 
+using ::testing::Eq;
+using ::testing::Optional;
+
 namespace aapt {
 
 TEST(ResourceTypeTest, ParseResourceTypes) {
@@ -123,6 +126,106 @@ TEST(ResourceTypeTest, ParseResourceTypes) {
 
   type = ParseResourceType("blahaha");
   EXPECT_EQ(type, nullptr);
+}
+
+TEST(ResourceTypeTest, ParseResourceNamedType) {
+  auto type = ParseResourceNamedType("anim");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("anim", ResourceType::kAnim))));
+
+  type = ParseResourceNamedType("layout");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout", ResourceType::kLayout))));
+
+  type = ParseResourceNamedType("layout:2");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout:2", ResourceType::kLayout))));
+
+  type = ParseResourceNamedType("layout:another");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout:another", ResourceType::kLayout))));
+
+  type = ParseResourceNamedType("layout:");
+  EXPECT_THAT(type, Eq(std::nullopt));
+
+  type = ParseResourceNamedType("layout2");
+  EXPECT_THAT(type, Eq(std::nullopt));
+
+  type = ParseResourceNamedType("blahaha");
+  EXPECT_THAT(type, Eq(std::nullopt));
+}
+
+TEST(ResourceTypeTest, ResourceNamedTypeWithDefaultName) {
+  auto type = ResourceNamedTypeWithDefaultName(ResourceType::kAnim);
+  EXPECT_THAT(type, Eq(ResourceNamedType("anim", ResourceType::kAnim)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kAnimator);
+  EXPECT_THAT(type, Eq(ResourceNamedType("animator", ResourceType::kAnimator)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kArray);
+  EXPECT_THAT(type, Eq(ResourceNamedType("array", ResourceType::kArray)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kAttr);
+  EXPECT_THAT(type, Eq(ResourceNamedType("attr", ResourceType::kAttr)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kAttrPrivate);
+  EXPECT_THAT(type, Eq(ResourceNamedType("^attr-private", ResourceType::kAttrPrivate)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kBool);
+  EXPECT_THAT(type, Eq(ResourceNamedType("bool", ResourceType::kBool)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kColor);
+  EXPECT_THAT(type, Eq(ResourceNamedType("color", ResourceType::kColor)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kConfigVarying);
+  EXPECT_THAT(type, Eq(ResourceNamedType("configVarying", ResourceType::kConfigVarying)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kDimen);
+  EXPECT_THAT(type, Eq(ResourceNamedType("dimen", ResourceType::kDimen)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kDrawable);
+  EXPECT_THAT(type, Eq(ResourceNamedType("drawable", ResourceType::kDrawable)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kFont);
+  EXPECT_THAT(type, Eq(ResourceNamedType("font", ResourceType::kFont)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kFraction);
+  EXPECT_THAT(type, Eq(ResourceNamedType("fraction", ResourceType::kFraction)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kId);
+  EXPECT_THAT(type, Eq(ResourceNamedType("id", ResourceType::kId)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kInteger);
+  EXPECT_THAT(type, Eq(ResourceNamedType("integer", ResourceType::kInteger)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kInterpolator);
+  EXPECT_THAT(type, Eq(ResourceNamedType("interpolator", ResourceType::kInterpolator)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kLayout);
+  EXPECT_THAT(type, Eq(ResourceNamedType("layout", ResourceType::kLayout)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kMenu);
+  EXPECT_THAT(type, Eq(ResourceNamedType("menu", ResourceType::kMenu)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kMipmap);
+  EXPECT_THAT(type, Eq(ResourceNamedType("mipmap", ResourceType::kMipmap)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kNavigation);
+  EXPECT_THAT(type, Eq(ResourceNamedType("navigation", ResourceType::kNavigation)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kPlurals);
+  EXPECT_THAT(type, Eq(ResourceNamedType("plurals", ResourceType::kPlurals)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kRaw);
+  EXPECT_THAT(type, Eq(ResourceNamedType("raw", ResourceType::kRaw)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kString);
+  EXPECT_THAT(type, Eq(ResourceNamedType("string", ResourceType::kString)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kStyle);
+  EXPECT_THAT(type, Eq(ResourceNamedType("style", ResourceType::kStyle)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kTransition);
+  EXPECT_THAT(type, Eq(ResourceNamedType("transition", ResourceType::kTransition)));
+
+  type = ResourceNamedTypeWithDefaultName(ResourceType::kXml);
+  EXPECT_THAT(type, Eq(ResourceNamedType("xml", ResourceType::kXml)));
 }
 
 }  // namespace aapt

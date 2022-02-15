@@ -19,22 +19,21 @@
 
 #include <iomanip>
 #include <limits>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
 
+#include "Source.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
-#include "Source.h"
-
 namespace aapt {
 
 /**
- * The various types of resource types available. Corresponds
- * to the 'type' in package:type/entry.
+ * The various types of resource types available.
  */
 enum class ResourceType {
   kAnim,
@@ -76,6 +75,52 @@ android::StringPiece to_string(ResourceType type);
  * Returns a pointer to a valid ResourceType, or nullptr if the string was invalid.
  */
 const ResourceType* ParseResourceType(const android::StringPiece& str);
+
+/**
+ * Pair of type name as in ResourceTable and actual resource type.
+ * Corresponds to the 'type' in package:type/entry.
+ *
+ * This is to support resource types with custom names inside resource tables.
+ */
+struct ResourceNamedType {
+  std::string name;
+  ResourceType type = ResourceType::kRaw;
+
+  ResourceNamedType() = default;
+  ResourceNamedType(const android::StringPiece& n, ResourceType t);
+
+  int compare(const ResourceNamedType& other) const;
+
+  const std::string& to_string() const;
+};
+
+/**
+ * Same as ResourceNamedType, but uses StringPieces instead.
+ * Use this if you need to avoid copying and know that
+ * the lifetime of this object is shorter than that
+ * of the original string.
+ */
+struct ResourceNamedTypeRef {
+  android::StringPiece name;
+  ResourceType type = ResourceType::kRaw;
+
+  ResourceNamedTypeRef() = default;
+  ResourceNamedTypeRef(const ResourceNamedTypeRef&) = default;
+  ResourceNamedTypeRef(ResourceNamedTypeRef&&) = default;
+  ResourceNamedTypeRef(const ResourceNamedType& rhs);  // NOLINT(google-explicit-constructor)
+  ResourceNamedTypeRef(const android::StringPiece& n, ResourceType t);
+  ResourceNamedTypeRef& operator=(const ResourceNamedTypeRef& rhs) = default;
+  ResourceNamedTypeRef& operator=(ResourceNamedTypeRef&& rhs) = default;
+  ResourceNamedTypeRef& operator=(const ResourceNamedType& rhs);
+
+  ResourceNamedType ToResourceNamedType() const;
+
+  std::string to_string() const;
+};
+
+ResourceNamedTypeRef ResourceNamedTypeWithDefaultName(ResourceType t);
+
+std::optional<ResourceNamedTypeRef> ParseResourceNamedType(const android::StringPiece& s);
 
 /**
  * A resource's name. This can uniquely identify
@@ -292,6 +337,81 @@ inline bool cmp_ids_dynamic_after_framework(const ResourceId& a, const ResourceI
 
 inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) {
   return out << to_string(val);
+}
+
+//
+// ResourceNamedType implementation.
+//
+inline ResourceNamedType::ResourceNamedType(const android::StringPiece& n, ResourceType t)
+    : name(n.to_string()), type(t) {
+}
+
+inline int ResourceNamedType::compare(const ResourceNamedType& other) const {
+  int cmp = static_cast<int>(type) - static_cast<int>(other.type);
+  if (cmp != 0) return cmp;
+  cmp = name.compare(other.name);
+  return cmp;
+}
+
+inline const std::string& ResourceNamedType::to_string() const {
+  return name;
+}
+
+inline bool operator<(const ResourceNamedType& lhs, const ResourceNamedType& rhs) {
+  return lhs.compare(rhs) < 0;
+}
+
+inline bool operator==(const ResourceNamedType& lhs, const ResourceNamedType& rhs) {
+  return lhs.compare(rhs) == 0;
+}
+
+inline bool operator!=(const ResourceNamedType& lhs, const ResourceNamedType& rhs) {
+  return lhs.compare(rhs) != 0;
+}
+
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNamedType& val) {
+  return out << val.to_string();
+}
+
+//
+// ResourceNamedTypeRef implementation.
+//
+inline ResourceNamedTypeRef::ResourceNamedTypeRef(const android::StringPiece& n, ResourceType t)
+    : name(n), type(t) {
+}
+
+inline ResourceNamedTypeRef::ResourceNamedTypeRef(const ResourceNamedType& rhs)
+    : name(rhs.name), type(rhs.type) {
+}
+
+inline ResourceNamedTypeRef& ResourceNamedTypeRef::operator=(const ResourceNamedType& rhs) {
+  name = rhs.name;
+  type = rhs.type;
+  return *this;
+}
+
+inline ResourceNamedType ResourceNamedTypeRef::ToResourceNamedType() const {
+  return ResourceNamedType(name, type);
+}
+
+inline std::string ResourceNamedTypeRef::to_string() const {
+  return name.to_string();
+}
+
+inline bool operator<(const ResourceNamedTypeRef& lhs, const ResourceNamedTypeRef& rhs) {
+  return std::tie(lhs.type, lhs.name) < std::tie(rhs.type, rhs.name);
+}
+
+inline bool operator==(const ResourceNamedTypeRef& lhs, const ResourceNamedTypeRef& rhs) {
+  return std::tie(lhs.type, lhs.name) == std::tie(rhs.type, rhs.name);
+}
+
+inline bool operator!=(const ResourceNamedTypeRef& lhs, const ResourceNamedTypeRef& rhs) {
+  return std::tie(lhs.type, lhs.name) != std::tie(rhs.type, rhs.name);
+}
+
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNamedTypeRef& val) {
+  return out << val.name;
 }
 
 //
