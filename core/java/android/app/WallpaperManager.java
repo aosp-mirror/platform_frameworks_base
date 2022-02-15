@@ -2023,7 +2023,7 @@ public class WallpaperManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
-    public float getWallpaperDimAmount() {
+    public @FloatRange (from = 0f, to = 1f) float getWallpaperDimAmount() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());

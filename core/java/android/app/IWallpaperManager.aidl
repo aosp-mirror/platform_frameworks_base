@@ -211,6 +211,7 @@ interface IWallpaperManager {
      *
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)")
     oneway void setWallpaperDimAmount(float dimAmount);
 
     /**
@@ -219,6 +220,7 @@ interface IWallpaperManager {
      *
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)")
     float getWallpaperDimAmount();
 
     /**
