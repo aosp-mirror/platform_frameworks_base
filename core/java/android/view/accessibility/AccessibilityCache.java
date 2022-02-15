@@ -46,6 +46,8 @@ public class AccessibilityCache {
 
     private static final boolean CHECK_INTEGRITY = Build.IS_ENG;
 
+    private boolean mEnabled = true;
+
     /**
      * {@link AccessibilityEvent} types that are critical for the cache to stay up to date
      *
@@ -98,6 +100,21 @@ public class AccessibilityCache {
         mAccessibilityNodeRefresher = nodeRefresher;
     }
 
+    /** Returns if the cache is enabled. */
+    public boolean isEnabled() {
+        synchronized (mLock) {
+            return mEnabled;
+        }
+    }
+
+    /** Sets enabled status. */
+    public void setEnabled(boolean enabled) {
+        synchronized (mLock) {
+            mEnabled = enabled;
+            clear();
+        }
+    }
+
     /**
      * Sets all {@link AccessibilityWindowInfo}s of all displays into the cache.
      * The key of SparseArray is display ID.
@@ -110,6 +127,12 @@ public class AccessibilityCache {
             SparseArray<List<AccessibilityWindowInfo>> windowsOnAllDisplays,
             long populationTimeStamp) {
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return;
+            }
             if (DEBUG) {
                 Log.i(LOG_TAG, "Set windows");
             }
@@ -148,6 +171,12 @@ public class AccessibilityCache {
      */
     public void addWindow(AccessibilityWindowInfo window) {
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return;
+            }
             if (DEBUG) {
                 Log.i(LOG_TAG, "Caching window: " + window.getId() + " at display Id [ "
                         + window.getDisplayId() + " ]");
@@ -177,6 +206,12 @@ public class AccessibilityCache {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         AccessibilityNodeInfo nodeToRefresh = null;
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return;
+            }
             if (DEBUG) {
                 Log.i(LOG_TAG, "onAccessibilityEvent(" + event + ")");
             }
@@ -292,6 +327,12 @@ public class AccessibilityCache {
      */
     public AccessibilityNodeInfo getNode(int windowId, long accessibilityNodeId) {
         synchronized(mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return null;
+            }
             LongSparseArray<AccessibilityNodeInfo> nodes = mNodeCache.get(windowId);
             if (nodes == null) {
                 return null;
@@ -309,6 +350,28 @@ public class AccessibilityCache {
         }
     }
 
+    /** Returns {@code true} if {@code info} is in the cache. */
+    public boolean isNodeInCache(AccessibilityNodeInfo info) {
+        if (info == null) {
+            return false;
+        }
+        int windowId = info.getWindowId();
+        long accessibilityNodeId = info.getSourceNodeId();
+        synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return false;
+            }
+            LongSparseArray<AccessibilityNodeInfo> nodes = mNodeCache.get(windowId);
+            if (nodes == null) {
+                return false;
+            }
+            return nodes.get(accessibilityNodeId) != null;
+        }
+    }
+
     /**
      * Gets all {@link AccessibilityWindowInfo}s of all displays from the cache.
      *
@@ -317,6 +380,12 @@ public class AccessibilityCache {
      */
     public SparseArray<List<AccessibilityWindowInfo>> getWindowsOnAllDisplays() {
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return null;
+            }
             if (!mIsAllWindowsCached) {
                 return null;
             }
@@ -373,6 +442,12 @@ public class AccessibilityCache {
      */
     public AccessibilityWindowInfo getWindow(int windowId) {
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return null;
+            }
             final int displayCounts = mWindowCacheByDisplay.size();
             for (int i = 0; i < displayCounts; i++) {
                 final SparseArray<AccessibilityWindowInfo> windowsOfDisplay =
@@ -397,6 +472,12 @@ public class AccessibilityCache {
      */
     public void add(AccessibilityNodeInfo info) {
         synchronized(mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return;
+            }
             if (VERBOSE) {
                 Log.i(LOG_TAG, "add(" + info + ")");
             }
@@ -522,6 +603,12 @@ public class AccessibilityCache {
      */
     public AccessibilityNodeInfo getFocus(int focusType, long initialNodeId, int windowId) {
         synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return null;
+            }
             int currentFocusWindowId;
             long currentFocusId;
             if (focusType == FOCUS_ACCESSIBILITY) {
@@ -600,6 +687,23 @@ public class AccessibilityCache {
             return;
         }
         mNodeCache.remove(windowId);
+    }
+
+    /** Clears a subtree rooted at {@code info}. */
+    public boolean clearSubTree(AccessibilityNodeInfo info) {
+        if (info == null) {
+            return false;
+        }
+        synchronized (mLock) {
+            if (!mEnabled) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Cache is disabled");
+                }
+                return false;
+            }
+            clearSubTreeLocked(info.getWindowId(), info.getSourceNodeId());
+            return true;
+        }
     }
 
     /**

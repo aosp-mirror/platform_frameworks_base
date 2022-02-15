@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
 import android.text.style.LeadingMarginSpan;
@@ -403,6 +404,21 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set the line break configuration. The line break will be passed to native used for
+         * calculating the text wrapping. The default value of the line break style is
+         * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}
+         *
+         * @param lineBreakConfig the line break configuration for text wrapping.
+         * @return this builder, useful for chaining.
+         * @see android.widget.TextView#setLineBreakConfig
+         */
+        @NonNull
+        public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+            mLineBreakConfig = lineBreakConfig;
+            return this;
+        }
+
+        /**
          * Build the {@link StaticLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this
@@ -438,6 +454,7 @@ public class StaticLayout extends Layout {
         @Nullable private int[] mRightIndents;
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
+        private LineBreakConfig mLineBreakConfig;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -612,7 +629,6 @@ public class StaticLayout extends Layout {
         TextPaint paint = b.mPaint;
         int outerWidth = b.mWidth;
         TextDirectionHeuristic textDir = b.mTextDir;
-        final boolean fallbackLineSpacing = b.mFallbackLineSpacing;
         float spacingmult = b.mSpacingMult;
         float spacingadd = b.mSpacingAdd;
         float ellipsizedWidth = b.mEllipsizedWidth;
@@ -630,6 +646,7 @@ public class StaticLayout extends Layout {
         mLineCount = 0;
         mEllipsized = false;
         mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
+        mFallbackLineSpacing = b.mFallbackLineSpacing;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
@@ -670,7 +687,7 @@ public class StaticLayout extends Layout {
             PrecomputedText precomputed = (PrecomputedText) source;
             final @PrecomputedText.Params.CheckResultUsableResult int checkResult =
                     precomputed.checkResultUsable(bufStart, bufEnd, textDir, paint,
-                            b.mBreakStrategy, b.mHyphenationFrequency);
+                            b.mBreakStrategy, b.mHyphenationFrequency, b.mLineBreakConfig);
             switch (checkResult) {
                 case PrecomputedText.Params.UNUSABLE:
                     break;
@@ -680,6 +697,7 @@ public class StaticLayout extends Layout {
                                 .setBreakStrategy(b.mBreakStrategy)
                                 .setHyphenationFrequency(b.mHyphenationFrequency)
                                 .setTextDirection(textDir)
+                                .setLineBreakConfig(b.mLineBreakConfig)
                                 .build();
                     precomputed = PrecomputedText.create(precomputed, newParams);
                     paragraphInfo = precomputed.getParagraphInfo();
@@ -692,8 +710,8 @@ public class StaticLayout extends Layout {
         }
 
         if (paragraphInfo == null) {
-            final PrecomputedText.Params param = new PrecomputedText.Params(paint, textDir,
-                    b.mBreakStrategy, b.mHyphenationFrequency);
+            final PrecomputedText.Params param = new PrecomputedText.Params(paint,
+                    b.mLineBreakConfig, textDir, b.mBreakStrategy, b.mHyphenationFrequency);
             paragraphInfo = PrecomputedText.createMeasuredParagraphs(source, param, bufStart,
                     bufEnd, false /* computeLayout */);
         }
@@ -867,17 +885,17 @@ public class StaticLayout extends Layout {
 
                     boolean moreChars = (endPos < bufEnd);
 
-                    final int ascent = fallbackLineSpacing
+                    final int ascent = mFallbackLineSpacing
                             ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
                             : fmAscent;
-                    final int descent = fallbackLineSpacing
+                    final int descent = mFallbackLineSpacing
                             ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
 
                     // The fallback ascent/descent may be larger than top/bottom of the default font
                     // metrics. Adjust top/bottom with ascent/descent for avoiding unexpected
                     // clipping.
-                    if (fallbackLineSpacing) {
+                    if (mFallbackLineSpacing) {
                         if (ascent < fmTop) {
                             fmTop = ascent;
                         }
@@ -1381,6 +1399,11 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
+    @Override
+    public boolean isFallbackLineSpacingEnabled() {
+        return mFallbackLineSpacing;
+    }
+
     /**
      * Return the total height of this layout.
      *
@@ -1407,6 +1430,7 @@ public class StaticLayout extends Layout {
     @UnsupportedAppUsage
     private int mColumns;
     private int mEllipsizedWidth;
+    private boolean mFallbackLineSpacing;
 
     /**
      * Keeps track if ellipsize is applied to the text.

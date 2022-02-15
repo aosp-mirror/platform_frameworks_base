@@ -55,72 +55,39 @@ framework_docs_only_libs = [
     "android-support-multidex-instrumentation",
 ]
 
+// These defaults enable doc-stub generation, api lint database generation and sdk value generation.
 stubs_defaults {
     name: "android-non-updatable-doc-stubs-defaults",
     defaults: ["android-non-updatable-stubs-defaults"],
     srcs: [
         // No longer part of the stubs, but are included in the docs.
-        "test-base/src/**/*.java",
-        "test-mock/src/**/*.java",
-        "test-runner/src/**/*.java",
-    ],
-    libs: framework_docs_only_libs,
-    create_doc_stubs: true,
-    write_sdk_values: true,
-}
-
-stubs_defaults {
-    name: "framework-doc-stubs-default",
-    srcs: [
-        ":android-non-updatable-stub-sources",
-
-        // Module sources
-        ":art.module.public.api{.public.stubs.source}",
-        ":conscrypt.module.public.api{.public.stubs.source}",
-        ":i18n.module.public.api{.public.stubs.source}",
-
-        // No longer part of the stubs, but are included in the docs.
         ":android-test-base-sources",
         ":android-test-mock-sources",
         ":android-test-runner-sources",
     ],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
-    annotations_enabled: true,
-    filter_packages: packages_to_document,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    previous_api: ":android.api.public.latest",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
     write_sdk_values: true,
-    // TODO(b/169090544): remove below aidl includes.
-    aidl: {
-        local_include_dirs: ["media/aidl"],
-        include_dirs: [
-            "frameworks/av/aidl",
-            "frameworks/native/libs/permission/aidl",
-        ],
-    },
 }
 
 // Defaults module for doc-stubs targets that use module source code as input.
 stubs_defaults {
     name: "framework-doc-stubs-sources-default",
-    defaults: ["framework-doc-stubs-default"],
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
     srcs: [
+        ":art.module.public.api{.public.stubs.source}",
+        ":conscrypt.module.public.api{.public.stubs.source}",
+        ":i18n.module.public.api{.public.stubs.source}",
+
         ":framework-appsearch-sources",
+        ":framework-auxiliary-sources",
         ":framework-connectivity-sources",
+        ":framework-bluetooth-sources",
+        ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
+        ":framework-ondevicepersonalization-sources",
         ":framework-permission-sources",
         ":framework-permission-s-sources",
         ":framework-scheduling-sources",
@@ -137,13 +104,19 @@ stubs_defaults {
 
 droidstubs {
     name: "android-non-updatable-doc-stubs",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args,
 }
 
 droidstubs {
     name: "android-non-updatable-doc-stubs-system",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
 }
@@ -153,30 +126,23 @@ droidstubs {
     defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
     api_levels_sdk_type: "system",
 }
 
 droidstubs {
     name: "framework-doc-stubs",
-    defaults: ["framework-doc-stubs-default"],
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    srcs: [":all-modules-public-stubs-source"],
     args: metalava_framework_docs_args,
-    srcs: [
-        ":android.net.ipsec.ike{.public.stubs.source}",
-        ":framework-appsearch{.public.stubs.source}",
-        ":framework-connectivity{.public.stubs.source}",
-        ":framework-graphics{.public.stubs.source}",
-        ":framework-media{.public.stubs.source}",
-        ":framework-mediaprovider{.public.stubs.source}",
-        ":framework-nearby{.public.stubs.source}",
-        ":framework-permission{.public.stubs.source}",
-        ":framework-permission-s{.public.stubs.source}",
-        ":framework-scheduling{.public.stubs.source}",
-        ":framework-sdkextensions{.public.stubs.source}",
-        ":framework-statsd{.public.stubs.source}",
-        ":framework-supplementalprocess{.public.stubs.source}",
-        ":framework-tethering{.public.stubs.source}",
-        ":framework-uwb{.public.stubs.source}",
-        ":framework-wifi{.public.stubs.source}",
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
     ],
     aidl: {
         local_include_dirs: [
@@ -186,45 +152,6 @@ droidstubs {
             "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
-}
-
-// This produces the same annotations.zip as framework-doc-stubs, but by using
-// outputs from individual modules instead of all the source code.
-genrule {
-    name: "sdk-annotations.zip",
-    srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
-
-        // Conscrypt and i18n currently do not enable annotations
-        // ":conscrypt.module.public.api{.public.annotations.zip}",
-        // ":i18n.module.public.api{.public.annotations.zip}",
-
-        // Modules that enable annotations below
-        ":android.net.ipsec.ike{.public.annotations.zip}",
-        ":art.module.public.api{.public.annotations.zip}",
-        ":framework-appsearch{.public.annotations.zip}",
-        ":framework-connectivity{.public.annotations.zip}",
-        ":framework-graphics{.public.annotations.zip}",
-        ":framework-media{.public.annotations.zip}",
-        ":framework-mediaprovider{.public.annotations.zip}",
-        ":framework-nearby{.public.annotations.zip}",
-        ":framework-permission{.public.annotations.zip}",
-        ":framework-permission-s{.public.annotations.zip}",
-        ":framework-scheduling{.public.annotations.zip}",
-        ":framework-sdkextensions{.public.annotations.zip}",
-        ":framework-statsd{.public.annotations.zip}",
-        ":framework-supplementalprocess{.public.annotations.zip}",
-        ":framework-tethering{.public.annotations.zip}",
-        ":framework-uwb{.public.annotations.zip}",
-        ":framework-wifi{.public.annotations.zip}",
-    ],
-    out: ["annotations.zip"],
-    tools: [
-        "merge_annotation_zips",
-        "soong_zip",
-    ],
-    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
-        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
 }
 
 /////////////////////////////////////////////////////////////////////

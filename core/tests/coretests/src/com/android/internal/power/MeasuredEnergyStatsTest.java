@@ -383,10 +383,10 @@ public class MeasuredEnergyStatsTest {
         assertEquals(13, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0));
         // 6 * (6000-4000)/(6000-2000)
         assertEquals(3, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1));
-
-        // POWER_BUCKET_SCREEN_OTHER was only present along with state=1
-        assertEquals(0, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 0));
-        assertEquals(40, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 1));
+        // 40 * (4000-1000)/(5000-1000)
+        assertEquals(30, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 0));
+        // 40 * (5000-4000)/(5000-1000)
+        assertEquals(10, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 1));
     }
 
     @Test
@@ -465,15 +465,22 @@ public class MeasuredEnergyStatsTest {
         supportedStandardBuckets[POWER_BUCKET_SCREEN_DOZE] = false;
         supportedStandardBuckets[POWER_BUCKET_SCREEN_OTHER] = true;
 
+        final int[] supportedMultiStateBuckets = new int[]{POWER_BUCKET_SCREEN_ON};
         final MeasuredEnergyStats.Config config =
                 new MeasuredEnergyStats.Config(supportedStandardBuckets, customBucketNames,
-                        new int[0], new String[]{"s"});
+                        supportedMultiStateBuckets, new String[]{"s1", "s2"});
         final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10);
-        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5);
+        stats.setState(1, 0);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 10, 1000);
+        stats.updateStandardBucket(POWER_BUCKET_SCREEN_ON, 5, 2000);
         stats.updateStandardBucket(POWER_BUCKET_SCREEN_OTHER, 40);
         stats.updateCustomBucket(0, 50);
         stats.updateCustomBucket(1, 60);
+
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0))
+                .isEqualTo(0);
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1))
+                .isEqualTo(15);
 
         MeasuredEnergyStats.resetIfNotNull(stats);
         // All charges should be reset to 0
@@ -485,7 +492,13 @@ public class MeasuredEnergyStatsTest {
                 assertFalse(stats.isStandardBucketSupported(i));
                 assertEquals(POWER_DATA_UNAVAILABLE, stats.getAccumulatedStandardBucketCharge(i));
             }
+
         }
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0))
+                .isEqualTo(0);
+        assertThat(stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1))
+                .isEqualTo(0);
+
         for (int i = 0; i < customBucketNames.length; i++) {
             assertEquals(0, stats.getAccumulatedCustomBucketCharge(i));
         }

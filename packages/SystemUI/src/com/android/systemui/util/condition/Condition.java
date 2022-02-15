@@ -36,6 +36,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
     private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
     private boolean mIsConditionMet = false;
     private boolean mStarted = false;
+    private boolean mOverriding = false;
 
     /**
      * Starts monitoring the condition.
@@ -48,6 +49,21 @@ public abstract class Condition implements CallbackController<Condition.Callback
     protected abstract void stop();
 
     /**
+     * Sets whether this condition's value overrides others in determining the overall state.
+     */
+    public void setOverriding(boolean overriding) {
+        mOverriding = overriding;
+        updateCondition(mIsConditionMet);
+    }
+
+    /**
+     * Returns whether the current condition overrides
+     */
+    public boolean isOverridingCondition() {
+        return mOverriding;
+    }
+
+    /**
      * Registers a callback to receive updates once started. This should be called before
      * {@link #start()}. Also triggers the callback immediately if already started.
      */
@@ -57,7 +73,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
         mCallbacks.add(new WeakReference<>(callback));
 
         if (mStarted) {
-            callback.onConditionChanged(this, mIsConditionMet);
+            callback.onConditionChanged(this);
             return;
         }
 
@@ -107,9 +123,13 @@ public abstract class Condition implements CallbackController<Condition.Callback
             if (cb == null) {
                 iterator.remove();
             } else {
-                cb.onConditionChanged(this, mIsConditionMet);
+                cb.onConditionChanged(this);
             }
         }
+    }
+
+    public boolean isConditionMet() {
+        return mIsConditionMet;
     }
 
     private boolean shouldLog() {
@@ -124,8 +144,7 @@ public abstract class Condition implements CallbackController<Condition.Callback
          * Called when the fulfillment of the condition changes.
          *
          * @param condition The condition in question.
-         * @param isConditionMet True if the condition has been fulfilled. False otherwise.
          */
-        void onConditionChanged(Condition condition, boolean isConditionMet);
+        void onConditionChanged(Condition condition);
     }
 }

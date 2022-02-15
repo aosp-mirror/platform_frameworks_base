@@ -17,6 +17,8 @@
 package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -73,9 +75,9 @@ public final class NetworkStateSnapshot implements Parcelable {
 
     /** @hide */
     public NetworkStateSnapshot(@NonNull Parcel in) {
-        mNetwork = in.readParcelable(null);
-        mNetworkCapabilities = in.readParcelable(null);
-        mLinkProperties = in.readParcelable(null);
+        mNetwork = in.readParcelable(null, android.net.Network.class);
+        mNetworkCapabilities = in.readParcelable(null, android.net.NetworkCapabilities.class);
+        mLinkProperties = in.readParcelable(null, android.net.LinkProperties.class);
         mSubscriberId = in.readString();
         mLegacyType = in.readInt();
     }
@@ -98,11 +100,28 @@ public final class NetworkStateSnapshot implements Parcelable {
         return mLinkProperties;
     }
 
-    /** Get the Subscriber Id of the network associated with this snapshot. */
+    /**
+     * Get the Subscriber Id of the network associated with this snapshot.
+     * @deprecated Please use #getSubId, which doesn't return personally identifiable
+     * information.
+     */
+    @Deprecated
     @Nullable
     public String getSubscriberId() {
         return mSubscriberId;
     }
+
+    /** Get the subId of the network associated with this snapshot. */
+    public int getSubId() {
+        if (mNetworkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            final NetworkSpecifier spec = mNetworkCapabilities.getNetworkSpecifier();
+            if (spec instanceof TelephonyNetworkSpecifier) {
+                return ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
+            }
+        }
+        return INVALID_SUBSCRIPTION_ID;
+    }
+
 
     /**
      * Get the legacy type of the network associated with this snapshot.

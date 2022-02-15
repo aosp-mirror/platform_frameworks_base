@@ -30,6 +30,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -56,6 +57,8 @@ import java.util.function.Supplier;
  * "quick & dirty". For example, to define aliases, we use a regular intent filter and meta-data
  * in the manifest, instead of adding proper tags/attributes to AndroidManifest.xml.
  *
+ * Because it's an experimental feature, it can't be enabled on a user build.
+ *
  * Also, for now, aliases can be defined across any packages, but in the final version, there'll
  * be restrictions:
  * - We probably should only allow either privileged or preinstalled apps.
@@ -76,6 +79,9 @@ public class ComponentAliasResolver {
     private final Object mLock = new Object();
     private final ActivityManagerService mAm;
     private final Context mContext;
+
+    @GuardedBy("mLock")
+    private boolean mEnabledByDeviceConfig;
 
     @GuardedBy("mLock")
     private boolean mEnabled;
@@ -141,7 +147,7 @@ public class ComponentAliasResolver {
     /**
      * Call this on systemRead().
      */
-    public void onSystemReady(String overrides) {
+    public void onSystemReady(boolean enabledByDeviceConfig, String overrides) {
         synchronized (mLock) {
             mPlatformCompat = (PlatformCompat) ServiceManager.getService(
                     Context.PLATFORM_COMPAT_SERVICE);
@@ -149,19 +155,21 @@ public class ComponentAliasResolver {
                     mCompatChangeListener);
         }
         if (DEBUG) Slog.d(TAG, "Compat listener set.");
-        update(overrides);
+        update(enabledByDeviceConfig, overrides);
     }
 
     /**
      * (Re-)loads aliases from <meta-data> and the device config override.
      */
-    public void update(String overrides) {
+    public void update(boolean enabledByDeviceConfig, String overrides) {
         synchronized (mLock) {
             if (mPlatformCompat == null) {
                 return; // System not ready.
             }
-            final boolean enabled = mPlatformCompat.isChangeEnabledByPackageName(
-                    USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM);
+            final boolean enabled = Build.isDebuggable()
+                    && (enabledByDeviceConfig
+                        || mPlatformCompat.isChangeEnabledByPackageName(
+                        USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM));
             if (enabled != mEnabled) {
                 Slog.i(TAG, (enabled ? "Enabling" : "Disabling") + " component aliases...");
                 if (enabled) {
@@ -172,6 +180,7 @@ public class ComponentAliasResolver {
                 }
             }
             mEnabled = enabled;
+            mEnabledByDeviceConfig = enabledByDeviceConfig;
             mOverrideString = overrides;
 
             if (mEnabled) {
@@ -184,7 +193,7 @@ public class ComponentAliasResolver {
 
     private void refresh() {
         synchronized (mLock) {
-            update(mOverrideString);
+            update(mEnabledByDeviceConfig, mOverrideString);
         }
     }
 

@@ -3239,6 +3239,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with PRIMARY_CAMERA.</p>
      * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, this position cannot be accurately
      * represented by the camera device, and will be represented as <code>(0, 0, 0)</code>.</p>
+     * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is AUTOMOTIVE, then this position is relative to the
+     * origin of the automotive sensor coordinate system, which is at the center of the rear
+     * axle.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>

@@ -33,6 +33,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Handler;
+import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -215,14 +216,15 @@ public class Notifier {
      * Called when a wake lock is acquired.
      */
     public void onWakeLockAcquired(int flags, String tag, String packageName,
-            int ownerUid, int ownerPid, WorkSource workSource, String historyTag) {
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
+            IWakeLockCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockAcquired: flags=" + flags + ", tag=\"" + tag
                     + "\", packageName=" + packageName
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
-
+        notifyWakeLockListener(callback, true);
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         if (monitorType >= 0) {
             try {
@@ -300,8 +302,9 @@ public class Notifier {
      */
     public void onWakeLockChanging(int flags, String tag, String packageName,
             int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
-            int newFlags, String newTag, String newPackageName, int newOwnerUid,
-            int newOwnerPid, WorkSource newWorkSource, String newHistoryTag) {
+            IWakeLockCallback callback, int newFlags, String newTag, String newPackageName,
+            int newOwnerUid, int newOwnerPid, WorkSource newWorkSource, String newHistoryTag,
+            IWakeLockCallback newCallback) {
 
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
@@ -323,10 +326,16 @@ public class Notifier {
             } catch (RemoteException ex) {
                 // Ignore
             }
-        } else {
-            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource, historyTag);
+        } else if (!PowerManagerService.isSameCallback(callback, newCallback)) {
+            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource, historyTag,
+                    null /* Do not notify the old callback */);
             onWakeLockAcquired(newFlags, newTag, newPackageName, newOwnerUid, newOwnerPid,
-                    newWorkSource, newHistoryTag);
+                    newWorkSource, newHistoryTag, newCallback /* notify the new callback */);
+        } else {
+            onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource, historyTag,
+                    callback);
+            onWakeLockAcquired(newFlags, newTag, newPackageName, newOwnerUid, newOwnerPid,
+                    newWorkSource, newHistoryTag, newCallback);
         }
     }
 
@@ -334,14 +343,15 @@ public class Notifier {
      * Called when a wake lock is released.
      */
     public void onWakeLockReleased(int flags, String tag, String packageName,
-            int ownerUid, int ownerPid, WorkSource workSource, String historyTag) {
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
+            IWakeLockCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockReleased: flags=" + flags + ", tag=\"" + tag
                     + "\", packageName=" + packageName
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
-
+        notifyWakeLockListener(callback, false);
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         if (monitorType >= 0) {
             try {
@@ -545,7 +555,7 @@ public class Notifier {
     /**
      * Called when there has been user activity.
      */
-    public void onUserActivity(int event, int uid) {
+    public void onUserActivity(int displayGroupId, int event, int uid) {
         if (DEBUG) {
             Slog.d(TAG, "onUserActivity: event=" + event + ", uid=" + uid);
         }
@@ -560,7 +570,8 @@ public class Notifier {
             if (!mUserActivityPending) {
                 mUserActivityPending = true;
                 Message msg = mHandler.obtainMessage(MSG_USER_ACTIVITY);
-                msg.arg1 = event;
+                msg.arg1 = displayGroupId;
+                msg.arg2 = event;
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
             }
@@ -633,14 +644,15 @@ public class Notifier {
     /**
      * Called when the screen policy changes.
      */
-    public void onScreenPolicyUpdate(int newPolicy) {
+    public void onScreenPolicyUpdate(int displayGroupId, int newPolicy) {
         if (DEBUG) {
             Slog.d(TAG, "onScreenPolicyUpdate: newPolicy=" + newPolicy);
         }
 
         synchronized (mLock) {
             Message msg = mHandler.obtainMessage(MSG_SCREEN_POLICY);
-            msg.arg1 = newPolicy;
+            msg.arg1 = displayGroupId;
+            msg.arg2 = newPolicy;
             msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
@@ -675,7 +687,7 @@ public class Notifier {
         mSuspendBlocker.release();
     }
 
-    private void sendUserActivity(int event) {
+    private void sendUserActivity(int displayGroupId, int event) {
         synchronized (mLock) {
             if (!mUserActivityPending) {
                 return;
@@ -686,7 +698,7 @@ public class Notifier {
         tm.notifyUserActivity();
         mPolicy.userActivity();
         mFaceDownDetector.userActivity(event);
-        mScreenUndimDetector.userActivity();
+        mScreenUndimDetector.userActivity(displayGroupId);
     }
 
     void postEnhancedDischargePredictionBroadcast(long delayMs) {
@@ -840,8 +852,8 @@ public class Notifier {
         mSuspendBlocker.release();
     }
 
-    private void screenPolicyChanging(int screenPolicy) {
-        mScreenUndimDetector.recordScreenPolicy(screenPolicy);
+    private void screenPolicyChanging(int displayGroupId, int screenPolicy) {
+        mScreenUndimDetector.recordScreenPolicy(displayGroupId, screenPolicy);
     }
 
     private void lockProfile(@UserIdInt int userId) {
@@ -857,6 +869,18 @@ public class Notifier {
         return enabled && dndOff;
     }
 
+    private void notifyWakeLockListener(IWakeLockCallback callback, boolean isEnabled) {
+        if (callback != null) {
+            mHandler.post(() -> {
+                try {
+                    callback.onStateChanged(isEnabled);
+                } catch (RemoteException e) {
+                    throw new IllegalArgumentException("Wakelock.mCallback is already dead.", e);
+                }
+            });
+        }
+    }
+
     private final class NotifierHandler extends Handler {
 
         public NotifierHandler(Looper looper) {
@@ -866,7 +890,7 @@ public class Notifier {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_ACTIVITY:
-                    sendUserActivity(msg.arg1);
+                    sendUserActivity(msg.arg1, msg.arg2);
                     break;
                 case MSG_BROADCAST:
                     sendNextBroadcast();
@@ -885,7 +909,7 @@ public class Notifier {
                     showWiredChargingStarted(msg.arg1);
                     break;
                 case MSG_SCREEN_POLICY:
-                    screenPolicyChanging(msg.arg1);
+                    screenPolicyChanging(msg.arg1, msg.arg2);
                     break;
             }
         }

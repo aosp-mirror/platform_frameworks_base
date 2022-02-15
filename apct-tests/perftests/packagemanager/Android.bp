@@ -10,7 +10,10 @@ package {
 android_test {
     name: "PackageManagerPerfTests",
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     static_libs: [
         "platform-compat-test-rules",
@@ -21,6 +24,7 @@ android_test {
         "apct-perftests-utils",
         "collector-device-lib-platform",
         "cts-install-lib-java",
+        "services.core",
     ],
 
     libs: ["android.test.base"],

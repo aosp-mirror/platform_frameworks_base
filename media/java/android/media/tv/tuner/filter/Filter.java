@@ -153,13 +153,14 @@ public class Filter implements AutoCloseable {
 
 
     /** @hide */
-    @IntDef(flag = true, prefix = "STATUS_", value = {STATUS_DATA_READY, STATUS_LOW_WATER,
-            STATUS_HIGH_WATER, STATUS_OVERFLOW})
+    @IntDef(prefix = "STATUS_",
+            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
 
     /**
-     * The status of a filter that the data in the filter buffer is ready to be read.
+     * The status of a filter that the data in the filter buffer is ready to be read. It can also be
+     * used to know the STC (System Time Clock) ready status if it's PCR filter.
      */
     public static final int STATUS_DATA_READY = DemuxFilterStatus.DATA_READY;
     /**
@@ -184,8 +185,7 @@ public class Filter implements AutoCloseable {
     public static final int STATUS_OVERFLOW = DemuxFilterStatus.OVERFLOW;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SCRAMBLING_STATUS_",
+    @IntDef(prefix = "SCRAMBLING_STATUS_",
             value = {SCRAMBLING_STATUS_UNKNOWN, SCRAMBLING_STATUS_NOT_SCRAMBLED,
                     SCRAMBLING_STATUS_SCRAMBLED})
     @Retention(RetentionPolicy.SOURCE)
@@ -208,8 +208,7 @@ public class Filter implements AutoCloseable {
             android.hardware.tv.tuner.ScramblingStatus.SCRAMBLED;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MONITOR_EVENT_",
+    @IntDef(prefix = "MONITOR_EVENT_",
             value = {MONITOR_EVENT_SCRAMBLING_STATUS, MONITOR_EVENT_IP_CID_CHANGE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MonitorEventMask {}
@@ -253,6 +252,8 @@ public class Filter implements AutoCloseable {
     private native int nativeClose();
     private native String nativeAcquireSharedFilterToken();
     private native void nativeFreeSharedFilterToken(String token);
+    private native int nativeSetTimeDelayHint(int timeDelayInMs);
+    private native int nativeSetDataSizeDelayHint(int dataSizeDelayInBytes);
 
     // Called by JNI
     private Filter(long id) {
@@ -280,9 +281,21 @@ public class Filter implements AutoCloseable {
                     synchronized (mCallbackLock) {
                         if (mCallback != null) {
                             mCallback.onFilterEvent(this, events);
+                        } else {
+                            for (FilterEvent event : events) {
+                                if (event instanceof MediaEvent) {
+                                    ((MediaEvent)event).release();
+                                }
+                            }
                         }
                     }
                 });
+            } else {
+                for (FilterEvent event : events) {
+                    if (event instanceof MediaEvent) {
+                        ((MediaEvent)event).release();
+                    }
+                }
             }
         }
     }
@@ -555,6 +568,8 @@ public class Filter implements AutoCloseable {
             if (res != Tuner.RESULT_SUCCESS) {
                 TunerUtils.throwExceptionForResult(res, "Failed to close filter.");
             } else {
+                mCallback = null;
+                mExecutor = null;
                 mIsStarted = false;
                 mIsClosed = true;
             }
@@ -596,6 +611,62 @@ public class Filter implements AutoCloseable {
             }
             nativeFreeSharedFilterToken(filterToken);
             mIsShared = false;
+        }
+    }
+
+    /**
+     * Set filter time delay.
+     *
+     * <p> Setting a time delay instructs the filter to delay its event callback invocation until
+     * the specified amount of time has passed. The default value (delay disabled) is {@code 0}.
+     *
+     * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
+     * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * @param durationInMs specifies the duration of the delay in milliseconds.
+     * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
+     * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
+     * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
+     * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
+     */
+    public int delayCallbackForDurationMillis(long durationInMs) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                  TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
+            return Tuner.RESULT_UNAVAILABLE;
+        }
+
+        if (durationInMs >= 0 && durationInMs <= Integer.MAX_VALUE) {
+            synchronized (mLock) {
+                return nativeSetTimeDelayHint((int) durationInMs);
+            }
+        }
+        return Tuner.RESULT_INVALID_ARGUMENT;
+    }
+
+    /**
+     * Set filter data size delay.
+     *
+     * <p> Setting a data size delay instructs the filter to delay its event callback invocation
+     * until a specified amount of data has accumulated. The default value (delay disabled) is
+     * {@code 0}.
+     *
+     * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
+     * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     *
+     * @param bytesAccumulated specifies the delay condition in bytes.
+     * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
+     * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
+     * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
+     * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
+     */
+    public int delayCallbackUntilBytesAccumulated(int bytesAccumulated) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                  TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
+            return Tuner.RESULT_UNAVAILABLE;
+        }
+
+        synchronized (mLock) {
+            return nativeSetDataSizeDelayHint(bytesAccumulated);
         }
     }
 }

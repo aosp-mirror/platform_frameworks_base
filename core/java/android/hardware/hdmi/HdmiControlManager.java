@@ -105,6 +105,12 @@ public final class HdmiControlManager {
             "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
 
     /**
+     * Used as an extra field in the Set Menu Language intent. Contains the requested locale.
+     * @hide
+     */
+    public static final String EXTRA_LOCALE = "android.hardware.hdmi.extra.LOCALE";
+
+    /**
      * Volume value for mute state.
      */
     public static final int AVR_VOLUME_MUTED = 101;
@@ -558,6 +564,32 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TvSendStandbyOnSleep {}
 
+    // -- Whether a playback device should act on an incoming {@code <Set Menu Language>} message.
+    /**
+     * Confirmation dialog should be shown upon receiving the CEC message.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SET_MENU_LANGUAGE
+     * @hide
+     */
+    public static final int SET_MENU_LANGUAGE_ENABLED = 1;
+    /**
+     * The message should be ignored.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_SET_MENU_LANGUAGE
+     * @hide
+     */
+    public static final int SET_MENU_LANGUAGE_DISABLED = 0;
+    /**
+     * @see HdmiControlManager#CEC_SETTING_NAME_SET_MENU_LANGUAGE
+     * @hide
+     */
+    @IntDef(prefix = { "SET_MENU_LANGUAGE_" }, value = {
+            SET_MENU_LANGUAGE_ENABLED,
+            SET_MENU_LANGUAGE_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetMenuLanguage {}
+
     // -- The RC profile of a TV panel.
     /**
      * RC profile none.
@@ -812,6 +844,13 @@ public final class HdmiControlManager {
     public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP =
             "tv_send_standby_on_sleep";
     /**
+     * Name of a setting deciding whether {@code <Set Menu Language>} message should be
+     * handled by the framework or ignored.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_SET_MENU_LANGUAGE = "set_menu_language";
+    /**
      * Name of a setting representing the RC profile of a TV panel.
      *
      * @hide
@@ -977,6 +1016,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
         CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
         CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+        CEC_SETTING_NAME_SET_MENU_LANGUAGE,
         CEC_SETTING_NAME_RC_PROFILE_TV,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,

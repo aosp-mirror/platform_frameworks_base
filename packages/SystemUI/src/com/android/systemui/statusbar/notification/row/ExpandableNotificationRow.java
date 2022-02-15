@@ -49,6 +49,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -115,6 +116,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -136,11 +138,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         implements PluginListener<NotificationMenuRowPlugin>, SwipeableView,
         NotificationFadeAware.FadeOptimizedNotification {
 
-    private static final boolean DEBUG = false;
+    private static final String TAG = "ExpandableNotifRow";
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
-    private static final String TAG = "ExpandableNotifRow";
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
@@ -1245,6 +1247,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void reInflateViews() {
+        Trace.beginSection("ExpandableNotificationRow#reInflateViews");
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
@@ -1276,6 +1279,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
         params.setNeedsReinflation(true);
         mRowContentBindStage.requestRebind(mEntry, null /* callback */);
+        Trace.endSection();
     }
 
     @Override
@@ -1462,7 +1466,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void performDismiss(boolean fromAccessibility) {
         Dependency.get(MetricsLogger.class).count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
         dismiss(fromAccessibility);
-        if (mEntry.isClearable()) {
+        if (mEntry.isDismissable()) {
             if (mOnUserInteractionCallback != null) {
                 mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL,
                         mOnUserInteractionCallback.getGroupSummaryToDismiss(mEntry));
@@ -1733,6 +1737,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
             }
         };
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection(appendTraceStyleTag("ExpNotRow#onMeasure"));
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
+    }
+
+    /** Generates and appends "(MessagingStyle)" type tag to passed string for tracing. */
+    @NonNull
+    private String appendTraceStyleTag(@NonNull String traceTag) {
+        if (!Trace.isEnabled()) {
+            return traceTag;
+        }
+
+        Class<? extends Notification.Style> style =
+                getEntry().getSbn().getNotification().getNotificationStyle();
+        if (style == null) {
+            return traceTag + "(nostyle)";
+        } else {
+            return traceTag + "(" + style.getSimpleName() + ")";
+        }
     }
 
     @Override
@@ -2541,6 +2568,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Trace.beginSection(appendTraceStyleTag("ExpNotRow#onLayout"));
         int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
         if (intrinsicBefore != getIntrinsicHeight()
@@ -2554,6 +2582,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mLayoutListener != null) {
             mLayoutListener.onLayout();
         }
+        Trace.endSection();
     }
 
     /**
@@ -2673,9 +2702,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
      *         otherwise some state might not be updated. To request about the general clearability
-     *         see {@link NotificationEntry#isClearable()}.
+     *         see {@link NotificationEntry#isDismissable()}.
      */
     public boolean canViewBeDismissed() {
+        return mEntry.isDismissable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+    }
+
+    /**
+     * @return Whether this view is allowed to be cleared with clear all. Only valid for visible
+     * notifications as otherwise some state might not be updated. To request about the general
+     * clearability see {@link NotificationEntry#isClearable()}.
+     */
+    public boolean canViewBeCleared() {
         return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
     }
 

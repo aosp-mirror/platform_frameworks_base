@@ -28,8 +28,16 @@ import android.annotation.SystemApi;
 @SystemApi
 public interface ScanCallback {
 
-    /** Scan locked the signal. */
+    /**
+     * Scan locked the signal.
+     *
+     * It can also be notified after signal is locked if the signal attributes transmission
+     * parameter of the signal is changed (e.g., Modulation).
+     */
     void onLocked();
+
+    /** Scan unlocked the signal. */
+    default void onUnlocked() {}
 
     /** Scan stopped. */
     void onScanStopped();
@@ -89,4 +97,7 @@ public interface ScanCallback {
 
     /** DVBC Frontend Annex reported. */
     default void onDvbcAnnexReported(@DvbcFrontendSettings.Annex int dvbcAnnex) {}
+
+    /** DVBT Frontend Cell Ids reported. */
+    default void onDvbtCellIdsReported(@NonNull int[] dvbtCellIds) {}
 }

@@ -52,8 +52,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
@@ -68,6 +71,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -84,10 +88,10 @@ import android.util.SparseSetArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -235,6 +239,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_UID_ACTIVE = 6;
     static final int MSG_UID_IDLE = 7;
     static final int MSG_CHECK_CHANGED_JOB_LIST = 8;
+    static final int MSG_CHECK_MEDIA_EXEMPTION = 9;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -249,8 +254,6 @@ public class JobSchedulerService extends com.android.server.SystemService
      * {@link #mControllers}.
      */
     private final List<RestrictingController> mRestrictiveControllers;
-    /** Need direct access to this for testing. */
-    private final BatteryController mBatteryController;
     /** Need direct access to this for testing. */
     private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
@@ -268,8 +271,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private final List<JobRestriction> mJobRestrictions;
 
-    @NonNull
-    private final String mSystemGalleryPackage;
+    @GuardedBy("mLock")
+    private final BatteryStateTracker mBatteryStateTracker;
+
+    @GuardedBy("mLock")
+    private final SparseArray<String> mCloudMediaProviderPackages = new SparseArray<>();
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
@@ -354,6 +360,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     // Putting RESTRICTED_INDEX after NEVER_INDEX to make it easier for proto dumping
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int RESTRICTED_INDEX = 5;
+    // Putting EXEMPTED_INDEX after RESTRICTED_INDEX to make it easier for proto dumping
+    // (ScheduledJobStateChanged and JobStatusDumpProto).
+    public static final int EXEMPTED_INDEX = 6;
 
     private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
             EconomyManagerInternal.TareStateChangeListener {
@@ -411,6 +420,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                             break;
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
                         case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
+                        case Constants.KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC:
+                        case Constants.KEY_CONN_USE_CELL_SIGNAL_STRENGTH:
+                        case Constants.KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS:
                             mConstants.updateConnectivityConstantsLocked();
                             break;
                         case Constants.KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS:
@@ -483,6 +495,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
+        private static final String KEY_CONN_USE_CELL_SIGNAL_STRENGTH =
+                "conn_use_cell_signal_strength";
+        private static final String KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS =
+                "conn_update_all_jobs_min_interval_ms";
+        private static final String KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
+                "conn_low_signal_strength_relax_frac";
         private static final String KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
                 "prefetch_force_batch_relax_threshold_ms";
         private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
@@ -508,6 +526,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
+        private static final boolean DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH = true;
+        private static final long DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = MINUTE_IN_MILLIS;
+        private static final float DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC = 0.5f;
         private static final long DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS = HOUR_IN_MILLIS;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
@@ -563,6 +584,23 @@ public class JobSchedulerService extends com.android.server.SystemService
          * we consider matching it against a metered network.
          */
         public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
+        /**
+         * Whether to use the cell signal strength to determine if a particular job is eligible to
+         * run.
+         */
+        public boolean CONN_USE_CELL_SIGNAL_STRENGTH = DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH;
+        /**
+         * When throttling updating all tracked jobs, make sure not to update them more frequently
+         * than this value.
+         */
+        public long CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS =
+                DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS;
+        /**
+         * The fraction of a job's running window that must pass before we consider running it on
+         * low signal strength networks.
+         */
+        public float CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
+                DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC;
 
         /**
          * The amount of time within which we would consider the app to be launching relatively soon
@@ -655,6 +693,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             CONN_PREFETCH_RELAX_FRAC = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
+            CONN_USE_CELL_SIGNAL_STRENGTH = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_USE_CELL_SIGNAL_STRENGTH,
+                    DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH);
+            CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS,
+                    DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS);
+            CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC = DeviceConfig.getFloat(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC,
+                    DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC);
         }
 
         private void updatePrefetchConstantsLocked() {
@@ -733,6 +783,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
+            pw.print(KEY_CONN_USE_CELL_SIGNAL_STRENGTH, CONN_USE_CELL_SIGNAL_STRENGTH).println();
+            pw.print(KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS, CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS)
+                    .println();
+            pw.print(KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC, CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC)
+                    .println();
             pw.print(KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
                     PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS).println();
 
@@ -1206,18 +1261,16 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             mStartedUsers = ArrayUtils.appendInt(mStartedUsers, user.getUserIdentifier());
         }
-        // The user is starting but credential encrypted storage is still locked.
-        // Only direct-boot-aware jobs can safely run.
-        // Let's kick off any eligible jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
+    /** Start jobs after user is available, delayed by a few seconds since non-urgent. */
     @Override
-    public void onUserUnlocked(@NonNull TargetUser user) {
-        // The user is fully unlocked and credential encrypted storage is now decrypted.
-        // Direct-boot-UNaware jobs can now safely run.
-        // Let's kick off any outstanding jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    public void onUserCompletedEvent(@NonNull TargetUser user, UserCompletedEventType eventType) {
+        if (eventType.includesOnUserStarting() || eventType.includesOnUserUnlocked()) {
+            // onUserStarting: direct-boot-aware jobs can safely run
+            // onUserUnlocked: direct-boot-UNaware jobs can safely run.
+            mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        }
     }
 
     @Override
@@ -1553,9 +1606,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "UID " + uid + " bias changed from " + prevBias + " to " + newBias);
                 }
                 for (int c = 0; c < mControllers.size(); ++c) {
-                    mControllers.get(c).onUidBiasChangedLocked(uid, newBias);
+                    mControllers.get(c).onUidBiasChangedLocked(uid, prevBias, newBias);
                 }
             }
+        }
+    }
+
+    /** Return the current bias of the given UID. */
+    public int getUidBias(int uid) {
+        synchronized (mLock) {
+            return mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
         }
     }
 
@@ -1623,12 +1683,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (int i=0; i<mActiveServices.size(); i++) {
                 final JobServiceContext jsc = mActiveServices.get(i);
                 final JobStatus job = jsc.getRunningJobLocked();
-                if (job != null
-                        && !job.canRunInDoze()
-                        && !job.dozeWhitelisted
-                        && !job.uidActive) {
-                    // We will report active if we have a job running and it is not an exception
-                    // due to being in the foreground or whitelisted.
+                if (job != null && !job.canRunInDoze()) {
+                    // We will report active if we have a job running and it does not have an
+                    // exception that allows it to run in Doze.
                     active = true;
                     break;
                 }
@@ -1690,6 +1747,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Initialize the job store and set up any persisted jobs
         mJobs = JobStore.initAndGet(this);
 
+        mBatteryStateTracker = new BatteryStateTracker();
+        mBatteryStateTracker.startTracking();
+
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
         final ConnectivityController connectivityController = new ConnectivityController(this);
@@ -1697,8 +1757,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new TimeController(this));
         final IdleController idleController = new IdleController(this);
         mControllers.add(idleController);
-        mBatteryController = new BatteryController(this);
-        mControllers.add(mBatteryController);
+        final BatteryController batteryController = new BatteryController(this);
+        mControllers.add(batteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
         final BackgroundJobsController backgroundJobsController =
@@ -1718,16 +1778,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mTareController);
 
         mRestrictiveControllers = new ArrayList<>();
-        mRestrictiveControllers.add(mBatteryController);
+        mRestrictiveControllers.add(batteryController);
         mRestrictiveControllers.add(connectivityController);
         mRestrictiveControllers.add(idleController);
 
         // Create restrictions
         mJobRestrictions = new ArrayList<>();
         mJobRestrictions.add(new ThermalStatusRestriction(this));
-
-        mSystemGalleryPackage = Objects.requireNonNull(
-                context.getString(R.string.config_systemGallery));
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
@@ -1797,6 +1854,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
+
+            LocalServices.getService(StorageManagerInternal.class)
+                    .registerCloudProviderChangeListener(new CloudProviderChangeListener());
 
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
@@ -2296,6 +2356,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                         break;
                     }
 
+                    case MSG_CHECK_MEDIA_EXEMPTION: {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        synchronized (mLock) {
+                            updateMediaBackupExemptionLocked(
+                                    args.argi1, (String) args.arg1, (String) args.arg2);
+                        }
+                        args.recycle();
+                        break;
+                    }
                 }
                 maybeRunPendingJobsLocked();
             }
@@ -2484,6 +2553,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     shouldForceBatchJob =
                             mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
                                     && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
+                                    && job.getEffectiveStandbyBucket() != EXEMPTED_INDEX
                                     && !batchDelayExpired;
                 }
 
@@ -2591,10 +2661,29 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "Check changed jobs...");
         }
+        if (mChangedJobList.size() == 0) {
+            return;
+        }
 
         mChangedJobList.forEach(mMaybeQueueFunctor);
         mMaybeQueueFunctor.postProcessLocked();
         mChangedJobList.clear();
+    }
+
+    @GuardedBy("mLock")
+    private void updateMediaBackupExemptionLocked(int userId, @Nullable String oldPkg,
+            @Nullable String newPkg) {
+        final Predicate<JobStatus> shouldProcessJob =
+                (job) -> job.getSourceUserId() == userId
+                        && (job.getSourcePackageName().equals(oldPkg)
+                        || job.getSourcePackageName().equals(newPkg));
+        mJobs.forEachJob(shouldProcessJob,
+                (job) -> {
+                    if (job.updateMediaBackupExemptionStatus()) {
+                        mChangedJobList.add(job);
+                    }
+                });
+        mHandler.sendEmptyMessage(MSG_CHECK_CHANGED_JOB_LIST);
     }
 
     /** Returns true if both the calling and source users for the job are started. */
@@ -2756,7 +2845,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
                         ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
                         : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
-            } else if (job.getEffectivePriority() == JobInfo.PRIORITY_HIGH) {
+            } else if (job.getEffectivePriority() >= JobInfo.PRIORITY_HIGH) {
                 return mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
             } else {
                 return mConstants.RUNTIME_MIN_GUARANTEE_MS;
@@ -2809,6 +2898,129 @@ public class JobSchedulerService extends com.android.server.SystemService
             return adjustJobBias(override, job);
         }
         return adjustJobBias(bias, job);
+    }
+
+    private final class BatteryStateTracker extends BroadcastReceiver {
+        /**
+         * Track whether we're "charging", where charging means that we're ready to commit to
+         * doing work.
+         */
+        private boolean mCharging;
+        /** Keep track of whether the battery is charged enough that we want to do work. */
+        private boolean mBatteryNotLow;
+        /** Sequence number of last broadcast. */
+        private int mLastBatterySeq = -1;
+
+        private BroadcastReceiver mMonitor;
+
+        BatteryStateTracker() {
+        }
+
+        public void startTracking() {
+            IntentFilter filter = new IntentFilter();
+
+            // Battery health.
+            filter.addAction(Intent.ACTION_BATTERY_LOW);
+            filter.addAction(Intent.ACTION_BATTERY_OKAY);
+            // Charging/not charging.
+            filter.addAction(BatteryManager.ACTION_CHARGING);
+            filter.addAction(BatteryManager.ACTION_DISCHARGING);
+            getTestableContext().registerReceiver(this, filter);
+
+            // Initialise tracker state.
+            BatteryManagerInternal batteryManagerInternal =
+                    LocalServices.getService(BatteryManagerInternal.class);
+            mBatteryNotLow = !batteryManagerInternal.getBatteryLevelLow();
+            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+        }
+
+        public void setMonitorBatteryLocked(boolean enabled) {
+            if (enabled) {
+                if (mMonitor == null) {
+                    mMonitor = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            onReceiveInternal(intent);
+                        }
+                    };
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+                    getTestableContext().registerReceiver(mMonitor, filter);
+                }
+            } else if (mMonitor != null) {
+                getTestableContext().unregisterReceiver(mMonitor);
+                mMonitor = null;
+            }
+        }
+
+        public boolean isCharging() {
+            return mCharging;
+        }
+
+        public boolean isBatteryNotLow() {
+            return mBatteryNotLow;
+        }
+
+        public boolean isMonitoring() {
+            return mMonitor != null;
+        }
+
+        public int getSeq() {
+            return mLastBatterySeq;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onReceiveInternal(intent);
+        }
+
+        @VisibleForTesting
+        public void onReceiveInternal(Intent intent) {
+            synchronized (mLock) {
+                final String action = intent.getAction();
+                boolean changed = false;
+                if (Intent.ACTION_BATTERY_LOW.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery life too low @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (mBatteryNotLow) {
+                        mBatteryNotLow = false;
+                        changed = true;
+                    }
+                } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery high enough @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (!mBatteryNotLow) {
+                        mBatteryNotLow = true;
+                        changed = true;
+                    }
+                } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery charging @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (!mCharging) {
+                        mCharging = true;
+                        changed = true;
+                    }
+                } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Disconnected from power @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (mCharging) {
+                        mCharging = false;
+                        changed = true;
+                    }
+                }
+                mLastBatterySeq =
+                        intent.getIntExtra(BatteryManager.EXTRA_SEQUENCE, mLastBatterySeq);
+                if (changed) {
+                    for (int c = mControllers.size() - 1; c >= 0; --c) {
+                        mControllers.get(c).onBatteryStateChangedLocked();
+                    }
+                }
+            }
+        }
     }
 
     final class LocalService implements JobSchedulerInternal {
@@ -2869,8 +3081,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public String getMediaBackupPackage() {
-            return mSystemGalleryPackage;
+        public String getCloudMediaProviderPackage(int userId) {
+            return mCloudMediaProviderPackages.get(userId);
         }
 
         @Override
@@ -2955,8 +3167,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             return FREQUENT_INDEX;
         } else if (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) {
             return WORKING_INDEX;
-        } else {
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
             return ACTIVE_INDEX;
+        } else {
+            return EXEMPTED_INDEX;
         }
     }
 
@@ -2974,6 +3188,35 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slog.v(TAG, packageName + "/" + userId + " standby bucket index: " + bucket);
         }
         return bucket;
+    }
+
+    private class CloudProviderChangeListener implements
+            StorageManagerInternal.CloudProviderChangeListener {
+
+        @Override
+        public void onCloudProviderChanged(int userId, @Nullable String authority) {
+            final PackageManager pm = getContext()
+                    .createContextAsUser(UserHandle.of(userId), 0)
+                    .getPackageManager();
+            final ProviderInfo pi = pm.resolveContentProvider(
+                    authority, PackageManager.ComponentInfoFlags.of(0));
+            final String newPkg = (pi == null) ? null : pi.packageName;
+            synchronized (mLock) {
+                final String oldPkg = mCloudMediaProviderPackages.get(userId);
+                if (!Objects.equals(oldPkg, newPkg)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Cloud provider of user " + userId + " changed from " + oldPkg
+                                + " to " + newPkg);
+                    }
+                    mCloudMediaProviderPackages.put(userId, newPkg);
+                    SomeArgs args = SomeArgs.obtain();
+                    args.argi1 = userId;
+                    args.arg1 = oldPkg;
+                    args.arg2 = newPkg;
+                    mHandler.obtainMessage(MSG_CHECK_MEDIA_EXEMPTION, args).sendToTarget();
+                }
+            }
+        }
     }
 
     /**
@@ -3410,29 +3653,27 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void setMonitorBattery(boolean enabled) {
         synchronized (mLock) {
-            if (mBatteryController != null) {
-                mBatteryController.getTracker().setMonitorBatteryLocked(enabled);
-            }
+            mBatteryStateTracker.setMonitorBatteryLocked(enabled);
         }
     }
 
     int getBatterySeq() {
         synchronized (mLock) {
-            return mBatteryController != null ? mBatteryController.getTracker().getSeq() : -1;
+            return mBatteryStateTracker.getSeq();
         }
     }
 
-    boolean getBatteryCharging() {
+    /** Return {@code true} if the device is currently charging. */
+    public boolean isBatteryCharging() {
         synchronized (mLock) {
-            return mBatteryController != null
-                    ? mBatteryController.getTracker().isOnStablePower() : false;
+            return mBatteryStateTracker.isCharging();
         }
     }
 
-    boolean getBatteryNotLow() {
+    /** Return {@code true} if the battery is not low. */
+    public boolean isBatteryNotLow() {
         synchronized (mLock) {
-            return mBatteryController != null
-                    ? mBatteryController.getTracker().isBatteryNotLow() : false;
+            return mBatteryStateTracker.isBatteryNotLow();
         }
     }
 
@@ -3607,7 +3848,23 @@ public class JobSchedulerService extends com.android.server.SystemService
             mQuotaTracker.dump(pw);
             pw.println();
 
+            pw.print("Battery charging: ");
+            pw.println(mBatteryStateTracker.isCharging());
+            pw.print("Battery not low: ");
+            pw.println(mBatteryStateTracker.isBatteryNotLow());
+            if (mBatteryStateTracker.isMonitoring()) {
+                pw.print("MONITORING: seq=");
+                pw.println(mBatteryStateTracker.getSeq());
+            }
+            pw.println();
+
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
+            pw.println();
+
+            pw.print("Media Cloud Providers: ");
+            pw.println(mCloudMediaProviderPackages);
+            pw.println();
+
             pw.print("Registered ");
             pw.print(mJobs.size());
             pw.println(" jobs:");

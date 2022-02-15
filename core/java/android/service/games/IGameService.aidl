@@ -16,10 +16,14 @@
 
 package android.service.games;
 
+import android.service.games.GameStartedEvent;
+import android.service.games.IGameServiceController;
+
 /**
  * @hide
  */
 oneway interface IGameService {
-    void connected();
+    void connected(in IGameServiceController gameServiceController);
     void disconnected();
+    void gameStarted(in GameStartedEvent gameStartedEvent);
 }

@@ -17,9 +17,14 @@
 package com.android.systemui.dreams.dagger;
 
 import android.content.ContentResolver;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
@@ -35,6 +40,7 @@ import com.android.systemui.tuner.TunerService;
 
 import javax.inject.Named;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -44,6 +50,10 @@ public abstract class DreamOverlayModule {
     private static final String DREAM_OVERLAY_BATTERY_VIEW = "dream_overlay_battery_view";
     public static final String DREAM_OVERLAY_BATTERY_CONTROLLER =
             "dream_overlay_battery_controller";
+    public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
+    public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
+    public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
+            "burn_in_protection_update_interval";
 
     /** */
     @Provides
@@ -58,6 +68,7 @@ public abstract class DreamOverlayModule {
     /** */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
+    @Named(DREAM_OVERLAY_CONTENT_VIEW)
     public static ViewGroup providesDreamOverlayContentView(DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_content),
                 "R.id.dream_overlay_content must not be null");
@@ -101,5 +112,39 @@ public abstract class DreamOverlayModule {
                 mainHandler,
                 contentResolver,
                 batteryController);
+    }
+
+    /** */
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    @Named(MAX_BURN_IN_OFFSET)
+    static int providesMaxBurnInOffset(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.default_burn_in_prevention_offset);
+    }
+
+    /** */
+    @Provides
+    @Named(BURN_IN_PROTECTION_UPDATE_INTERVAL)
+    static long providesBurnInProtectionUpdateInterval(@Main Resources resources) {
+        return resources.getInteger(
+                R.integer.config_dreamOverlayBurnInProtectionUpdateIntervalMillis);
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static LifecycleOwner providesLifecycleOwner(Lazy<LifecycleRegistry> lifecycleRegistryLazy) {
+        return () -> lifecycleRegistryLazy.get();
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static LifecycleRegistry providesLifecycleRegistry(LifecycleOwner lifecycleOwner) {
+        return new LifecycleRegistry(lifecycleOwner);
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
+        return lifecycleOwner.getLifecycle();
     }
 }

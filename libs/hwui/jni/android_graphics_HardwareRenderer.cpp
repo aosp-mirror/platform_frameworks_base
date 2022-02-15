@@ -609,10 +609,19 @@ static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
         auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
                 env->NewGlobalRef(frameCallback));
-        proxy->setFrameCallback([globalCallbackRef](int64_t frameNr) {
+        proxy->setFrameCallback([globalCallbackRef](int32_t syncResult,
+                                                    int64_t frameNr) -> std::function<void(bool)> {
             JNIEnv* env = getenv(globalCallbackRef->vm());
-            env->CallVoidMethod(globalCallbackRef->object(), gFrameDrawingCallback.onFrameDraw,
-                    static_cast<jlong>(frameNr));
+            ScopedLocalRef<jobject> frameCommitCallback(
+                    env, env->CallObjectMethod(
+                                 globalCallbackRef->object(), gFrameDrawingCallback.onFrameDraw,
+                                 static_cast<jint>(syncResult), static_cast<jlong>(frameNr)));
+            if (frameCommitCallback == nullptr) {
+                return nullptr;
+            }
+            sp<FrameCommitWrapper> wrapper =
+                    sp<FrameCommitWrapper>::make(env, frameCommitCallback.get());
+            return [wrapper](bool didProduceBuffer) { wrapper->onFrameCommit(didProduceBuffer); };
         });
     }
 }
@@ -623,7 +632,7 @@ static void android_view_ThreadedRenderer_setFrameCommitCallback(JNIEnv* env, jo
     if (!callback) {
         proxy->setFrameCommitCallback(nullptr);
     } else {
-        sp<FrameCommitWrapper> wrapper = new FrameCommitWrapper{env, callback};
+        sp<FrameCommitWrapper> wrapper = sp<FrameCommitWrapper>::make(env, callback);
         proxy->setFrameCommitCallback(
                 [wrapper](bool didProduceBuffer) { wrapper->onFrameCommit(didProduceBuffer); });
     }
@@ -1003,8 +1012,9 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");
-    gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
-            "onFrameDraw", "(J)V");
+    gFrameDrawingCallback.onFrameDraw =
+            GetMethodIDOrDie(env, frameCallbackClass, "onFrameDraw",
+                             "(IJ)Landroid/graphics/HardwareRenderer$FrameCommitCallback;");
 
     jclass frameCommitClass =
             FindClassOrDie(env, "android/graphics/HardwareRenderer$FrameCommitCallback");

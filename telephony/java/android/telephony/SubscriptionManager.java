@@ -26,6 +26,7 @@ import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -92,6 +93,7 @@ import java.util.stream.Collectors;
  * and provides information about the current Telephony Subscriptions.
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class SubscriptionManager {
     private static final String LOG_TAG = "SubscriptionManager";
     private static final boolean DBG = false;
@@ -192,7 +194,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Void aVoid) {
+        public T recompute(Void aVoid) {
             T result = mDefaultValue;
 
             try {
@@ -226,7 +228,7 @@ public class SubscriptionManager {
         }
 
         @Override
-        protected T recompute(Integer query) {
+        public T recompute(Integer query) {
             T result = mDefaultValue;
 
             try {
@@ -941,6 +943,13 @@ public class SubscriptionManager {
     public static final String PROFILE_CLASS = SimInfo.COLUMN_PROFILE_CLASS;
 
     /**
+     * TelephonyProvider column name for the port index of the active UICC port.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String PORT_INDEX = SimInfo.COLUMN_PORT_INDEX;
+
+    /**
      * TelephonyProvider column name for VoIMS opt-in status.
      *
      * <P>Type: INTEGER (int)</P>
@@ -1030,11 +1039,74 @@ public class SubscriptionManager {
     public static final String UICC_APPLICATIONS_ENABLED = SimInfo.COLUMN_UICC_APPLICATIONS_ENABLED;
 
     /**
-     * Indicate which network type is allowed. By default it's enabled.
+     * Indicate which network type is allowed.
      * @hide
      */
     public static final String ALLOWED_NETWORK_TYPES =
             SimInfo.COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"USAGE_SETTING_"},
+        value = {
+            USAGE_SETTING_UNKNOWN,
+            USAGE_SETTING_DEFAULT,
+            USAGE_SETTING_VOICE_CENTRIC,
+            USAGE_SETTING_DATA_CENTRIC})
+    public @interface UsageSetting {}
+
+    /**
+     * The usage setting is unknown.
+     *
+     * This will be the usage setting returned on devices that do not support querying the
+     * or setting the usage setting.
+     *
+     * It may also be provided by a carrier that wishes to provide a value to avoid making any
+     * settings changes.
+     */
+    public static final int USAGE_SETTING_UNKNOWN = -1;
+
+    /**
+     * Subscription uses the default setting.
+     *
+     * The value is based upon device capability and the other properties of the subscription.
+     *
+     * Most subscriptions will default to voice-centric when in a phone.
+     *
+     * An opportunistic subscription will default to data-centric.
+     *
+     * {@see SubscriptionInfo#isOpportunistic}
+     */
+    public static final int USAGE_SETTING_DEFAULT = 0;
+
+    /**
+     * This subscription is forced to voice-centric mode
+     *
+     * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     */
+    public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
+
+    /**
+     * This subscription is forced to data-centric mode
+     *
+     * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
+     * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
+     * Annex A.
+     */
+    public static final int USAGE_SETTING_DATA_CENTRIC = 2;
+
+    /**
+     * Indicate the preferred usage setting for the subscription.
+     *
+     * 0 - Default - If the value has not been explicitly set, it will be "default"
+     * 1 - Voice-centric
+     * 2 - Data-centric
+     *
+     * @hide
+     */
+    public static final String USAGE_SETTING = SimInfo.COLUMN_USAGE_SETTING;
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
@@ -2791,10 +2863,43 @@ public class SubscriptionManager {
      *             outlined above.
      * @throws IllegalArgumentException if plans don't meet the requirements
      *             defined in {@link SubscriptionPlan}.
+     * @deprecated use {@link #setSubscriptionPlans(int, List, long)} instead.
      */
+    @Deprecated
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
+        setSubscriptionPlans(subId, plans, 0);
+    }
+
+    /**
+     * Set the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to. An empty list
+     *            may be sent to clear any existing plans.
+     * @param plans the list of plans. The first plan is always the primary and
+     *            most important plan. Any additional plans are secondary and
+     *            may not be displayed or used by decision making logic.
+     * @param expirationDurationMillis the duration after which the subscription plans
+     *            will be automatically cleared, or {@code 0} to leave the plans until
+     *            explicitly cleared, or the next reboot, whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
+     * @throws IllegalArgumentException if plans don't meet the requirements
+     *             defined in {@link SubscriptionPlan}.
+     */
+    public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans,
+            @DurationMillisLong long expirationDurationMillis) {
         getNetworkPolicyManager().setSubscriptionPlans(subId,
-                plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
+                plans.toArray(new SubscriptionPlan[0]), expirationDurationMillis,
+                mContext.getOpPackageName());
     }
 
     /**
@@ -2813,17 +2918,17 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideUnmetered set if the billing relationship should be
      *            considered unmetered.
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
      *            outlined above.
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         setSubscriptionOverrideUnmetered(subId, overrideUnmetered,
-                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+                TelephonyManager.getAllNetworkTypes(), expirationDurationMillis);
     }
 
     /**
@@ -2845,8 +2950,8 @@ public class SubscriptionManager {
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2854,10 +2959,10 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
             @NonNull @Annotation.NetworkType int[] networkTypes,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         final int overrideValue = overrideUnmetered ? SUBSCRIPTION_OVERRIDE_UNMETERED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_UNMETERED,
-                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, expirationDurationMillis, mContext.getOpPackageName());
     }
 
     /**
@@ -2877,17 +2982,17 @@ public class SubscriptionManager {
      * @param subId the subscriber this override applies to.
      * @param overrideCongested set if the subscription should be considered
      *            congested.
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
      *            outlined above.
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         setSubscriptionOverrideCongested(subId, overrideCongested,
-                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+                TelephonyManager.getAllNetworkTypes(), expirationDurationMillis);
     }
 
     /**
@@ -2910,8 +3015,8 @@ public class SubscriptionManager {
      * @param networkTypes the network types this override applies to. If no
      *            network types are specified, override values will be ignored.
      *            {@see TelephonyManager#getAllNetworkTypes()}
-     * @param timeoutMillis the timeout after which the requested override will
-     *            be automatically cleared, or {@code 0} to leave in the
+     * @param expirationDurationMillis the duration after which the requested override
+     *            will be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -2919,10 +3024,10 @@ public class SubscriptionManager {
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
             @NonNull @Annotation.NetworkType int[] networkTypes,
-            @DurationMillisLong long timeoutMillis) {
+            @DurationMillisLong long expirationDurationMillis) {
         final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
-                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, expirationDurationMillis, mContext.getOpPackageName());
     }
 
     /**
@@ -3820,6 +3925,11 @@ public class SubscriptionManager {
      * {@link #PHONE_NUMBER_SOURCE_UICC UICC} and decide if the previously set phone number
      * of source {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} should be updated.
      *
+     * <p>The API provides no guarantees of what format the number is in: the format can vary
+     * depending on the {@code source} and the network etc. Programmatic parsing should be done
+     * cautiously, for example, after formatting the number to a consistent format with
+     * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
+     *
      * <p>Note the assumption is that one subscription (which usually means one SIM) has
      * only one phone number. The multiple sources backup each other so hopefully at least one
      * is availavle. For example, for a carrier that doesn't typically set phone numbers
@@ -3878,6 +3988,11 @@ public class SubscriptionManager {
      * from available sources in the following order: {@link #PHONE_NUMBER_SOURCE_CARRIER}
      * > {@link #PHONE_NUMBER_SOURCE_UICC} > {@link #PHONE_NUMBER_SOURCE_IMS}.
      *
+     * <p>The API provides no guarantees of what format the number is in: the format can vary
+     * depending on the underlying source and the network etc. Programmatic parsing should be done
+     * cautiously, for example, after formatting the number to a consistent format with
+     * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
+     *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @return the phone number, or an empty string if not available.
@@ -3916,6 +4031,9 @@ public class SubscriptionManager {
      * <p>The API is suitable for carrier apps to provide a phone number, for example when
      * it's not possible to update {@link #PHONE_NUMBER_SOURCE_UICC UICC} directly.
      *
+     * <p>It's recommended that the phone number is formatted to well-known formats,
+     * for example, by {@link PhoneNumberUtils} {@code formatNumber*} methods.
+     *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @param number the phone number, or an empty string to remove the previously set number.
@@ -3943,4 +4061,33 @@ public class SubscriptionManager {
             throw ex.rethrowAsRuntimeException();
         }
     }
+
+    /**
+     * Set the preferred usage setting.
+     *
+     * The cellular usage setting is a switch which controls the mode of operation for the cellular
+     * radio to either require or not require voice service. It is not managed via Android’s
+     * Settings.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param usageSetting the requested usage setting.
+     *
+     * @throws IllegalStateException if a specific mode or setting the mode is not supported on a
+     * particular device.
+     *
+     * <p>Requires {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * or that the calling app has CarrierPrivileges for the given subscription.
+     *
+     * Note: This method will not allow the setting of USAGE_SETTING_UNKNOWN.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    void setUsageSetting(int subscriptionId, @UsageSetting int usageSetting) {
+        if (VDBG) logd("[setUsageSetting]+ setting:" + usageSetting + " subId:" + subscriptionId);
+        setSubscriptionPropertyHelper(subscriptionId, "setUsageSetting",
+                (iSub)-> iSub.setUsageSetting(
+                        usageSetting, subscriptionId, mContext.getOpPackageName()));
+    }
 }
+

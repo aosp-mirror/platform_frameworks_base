@@ -18,28 +18,36 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.content.Context
 import android.view.View
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.util.traceSection
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /**
  * Responsible for building and applying the "shade node spec": the list (tree) of things that
  * currently populate the notification shade.
  */
-class ShadeViewManager constructor(
+class ShadeViewManager @AssistedInject constructor(
     context: Context,
-    listContainer: NotificationListContainer,
-    private val stackController: NotifStackController,
+    @Assisted listContainer: NotificationListContainer,
+    @Assisted private val stackController: NotifStackController,
+    mediaContainerController: MediaContainerController,
+    featureManager: NotificationSectionsFeatureManager,
+    sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
     logger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
     private val rootController = RootNodeController(listContainer, View(context))
-    private val specBuilder = NodeSpecBuilder(viewBarn)
+    private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager,
+            sectionHeaderVisibilityProvider, viewBarn)
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
     /** Method for attaching this manager to the pipeline. */
@@ -65,16 +73,10 @@ class ShadeViewManager constructor(
     }
 }
 
-class ShadeViewManagerFactory @Inject constructor(
-    private val context: Context,
-    private val logger: ShadeViewDifferLogger,
-    private val viewBarn: NotifViewBarn
-) {
-    fun create(listContainer: NotificationListContainer, stackController: NotifStackController) =
-        ShadeViewManager(
-            context,
-            listContainer,
-            stackController,
-            logger,
-            viewBarn)
+@AssistedFactory
+interface ShadeViewManagerFactory {
+    fun create(
+        listContainer: NotificationListContainer,
+        stackController: NotifStackController
+    ): ShadeViewManager
 }

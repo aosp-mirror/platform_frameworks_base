@@ -18,7 +18,12 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
+import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
+import static android.app.StatusBarManager.NavBarModeOverride;
+import static android.app.StatusBarManager.SessionFlags;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -35,17 +40,21 @@ import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.om.IOverlayManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -57,8 +66,10 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationStats;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
@@ -75,11 +86,15 @@ import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -137,6 +152,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final ActivityManagerInternal mActivityManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManager;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
 
@@ -145,10 +161,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final SparseArray<UiState> mDisplayUiState = new SparseArray<>();
     @GuardedBy("mLock")
     private IUdfpsHbmListener mUdfpsHbmListener;
+    @GuardedBy("mLock")
+    private IBiometricContextListener mBiometricContextListener;
 
     @GuardedBy("mCurrentRequestAddTilePackages")
     private final ArrayMap<String, Long> mCurrentRequestAddTilePackages = new ArrayMap<>();
     private static final long REQUEST_TIME_OUT = TimeUnit.MINUTES.toNanos(5);
+
+    private IOverlayManager mOverlayManager;
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
@@ -250,6 +270,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mTileRequestTracker = new TileRequestTracker(mContext);
+        mSessionMonitor = new SessionMonitor(mContext);
+    }
+
+    private IOverlayManager getOverlayManager() {
+        // No need to synchronize; worst-case scenario it will be fetched twice.
+        if (mOverlayManager == null) {
+            mOverlayManager = IOverlayManager.Stub.asInterface(
+                    ServiceManager.getService(Context.OVERLAY_SERVICE));
+            if (mOverlayManager == null) {
+                Slog.w("StatusBarManager", "warning: no OVERLAY_SERVICE");
+            }
+        }
+        return mOverlayManager;
     }
 
     @Override
@@ -563,11 +596,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetsType int[] types) {
+        public void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
                 try {
-                    mBar.showTransient(displayId, types);
+                    mBar.showTransient(displayId, types, isGestureOnSystemBar);
                 } catch (RemoteException ex) { }
             }
         }
@@ -860,6 +894,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (mBar != null) {
             try {
                 mBar.hideAuthenticationDialog();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void setBiometicContextListener(IBiometricContextListener listener) {
+        enforceStatusBarService();
+        synchronized (mLock) {
+            mBiometricContextListener = listener;
+        }
+        if (mBar != null) {
+            try {
+                mBar.setBiometicContextListener(listener);
             } catch (RemoteException ex) {
             }
         }
@@ -1220,6 +1268,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 "StatusBarManagerService");
     }
 
+    private void enforceMediaContentControl() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MEDIA_CONTENT_CONTROL,
+                "StatusBarManagerService");
+    }
+
     /**
      *  For targetSdk S+ we require STATUS_BAR. For targetSdk < S, we only require EXPAND_STATUS_BAR
      *  but also require that it falls into one of the allowed use-cases to lock down abuse vector.
@@ -1287,8 +1341,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mHandler.post(() -> {
             synchronized (mLock) {
                 setUdfpsHbmListener(mUdfpsHbmListener);
+                setBiometicContextListener(mBiometricContextListener);
             }
         });
+    }
+
+    @VisibleForTesting
+    void registerOverlayManager(IOverlayManager overlayManager) {
+        mOverlayManager = overlayManager;
     }
 
     /**
@@ -1367,6 +1427,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } else {
                     ShutdownThread.reboot(getUiContext(), reason, false);
                 }
+            });
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Allows the status bar to restart android (vs a full reboot).
+     */
+    @Override
+    public void restart() {
+        enforceStatusBarService();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mHandler.post(() -> {
+                mActivityManagerInternal.restart();
             });
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1842,8 +1918,198 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
+    @Override
+    public void onSessionStarted(@SessionFlags int sessionType, InstanceId instance) {
+        mSessionMonitor.onSessionStarted(sessionType, instance);
+    }
+
+    @Override
+    public void onSessionEnded(@SessionFlags int sessionType, InstanceId instance) {
+        mSessionMonitor.onSessionEnded(sessionType, instance);
+    }
+
+    @Override
+    public void registerSessionListener(@SessionFlags int sessionFlags,
+            ISessionListener listener) {
+        mSessionMonitor.registerSessionListener(sessionFlags, listener);
+    }
+
+    @Override
+    public void unregisterSessionListener(@SessionFlags int sessionFlags,
+            ISessionListener listener) {
+        mSessionMonitor.unregisterSessionListener(sessionFlags, listener);
+    }
+
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
+    }
+
+    /**
+     * Sets or removes the navigation bar mode override.
+     *
+     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     */
+    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
+        enforceStatusBar();
+        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
+                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
+            throw new UnsupportedOperationException(
+                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+        }
+
+        final int userId = mCurrentUserId;
+        final long userIdentity = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NAV_BAR_KIDS_MODE, navBarModeOverride, userId);
+
+            IOverlayManager overlayManager = getOverlayManager();
+            if (overlayManager != null && navBarModeOverride == NAV_BAR_MODE_OVERRIDE_KIDS
+                    && isPackageSupported(NAV_BAR_MODE_3BUTTON_OVERLAY)) {
+                overlayManager.setEnabledExclusiveInCategory(NAV_BAR_MODE_3BUTTON_OVERLAY, userId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(userIdentity);
+        }
+    }
+
+    /**
+     * Gets the navigation bar mode override. Returns default value if no override is set.
+     *
+     * @hide
+     */
+    public @NavBarModeOverride int getNavBarModeOverride() {
+        enforceStatusBar();
+
+        int navBarKidsMode = NAV_BAR_MODE_OVERRIDE_NONE;
+        final int userId = mCurrentUserId;
+        final long userIdentity = Binder.clearCallingIdentity();
+        try {
+            navBarKidsMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NAV_BAR_KIDS_MODE, userId);
+        } catch (Settings.SettingNotFoundException ex) {
+            return navBarKidsMode;
+        } finally {
+            Binder.restoreCallingIdentity(userIdentity);
+        }
+        return navBarKidsMode;
+    }
+
+    private boolean isPackageSupported(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        try {
+            return mContext.getPackageManager().getPackageInfo(packageName,
+                    PackageManager.PackageInfoFlags.of(0)) != null;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            if (SPEW) {
+                Slog.d(TAG, "Package not found: " + packageName);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the *sender* device. See
+     * {@link StatusBarManager.updateMediaTapToTransferSenderDisplay} for more information.
+     *
+     * @param undoCallback a callback that will be triggered if the user elects to undo a media
+     *                     transfer.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     */
+    @Override
+    public void updateMediaTapToTransferSenderDisplay(
+            @StatusBarManager.MediaTransferSenderState int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable IUndoMediaTransferCallback undoCallback
+    ) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.updateMediaTapToTransferSenderDisplay(displayState, routeInfo, undoCallback);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "updateMediaTapToTransferSenderDisplay", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the *receiver* device. See
+     * {@link StatusBarManager.updateMediaTapToTransferReceiverDisplay} for more information.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     */
+    @Override
+    public void updateMediaTapToTransferReceiverDisplay(
+            @StatusBarManager.MediaTransferReceiverState int displayState,
+            MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.updateMediaTapToTransferReceiverDisplay(
+                        displayState, routeInfo, appIcon, appName);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "updateMediaTapToTransferReceiverDisplay", e);
+            }
+        }
+    }
+
+    /**
+     * Registers a provider that gives information about nearby devices that are able to play media.
+     * See {@link StatusBarmanager.registerNearbyMediaDevicesProvider}.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     *
+     * @param provider the nearby device information provider to register
+     *
+     * @hide
+     */
+    @Override
+    public void registerNearbyMediaDevicesProvider(
+            @NonNull INearbyMediaDevicesProvider provider
+    ) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.registerNearbyMediaDevicesProvider(provider);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "registerNearbyMediaDevicesProvider", e);
+            }
+        }
+    }
+
+    /**
+     * Unregisters a provider that gives information about nearby devices that are able to play
+     * media. See {@link StatusBarmanager.unregisterNearbyMediaDevicesProvider}.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     *
+     * @param provider the nearby device information provider to unregister
+     *
+     * @hide
+     */
+    @Override
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull INearbyMediaDevicesProvider provider
+    ) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.unregisterNearbyMediaDevicesProvider(provider);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "unregisterNearbyMediaDevicesProvider", e);
+            }
+        }
     }
 
     /** @hide */

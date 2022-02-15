@@ -40,6 +40,8 @@ import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
+import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
@@ -238,6 +240,17 @@ public abstract class WMShellBaseModule {
     }
 
     //
+    // Back animation
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<BackAnimation> provideBackAnimation(
+            Optional<BackAnimationController> backAnimationController) {
+        return backAnimationController.map(BackAnimationController::getBackAnimationImpl);
+    }
+
+    //
     // Bubbles (optional feature)
     //
 
@@ -362,7 +375,6 @@ public abstract class WMShellBaseModule {
         return Optional.empty();
     }
 
-
     //
     // Task to Surface communication
     //
@@ -459,9 +471,10 @@ public abstract class WMShellBaseModule {
     static Transitions provideTransitions(ShellTaskOrganizer organizer, TransactionPool pool,
             DisplayController displayController, Context context,
             @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor) {
         return new Transitions(organizer, pool, displayController, context, mainExecutor,
-                animExecutor);
+                mainHandler, animExecutor);
     }
 
     @WMSingleton
@@ -678,5 +691,18 @@ public abstract class WMShellBaseModule {
         return new ShellCommandHandlerImpl(shellTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
                 hideDisplayCutout, appPairsOptional, recentTasksOptional, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<BackAnimationController> provideBackAnimationController(
+            Context context,
+            @ShellMainThread ShellExecutor shellExecutor
+    ) {
+        if (BackAnimationController.IS_ENABLED) {
+            return Optional.of(
+                    new BackAnimationController(shellExecutor, context));
+        }
+        return Optional.empty();
     }
 }

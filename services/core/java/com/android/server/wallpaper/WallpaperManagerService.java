@@ -81,7 +81,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SELinux;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -92,6 +94,7 @@ import android.service.wallpaper.IWallpaperService;
 import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -420,13 +423,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.v(TAG, "notifyWallpaperColorsChangedOnDisplay " + which);
             }
 
-            needsExtraction = wallpaper.primaryColors == null;
+            needsExtraction = wallpaper.primaryColors == null || wallpaper.mIsColorExtractedFromDim;
         }
 
         if (needsExtraction) {
             extractColors(wallpaper);
         }
-        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
+        notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper), which,
+                wallpaper.userId, displayId);
     }
 
     private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {
@@ -491,12 +495,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         String cropFile = null;
         boolean defaultImageWallpaper = false;
         int wallpaperId;
+        float dimAmount;
+
+        synchronized (mLock) {
+            wallpaper.mIsColorExtractedFromDim = false;
+        }
 
         if (wallpaper.equals(mFallbackWallpaper)) {
             synchronized (mLock) {
                 if (mFallbackWallpaper.primaryColors != null) return;
             }
-            final WallpaperColors colors = extractDefaultImageWallpaperColors();
+            final WallpaperColors colors = extractDefaultImageWallpaperColors(wallpaper);
             synchronized (mLock) {
                 mFallbackWallpaper.primaryColors = colors;
             }
@@ -513,18 +522,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 defaultImageWallpaper = true;
             }
             wallpaperId = wallpaper.wallpaperId;
+            dimAmount = wallpaper.mWallpaperDimAmount;
         }
 
         WallpaperColors colors = null;
         if (cropFile != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(cropFile);
             if (bitmap != null) {
-                colors = WallpaperColors.fromBitmap(bitmap);
+                colors = WallpaperColors.fromBitmap(bitmap, dimAmount);
                 bitmap.recycle();
             }
         } else if (defaultImageWallpaper) {
             // There is no crop and source file because this is default image wallpaper.
-            colors = extractDefaultImageWallpaperColors();
+            colors = extractDefaultImageWallpaperColors(wallpaper);
         }
 
         if (colors == null) {
@@ -544,11 +554,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private WallpaperColors extractDefaultImageWallpaperColors() {
+    private WallpaperColors extractDefaultImageWallpaperColors(WallpaperData wallpaper) {
         if (DEBUG) Slog.d(TAG, "Extract default image wallpaper colors");
+        float dimAmount;
 
         synchronized (mLock) {
             if (mCacheDefaultImageWallpaperColors != null) return mCacheDefaultImageWallpaperColors;
+            dimAmount = wallpaper.mWallpaperDimAmount;
         }
 
         WallpaperColors colors = null;
@@ -561,7 +573,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final BitmapFactory.Options options = new BitmapFactory.Options();
             final Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
             if (bitmap != null) {
-                colors = WallpaperColors.fromBitmap(bitmap);
+                colors = WallpaperColors.fromBitmap(bitmap, dimAmount);
                 bitmap.recycle();
             }
         } catch (OutOfMemoryError e) {
@@ -946,6 +958,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         long lastDiedTime;
         boolean wallpaperUpdating;
         WallpaperObserver wallpaperObserver;
+
+        /**
+         * The dim amount to be applied to the wallpaper.
+         */
+        float mWallpaperDimAmount = 0.0f;
+
+        /**
+         * A map to keep track of the dimming set by different applications. The key is the calling
+         * UID and the value is the dim amount.
+         */
+        ArrayMap<Integer, Float> mUidToDimAmount = new ArrayMap<>();
+
+        /**
+         * Whether we need to extract the wallpaper colors again to calculate the dark hints
+         * after dimming is applied.
+         */
+        boolean mIsColorExtractedFromDim;
 
         /**
          * List of callbacks registered they should each be notified when the wallpaper is changed.
@@ -1485,6 +1514,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         connector.mEngine.addLocalColorsAreas(areas);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to register local colors areas", e);
+                    }
+                }
+
+                if (mWallpaper.mWallpaperDimAmount != 0f) {
+                    try {
+                        connector.mEngine.applyDimming(mWallpaper.mWallpaperDimAmount);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to dim wallpaper", e);
                     }
                 }
             }
@@ -2536,6 +2573,110 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (purgeAreas.size() > 0) engine.removeLocalColorsAreas(purgeAreas);
     }
 
+    /**
+     * Returns true if the lock screen wallpaper exists (different wallpaper from the system)
+     */
+    @Override
+    public boolean lockScreenWallpaperExists() {
+        synchronized (mLock) {
+            return mLockWallpaperMap.get(mCurrentUserId) != null;
+        }
+    }
+
+    /**
+     * Sets wallpaper dim amount for the calling UID. This only applies to FLAG_SYSTEM wallpaper as
+     * the lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     *
+     * @param dimAmount Dim amount which would be blended with the system default dimming.
+     */
+    @Override
+    public void setWallpaperDimAmount(float dimAmount) throws RemoteException {
+        setWallpaperDimAmountForUid(Binder.getCallingUid(), dimAmount);
+    }
+
+    /**
+     * Sets wallpaper dim amount for a given UID. This only applies to FLAG_SYSTEM wallpaper as the
+     * lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     *
+     * @param uid Caller UID that wants to set the wallpaper dim amount
+     * @param dimAmount Dim amount where 0f reverts any dimming applied by the caller (fully bright)
+     *                  and 1f is fully black
+     * @throws RemoteException
+     */
+    public void setWallpaperDimAmountForUid(int uid, float dimAmount) {
+        checkPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
+                WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+
+                if (dimAmount == 0.0f) {
+                    wallpaper.mUidToDimAmount.remove(uid);
+                } else {
+                    wallpaper.mUidToDimAmount.put(uid, dimAmount);
+                }
+
+                float maxDimAmount = getHighestDimAmountFromMap(wallpaper.mUidToDimAmount);
+                wallpaper.mWallpaperDimAmount = maxDimAmount;
+                // Also set the dim amount to the lock screen wallpaper if the lock and home screen
+                // do not share the same wallpaper
+                if (lockWallpaper != null) {
+                    lockWallpaper.mWallpaperDimAmount = maxDimAmount;
+                }
+
+                if (wallpaper.connection != null) {
+                    wallpaper.connection.forEachDisplayConnector(connector -> {
+                        if (connector.mEngine != null) {
+                            try {
+                                connector.mEngine.applyDimming(maxDimAmount);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG,
+                                        "Can't apply dimming on wallpaper display connector", e);
+                            }
+                        }
+                    });
+                    // Need to extract colors again to re-calculate dark hints after
+                    // applying dimming.
+                    wallpaper.mIsColorExtractedFromDim = true;
+                    notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+                    if (lockWallpaper != null) {
+                        lockWallpaper.mIsColorExtractedFromDim = true;
+                        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+                    }
+                    saveSettingsLocked(wallpaper.userId);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public float getWallpaperDimAmount() {
+        checkPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT);
+        synchronized (mLock) {
+            WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            return data.mWallpaperDimAmount;
+        }
+    }
+
+    /**
+     * Gets the highest dim amount among all the calling UIDs that set the wallpaper dim amount.
+     * Return 0f as default value to indicate no application has dimmed the wallpaper.
+     *
+     * @param uidToDimAmountMap Map of UIDs to dim amounts
+     */
+    private float getHighestDimAmountFromMap(ArrayMap<Integer, Float> uidToDimAmountMap) {
+        float maxDimAmount = 0.0f;
+        for (Map.Entry<Integer, Float> entry : uidToDimAmountMap.entrySet()) {
+            if (entry.getValue() > maxDimAmount) {
+                maxDimAmount = entry.getValue();
+            }
+        }
+        return maxDimAmount;
+    }
+
     @Override
     public WallpaperColors getWallpaperColors(int which, int userId, int displayId)
             throws RemoteException {
@@ -2562,15 +2703,39 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (wallpaperData == null) {
                 return null;
             }
-            shouldExtract = wallpaperData.primaryColors == null;
+            shouldExtract = wallpaperData.primaryColors == null
+                    || wallpaperData.mIsColorExtractedFromDim;
         }
 
         if (shouldExtract) {
             extractColors(wallpaperData);
         }
 
+        return getAdjustedWallpaperColorsOnDimming(wallpaperData);
+    }
+
+    /**
+     * Gets the adjusted {@link WallpaperColors} if the wallpaper colors were not extracted from
+     * bitmap (i.e. it's a live wallpaper) and the dim amount is not 0. If these conditions apply,
+     * default to using color hints that do not support dark theme and dark text.
+     *
+     * @param wallpaperData WallpaperData containing the WallpaperColors and mWallpaperDimAmount
+     */
+    WallpaperColors getAdjustedWallpaperColorsOnDimming(WallpaperData wallpaperData) {
         synchronized (mLock) {
-            return wallpaperData.primaryColors;
+            WallpaperColors wallpaperColors = wallpaperData.primaryColors;
+
+            if (wallpaperColors != null
+                    && (wallpaperColors.getColorHints() & WallpaperColors.HINT_FROM_BITMAP) == 0
+                    && wallpaperData.mWallpaperDimAmount != 0f) {
+                int adjustedColorHints = wallpaperColors.getColorHints()
+                        & ~WallpaperColors.HINT_SUPPORTS_DARK_TEXT
+                        & ~WallpaperColors.HINT_SUPPORTS_DARK_THEME;
+                return new WallpaperColors(
+                        wallpaperColors.getPrimaryColor(), wallpaperColors.getSecondaryColor(),
+                        wallpaperColors.getTertiaryColor(), adjustedColorHints);
+            }
+            return wallpaperColors;
         }
     }
 
@@ -2640,6 +2805,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.fromForegroundApp = fromForegroundApp;
                     wallpaper.cropHint.set(cropHint);
                     wallpaper.allowBackup = allowBackup;
+                    wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
                 }
                 return pfd;
             } finally {
@@ -2664,6 +2830,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         lockWP.cropHint.set(sysWP.cropHint);
         lockWP.allowBackup = sysWP.allowBackup;
         lockWP.primaryColors = sysWP.primaryColors;
+        lockWP.mWallpaperDimAmount = sysWP.mWallpaperDimAmount;
 
         // Migrate the bitmap files outright; no need to copy
         try {
@@ -3191,6 +3358,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             out.attributeInt(null, "paddingBottom", wpdData.mPadding.bottom);
         }
 
+        out.attributeFloat(null, "dimAmount", wallpaper.mWallpaperDimAmount);
+        int dimAmountsCount = wallpaper.mUidToDimAmount.size();
+        out.attributeInt(null, "dimAmountsCount", dimAmountsCount);
+        if (dimAmountsCount > 0) {
+            int index = 0;
+            for (Map.Entry<Integer, Float> entry : wallpaper.mUidToDimAmount.entrySet()) {
+                out.attributeInt(null, "dimUID" + index, entry.getKey());
+                out.attributeFloat(null, "dimValue" + index, entry.getValue());
+                index++;
+            }
+        }
+
         if (wallpaper.primaryColors != null) {
             int colorsCount = wallpaper.primaryColors.getMainColors().size();
             out.attributeInt(null, "colorsCount", colorsCount);
@@ -3265,6 +3444,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
         return parser.getAttributeInt(null, name, defValue);
+    }
+
+    private float getAttributeFloat(TypedXmlPullParser parser, String name, float defValue) {
+        return parser.getAttributeFloat(null, name, defValue);
     }
 
     /**
@@ -3471,6 +3654,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         wpData.mPadding.top = getAttributeInt(parser, "paddingTop", 0);
         wpData.mPadding.right = getAttributeInt(parser, "paddingRight", 0);
         wpData.mPadding.bottom = getAttributeInt(parser, "paddingBottom", 0);
+        wallpaper.mWallpaperDimAmount = getAttributeFloat(parser, "dimAmount", 0f);
+        int dimAmountsCount = getAttributeInt(parser, "dimAmountsCount", 0);
+        if (dimAmountsCount > 0) {
+            ArrayMap<Integer, Float> allDimAmounts = new ArrayMap<>(dimAmountsCount);
+            for (int i = 0; i < dimAmountsCount; i++) {
+                int uid = getAttributeInt(parser, "dimUID" + i, 0);
+                float dimValue = getAttributeFloat(parser, "dimValue" + i, 0f);
+                allDimAmounts.put(uid, dimValue);
+            }
+            wallpaper.mUidToDimAmount = allDimAmounts;
+        }
         int colorsCount = getAttributeInt(parser, "colorsCount", 0);
         int allColorsCount =  getAttributeInt(parser, "allColorsCount", 0);
         if (allColorsCount > 0) {
@@ -3637,6 +3831,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return false;
     }
 
+    @Override // Binder call
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        new WallpaperManagerShellCommand(WallpaperManagerService.this).exec(this, in, out, err,
+                args, callback, resultReceiver);
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -3664,6 +3866,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 pw.print("  mName=");  pw.println(wallpaper.name);
                 pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
                 pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
+                pw.print("  mWallpaperDimAmount="); pw.println(wallpaper.mWallpaperDimAmount);
+                pw.print("  isColorExtracted="); pw.println(wallpaper.mIsColorExtractedFromDim);
+                pw.println("  mUidToDimAmount:");
+                for (Map.Entry<Integer, Float> entry : wallpaper.mUidToDimAmount.entrySet()) {
+                    pw.print("    UID="); pw.print(entry.getKey());
+                    pw.print(" dimAmount="); pw.println(entry.getValue());
+                }
                 if (wallpaper.connection != null) {
                     WallpaperConnection conn = wallpaper.connection;
                     pw.print("  Wallpaper connection ");
@@ -3695,6 +3904,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
                 pw.print("  mName=");  pw.println(wallpaper.name);
                 pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
+                pw.print("  mWallpaperDimAmount="); pw.println(wallpaper.mWallpaperDimAmount);
             }
             pw.println("Fallback wallpaper state:");
             pw.print(" User "); pw.print(mFallbackWallpaper.userId);

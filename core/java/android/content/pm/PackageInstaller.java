@@ -418,6 +418,48 @@ public class PackageInstaller {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FileLocation{}
 
+    /**
+     * The installer did not call SessionParams#setPackageSource(int) to specify the package
+     * source.
+     */
+    public static final int PACKAGE_SOURCE_UNSPECIFIED = 0;
+
+    /**
+     * Code indicating that the package being installed is from a source not reflected by any
+     * other package source constant.
+     */
+    public static final int PACKAGE_SOURCE_OTHER = 1;
+
+    /**
+     * Code indicating that the package being installed is from a store. An app store that
+     * installs an app for the user would use this.
+     */
+    public static final int PACKAGE_SOURCE_STORE = 2;
+
+    /**
+     * Code indicating that the package being installed comes from a local file on the device. A
+     * file manager that is facilitating the installation of an APK file would use this.
+     */
+    public static final int PACKAGE_SOURCE_LOCAL_FILE = 3;
+
+    /**
+     * Code indicating that the package being installed comes from a file that was downloaded to
+     * the device by the user. For use in place of PACKAGE_SOURCE_LOCAL_FILE when the installer
+     * knows the package was downloaded.
+     */
+    public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "PACKAGE_SOURCE_" }, value = {
+            PACKAGE_SOURCE_UNSPECIFIED,
+            PACKAGE_SOURCE_STORE,
+            PACKAGE_SOURCE_LOCAL_FILE,
+            PACKAGE_SOURCE_DOWNLOADED_FILE,
+            PACKAGE_SOURCE_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PackageSourceType{}
+
     /** Default set of checksums - includes all available checksums.
      * @see Session#requestChecksums  */
     private static final int DEFAULT_CHECKSUMS =
@@ -1722,6 +1764,8 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean isMultiPackage;
         /** {@hide} */
+        public int packageSource = PACKAGE_SOURCE_UNSPECIFIED;
+        /** {@hide} */
         public boolean isStaged;
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
@@ -1754,11 +1798,11 @@ public class PackageInstaller {
             installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
-            appIcon = source.readParcelable(null);
+            appIcon = source.readParcelable(null, android.graphics.Bitmap.class);
             appLabel = source.readString();
-            originatingUri = source.readParcelable(null);
+            originatingUri = source.readParcelable(null, android.net.Uri.class);
             originatingUid = source.readInt();
-            referrerUri = source.readParcelable(null);
+            referrerUri = source.readParcelable(null, android.net.Uri.class);
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
@@ -1770,12 +1814,13 @@ public class PackageInstaller {
             forceQueryableOverride = source.readBoolean();
             requiredInstalledVersionCode = source.readLong();
             DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
-                    DataLoaderParamsParcel.class.getClassLoader());
+                    DataLoaderParamsParcel.class.getClassLoader(), android.content.pm.DataLoaderParamsParcel.class);
             if (dataLoaderParamsParcel != null) {
                 dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
             rollbackDataPolicy = source.readInt();
             requireUserAction = source.readInt();
+            packageSource = source.readInt();
         }
 
         /** {@hide} */
@@ -1805,6 +1850,7 @@ public class PackageInstaller {
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
             ret.requireUserAction = requireUserAction;
+            ret.packageSource = packageSource;
             return ret;
         }
 
@@ -1923,6 +1969,13 @@ public class PackageInstaller {
         public void setGrantedRuntimePermissions(String[] permissions) {
             installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             this.grantedRuntimePermissions = permissions;
+        }
+
+        /**
+         * Sets the apk package installation source.
+         */
+        public void setPackageSource(@PackageSourceType int packageSource) {
+            this.packageSource = packageSource;
         }
 
         /**
@@ -2289,6 +2342,7 @@ public class PackageInstaller {
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("packageSource", packageSource);
             pw.printPair("whitelistedRestrictedPermissions", whitelistedRestrictedPermissions);
             pw.printPair("autoRevokePermissions", autoRevokePermissionsMode);
             pw.printPair("installerPackageName", installerPackageName);
@@ -2338,6 +2392,7 @@ public class PackageInstaller {
             }
             dest.writeInt(rollbackDataPolicy);
             dest.writeInt(requireUserAction);
+            dest.writeInt(packageSource);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -2367,42 +2422,72 @@ public class PackageInstaller {
         private static final int[] NO_SESSIONS = {};
 
         /** @hide */
-        @IntDef(prefix = { "STAGED_SESSION_" }, value = {
-                STAGED_SESSION_NO_ERROR,
-                STAGED_SESSION_VERIFICATION_FAILED,
-                STAGED_SESSION_ACTIVATION_FAILED,
-                STAGED_SESSION_UNKNOWN,
-                STAGED_SESSION_CONFLICT})
+        @IntDef(prefix = { "SESSION_" }, value = {
+                SESSION_NO_ERROR,
+                SESSION_VERIFICATION_FAILED,
+                SESSION_ACTIVATION_FAILED,
+                SESSION_UNKNOWN_ERROR,
+                SESSION_CONFLICT})
         @Retention(RetentionPolicy.SOURCE)
-        public @interface StagedSessionErrorCode{}
+        public @interface SessionErrorCode {}
         /**
-         * Constant indicating that no error occurred during the preparation or the activation of
-         * this staged session.
+         * @deprecated use {@link #SESSION_NO_ERROR}.
          */
+        @Deprecated
         public static final int STAGED_SESSION_NO_ERROR = 0;
 
         /**
-         * Constant indicating that an error occurred during the verification phase (pre-reboot) of
-         * this staged session.
+         * @deprecated use {@link #SESSION_VERIFICATION_FAILED}.
          */
+        @Deprecated
         public static final int STAGED_SESSION_VERIFICATION_FAILED = 1;
 
         /**
-         * Constant indicating that an error occurred during the activation phase (post-reboot) of
-         * this staged session.
+         * @deprecated use {@link #SESSION_ACTIVATION_FAILED}.
          */
+        @Deprecated
         public static final int STAGED_SESSION_ACTIVATION_FAILED = 2;
 
         /**
-         * Constant indicating that an unknown error occurred while processing this staged session.
+         * @deprecated use {@link #SESSION_UNKNOWN_ERROR}.
          */
+        @Deprecated
         public static final int STAGED_SESSION_UNKNOWN = 3;
 
         /**
-         * Constant indicating that the session was in conflict with another staged session and had
+         * @deprecated use {@link #SESSION_CONFLICT}.
+         */
+        @Deprecated
+        public static final int STAGED_SESSION_CONFLICT = 4;
+
+        /**
+         * Constant indicating that no error occurred during the preparation or the activation of
+         * this session.
+         */
+        public static final int SESSION_NO_ERROR = 0;
+
+        /**
+         * Constant indicating that an error occurred during the verification phase of
+         * this session.
+         */
+        public static final int SESSION_VERIFICATION_FAILED = 1;
+
+        /**
+         * Constant indicating that an error occurred during the activation phase of
+         * this session.
+         */
+        public static final int SESSION_ACTIVATION_FAILED = 2;
+
+        /**
+         * Constant indicating that an unknown error occurred while processing this session.
+         */
+        public static final int SESSION_UNKNOWN_ERROR = 3;
+
+        /**
+         * Constant indicating that the session was in conflict with another session and had
          * to be sacrificed for resolution.
          */
-        public static final int STAGED_SESSION_CONFLICT = 4;
+        public static final int SESSION_CONFLICT = 4;
 
         private static String userActionToString(int requireUserAction) {
             switch(requireUserAction) {
@@ -2486,13 +2571,13 @@ public class PackageInstaller {
         public int[] childSessionIds = NO_SESSIONS;
 
         /** {@hide} */
-        public boolean isStagedSessionApplied;
+        public boolean isSessionApplied;
         /** {@hide} */
-        public boolean isStagedSessionReady;
+        public boolean isSessionReady;
         /** {@hide} */
-        public boolean isStagedSessionFailed;
-        private int mStagedSessionErrorCode;
-        private String mStagedSessionErrorMessage;
+        public boolean isSessionFailed;
+        private int mSessionErrorCode;
+        private String mSessionErrorMessage;
 
         /** {@hide} */
         public boolean isCommitted;
@@ -2508,6 +2593,9 @@ public class PackageInstaller {
 
         /** {@hide} */
         public int requireUserAction;
+
+        /** {@hide} */
+        public int packageSource = PACKAGE_SOURCE_UNSPECIFIED;
 
         /** {@hide} */
         public int installerUid;
@@ -2533,13 +2621,13 @@ public class PackageInstaller {
             installScenario = source.readInt();
             sizeBytes = source.readLong();
             appPackageName = source.readString();
-            appIcon = source.readParcelable(null);
+            appIcon = source.readParcelable(null, android.graphics.Bitmap.class);
             appLabel = source.readString();
 
             installLocation = source.readInt();
-            originatingUri = source.readParcelable(null);
+            originatingUri = source.readParcelable(null, android.net.Uri.class);
             originatingUid = source.readInt();
-            referrerUri = source.readParcelable(null);
+            referrerUri = source.readParcelable(null, android.net.Uri.class);
             grantedRuntimePermissions = source.readStringArray();
             whitelistedRestrictedPermissions = source.createStringArrayList();
             autoRevokePermissionsMode = source.readInt();
@@ -2553,16 +2641,17 @@ public class PackageInstaller {
             if (childSessionIds == null) {
                 childSessionIds = NO_SESSIONS;
             }
-            isStagedSessionApplied = source.readBoolean();
-            isStagedSessionReady = source.readBoolean();
-            isStagedSessionFailed = source.readBoolean();
-            mStagedSessionErrorCode = source.readInt();
-            mStagedSessionErrorMessage = source.readString();
+            isSessionApplied = source.readBoolean();
+            isSessionReady = source.readBoolean();
+            isSessionFailed = source.readBoolean();
+            mSessionErrorCode = source.readInt();
+            mSessionErrorMessage = source.readString();
             isCommitted = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
             installerUid = source.readInt();
+            packageSource = source.readInt();
         }
 
         /**
@@ -2899,6 +2988,13 @@ public class PackageInstaller {
         }
 
         /**
+         * Gets the apk package installation source.
+         */
+        public @PackageSourceType int getPackageSource() {
+            return packageSource;
+        }
+
+        /**
          * Returns true if this session is a multi-package session containing references to other
          * sessions.
          */
@@ -2951,7 +3047,7 @@ public class PackageInstaller {
          * since that is the one that should have been {@link Session#commit committed}.
          */
         public boolean isStagedSessionActive() {
-            return isStaged && isCommitted && !isStagedSessionApplied && !isStagedSessionFailed
+            return isStaged && isCommitted && !isSessionApplied && !isSessionFailed
                     && !hasParentSessionId();
         }
 
@@ -2992,7 +3088,7 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionApplied() {
             checkSessionIsStaged();
-            return isStagedSessionApplied;
+            return isSessionApplied;
         }
 
         /**
@@ -3001,7 +3097,7 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionReady() {
             checkSessionIsStaged();
-            return isStagedSessionReady;
+            return isSessionReady;
         }
 
         /**
@@ -3010,16 +3106,16 @@ public class PackageInstaller {
          */
         public boolean isStagedSessionFailed() {
             checkSessionIsStaged();
-            return isStagedSessionFailed;
+            return isSessionFailed;
         }
 
         /**
          * If something went wrong with a staged session, clients can check this error code to
          * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
          */
-        public @StagedSessionErrorCode int getStagedSessionErrorCode() {
+        public @SessionErrorCode int getStagedSessionErrorCode() {
             checkSessionIsStaged();
-            return mStagedSessionErrorCode;
+            return mSessionErrorCode;
         }
 
         /**
@@ -3028,14 +3124,13 @@ public class PackageInstaller {
          */
         public @NonNull String getStagedSessionErrorMessage() {
             checkSessionIsStaged();
-            return mStagedSessionErrorMessage;
+            return mSessionErrorMessage;
         }
 
         /** {@hide} */
-        public void setStagedSessionErrorCode(@StagedSessionErrorCode int errorCode,
-                                              String errorMessage) {
-            mStagedSessionErrorCode = errorCode;
-            mStagedSessionErrorMessage = errorMessage;
+        public void setSessionErrorCode(@SessionErrorCode int errorCode, String errorMessage) {
+            mSessionErrorCode = errorCode;
+            mSessionErrorMessage = errorMessage;
         }
 
         /**
@@ -3124,16 +3219,17 @@ public class PackageInstaller {
             dest.writeBoolean(forceQueryable);
             dest.writeInt(parentSessionId);
             dest.writeIntArray(childSessionIds);
-            dest.writeBoolean(isStagedSessionApplied);
-            dest.writeBoolean(isStagedSessionReady);
-            dest.writeBoolean(isStagedSessionFailed);
-            dest.writeInt(mStagedSessionErrorCode);
-            dest.writeString(mStagedSessionErrorMessage);
+            dest.writeBoolean(isSessionApplied);
+            dest.writeBoolean(isSessionReady);
+            dest.writeBoolean(isSessionFailed);
+            dest.writeInt(mSessionErrorCode);
+            dest.writeString(mSessionErrorMessage);
             dest.writeBoolean(isCommitted);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);
+            dest.writeInt(packageSource);
         }
 
         public static final Parcelable.Creator<SessionInfo>

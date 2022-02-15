@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.IFACE_ALL;
@@ -30,8 +31,12 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
-import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
+import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.net.NetworkStatsHistory.Entry;
 import android.os.Binder;
 import android.service.NetworkStatsCollectionKeyProto;
 import android.service.NetworkStatsCollectionProto;
@@ -40,21 +45,15 @@ import android.telephony.SubscriptionPlan;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.IntArray;
-import android.util.MathUtils;
+import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.Range;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastDataInput;
-import com.android.internal.util.FastDataOutput;
 import com.android.internal.util.FileRotator;
-import com.android.internal.util.IndentingPrintWriter;
-
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
+import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.NetworkStatsUtils;
 
 import libcore.io.IoUtils;
 
@@ -62,6 +61,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -74,7 +74,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Collection of {@link NetworkStatsHistory}, stored based on combined key of
@@ -82,13 +85,11 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi(client = MODULE_LIBRARIES)
 public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.Writer {
     private static final String TAG = NetworkStatsCollection.class.getSimpleName();
     /** File header magic number: "ANET" */
     private static final int FILE_MAGIC = 0x414E4554;
-
-    /** Default buffer size from BufferedInputStream */
-    private static final int BUFFER_SIZE = 8192;
 
     private static final int VERSION_NETWORK_INIT = 1;
 
@@ -108,15 +109,23 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     private long mTotalBytes;
     private boolean mDirty;
 
+    /**
+     * Construct a {@link NetworkStatsCollection} object.
+     *
+     * @param bucketDuration duration of the buckets in this object, in milliseconds.
+     * @hide
+     */
     public NetworkStatsCollection(long bucketDuration) {
         mBucketDuration = bucketDuration;
         reset();
     }
 
+    /** @hide */
     public void clear() {
         reset();
     }
 
+    /** @hide */
     public void reset() {
         mStats.clear();
         mStartMillis = Long.MAX_VALUE;
@@ -125,6 +134,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         mDirty = false;
     }
 
+    /** @hide */
     public long getStartMillis() {
         return mStartMillis;
     }
@@ -132,6 +142,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     /**
      * Return first atomic bucket in this collection, which is more conservative
      * than {@link #mStartMillis}.
+     * @hide
      */
     public long getFirstAtomicBucketMillis() {
         if (mStartMillis == Long.MAX_VALUE) {
@@ -141,26 +152,32 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     public long getEndMillis() {
         return mEndMillis;
     }
 
+    /** @hide */
     public long getTotalBytes() {
         return mTotalBytes;
     }
 
+    /** @hide */
     public boolean isDirty() {
         return mDirty;
     }
 
+    /** @hide */
     public void clearDirty() {
         mDirty = false;
     }
 
+    /** @hide */
     public boolean isEmpty() {
         return mStartMillis == Long.MAX_VALUE && mEndMillis == Long.MIN_VALUE;
     }
 
+    /** @hide */
     @VisibleForTesting
     public long roundUp(long time) {
         if (time == Long.MIN_VALUE || time == Long.MAX_VALUE
@@ -176,6 +193,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     @VisibleForTesting
     public long roundDown(long time) {
         if (time == Long.MIN_VALUE || time == Long.MAX_VALUE
@@ -190,17 +208,19 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel) {
         return getRelevantUids(accessLevel, Binder.getCallingUid());
     }
 
+    /** @hide */
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel,
                 final int callerUid) {
-        IntArray uids = new IntArray();
+        final ArrayList<Integer> uids = new ArrayList<>();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
             if (NetworkStatsAccess.isAccessibleToUser(key.uid, callerUid, accessLevel)) {
-                int j = uids.binarySearch(key.uid);
+                int j = Collections.binarySearch(uids, new Integer(key.uid));
 
                 if (j < 0) {
                     j = ~j;
@@ -208,12 +228,13 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
                 }
             }
         }
-        return uids.toArray();
+        return CollectionUtils.toIntArray(uids);
     }
 
     /**
      * Combine all {@link NetworkStatsHistory} in this collection which match
      * the requested parameters.
+     * @hide
      */
     public NetworkStatsHistory getHistory(NetworkTemplate template, SubscriptionPlan augmentPlan,
             int uid, int set, int tag, int fields, long start, long end,
@@ -225,7 +246,8 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
         // 180 days of history should be enough for anyone; if we end up needing
         // more, we'll dynamically grow the history object.
-        final int bucketEstimate = (int) MathUtils.constrain(((end - start) / mBucketDuration), 0,
+        final int bucketEstimate = (int) NetworkStatsUtils.constrain(
+                ((end - start) / mBucketDuration), 0,
                 (180 * DateUtils.DAY_IN_MILLIS) / mBucketDuration);
         final NetworkStatsHistory combined = new NetworkStatsHistory(
                 mBucketDuration, bucketEstimate, fields);
@@ -316,7 +338,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
             final long deltaTotal = combined.getTotalBytes() - beforeTotal;
             if (deltaTotal != 0) {
-                Slog.d(TAG, "Augmented network usage by " + deltaTotal + " bytes");
+                Log.d(TAG, "Augmented network usage by " + deltaTotal + " bytes");
             }
 
             // Finally we can slice data as originally requested
@@ -338,6 +360,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * @param end - end of the range, timestamp in milliseconds since the epoch.
      * @param accessLevel - caller access level.
      * @param callerUid - caller UID.
+     * @hide
      */
     public NetworkStats getSummary(NetworkTemplate template, long start, long end,
             @NetworkStatsAccess.Level int accessLevel, int callerUid) {
@@ -384,6 +407,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     /**
      * Record given {@link android.net.NetworkStats.Entry} into this collection.
+     * @hide
      */
     public void recordData(NetworkIdentitySet ident, int uid, int set, int tag, long start,
             long end, NetworkStats.Entry entry) {
@@ -394,8 +418,12 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
 
     /**
      * Record given {@link NetworkStatsHistory} into this collection.
+     *
+     * @hide
      */
-    private void recordHistory(Key key, NetworkStatsHistory history) {
+    public void recordHistory(@NonNull Key key, @NonNull NetworkStatsHistory history) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(history);
         if (history.size() == 0) return;
         noteRecordedHistory(history.getStart(), history.getEnd(), history.getTotalBytes());
 
@@ -410,8 +438,11 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     /**
      * Record all {@link NetworkStatsHistory} contained in the given collection
      * into this collection.
+     *
+     * @hide
      */
-    public void recordCollection(NetworkStatsCollection another) {
+    public void recordCollection(@NonNull NetworkStatsCollection another) {
+        Objects.requireNonNull(another);
         for (int i = 0; i < another.mStats.size(); i++) {
             final Key key = another.mStats.keyAt(i);
             final NetworkStatsHistory value = another.mStats.valueAt(i);
@@ -440,10 +471,10 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     @Override
     public void read(InputStream in) throws IOException {
-        final FastDataInput dataIn = new FastDataInput(in, BUFFER_SIZE);
-        read(dataIn);
+        read((DataInput) new DataInputStream(in));
     }
 
     private void read(DataInput in) throws IOException {
@@ -480,20 +511,20 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     @Override
     public void write(OutputStream out) throws IOException {
-        final FastDataOutput dataOut = new FastDataOutput(out, BUFFER_SIZE);
-        write(dataOut);
-        dataOut.flush();
+        write((DataOutput) new DataOutputStream(out));
+        out.flush();
     }
 
     private void write(DataOutput out) throws IOException {
         // cluster key lists grouped by ident
-        final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = Maps.newHashMap();
+        final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = new HashMap<>();
         for (Key key : mStats.keySet()) {
             ArrayList<Key> keys = keysByIdent.get(key.ident);
             if (keys == null) {
-                keys = Lists.newArrayList();
+                keys = new ArrayList<>();
                 keysByIdent.put(key.ident, keys);
             }
             keys.add(key);
@@ -523,6 +554,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * See {@code NetworkStatsService#maybeUpgradeLegacyStatsLocked}.
      *
      * @deprecated
+     * @hide
      */
     @Deprecated
     public void readLegacyNetwork(File file) throws IOException {
@@ -568,6 +600,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * See {@code NetworkStatsService#maybeUpgradeLegacyStatsLocked}.
      *
      * @deprecated
+     * @hide
      */
     @Deprecated
     public void readLegacyUid(File file, boolean onlyTags) throws IOException {
@@ -638,14 +671,15 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * Remove any {@link NetworkStatsHistory} attributed to the requested UID,
      * moving any {@link NetworkStats#TAG_NONE} series to
      * {@link TrafficStats#UID_REMOVED}.
+     * @hide
      */
     public void removeUids(int[] uids) {
-        final ArrayList<Key> knownKeys = Lists.newArrayList();
+        final ArrayList<Key> knownKeys = new ArrayList<>();
         knownKeys.addAll(mStats.keySet());
 
         // migrate all UID stats into special "removed" bucket
         for (Key key : knownKeys) {
-            if (ArrayUtils.contains(uids, key.uid)) {
+            if (CollectionUtils.contains(uids, key.uid)) {
                 // only migrate combined TAG_NONE history
                 if (key.tag == TAG_NONE) {
                     final NetworkStatsHistory uidHistory = mStats.get(key);
@@ -672,12 +706,13 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     }
 
     private ArrayList<Key> getSortedKeys() {
-        final ArrayList<Key> keys = Lists.newArrayList();
+        final ArrayList<Key> keys = new ArrayList<>();
         keys.addAll(mStats.keySet());
-        Collections.sort(keys);
+        Collections.sort(keys, (left, right) -> Key.compare(left, right));
         return keys;
     }
 
+    /** @hide */
     public void dump(IndentingPrintWriter pw) {
         for (Key key : getSortedKeys()) {
             pw.print("ident="); pw.print(key.ident.toString());
@@ -692,29 +727,31 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
     }
 
+    /** @hide */
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         for (Key key : getSortedKeys()) {
-            final long startStats = proto.start(NetworkStatsCollectionProto.STATS);
+            final long startStats = proto.start(NetworkStatsCollectionProto.STATS_FIELD_NUMBER);
 
             // Key
-            final long startKey = proto.start(NetworkStatsCollectionStatsProto.KEY);
-            key.ident.dumpDebug(proto, NetworkStatsCollectionKeyProto.IDENTITY);
-            proto.write(NetworkStatsCollectionKeyProto.UID, key.uid);
-            proto.write(NetworkStatsCollectionKeyProto.SET, key.set);
-            proto.write(NetworkStatsCollectionKeyProto.TAG, key.tag);
+            final long startKey = proto.start(NetworkStatsCollectionStatsProto.KEY_FIELD_NUMBER);
+            key.ident.dumpDebug(proto, NetworkStatsCollectionKeyProto.IDENTITY_FIELD_NUMBER);
+            proto.write(NetworkStatsCollectionKeyProto.UID_FIELD_NUMBER, key.uid);
+            proto.write(NetworkStatsCollectionKeyProto.SET_FIELD_NUMBER, key.set);
+            proto.write(NetworkStatsCollectionKeyProto.TAG_FIELD_NUMBER, key.tag);
             proto.end(startKey);
 
             // Value
             final NetworkStatsHistory history = mStats.get(key);
-            history.dumpDebug(proto, NetworkStatsCollectionStatsProto.HISTORY);
+            history.dumpDebug(proto, NetworkStatsCollectionStatsProto.HISTORY_FIELD_NUMBER);
             proto.end(startStats);
         }
 
         proto.end(start);
     }
 
+    /** @hide */
     public void dumpCheckin(PrintWriter pw, long start, long end) {
         dumpCheckin(pw, start, end, NetworkTemplate.buildTemplateMobileWildcard(), "cell");
         dumpCheckin(pw, start, end, NetworkTemplate.buildTemplateWifiWildcard(), "wifi");
@@ -777,16 +814,102 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         return false;
     }
 
-    private static class Key implements Comparable<Key> {
+    /**
+     * Get the all historical stats of the collection {@link NetworkStatsCollection}.
+     *
+     * @return All {@link NetworkStatsHistory} in this collection.
+     */
+    @NonNull
+    public Map<Key, NetworkStatsHistory> getEntries() {
+        return new ArrayMap(mStats);
+    }
+
+    /**
+     * Builder class for {@link NetworkStatsCollection}.
+     */
+    public static final class Builder {
+        private final long mBucketDuration;
+        private final ArrayMap<Key, NetworkStatsHistory> mEntries = new ArrayMap<>();
+
+        /**
+         * Creates a new Builder with given bucket duration.
+         *
+         * @param bucketDuration Duration of the buckets of the object, in milliseconds.
+         */
+        public Builder(long bucketDuration) {
+            mBucketDuration = bucketDuration;
+        }
+
+        /**
+         * Add association of the history with the specified key in this map.
+         *
+         * @param key The object used to identify a network, see {@link Key}.
+         * @param history {@link NetworkStatsHistory} instance associated to the given {@link Key}.
+         * @return The builder object.
+         */
+        @NonNull
+        public NetworkStatsCollection.Builder addEntry(@NonNull Key key,
+                @NonNull NetworkStatsHistory history) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(history);
+            final List<Entry> historyEntries = history.getEntries();
+
+            final NetworkStatsHistory.Builder historyBuilder =
+                    new NetworkStatsHistory.Builder(mBucketDuration, historyEntries.size());
+            for (Entry entry : historyEntries) {
+                historyBuilder.addEntry(entry);
+            }
+
+            mEntries.put(key, historyBuilder.build());
+            return this;
+        }
+
+        /**
+         * Builds the instance of the {@link NetworkStatsCollection}.
+         *
+         * @return the built instance of {@link NetworkStatsCollection}.
+         */
+        @NonNull
+        public NetworkStatsCollection build() {
+            final NetworkStatsCollection collection = new NetworkStatsCollection(mBucketDuration);
+            for (int i = 0; i < mEntries.size(); i++) {
+                collection.recordHistory(mEntries.keyAt(i), mEntries.valueAt(i));
+            }
+            return collection;
+        }
+    }
+
+    /**
+     * the identifier that associate with the {@link NetworkStatsHistory} object to identify
+     * a certain record in the {@link NetworkStatsCollection} object.
+     */
+    public static class Key {
+        /** @hide */
         public final NetworkIdentitySet ident;
+        /** @hide */
         public final int uid;
+        /** @hide */
         public final int set;
+        /** @hide */
         public final int tag;
 
         private final int mHashCode;
 
-        Key(NetworkIdentitySet ident, int uid, int set, int tag) {
-            this.ident = ident;
+        /**
+         * Construct a {@link Key} object.
+         *
+         * @param ident a Set of {@link NetworkIdentity} that associated with the record.
+         * @param uid Uid of the record.
+         * @param set Set of the record, see {@code NetworkStats#SET_*}.
+         * @param tag Tag of the record, see {@link TrafficStats#setThreadStatsTag(int)}.
+         */
+        public Key(@NonNull Set<NetworkIdentity> ident, int uid, int set, int tag) {
+            this(new NetworkIdentitySet(Objects.requireNonNull(ident)), uid, set, tag);
+        }
+
+        /** @hide */
+        public Key(@NonNull NetworkIdentitySet ident, int uid, int set, int tag) {
+            this.ident = Objects.requireNonNull(ident);
             this.uid = uid;
             this.set = set;
             this.tag = tag;
@@ -799,7 +922,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (obj instanceof Key) {
                 final Key key = (Key) obj;
                 return uid == key.uid && set == key.set && tag == key.tag
@@ -808,20 +931,22 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
             return false;
         }
 
-        @Override
-        public int compareTo(Key another) {
+        /** @hide */
+        public static int compare(@NonNull Key left, @NonNull Key right) {
+            Objects.requireNonNull(left);
+            Objects.requireNonNull(right);
             int res = 0;
-            if (ident != null && another.ident != null) {
-                res = ident.compareTo(another.ident);
+            if (left.ident != null && right.ident != null) {
+                res = NetworkIdentitySet.compare(left.ident, right.ident);
             }
             if (res == 0) {
-                res = Integer.compare(uid, another.uid);
+                res = Integer.compare(left.uid, right.uid);
             }
             if (res == 0) {
-                res = Integer.compare(set, another.set);
+                res = Integer.compare(left.set, right.set);
             }
             if (res == 0) {
-                res = Integer.compare(tag, another.tag);
+                res = Integer.compare(left.tag, right.tag);
             }
             return res;
         }

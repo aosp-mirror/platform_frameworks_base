@@ -1,7 +1,10 @@
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
+
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -124,7 +127,8 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return context.getString(R.string.managed_user_title);
+            return context.getSystemService(DevicePolicyManager.class).getString(
+                    WORK_PROFILE_USER_LABEL, () -> context.getString(R.string.managed_user_title));
         } else if (info.isGuest()) {
             name = context.getString(R.string.user_guest);
         }

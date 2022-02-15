@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.policy.dagger;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.UserManager;
 
 import com.android.internal.R;
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
@@ -161,6 +163,14 @@ public interface StatusBarPolicyModule {
         );
         controller.init();
         return controller;
+    }
+
+    /** Returns a singleton instance of DeviceStateRotationLockSettingsManager */
+    @SysUISingleton
+    @Provides
+    static DeviceStateRotationLockSettingsManager provideAutoRotateSettingsManager(
+            Context context) {
+        return DeviceStateRotationLockSettingsManager.getInstance(context);
     }
 
     /**

@@ -263,6 +263,25 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return null;
+            }
+            IVoiceInteractor voiceInteractor = session.mInteractor;
+            if (voiceInteractor == null || voiceInteractor.asBinder() != callingVoiceInteractor) {
+                return null;
+            }
+            return session.mSessionComponentName.getPackageName();
+        }
+
+        @Override
         public HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity() {
             // IMPORTANT: This is called when performing permission checks; do not lock!
 
@@ -1168,7 +1187,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull Identity voiceInteractorIdentity,
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory,
-                IHotwordRecognitionStatusCallback callback) {
+                IHotwordRecognitionStatusCallback callback,
+                int detectorType) {
             enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1184,7 +1204,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.updateStateLocked(
-                            voiceInteractorIdentity, options, sharedMemory, callback);
+                            voiceInteractorIdentity, options, sharedMemory, callback, detectorType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

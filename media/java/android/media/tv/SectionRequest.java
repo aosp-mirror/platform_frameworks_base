@@ -20,9 +20,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
-public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.SECTION;
+/**
+ * A request for Section from broadcast signal.
+ */
+public final class SectionRequest extends BroadcastInfoRequest implements Parcelable {
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
+            TvInputManager.BROADCAST_INFO_TYPE_SECTION;
 
     public static final @NonNull Parcelable.Creator<SectionRequest> CREATOR =
             new Parcelable.Creator<SectionRequest>() {
@@ -42,34 +45,49 @@ public class SectionRequest extends BroadcastInfoRequest implements Parcelable {
     private final int mTableId;
     private final int mVersion;
 
-    public static SectionRequest createFromParcelBody(Parcel in) {
+    static SectionRequest createFromParcelBody(Parcel in) {
         return new SectionRequest(in);
     }
 
-    public SectionRequest(int requestId, int option, int tsPid, int tableId, int version) {
-        super(requestType, requestId, option);
+    public SectionRequest(int requestId, @RequestOption int option, int tsPid, int tableId,
+            int version) {
+        super(REQUEST_TYPE, requestId, option);
         mTsPid = tsPid;
         mTableId = tableId;
         mVersion = version;
     }
 
-    protected SectionRequest(Parcel source) {
-        super(requestType, source);
+    SectionRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         mTsPid = source.readInt();
         mTableId = source.readInt();
         mVersion = source.readInt();
     }
 
+    /**
+     * Gets the packet identifier (PID) of the TS (transport stream).
+     */
     public int getTsPid() {
         return mTsPid;
     }
 
+    /**
+     * Gets the ID of the requested table.
+     */
     public int getTableId() {
         return mTableId;
     }
 
+    /**
+     * Gets the version number of requested session. If it is null, value will be -1.
+     */
     public int getVersion() {
         return mVersion;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

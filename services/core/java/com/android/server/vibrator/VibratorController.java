@@ -36,8 +36,6 @@ import libcore.util.NativeAllocationRegistry;
 /** Controls a single vibrator. */
 final class VibratorController {
     private static final String TAG = "VibratorController";
-    // TODO(b/167947076): load suggested range from config
-    private static final int SUGGESTED_FREQUENCY_SAFE_RANGE = 200;
 
     private final Object mLock = new Object();
 
@@ -74,8 +72,7 @@ final class VibratorController {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
         VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
-        mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
-                vibratorInfoBuilder);
+        mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(vibratorInfoBuilder);
         mVibratorInfo = vibratorInfoBuilder.build();
 
         if (!mVibratorInfoLoadSuccessful) {
@@ -126,8 +123,7 @@ final class VibratorController {
             }
             int vibratorId = mVibratorInfo.getId();
             VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
-            mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
-                    vibratorInfoBuilder);
+            mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(vibratorInfoBuilder);
             mVibratorInfo = vibratorInfoBuilder.build();
             if (!mVibratorInfoLoadSuccessful) {
                 Slog.e(TAG, "Failed retry of HAL getInfo for vibrator " + vibratorId);
@@ -419,8 +415,7 @@ final class VibratorController {
 
         private static native void alwaysOnDisable(long nativePtr, long id);
 
-        private static native boolean getInfo(long nativePtr, float suggestedFrequencyRange,
-                VibratorInfo.Builder infoBuilder);
+        private static native boolean getInfo(long nativePtr, VibratorInfo.Builder infoBuilder);
 
         private long mNativePtr = 0;
 
@@ -490,8 +485,8 @@ final class VibratorController {
         /**
          * Loads device vibrator metadata and returns true if all metadata was loaded successfully.
          */
-        public boolean getInfo(float suggestedFrequencyRange, VibratorInfo.Builder infoBuilder) {
-            return getInfo(mNativePtr, suggestedFrequencyRange, infoBuilder);
+        public boolean getInfo(VibratorInfo.Builder infoBuilder) {
+            return getInfo(mNativePtr, infoBuilder);
         }
     }
 }

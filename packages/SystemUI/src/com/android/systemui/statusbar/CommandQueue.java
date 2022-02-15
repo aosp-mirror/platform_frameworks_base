@@ -37,11 +37,14 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,6 +65,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
@@ -154,6 +158,11 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_UDFPS_HBM_LISTENER = 60 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_ADD = 61 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_CANCEL = 62 << MSG_SHIFT;
+    private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
+    private static final int MSG_MEDIA_TRANSFER_SENDER_STATE = 64 << MSG_SHIFT;
+    private static final int MSG_MEDIA_TRANSFER_RECEIVER_STATE = 65 << MSG_SHIFT;
+    private static final int MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 66 << MSG_SHIFT;
+    private static final int MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 67 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -317,6 +326,12 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         /**
+         * @see IStatusBar#setBiometicContextListener(IBiometricContextListener)
+         */
+        default void setBiometicContextListener(IBiometricContextListener listener) {
+        }
+
+        /**
          * @see IStatusBar#setUdfpsHbmListener(IUdfpsHbmListener)
          */
         default void setUdfpsHbmListener(IUdfpsHbmListener listener) {
@@ -348,9 +363,17 @@ public class CommandQueue extends IStatusBar.Stub implements
                 String packageName) { }
 
         /**
-         * @see IStatusBar#showTransient(int, int[]).
+         * @see IStatusBar#showTransient(int, int[], boolean).
          */
         default void showTransient(int displayId, @InternalInsetsType int[] types) { }
+
+        /**
+         * @see IStatusBar#showTransient(int, int[], boolean).
+         */
+        default void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
+            showTransient(displayId, types);
+        }
 
         /**
          * @see IStatusBar#abortTransient(int, int[]).
@@ -423,6 +446,31 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#cancelRequestAddTile
          */
         default void cancelRequestAddTile(@NonNull String packageName) {}
+
+        /** @see IStatusBar#updateMediaTapToTransferSenderDisplay */
+        default void updateMediaTapToTransferSenderDisplay(
+                @StatusBarManager.MediaTransferSenderState int displayState,
+                @NonNull MediaRoute2Info routeInfo,
+                @Nullable IUndoMediaTransferCallback undoCallback) {}
+
+        /** @see IStatusBar#updateMediaTapToTransferReceiverDisplay */
+        default void updateMediaTapToTransferReceiverDisplay(
+                @StatusBarManager.MediaTransferReceiverState int displayState,
+                @NonNull MediaRoute2Info routeInfo,
+                @Nullable Icon appIcon,
+                @Nullable CharSequence appName) {}
+
+        /**
+         * @see IStatusBar#registerNearbyMediaDevicesProvider
+         */
+        default void registerNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
+
+        /**
+         * @see IStatusBar#unregisterNearbyMediaDevicesProvider
+         */
+        default void unregisterNearbyMediaDevicesProvider(
+                @NonNull INearbyMediaDevicesProvider provider) {}
     }
 
     public CommandQueue(Context context) {
@@ -950,6 +998,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void setBiometicContextListener(IBiometricContextListener listener) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_BIOMETRICS_LISTENER, listener).sendToTarget();
+        }
+    }
+
+    @Override
     public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SET_UDFPS_HBM_LISTENER, listener).sendToTarget();
@@ -1038,9 +1093,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void showTransient(int displayId, int[] types) {
+    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, 0, types).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, isGestureOnSystemBar ? 1 : 0,
+                    types).sendToTarget();
         }
     }
 
@@ -1151,6 +1207,45 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void cancelRequestAddTile(@NonNull String s) throws RemoteException {
         mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_CANCEL, s).sendToTarget();
+    }
+
+    @Override
+    public void updateMediaTapToTransferSenderDisplay(
+            @StatusBarManager.MediaTransferSenderState int displayState,
+            MediaRoute2Info routeInfo,
+            IUndoMediaTransferCallback undoCallback
+    ) throws RemoteException {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = displayState;
+        args.arg2 = routeInfo;
+        args.arg3 = undoCallback;
+        mHandler.obtainMessage(MSG_MEDIA_TRANSFER_SENDER_STATE, args).sendToTarget();
+    }
+
+    @Override
+    public void updateMediaTapToTransferReceiverDisplay(
+            int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = displayState;
+        args.arg2 = routeInfo;
+        args.arg3 = appIcon;
+        args.arg4 = appName;
+        mHandler.obtainMessage(MSG_MEDIA_TRANSFER_RECEIVER_STATE, args).sendToTarget();
+    }
+
+    @Override
+    public void registerNearbyMediaDevicesProvider(@NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider).sendToTarget();
+    }
+
+    @Override
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull INearbyMediaDevicesProvider provider) {
+        mHandler.obtainMessage(MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER, provider)
+                .sendToTarget();
     }
 
     private final class H extends Handler {
@@ -1402,6 +1497,12 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).hideAuthenticationDialog();
                     }
                     break;
+                case MSG_SET_BIOMETRICS_LISTENER:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setBiometicContextListener(
+                                (IBiometricContextListener) msg.obj);
+                    }
+                    break;
                 case MSG_SET_UDFPS_HBM_LISTENER:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).setUdfpsHbmListener((IUdfpsHbmListener) msg.obj);
@@ -1444,8 +1545,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_SHOW_TRANSIENT: {
                     final int displayId = msg.arg1;
                     final int[] types = (int[]) msg.obj;
+                    final boolean isGestureOnSystemBar = msg.arg2 != 0;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showTransient(displayId, types);
+                        mCallbacks.get(i).showTransient(displayId, types, isGestureOnSystemBar);
                     }
                     break;
                 }
@@ -1543,6 +1645,43 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).cancelRequestAddTile(packageName);
                     }
+                    break;
+                case MSG_MEDIA_TRANSFER_SENDER_STATE:
+                    args = (SomeArgs) msg.obj;
+                    int displayState = (int) args.arg1;
+                    MediaRoute2Info routeInfo = (MediaRoute2Info) args.arg2;
+                    IUndoMediaTransferCallback undoCallback =
+                            (IUndoMediaTransferCallback) args.arg3;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).updateMediaTapToTransferSenderDisplay(
+                                displayState, routeInfo, undoCallback);
+                    }
+                    args.recycle();
+                    break;
+                case MSG_MEDIA_TRANSFER_RECEIVER_STATE:
+                    args = (SomeArgs) msg.obj;
+                    int receiverDisplayState = (int) args.arg1;
+                    MediaRoute2Info receiverRouteInfo = (MediaRoute2Info) args.arg2;
+                    Icon appIcon = (Icon) args.arg3;
+                    appName = (CharSequence) args.arg4;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).updateMediaTapToTransferReceiverDisplay(
+                                receiverDisplayState, receiverRouteInfo, appIcon, appName);
+                    }
+                    args.recycle();
+                    break;
+                case MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    INearbyMediaDevicesProvider provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).registerNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
+                case MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER:
+                    provider = (INearbyMediaDevicesProvider) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).unregisterNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
             }
         }
     }

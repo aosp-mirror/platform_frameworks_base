@@ -17,13 +17,44 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
-/** @hide */
-public class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final int responseType = BroadcastInfoType.DSMCC;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A response for DSM-CC from broadcast signal.
+ */
+public final class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
+            TvInputManager.BROADCAST_INFO_TYPE_DSMCC;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "BIOP_MESSAGE_TYPE_", value = {
+            BIOP_MESSAGE_TYPE_DIRECTORY,
+            BIOP_MESSAGE_TYPE_FILE,
+            BIOP_MESSAGE_TYPE_STREAM,
+            BIOP_MESSAGE_TYPE_SERVICE_GATEWAY,
+
+    })
+    public @interface BiopMessageType {}
+
+    /** Broadcast Inter-ORB Protocol (BIOP) message types */
+    /** BIOP directory message */
+    public static final String BIOP_MESSAGE_TYPE_DIRECTORY = "directory";
+    /** BIOP file message */
+    public static final String BIOP_MESSAGE_TYPE_FILE = "file";
+    /** BIOP stream message */
+    public static final String BIOP_MESSAGE_TYPE_STREAM = "stream";
+    /** BIOP service gateway message */
+    public static final String BIOP_MESSAGE_TYPE_SERVICE_GATEWAY = "service_gateway";
 
     public static final @NonNull Parcelable.Creator<DsmccResponse> CREATOR =
             new Parcelable.Creator<DsmccResponse>() {
@@ -39,30 +70,186 @@ public class DsmccResponse extends BroadcastInfoResponse implements Parcelable {
                 }
             };
 
-    private final ParcelFileDescriptor mFile;
+    private final @BiopMessageType String mBiopMessageType;
+    private final ParcelFileDescriptor mFileDescriptor;
+    private final List<String> mChildList;
+    private final int[] mEventIds;
+    private final String[] mEventNames;
 
-    public static DsmccResponse createFromParcelBody(Parcel in) {
+    static DsmccResponse createFromParcelBody(Parcel in) {
         return new DsmccResponse(in);
     }
 
-    public DsmccResponse(int requestId, int sequence, int responseResult,
-            ParcelFileDescriptor file) {
-        super(responseType, requestId, sequence, responseResult);
-        mFile = file;
+    /**
+     * Constructs a BIOP file message response.
+     */
+    public DsmccResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            @Nullable ParcelFileDescriptor file) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
+        mBiopMessageType = BIOP_MESSAGE_TYPE_FILE;
+        mFileDescriptor = file;
+        mChildList = null;
+        mEventIds = null;
+        mEventNames = null;
     }
 
-    protected DsmccResponse(Parcel source) {
-        super(responseType, source);
-        mFile = source.readFileDescriptor();
+    /**
+     * Constructs a BIOP service gateway or directory message response.
+     */
+    public DsmccResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            boolean isServiceGateway, @Nullable List<String> childList) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
+        if (isServiceGateway) {
+            mBiopMessageType = BIOP_MESSAGE_TYPE_SERVICE_GATEWAY;
+        } else {
+            mBiopMessageType = BIOP_MESSAGE_TYPE_DIRECTORY;
+        }
+        mFileDescriptor = null;
+        mChildList = childList;
+        mEventIds = null;
+        mEventNames = null;
     }
 
+    /**
+     * Constructs a BIOP stream message response.
+     *
+     * <p>The current stream message response does not support other stream messages types than
+     * stream event message type.
+     */
+    public DsmccResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            @Nullable int[] eventIds, @Nullable String[] eventNames) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
+        mBiopMessageType = BIOP_MESSAGE_TYPE_STREAM;
+        mFileDescriptor = null;
+        mChildList = null;
+        mEventIds = eventIds;
+        mEventNames = eventNames;
+        if (mEventIds.length != eventNames.length) {
+            throw new IllegalStateException("The size of eventIds and eventNames must be equal");
+        }
+    }
+
+    private DsmccResponse(@NonNull Parcel source) {
+        super(RESPONSE_TYPE, source);
+
+        mBiopMessageType = source.readString();
+        switch (mBiopMessageType) {
+            case BIOP_MESSAGE_TYPE_SERVICE_GATEWAY:
+            case BIOP_MESSAGE_TYPE_DIRECTORY:
+                int childNum = source.readInt();
+                mChildList = new ArrayList<>();
+                for (int i = 0; i < childNum; i++) {
+                    mChildList.add(source.readString());
+                }
+                mFileDescriptor = null;
+                mEventIds = null;
+                mEventNames = null;
+                break;
+            case BIOP_MESSAGE_TYPE_FILE:
+                mFileDescriptor = source.readFileDescriptor();
+                mChildList = null;
+                mEventIds = null;
+                mEventNames = null;
+                break;
+            case BIOP_MESSAGE_TYPE_STREAM:
+                int eventNum = source.readInt();
+                mEventIds = new int[eventNum];
+                mEventNames = new String[eventNum];
+                for (int i = 0; i < eventNum; i++) {
+                    mEventIds[i] = source.readInt();
+                    mEventNames[i] = source.readString();
+                }
+                mChildList = null;
+                mFileDescriptor = null;
+                break;
+            default:
+                throw new IllegalStateException("unexpected BIOP message type");
+        }
+    }
+
+    /**
+     * Returns the BIOP message type.
+     */
+    @NonNull
+    public @BiopMessageType String getBiopMessageType() {
+        return mBiopMessageType;
+    }
+
+    /**
+     * Returns the file descriptor for a given file message response.
+     */
+    @NonNull
     public ParcelFileDescriptor getFile() {
-        return mFile;
+        if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_FILE)) {
+            throw new IllegalStateException("Not file object");
+        }
+        return mFileDescriptor;
+    }
+
+    /**
+     * Returns a list of subobject names for the given service gateway or directory message
+     * response.
+     */
+    @NonNull
+    public List<String> getChildList() {
+        if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_DIRECTORY)
+                && !mBiopMessageType.equals(BIOP_MESSAGE_TYPE_SERVICE_GATEWAY)) {
+            throw new IllegalStateException("Not directory object");
+        }
+        return new ArrayList<String>(mChildList);
+    }
+
+    /**
+     * Returns all event IDs carried in a given stream message response.
+     */
+    @NonNull
+    public int[] getStreamEventIds() {
+        if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_STREAM)) {
+            throw new IllegalStateException("Not stream event object");
+        }
+        return mEventIds;
+    }
+
+    /**
+     * Returns all event names carried in a given stream message response.
+     */
+    @NonNull
+    public String[] getStreamEventNames() {
+        if (!mBiopMessageType.equals(BIOP_MESSAGE_TYPE_STREAM)) {
+            throw new IllegalStateException("Not stream event object");
+        }
+        return mEventNames;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        mFile.writeToParcel(dest, flags);
+        dest.writeString(mBiopMessageType);
+        switch (mBiopMessageType) {
+            case BIOP_MESSAGE_TYPE_SERVICE_GATEWAY:
+            case BIOP_MESSAGE_TYPE_DIRECTORY:
+                dest.writeInt(mChildList.size());
+                for (String child : mChildList) {
+                    dest.writeString(child);
+                }
+                break;
+            case BIOP_MESSAGE_TYPE_FILE:
+                dest.writeFileDescriptor(mFileDescriptor.getFileDescriptor());
+                break;
+            case BIOP_MESSAGE_TYPE_STREAM:
+                dest.writeInt(mEventIds.length);
+                for (int i = 0; i < mEventIds.length; i++) {
+                    dest.writeInt(mEventIds[i]);
+                    dest.writeString(mEventNames[i]);
+                }
+                break;
+            default:
+                throw new IllegalStateException("unexpected BIOP message type");
+        }
     }
 }

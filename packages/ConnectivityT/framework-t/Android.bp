@@ -25,11 +25,16 @@ filegroup {
     name: "framework-connectivity-netstats-internal-sources",
     srcs: [
         "src/android/app/usage/*.java",
-        "src/android/net/DataUsage*.*",
-        "src/android/net/INetworkStats*.*",
-        "src/android/net/NetworkIdentity*.java",
+        "src/android/net/DataUsageRequest.*",
+        "src/android/net/INetworkStatsService.aidl",
+        "src/android/net/INetworkStatsSession.aidl",
+        "src/android/net/NetworkIdentity.java",
+        "src/android/net/NetworkIdentitySet.java",
         "src/android/net/NetworkStateSnapshot.*",
-        "src/android/net/NetworkStats*.*",
+        "src/android/net/NetworkStats.*",
+        "src/android/net/NetworkStatsAccess.*",
+        "src/android/net/NetworkStatsCollection.*",
+        "src/android/net/NetworkStatsHistory.*",
         "src/android/net/NetworkTemplate.*",
         "src/android/net/TrafficStats.java",
         "src/android/net/UnderlyingNetworkInfo.*",
@@ -114,6 +119,28 @@ filegroup {
     ],
 }
 
+// Ethernet related libraries.
+
+filegroup {
+    name: "framework-connectivity-ethernet-sources",
+    srcs: [
+        "src/android/net/EthernetManager.java",
+        "src/android/net/EthernetNetworkManagementException.java",
+        "src/android/net/EthernetNetworkManagementException.aidl",
+        "src/android/net/EthernetNetworkSpecifier.java",
+        "src/android/net/EthernetNetworkUpdateRequest.java",
+        "src/android/net/EthernetNetworkUpdateRequest.aidl",
+        "src/android/net/IEthernetManager.aidl",
+        "src/android/net/IEthernetNetworkManagementListener.aidl",
+        "src/android/net/IEthernetServiceListener.aidl",
+        "src/android/net/ITetheredInterfaceCallback.aidl",
+    ],
+    path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
@@ -130,10 +157,49 @@ filegroup {
 filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
+        ":framework-connectivity-ethernet-sources",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+filegroup {
+    name: "framework-connectivity-tiramisu-updatable-sources",
+    srcs: [
         ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],
-    visibility: ["//frameworks/base"],
+    visibility: [
+        "//frameworks/base",
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+cc_library_shared {
+    name: "libframework-connectivity-tiramisu-jni",
+    min_sdk_version: "30",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        // Don't warn about S API usage even with
+        // min_sdk 30: the library is only loaded
+        // on S+ devices
+        "-Wno-unguarded-availability",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/android_net_TrafficStats.cpp",
+        "jni/onload.cpp",
+    ],
+    shared_libs: [
+        "libandroid",
+        "liblog",
+        "libnativehelper",
+    ],
+    stl: "none",
+    apex_available: [
+        "com.android.tethering",
+    ],
 }

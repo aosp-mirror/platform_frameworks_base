@@ -244,9 +244,6 @@ class SettingsProtoDumpUtil {
 
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.Autofill.COMPAT_MODE_ALLOWED_PACKAGES);
-        dumpSetting(s, p,
                 Settings.Global.AUTOFILL_LOGGING_LEVEL,
                 GlobalSettingsProto.Autofill.LOGGING_LEVEL);
         dumpSetting(s, p,
@@ -699,6 +696,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.MAX_ERROR_BYTES_PREFIX,
                 GlobalSettingsProto.MAX_ERROR_BYTES);
 
+        final long managedDeviceProvisioningToken =
+                p.start(GlobalSettingsProto.MANAGED_DEVICE_PROVISIONING);
+        dumpSetting(s, p,
+                Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
+                GlobalSettingsProto.ManagedDeviceProvisioning
+                        .MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER);
+        p.end(managedDeviceProvisioningToken);
+
         final long euiccToken = p.start(GlobalSettingsProto.EUICC);
         dumpSetting(s, p,
                 Settings.Global.EUICC_PROVISIONED,
@@ -1100,10 +1105,6 @@ class SettingsProtoDumpUtil {
         p.end(notificationToken);
 
         dumpSetting(s, p,
-                Settings.Global.NSD_ON,
-                GlobalSettingsProto.NSD_ON);
-
-        dumpSetting(s, p,
                 Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
                 GlobalSettingsProto.NR_NSA_TRACKING_SCREEN_OFF_MODE);
 
@@ -1384,9 +1385,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
                 GlobalSettingsProto.Sys.STORAGE_CACHE_PERCENTAGE);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
-                GlobalSettingsProto.Sys.STORAGE_CACHE_MAX_BYTES);
         dumpSetting(s, p,
                 Settings.Global.SYS_UIDCPUPOWER,
                 GlobalSettingsProto.Sys.UIDCPUPOWER);
@@ -1817,6 +1815,13 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
+                SecureSettingsProto.Accessibility.ODI_CAPTIONS_VOLUME_UI_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
@@ -2246,6 +2251,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
+
+        dumpSetting(s, p,
+                Settings.Secure.NAV_BAR_KIDS_MODE,
+                SecureSettingsProto.NAV_BAR_KIDS_MODE);
 
         dumpSetting(s, p,
                 Settings.Secure.NAVIGATION_MODE,
@@ -2912,6 +2921,18 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.VIBRATE_WHEN_RINGING,
                 SystemSettingsProto.Vibrate.WHEN_RINGING);
+
+        // NOTIFICATION_VIBRATION_INTENSITY is already logged at Notification.vibration_intensity
+        // HAPTIC_FEEDBACK_INTENSITY is already logged at HapticFeedback.intensity
+        dumpSetting(s, p,
+                Settings.System.ALARM_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.ALARM_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.MEDIA_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.MEDIA_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.RING_VIBRATION_INTENSITY,
+                SystemSettingsProto.Vibrate.RING_INTENSITY);
         p.end(vibrateToken);
 
         final long volumeToken = p.start(SystemSettingsProto.VOLUME);

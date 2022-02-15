@@ -746,6 +746,10 @@ public final class LoadedApk {
                 // default linker namespace.
                 continue;
             }
+            if (info.isSdk()) {
+                // SDKs are not loaded automatically.
+                continue;
+            }
             if (libsToLoadAfter.contains(info.getName())) {
                 if (DEBUG) {
                     Slog.v(ActivityThread.TAG,
@@ -1341,20 +1345,50 @@ public final class LoadedApk {
         return mResources;
     }
 
+    /**
+     * Used to investigate "duplicate app objects" bug (b/185177290).
+     * makeApplication() should only be called on the main thread, so no synchronization should
+     * be needed, but syncing anyway just in case.
+     */
+    @GuardedBy("sApplicationCache")
+    private static final ArrayMap<String, Application> sApplicationCache = new ArrayMap<>(4);
+
     @UnsupportedAppUsage
     public Application makeApplication(boolean forceDefaultAppClass,
             Instrumentation instrumentation) {
         if (mApplication != null) {
             return mApplication;
         }
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
+
+        // For b/185177290.
+        final boolean wrongUser =
+                UserHandle.myUserId() != UserHandle.getUserId(mApplicationInfo.uid);
+        if (wrongUser) {
+            Slog.wtf(TAG, "makeApplication called with wrong appinfo UID: myUserId="
+                    + UserHandle.myUserId() + " appinfo.uid=" + mApplicationInfo.uid);
+        }
+        synchronized (sApplicationCache) {
+            final Application cached = sApplicationCache.get(mPackageName);
+            if (cached != null) {
+                // Looks like this is always happening for the system server, because
+                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
+                if (!"android".equals(mPackageName)) {
+                    Slog.wtf(TAG, "App instance already created for package=" + mPackageName
+                            + " instance=" + cached);
+                }
+                // TODO Return the cached one, unless it's for the wrong user?
+                // For now, we just add WTF checks.
+            }
+        }
 
         Application app = null;
 
-        final String myProcessName = Process.myProcessName();
-        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
-                myProcessName);
+        // Temporarily disable per-process app class to investigate b/185177290
+//        final String myProcessName = Process.myProcessName();
+//        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+//                myProcessName);
+        String appClass = mApplicationInfo.className;
         if (forceDefaultAppClass || (appClass == null)) {
             appClass = "android.app.Application";
         }
@@ -1397,6 +1431,9 @@ public final class LoadedApk {
         }
         mActivityThread.mAllApplications.add(app);
         mApplication = app;
+        synchronized (sApplicationCache) {
+            sApplicationCache.put(mPackageName, app);
+        }
 
         if (instrumentation != null) {
             try {
@@ -1697,7 +1734,11 @@ public final class LoadedApk {
                         return;
                     }
 
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                "broadcastReceiveReg: " + intent.getAction());
+                    }
+
                     try {
                         ClassLoader cl = mReceiver.getClass().getClassLoader();
                         intent.setExtrasClassLoader(cl);

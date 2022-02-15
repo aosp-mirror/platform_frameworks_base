@@ -464,6 +464,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
 
     /**
+     * Namespace for all Supplemental Api related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SUPPLEMENTAL_API = "supplemental_api";
+
+    /**
      * Namespace for all SurfaceFlinger features that are used at the native level.
      * These features are applied on boot or after reboot.
      *
@@ -564,6 +571,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
 
     /**
+     * Definitions for selection toolbar related functions.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_SELECTION_TOOLBAR = "selection_toolbar";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
@@ -571,7 +586,7 @@ public final class DeviceConfig {
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
             Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
-                    NAMESPACE_STATSD_JAVA_BOOT);
+                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR);
     /**
      * Privacy related properties definitions.
      *
@@ -678,6 +693,15 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_UWB = "uwb";
+
+    /**
+     * Namespace for AmbientContextEventManagerService related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE =
+            "ambient_context_manager_service";
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")

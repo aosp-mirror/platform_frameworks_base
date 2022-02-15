@@ -26,10 +26,12 @@ import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -249,7 +251,8 @@ public class AudioSystem
             AUDIO_FORMAT_SBC,
             AUDIO_FORMAT_APTX,
             AUDIO_FORMAT_APTX_HD,
-            AUDIO_FORMAT_LDAC}
+            AUDIO_FORMAT_LDAC,
+            AUDIO_FORMAT_LC3}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioFormatNativeEnumForBtCodec {}
@@ -281,6 +284,7 @@ public class AudioSystem
             case AUDIO_FORMAT_APTX: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX;
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
+            case AUDIO_FORMAT_LC3: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3;
             default:
                 Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
                         + " for conversion to BT codec");
@@ -321,6 +325,8 @@ public class AudioSystem
                 return AudioSystem.AUDIO_FORMAT_APTX_HD;
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                 return AudioSystem.AUDIO_FORMAT_LDAC;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                return AudioSystem.AUDIO_FORMAT_LC3;
             default:
                 Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
                         + " for conversion to audio format");
@@ -421,6 +427,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_LHDC_LL";
             case /* AUDIO_FORMAT_APTX_TWSP       */ 0x2A000000:
                 return "AUDIO_FORMAT_APTX_TWSP";
+            case /* AUDIO_FORMAT_LC3             */ 0x2B000000:
+                return "AUDIO_FORMAT_LC3";
 
             /* Aliases */
             case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
@@ -983,6 +991,8 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLE_HEADSET = 0x20000000;
     /** @hide */
     public static final int DEVICE_OUT_BLE_SPEAKER = 0x20000001;
+    /** @hide */
+    public static final int DEVICE_OUT_BLE_BROADCAST = 0x20000002;
 
     /** @hide */
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
@@ -1043,6 +1053,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_ECHO_CANCELLER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_SPEAKER);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_BROADCAST);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
 
         DEVICE_OUT_ALL_A2DP_SET = new HashSet<>();
@@ -1073,6 +1084,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_BLE_SET = new HashSet<>();
         DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_SPEAKER);
+        DEVICE_OUT_ALL_BLE_SET.add(DEVICE_OUT_BLE_BROADCAST);
     }
 
     // input devices
@@ -1256,6 +1268,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_ECHO_CANCELLER_NAME = "echo_canceller";
     /** @hide */ public static final String DEVICE_OUT_BLE_HEADSET_NAME = "ble_headset";
     /** @hide */ public static final String DEVICE_OUT_BLE_SPEAKER_NAME = "ble_speaker";
+    /** @hide */ public static final String DEVICE_OUT_BLE_BROADCAST_NAME = "ble_broadcast";
 
     /** @hide */ public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     /** @hide */ public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -1355,9 +1368,11 @@ public class AudioSystem
             return DEVICE_OUT_BLE_HEADSET_NAME;
         case DEVICE_OUT_BLE_SPEAKER:
             return DEVICE_OUT_BLE_SPEAKER_NAME;
+        case DEVICE_OUT_BLE_BROADCAST:
+            return DEVICE_OUT_BLE_BROADCAST_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
-            return Integer.toString(device);
+            return "0x" + Integer.toHexString(device);
         }
     }
 
@@ -1542,9 +1557,24 @@ public class AudioSystem
      *     {@link #AUDIO_STATUS_ERROR} or {@link #AUDIO_STATUS_SERVER_DIED}
      */
     @UnsupportedAppUsage
-    public static native int setDeviceConnectionState(int device, int state,
-                                                      String device_address, String device_name,
-                                                      int codecFormat);
+    public static int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
+            int codecFormat) {
+        android.media.audio.common.AudioPort port =
+                AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(attributes);
+        Parcel parcel = Parcel.obtain();
+        port.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        try {
+            return setDeviceConnectionState(state, parcel, codecFormat);
+        } finally {
+            parcel.recycle();
+        }
+    }
+    /**
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static native int setDeviceConnectionState(int state, Parcel parcel, int codecFormat);
     /** @hide */
     @UnsupportedAppUsage
     public static native int getDeviceConnectionState(int device, String device_address);
@@ -1768,12 +1798,33 @@ public class AudioSystem
 
     /**
      * @hide
+     * Direct playback modes supported by audio HAL implementation.
+     */
+    public static final int DIRECT_NOT_SUPPORTED = 0;
+    public static final int DIRECT_OFFLOAD_SUPPORTED = 1;
+    public static final int DIRECT_OFFLOAD_GAPLESS_SUPPORTED = 3;
+    public static final int DIRECT_BITSTREAM_SUPPORTED = 4;
+
+    /**
+     * @hide
      * Compressed audio offload decoding modes supported by audio HAL implementation.
      * Keep in sync with system/media/include/media/audio.h.
      */
-    public static final int OFFLOAD_NOT_SUPPORTED = 0;
-    public static final int OFFLOAD_SUPPORTED = 1;
+    public static final int OFFLOAD_NOT_SUPPORTED = DIRECT_NOT_SUPPORTED;
+    public static final int OFFLOAD_SUPPORTED = DIRECT_OFFLOAD_SUPPORTED;
     public static final int OFFLOAD_GAPLESS_SUPPORTED = 2;
+
+    /**
+     * @hide
+     * Returns how direct playback of an audio format is currently available on the device.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return the direct playback mode available with given format and attributes. Any combination
+     *         of {@link #DIRECT_NOT_SUPPORTED}, {@link #DIRECT_OFFLOAD_SUPPORTED},
+     *         {@link #DIRECT_OFFLOAD_GAPLESS_SUPPORTED} and {@link #DIRECT_BITSTREAM_SUPPORTED}.
+     */
+    public static native int getDirectPlaybackSupport(
+            @NonNull AudioFormat format, @NonNull AudioAttributes attributes);
 
     static int getOffloadSupport(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
         return native_get_offload_support(format.getEncoding(), format.getSampleRate(),
@@ -1805,16 +1856,15 @@ public class AudioSystem
 
     /**
      * @hide
-     * Communicate UID of active assistant to audio policy service.
+     * Communicate UIDs of the active assistant to audio policy service.
      */
-    public static native int setAssistantUid(int uid);
+    public static native int setActiveAssistantServicesUids(int[] uids);
 
     /**
-     * Communicate UID of the current {@link android.service.voice.HotwordDetectionService} to audio
-     * policy service.
      * @hide
+     * Communicate UIDs of assistant to audio policy service.
      */
-    public static native int setHotwordDetectionServiceUid(int uid);
+    public static native int setAssistantServicesUids(int[] uids);
 
     /**
      * @hide
@@ -1834,6 +1884,12 @@ public class AudioSystem
      * @see AudioManager#isHapticPlaybackSupported()
      */
     public static native boolean isHapticPlaybackSupported();
+
+    /**
+     * @hide
+     * @see AudioManager#isUltrasoundSupported()
+     */
+    public static native boolean isUltrasoundSupported();
 
     /**
      * @hide
@@ -2080,6 +2136,15 @@ public class AudioSystem
     public static native boolean canBeSpatialized(AudioAttributes attributes,
                                               AudioFormat format,
                                               AudioDeviceAttributes[] devices);
+
+    /**
+     * @hide
+     * @param attributes audio attributes describing the playback use case
+     * @param audioProfilesList the list of AudioProfiles that can be played as direct output
+     * @return {@link #SUCCESS} if the list of AudioProfiles was successfully created (can be empty)
+     */
+    public static native int getDirectProfilesForAttributes(@NonNull AudioAttributes attributes,
+            @NonNull ArrayList<AudioProfile> audioProfilesList);
 
     // Items shared with audio service
 

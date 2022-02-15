@@ -238,7 +238,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @param key the key to check if removable
      * @return true if the alert entry can be removed
      */
-    protected boolean canRemoveImmediately(String key) {
+    public boolean canRemoveImmediately(String key) {
         AlertEntry alertEntry = mAlertEntries.get(key);
         return alertEntry == null || alertEntry.wasShownLongEnough()
                 || alertEntry.mEntry.isRowDismissed();
@@ -255,6 +255,30 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     @Override
     public boolean shouldExtendLifetime(NotificationEntry entry) {
         return !canRemoveImmediately(entry.getKey());
+    }
+
+    /**
+     * @param key
+     * @return true if the entry is pinned
+     */
+    public boolean isSticky(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return alerting.isSticky();
+        }
+        return false;
+    }
+
+    /**
+     * @param key
+     * @return When a HUN entry should be removed in milliseconds from now
+     */
+    public long getEarliestRemovalTime(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
+        }
+        return 0;
     }
 
     @Override
@@ -296,7 +320,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * @param updatePostTime whether or not to refresh the post time
          */
         public void updateEntry(boolean updatePostTime) {
-            mLogger.logUpdateEntry(updatePostTime);
+            mLogger.logUpdateEntry(mEntry.getKey(), updatePostTime);
 
             long currentTime = mClock.currentTimeMillis();
             mEarliestRemovaltime = currentTime + mMinimumDisplayTime;

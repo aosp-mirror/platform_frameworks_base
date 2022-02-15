@@ -25,4 +25,21 @@
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
+
+    <dimen name="split_shade_notifications_scrim_margin_bottom">16dp</dimen>
+
+    <dimen name="notification_panel_margin_bottom">48dp</dimen>
+
+    <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
+    <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">0.45</item>
+    <dimen name="controls_task_view_right_margin">8dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for qs to fully transition to the
+         shade -->
+    <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for scrim to fully transition to
+         the shade (in alpha) -->
+    <dimen name="lockscreen_shade_scrim_transition_distance">200dp</dimen>
+
 </resources>

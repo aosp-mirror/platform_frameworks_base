@@ -32,8 +32,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;
@@ -44,6 +42,7 @@ import android.os.Trace;
 import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.PrintWriterPrinter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -53,9 +52,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.component.ParsedApexSystemService;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -411,6 +414,13 @@ public abstract class ApexManager {
             throws PackageManagerException;
 
     /**
+     * Get a list of apex system services implemented in an apex.
+     *
+     * <p>The list is sorted by initOrder for consistency.
+     */
+    public abstract List<ApexSystemServiceInfo> getApexSystemServices();
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -436,6 +446,12 @@ public abstract class ApexManager {
 
         @GuardedBy("mLock")
         private Set<ActiveApexInfo> mActiveApexInfosCache;
+
+        /**
+         * Map of all apex system services to the jar files they are contained in.
+         */
+        @GuardedBy("mLock")
+        private List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -566,6 +582,8 @@ public abstract class ApexManager {
                 ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
 
                 if (throwable == null) {
+                    // Calling hideAsFinal to assign derived fields for the app info flags.
+                    parseResult.parsedPackage.hideAsFinal();
                     final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
                             parseResult.parsedPackage, ai, flags);
                     if (packageInfo == null) {
@@ -573,6 +591,37 @@ public abstract class ApexManager {
                                 + ai.modulePath);
                     }
                     mAllPackagesCache.add(packageInfo);
+                    for (ParsedApexSystemService service :
+                            parseResult.parsedPackage.getApexSystemServices()) {
+                        String minSdkVersion = service.getMinSdkVersion();
+                        if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with min_sdk_version=%s is skipped",
+                                    service.getName(), service.getMinSdkVersion()));
+                            continue;
+                        }
+                        String maxSdkVersion = service.getMaxSdkVersion();
+                        if (maxSdkVersion != null && !UnboundedSdkLevel.isAtMost(maxSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with max_sdk_version=%s is skipped",
+                                    service.getName(), service.getMaxSdkVersion()));
+                            continue;
+                        }
+
+                        String name = service.getName();
+                        for (ApexSystemServiceInfo info : mApexSystemServices) {
+                            if (info.getName().equals(name)) {
+                                throw new IllegalStateException(String.format(
+                                        "Duplicate apex-system-service %s from %s, %s",
+                                        name, info.mJarPath, service.getJarPath()));
+                            }
+                        }
+
+                        ApexSystemServiceInfo info = new ApexSystemServiceInfo(
+                                service.getName(), service.getJarPath(), service.getInitOrder());
+                        mApexSystemServices.add(info);
+                    }
+                    Collections.sort(mApexSystemServices);
                     mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                     if (ai.isActive) {
                         if (activePackagesSet.contains(packageInfo.packageName)) {
@@ -760,7 +809,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                         "apexd verification failed : " + e.getMessage());
             }
         }
@@ -787,7 +836,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                         "Failed to mark apexd session as ready : " + e.getMessage());
             }
         }
@@ -1092,6 +1141,15 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public List<ApexSystemServiceInfo> getApexSystemServices() {
+            synchronized (mLock) {
+                Preconditions.checkState(mApexSystemServices != null,
+                        "APEX packages have not been scanned");
+                return mApexSystemServices;
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1116,6 +1174,10 @@ public abstract class ApexManager {
                 ipw.println("Path: " + pi.applicationInfo.sourceDir);
                 ipw.println("IsActive: " + isActive(pi));
                 ipw.println("IsFactory: " + isFactory(pi));
+                ipw.println("ApplicationInfo: ");
+                ipw.increaseIndent();
+                pi.applicationInfo.dump(new PrintWriterPrinter(ipw), "");
+                ipw.decreaseIndent();
                 ipw.decreaseIndent();
             }
             ipw.decreaseIndent();
@@ -1367,6 +1429,13 @@ public abstract class ApexManager {
         @Override
         void installPackage(File apexFile, PackageParser2 packageParser) {
             throw new UnsupportedOperationException("APEX updates are not supported");
+        }
+
+        @Override
+        public List<ApexSystemServiceInfo> getApexSystemServices() {
+            // TODO(satayev): we can't really support flattened apex use case, and need to migrate
+            // the manifest entries into system's manifest asap.
+            return Collections.emptyList();
         }
 
         @Override

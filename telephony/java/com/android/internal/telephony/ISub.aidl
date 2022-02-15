@@ -313,4 +313,15 @@ interface ISub {
 
     void setPhoneNumber(int subId, int source, String number,
             String callingPackage, String callingFeatureId);
+
+    /**
+     * Set the Usage Setting for this subscription.
+     *
+     * @param usageSetting the usage setting for this subscription
+     * @param subId the unique SubscriptionInfo index in database
+     * @param callingPackage The package making the IPC.
+     *
+     * @throws SecurityException if doesn't have MODIFY_PHONE_STATE or Carrier Privileges
+     */
+    int setUsageSetting(int usageSetting, int subId, String callingPackage);
 }

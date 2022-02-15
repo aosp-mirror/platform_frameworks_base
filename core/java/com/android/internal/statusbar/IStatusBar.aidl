@@ -20,15 +20,19 @@ import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
 import android.view.InsetsVisibilities;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 
@@ -166,6 +170,8 @@ oneway interface IStatusBar
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
     void hideAuthenticationDialog();
+    /* Used to notify the biometric service of events that occur outside of an operation. */
+    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
@@ -207,8 +213,10 @@ oneway interface IStatusBar
      *
      * @param displayId the ID of the display to notify.
      * @param types the internal insets types of the bars are about to show transiently.
+     * @param isGestureOnSystemBar whether the gesture to show the transient bar was a gesture on
+     *        one of the bars itself.
      */
-    void showTransient(int displayId, in int[] types);
+    void showTransient(int displayId, in int[] types, boolean isGestureOnSystemBar);
 
     /**
      * Notifies System UI to abort the transient state of system bars, which prevents the bars being
@@ -291,4 +299,23 @@ oneway interface IStatusBar
 
     void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);
+
+    /** Notifies System UI about an update to the media tap-to-transfer sender state. */
+    void updateMediaTapToTransferSenderDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in IUndoMediaTransferCallback undoCallback);
+
+    /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
+    void updateMediaTapToTransferReceiverDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in Icon appIcon,
+        in CharSequence appName);
+
+    /** Registers a nearby media devices provider. */
+    void registerNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Unregisters a nearby media devices provider. */
+    void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 }

@@ -33,6 +33,7 @@ import android.media.Session2CommandGroup;
 import android.media.Session2Token;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -45,7 +46,10 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.annotation.MinSdk;
 import com.android.server.SystemService;
 
 import java.lang.ref.WeakReference;
@@ -60,6 +64,8 @@ import java.util.concurrent.Executors;
  * and their ongoing media playback state.
  * @hide
  */
+@MinSdk(Build.VERSION_CODES.S)
+@RequiresApi(Build.VERSION_CODES.S)
 public class MediaCommunicationService extends SystemService {
     private static final String TAG = "MediaCommunicationSrv";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -76,7 +82,7 @@ public class MediaCommunicationService extends SystemService {
 
     final Executor mRecordExecutor = Executors.newSingleThreadExecutor();
     @GuardedBy("mLock")
-    final List<CallbackRecord> mCallbackRecords = new ArrayList<>();
+    final ArrayList<CallbackRecord> mCallbackRecords = new ArrayList<>();
     final NotificationManager mNotificationManager;
     MediaSessionManager mSessionManager;
 
@@ -147,8 +153,8 @@ public class MediaCommunicationService extends SystemService {
         return null;
     }
 
-    List<Session2Token> getSession2TokensLocked(int userId) {
-        List<Session2Token> list = new ArrayList<>();
+    ArrayList<Session2Token> getSession2TokensLocked(int userId) {
+        ArrayList<Session2Token> list = new ArrayList<>();
         if (userId == ALL.getIdentifier()) {
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
@@ -234,28 +240,29 @@ public class MediaCommunicationService extends SystemService {
     }
 
     void dispatchSession2Changed(int userId) {
-        MediaParceledListSlice<Session2Token> allSession2Tokens;
-        MediaParceledListSlice<Session2Token> userSession2Tokens;
+        ArrayList<Session2Token> allSession2Tokens;
+        ArrayList<Session2Token> userSession2Tokens;
 
         synchronized (mLock) {
-            allSession2Tokens =
-                    new MediaParceledListSlice<>(getSession2TokensLocked(ALL.getIdentifier()));
-            userSession2Tokens = new MediaParceledListSlice<>(getSession2TokensLocked(userId));
-        }
-        allSession2Tokens.setInlineCountLimit(1);
-        userSession2Tokens.setInlineCountLimit(1);
+            allSession2Tokens = getSession2TokensLocked(ALL.getIdentifier());
+            userSession2Tokens = getSession2TokensLocked(userId);
 
-        synchronized (mLock) {
             for (CallbackRecord record : mCallbackRecords) {
                 if (record.mUserId == ALL.getIdentifier()) {
                     try {
-                        record.mCallback.onSession2Changed(allSession2Tokens);
+                        MediaParceledListSlice<Session2Token> toSend =
+                                new MediaParceledListSlice<>(allSession2Tokens);
+                        toSend.setInlineCountLimit(0);
+                        record.mCallback.onSession2Changed(toSend);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to notify session2 tokens changed " + record);
                     }
                 } else if (record.mUserId == userId) {
                     try {
-                        record.mCallback.onSession2Changed(userSession2Tokens);
+                        MediaParceledListSlice<Session2Token> toSend =
+                                new MediaParceledListSlice<>(userSession2Tokens);
+                        toSend.setInlineCountLimit(0);
+                        record.mCallback.onSession2Changed(toSend);
                     } catch (RemoteException e) {
                         Log.w(TAG, "Failed to notify session2 tokens changed " + record);
                     }
@@ -379,7 +386,7 @@ public class MediaCommunicationService extends SystemService {
             try {
                 // Check that they can make calls on behalf of the user and get the final user id
                 int resolvedUserId = handleIncomingUser(pid, uid, userId, null);
-                List<Session2Token> result;
+                ArrayList<Session2Token> result;
                 synchronized (mLock) {
                     result = getSession2TokensLocked(resolvedUserId);
                 }

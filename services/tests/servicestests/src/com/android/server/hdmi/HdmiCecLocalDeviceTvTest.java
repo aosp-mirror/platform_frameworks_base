@@ -62,6 +62,23 @@ import java.util.concurrent.TimeUnit;
 public class HdmiCecLocalDeviceTvTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
 
+    private static final String[] SADS_NOT_TO_QUERY = new String[]{
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
+            HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX};
+    private static final HdmiCecMessage SAD_QUERY =
+            HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(ADDR_TV, ADDR_AUDIO_SYSTEM,
+                    new int[]{Constants.AUDIO_CODEC_LPCM, Constants.AUDIO_CODEC_DD,
+                            Constants.AUDIO_CODEC_MP3, Constants.AUDIO_CODEC_MPEG2});
+
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
@@ -121,7 +138,6 @@ public class HdmiCecLocalDeviceTvTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =
@@ -137,6 +153,10 @@ public class HdmiCecLocalDeviceTvTest {
         mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
         mTestLooper.dispatchAll();
         mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
+        for (String sad : SADS_NOT_TO_QUERY) {
+            mHdmiControlService.getHdmiCecConfig().setIntValue(
+                    sad, HdmiControlManager.QUERY_SAD_DISABLED);
+        }
         mNativeWrapper.clearResultMessages();
     }
 
@@ -172,8 +192,14 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_deviceInNetworkIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x3000)
+                .setPortId(0)
+                .setDeviceType(Constants.ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(externalDevice);
         mTestLooper.dispatchAll();
 
@@ -185,7 +211,7 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_unknownLogicalAddressInNetworkIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(0x1000, 1);
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.hardwarePort(0x1000, 1);
 
         mHdmiControlService.setActiveSource(Constants.ADDR_UNREGISTERED,
                 externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
@@ -197,8 +223,14 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void getActiveSource_unknownDeviceIsActiveSource() {
-        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
-                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        HdmiDeviceInfo externalDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(Constants.ADDR_PLAYBACK_3)
+                .setPhysicalAddress(0x0000)
+                .setPortId(0)
+                .setDeviceType(ADDR_PLAYBACK_1)
+                .setVendorId(0)
+                .setDisplayName("Test Device")
+                .build();
 
         mHdmiControlService.setActiveSource(externalDevice.getLogicalAddress(),
                 externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
@@ -240,7 +272,7 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
         mTestLooper.dispatchAll();
         mPowerManager.setInteractive(false);
-        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+        HdmiCecMessage imageViewOn = HdmiCecMessage.build(ADDR_PLAYBACK_1, mTvLogicalAddress,
                 Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
@@ -268,7 +300,7 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED);
         mTestLooper.dispatchAll();
         mPowerManager.setInteractive(false);
-        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+        HdmiCecMessage imageViewOn = HdmiCecMessage.build(ADDR_PLAYBACK_1, mTvLogicalAddress,
                 Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
@@ -431,6 +463,7 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV,
                 ADDR_AUDIO_SYSTEM);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(SAD_QUERY);
     }
 
     @Test
@@ -452,6 +485,7 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV,
                 ADDR_AUDIO_SYSTEM);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(SAD_QUERY);
     }
 
     @Test
@@ -474,11 +508,12 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV,
                 ADDR_AUDIO_SYSTEM);
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
     }
 
     @Test
     public void supportsRecordTvScreen() {
-        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_RECORDER_1, mTvLogicalAddress,
+        HdmiCecMessage recordTvScreen = HdmiCecMessage.build(ADDR_RECORDER_1, mTvLogicalAddress,
                 Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
 
         mNativeWrapper.onCecMessage(recordTvScreen);

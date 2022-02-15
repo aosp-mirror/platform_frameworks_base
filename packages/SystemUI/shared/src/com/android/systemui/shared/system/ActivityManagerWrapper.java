@@ -61,7 +61,7 @@ import java.util.function.Consumer;
 public class ActivityManagerWrapper {
 
     private static final String TAG = "ActivityManagerWrapper";
-
+    private static final int NUM_RECENT_ACTIVITIES_REQUEST = 3;
     private static final ActivityManagerWrapper sInstance = new ActivityManagerWrapper();
 
     // Should match the values in PhoneWindowManager
@@ -110,6 +110,22 @@ public class ActivityManagerWrapper {
             return null;
         }
         return tasks.get(0);
+    }
+
+    /**
+     * We ask for {@link #NUM_RECENT_ACTIVITIES_REQUEST} activities because when in split screen,
+     * we'll get back 2 activities for each split app and one for launcher. Launcher might be more
+     * "recently" used than one of the split apps so if we only request 2 tasks, then we might miss
+     * out on one of the split apps
+     *
+     * @return an array of up to {@link #NUM_RECENT_ACTIVITIES_REQUEST} running tasks
+     *         filtering only for tasks that can be visible in the recent tasks list.
+     */
+    public ActivityManager.RunningTaskInfo[] getRunningTasks(boolean filterOnlyVisibleRecents) {
+        // Note: The set of running tasks from the system is ordered by recency
+        List<ActivityManager.RunningTaskInfo> tasks =
+                mAtm.getTasks(NUM_RECENT_ACTIVITIES_REQUEST, filterOnlyVisibleRecents);
+        return tasks.toArray(new RunningTaskInfo[tasks.size()]);
     }
 
     /**

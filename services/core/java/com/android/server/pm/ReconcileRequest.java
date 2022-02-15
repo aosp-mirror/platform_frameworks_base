@@ -16,10 +16,7 @@
 
 package com.android.server.pm;
 
-import android.content.pm.SharedLibraryInfo;
-
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.Collections;
 import java.util.Map;
@@ -37,38 +34,29 @@ final class ReconcileRequest {
     public final Map<String, ScanResult> mScannedPackages;
 
     public final Map<String, AndroidPackage> mAllPackages;
-    public final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> mSharedLibrarySource;
     public final Map<String, InstallArgs> mInstallArgs;
     public final Map<String, PackageInstalledInfo> mInstallResults;
     public final Map<String, PrepareResult> mPreparedPackages;
     public final Map<String, Settings.VersionInfo> mVersionInfos;
-    public final Map<String, PackageSetting> mLastStaticSharedLibSettings;
 
     ReconcileRequest(Map<String, ScanResult> scannedPackages,
             Map<String, InstallArgs> installArgs,
             Map<String, PackageInstalledInfo> installResults,
             Map<String, PrepareResult> preparedPackages,
-            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
             Map<String, AndroidPackage> allPackages,
-            Map<String, Settings.VersionInfo> versionInfos,
-            Map<String, PackageSetting> lastStaticSharedLibSettings) {
+            Map<String, Settings.VersionInfo> versionInfos) {
         mScannedPackages = scannedPackages;
         mInstallArgs = installArgs;
         mInstallResults = installResults;
         mPreparedPackages = preparedPackages;
-        mSharedLibrarySource = sharedLibrarySource;
         mAllPackages = allPackages;
         mVersionInfos = versionInfos;
-        mLastStaticSharedLibSettings = lastStaticSharedLibSettings;
     }
 
     ReconcileRequest(Map<String, ScanResult> scannedPackages,
-            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
             Map<String, AndroidPackage> allPackages,
-            Map<String, Settings.VersionInfo> versionInfos,
-            Map<String, PackageSetting> lastStaticSharedLibSettings) {
+            Map<String, Settings.VersionInfo> versionInfos) {
         this(scannedPackages, Collections.emptyMap(), Collections.emptyMap(),
-                Collections.emptyMap(), sharedLibrarySource, allPackages, versionInfos,
-                lastStaticSharedLibSettings);
+                Collections.emptyMap(), allPackages, versionInfos);
     }
 }

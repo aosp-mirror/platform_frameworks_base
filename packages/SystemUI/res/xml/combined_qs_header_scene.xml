@@ -23,11 +23,22 @@
         app:constraintSetEnd="@id/qs_header_constraint"
         app:constraintSetStart="@id/qqs_header_constraint">
         <KeyFrameSet>
+            <!-- These positions are to prevent visual movement of @id/date -->
             <KeyPosition
                 app:keyPositionType="pathRelative"
                 app:percentX="0"
-                app:framePosition="50"
+                app:framePosition="49"
                 app:motionTarget="@id/date" />
+            <KeyPosition
+                app:keyPositionType="pathRelative"
+                app:percentX="1"
+                app:framePosition="51"
+                app:motionTarget="@id/date" />
+            <KeyAttribute
+                app:motionTarget="@id/date"
+                app:framePosition="50"
+                android:alpha="0"
+                />
         </KeyFrameSet>
     </Transition>
 

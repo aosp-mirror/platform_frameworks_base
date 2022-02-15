@@ -19,6 +19,7 @@ package com.android.wm.shell.common;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -34,6 +35,7 @@ import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingList
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This module deals with display rotations coming from WM. When WM starts a rotation: after it has
@@ -74,6 +76,11 @@ public class DisplayController {
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register display controller");
         }
+    }
+
+    /** Get the DisplayChangeController. */
+    public DisplayChangeController getChangeController() {
+        return mChangeController;
     }
 
     /**
@@ -238,6 +245,21 @@ public class DisplayController {
         }
     }
 
+    private void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+            List<Rect> unrestricted) {
+        synchronized (mDisplays) {
+            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
+                Slog.w(TAG, "Skipping onKeepClearAreasChanged on unknown"
+                        + " display, displayId=" + displayId);
+                return;
+            }
+            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                mDisplayChangedListeners.get(i)
+                    .onKeepClearAreasChanged(displayId, restricted, unrestricted);
+            }
+        }
+    }
+
     private static class DisplayRecord {
         private int mDisplayId;
         private Context mContext;
@@ -296,6 +318,14 @@ public class DisplayController {
                 DisplayController.this.onFixedRotationFinished(displayId);
             });
         }
+
+        @Override
+        public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) {
+            mMainExecutor.execute(() -> {
+                DisplayController.this.onKeepClearAreasChanged(displayId, restricted, unrestricted);
+            });
+        }
     }
 
     /**
@@ -330,5 +360,11 @@ public class DisplayController {
          * Called when fixed rotation on a display is finished.
          */
         default void onFixedRotationFinished(int displayId) {}
+
+        /**
+         * Called when keep-clear areas on a display have changed.
+         */
+        default void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) {}
     }
 }

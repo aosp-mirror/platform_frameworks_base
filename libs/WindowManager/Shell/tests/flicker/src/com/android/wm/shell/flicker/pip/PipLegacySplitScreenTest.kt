@@ -90,19 +90,15 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         }
 
     /** {@inheritDoc}  */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(com.android.server.wm.flicker.helpers.isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @FlakyTest(bugId = 161435597)
     @Test
     fun pipWindowInsideDisplayBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -119,8 +115,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @FlakyTest(bugId = 161435597)
     @Test
     fun pipLayerInsideDisplayBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 

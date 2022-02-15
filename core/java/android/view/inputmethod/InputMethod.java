@@ -26,11 +26,15 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
+
+import java.util.List;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -100,11 +104,15 @@ public interface InputMethod {
      *                             operations that are allowed only to the
      *                             current IME.
      * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
+     * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
      * @hide
      */
     @MainThread
     default void initializeInternal(IBinder token,
-            IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
+            IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
+            boolean stylusHwSupported, boolean shouldShowImeSwitcherWhenImeIsShown) {
         attachToken(token);
     }
 
@@ -223,6 +231,8 @@ public interface InputMethod {
      *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
      *                        long as your implementation of {@link InputMethod} relies on such
      *                        IPCs
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
@@ -231,12 +241,24 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken) {
+            @NonNull IBinder startInputToken, boolean shouldShowImeSwitcherWhenImeIsShown) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {
             startInput(inputConnection, editorInfo);
         }
+    }
+
+    /**
+     * Notifies that whether the IME should show the IME switcher or not is being changed.
+     *
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
+     * @hide
+     */
+    @MainThread
+    default void onShouldShowImeSwitcherWhenImeIsShownChanged(
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
     }
 
     /**
@@ -383,5 +405,32 @@ public interface InputMethod {
      * @hide
      */
     public void setCurrentHideInputToken(IBinder hideInputToken);
+
+    /**
+     * Checks if IME is ready to start stylus handwriting session.
+     * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
+     * @param requestId
+     * @hide
+     */
+    default void canStartStylusHandwriting(int requestId) {
+        // intentionally empty
+    }
+
+    /**
+     * Start stylus handwriting session.
+     * @hide
+     */
+    default void startStylusHandwriting(
+            int requestId, @NonNull InputChannel channel, @Nullable List<MotionEvent> events) {
+        // intentionally empty
+    }
+
+    /**
+     * Initialize Ink window early-on.
+     * @hide
+     */
+    default void initInkWindow() {
+        // intentionally empty
+    }
 
 }

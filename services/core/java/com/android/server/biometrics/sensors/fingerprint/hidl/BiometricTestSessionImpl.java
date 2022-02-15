@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
@@ -201,7 +202,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void cleanupInternalState(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mFingerprint21.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
+        mFingerprint21.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 try {

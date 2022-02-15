@@ -311,7 +311,7 @@ class ManifestVisitor : public BaseVisitor {
               component_process ? component_process->value : default_process_;
           get_name = !process.empty() && process[0] != ':';
         }
-      } else if (node->name == "instrumentation") {
+      } else if (node->name == "instrumentation" || node->name == "process") {
         get_name = true;
       }
 

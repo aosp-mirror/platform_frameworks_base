@@ -17,11 +17,23 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"隨附裝置管理工具"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"選擇由 &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; 管理的<xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
-    <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"手錶"</string>
     <string name="confirmation_title" msgid="8455544820286920304">"允許 &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; 管理您的&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_summary" msgid="2059360676631420073">"必須使用此應用程式，才能管理<xliff:g id="PROFILE_NAME">%1$s</xliff:g>。<xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"手錶"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"選擇由 &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; 管理的<xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」將可存取通知、電話、短訊、聯絡人和日曆資料。"</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」將可存取通知、電話、短訊、聯絡人和日曆資料。"</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;串流播放應用程式的內容嗎？"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"讓「<xliff:g id="APP_NAME">%1$s</xliff:g>」在「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」連線時可透過遠端方式存取此手機上安裝的應用程式。"</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"讓「<xliff:g id="APP_NAME">%1$s</xliff:g>」在「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」連線時可透過遠端方式存取此平板電腦上安裝的應用程式。"</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"讓「<xliff:g id="APP_NAME">%1$s</xliff:g>」在「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」連線時可透過遠端方式存取此裝置上安裝的應用程式。"</string>
+    <string name="title_automotive_projection" msgid="3296005598978412847"></string>
+    <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取您手機中的這項資料"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
+    <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"允許"</string>
     <string name="consent_no" msgid="2640796915611404382">"不允許"</string>
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"將應用程式權限轉移至手錶"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"為簡化手錶的設定程序，在設定過程中安裝到手錶上的應用程式都將沿用手機上的權限。\n\n這些權限可能包括手錶麥克風和位置的存取權。"</string>
 </resources>

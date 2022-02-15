@@ -122,15 +122,14 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(AppStandbyInternal.class))
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
+        doReturn(mock(BatteryManagerInternal.class))
+                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
         doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
-        // Called in BatteryController constructor.
-        doReturn(mock(BatteryManagerInternal.class))
-                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         // Called in ConnectivityController constructor.
         when(mContext.getSystemService(ConnectivityManager.class))
                 .thenReturn(mock(ConnectivityManager.class));
@@ -203,6 +202,49 @@ public class JobSchedulerServiceTest {
             int callingUid) {
         return JobStatus.createFromJobInfo(
                 jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
+    }
+
+    @Test
+    public void testGetMinJobExecutionGuaranteeMs() {
+        JobStatus ejMax = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(1).setExpedited(true));
+        JobStatus ejHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(2).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus ejMaxDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(3).setExpedited(true));
+        JobStatus ejHighDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(4).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(5).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobDef = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(6));
+
+        spyOn(ejMax);
+        spyOn(ejHigh);
+        spyOn(ejMaxDowngraded);
+        spyOn(ejHighDowngraded);
+        spyOn(jobHigh);
+        spyOn(jobDef);
+
+        when(ejMax.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejHigh.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejMaxDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
+
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMax));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMaxDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHighDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDef));
     }
 
     /**

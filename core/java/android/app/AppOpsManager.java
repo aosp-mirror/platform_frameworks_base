@@ -1327,9 +1327,17 @@ public class AppOpsManager {
      */
     public static final int OP_ESTABLISH_VPN_MANAGER = AppProtoEnums.APP_OP_ESTABLISH_VPN_MANAGER;
 
+    /**
+     * Access restricted settings.
+     *
+     * @hide
+     */
+    public static final int OP_ACCESS_RESTRICTED_SETTINGS =
+            AppProtoEnums.APP_OP_ACCESS_RESTRICTED_SETTINGS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 119;
+    public static final int _NUM_OP = 120;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1784,6 +1792,14 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
 
+    /**
+     * Limit user accessing restricted settings.
+     *
+     * @hide
+     */
+    public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
+            "android:access_restricted_settings";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2004,6 +2020,7 @@ public class AppOpsManager {
             OP_NEARBY_WIFI_DEVICES,             // OP_NEARBY_WIFI_DEVICES
             OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
             OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
+            OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -2129,6 +2146,7 @@ public class AppOpsManager {
             OPSTR_NEARBY_WIFI_DEVICES,
             OPSTR_ESTABLISH_VPN_SERVICE,
             OPSTR_ESTABLISH_VPN_MANAGER,
+            OPSTR_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2255,6 +2273,7 @@ public class AppOpsManager {
             "NEARBY_WIFI_DEVICES",
             "ESTABLISH_VPN_SERVICE",
             "ESTABLISH_VPN_MANAGER",
+            "ACCESS_RESTRICTED_SETTINGS",
     };
 
     /**
@@ -2344,11 +2363,11 @@ public class AppOpsManager {
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
-            null,
+            Manifest.permission.READ_MEDIA_AUDIO,
             null, // no permission for OP_WRITE_MEDIA_AUDIO
-            null,
+            Manifest.permission.READ_MEDIA_VIDEO,
             null, // no permission for OP_WRITE_MEDIA_VIDEO
-            null,
+            Manifest.permission.READ_MEDIA_IMAGE,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
@@ -2382,6 +2401,7 @@ public class AppOpsManager {
             Manifest.permission.NEARBY_WIFI_DEVICES,
             null, // no permission for OP_ESTABLISH_VPN_SERVICE
             null, // no permission for OP_ESTABLISH_VPN_MANAGER
+            null, // no permission for OP_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2509,6 +2529,7 @@ public class AppOpsManager {
             null, // NEARBY_WIFI_DEVICES
             null, // ESTABLISH_VPN_SERVICE
             null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2635,6 +2656,7 @@ public class AppOpsManager {
             null, // NEARBY_WIFI_DEVICES
             null, // ESTABLISH_VPN_SERVICE
             null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2760,6 +2782,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // NEARBY_WIFI_DEVICES
             AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
             AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
+            AppOpsManager.MODE_ALLOWED, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2889,6 +2912,7 @@ public class AppOpsManager {
             false, // NEARBY_WIFI_DEVICES
             false, // OP_ESTABLISH_VPN_SERVICE
             false, // OP_ESTABLISH_VPN_MANAGER
+            true, // ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -4058,7 +4082,7 @@ public class AppOpsManager {
                 LongSparseArray<NoteOpEvent> array = new LongSparseArray<>(numEntries);
 
                 for (int i = 0; i < numEntries; i++) {
-                    array.put(source.readLong(), source.readParcelable(null));
+                    array.put(source.readLong(), source.readParcelable(null, android.app.AppOpsManager.NoteOpEvent.class));
                 }
 
                 return array;
@@ -5178,7 +5202,7 @@ public class AppOpsManager {
             final int[] uids = parcel.createIntArray();
             if (!ArrayUtils.isEmpty(uids)) {
                 final ParceledListSlice<HistoricalUidOps> listSlice = parcel.readParcelable(
-                        HistoricalOps.class.getClassLoader());
+                        HistoricalOps.class.getClassLoader(), android.content.pm.ParceledListSlice.class);
                 final List<HistoricalUidOps> uidOps = (listSlice != null)
                         ? listSlice.getList() : null;
                 if (uidOps == null) {
@@ -10000,7 +10024,7 @@ public class AppOpsManager {
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null, android.content.pm.ParceledListSlice.class);
         return listSlice == null ? null : listSlice.getList();
     }
 

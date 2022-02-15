@@ -80,6 +80,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_AWAKE, mWakefulness.getWakefulness());
 
         verify(mWakefulnessObserver).onFinishedWakingUp();
+        verify(mWakefulnessObserver).onPostFinishedWakingUp();
     }
 
     @Test

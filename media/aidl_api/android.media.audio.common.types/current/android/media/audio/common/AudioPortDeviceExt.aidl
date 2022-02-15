@@ -36,5 +36,7 @@ package android.media.audio.common;
 @JavaDerive(equals=true, toString=true) @VintfStability
 parcelable AudioPortDeviceExt {
   android.media.audio.common.AudioDevice device;
+  int flags;
   android.media.audio.common.AudioFormatDescription[] encodedFormats;
+  const int FLAG_INDEX_DEFAULT_DEVICE = 0;
 }

@@ -17,7 +17,7 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
-import android.content.pm.parsing.ParsingPackageUtils
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.platform.test.annotations.Postsubmit
 import com.android.server.pm.PackageManagerException
 import com.android.server.pm.PackageManagerService

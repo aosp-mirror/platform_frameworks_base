@@ -32,8 +32,8 @@ import java.util.Collections;
 @RunWith(JUnit4.class)
 public class InstallerAllowedByManifestFormulaTest {
 
-    private static final InstallerAllowedByManifestFormula
-            FORMULA = new InstallerAllowedByManifestFormula();
+    private static final InstallerAllowedByManifestFormula FORMULA =
+            new InstallerAllowedByManifestFormula();
 
     @Test
     public void testFormulaMatches_installerAndCertBothInManifest() {
@@ -115,6 +115,7 @@ public class InstallerAllowedByManifestFormulaTest {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
                 .setAppCertificates(Collections.emptyList())
+                .setAppCertificateLineage(Collections.emptyList())
                 .setInstallerCertificates(Collections.emptyList())
                 .setInstallerName("abc")
                 .setVersionCode(-1)

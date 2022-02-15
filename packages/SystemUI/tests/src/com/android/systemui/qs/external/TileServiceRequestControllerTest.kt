@@ -20,6 +20,7 @@ import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.graphics.drawable.Icon
+import android.os.RemoteException
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
@@ -275,11 +276,89 @@ class TileServiceRequestControllerTest : SysuiTestCase() {
         assertThat(c.lastAccepted).isEqualTo(TileServiceRequestController.TILE_ALREADY_ADDED)
     }
 
+    @Test
+    fun interfaceThrowsRemoteException_doesntCrash() {
+        val cancelListenerCaptor =
+                ArgumentCaptor.forClass(DialogInterface.OnCancelListener::class.java)
+        val captor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
+        verify(commandQueue, atLeastOnce()).addCallback(capture(captor))
+
+        val callback = object : IAddTileResultCallback.Stub() {
+            override fun onTileRequest(p0: Int) {
+                throw RemoteException()
+            }
+        }
+        captor.value.requestAddTile(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
+
+        cancelListenerCaptor.value.onCancel(tileRequestDialog)
+    }
+
+    @Test
+    fun testDismissDialogResponse() {
+        val dismissListenerCaptor =
+            ArgumentCaptor.forClass(DialogInterface.OnDismissListener::class.java)
+
+        val callback = Callback()
+        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
+
+        dismissListenerCaptor.value.onDismiss(tileRequestDialog)
+        assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.DISMISSED)
+    }
+
+    @Test
+    fun addTileAndThenDismissSendsOnlyAddTile() {
+        // After clicking, the dialog is dismissed. This tests that only one response
+        // is sent (the first one)
+        val dismissListenerCaptor =
+            ArgumentCaptor.forClass(DialogInterface.OnDismissListener::class.java)
+        val clickListenerCaptor =
+            ArgumentCaptor.forClass(DialogInterface.OnClickListener::class.java)
+
+        val callback = Callback()
+        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        verify(tileRequestDialog).setPositiveButton(anyInt(), capture(clickListenerCaptor))
+        verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
+
+        clickListenerCaptor.value.onClick(tileRequestDialog, DialogInterface.BUTTON_POSITIVE)
+        dismissListenerCaptor.value.onDismiss(tileRequestDialog)
+
+        assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.ADD_TILE)
+        assertThat(callback.timesCalled).isEqualTo(1)
+    }
+
+    @Test
+    fun cancelAndThenDismissSendsOnlyOnce() {
+        // After cancelling, the dialog is dismissed. This tests that only one response
+        // is sent.
+        val dismissListenerCaptor =
+            ArgumentCaptor.forClass(DialogInterface.OnDismissListener::class.java)
+        val cancelListenerCaptor =
+            ArgumentCaptor.forClass(DialogInterface.OnCancelListener::class.java)
+
+        val callback = Callback()
+        controller.requestTileAdd(TEST_COMPONENT, TEST_APP_NAME, TEST_LABEL, icon, callback)
+        verify(tileRequestDialog).setOnCancelListener(capture(cancelListenerCaptor))
+        verify(tileRequestDialog).setOnDismissListener(capture(dismissListenerCaptor))
+
+        cancelListenerCaptor.value.onCancel(tileRequestDialog)
+        dismissListenerCaptor.value.onDismiss(tileRequestDialog)
+
+        assertThat(callback.lastAccepted).isEqualTo(TileServiceRequestController.DISMISSED)
+        assertThat(callback.timesCalled).isEqualTo(1)
+    }
+
     private class Callback : IAddTileResultCallback.Stub(), Consumer<Int> {
         var lastAccepted: Int? = null
             private set
+
+        var timesCalled = 0
+            private set
+
         override fun accept(t: Int) {
             lastAccepted = t
+            timesCalled++
         }
 
         override fun onTileRequest(r: Int) {

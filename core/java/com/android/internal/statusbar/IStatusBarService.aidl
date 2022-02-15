@@ -20,16 +20,22 @@ import android.app.Notification;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -97,6 +103,9 @@ interface IStatusBarService
     void shutdown();
     void reboot(boolean safeMode);
 
+    /** just restarts android without rebooting device. Used for some feature flags. */
+    void restart();
+
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
@@ -123,6 +132,8 @@ interface IStatusBarService
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
     void hideAuthenticationDialog();
+    // Used to notify the biometric service of events that occur outside of an operation.
+    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
@@ -162,4 +173,52 @@ interface IStatusBarService
 
     void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
     void cancelRequestAddTile(in String packageName);
+
+    /**
+    * Overrides the navigation bar mode.
+    *
+    * @param navBarModeOverride the mode of the navigation bar override to be set.
+    *
+    * @hide
+    */
+    void setNavBarModeOverride(int navBarModeOverride);
+
+    /**
+    * Gets the navigation bar mode override.
+    *
+    * @hide
+    */
+    int getNavBarModeOverride();
+
+    /**
+    * Register a listener for certain sessions. Each session may be guarded by its own permission.
+    */
+    void registerSessionListener(int sessionFlags, in ISessionListener listener);
+    void unregisterSessionListener(int sessionFlags, in ISessionListener listener);
+
+    /**
+    * Informs all registered listeners that a session has begun and has the following instanceId.
+    * Can only be set by callers with certain permission based on the session type being updated.
+    */
+    void onSessionStarted(int sessionType, in InstanceId instanceId);
+    void onSessionEnded(int sessionType, in InstanceId instanceId);
+
+    /** Notifies System UI about an update to the media tap-to-transfer sender state. */
+    void updateMediaTapToTransferSenderDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in IUndoMediaTransferCallback undoCallback);
+
+    /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
+    void updateMediaTapToTransferReceiverDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in Icon appIcon,
+        in CharSequence appName);
+
+    /** Registers a nearby media devices provider. */
+    void registerNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Unregisters a nearby media devices provider. */
+    void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 }

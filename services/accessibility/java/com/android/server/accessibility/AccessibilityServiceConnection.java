@@ -16,9 +16,13 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -123,6 +127,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     public void unbindLocked() {
+        if (requestImeApis()) {
+            mSystemSupport.unbindImeLocked(this);
+        }
         mContext.unbindService(this);
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
@@ -184,6 +191,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             // the new configuration (for example, initializing the input filter).
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityServiceConnection::initializeService, this));
+            if (requestImeApis()) {
+                mSystemSupport.requestImeLocked(this);
+            }
         }
     }
 
@@ -310,6 +320,41 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     @Override
+    @AccessibilityService.SoftKeyboardController.EnableImeResult
+    public int setInputMethodEnabled(String imeId, boolean enabled) throws SecurityException {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("switchToInputMethod", "imeId=" + imeId);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return ENABLE_IME_FAIL_UNKNOWN;
+            }
+        }
+
+        final int callingUserId = UserHandle.getCallingUserId();
+        final InputMethodManagerInternal inputMethodManagerInternal =
+                InputMethodManagerInternal.get();
+
+        final @AccessibilityService.SoftKeyboardController.EnableImeResult int checkResult;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                checkResult = mSecurityPolicy.canEnableDisableInputMethod(imeId, this);
+            }
+            if (checkResult != ENABLE_IME_SUCCESS) {
+                return checkResult;
+            }
+            if (inputMethodManagerInternal.setInputMethodEnabled(imeId,
+                        enabled, callingUserId)) {
+                return ENABLE_IME_SUCCESS;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return ENABLE_IME_FAIL_UNKNOWN;
+    }
+
+    @Override
     public boolean isAccessibilityButtonAvailable() {
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("isAccessibilityButtonAvailable", "");
@@ -331,6 +376,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             // waiting on the lock we held during the force stop handling.
             if (!isConnectedLocked()) {
                 return;
+            }
+            if (requestImeApis()) {
+                mSystemSupport.unbindImeLocked(this);
             }
             mAccessibilityServiceInfo.crashed = true;
             AccessibilityUserState userState = mUserStateWeakReference.get();
@@ -471,6 +519,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 AccessibilityServiceConnection::notifyTouchStateInternal,
                 AccessibilityServiceConnection.this, displayId, state);
         mMainHandler.sendMessage(msg);
+    }
+
+    public boolean requestImeApis() {
+        return mRequestImeApis;
     }
 
     private void notifyMotionEventInternal(MotionEvent event) {

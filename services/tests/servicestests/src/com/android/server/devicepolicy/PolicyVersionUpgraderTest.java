@@ -16,6 +16,11 @@
 
 package com.android.server.devicepolicy;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
+import static com.android.server.devicepolicy.DevicePolicyManagerService.POLICIES_VERSION_XML;
+import static com.android.server.devicepolicy.DpmTestUtils.writeInputStreamToFile;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.admin.DeviceAdminInfo;
@@ -24,12 +29,15 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
+import android.os.UserHandle;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.frameworks.servicestests.R;
 import com.android.internal.util.JournaledFile;
+import com.android.server.SystemService;
 
 import com.google.common.io.Files;
 
@@ -51,7 +59,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @RunWith(JUnit4.class)
-public class PolicyVersionUpgraderTest {
+public class PolicyVersionUpgraderTest extends DpmTestBase {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
     private static final int LATEST_TESTED_VERSION = 2;
@@ -187,6 +195,40 @@ public class PolicyVersionUpgraderTest {
                 PERMISSIONS_TAG)).isFalse();
         assertThat(getBooleanValueTag(readPoliciesFileToStream(ownerUser),
                 PERMISSIONS_TAG)).isTrue();
+    }
+
+    @Test
+    public void testNoStaleDataInCacheAfterUpgrade() throws Exception {
+        setUpPackageManagerForAdmin(admin1, UserHandle.getUid(USER_SYSTEM, 123 /* admin app ID */));
+        // Reusing COPE migration policy files there, only DO on user 0 is needed.
+        writeInputStreamToFile(getRawStream(R.raw.comp_policies_primary),
+                new File(getServices().systemUserDataDir, "device_policies.xml")
+                        .getAbsoluteFile());
+        writeInputStreamToFile(getRawStream(R.raw.comp_device_owner),
+                new File(getServices().dataDir, "device_owner_2.xml")
+                        .getAbsoluteFile());
+
+        // Write policy version 0
+        File versionFilePath =
+                new File(getServices().systemUserDataDir, POLICIES_VERSION_XML).getAbsoluteFile();
+        DpmTestUtils.writeToFile(versionFilePath, "0\n");
+
+        DevicePolicyManagerServiceTestable dpms;
+        final long ident = getContext().binder.clearCallingIdentity();
+        try {
+            dpms = new DevicePolicyManagerServiceTestable(getServices(), getContext());
+
+            // Simulate access that would cause policy data to be cached in mUserData.
+            dpms.isCommonCriteriaModeEnabled(null);
+
+            dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
+        } finally {
+            getContext().binder.restoreCallingIdentity(ident);
+        }
+
+        // DO should be marked as able to grant sensors permission during upgrade and should be
+        // reported as such via the API.
+        assertThat(dpms.canAdminGrantSensorsPermissionsForUser(/* userId= */0)).isTrue();
     }
 
     @Test

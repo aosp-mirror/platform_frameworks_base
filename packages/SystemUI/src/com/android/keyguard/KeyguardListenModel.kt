@@ -64,3 +64,19 @@ data class KeyguardFaceListenModel(
     val secureCameraLaunched: Boolean,
     val switchingUser: Boolean
 ) : KeyguardListenModel()
+/**
+ * Verbose debug information associated with [KeyguardUpdateMonitor.shouldTriggerActiveUnlock].
+ */
+data class KeyguardActiveUnlockModel(
+    @CurrentTimeMillisLong override val timeMillis: Long,
+    override val userId: Int,
+    override val listening: Boolean,
+    // keep sorted
+    val authInterruptActive: Boolean,
+    val encryptedOrTimedOut: Boolean,
+    val fpLockout: Boolean,
+    val lockDown: Boolean,
+    val switchingUser: Boolean,
+    val triggerActiveUnlockForAssistant: Boolean,
+    val userCanDismissLockScreen: Boolean
+) : KeyguardListenModel()

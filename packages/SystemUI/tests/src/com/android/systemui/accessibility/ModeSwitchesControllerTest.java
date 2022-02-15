@@ -91,7 +91,6 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
         verify(mModeSwitch).onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
     }
 
-
     @Test
     public void testOnSwitchClick_showWindowModeButton_invokeListener() {
         mModeSwitchesController.showButton(Display.DEFAULT_DISPLAY,

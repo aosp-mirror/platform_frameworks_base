@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
 import static org.junit.Assert.assertEquals;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -329,5 +333,29 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
 
         assertTrue(row.getIsNonblockable());
+    }
+
+    @Test
+    public void testCanDismissNoClear() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        modifySbn(row.getEntry())
+                .setFlag(mContext, FLAG_NO_CLEAR, true)
+                .build();
+        row.performDismiss(false);
+        verify(mNotificationTestHelper.mOnUserInteractionCallback)
+                .onDismiss(any(), anyInt(), any());
+    }
+
+    @Test
+    public void testCannotDismissOngoing() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        modifySbn(row.getEntry())
+                .setFlag(mContext, FLAG_ONGOING_EVENT, true)
+                .build();
+        row.performDismiss(false);
+        verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
+                .onDismiss(any(), anyInt(), any());
     }
 }

@@ -17,21 +17,23 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
-import static com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_COLLAPSED_LANDSCAPE_MEDIA;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,58 +53,65 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                 }
             };
 
-    // brightness is visible only in split shade
-    private final QuickQSBrightnessController mBrightnessController;
-    private final BrightnessMirrorHandler mBrightnessMirrorHandler;
-    private final FooterActionsController mFooterActionsController;
+    private final MediaFlags mMediaFlags;
+    private final boolean mUsingCollapsedLandscapeMedia;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
+            @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA) boolean usingCollapsedLandscapeMedia,
+            MediaFlags mediaFlags,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager,
-            QuickQSBrightnessController quickQSBrightnessController,
-            @Named(QQS_FOOTER) FooterActionsController footerActionsController
+            DumpManager dumpManager
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager);
-        mBrightnessController = quickQSBrightnessController;
-        mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
-        mFooterActionsController = footerActionsController;
+        mUsingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia;
+        mMediaFlags = mediaFlags;
     }
 
     @Override
     protected void onInit() {
         super.onInit();
-        mMediaHost.setExpansion(0.0f);
+        updateMediaExpansion();
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
-        mBrightnessController.init(mShouldUseSplitNotificationShade);
-        mFooterActionsController.init();
-        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
+    }
+
+    private void updateMediaExpansion() {
+        int rotation = getRotation();
+        boolean isLandscape = rotation == RotationUtils.ROTATION_LANDSCAPE
+                || rotation == RotationUtils.ROTATION_SEASCAPE;
+        if (mMediaFlags.useMediaSessionLayout()
+                && (!mUsingCollapsedLandscapeMedia || !isLandscape)) {
+            mMediaHost.setExpansion(MediaHost.EXPANDED);
+        } else {
+            mMediaHost.setExpansion(MediaHost.COLLAPSED);
+        }
+    }
+
+    @VisibleForTesting
+    protected int getRotation() {
+        return RotationUtils.getRotation(getContext());
     }
 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mBrightnessMirrorHandler.onQsPanelAttached();
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mBrightnessMirrorHandler.onQsPanelDettached();
     }
 
     @Override
     void setListening(boolean listening) {
         super.setListening(listening);
-        mBrightnessController.setListening(listening);
-        mFooterActionsController.setListening(listening);
     }
 
     public boolean isListening() {
@@ -115,15 +124,8 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     }
 
     @Override
-    public void refreshAllTiles() {
-        mBrightnessController.checkRestrictionAndSetEnabled();
-        super.refreshAllTiles();
-    }
-
-    @Override
     protected void onConfigurationChanged() {
-        mBrightnessController.refreshVisibility(mShouldUseSplitNotificationShade);
-        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
+        updateMediaExpansion();
     }
 
     @Override
@@ -145,9 +147,5 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     public int getNumQuickTiles() {
         return mView.getNumQuickTiles();
-    }
-
-    public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
-        mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 }

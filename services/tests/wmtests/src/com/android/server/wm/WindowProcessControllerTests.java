@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -374,9 +375,19 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
         doReturn(true).when(activity).applyAppSpecificConfig(anyInt(), any());
-        mWpc.updateAppSpecificSettingsForAllActivities(Configuration.UI_MODE_NIGHT_YES,
-                LocaleList.forLanguageTags("en-XA"));
+        mWpc.updateAppSpecificSettingsForAllActivitiesInPackage(DEFAULT_COMPONENT_PACKAGE_NAME,
+                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
         verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testTopActivityUiModeChangeForDifferentPackage_noScheduledConfigChange() {
+        final ActivityRecord activity = createActivityRecord(mWpc);
+        activity.mVisibleRequested = true;
+        mWpc.updateAppSpecificSettingsForAllActivitiesInPackage("com.different.package",
+                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
+        verify(activity, never()).applyAppSpecificConfig(anyInt(), any());
+        verify(activity, never()).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 
     @Test

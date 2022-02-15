@@ -972,6 +972,13 @@ public interface InputConnection {
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} at
      * once, as soon as possible, regardless of cursor/anchor position changes. This flag can be
      * used together with {@link #CURSOR_UPDATE_MONITOR}.
+     * <p>
+     * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * filter-out others.
+     * It can be CPU intensive to include all, filtering specific info is recommended.
+     * </p>
      */
     int CURSOR_UPDATE_IMMEDIATE = 1 << 0;
 
@@ -983,17 +990,69 @@ public interface InputConnection {
      * <p>
      * This flag can be used together with {@link #CURSOR_UPDATE_IMMEDIATE}.
      * </p>
+     * <p>
+     * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * filter-out others.
+     * It can be CPU intensive to include all, filtering specific info is recommended.
+     * </p>
      */
     int CURSOR_UPDATE_MONITOR = 1 << 1;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new {@link EditorBoundsInfo} whenever cursor/anchor position is changed. To disable
+     * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be used together with filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 1 << 2;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new character bounds {@link CursorAnchorInfo#getCharacterBounds(int)} whenever
+     * cursor/anchor position is changed. To disable
+     * monitoring, call {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 1 << 3;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new Insertion marker info {@link CursorAnchorInfo#getInsertionMarkerFlags()},
+     * {@link CursorAnchorInfo#getInsertionMarkerBaseline()}, etc whenever cursor/anchor position is
+     * changed. To disable monitoring, call {@link InputConnection#requestCursorUpdates(int)} again
+     * with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS} and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
+     * and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 1 << 4;
 
     /**
      * Called by the input method to ask the editor for calling back
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
      * notify cursor/anchor locations.
      *
-     * @param cursorUpdateMode {@link #CURSOR_UPDATE_IMMEDIATE} and/or
-     * {@link #CURSOR_UPDATE_MONITOR}. Pass {@code 0} to disable the effect of
-     * {@link #CURSOR_UPDATE_MONITOR}.
+     * @param cursorUpdateMode any combination of update modes and filters:
+     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}, and date filters:
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     * Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
+     * rejected and method will return {@code false}.
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
      *         application will not call {@link InputMethodManager#updateCursorAnchorInfo(
      *         android.view.View, CursorAnchorInfo)}.

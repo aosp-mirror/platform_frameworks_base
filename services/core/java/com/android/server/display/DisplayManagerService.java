@@ -45,7 +45,10 @@ import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -75,6 +78,7 @@ import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.display.WifiDisplayStatus;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.hardware.input.InputManagerInternal;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
@@ -138,7 +142,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -421,6 +424,32 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
+    // Keeps note of what state the device is in, used for idle screen brightness mode.
+    private boolean mIsDocked;
+    private boolean mIsDreaming;
+
+    private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final DisplayManagerInternal dmi =
+                    LocalServices.getService(DisplayManagerInternal.class);
+            if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
+                int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                mIsDocked = dockState == Intent.EXTRA_DOCK_STATE_DESK
+                        || dockState == Intent.EXTRA_DOCK_STATE_LE_DESK
+                        || dockState == Intent.EXTRA_DOCK_STATE_HE_DESK;
+            }
+            if (Intent.ACTION_DREAMING_STARTED.equals(intent.getAction())) {
+                mIsDreaming = true;
+            } else if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
+                mIsDreaming = false;
+            }
+            setDockedAndIdleEnabled(/* enabled= */(mIsDocked && mIsDreaming),
+                    Display.DEFAULT_DISPLAY);
+        }
+    };
+
     private final boolean mAllowNonNativeRefreshRateOverride;
 
     private final BrightnessSynchronizer mBrightnessSynchronizer;
@@ -616,6 +645,13 @@ public final class DisplayManagerService extends SystemService {
         mSettingsObserver = new SettingsObserver();
 
         mBrightnessSynchronizer.startSynchronizing();
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DREAMING_STARTED);
+        filter.addAction(Intent.ACTION_DREAMING_STOPPED);
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+
+        mContext.registerReceiver(mIdleModeReceiver, filter);
     }
 
     @VisibleForTesting
@@ -678,7 +714,6 @@ public final class DisplayManagerService extends SystemService {
                         display.getDisplayInfoLocked().shouldConstrainMetricsForLauncher;
                 if (display.setDisplayInfoOverrideFromWindowManagerLocked(info)) {
                     handleLogicalDisplayChangedLocked(display);
-                    scheduleTraversalLocked(false);
                 }
             }
         }
@@ -838,11 +873,11 @@ public final class DisplayManagerService extends SystemService {
 
     private void updateUserPreferredDisplayModeSettingsLocked() {
         final float refreshRate = Settings.Global.getFloat(mContext.getContentResolver(),
-                Settings.Global.USER_PREFERRED_REFRESH_RATE, 0.0f);
+                Settings.Global.USER_PREFERRED_REFRESH_RATE, Display.INVALID_DISPLAY_REFRESH_RATE);
         final int height = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, -1);
+                Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, Display.INVALID_DISPLAY_HEIGHT);
         final int width = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, -1);
+                Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, Display.INVALID_DISPLAY_WIDTH);
         Display.Mode mode = new Display.Mode(width, height, refreshRate);
         mUserPreferredMode = isResolutionAndRefreshRateValid(mode) ? mode : null;
     }
@@ -1215,6 +1250,14 @@ public final class DisplayManagerService extends SystemService {
         }
         final Surface surface = virtualDisplayConfig.getSurface();
         int flags = virtualDisplayConfig.getFlags();
+        if (virtualDevice != null) {
+            final VirtualDeviceManagerInternal vdm =
+                    getLocalService(VirtualDeviceManagerInternal.class);
+            if (!vdm.isValidVirtualDevice(virtualDevice)) {
+                throw new SecurityException("Invalid virtual device");
+            }
+            flags |= vdm.getBaseVirtualDisplayFlags(virtualDevice);
+        }
 
         if (surface != null && surface.isSingleBuffered()) {
             throw new IllegalArgumentException("Surface can't be single-buffered");
@@ -1247,14 +1290,6 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
-        if (virtualDevice != null) {
-            final VirtualDeviceManagerInternal vdm =
-                    getLocalService(VirtualDeviceManagerInternal.class);
-            if (!vdm.isValidVirtualDevice(virtualDevice)) {
-                throw new SecurityException("Invalid virtual device");
-            }
-        }
-
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
             if (!canProjectVideo(projection)) {
@@ -1283,7 +1318,9 @@ public final class DisplayManagerService extends SystemService {
 
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
-            if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+            // The virtualDevice instance has been validated above using isValidVirtualDevice
+            if (virtualDevice == null
+                    && !checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a virtual display which is not in the default DisplayGroup.");
             }
@@ -1525,8 +1562,11 @@ public final class DisplayManagerService extends SystemService {
         }
         if (mUserPreferredMode != null) {
             device.setUserPreferredDisplayModeLocked(mUserPreferredMode);
+        } else {
+            configurePreferredDisplayModeLocked(display);
         }
         addDisplayPowerControllerLocked(display);
+
         mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
 
         final float brightnessDefault = display.getDisplayInfoLocked().brightnessDefault;
@@ -1653,6 +1693,24 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void configurePreferredDisplayModeLocked(LogicalDisplay display) {
+        final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+        final Point userPreferredResolution =
+                mPersistentDataStore.getUserPreferredResolution(device);
+        final float refreshRate = mPersistentDataStore.getUserPreferredRefreshRate(device);
+        if (userPreferredResolution == null && Float.isNaN(refreshRate)) {
+            return;
+        }
+        Display.Mode.Builder modeBuilder = new Display.Mode.Builder();
+        if (userPreferredResolution != null) {
+            modeBuilder.setResolution(userPreferredResolution.x, userPreferredResolution.y);
+        }
+        if (!Float.isNaN(refreshRate)) {
+            modeBuilder.setRefreshRate(refreshRate);
+        }
+        device.setUserPreferredDisplayModeLocked(modeBuilder.build());
+    }
+
     // If we've never recorded stable device stats for this device before and they aren't
     // explicitly configured, go ahead and record the stable device stats now based on the status
     // of the default display at first boot.
@@ -1696,36 +1754,93 @@ public final class DisplayManagerService extends SystemService {
         return mWideColorSpace.getId();
     }
 
-    void setUserPreferredDisplayModeInternal(Display.Mode mode) {
+    void setUserPreferredDisplayModeInternal(int displayId, Display.Mode mode) {
         synchronized (mSyncRoot) {
-            if (Objects.equals(mUserPreferredMode, mode)) {
-                return;
-            }
-
-            if (mode != null && !isResolutionAndRefreshRateValid(mode)) {
+            if (mode != null && !isResolutionAndRefreshRateValid(mode)
+                    && displayId == Display.INVALID_DISPLAY) {
                 throw new IllegalArgumentException("width, height and refresh rate of mode should "
-                        + "be greater than 0");
+                        + "be greater than 0 when setting the global user preferred display mode.");
             }
-            mUserPreferredMode = mode;
 
-            final int resolutionHeight = mode == null ? -1 : mode.getPhysicalHeight();
-            final int resolutionWidth = mode == null ? -1 : mode.getPhysicalWidth();
-            final float refreshRate = mode == null ? 0.0f : mode.getRefreshRate();
-            Settings.Global.putFloat(mContext.getContentResolver(),
-                    Settings.Global.USER_PREFERRED_REFRESH_RATE, refreshRate);
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, resolutionHeight);
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, resolutionWidth);
-            mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
-                device.setUserPreferredDisplayModeLocked(mode);
-            });
+            final int resolutionHeight = mode == null ? Display.INVALID_DISPLAY_HEIGHT
+                    : mode.getPhysicalHeight();
+            final int resolutionWidth = mode == null ? Display.INVALID_DISPLAY_WIDTH
+                    : mode.getPhysicalWidth();
+            final float refreshRate = mode == null ? Display.INVALID_DISPLAY_REFRESH_RATE
+                    : mode.getRefreshRate();
+
+            storeModeInPersistentDataStoreLocked(
+                    displayId, resolutionWidth, resolutionHeight, refreshRate);
+            if (displayId != Display.INVALID_DISPLAY) {
+                setUserPreferredModeForDisplayLocked(displayId, mode);
+            } else {
+                mUserPreferredMode = mode;
+                storeModeInGlobalSettingsLocked(
+                        resolutionWidth, resolutionHeight, refreshRate, mode);
+            }
         }
     }
 
-    private Display.Mode getUserPreferredDisplayModeInternal() {
+    private void storeModeInPersistentDataStoreLocked(int displayId, int resolutionWidth,
+            int resolutionHeight, float refreshRate) {
+        DisplayDevice displayDevice = getDeviceForDisplayLocked(displayId);
+        if (displayDevice == null) {
+            return;
+        }
+        mPersistentDataStore.setUserPreferredResolution(
+                displayDevice, resolutionWidth, resolutionHeight);
+        mPersistentDataStore.setUserPreferredRefreshRate(displayDevice, refreshRate);
+    }
+
+    private void setUserPreferredModeForDisplayLocked(int displayId, Display.Mode mode) {
+        DisplayDevice displayDevice = getDeviceForDisplayLocked(displayId);
+        if (displayDevice == null) {
+            return;
+        }
+        displayDevice.setUserPreferredDisplayModeLocked(mode);
+    }
+
+    private void storeModeInGlobalSettingsLocked(
+            int resolutionWidth, int resolutionHeight, float refreshRate, Display.Mode mode) {
+        Settings.Global.putFloat(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_REFRESH_RATE, refreshRate);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, resolutionHeight);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, resolutionWidth);
+        mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
+            // If there is a display specific mode, don't override that
+            final Point deviceUserPreferredResolution =
+                    mPersistentDataStore.getUserPreferredResolution(device);
+            final float deviceRefreshRate =
+                    mPersistentDataStore.getUserPreferredRefreshRate(device);
+            if (!isValidResolution(deviceUserPreferredResolution)
+                    && !isValidRefreshRate(deviceRefreshRate)) {
+                device.setUserPreferredDisplayModeLocked(mode);
+            }
+        });
+    }
+
+    Display.Mode getUserPreferredDisplayModeInternal(int displayId) {
         synchronized (mSyncRoot) {
-            return mUserPreferredMode;
+            if (displayId == Display.INVALID_DISPLAY) {
+                return mUserPreferredMode;
+            }
+            DisplayDevice displayDevice = getDeviceForDisplayLocked(displayId);
+            if (displayDevice == null) {
+                return null;
+            }
+            return displayDevice.getUserPreferredDisplayModeLocked();
+        }
+    }
+
+    Display.Mode getSystemPreferredDisplayModeInternal(int displayId) {
+        synchronized (mSyncRoot) {
+            final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+            if (device == null) {
+                return null;
+            }
+            return device.getSystemPreferredDisplayModeLocked();
         }
     }
 
@@ -1744,6 +1859,14 @@ public final class DisplayManagerService extends SystemService {
     @DisplayManager.SwitchingType
     int getRefreshRateSwitchingTypeInternal() {
         return mDisplayModeDirector.getModeSwitchingType();
+    }
+
+    private DisplayDecorationSupport getDisplayDecorationSupportInternal(int displayId) {
+        final IBinder displayToken = getDisplayToken(displayId);
+        if (null == displayToken) {
+            return null;
+        }
+        return SurfaceControl.getDisplayDecorationSupport(displayToken);
     }
 
     private void setBrightnessConfigurationForDisplayInternal(
@@ -2071,6 +2194,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    Display.Mode getActiveDisplayModeAtStart(int displayId) {
+        synchronized (mSyncRoot) {
+            final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+            if (device == null) {
+                return null;
+            }
+            return device.getActiveDisplayModeAtStartLocked();
+        }
+    }
+
     void setAmbientColorTemperatureOverride(float cct) {
         synchronized (mSyncRoot) {
             final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
@@ -2092,6 +2225,16 @@ public final class DisplayManagerService extends SystemService {
                 }
                 display.getDisplayInfoLocked().shouldConstrainMetricsForLauncher = constrain;
                 setDisplayInfoOverrideFromWindowManagerInternal(i, display.getDisplayInfoLocked());
+            }
+        }
+    }
+
+    void setDockedAndIdleEnabled(boolean enabled, int displayId) {
+        synchronized (mSyncRoot) {
+            final DisplayPowerController displayPowerController = mDisplayPowerControllers.get(
+                    displayId);
+            if (displayPowerController != null) {
+                displayPowerController.setAutomaticScreenBrightnessMode(enabled);
             }
         }
     }
@@ -2320,7 +2463,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
 
             if (mUserPreferredMode != null) {
-                pw.println(mUserPreferredMode.toString());
+                pw.println(mUserPreferredMode);
             }
 
             pw.println();
@@ -3326,23 +3469,33 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void setUserPreferredDisplayMode(Display.Mode mode) {
+        public void setUserPreferredDisplayMode(int displayId, Display.Mode mode) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE,
                     "Permission required to set the user preferred display mode.");
             final long token = Binder.clearCallingIdentity();
             try {
-                setUserPreferredDisplayModeInternal(mode);
+                setUserPreferredDisplayModeInternal(displayId, mode);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override // Binder call
-        public Display.Mode getUserPreferredDisplayMode() {
+        public Display.Mode getUserPreferredDisplayMode(int displayId) {
             final long token = Binder.clearCallingIdentity();
             try {
-                return getUserPreferredDisplayModeInternal();
+                return getUserPreferredDisplayModeInternal(displayId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public Display.Mode getSystemPreferredDisplayMode(int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getSystemPreferredDisplayModeInternal(displayId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -3396,12 +3549,30 @@ public final class DisplayManagerService extends SystemService {
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override // Binder call
+        public DisplayDecorationSupport getDisplayDecorationSupport(int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getDisplayDecorationSupportInternal(displayId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     private static boolean isValidBrightness(float brightness) {
         return !Float.isNaN(brightness)
                 && (brightness >= PowerManager.BRIGHTNESS_MIN)
                 && (brightness <= PowerManager.BRIGHTNESS_MAX);
+    }
+
+    private static boolean isValidResolution(Point resolution) {
+        return (resolution != null) && (resolution.x > 0) && (resolution.y > 0);
+    }
+
+    private static boolean isValidRefreshRate(float refreshRate) {
+        return !Float.isNaN(refreshRate) && (refreshRate > 0.0f);
     }
 
     private final class LocalService extends DisplayManagerInternal {

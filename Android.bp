@@ -25,6 +25,18 @@
 //
 // READ ME: ########################################################
 
+// TODO(b/21090328): Remove filter after we are ready to.
+soong_config_module_type {
+    name: "java_library_with_nonpublic_deps",
+    module_type: "java_library",
+    config_namespace: "ANDROID",
+    bool_variables: ["include_nonpublic_framework_api"],
+    properties: [
+        "static_libs",
+        "libs",
+    ],
+}
+
 package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -50,12 +62,8 @@ license {
         "SPDX-license-identifier-Apache-2.0",
         "SPDX-license-identifier-BSD",
         "SPDX-license-identifier-CC-BY",
-        "SPDX-license-identifier-CPL-1.0",
-        "SPDX-license-identifier-GPL",
-        "SPDX-license-identifier-GPL-2.0",
         "SPDX-license-identifier-MIT",
         "SPDX-license-identifier-Unicode-DFS",
-        "SPDX-license-identifier-W3C",
         "legacy_unencumbered",
     ],
     license_text: [
@@ -81,7 +89,7 @@ filegroup {
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
-        ":framework-media-sources",
+        ":framework-media-non-updatable-sources",
         ":framework-mms-sources",
         ":framework-omapi-sources",
         ":framework-opengl-sources",
@@ -101,6 +109,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.security.keymint-V1-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
@@ -127,6 +136,7 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        ":logd_aidl",
         ":resourcemanager_aidl",
         ":storaged_aidl",
         ":vold_aidl",
@@ -142,49 +152,12 @@ filegroup {
     ],
 }
 
-java_library {
-    name: "framework-updatable-stubs-module_libs_api",
-    static_libs: [
-        "android.net.ipsec.ike.stubs.module_lib",
-        "framework-appsearch.stubs.module_lib",
-        "framework-connectivity.stubs.module_lib",
-        "framework-graphics.stubs.module_lib",
-        "framework-media.stubs.module_lib",
-        "framework-mediaprovider.stubs.module_lib",
-        "framework-permission.stubs.module_lib",
-        "framework-permission-s.stubs.module_lib",
-        "framework-scheduling.stubs.module_lib",
-        "framework-sdkextensions.stubs.module_lib",
-        "framework-statsd.stubs.module_lib",
-        "framework-supplementalprocess.stubs.module_lib",
-        "framework-tethering.stubs.module_lib",
-        "framework-uwb.stubs.module_lib",
-        "framework-wifi.stubs.module_lib",
-    ],
-    sdk_version: "module_current",
-    visibility: ["//visibility:private"],
-}
-
-java_library {
+java_library_with_nonpublic_deps {
     name: "framework-all",
     installable: false,
     static_libs: [
-        "android.net.ipsec.ike.impl",
+        "all-framework-module-impl",
         "framework-minus-apex",
-        "framework-appsearch.impl",
-        "framework-connectivity.impl",
-        "framework-graphics.impl",
-        "framework-mediaprovider.impl",
-        "framework-permission.impl",
-        "framework-permission-s.impl",
-        "framework-scheduling.impl",
-        "framework-sdkextensions.impl",
-        "framework-statsd.impl",
-        "framework-supplementalprocess.impl",
-        "framework-tethering.impl",
-        "framework-uwb.impl",
-        "framework-wifi.impl",
-        "updatable-media",
     ],
     apex_available: ["//apex_available:platform"],
     sdk_version: "core_platform",
@@ -301,6 +274,7 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         "core/java/**/*.logtags",
         ":apex-info-list",
     ],
@@ -312,7 +286,10 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            // TODO: remove when moved to the below package
+            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     dxflags: [
@@ -362,6 +339,7 @@ java_defaults {
         "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
         "modules-utils-preconditions",
+        "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
@@ -419,7 +397,6 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
-        "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
@@ -435,7 +412,6 @@ filegroup {
     name: "framework-ike-shared-srcs",
     visibility: ["//packages/modules/IPsec"],
     srcs: [
-        "core/java/android/net/annotations/PolicyDirection.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
@@ -449,7 +425,6 @@ filegroup {
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         ":framework-annotations",
         ":modules-utils-preconditions-srcs",
-        "core/java/android/net/DhcpResults.java",
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/HexDump.java",
@@ -543,7 +518,9 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
-// These defaults are used for both the jar stubs and the doc stubs.
+// Defaults for all stubs that include the non-updatable framework. These defaults do not include
+// module symbols, so will not compile correctly on their own. Users must add module APIs to the
+// classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
     srcs: [":android-non-updatable-stub-sources"],
@@ -551,17 +528,18 @@ stubs_defaults {
     system_modules: "none",
     java_version: "1.8",
     arg_files: ["core/res/AndroidManifest.xml"],
-    // TODO(b/147699819): remove below aidl includes.
     aidl: {
         local_include_dirs: [
-            "apex/media/aidl/stable",
             "media/aidl",
             "telephony/java",
         ],
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            // TODO: remove when moved to the below package
+            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
@@ -581,15 +559,6 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
-        "art.module.public.api",
-        "sdk_module-lib_current_framework-tethering",
-        // There are a few classes from modules used by the core that
-        // need to be resolved by metalava. We use a prebuilt stub of the
-        // full sdk to ensure we can resolve them. If a new class gets added,
-        // the prebuilts/sdk/current needs to be updated.
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
     ],
     filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554
@@ -599,6 +568,34 @@ stubs_defaults {
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//visibility:private"],
     visibility: ["//frameworks/base/api"],
+}
+
+// Defaults with module APIs in the classpath (mostly from prebuilts).
+// Suitable for compiling android-non-updatable.
+stubs_defaults {
+    name: "module-classpath-stubs-defaults",
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+    libs: [
+        "art.module.public.api",
+        "sdk_module-lib_current_framework-tethering",
+        "sdk_module-lib_current_framework-connectivity-tiramisu",
+        "sdk_public_current_framework-bluetooth",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    defaults_visibility: ["//visibility:private"],
 }
 
 build = [

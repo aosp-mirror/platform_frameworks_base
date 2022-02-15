@@ -25,8 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,7 +54,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+class OpenAppWarmTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -85,31 +84,21 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
         }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appWindowReplacesLauncherAsTopWindow() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
+    override fun appWindowReplacesLauncherAsTopWindow() =
+            super.appWindowReplacesLauncherAsTopWindow()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -119,16 +108,7 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun appLayerReplacesLauncher() {
-        // This test doesn't work in shell transitions because of b/206094140
-        assumeFalse(isShellTransitionsEnabled)
-        super.appLayerReplacesLauncher()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
+    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
 
     /** {@inheritDoc} */
     @Presubmit
@@ -139,6 +119,16 @@ class OpenAppWarmTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     @Presubmit
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
     companion object {
         /**

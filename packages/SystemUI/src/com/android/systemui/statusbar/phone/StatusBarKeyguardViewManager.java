@@ -29,6 +29,7 @@ import android.content.res.ColorStateList;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,10 +49,9 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -87,7 +87,7 @@ import dagger.Lazy;
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         PanelExpansionListener, NavigationModeController.ModeChangedListener,
-        KeyguardViewController, WakefulnessLifecycle.Observer {
+        KeyguardViewController {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -112,6 +112,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
     private final KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
+    private final DreamOverlayStateController mDreamOverlayStateController;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final Lazy<ShadeController> mShadeController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
@@ -212,6 +213,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DockManager mDockManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateManager;
+    private final LatencyTracker mLatencyTracker;
     private KeyguardBypassController mBypassController;
     @Nullable private AlternateAuthInterceptor mAlternateAuthInterceptor;
 
@@ -236,6 +238,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SysuiStatusBarStateController sysuiStatusBarStateController,
             ConfigurationController configurationController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
             NavigationModeController navigationModeController,
             DockManager dockManager,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -243,13 +246,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             NotificationMediaManager notificationMediaManager,
             KeyguardBouncer.Factory keyguardBouncerFactory,
             KeyguardMessageAreaController.Factory keyguardMessageAreaFactory,
-            Lazy<ShadeController> shadeController) {
+            Lazy<ShadeController> shadeController,
+            LatencyTracker latencyTracker) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mConfigurationController = configurationController;
         mNavigationModeController = navigationModeController;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mDreamOverlayStateController = dreamOverlayStateController;
         mKeyguardStateController = keyguardStateController;
         mMediaManager = notificationMediaManager;
         mKeyguardUpdateManager = keyguardUpdateMonitor;
@@ -258,6 +263,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardBouncerFactory = keyguardBouncerFactory;
         mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
         mShadeController = shadeController;
+        mLatencyTracker = latencyTracker;
     }
 
     @Override
@@ -371,6 +377,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     @Override
     public void show(Bundle options) {
+        Trace.beginSection("StatusBarKeyguardViewManager#show");
         mShowing = true;
         mNotificationShadeWindowController.setKeyguardShowing(true);
         mKeyguardStateController.notifyKeyguardState(mShowing,
@@ -378,6 +385,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         reset(true /* hideBouncerWhenShowing */);
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                 SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
+        Trace.endSection();
     }
 
     /**
@@ -392,15 +400,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             mStatusBar.showKeyguard();
             if (hideBouncerWhenShowing) {
-                hideBouncer(shouldDestroyViewOnReset() /* destroyView */);
+                hideBouncer(false /* destroyView */);
                 mBouncer.prepare();
             }
         }
         updateStates();
-    }
-
-    protected boolean shouldDestroyViewOnReset() {
-        return false;
     }
 
     /**
@@ -716,6 +720,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void hide(long startTime, long fadeoutDuration) {
+        Trace.beginSection("StatusBarKeyguardViewManager#hide");
         mShowing = false;
         mKeyguardStateController.notifyKeyguardState(mShowing,
                 mKeyguardStateController.isOccluded());
@@ -815,6 +820,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                 SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__HIDDEN);
+        Trace.endSection();
     }
 
     private boolean needsBypassFading() {
@@ -855,15 +861,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void wakeAndUnlockDejank() {
-        if (mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
-                && LatencyTracker.isEnabled(mContext)) {
+        if (mBiometricUnlockController.isWakeAndUnlock() && mLatencyTracker.isEnabled()) {
             BiometricSourceType type = mBiometricUnlockController.getBiometricType();
-            DejankUtils.postAfterTraversal(() -> {
-                    LatencyTracker.getInstance(mContext).onActionEnd(
-                            type == BiometricSourceType.FACE
-                                    ? LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK
-                                    : LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
-            });
+            mLatencyTracker.onActionEnd(type == BiometricSourceType.FACE
+                            ? LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK
+                            : LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
         }
     }
 
@@ -1179,8 +1181,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean bouncerNeedsScrimming() {
-        return mOccluded || mBouncer.willDismissWithAction()
-                || mStatusBar.isFullScreenUserSwitcherState()
+        // When a dream overlay is active, scrimming will cause any expansion to immediately expand.
+        return (mOccluded && !mDreamOverlayStateController.isOverlayActive())
+                || mBouncer.willDismissWithAction()
                 || (mBouncer.isShowing() && mBouncer.isScrimmed())
                 || mBouncer.isFullscreenBouncer();
     }

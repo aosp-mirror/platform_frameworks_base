@@ -17,11 +17,12 @@
 package android.media.tv;
 
 import android.content.ComponentName;
+import android.media.tv.AdResponse;
 import android.media.tv.AitInfo;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.ITvInputSession;
-import android.net.Uri;
 import android.media.tv.TvTrackInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.InputChannel;
 
@@ -46,6 +47,7 @@ oneway interface ITvInputClient {
     void onTimeShiftStartPositionChanged(long timeMs, int seq);
     void onTimeShiftCurrentPositionChanged(long timeMs, int seq);
     void onAitInfoUpdated(in AitInfo aitInfo, int seq);
+    void onSignalStrength(int stength, int seq);
 
     void onTuned(in Uri channelUri, int seq);
     // For the recording session
@@ -54,4 +56,7 @@ oneway interface ITvInputClient {
 
     // For broadcast info
     void onBroadcastInfoResponse(in BroadcastInfoResponse response, int seq);
+
+    // For ad response
+    void onAdResponse(in AdResponse response, int seq);
 }

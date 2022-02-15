@@ -16,17 +16,17 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:clipToPadding="false"
     android:paddingEnd="@dimen/compat_hint_padding_end"
-    android:paddingBottom="5dp"
+    android:paddingBottom="8dp"
     android:clickable="true">
 
     <TextView
         android:id="@+id/compat_mode_hint_text"
-        android:layout_width="188dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:lineSpacingExtra="4sp"
         android:background="@drawable/compat_hint_bubble"

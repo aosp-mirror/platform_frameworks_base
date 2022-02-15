@@ -247,4 +247,21 @@ public class AccessibilityServiceConnectionTest {
         verify(mMockServiceClient).onPerformGestureResult(0, false);
     }
 
+    @Test
+    public void unbind_resetAllMagnification() {
+        mConnection.unbindLocked();
+        verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
+    }
+
+    @Test
+    public void binderDied_resetAllMagnification() {
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        mConnection.binderDied();
+
+        verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
+    }
+
 }

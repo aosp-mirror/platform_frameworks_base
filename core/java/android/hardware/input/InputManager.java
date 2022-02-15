@@ -35,6 +35,7 @@ import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
 import android.hardware.lights.LightsRequest;
+import android.os.Binder;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.CombinedVibration;
@@ -58,6 +59,7 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
@@ -213,14 +215,6 @@ public final class InputManager {
     @TestApi
     @ChangeId
     public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L;
-
-    /**
-     * Check whether apps are using FLAG_SLIPPERY for their windows. We expect that this flag is
-     * only used by the system components. If so, we can lock it down.
-     * @hide
-     */
-    @ChangeId
-    public static final long BLOCK_FLAG_SLIPPERY = android.os.IInputConstants.BLOCK_FLAG_SLIPPERY;
 
     /**
      * Input Event Injection Synchronization Mode: None.
@@ -645,6 +639,30 @@ public final class InputManager {
     }
 
     /**
+     * Returns the descriptors of all supported keyboard layouts appropriate for the specified
+     * input device.
+     * <p>
+     * The input manager consults the built-in keyboard layouts as well as all keyboard layouts
+     * advertised by applications using a {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
+     * </p>
+     *
+     * @param device The input device to query.
+     * @return The ids of all keyboard layouts which are supported by the specified input device.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull InputDevice device) {
+        KeyboardLayout[] layouts = getKeyboardLayoutsForInputDevice(device.getIdentifier());
+        List<String> res = new ArrayList<>();
+        for (KeyboardLayout kl : layouts) {
+            res.add(kl.getDescriptor());
+        }
+        return res;
+    }
+
+    /**
      * Gets information about all supported keyboard layouts appropriate
      * for a specific input device.
      * <p>
@@ -658,7 +676,9 @@ public final class InputManager {
      *
      * @hide
      */
-    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+    @NonNull
+    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
+            @NonNull InputDeviceIdentifier identifier) {
         try {
             return mIm.getKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
@@ -688,15 +708,17 @@ public final class InputManager {
     }
 
     /**
-     * Gets the current keyboard layout descriptor for the specified input
-     * device.
+     * Gets the current keyboard layout descriptor for the specified input device.
      *
      * @param identifier Identifier for the input device
-     * @return The keyboard layout descriptor, or null if no keyboard layout has
-     *         been set.
+     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
+     *
      * @hide
      */
-    public String getCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier) {
+    @TestApi
+    @Nullable
+    public String getCurrentKeyboardLayoutForInputDevice(
+            @NonNull InputDeviceIdentifier identifier) {
         try {
             return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
         } catch (RemoteException ex) {
@@ -705,20 +727,21 @@ public final class InputManager {
     }
 
     /**
-     * Sets the current keyboard layout descriptor for the specified input
-     * device.
+     * Sets the current keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use,
-     *            must not be null.
+     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
+     *
      * @hide
      */
-    public void setCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
+    @TestApi
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
         if (identifier == null) {
             throw new IllegalArgumentException("identifier must not be null");
         }
@@ -735,11 +758,11 @@ public final class InputManager {
     }
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified
-     * input device.
+     * Gets all keyboard layout descriptors that are enabled for the specified input device.
      *
      * @param identifier The identifier for the input device.
      * @return The keyboard layout descriptors.
+     *
      * @hide
      */
     public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
@@ -757,15 +780,16 @@ public final class InputManager {
     /**
      * Adds the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
-     *            add.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
+     *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
         if (identifier == null) {
@@ -785,17 +809,19 @@ public final class InputManager {
     /**
      * Removes the keyboard layout descriptor for the specified input device.
      * <p>
-     * This method may have the side-effect of causing the input device in
-     * question to be reconfigured.
+     * This method may have the side-effect of causing the input device in question to be
+     * reconfigured.
      * </p>
      *
      * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to
-     *            remove.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
+     *
      * @hide
      */
-    public void removeKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
+    @TestApi
+    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
+    public void removeKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
+            @NonNull String keyboardLayoutDescriptor) {
         if (identifier == null) {
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
@@ -1052,6 +1078,27 @@ public final class InputManager {
         return ret;
     }
 
+    /**
+     * Gets the key code produced by the specified location on a US keyboard layout.
+     * Key code as defined in {@link android.view.KeyEvent}.
+     * This API is only functional for devices with {@link InputDevice#SOURCE_KEYBOARD} available
+     * which can alter their key mapping using country specific keyboard layouts.
+     *
+     * @param deviceId The input device id.
+     * @param locationKeyCode The location of a key on a US keyboard layout.
+     * @return The key code produced when pressing the key at the specified location, given the
+     *         active keyboard layout. Returns {@link KeyEvent#KEYCODE_UNKNOWN} if the requested
+     *         mapping could not be determined, or if an error occurred.
+     * @hide
+     */
+    public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
+        try {
+            return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     /**
      * Injects an input event into the event system on behalf of an application.
@@ -1165,7 +1212,7 @@ public final class InputManager {
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
         try {
-            return mIm.monitorGestureInput(name, displayId);
+            return mIm.monitorGestureInput(new Binder(), name, displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -1313,19 +1360,18 @@ public final class InputManager {
     }
 
     /**
-     * Add a runtime association between the input device name and display, by unique id. Input
-     * device names are expected to be unique.
-     * @param inputDeviceName The name of the input device.
+     * Add a runtime association between the input port and display, by unique id. Input ports are
+     * expected to be unique.
+     * @param inputPort The port of the input device.
      * @param displayUniqueId The unique id of the associated display.
      * <p>
      * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
-    public void addUniqueIdAssociation(@NonNull String inputDeviceName,
-            @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         try {
-            mIm.addUniqueIdAssociation(inputDeviceName, displayUniqueId);
+            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1333,15 +1379,15 @@ public final class InputManager {
 
     /**
      * Removes a runtime association between the input device and display.
-     * @param inputDeviceName The name of the input device.
+     * @param inputPort The port of the input device.
      * <p>
      * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
-    public void removeUniqueIdAssociation(@NonNull String inputDeviceName) {
+    public void removeUniqueIdAssociation(@NonNull String inputPort) {
         try {
-            mIm.removeUniqueIdAssociation(inputDeviceName);
+            mIm.removeUniqueIdAssociation(inputPort);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1644,6 +1690,18 @@ public final class InputManager {
     void closeLightSession(int deviceId, @NonNull IBinder token) {
         try {
             mIm.closeLightSession(deviceId, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Cancel all ongoing pointer gestures on all displays.
+     * @hide
+     */
+    public void cancelCurrentTouch() {
+        try {
+            mIm.cancelCurrentTouch();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

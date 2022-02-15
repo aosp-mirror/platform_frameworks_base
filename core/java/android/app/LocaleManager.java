@@ -55,6 +55,9 @@ public class LocaleManager {
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
      *
+     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
+     * Backup & Restore.
+     *
      * @param locales the desired locales for the calling app.
      */
     @UserHandleAware
@@ -66,6 +69,9 @@ public class LocaleManager {
      * Sets the UI locales for a specified app (described by package name).
      *
      * <p>Pass a {@link LocaleList#getEmptyLocaleList()} to reset to the system locale.
+     *
+     * <p><b>Note:</b> The set locales are persisted; they are backed up if the user has enabled
+     * Backup & Restore.
      *
      * @param appPackageName the package name of the app for which to set the locales.
      * @param locales the desired locales for the specified app.
@@ -95,18 +101,20 @@ public class LocaleManager {
     }
 
     /**
-     * Returns the current UI locales for a specific app (described by package name).
+     * Returns the current UI locales for a specified app (described by package name).
      *
      * <p>Returns a {@link LocaleList#getEmptyLocaleList()} if no app-specific locales are set.
      *
-     * <b>Note:</b> Non-system apps should read Locale information via their in-process
-     * LocaleLists.
+     * <p>This API can be used by an app's installer
+     * (per {@link android.content.pm.InstallSourceInfo#getInstallingPackageName}) to retrieve
+     * the app's locales.
+     * All other cases require {@code android.Manifest.permission#READ_APP_SPECIFIC_LOCALES}.
+     * Apps should generally retrieve their own locales via their in-process LocaleLists,
+     * or by calling {@link #getApplicationLocales()}.
      *
      * @param appPackageName the package name of the app for which to retrieve the locales.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.READ_APP_SPECIFIC_LOCALES)
+    @RequiresPermission(value = Manifest.permission.READ_APP_SPECIFIC_LOCALES, conditional = true)
     @UserHandleAware
     @NonNull
     public LocaleList getApplicationLocales(@NonNull String appPackageName) {

@@ -138,6 +138,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         }
         setWakefulness(WAKEFULNESS_AWAKE);
         dispatch(Observer::onFinishedWakingUp);
+        dispatch(Observer::onPostFinishedWakingUp);
     }
 
     public void dispatchStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
@@ -236,6 +237,12 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public interface Observer {
         default void onStartedWakingUp() {}
         default void onFinishedWakingUp() {}
+
+        /**
+         * Called after the finished waking up call, ensuring it's after all the other listeners,
+         * reacting to {@link #onFinishedWakingUp()}
+         */
+        default void onPostFinishedWakingUp() {}
         default void onStartedGoingToSleep() {}
         default void onFinishedGoingToSleep() {}
     }

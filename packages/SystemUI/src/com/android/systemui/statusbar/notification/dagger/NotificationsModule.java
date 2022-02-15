@@ -47,9 +47,12 @@ import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifPipelineChoreographerModule;
 import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorsModule;
+import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager;
+import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
@@ -60,11 +63,13 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -99,8 +104,10 @@ import dagger.Provides;
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
 @Module(includes = {
+        CoordinatorsModule.class,
+        NotifPipelineChoreographerModule.class,
+        NotifPanelEventSourceModule.class,
         NotificationSectionHeadersModule.class,
-        CoordinatorsModule.class
 })
 public interface NotificationsModule {
     @Binds
@@ -196,12 +203,14 @@ public interface NotificationsModule {
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
             NotificationEntryManager notificationEntryManager,
-            Handler handler,
+            VisualStabilityProvider visualStabilityProvider,
+            @Main Handler handler,
             StatusBarStateController statusBarStateController,
             WakefulnessLifecycle wakefulnessLifecycle,
             DumpManager dumpManager) {
         return new VisualStabilityManager(
                 notificationEntryManager,
+                visualStabilityProvider,
                 handler,
                 statusBarStateController,
                 wakefulnessLifecycle,
@@ -355,6 +364,10 @@ public interface NotificationsModule {
     /** */
     @Binds
     NotifInflater bindNotifInflater(NotifInflaterImpl notifInflaterImpl);
+
+    /** */
+    @Binds
+    BindEventManager bindBindEventManagerImpl(BindEventManagerImpl bindEventManagerImpl);
 
     /** */
     @Binds

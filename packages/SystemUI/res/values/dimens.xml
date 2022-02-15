@@ -30,10 +30,10 @@
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
     <!-- dimensions for the navigation bar handle -->
-    <dimen name="navigation_handle_radius">2dp</dimen>
-    <dimen name="navigation_handle_bottom">10dp</dimen>
+    <dimen name="navigation_handle_radius">1dp</dimen>
+    <dimen name="navigation_handle_bottom">6dp</dimen>
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
-    <dimen name="navigation_home_handle_width">108dp</dimen>
+    <dimen name="navigation_home_handle_width">72dp</dimen>
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
@@ -43,6 +43,8 @@
     <dimen name="navigation_edge_panel_height">96dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+    <!-- The threshold to progress back animation for edge swipe -->
+    <dimen name="navigation_edge_action_progress_threshold">400dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
@@ -258,36 +260,44 @@
 
     <!-- Dimensions related to screenshots -->
 
-    <!-- The padding on the global screenshot background image -->
-    <dimen name="screenshot_x_scale">80dp</dimen>
-    <dimen name="screenshot_bg_protection_height">242dp</dimen>
-    <dimen name="screenshot_preview_elevation">4dp</dimen>
-    <dimen name="screenshot_offset_y">8dp</dimen>
-    <dimen name="screenshot_offset_x">16dp</dimen>
-    <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
-    <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
-    <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
-    <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
-    <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
-    <dimen name="screenshot_action_container_padding_right">8dp</dimen>
-    <!-- Radius of the chip background on global screenshot actions -->
-    <dimen name="screenshot_button_corner_radius">8dp</dimen>
-    <!-- Margin between successive chips -->
-    <dimen name="screenshot_action_chip_margin_start">8dp</dimen>
-    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
-    <dimen name="screenshot_action_chip_margin_vertical">4dp</dimen>
-    <dimen name="screenshot_action_chip_padding_vertical">11dp</dimen>
-    <dimen name="screenshot_action_chip_icon_size">18sp</dimen>
-    <!-- Padding on each side of the icon for icon-only chips -->
-    <dimen name="screenshot_action_chip_icon_only_padding_horizontal">14dp</dimen>
-    <!-- Padding at the edges of the chip for icon-and-text chips -->
-    <dimen name="screenshot_action_chip_padding_horizontal">12dp</dimen>
-    <!-- Spacing between chip icon and chip text -->
-    <dimen name="screenshot_action_chip_spacing">8dp</dimen>
-    <dimen name="screenshot_action_chip_text_size">14sp</dimen>
-    <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
+
     <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
     <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
+
+    <!-- Dimensions shared between "overlays" (clipboard and screenshot preview UIs) -->
+    <!-- Constrained size of the floating overlay preview -->
+    <dimen name="overlay_x_scale">80dp</dimen>
+    <!-- Radius of the chip background on floating overlay actions -->
+    <dimen name="overlay_button_corner_radius">8dp</dimen>
+    <!-- Margin between successive chips -->
+    <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
+    <dimen name="overlay_action_chip_margin_vertical">4dp</dimen>
+    <dimen name="overlay_action_chip_padding_vertical">11dp</dimen>
+    <dimen name="overlay_action_chip_icon_size">18sp</dimen>
+    <!-- Padding on each side of the icon for icon-only chips -->
+    <dimen name="overlay_action_chip_icon_only_padding_horizontal">14dp</dimen>
+    <!-- Padding at the edges of the chip for icon-and-text chips -->
+    <dimen name="overlay_action_chip_padding_horizontal">12dp</dimen>
+    <!-- Spacing between chip icon and chip text -->
+    <dimen name="overlay_action_chip_spacing">8dp</dimen>
+    <dimen name="overlay_action_chip_text_size">14sp</dimen>
+    <dimen name="overlay_offset_y">8dp</dimen>
+    <dimen name="overlay_offset_x">16dp</dimen>
+    <dimen name="overlay_preview_elevation">4dp</dimen>
+    <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
+    <dimen name="overlay_bg_protection_height">242dp</dimen>
+    <dimen name="overlay_action_container_corner_radius">18dp</dimen>
+    <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
+    <dimen name="overlay_action_container_padding_right">8dp</dimen>
+    <dimen name="overlay_dismiss_button_elevation">7dp</dimen>
+    <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
+    <dimen name="overlay_dismiss_button_margin">8dp</dimen>
+    <dimen name="overlay_border_width">4dp</dimen>
+    <!-- need a negative margin for some of the constraints. should be overlay_border_width * -1 -->
+    <dimen name="overlay_border_width_neg">-4dp</dimen>
+
+    <dimen name="clipboard_preview_size">@dimen/overlay_x_scale</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
@@ -302,9 +312,6 @@
 
     <!-- Move the back button drawable for 3 button layout upwards in ime mode and in portrait -->
     <dimen name="navbar_back_button_ime_offset">2dp</dimen>
-
-    <!-- Amount of close_handle that will NOT overlap the notification list -->
-    <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
@@ -322,7 +329,10 @@
 
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
-    <dimen name="qs_footer_height">96dp</dimen>
+    <dimen name="qs_footer_height">48dp</dimen>
+
+    <!-- 40dp (circles) + 8dp (circle padding) + 8dp (top) + 4dp (bottom) -->
+    <dimen name="new_footer_height">60dp</dimen>
 
     <!-- The size of each of the icon buttons in the QS footer -->
     <dimen name="qs_footer_action_button_size">48dp</dimen>
@@ -331,6 +341,9 @@
 
     <!-- (48dp - 44dp) / 2 -->
     <dimen name="qs_footer_action_inset">2dp</dimen>
+    <!-- (48dp - 40dp) / 2 -->
+    <dimen name="new_qs_footer_action_inset">4dp</dimen>
+    <dimen name="new_qs_footer_action_inset_negative">-4dp</dimen>
 
     <!-- Margins on each side of QS Footer -->
     <dimen name="qs_footer_margin">2dp</dimen>
@@ -361,8 +374,19 @@
     <!-- The top margin of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
 
-    <!-- The bottom margin of the panel that holds the list of notifications. -->
-    <dimen name="notification_panel_margin_bottom">0dp</dimen>
+    <!-- The minimum content height for the split shade NSSL.
+         It is used because if the height is too small, the expansion motion is too fast.
+         Note that the value of 256dp is more or less a random value and can be changed to tweak
+         the expansion motion.
+    -->
+    <dimen name="nssl_split_shade_min_content_height">256dp</dimen>
+
+    <dimen name="notification_panel_margin_bottom">32dp</dimen>
+
+    <!-- The bottom padding of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_padding_bottom">0dp</dimen>
+
+    <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
@@ -424,7 +448,9 @@
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
 
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">
+        @*android:dimen/rounded_corner_content_padding
+    </dimen>
 
     <dimen name="navigation_key_padding">0dp</dimen>
 
@@ -473,28 +499,13 @@
     <dimen name="qs_tile_text_size">14sp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
-    <dimen name="qs_panel_padding_bottom">0dp</dimen>
+    <dimen name="qs_panel_elevation">4dp</dimen>
+    <dimen name="qs_panel_padding_bottom">@dimen/new_footer_height</dimen>
     <dimen name="qs_panel_padding_top">48dp</dimen>
-    <dimen name="qs_detail_header_padding">0dp</dimen>
-    <dimen name="qs_detail_image_width">56dp</dimen>
-    <dimen name="qs_detail_image_height">56dp</dimen>
-    <dimen name="qs_detail_image_padding">16dp</dimen>
-    <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_detail_header_text_size">20sp</dimen>
-    <dimen name="qs_detail_button_text_size">14sp</dimen>
-    <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
-    <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
-    <dimen name="qs_detail_empty_text_size">14sp</dimen>
-    <dimen name="qs_detail_header_margin_top">28dp</dimen>
-    <dimen name="qs_detail_header_text_padding">16dp</dimen>
+
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_detail_padding_start">16dp</dimen>
-    <dimen name="qs_detail_items_padding_top">4dp</dimen>
-    <dimen name="qs_detail_item_icon_size">24dp</dimen>
-    <dimen name="qs_detail_item_icon_width">32dp</dimen>
-    <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
-    <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
+
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
@@ -508,9 +519,6 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
     <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
-    <!-- Desired qs icon overlay size. -->
-    <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
-
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
 
@@ -521,8 +529,6 @@
 
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
-
-    <dimen name="qs_detail_margin_top">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
     <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
@@ -556,15 +562,13 @@
     <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
-    <dimen name="notification_children_container_margin_top">
-        @*android:dimen/notification_content_margin_top
-    </dimen>
+    <dimen name="notification_children_container_margin_top">48dp</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
+    <dimen name="conversation_single_line_face_pile_size">24dp</dimen>
 
     <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_avatar_size">17dp</dimen>
@@ -633,10 +637,13 @@
     <dimen name="panel_overshoot_amount">16dp</dimen>
 
     <!-- The padding between notification children when collapsed -->
-    <dimen name="notification_children_padding">4dp</dimen>
+    <dimen name="notification_children_padding">8dp</dimen>
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
+
+    <!-- The padding on the bottom of the last group hybrid notification when collapsed -->
+    <dimen name="notification_children_collapsed_bottom_padding">16dp</dimen>
 
     <!-- end margin for system icons if multi user switch is hidden -->
     <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>
@@ -969,6 +976,12 @@
     <dimen name="qs_media_enabled_seekbar_vertical_padding">28dp</dimen>
     <dimen name="qs_media_disabled_seekbar_vertical_padding">29dp</dimen>
 
+    <!-- Sizes for alternate session-based layout -->
+    <dimen name="qs_media_session_enabled_seekbar_vertical_padding">15dp</dimen>
+    <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
+    <dimen name="qs_media_session_height_expanded">184dp</dimen>
+    <dimen name="qs_media_session_height_collapsed">128dp</dimen>
+
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
     <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
@@ -977,12 +990,18 @@
     <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
 
-    <!-- Media tap-to-transfer chip -->
+    <!-- Media tap-to-transfer chip for sender device -->
     <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
     <dimen name="media_ttt_text_size">16sp</dimen>
-    <dimen name="media_ttt_icon_size">16dp</dimen>
+    <dimen name="media_ttt_app_icon_size">24dp</dimen>
+    <dimen name="media_ttt_status_icon_size">20dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
     <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
+    <dimen name="media_ttt_last_item_start_margin">12dp</dimen>
+
+    <!-- Media tap-to-transfer chip for receiver device -->
+    <dimen name="media_ttt_chip_size_receiver">100dp</dimen>
+    <dimen name="media_ttt_icon_size_receiver">95dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
@@ -1008,6 +1027,7 @@
     <dimen name="controls_header_bottom_margin">24dp</dimen>
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
+    <dimen name="controls_padding_horizontal">0dp</dimen>
     <dimen name="control_header_text_size">20sp</dimen>
     <dimen name="control_item_text_size">16sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
@@ -1034,6 +1054,9 @@
     <dimen name="controls_setup_subtitle">14sp</dimen>
     <dimen name="controls_setup_vertical_padding">52dp</dimen>
     <dimen name="controls_detail_dialog_header_height">52dp</dimen>
+    <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
+    <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">1.0</item>
+    <dimen name="controls_task_view_right_margin">0dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>
@@ -1259,6 +1282,8 @@
 
     <!-- Internet dialog related dimensions -->
     <dimen name="internet_dialog_corner_radius">24dp</dimen>
+    <!-- Width of progress bar -->
+    <dimen name="internet_dialog_progress_bar_width">152dp</dimen>
     <!-- End margin of network layout -->
     <dimen name="internet_dialog_network_layout_margin">16dp</dimen>
     <!-- Size of switch bar in internet dialog -->
@@ -1308,4 +1333,54 @@
     <dimen name="dream_overlay_status_bar_height">80dp</dimen>
     <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
     <dimen name="dream_overlay_status_icon_margin">8dp</dimen>
+    <!-- Height of the area at the top of the dream overlay to allow dragging down the notifications
+         shade. -->
+    <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
+
+    <!-- Dream overlay complications related dimensions -->
+    <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_text_size">18sp</dimen>
+    <dimen name="dream_overlay_complication_weather_text_size">18sp</dimen>
+
+    <!-- The position of the end guide, which dream overlay complications can align their start with
+         if their end is aligned with the parent end. Represented as the percentage over from the
+         start of the parent container. -->
+    <item name="dream_overlay_complication_guide_end_percent" format="float" type="dimen">
+        0.75
+    </item>
+
+    <!-- The position of the start guide, which dream overlay complications can align their end to
+         if their start is aligned with the parent start. Represented as the percentage over from
+         the start of the parent container. -->
+    <item name="dream_overlay_complication_guide_start_percent" format="float" type="dimen">
+        0.25
+    </item>
+
+    <!-- The position of the bottom guide, which dream overlay complications can align their top to
+         if their bottom is aligned with the parent bottom. Represented as the percentage over from
+         the top of the parent container. -->
+    <item name="dream_overlay_complication_guide_bottom_percent" format="float" type="dimen">
+        0.90
+    </item>
+
+    <!-- The position of the top guide, which dream overlay complications can align their bottom to
+     if their top is aligned with the parent top. Represented as the percentage over from
+     the top of the parent container. -->
+    <item name="dream_overlay_complication_guide_top_percent" format="float" type="dimen">
+        0.10
+    </item>
+
+    <!-- The percentage of the screen from which a swipe can start to reveal the bouncer. -->
+    <item name="dream_overlay_bouncer_start_region_screen_percentage" format="float" type="dimen">
+        .2
+    </item>
+
+    <!-- The margins applied to the dream overlay container -->
+    <dimen name="dream_overlay_container_margin_start">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_end">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_top">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_bottom">0dp</dimen>
+
+    <!-- The margin applied between complications -->
+    <dimen name="dream_overlay_complication_margin">0dp</dimen>
 </resources>

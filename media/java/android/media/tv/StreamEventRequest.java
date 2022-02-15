@@ -21,9 +21,12 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
-public class StreamEventRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.STREAM_EVENT;
+/**
+ * A request for Stream Event from broadcast signal.
+ */
+public final class StreamEventRequest extends BroadcastInfoRequest implements Parcelable {
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
+            TvInputManager.BROADCAST_INFO_STREAM_EVENT;
 
     public static final @NonNull Parcelable.Creator<StreamEventRequest> CREATOR =
             new Parcelable.Creator<StreamEventRequest>() {
@@ -42,29 +45,43 @@ public class StreamEventRequest extends BroadcastInfoRequest implements Parcelab
     private final Uri mTargetUri;
     private final String mEventName;
 
-    public static StreamEventRequest createFromParcelBody(Parcel in) {
+    static StreamEventRequest createFromParcelBody(Parcel in) {
         return new StreamEventRequest(in);
     }
 
-    public StreamEventRequest(int requestId, int option, Uri targetUri, String eventName) {
-        super(requestType, requestId, option);
+    public StreamEventRequest(int requestId, @RequestOption int option, @NonNull Uri targetUri,
+            @NonNull String eventName) {
+        super(REQUEST_TYPE, requestId, option);
         this.mTargetUri = targetUri;
         this.mEventName = eventName;
     }
 
-    protected StreamEventRequest(Parcel source) {
-        super(requestType, source);
+    StreamEventRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         String uriString = source.readString();
         mTargetUri = uriString == null ? null : Uri.parse(uriString);
         mEventName = source.readString();
     }
 
+    /**
+     * Gets the URI for the DSM-CC Object or the event description file describing the event.
+     */
+    @NonNull
     public Uri getTargetUri() {
         return mTargetUri;
     }
 
+    /**
+     * Gets the name of the event.
+     */
+    @NonNull
     public String getEventName() {
         return mEventName;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

@@ -21,7 +21,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_T
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import android.content.pm.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;

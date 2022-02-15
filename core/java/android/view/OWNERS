@@ -11,6 +11,9 @@ jjaggi@google.com
 roosa@google.com
 jreck@google.com
 
+# Autofill
+per-file ViewStructure.java = file:/core/java/android/service/autofill/OWNERS
+
 # Display
 per-file Display*.java = file:/services/core/java/com/android/server/display/OWNERS
 per-file Display*.aidl = file:/services/core/java/com/android/server/display/OWNERS
@@ -29,6 +32,13 @@ per-file KeyEvent.java = file:/services/core/java/com/android/server/input/OWNER
 per-file MotionEvent.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file PointerIcon.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file SimulatedDpad.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file BatchedInputEventReceiver.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file DragEvent.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file DragEvent.aidl = file:/services/core/java/com/android/server/input/OWNERS
+per-file GestureDetector.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file ScaleGestureDetector.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file KeyboardShortcut*.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file KeyCharacterMap.java = file:/services/core/java/com/android/server/input/OWNERS
 
 # InputWindowHandle
 per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/input/OWNERS
@@ -73,6 +83,7 @@ per-file Inset*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IPinnedStackListener.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRecents*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IRemote*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ISurfaceControlViewHost*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS

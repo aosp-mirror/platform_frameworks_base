@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -25,9 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,7 +63,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 10)
-                wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+                wmHelper.waitPipGone()
                 wmHelper.waitForWindowSurfaceDisappeared(pipApp.component)
                 wmHelper.waitForAppTransitionIdle()
             }
@@ -80,13 +77,9 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     companion object {
         /**
@@ -100,7 +93,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 20)
+                            repetitions = 3)
         }
     }
 }

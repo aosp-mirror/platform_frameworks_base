@@ -17,6 +17,7 @@
 package android.net;
 
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.net.TrafficStats.UID_TETHERING;
@@ -24,15 +25,13 @@ import static android.net.TrafficStats.UID_TETHERING;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.app.AppOpsManager;
-import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
-
-import com.android.server.LocalServices;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,9 +107,8 @@ public final class NetworkStatsAccess {
 
     /** Returns the {@link NetworkStatsAccess.Level} for the given caller. */
     public static @NetworkStatsAccess.Level int checkAccessLevel(
-            Context context, int callingUid, String callingPackage) {
-        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
+            Context context, int callingPid, int callingUid, String callingPackage) {
+        final DevicePolicyManager mDpm = context.getSystemService(DevicePolicyManager.class);
         final TelephonyManager tm = (TelephonyManager)
                 context.getSystemService(Context.TELEPHONY_SERVICE);
         boolean hasCarrierPrivileges;
@@ -123,10 +121,15 @@ public final class NetworkStatsAccess {
             Binder.restoreCallingIdentity(token);
         }
 
-        final boolean isDeviceOwner = dpmi != null && dpmi.isActiveDeviceOwner(callingUid);
+        final boolean isDeviceOwner = mDpm != null && mDpm.isDeviceOwnerApp(callingPackage);
         final int appId = UserHandle.getAppId(callingUid);
+
+        final boolean isNetworkStack = context.checkPermission(
+                android.Manifest.permission.NETWORK_STACK, callingPid, callingUid)
+                == PERMISSION_GRANTED;
+
         if (hasCarrierPrivileges || isDeviceOwner
-                || appId == Process.SYSTEM_UID || appId == Process.NETWORK_STACK_UID) {
+                || appId == Process.SYSTEM_UID || isNetworkStack) {
             // Carrier-privileged apps and device owners, and the system (including the
             // network stack) can access data usage for all apps on the device.
             return NetworkStatsAccess.Level.DEVICE;
@@ -139,8 +142,8 @@ public final class NetworkStatsAccess {
         }
 
         //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
-        boolean isProfileOwner = dpmi != null && (dpmi.isActiveProfileOwner(callingUid)
-                || dpmi.isActiveDeviceOwner(callingUid));
+        boolean isProfileOwner = mDpm != null && (mDpm.isProfileOwnerApp(callingPackage)
+                || mDpm.isDeviceOwnerApp(callingPackage));
         if (isProfileOwner) {
             // Apps with the AppOps permission, profile owners, and apps with the privileged
             // permission can access data usage for all apps in this user/profile.
@@ -157,6 +160,8 @@ public final class NetworkStatsAccess {
      */
     public static boolean isAccessibleToUser(int uid, int callerUid,
             @NetworkStatsAccess.Level int accessLevel) {
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        final int callerUserId = UserHandle.getUserHandleForUid(callerUid).getIdentifier();
         switch (accessLevel) {
             case NetworkStatsAccess.Level.DEVICE:
                 // Device-level access - can access usage for any uid.
@@ -167,13 +172,13 @@ public final class NetworkStatsAccess {
                 // anonymized uids
                 return uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED
                         || uid == UID_TETHERING || uid == UID_ALL
-                        || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
+                        || userId == callerUserId;
             case NetworkStatsAccess.Level.USER:
                 // User-level access - can access usage for any app running in the same user, along
                 // with some special uids (system, removed, or tethering).
                 return uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED
                         || uid == UID_TETHERING
-                        || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
+                        || userId == callerUserId;
             case NetworkStatsAccess.Level.DEFAULT:
             default:
                 // Default access level - can only access one's own usage.
@@ -187,8 +192,8 @@ public final class NetworkStatsAccess {
             AppOpsManager appOps = (AppOpsManager) context.getSystemService(
                     Context.APP_OPS_SERVICE);
 
-            final int mode = appOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
-                    callingUid, callingPackage);
+            final int mode = appOps.noteOp(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    callingUid, callingPackage, null /* attributionTag */, null /* message */);
             if (mode == AppOpsManager.MODE_DEFAULT) {
                 // The default behavior here is to check if PackageManager has given the app
                 // permission.

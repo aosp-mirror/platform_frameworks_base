@@ -43,12 +43,14 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
+import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
@@ -744,8 +746,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP.
                     final Task rootTask = r.getRootTask();
-                    rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatio());
+                    rootTask.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio(),
+                            r.pictureInPictureArgs.getExpandedAspectRatio());
                     rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
             }
@@ -764,6 +766,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             ActivityRecord.splashScreenAttachedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void requestCompatCameraControl(IBinder token, boolean showControl,
+            boolean transformationApplied, ICompatCameraControlCallback callback) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r != null) {
+                    r.updateCameraCompatState(showControl, transformationApplied, callback);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     /**
@@ -790,15 +808,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                     + ": Current activity does not support picture-in-picture.");
         }
 
+        final float minAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+        final float maxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+
         if (params.hasSetAspectRatio()
                 && !mService.mWindowManager.isValidPictureInPictureAspectRatio(
                 r.mDisplayContent, params.getAspectRatio())) {
-            final float minAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-            final float maxAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             throw new IllegalArgumentException(String.format(caller
                             + ": Aspect ratio is too extreme (must be between %f and %f).",
+                    minAspectRatio, maxAspectRatio));
+        }
+
+        if (mService.mSupportsExpandedPictureInPicture && params.hasSetExpandedAspectRatio()
+                && !mService.mWindowManager.isValidExpandedPictureInPictureAspectRatio(
+                r.mDisplayContent, params.getExpandedAspectRatio())) {
+            throw new IllegalArgumentException(String.format(caller
+                            + ": Expanded aspect ratio is not extreme enough (must not be between"
+                            + " %f and %f).",
                     minAspectRatio, maxAspectRatio));
         }
 
@@ -1064,17 +1092,17 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim) {
+            int enterAnim, int exitAnim, @ColorInt int backgroundColor) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null && r.isState(RESUMED, PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null, null,
+                        packageName, enterAnim, exitAnim, backgroundColor, null, null,
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, r.mOverrideTaskTransition),
+                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
                         null /* startCallback */, null /* finishCallback */);
             }
         }
@@ -1117,13 +1145,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    public void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    r.setDisablePreviewScreenshots(disable);
+                    r.setRecentsScreenshotEnabled(enabled);
                 }
             }
         } finally {

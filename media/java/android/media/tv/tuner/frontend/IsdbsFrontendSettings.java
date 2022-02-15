@@ -54,8 +54,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_BPSK,
                     MODULATION_MOD_QPSK, MODULATION_MOD_TC8PSK})
     @Retention(RetentionPolicy.SOURCE)
@@ -84,8 +83,7 @@ public class IsdbsFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
                     CODERATE_5_6, CODERATE_7_8})
     @Retention(RetentionPolicy.SOURCE)

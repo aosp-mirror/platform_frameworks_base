@@ -678,6 +678,66 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                         opening, closing, false /* visible */));
     }
 
+    @Test
+    public void testGetAnimationTargets_embeddedTask() {
+        // [DisplayContent] -+- [Task1] -            [ActivityRecord1] (opening, invisible)
+        //                   +- [Task2] (embedded) - [ActivityRecord2] (opening, invisible)
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
+        activity1.setVisible(false);
+        activity1.mVisibleRequested = true;
+
+        final Task task2 = createTask(mDisplayContent);
+        task2.mRemoveWithTaskOrganizer = true;
+        final ActivityRecord activity2 = createActivityRecord(task2);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        opening.add(activity1);
+        opening.add(activity2);
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+
+        // No animation on the embedded task.
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{activity1.getTask()}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, true /* visible */));
+        assertEquals(
+                new ArraySet<>(),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, false /* visible */));
+    }
+
+
+    @Test
+    public void testGetAnimationTargets_activityInEmbeddedTask() {
+        // [DisplayContent] - [Task] (embedded)-+- [ActivityRecord1] (opening, invisible)
+        //                                      +- [ActivityRecord2] (closing, visible)
+        final Task task = createTask(mDisplayContent);
+        task.mRemoveWithTaskOrganizer = true;
+
+        final ActivityRecord activity1 = createActivityRecord(task);
+        activity1.setVisible(false);
+        activity1.mVisibleRequested = true;
+        final ActivityRecord activity2 = createActivityRecord(task);
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        opening.add(activity1);
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+        closing.add(activity2);
+
+        // Even though embedded task itself doesn't animate, activities in an embedded task
+        // animate.
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{activity1}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, true /* visible */));
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{activity2}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, false /* visible */));
+    }
+
     static class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
         @Override
         public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,

@@ -17,8 +17,12 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
+import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
+
+import android.accessibilityservice.MagnificationConfig;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -63,7 +67,8 @@ import java.util.Locale;
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
-public class FullScreenMagnificationController {
+public class FullScreenMagnificationController implements
+        WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "FullScreenMagnificationController";
 
@@ -84,6 +89,10 @@ public class FullScreenMagnificationController {
     /** List of display Magnification, mapping from displayId -> DisplayMagnification. */
     @GuardedBy("mLock")
     private final SparseArray<DisplayMagnification> mDisplays = new SparseArray<>(0);
+
+    private final Rect mTempRect = new Rect();
+    // Whether the following typing focus feature for magnification is enabled.
+    private boolean mMagnificationFollowTypingEnabled = true;
 
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
@@ -114,8 +123,7 @@ public class FullScreenMagnificationController {
 
         private final int mDisplayId;
 
-        private static final int INVALID_ID = -1;
-        private int mIdOfLastServiceToMagnify = INVALID_ID;
+        private int mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
         private boolean mMagnificationActivated = false;
 
         DisplayMagnification(int displayId) {
@@ -359,9 +367,16 @@ public class FullScreenMagnificationController {
             return mIdOfLastServiceToMagnify;
         }
 
+        @GuardedBy("mLock")
         void onMagnificationChangedLocked() {
-            mControllerCtx.getAms().notifyMagnificationChanged(mDisplayId, mMagnificationRegion,
-                    getScale(), getCenterX(), getCenterY());
+            final MagnificationConfig config = new MagnificationConfig.Builder()
+                    .setMode(MAGNIFICATION_MODE_FULLSCREEN)
+                    .setScale(getScale())
+                    .setCenterX(getCenterX())
+                    .setCenterY(getCenterY()).build();
+            mControllerCtx.getAms().notifyMagnificationChanged(mDisplayId,
+                    mMagnificationRegion,
+                    config);
             if (mUnregisterPending && !isMagnifying()) {
                 unregister(mDeleteAfterUnregister);
             }
@@ -422,7 +437,7 @@ public class FullScreenMagnificationController {
                 }
 
                 final float scale = getScale();
-                offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_ID);
+                offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_SERVICE_ID);
             }
         }
 
@@ -469,7 +484,7 @@ public class FullScreenMagnificationController {
                 spec.clear();
                 onMagnificationChangedLocked();
             }
-            mIdOfLastServiceToMagnify = INVALID_ID;
+            mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
             mForceShowMagnifiableBounds = false;
             sendSpecToAnimation(spec, animationCallback);
             return changed;
@@ -516,7 +531,7 @@ public class FullScreenMagnificationController {
             }
             final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
             sendSpecToAnimation(mCurrentMagnificationSpec, animationCallback);
-            if (isMagnifying() && (id != INVALID_ID)) {
+            if (isMagnifying() && (id != INVALID_SERVICE_ID)) {
                 mIdOfLastServiceToMagnify = id;
                 mMagnificationInfoChangedCallback.onRequestMagnificationSpec(mDisplayId,
                         mIdOfLastServiceToMagnify);
@@ -580,7 +595,7 @@ public class FullScreenMagnificationController {
             if (updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY)) {
                 onMagnificationChangedLocked();
             }
-            if (id != INVALID_ID) {
+            if (id != INVALID_SERVICE_ID) {
                 mIdOfLastServiceToMagnify = id;
             }
             sendSpecToAnimation(mCurrentMagnificationSpec, null);
@@ -725,6 +740,37 @@ public class FullScreenMagnificationController {
                 unregisterLocked(displays.keyAt(i), false);
             }
         }
+    }
+
+    @Override
+    public void onRectangleOnScreenRequested(int displayId, int left, int top, int right,
+            int bottom) {
+        synchronized (mLock) {
+            if (!mMagnificationFollowTypingEnabled) {
+                return;
+            }
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            if (!display.isMagnifying()) {
+                return;
+            }
+            final Rect magnifiedRegionBounds = mTempRect;
+            display.getMagnifiedFrameInContentCoordsLocked(magnifiedRegionBounds);
+            if (magnifiedRegionBounds.contains(left, top, right, bottom)) {
+                return;
+            }
+            display.onRectangleOnScreenRequested(left, top, right, bottom);
+        }
+    }
+
+    void setMagnificationFollowTypingEnabled(boolean enabled) {
+        mMagnificationFollowTypingEnabled = enabled;
+    }
+
+    boolean isMagnificationFollowTypingEnabled() {
+        return mMagnificationFollowTypingEnabled;
     }
 
     /**

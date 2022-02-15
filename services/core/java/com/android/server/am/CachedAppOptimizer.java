@@ -539,6 +539,8 @@ public final class CachedAppOptimizer {
      */
     static private native void compactProcess(int pid, int compactionFlags);
 
+    static private native void cancelCompaction();
+
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
      * should be enabled, and starts the freeze/compaction thread if needed.
@@ -920,7 +922,7 @@ public final class CachedAppOptimizer {
     void unfreezeTemporarily(ProcessRecord app) {
         if (mUseFreezer) {
             synchronized (mProcLock) {
-                if (app.mOptRecord.isFrozen()) {
+                if (app.mOptRecord.isFrozen() || app.mOptRecord.isPendingFreeze()) {
                     unfreezeAppLSP(app);
                     freezeAppAsyncLSP(app);
                 }
@@ -960,7 +962,7 @@ public final class CachedAppOptimizer {
         }
 
         opt.setFreezerOverride(false);
-        if (!opt.isFrozen()) {
+        if (pid == 0 || !opt.isFrozen()) {
             return;
         }
 
@@ -975,7 +977,7 @@ public final class CachedAppOptimizer {
                 Slog.d(TAG_AM, "pid " + pid + " " + app.processName
                         + " received sync transactions while frozen, killing");
                 app.killLocked("Sync transaction while in frozen state",
-                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.REASON_FREEZER,
                         ApplicationExitInfo.SUBREASON_FREEZER_BINDER_TRANSACTION, true);
                 processKilled = true;
             }
@@ -988,7 +990,7 @@ public final class CachedAppOptimizer {
             Slog.d(TAG_AM, "Unable to query binder frozen info for pid " + pid + " "
                     + app.processName + ". Killing it. Exception: " + e);
             app.killLocked("Unable to query binder frozen stats",
-                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.REASON_FREEZER,
                     ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
             processKilled = true;
         }
@@ -1005,7 +1007,7 @@ public final class CachedAppOptimizer {
             Slog.e(TAG_AM, "Unable to unfreeze binder for " + pid + " " + app.processName
                     + ". Killing it");
             app.killLocked("Unable to unfreeze",
-                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.REASON_FREEZER,
                     ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
             return;
         }
@@ -1046,6 +1048,26 @@ public final class CachedAppOptimizer {
             }
 
             mFrozenProcesses.delete(app.getPid());
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    void onOomAdjustChanged(int oldAdj, int newAdj, ProcessRecord app) {
+        // Cancel any currently executing compactions
+        // if the process moved out of cached state
+        if (DefaultProcessDependencies.mPidCompacting == app.mPid && newAdj < oldAdj
+                && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+            cancelCompaction();
+        }
+
+        // Perform a minor compaction when a perceptible app becomes the prev/home app
+        // Perform a major compaction when any app enters cached
+        if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
+                && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
+            compactAppSome(app);
+        } else if (newAdj >= ProcessList.CACHED_APP_MIN_ADJ
+                && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
+            compactAppFull(app);
         }
     }
 
@@ -1090,6 +1112,13 @@ public final class CachedAppOptimizer {
                         pid = proc.getPid();
                         name = proc.processName;
                         opt.setHasPendingCompact(false);
+
+                        if (mAm.mInternal.isPendingTopUid(proc.uid)) {
+                            // In case the OOM Adjust has not yet been propagated we see if this is
+                            // pending on becoming top app in which case we should not compact.
+                            Slog.e(TAG_AM, "Skip compaction since UID is active for  " + name);
+                            return;
+                        }
 
                         // don't compact if the process has returned to perceptible
                         // and this is only a cached/home/prev compaction
@@ -1394,7 +1423,7 @@ public final class CachedAppOptimizer {
                     mFreezeHandler.post(() -> {
                         synchronized (mAm) {
                             proc.killLocked("Unable to freeze binder interface",
-                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.REASON_FREEZER,
                                     ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
                         }
                     });
@@ -1448,7 +1477,7 @@ public final class CachedAppOptimizer {
                 mFreezeHandler.post(() -> {
                     synchronized (mAm) {
                         proc.killLocked("Unable to freeze binder interface",
-                                ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.REASON_FREEZER,
                                 ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
                     }
                 });
@@ -1500,6 +1529,8 @@ public final class CachedAppOptimizer {
      * Default implementation for ProcessDependencies, public vor visibility to OomAdjuster class.
      */
     private static final class DefaultProcessDependencies implements ProcessDependencies {
+        public static int mPidCompacting = -1;
+
         // Get memory RSS from process.
         @Override
         public long[] getRss(int pid) {
@@ -1509,6 +1540,7 @@ public final class CachedAppOptimizer {
         // Compact process.
         @Override
         public void performCompaction(String action, int pid) throws IOException {
+            mPidCompacting = pid;
             if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])) {
                 compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
             } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FILE])) {
@@ -1516,6 +1548,7 @@ public final class CachedAppOptimizer {
             } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                 compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
+            mPidCompacting = -1;
         }
     }
 }

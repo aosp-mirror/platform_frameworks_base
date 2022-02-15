@@ -162,6 +162,14 @@ public class Utils {
     }
 
     /**
+     * Returns true if the device should use the collapsed layout for the media player when in
+     * landscape (or seascape) orientation
+     */
+    public static boolean useCollapsedMediaInLandscape(Resources resources) {
+        return resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed);
+    }
+
+    /**
      * Returns true if the device should use the split notification shade, based on orientation and
      * screen width.
      */

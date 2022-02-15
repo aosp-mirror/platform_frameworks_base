@@ -172,7 +172,7 @@ public final class AccessibilityGestureEvent implements Parcelable {
     private AccessibilityGestureEvent(@NonNull Parcel parcel) {
         mGestureId = parcel.readInt();
         mDisplayId = parcel.readInt();
-        ParceledListSlice<MotionEvent> slice = parcel.readParcelable(getClass().getClassLoader());
+        ParceledListSlice<MotionEvent> slice = parcel.readParcelable(getClass().getClassLoader(), android.content.pm.ParceledListSlice.class);
         mMotionEvents = slice.getList();
     }
 

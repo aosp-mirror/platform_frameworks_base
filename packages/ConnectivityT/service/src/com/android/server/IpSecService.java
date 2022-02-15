@@ -45,7 +45,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.TrafficStats;
-import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -96,8 +95,6 @@ import java.util.Objects;
 public class IpSecService extends IIpSecService.Stub {
     private static final String TAG = "IpSecService";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final String NETD_SERVICE_NAME = "netd";
     private static final int[] ADDRESS_FAMILIES =
             new int[] {OsConstants.AF_INET, OsConstants.AF_INET6};
 
@@ -105,6 +102,8 @@ public class IpSecService extends IIpSecService.Stub {
     private static final InetAddress INADDR_ANY;
 
     @VisibleForTesting static final int MAX_PORT_BIND_ATTEMPTS = 10;
+
+    private final INetd mNetd;
 
     static {
         try {
@@ -119,6 +118,7 @@ public class IpSecService extends IIpSecService.Stub {
 
     /* Binder context for this service */
     private final Context mContext;
+    private final Dependencies mDeps;
 
     /**
      * The next non-repeating global ID for tracking resources between users, this service, and
@@ -129,23 +129,24 @@ public class IpSecService extends IIpSecService.Stub {
     @GuardedBy("IpSecService.this")
     private int mNextResourceId = 1;
 
-    interface IpSecServiceConfiguration {
-        INetd getNetdInstance() throws RemoteException;
-
-        static IpSecServiceConfiguration GETSRVINSTANCE =
-                new IpSecServiceConfiguration() {
-                    @Override
-                    public INetd getNetdInstance() throws RemoteException {
-                        final INetd netd = NetdService.getInstance();
-                        if (netd == null) {
-                            throw new RemoteException("Failed to Get Netd Instance");
-                        }
-                        return netd;
-                    }
-                };
+    /**
+     * Dependencies of IpSecService, for injection in tests.
+     */
+    @VisibleForTesting
+    public static class Dependencies {
+        /**
+         * Get a reference to INetd.
+         */
+        public INetd getNetdInstance(Context context) throws RemoteException {
+            final INetd netd = INetd.Stub.asInterface((IBinder)
+                    context.getSystemService(Context.NETD_SERVICE));
+            if (netd == null) {
+                throw new RemoteException("Failed to Get Netd Instance");
+            }
+            return netd;
+        }
     }
 
-    private final IpSecServiceConfiguration mSrvConfig;
     final UidFdTagger mUidFdTagger;
 
     /**
@@ -491,8 +492,8 @@ public class IpSecService extends IIpSecService.Stub {
      * <p>This class associates kernel resources with the UID that owns and controls them.
      */
     private abstract class OwnedResourceRecord implements IResource {
-        final int pid;
-        final int uid;
+        final int mPid;
+        final int mUid;
         protected final int mResourceId;
 
         OwnedResourceRecord(int resourceId) {
@@ -501,8 +502,8 @@ public class IpSecService extends IIpSecService.Stub {
                 throw new IllegalArgumentException("Resource ID must not be INVALID_RESOURCE_ID");
             }
             mResourceId = resourceId;
-            pid = Binder.getCallingPid();
-            uid = Binder.getCallingUid();
+            mPid = Binder.getCallingPid();
+            mUid = Binder.getCallingUid();
 
             getResourceTracker().take();
         }
@@ -512,7 +513,7 @@ public class IpSecService extends IIpSecService.Stub {
 
         /** Convenience method; retrieves the user resource record for the stored UID. */
         protected UserRecord getUserRecord() {
-            return mUserResourceTracker.getUserRecord(uid);
+            return mUserResourceTracker.getUserRecord(mUid);
         }
 
         @Override
@@ -527,9 +528,9 @@ public class IpSecService extends IIpSecService.Stub {
                     .append("{mResourceId=")
                     .append(mResourceId)
                     .append(", pid=")
-                    .append(pid)
+                    .append(mPid)
                     .append(", uid=")
-                    .append(uid)
+                    .append(mUid)
                     .append("}")
                     .toString();
         }
@@ -545,7 +546,7 @@ public class IpSecService extends IIpSecService.Stub {
         SparseArray<RefcountedResource<T>> mArray = new SparseArray<>();
         private final String mTypeName;
 
-        public RefcountedResourceArray(String typeName) {
+        RefcountedResourceArray(String typeName) {
             this.mTypeName = typeName;
         }
 
@@ -625,16 +626,14 @@ public class IpSecService extends IIpSecService.Stub {
         public void freeUnderlyingResources() {
             int spi = mSpi.getSpi();
             try {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecDeleteSecurityAssociation(
-                                uid,
-                                mConfig.getSourceAddress(),
-                                mConfig.getDestinationAddress(),
-                                spi,
-                                mConfig.getMarkValue(),
-                                mConfig.getMarkMask(),
-                                mConfig.getXfrmInterfaceId());
+                mNetd.ipSecDeleteSecurityAssociation(
+                        mUid,
+                        mConfig.getSourceAddress(),
+                        mConfig.getDestinationAddress(),
+                        spi,
+                        mConfig.getMarkValue(),
+                        mConfig.getMarkMask(),
+                        mConfig.getXfrmInterfaceId());
             } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(TAG, "Failed to delete SA with ID: " + mResourceId, e);
             }
@@ -681,7 +680,8 @@ public class IpSecService extends IIpSecService.Stub {
 
         private boolean mOwnedByTransform = false;
 
-        SpiRecord(int resourceId, String sourceAddress, String destinationAddress, int spi) {
+        SpiRecord(int resourceId, String sourceAddress,
+                String destinationAddress, int spi) {
             super(resourceId);
             mSourceAddress = sourceAddress;
             mDestinationAddress = destinationAddress;
@@ -693,11 +693,9 @@ public class IpSecService extends IIpSecService.Stub {
         public void freeUnderlyingResources() {
             try {
                 if (!mOwnedByTransform) {
-                    mSrvConfig
-                            .getNetdInstance()
-                            .ipSecDeleteSecurityAssociation(
-                                    uid, mSourceAddress, mDestinationAddress, mSpi, 0 /* mark */,
-                                    0 /* mask */, 0 /* if_id */);
+                    mNetd.ipSecDeleteSecurityAssociation(
+                            mUid, mSourceAddress, mDestinationAddress, mSpi, 0 /* mark */,
+                            0 /* mask */, 0 /* if_id */);
                 }
             } catch (ServiceSpecificException | RemoteException e) {
                 Log.e(TAG, "Failed to delete SPI reservation with ID: " + mResourceId, e);
@@ -844,19 +842,18 @@ public class IpSecService extends IIpSecService.Stub {
             //       Teardown VTI
             //       Delete global policies
             try {
-                final INetd netd = mSrvConfig.getNetdInstance();
-                netd.ipSecRemoveTunnelInterface(mInterfaceName);
+                mNetd.ipSecRemoveTunnelInterface(mInterfaceName);
 
                 for (int selAddrFamily : ADDRESS_FAMILIES) {
-                    netd.ipSecDeleteSecurityPolicy(
-                            uid,
+                    mNetd.ipSecDeleteSecurityPolicy(
+                            mUid,
                             selAddrFamily,
                             IpSecManager.DIRECTION_OUT,
                             mOkey,
                             0xffffffff,
                             mIfId);
-                    netd.ipSecDeleteSecurityPolicy(
-                            uid,
+                    mNetd.ipSecDeleteSecurityPolicy(
+                            mUid,
                             selAddrFamily,
                             IpSecManager.DIRECTION_IN,
                             mIkey,
@@ -1011,30 +1008,23 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context) {
-        this(context, IpSecServiceConfiguration.GETSRVINSTANCE);
-    }
-
-    static IpSecService create(Context context)
-            throws InterruptedException {
-        final IpSecService service = new IpSecService(context);
-        service.connectNativeNetdService();
-        return service;
+    public IpSecService(Context context) {
+        this(context, new Dependencies());
     }
 
     @NonNull
     private AppOpsManager getAppOpsManager() {
         AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        if(appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
+        if (appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
         return appOps;
     }
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, IpSecServiceConfiguration config) {
+    public IpSecService(Context context, Dependencies deps) {
         this(
                 context,
-                config,
+                deps,
                 (fd, uid) -> {
                     try {
                         TrafficStats.setThreadStatsUid(uid);
@@ -1047,42 +1037,14 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, IpSecServiceConfiguration config,
-            UidFdTagger uidFdTagger) {
+    public IpSecService(Context context, Dependencies deps, UidFdTagger uidFdTagger) {
         mContext = context;
-        mSrvConfig = config;
+        mDeps = Objects.requireNonNull(deps, "Missing dependencies.");
         mUidFdTagger = uidFdTagger;
-    }
-
-    public void systemReady() {
-        if (isNetdAlive()) {
-            Log.d(TAG, "IpSecService is ready");
-        } else {
-            Log.wtf(TAG, "IpSecService not ready: failed to connect to NetD Native Service!");
-        }
-    }
-
-    private void connectNativeNetdService() {
-        // Avoid blocking the system server to do this
-        new Thread() {
-            @Override
-            public void run() {
-                synchronized (IpSecService.this) {
-                    NetdService.get(NETD_FETCH_TIMEOUT_MS);
-                }
-            }
-        }.start();
-    }
-
-    synchronized boolean isNetdAlive() {
         try {
-            final INetd netd = mSrvConfig.getNetdInstance();
-            if (netd == null) {
-                return false;
-            }
-            return netd.isAlive();
-        } catch (RemoteException re) {
-            return false;
+            mNetd = mDeps.getNetdInstance(mContext);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1141,15 +1103,13 @@ public class IpSecService extends IIpSecService.Stub {
                         IpSecManager.Status.RESOURCE_UNAVAILABLE, INVALID_RESOURCE_ID, spi);
             }
 
-            spi =
-                    mSrvConfig
-                            .getNetdInstance()
-                            .ipSecAllocateSpi(callingUid, "", destinationAddress, requestedSpi);
+            spi = mNetd.ipSecAllocateSpi(callingUid, "", destinationAddress, requestedSpi);
             Log.d(TAG, "Allocated SPI " + spi);
             userRecord.mSpiRecords.put(
                     resourceId,
                     new RefcountedResource<SpiRecord>(
-                            new SpiRecord(resourceId, "", destinationAddress, spi), binder));
+                            new SpiRecord(resourceId, "",
+                            destinationAddress, spi), binder));
         } catch (ServiceSpecificException e) {
             if (e.errorCode == OsConstants.ENOENT) {
                 return new IpSecSpiResponse(
@@ -1229,7 +1189,7 @@ public class IpSecService extends IIpSecService.Stub {
          * <p>Since the socket is created on behalf of an unprivileged application, all traffic
          * should be accounted to the UID of the unprivileged application.
          */
-        public void tag(FileDescriptor fd, int uid) throws IOException;
+        void tag(FileDescriptor fd, int uid) throws IOException;
     }
 
     /**
@@ -1250,38 +1210,53 @@ public class IpSecService extends IIpSecService.Stub {
         int callingUid = Binder.getCallingUid();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(callingUid);
         final int resourceId = mNextResourceId++;
-        FileDescriptor sockFd = null;
+
+        ParcelFileDescriptor pFd = null;
         try {
             if (!userRecord.mSocketQuotaTracker.isAvailable()) {
                 return new IpSecUdpEncapResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
             }
 
-            sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-            mUidFdTagger.tag(sockFd, callingUid);
+            FileDescriptor sockFd = null;
+            try {
+                sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                pFd = ParcelFileDescriptor.dup(sockFd);
+            } finally {
+                IoUtils.closeQuietly(sockFd);
+            }
 
+            mUidFdTagger.tag(pFd.getFileDescriptor(), callingUid);
             // This code is common to both the unspecified and specified port cases
             Os.setsockoptInt(
-                    sockFd,
+                    pFd.getFileDescriptor(),
                     OsConstants.IPPROTO_UDP,
                     OsConstants.UDP_ENCAP,
                     OsConstants.UDP_ENCAP_ESPINUDP);
 
-            mSrvConfig.getNetdInstance().ipSecSetEncapSocketOwner(
-                        new ParcelFileDescriptor(sockFd), callingUid);
+            mNetd.ipSecSetEncapSocketOwner(pFd, callingUid);
             if (port != 0) {
                 Log.v(TAG, "Binding to port " + port);
-                Os.bind(sockFd, INADDR_ANY, port);
+                Os.bind(pFd.getFileDescriptor(), INADDR_ANY, port);
             } else {
-                port = bindToRandomPort(sockFd);
+                port = bindToRandomPort(pFd.getFileDescriptor());
             }
 
             userRecord.mEncapSocketRecords.put(
                     resourceId,
                     new RefcountedResource<EncapSocketRecord>(
-                            new EncapSocketRecord(resourceId, sockFd, port), binder));
-            return new IpSecUdpEncapResponse(IpSecManager.Status.OK, resourceId, port, sockFd);
+                            new EncapSocketRecord(resourceId, pFd.getFileDescriptor(), port),
+                            binder));
+            return new IpSecUdpEncapResponse(IpSecManager.Status.OK, resourceId, port,
+                    pFd.getFileDescriptor());
         } catch (IOException | ErrnoException e) {
-            IoUtils.closeQuietly(sockFd);
+            try {
+                if (pFd != null) {
+                    pFd.close();
+                }
+            } catch (IOException ex) {
+                // Nothing can be done at this point
+                Log.e(TAG, "Failed to close pFd.");
+            }
         }
         // If we make it to here, then something has gone wrong and we couldn't open a socket.
         // The only reasonable condition that would cause that is resource unavailable.
@@ -1329,16 +1304,15 @@ public class IpSecService extends IIpSecService.Stub {
             //       Create VTI
             //       Add inbound/outbound global policies
             //              (use reqid = 0)
-            final INetd netd = mSrvConfig.getNetdInstance();
-            netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
+            mNetd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
 
             BinderUtils.withCleanCallingIdentity(() -> {
-                NetdUtils.setInterfaceUp(netd, intfName);
+                NetdUtils.setInterfaceUp(mNetd, intfName);
             });
 
             for (int selAddrFamily : ADDRESS_FAMILIES) {
                 // Always send down correct local/remote addresses for template.
-                netd.ipSecAddSecurityPolicy(
+                mNetd.ipSecAddSecurityPolicy(
                         callerUid,
                         selAddrFamily,
                         IpSecManager.DIRECTION_OUT,
@@ -1348,7 +1322,7 @@ public class IpSecService extends IIpSecService.Stub {
                         okey,
                         0xffffffff,
                         resourceId);
-                netd.ipSecAddSecurityPolicy(
+                mNetd.ipSecAddSecurityPolicy(
                         callerUid,
                         selAddrFamily,
                         IpSecManager.DIRECTION_IN,
@@ -1368,7 +1342,7 @@ public class IpSecService extends IIpSecService.Stub {
                 //
                 // This is necessary only on the tunnel interface, and not any the interface to
                 // which traffic will be forwarded to.
-                netd.ipSecAddSecurityPolicy(
+                mNetd.ipSecAddSecurityPolicy(
                         callerUid,
                         selAddrFamily,
                         IpSecManager.DIRECTION_FWD,
@@ -1425,12 +1399,10 @@ public class IpSecService extends IIpSecService.Stub {
         try {
             // We can assume general validity of the IP address, since we get them as a
             // LinkAddress, which does some validation.
-            mSrvConfig
-                    .getNetdInstance()
-                    .interfaceAddAddress(
-                            tunnelInterfaceInfo.mInterfaceName,
-                            localAddr.getAddress().getHostAddress(),
-                            localAddr.getPrefixLength());
+            mNetd.interfaceAddAddress(
+                    tunnelInterfaceInfo.mInterfaceName,
+                    localAddr.getAddress().getHostAddress(),
+                    localAddr.getPrefixLength());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1454,9 +1426,7 @@ public class IpSecService extends IIpSecService.Stub {
         try {
             // We can assume general validity of the IP address, since we get them as a
             // LinkAddress, which does some validation.
-            mSrvConfig
-                    .getNetdInstance()
-                    .interfaceDelAddress(
+            mNetd.interfaceDelAddress(
                             tunnelInterfaceInfo.mInterfaceName,
                             localAddr.getAddress().getHostAddress(),
                             localAddr.getPrefixLength());
@@ -1669,30 +1639,28 @@ public class IpSecService extends IIpSecService.Stub {
             cryptName = crypt.getName();
         }
 
-        mSrvConfig
-                .getNetdInstance()
-                .ipSecAddSecurityAssociation(
-                        Binder.getCallingUid(),
-                        c.getMode(),
-                        c.getSourceAddress(),
-                        c.getDestinationAddress(),
-                        (c.getNetwork() != null) ? c.getNetwork().getNetId() : 0,
-                        spiRecord.getSpi(),
-                        c.getMarkValue(),
-                        c.getMarkMask(),
-                        (auth != null) ? auth.getName() : "",
-                        (auth != null) ? auth.getKey() : new byte[] {},
-                        (auth != null) ? auth.getTruncationLengthBits() : 0,
-                        cryptName,
-                        (crypt != null) ? crypt.getKey() : new byte[] {},
-                        (crypt != null) ? crypt.getTruncationLengthBits() : 0,
-                        (authCrypt != null) ? authCrypt.getName() : "",
-                        (authCrypt != null) ? authCrypt.getKey() : new byte[] {},
-                        (authCrypt != null) ? authCrypt.getTruncationLengthBits() : 0,
-                        encapType,
-                        encapLocalPort,
-                        encapRemotePort,
-                        c.getXfrmInterfaceId());
+        mNetd.ipSecAddSecurityAssociation(
+                Binder.getCallingUid(),
+                c.getMode(),
+                c.getSourceAddress(),
+                c.getDestinationAddress(),
+                (c.getNetwork() != null) ? c.getNetwork().getNetId() : 0,
+                spiRecord.getSpi(),
+                c.getMarkValue(),
+                c.getMarkMask(),
+                (auth != null) ? auth.getName() : "",
+                (auth != null) ? auth.getKey() : new byte[] {},
+                (auth != null) ? auth.getTruncationLengthBits() : 0,
+                cryptName,
+                (crypt != null) ? crypt.getKey() : new byte[] {},
+                (crypt != null) ? crypt.getTruncationLengthBits() : 0,
+                (authCrypt != null) ? authCrypt.getName() : "",
+                (authCrypt != null) ? authCrypt.getKey() : new byte[] {},
+                (authCrypt != null) ? authCrypt.getTruncationLengthBits() : 0,
+                encapType,
+                encapLocalPort,
+                encapRemotePort,
+                c.getXfrmInterfaceId());
     }
 
     /**
@@ -1771,7 +1739,7 @@ public class IpSecService extends IIpSecService.Stub {
         TransformRecord info = userRecord.mTransformRecords.getResourceOrThrow(resourceId);
 
         // TODO: make this a function.
-        if (info.pid != getCallingPid() || info.uid != callingUid) {
+        if (info.mPid != getCallingPid() || info.mUid != callingUid) {
             throw new SecurityException("Only the owner of an IpSec Transform may apply it!");
         }
 
@@ -1781,15 +1749,13 @@ public class IpSecService extends IIpSecService.Stub {
                 c.getMode() == IpSecTransform.MODE_TRANSPORT,
                 "Transform mode was not Transport mode; cannot be applied to a socket");
 
-        mSrvConfig
-                .getNetdInstance()
-                .ipSecApplyTransportModeTransform(
-                        socket,
-                        callingUid,
-                        direction,
-                        c.getSourceAddress(),
-                        c.getDestinationAddress(),
-                        info.getSpiRecord().getSpi());
+        mNetd.ipSecApplyTransportModeTransform(
+                socket,
+                callingUid,
+                direction,
+                c.getSourceAddress(),
+                c.getDestinationAddress(),
+                info.getSpiRecord().getSpi());
     }
 
     /**
@@ -1801,9 +1767,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void removeTransportModeTransforms(ParcelFileDescriptor socket)
             throws RemoteException {
-        mSrvConfig
-                .getNetdInstance()
-                .ipSecRemoveTransportModeTransform(socket);
+        mNetd.ipSecRemoveTransportModeTransform(socket);
     }
 
     /**
@@ -1878,18 +1842,16 @@ public class IpSecService extends IIpSecService.Stub {
 
             // Always update the policy with the relevant XFRM_IF_ID
             for (int selAddrFamily : ADDRESS_FAMILIES) {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecUpdateSecurityPolicy(
-                                callingUid,
-                                selAddrFamily,
-                                direction,
-                                transformInfo.getConfig().getSourceAddress(),
-                                transformInfo.getConfig().getDestinationAddress(),
-                                spi, // If outbound, also add SPI to the policy.
-                                mark, // Must always set policy mark; ikey/okey for VTIs
-                                0xffffffff,
-                                c.getXfrmInterfaceId());
+                mNetd.ipSecUpdateSecurityPolicy(
+                        callingUid,
+                        selAddrFamily,
+                        direction,
+                        transformInfo.getConfig().getSourceAddress(),
+                        transformInfo.getConfig().getDestinationAddress(),
+                        spi, // If outbound, also add SPI to the policy.
+                        mark, // Must always set policy mark; ikey/okey for VTIs
+                        0xffffffff,
+                        c.getXfrmInterfaceId());
             }
 
             // Update SA with tunnel mark (ikey or okey based on direction)
@@ -1908,7 +1870,6 @@ public class IpSecService extends IIpSecService.Stub {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
         pw.println("IpSecService dump:");
-        pw.println("NetdNativeService Connection: " + (isNetdAlive() ? "alive" : "dead"));
         pw.println();
 
         pw.println("mUserResourceTracker:");

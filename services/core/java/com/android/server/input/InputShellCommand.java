@@ -560,7 +560,12 @@ public class InputShellCommand extends ShellCommand {
         sleep(duration);
 
         for (KeyEvent event: events) {
-            injectKeyEventAsync(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
+            final int keyCode = event.getKeyCode();
+            final KeyEvent upEvent = new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode,
+                    0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
+                    inputSource);
+            injectKeyEventAsync(upEvent);
+            metaState &= ~MODIFIER.getOrDefault(keyCode, 0);
         }
     }
 

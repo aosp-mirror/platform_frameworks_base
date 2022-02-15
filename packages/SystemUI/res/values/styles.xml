@@ -96,17 +96,12 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-    <style name="TextAppearance.QS.DetailHeader">
-        <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-    </style>
-
     <style name="TextAppearance.QS.DetailItemPrimary">
-        <item name="android:textSize">@dimen/qs_detail_item_primary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
     </style>
 
     <style name="TextAppearance.QS.DetailItemSecondary">
-        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
@@ -118,23 +113,6 @@
     <style name="TextAppearance.QS.Warning">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailButton">
-        <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailButton.White">
-        <item name="android:textColor">@color/zen_introduction</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailEmpty">
-        <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.QS.SegmentedButton">
@@ -167,7 +145,7 @@
     </style>
 
     <style name="TextAppearance.QS.UserSwitcher">
-        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
@@ -236,11 +214,55 @@
         <item name="android:textColor">?android:attr/colorError</item>
     </style>
 
+    <style name="TextAppearance.AuthNonBioCredential"
+        parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:accessibilityLiveRegion">polite</item>
+        <item name="android:textAlignment">gravity</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Title">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Subtitle">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Description">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.Error">
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">18dp</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/colorError</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:gravity">center</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">?android:attr/colorForeground</item>
         <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="AuthCredentialHeaderStyle">
+        <item name="android:paddingStart">48dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">28dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_gravity">top</item>
     </style>
 
     <style name="DeviceManagementDialogTitle">
@@ -307,9 +329,8 @@
         <item name="android:maxWidth">420dp</item>
         <item name="android:minHeight">0dp</item>
         <item name="android:minWidth">0dp</item>
-        <item name="android:paddingBottom">0dp</item>
-        <item name="android:paddingHorizontal">44dp</item>
-        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingHorizontal">60dp</item>
+        <item name="android:paddingBottom">40dp</item>
     </style>
 
     <style name="LockPatternStyle">
@@ -390,9 +411,6 @@
         <item name="numColumns">3</item>
     </style>
 
-    <style name="AutoSizingList">
-        <item name="enableAutoSizing">true</item>
-    </style>
     <style name="Theme.SystemUI.MediaProjectionAlertDialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -404,19 +422,19 @@
     </style>
 
     <style name="DualToneLightTheme">
-        <item name="backgroundColor">@color/light_mode_icon_color_dual_tone_background</item>
+        <item name="iconBackgroundColor">@color/light_mode_icon_color_dual_tone_background</item>
         <item name="fillColor">@color/light_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/light_mode_icon_color_single_tone</item>
         <item name="homeHandleColor">@color/navigation_bar_home_handle_light_color</item>
     </style>
     <style name="DualToneDarkTheme">
-        <item name="backgroundColor">@color/dark_mode_icon_color_dual_tone_background</item>
+        <item name="iconBackgroundColor">@color/dark_mode_icon_color_dual_tone_background</item>
         <item name="fillColor">@color/dark_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_icon_color_single_tone</item>
         <item name="homeHandleColor">@color/navigation_bar_home_handle_dark_color</item>
     </style>
     <style name="QSHeaderDarkTheme">
-        <item name="backgroundColor">@color/dark_mode_qs_icon_color_dual_tone_background</item>
+        <item name="iconBackgroundColor">@color/dark_mode_qs_icon_color_dual_tone_background</item>
         <item name="fillColor">@color/dark_mode_qs_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_qs_icon_color_single_tone</item>
     </style>
@@ -581,6 +599,23 @@
         <item name="android:scaleType">centerInside</item>
     </style>
 
+    <style name="MediaPlayer.SessionAction"
+           parent="@android:style/Widget.Material.Button.Borderless.Small">
+        <item name="android:background">@drawable/qs_media_light_source</item>
+        <item name="android:tint">?android:attr/textColorPrimary</item>
+        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="MediaPlayer.SessionAction.Primary" parent="MediaPlayer.SessionAction">
+        <item name="android:background">@drawable/qs_media_round_button_background</item>
+        <item name="android:backgroundTint">@color/media_player_solid_button_bg</item>
+    </style>
+
     <style name="MediaPlayer.OutlineButton">
         <item name="android:background">@drawable/qs_media_button_background</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -647,7 +682,17 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="Screenshot" parent="@android:style/Theme.DeviceDefault.DayNight"/>
+    <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="overlayButtonTextColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- Clipboard overlay's edit text activity. -->
+    <style name="EditTextActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+    </style>
 
     <!-- Privacy dialog -->
     <style name="PrivacyDialog" parent="Theme.SystemUI.QuickSettings.Dialog">
@@ -701,11 +746,18 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.CreateUser" parent="@style/Theme.SystemUI">
+    <style name="Theme.UserSwitcherActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:statusBarColor">@color/user_switcher_fullscreen_bg</item>
+        <item name="android:windowBackground">@color/user_switcher_fullscreen_bg</item>
+        <item name="android:navigationBarColor">@color/user_switcher_fullscreen_bg</item>
+        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
+    </style>
+
+    <style name="Theme.CreateUser" parent="@android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">#33000000</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 
     <style name="Theme.PeopleTileConfigActivity" parent="@style/Theme.SystemUI">
@@ -721,7 +773,7 @@
      <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
       <item name="android:windowFullscreen">false</item>
       <item name="android:windowIsFloating">false</item>
-      <item name="android:windowBackground">@android:color/black</item>
+      <item name="android:windowBackground">@color/controls_task_view_bg</item>
       <item name="android:backgroundDimEnabled">false</item>
       <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
@@ -951,8 +1003,9 @@
     </style>
 
     <style name="InternetDialog.NetworkSummary">
-        <item name="android:layout_marginEnd">34dp</item>
+        <item name="android:layout_marginEnd">7dp</item>
         <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
         <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Secondary</item>
     </style>
 

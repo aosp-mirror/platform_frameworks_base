@@ -17,6 +17,8 @@
 package com.android.wm.shell.compatui;
 
 import android.annotation.Nullable;
+import android.app.TaskInfo;
+import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
@@ -38,6 +40,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -47,18 +50,20 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Controls to show/update restart-activity buttons on Tasks based on whether the foreground
+ * Controller to show/update compat UI components on Tasks based on whether the foreground
  * activities are in compatibility mode.
  */
 public class CompatUIController implements OnDisplaysChangedListener,
         DisplayImeController.ImePositionProcessor {
 
-    /** Callback for size compat UI interaction. */
+    /** Callback for compat UI interaction. */
     public interface CompatUICallback {
         /** Called when the size compat restart button appears. */
         void onSizeCompatRestartButtonAppeared(int taskId);
         /** Called when the size compat restart button is clicked. */
         void onSizeCompatRestartButtonClicked(int taskId);
+        /** Called when the camera compat control state is updated. */
+        void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state);
     }
 
     private static final String TAG = "CompatUIController";
@@ -70,8 +75,22 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SparseArray<PerDisplayOnInsetsChangedListener> mOnInsetsChangedListeners =
             new SparseArray<>(0);
 
-    /** The showing UIs by task id. */
-    private final SparseArray<CompatUIWindowManager> mActiveLayouts = new SparseArray<>(0);
+    /**
+     * The active Compat Control UI layouts by task id.
+     *
+     * <p>An active layout is a layout that is eligible to be shown for the associated task but
+     * isn't necessarily shown at a given time.
+     */
+    private final SparseArray<CompatUIWindowManager> mActiveCompatLayouts = new SparseArray<>(0);
+
+    /**
+     * The active Letterbox Education layout if there is one (there can be at most one active).
+     *
+     * <p>An active layout is a layout that is eligible to be shown for the associated task but
+     * isn't necessarily shown at a given time.
+     */
+    @Nullable
+    private LetterboxEduWindowManager mActiveLetterboxEduLayout;
 
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
@@ -86,10 +105,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private CompatUICallback mCallback;
 
-    /** Only show once automatically in the process life. */
-    private boolean mHasShownHint;
-    /** Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
-     * be shown. */
+    // Only show once automatically in the process life.
+    private boolean mHasShownSizeCompatHint;
+    private boolean mHasShownCameraCompatHint;
+
+    // Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
+    // be shown.
     private boolean mKeyguardOccluded;
 
     public CompatUIController(Context context,
@@ -122,24 +143,19 @@ public class CompatUIController implements OnDisplaysChangedListener,
      * Called when the Task info changed. Creates and updates the compat UI if there is an
      * activity in size compat, or removes the UI if there is no size compat activity.
      *
-     * @param displayId display the task and activity are in.
-     * @param taskId task the activity is in.
-     * @param taskConfig task config to place the compat UI with.
+     * @param taskInfo {@link TaskInfo} task the activity is in.
      * @param taskListener listener to handle the Task Surface placement.
      */
-    public void onCompatInfoChanged(int displayId, int taskId,
-            @Nullable Configuration taskConfig,
+    public void onCompatInfoChanged(TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        if (taskConfig == null || taskListener == null) {
+        if (taskInfo.configuration == null || taskListener == null) {
             // Null token means the current foreground activity is not in compatibility mode.
-            removeLayout(taskId);
-        } else if (mActiveLayouts.contains(taskId)) {
-            // UI already exists, update the UI layout.
-            updateLayout(taskId, taskConfig, taskListener);
-        } else {
-            // Create a new compat UI.
-            createLayout(displayId, taskId, taskConfig, taskListener);
+            removeLayouts(taskInfo.taskId);
+            return;
         }
+
+        createOrUpdateCompatLayout(taskInfo, taskListener);
+        createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
     }
 
     @Override
@@ -156,7 +172,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         final List<Integer> toRemoveTaskIds = new ArrayList<>();
         forAllLayoutsOnDisplay(displayId, layout -> toRemoveTaskIds.add(layout.getTaskId()));
         for (int i = toRemoveTaskIds.size() - 1; i >= 0; i--) {
-            removeLayout(toRemoveTaskIds.get(i));
+            removeLayouts(toRemoveTaskIds.get(i));
         }
     }
 
@@ -215,45 +231,96 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return mDisplaysWithIme.contains(displayId);
     }
 
-    private void createLayout(int displayId, int taskId, Configuration taskConfig,
+    private void createOrUpdateCompatLayout(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        final Context context = getOrCreateDisplayContext(displayId);
-        if (context == null) {
-            Log.e(TAG, "Cannot get context for display " + displayId);
+        CompatUIWindowManager layout = mActiveCompatLayouts.get(taskInfo.taskId);
+        if (layout != null) {
+            // UI already exists, update the UI layout.
+            if (!layout.updateCompatInfo(taskInfo, taskListener,
+                    showOnDisplay(layout.getDisplayId()))) {
+                // The layout is no longer eligible to be shown, remove from active layouts.
+                mActiveCompatLayouts.remove(taskInfo.taskId);
+            }
             return;
         }
 
-        final CompatUIWindowManager compatUIWindowManager =
-                createLayout(context, displayId, taskId, taskConfig, taskListener);
-        mActiveLayouts.put(taskId, compatUIWindowManager);
-        compatUIWindowManager.createLayout(showOnDisplay(displayId));
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        layout = createCompatUiWindowManager(context, taskInfo, taskListener);
+        if (layout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, add it the active layouts.
+            mActiveCompatLayouts.put(taskInfo.taskId, layout);
+        }
     }
 
     @VisibleForTesting
-    CompatUIWindowManager createLayout(Context context, int displayId, int taskId,
-            Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
+    CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
         final CompatUIWindowManager compatUIWindowManager = new CompatUIWindowManager(context,
-                taskConfig, mSyncQueue, mCallback, taskId, taskListener,
-                mDisplayController.getDisplayLayout(displayId), mHasShownHint);
-        // Only show hint for the first time.
-        mHasShownHint = true;
+                taskInfo, mSyncQueue, mCallback, taskListener,
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mHasShownSizeCompatHint,
+                mHasShownCameraCompatHint);
+        // TODO(b/218304113): updates values only if hints are actually shown to the user.
+        // Only show hints for the first time.
+        if (taskInfo.topActivityInSizeCompat) {
+            mHasShownSizeCompatHint = true;
+        }
+        if (taskInfo.hasCameraCompatControl()) {
+            mHasShownCameraCompatHint = true;
+        }
         return compatUIWindowManager;
     }
 
-    private void updateLayout(int taskId, Configuration taskConfig,
+    private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        final CompatUIWindowManager layout = mActiveLayouts.get(taskId);
-        if (layout == null) {
+        if (mActiveLetterboxEduLayout != null
+                && mActiveLetterboxEduLayout.getTaskId() == taskInfo.taskId) {
+            // UI already exists, update the UI layout.
+            if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
+                    showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
+                // The layout is no longer eligible to be shown, clear active layout.
+                mActiveLetterboxEduLayout = null;
+            }
             return;
         }
-        layout.updateCompatInfo(taskConfig, taskListener, showOnDisplay(layout.getDisplayId()));
+
+        // Create a new UI layout.
+        final Context context = getOrCreateDisplayContext(taskInfo.displayId);
+        if (context == null) {
+            return;
+        }
+        LetterboxEduWindowManager newLayout = new LetterboxEduWindowManager(context, taskInfo,
+                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                this::onLetterboxEduDismissed);
+        if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
+            // The new layout is eligible to be shown, make it the active layout.
+            if (mActiveLetterboxEduLayout != null) {
+                // Release the previous layout since at most one can be active.
+                // Since letterbox education is only shown once to the user, releasing the previous
+                // layout is only a precaution.
+                mActiveLetterboxEduLayout.release();
+            }
+            mActiveLetterboxEduLayout = newLayout;
+        }
     }
 
-    private void removeLayout(int taskId) {
-        final CompatUIWindowManager layout = mActiveLayouts.get(taskId);
+    private void onLetterboxEduDismissed() {
+        mActiveLetterboxEduLayout = null;
+    }
+
+    private void removeLayouts(int taskId) {
+        final CompatUIWindowManager layout = mActiveCompatLayouts.get(taskId);
         if (layout != null) {
             layout.release();
-            mActiveLayouts.remove(taskId);
+            mActiveCompatLayouts.remove(taskId);
+        }
+
+        if (mActiveLetterboxEduLayout != null && mActiveLetterboxEduLayout.getTaskId() == taskId) {
+            mActiveLetterboxEduLayout.release();
+            mActiveLetterboxEduLayout = null;
         }
     }
 
@@ -271,27 +338,33 @@ public class CompatUIController implements OnDisplaysChangedListener,
             if (display != null) {
                 context = mContext.createDisplayContext(display);
                 mDisplayContextCache.put(displayId, new WeakReference<>(context));
+            } else {
+                Log.e(TAG, "Cannot get context for display " + displayId);
             }
         }
         return context;
     }
 
-    private void forAllLayoutsOnDisplay(int displayId, Consumer<CompatUIWindowManager> callback) {
+    private void forAllLayoutsOnDisplay(int displayId,
+            Consumer<CompatUIWindowManagerAbstract> callback) {
         forAllLayouts(layout -> layout.getDisplayId() == displayId, callback);
     }
 
-    private void forAllLayouts(Consumer<CompatUIWindowManager> callback) {
+    private void forAllLayouts(Consumer<CompatUIWindowManagerAbstract> callback) {
         forAllLayouts(layout -> true, callback);
     }
 
-    private void forAllLayouts(Predicate<CompatUIWindowManager> condition,
-            Consumer<CompatUIWindowManager> callback) {
-        for (int i = 0; i < mActiveLayouts.size(); i++) {
-            final int taskId = mActiveLayouts.keyAt(i);
-            final CompatUIWindowManager layout = mActiveLayouts.get(taskId);
+    private void forAllLayouts(Predicate<CompatUIWindowManagerAbstract> condition,
+            Consumer<CompatUIWindowManagerAbstract> callback) {
+        for (int i = 0; i < mActiveCompatLayouts.size(); i++) {
+            final int taskId = mActiveCompatLayouts.keyAt(i);
+            final CompatUIWindowManager layout = mActiveCompatLayouts.get(taskId);
             if (layout != null && condition.test(layout)) {
                 callback.accept(layout);
             }
+        }
+        if (mActiveLetterboxEduLayout != null && condition.test(mActiveLetterboxEduLayout)) {
+            callback.accept(mActiveLetterboxEduLayout);
         }
     }
 

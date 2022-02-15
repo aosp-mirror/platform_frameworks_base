@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
@@ -37,20 +36,16 @@ import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
-import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
+import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
@@ -105,6 +100,7 @@ class WindowToken extends WindowContainer<WindowState> {
     final boolean mOwnerCanManageAppTokens;
 
     private FixedRotationTransformState mFixedRotationTransformState;
+    private SurfaceControl mFixedRotationTransformLeash;
 
     /**
      * When set to {@code true}, this window token is created from {@link WindowContext}
@@ -430,6 +426,13 @@ class WindowToken extends WindowContainer<WindowState> {
         return isFixedRotationTransforming() ? mFixedRotationTransformState.mDisplayFrames : null;
     }
 
+    Rect getFixedRotationTransformMaxBounds() {
+        return isFixedRotationTransforming()
+                ? mFixedRotationTransformState.mRotatedOverrideConfiguration.windowConfiguration
+                .getMaxBounds()
+                : null;
+    }
+
     Rect getFixedRotationTransformDisplayBounds() {
         return isFixedRotationTransforming()
                 ? mFixedRotationTransformState.mRotatedOverrideConfiguration.windowConfiguration
@@ -478,9 +481,6 @@ class WindowToken extends WindowContainer<WindowState> {
      * This should only be called when {@link #mFixedRotationTransformState} is non-null.
      */
     private void onFixedRotationStatePrepared() {
-        // Send the adjustment info first so when the client receives configuration change, it can
-        // get the rotated display metrics.
-        notifyFixedRotationTransform(true /* enabled */);
         // Resolve the rotated configuration.
         onConfigurationChanged(getParent().getConfiguration());
         final ActivityRecord r = asActivityRecord();
@@ -523,8 +523,14 @@ class WindowToken extends WindowContainer<WindowState> {
         if (state == null) {
             return;
         }
-
-        state.resetTransform();
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            state.resetTransform();
+        } else {
+            // Remove all the leashes
+            for (int i = state.mAssociatedTokens.size() - 1; i >= 0; --i) {
+                state.mAssociatedTokens.get(i).removeFixedRotationLeash();
+            }
+        }
         // Clear the flag so if the display will be updated to the same orientation, the transform
         // won't take effect.
         state.mIsTransforming = false;
@@ -536,48 +542,9 @@ class WindowToken extends WindowContainer<WindowState> {
         for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
             final WindowToken token = state.mAssociatedTokens.get(i);
             token.mFixedRotationTransformState = null;
-            token.notifyFixedRotationTransform(false /* enabled */);
             if (applyDisplayRotation == null) {
                 // Notify cancellation because the display does not change rotation.
                 token.cancelFixedRotationTransform();
-            }
-        }
-    }
-
-    /** Notifies application side to enable or disable the rotation adjustment of display info. */
-    void notifyFixedRotationTransform(boolean enabled) {
-        FixedRotationAdjustments adjustments = null;
-        // A token may contain windows of the same processes or different processes. The list is
-        // used to avoid sending the same adjustments to a process multiple times.
-        ArrayList<WindowProcessController> notifiedProcesses = null;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            final WindowProcessController app;
-            if (w.mAttrs.type == TYPE_APPLICATION_STARTING) {
-                // Use the host activity because starting window is controlled by window manager.
-                final ActivityRecord r = asActivityRecord();
-                if (r == null) {
-                    continue;
-                }
-                app = r.app;
-            } else {
-                app = mWmService.mAtmService.mProcessMap.getProcess(w.mSession.mPid);
-            }
-            if (app == null || !app.hasThread()) {
-                continue;
-            }
-            if (notifiedProcesses == null) {
-                notifiedProcesses = new ArrayList<>(2);
-                adjustments = enabled ? createFixedRotationAdjustmentsIfNeeded() : null;
-            } else if (notifiedProcesses.contains(app)) {
-                continue;
-            }
-            notifiedProcesses.add(app);
-            try {
-                mWmService.mAtmService.getLifecycleManager().scheduleTransaction(
-                        app.getThread(), FixedRotationAdjustmentsItem.obtain(token, adjustments));
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to schedule DisplayAdjustmentsItem to " + app, e);
             }
         }
     }
@@ -595,20 +562,48 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
+     * Gets or creates a leash which can be treated as if this window is not-rotated. This is
+     * used to adapt mismatched-rotation surfaces into code that expects all windows to share
+     * the same rotation.
+     */
+    @Nullable
+    SurfaceControl getOrCreateFixedRotationLeash() {
+        if (!mTransitionController.isShellTransitionsEnabled()) return null;
+        final int rotation = getRelativeDisplayRotation();
+        if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
+        if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        final SurfaceControl leash = makeSurface().setContainerLayer()
+                .setParent(getParentSurfaceControl())
+                .setName(getSurfaceControl() + " - rotation-leash")
+                .setHidden(false)
+                .setEffectLayer()
+                .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
+                .build();
+        t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
+        t.show(leash);
+        t.reparent(getSurfaceControl(), leash);
+        t.setAlpha(getSurfaceControl(), 1.f);
+        mFixedRotationTransformLeash = leash;
+        updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
+        return mFixedRotationTransformLeash;
+    }
+
+    void removeFixedRotationLeash() {
+        if (mFixedRotationTransformLeash == null) return;
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        t.reparent(getSurfaceControl(), getParentSurfaceControl());
+        t.remove(mFixedRotationTransformLeash);
+        mFixedRotationTransformLeash = null;
+    }
+
+    /**
      * It is called when the window is using fixed rotation transform, and before display applies
      * the same rotation, the rotation change for display is canceled, e.g. the orientation from
      * sensor is updated to previous direction.
      */
     void onCancelFixedRotationTransform(int originalDisplayRotation) {
-    }
-
-    FixedRotationAdjustments createFixedRotationAdjustmentsIfNeeded() {
-        if (!isFixedRotationTransforming()) {
-            return null;
-        }
-        final DisplayInfo displayInfo = mFixedRotationTransformState.mDisplayInfo;
-        return new FixedRotationAdjustments(displayInfo.rotation, displayInfo.appWidth,
-                displayInfo.appHeight, displayInfo.displayCutout);
     }
 
     @Override
@@ -625,7 +620,7 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     void updateSurfacePosition(SurfaceControl.Transaction t) {
         super.updateSurfacePosition(t);
-        if (isFixedRotationTransforming()) {
+        if (!mTransitionController.isShellTransitionsEnabled() && isFixedRotationTransforming()) {
             final ActivityRecord r = asActivityRecord();
             final Task rootTask = r != null ? r.getRootTask() : null;
             // Don't transform the activity in PiP because the PiP task organizer will handle it.
@@ -638,6 +633,20 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     @Override
+    protected void updateSurfaceRotation(SurfaceControl.Transaction t,
+            @Surface.Rotation int deltaRotation, SurfaceControl positionLeash) {
+        final ActivityRecord r = asActivityRecord();
+        if (r != null) {
+            final Task rootTask = r.getRootTask();
+            // Don't transform the activity in PiP because the PiP task organizer will handle it.
+            if (rootTask != null && rootTask.inPinnedWindowingMode()) {
+                return;
+            }
+        }
+        super.updateSurfaceRotation(t, deltaRotation, positionLeash);
+    }
+
+    @Override
     void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
         // Keep the transformed position to animate because the surface will show in different
         // rotation than the animator of leash.
@@ -645,14 +654,6 @@ class WindowToken extends WindowContainer<WindowState> {
             super.resetSurfacePositionForAnimationLeash(t);
         }
     }
-
-    /**
-     * Gives a chance to this {@link WindowToken} to adjust the {@link
-     * android.view.WindowManager.LayoutParams} of its windows.
-     */
-    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
-    }
-
 
     @CallSuper
     @Override

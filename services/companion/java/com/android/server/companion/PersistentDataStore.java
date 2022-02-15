@@ -25,19 +25,24 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-
-import static org.xmlpull.v1.XmlPullParser.END_TAG;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
+import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.DataStoreUtils.isEndOfTag;
+import static com.android.server.companion.DataStoreUtils.isStartOfTag;
+import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
+import android.content.pm.UserInfo;
 import android.net.MacAddress;
 import android.os.Environment;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.ExceptionUtils;
+import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -51,7 +56,9 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,17 +68,20 @@ import java.util.concurrent.ConcurrentMap;
  * The class responsible for persisting Association records and other related information (such as
  * previously used IDs) to a disk, and reading the data back from the disk.
  *
- * Before Android T the data was stored to `companion_device_manager_associations.xml` file in
- * {@link Environment#getUserSystemDirectory(int)}
- * (eg. `/data/system/users/0/companion_device_manager_associations.xml`)
- * @see #getBaseLegacyStorageFileForUser(int)
+ * <p>
+ * Before Android T the data was stored in "companion_device_manager_associations.xml" file in
+ * {@link Environment#getUserSystemDirectory(int) /data/system/user/}.
  *
- * Before Android T the data was stored using the v0 schema.
+ * See {@link #getBaseLegacyStorageFileForUser(int) getBaseLegacyStorageFileForUser()}.
  *
- * @see #readAssociationsV0(TypedXmlPullParser, int, Set)
- * @see #readAssociationV0(TypedXmlPullParser, int, int, Set)
+ * <p>
+ * Before Android T the data was stored using the v0 schema. See:
+ * <ul>
+ * <li>{@link #readAssociationsV0(TypedXmlPullParser, int, Collection) readAssociationsV0()}.
+ * <li>{@link #readAssociationV0(TypedXmlPullParser, int, int, Collection) readAssociationV0()}.
+ * </ul>
  *
- * The following snippet is a sample of a the file that is using v0 schema.
+ * The following snippet is a sample of a file that is using v0 schema.
  * <pre>{@code
  * <associations>
  *   <association
@@ -87,24 +97,28 @@ import java.util.concurrent.ConcurrentMap;
  * </associations>
  * }</pre>
  *
+ * <p>
+ * Since Android T the data is stored to "companion_device_manager.xml" file in
+ * {@link Environment#getDataSystemDeDirectory(int) /data/system_de/}.
  *
- * Since Android T the data is stored to `companion_device_manager.xml` file in
- * {@link Environment#getDataSystemDeDirectory(int)}.
- * (eg. `/data/system_de/0/companion_device_manager.xml`)
- * @see #getBaseStorageFileForUser(int)
-
+ * See {@link #getBaseStorageFileForUser(int) getBaseStorageFileForUser()}
+ *
+ * <p>
  * Since Android T the data is stored using the v1 schema.
- * In the v1 schema, a list of the previously used IDs is storead along with the association
+ *
+ * In the v1 schema, a list of the previously used IDs is stored along with the association
  * records.
- * V1 schema adds a new optional `display_name` attribute, and makes the `mac_address` attribute
+ *
+ * V1 schema adds a new optional "display_name" attribute, and makes the "mac_address" attribute
  * optional.
+ * <ul>
+ * <li> {@link #CURRENT_PERSISTENCE_VERSION}
+ * <li> {@link #readAssociationsV1(TypedXmlPullParser, int, Collection) readAssociationsV1()}
+ * <li> {@link #readAssociationV1(TypedXmlPullParser, int, Collection) readAssociationV1()}
+ * <li> {@link #readPreviouslyUsedIdsV1(TypedXmlPullParser, Map) readPreviouslyUsedIdsV1()}
+ * </ul>
  *
- * @see #CURRENT_PERSISTENCE_VERSION
- * @see #readAssociationsV1(TypedXmlPullParser, int, Set)
- * @see #readAssociationV1(TypedXmlPullParser, int, Set)
- * @see #readPreviouslyUsedIdsV1(TypedXmlPullParser, Map)
- *
- * The following snippet is a sample of a the file that is using v0 schema.
+ * The following snippet is a sample of a file that is using v0 schema.
  * <pre>{@code
  * <state persistence-version="1">
  *     <associations>
@@ -134,8 +148,9 @@ import java.util.concurrent.ConcurrentMap;
  * </state>
  * }</pre>
  */
+@SuppressLint("LongLogTag")
 final class PersistentDataStore {
-    private static final String LOG_TAG = CompanionDeviceManagerService.LOG_TAG + ".DataStore";
+    private static final String TAG = "CompanionDevice_PersistentDataStore";
     private static final boolean DEBUG = CompanionDeviceManagerService.DEBUG;
 
     private static final int CURRENT_PERSISTENCE_VERSION = 1;
@@ -162,11 +177,29 @@ final class PersistentDataStore {
     private static final String XML_ATTR_SELF_MANAGED = "self_managed";
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
+    private static final String XML_ATTR_LAST_TIME_CONNECTED = "last_time_connected";
 
     private static final String LEGACY_XML_ATTR_DEVICE = "device";
 
     private final @NonNull ConcurrentMap<Integer, AtomicFile> mUserIdToStorageFile =
             new ConcurrentHashMap<>();
+
+    void readStateForUsers(@NonNull List<UserInfo> users,
+            @NonNull Set<AssociationInfo> allAssociationsOut,
+            @NonNull SparseArray<Map<String, Set<Integer>>> previouslyUsedIdsPerUserOut) {
+        for (UserInfo user : users) {
+            final int userId = user.id;
+            // Previously used IDs are stored in the "out" collection per-user.
+            final Map<String, Set<Integer>> previouslyUsedIds = new ArrayMap<>();
+
+            // Associations for all users are stored in a single "flat" set: so we read directly
+            // into it.
+            readStateForUser(userId, allAssociationsOut, previouslyUsedIds);
+
+            // Save previously used IDs for this user into the "out" structure.
+            previouslyUsedIdsPerUserOut.append(userId, previouslyUsedIds);
+        }
+    }
 
     /**
      * Reads previously persisted data for the given user "into" the provided containers.
@@ -176,23 +209,25 @@ final class PersistentDataStore {
      * @param previouslyUsedIdsPerPackageOut a container to read the used IDs "into".
      */
     void readStateForUser(@UserIdInt int userId,
-            @NonNull Set<AssociationInfo> associationsOut,
+            @NonNull Collection<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
-        Slog.i(LOG_TAG, "Reading associations for user " + userId + " from disk");
+        Slog.i(TAG, "Reading associations for user " + userId + " from disk");
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Slog.d(LOG_TAG, "  > File=" + file.getBaseFile().getPath());
+        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
 
+        // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
+        // accesses to the file on the file system using this AtomicFile object.
         synchronized (file) {
             File legacyBaseFile = null;
             final AtomicFile readFrom;
             final String rootTag;
             if (!file.getBaseFile().exists()) {
-                if (DEBUG) Slog.d(LOG_TAG, "  > File does not exist -> Try to read legacy file");
+                if (DEBUG) Log.d(TAG, "  > File does not exist -> Try to read legacy file");
 
                 legacyBaseFile = getBaseLegacyStorageFileForUser(userId);
-                if (DEBUG) Slog.d(LOG_TAG, "  > Legacy file=" + legacyBaseFile.getPath());
+                if (DEBUG) Log.d(TAG, "  > Legacy file=" + legacyBaseFile.getPath());
                 if (!legacyBaseFile.exists()) {
-                    if (DEBUG) Slog.d(LOG_TAG, "  > Legacy file does not exist -> Abort");
+                    if (DEBUG) Log.d(TAG, "  > Legacy file does not exist -> Abort");
                     return;
                 }
 
@@ -203,13 +238,13 @@ final class PersistentDataStore {
                 rootTag = XML_TAG_STATE;
             }
 
-            if (DEBUG) Slog.d(LOG_TAG, "  > Reading associations...");
+            if (DEBUG) Log.d(TAG, "  > Reading associations...");
             final int version = readStateFromFileLocked(userId, readFrom, rootTag,
                     associationsOut, previouslyUsedIdsPerPackageOut);
             if (DEBUG) {
-                Slog.d(LOG_TAG, "  > Done reading: " + associationsOut);
+                Log.d(TAG, "  > Done reading: " + associationsOut);
                 if (version < CURRENT_PERSISTENCE_VERSION) {
-                    Slog.d(LOG_TAG, "  > File used old format: v." + version + " -> Re-write");
+                    Log.d(TAG, "  > File used old format: v." + version + " -> Re-write");
                 }
             }
 
@@ -217,13 +252,13 @@ final class PersistentDataStore {
                 // The data is either in the legacy file or in the legacy format, or both.
                 // Save the data to right file in using the current format.
                 if (DEBUG) {
-                    Slog.d(LOG_TAG, "  > Writing the data to " + file.getBaseFile().getPath());
+                    Log.d(TAG, "  > Writing the data to " + file.getBaseFile().getPath());
                 }
                 persistStateToFileLocked(file, associationsOut, previouslyUsedIdsPerPackageOut);
 
                 if (legacyBaseFile != null) {
                     // We saved the data to the right file, can delete the old file now.
-                    if (DEBUG) Slog.d(LOG_TAG, "  > Deleting legacy file");
+                    if (DEBUG) Log.d(TAG, "  > Deleting legacy file");
                     legacyBaseFile.delete();
                 }
             }
@@ -237,20 +272,23 @@ final class PersistentDataStore {
      * @param associations a set of user's associations.
      * @param previouslyUsedIdsPerPackage a set previously used Association IDs for the user.
      */
-    void persistStateForUser(@UserIdInt int userId, @NonNull Set<AssociationInfo> associations,
+    void persistStateForUser(@UserIdInt int userId,
+            @NonNull Collection<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
-        Slog.i(LOG_TAG, "Writing associations for user " + userId + " to disk");
-        if (DEBUG) Slog.d(LOG_TAG, "  > " + associations);
+        Slog.i(TAG, "Writing associations for user " + userId + " to disk");
+        if (DEBUG) Slog.d(TAG, "  > " + associations);
 
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Slog.d(LOG_TAG, "  > File=" + file.getBaseFile().getPath());
+        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
+        // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
+        // accesses to the file on the file system using this AtomicFile object.
         synchronized (file) {
             persistStateToFileLocked(file, associations, previouslyUsedIdsPerPackage);
         }
     }
 
     private int readStateFromFileLocked(@UserIdInt int userId, @NonNull AtomicFile file,
-            @NonNull String rootTag, @Nullable Set<AssociationInfo> associationsOut,
+            @NonNull String rootTag, @Nullable Collection<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         try (FileInputStream in = file.openRead()) {
             final TypedXmlPullParser parser = Xml.resolvePullParser(in);
@@ -276,44 +314,44 @@ final class PersistentDataStore {
             }
             return version;
         } catch (XmlPullParserException | IOException e) {
-            Slog.e(LOG_TAG, "Error while reading associations file", e);
+            Slog.e(TAG, "Error while reading associations file", e);
             return -1;
         }
     }
 
     private void persistStateToFileLocked(@NonNull AtomicFile file,
-            @Nullable Set<AssociationInfo> associations,
+            @Nullable Collection<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
-        file.write(out -> {
-            try {
-                final TypedXmlSerializer serializer = Xml.resolveSerializer(out);
-                serializer.setFeature(
-                        "http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        // Writing to file could fail, for example, if the user has been recently removed and so was
+        // their DE (/data/system_de/<user-id>/) directory.
+        writeToFileSafely(file, out -> {
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(out);
+            serializer.setFeature(
+                    "http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
-                serializer.startDocument(null, true);
-                serializer.startTag(null, XML_TAG_STATE);
-                writeIntAttribute(serializer,
-                        XML_ATTR_PERSISTENCE_VERSION, CURRENT_PERSISTENCE_VERSION);
+            serializer.startDocument(null, true);
+            serializer.startTag(null, XML_TAG_STATE);
+            writeIntAttribute(serializer,
+                    XML_ATTR_PERSISTENCE_VERSION, CURRENT_PERSISTENCE_VERSION);
 
-                writeAssociations(serializer, associations);
-                writePreviouslyUsedIds(serializer, previouslyUsedIdsPerPackage);
+            writeAssociations(serializer, associations);
+            writePreviouslyUsedIds(serializer, previouslyUsedIdsPerPackage);
 
-                serializer.endTag(null, XML_TAG_STATE);
-                serializer.endDocument();
-            } catch (Exception e) {
-                Slog.e(LOG_TAG, "Error while writing associations file", e);
-                throw ExceptionUtils.propagate(e);
-            }
+            serializer.endTag(null, XML_TAG_STATE);
+            serializer.endDocument();
         });
     }
 
+    /**
+     * Creates and caches {@link AtomicFile} object that represents the back-up file for the given
+     * user.
+     *
+     * IMPORTANT: the method will ALWAYS return the same {@link AtomicFile} object, which makes it
+     * possible to synchronize reads and writes to the file using the returned object.
+     */
     private @NonNull AtomicFile getStorageFileForUser(@UserIdInt int userId) {
         return mUserIdToStorageFile.computeIfAbsent(userId,
-                u -> new AtomicFile(getBaseStorageFileForUser(userId)));
-    }
-
-    private static @NonNull File getBaseStorageFileForUser(@UserIdInt int userId) {
-        return new File(Environment.getDataSystemDeDirectory(userId), FILE_NAME);
+                u -> createStorageFileForUser(userId, FILE_NAME));
     }
 
     private static @NonNull File getBaseLegacyStorageFileForUser(@UserIdInt int userId) {
@@ -321,7 +359,7 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationsV0(@NonNull TypedXmlPullParser parser,
-            @UserIdInt int userId, @NonNull Set<AssociationInfo> out)
+            @UserIdInt int userId, @NonNull Collection<AssociationInfo> out)
             throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATIONS);
 
@@ -342,7 +380,8 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationV0(@NonNull TypedXmlPullParser parser, @UserIdInt int userId,
-            int associationId, @NonNull Set<AssociationInfo> out) throws XmlPullParserException {
+            int associationId, @NonNull Collection<AssociationInfo> out)
+            throws XmlPullParserException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
@@ -356,11 +395,11 @@ final class PersistentDataStore {
 
         out.add(new AssociationInfo(associationId, userId, appPackage,
                 MacAddress.fromString(deviceAddress), null, profile,
-                /* managedByCompanionApp */false, notify, timeApproved));
+                /* managedByCompanionApp */false, notify, timeApproved, Long.MAX_VALUE));
     }
 
     private static void readAssociationsV1(@NonNull TypedXmlPullParser parser,
-            @UserIdInt int userId, @NonNull Set<AssociationInfo> out)
+            @UserIdInt int userId, @NonNull Collection<AssociationInfo> out)
             throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATIONS);
 
@@ -374,7 +413,7 @@ final class PersistentDataStore {
     }
 
     private static void readAssociationV1(@NonNull TypedXmlPullParser parser, @UserIdInt int userId,
-            @NonNull Set<AssociationInfo> out) throws XmlPullParserException, IOException {
+            @NonNull Collection<AssociationInfo> out) throws XmlPullParserException, IOException {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final int associationId = readIntAttribute(parser, XML_ATTR_ID);
@@ -386,9 +425,12 @@ final class PersistentDataStore {
         final boolean selfManaged = readBooleanAttribute(parser, XML_ATTR_SELF_MANAGED);
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
+        final long lastTimeConnected = readLongAttribute(
+                parser, XML_ATTR_LAST_TIME_CONNECTED, Long.MAX_VALUE);
 
         final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
-                appPackage, macAddress, displayName, profile, selfManaged, notify, timeApproved);
+                appPackage, macAddress, displayName, profile, selfManaged, notify, timeApproved,
+                lastTimeConnected);
         if (associationInfo != null) {
             out.add(associationInfo);
         }
@@ -421,9 +463,11 @@ final class PersistentDataStore {
     }
 
     private static void writeAssociations(@NonNull XmlSerializer parent,
-            @Nullable Set<AssociationInfo> associations) throws IOException {
+            @Nullable Collection<AssociationInfo> associations) throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATIONS);
-        forEach(associations, it -> writeAssociation(serializer, it));
+        for (AssociationInfo association : associations) {
+            writeAssociation(serializer, association);
+        }
         serializer.endTag(null, XML_TAG_ASSOCIATIONS);
     }
 
@@ -440,6 +484,8 @@ final class PersistentDataStore {
         writeBooleanAttribute(
                 serializer, XML_ATTR_NOTIFY_DEVICE_NEARBY, a.isNotifyOnDeviceNearby());
         writeLongAttribute(serializer, XML_ATTR_TIME_APPROVED, a.getTimeApprovedMs());
+        writeLongAttribute(
+                serializer, XML_ATTR_LAST_TIME_CONNECTED, a.getLastTimeConnectedMs());
 
         serializer.endTag(null, XML_TAG_ASSOCIATION);
     }
@@ -464,16 +510,6 @@ final class PersistentDataStore {
         serializer.endTag(null, XML_TAG_PACKAGE);
     }
 
-    private static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
-            throws XmlPullParserException {
-        return parser.getEventType() == START_TAG && tag.equals(parser.getName());
-    }
-
-    private static boolean isEndOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
-            throws XmlPullParserException {
-        return parser.getEventType() == END_TAG && tag.equals(parser.getName());
-    }
-
     private static void requireStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
             throws XmlPullParserException {
         if (isStartOfTag(parser, tag)) return;
@@ -488,13 +524,13 @@ final class PersistentDataStore {
     private static AssociationInfo createAssociationInfoNoThrow(int associationId,
             @UserIdInt int userId, @NonNull String appPackage, @Nullable MacAddress macAddress,
             @Nullable CharSequence displayName, @Nullable String profile, boolean selfManaged,
-            boolean notify, long timeApproved) {
+            boolean notify, long timeApproved, long lastTimeConnected) {
         AssociationInfo associationInfo = null;
         try {
             associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
-                    displayName, profile, selfManaged, notify, timeApproved);
+                    displayName, profile, selfManaged, notify, timeApproved, lastTimeConnected);
         } catch (Exception e) {
-            if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
+            if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
         }
         return associationInfo;
     }

@@ -28,6 +28,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -75,7 +76,7 @@ public class StatusBarStateControllerImpl implements
     // Must be a power of 2
     private static final int HISTORY_SIZE = 32;
 
-    private static final int MAX_STATE = StatusBarState.FULLSCREEN_USER_SWITCHER;
+    private static final int MAX_STATE = StatusBarState.SHADE_LOCKED;
     private static final int MIN_STATE = StatusBarState.SHADE;
 
     private static final Comparator<RankedListener> sComparator =
@@ -193,6 +194,7 @@ public class StatusBarStateControllerImpl implements
             mState = state;
             mUpcomingState = state;
             mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
+            Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", "StatusBarState " + tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStateChanged(mState);
             }
@@ -334,6 +336,9 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void setDozeAmountInternal(float dozeAmount) {
+        if (Float.compare(dozeAmount, mDozeAmount) == 0) {
+            return;
+        }
         mDozeAmount = dozeAmount;
         float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
         synchronized (mListeners) {
@@ -516,6 +521,7 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void recordHistoricalState(int newState, int lastState, boolean upcoming) {
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "statusBarState", newState);
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
         HistoricalState state = mHistoricalRecords[mHistoryIndex];
         state.mNewState = newState;

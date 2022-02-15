@@ -40,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 /**
@@ -305,6 +306,27 @@ public class PackageConfigPersister {
             }
             return new ActivityTaskManagerInternal.PackageConfig(
                     packageConfigRecord.mNightMode, packageConfigRecord.mLocales);
+        }
+    }
+
+    /**
+     * Dumps app-specific configurations for all packages for which the records
+     * exist.
+     */
+    void dump(PrintWriter pw, int userId) {
+        pw.println("INSTALLED PACKAGES HAVING APP-SPECIFIC CONFIGURATIONS");
+        pw.println("Current user ID : " + userId);
+        synchronized (mLock) {
+            HashMap<String, PackageConfigRecord> persistedPackageConfigMap = mModified.get(userId);
+            if (persistedPackageConfigMap != null) {
+                for (PackageConfigPersister.PackageConfigRecord packageConfig
+                        : persistedPackageConfigMap.values()) {
+                    pw.println();
+                    pw.println("    PackageName : " + packageConfig.mName);
+                    pw.println("        NightMode : " + packageConfig.mNightMode);
+                    pw.println("        Locales : " + packageConfig.mLocales);
+                }
+            }
         }
     }
 

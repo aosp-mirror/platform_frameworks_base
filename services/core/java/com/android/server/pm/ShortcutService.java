@@ -41,7 +41,6 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
-import android.content.pm.AppSearchShortcutInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
@@ -153,6 +152,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * TODO:
@@ -488,7 +488,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false);
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true);
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -735,8 +735,11 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "unloadUserLocked: user=" + userId);
         }
+        // Cancel any ongoing background tasks.
+        getUserShortcutsLocked(userId).cancelAllInFlightTasks();
+
         // Save all dirty information.
-        saveDirtyInfo();
+        saveDirtyInfo(false);
 
         // Unload
         mUsers.delete(userId);
@@ -1191,6 +1194,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void saveDirtyInfo() {
+        saveDirtyInfo(true);
+    }
+
+    private void saveDirtyInfo(boolean saveShortcutsInAppSearch) {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "saveDirtyInfo");
         }
@@ -1205,6 +1212,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
                         saveBaseStateLocked();
                     } else {
+                        if (saveShortcutsInAppSearch) {
+                            getUserShortcutsLocked(userId).forAllPackages(
+                                    ShortcutPackage::persistsAllShortcutsAsync);
+                        }
                         saveUserLocked(userId);
                     }
                 }
@@ -2804,28 +2815,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    private String createQuery(final boolean matchDynamic, final boolean matchPinned,
-            final boolean matchManifest, final boolean matchCached) {
-
-        final List<String> queries = new ArrayList<>(1);
-        if (matchDynamic) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_DYNAMIC);
-        }
-        if (matchPinned) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_PINNED);
-        }
-        if (matchManifest) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_MANIFEST);
-        }
-        if (matchCached) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_CACHED);
-        }
-        if (queries.isEmpty()) {
-            return "";
-        }
-        return "(" + String.join(" OR ", queries) + ")";
-    }
-
     /**
      * Remove all the information associated with a package.  This will really remove all the
      * information, including the restore information (i.e. it'll remove packages even if they're
@@ -2957,13 +2946,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             final Predicate<ShortcutInfo> filter = getFilterFromQuery(ids, locusIds, changedSince,
                     componentName, queryFlags, getPinnedByAnyLauncher);
-            if (ids != null && !ids.isEmpty()) {
-                p.findAllByIds(ret, ids, filter, cloneFlag, callingPackage, launcherUserId,
+            p.findAll(ret, filter, cloneFlag, callingPackage, launcherUserId,
                         getPinnedByAnyLauncher);
-            } else {
-                p.findAll(ret, filter, cloneFlag, callingPackage, launcherUserId,
-                        getPinnedByAnyLauncher);
-            }
         }
 
         private Predicate<ShortcutInfo> getFilterFromQuery(@Nullable ArraySet<String> ids,
@@ -3010,6 +2994,51 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public void getShortcutsAsync(int launcherUserId,
+                @NonNull String callingPackage, long changedSince,
+                @Nullable String packageName, @Nullable List<String> shortcutIds,
+                @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
+                int queryFlags, int userId, int callingPid, int callingUid,
+                @NonNull AndroidFuture<List<ShortcutInfo>> cb) {
+            final List<ShortcutInfo> ret = getShortcuts(launcherUserId, callingPackage,
+                    changedSince, packageName, shortcutIds, locusIds, componentName, queryFlags,
+                    userId, callingPid, callingUid);
+            if (shortcutIds == null || packageName == null || ret.size() >= shortcutIds.size()) {
+                // skip persistence layer if not querying by id in a specific package or all
+                // shortcuts have already been found.
+                cb.complete(ret);
+                return;
+            }
+            final ShortcutPackage p;
+            synchronized (mLock) {
+                p = getUserShortcutsLocked(userId).getPackageShortcutsIfExists(packageName);
+            }
+            if (p == null) {
+                cb.complete(ret);
+                return; // Bail-out directly if package doesn't exist.
+            }
+            // fetch remaining shortcuts from persistence layer
+            final ArraySet<String> ids = new ArraySet<>(shortcutIds);
+            // remove the ids that are already fetched
+            ret.stream().map(ShortcutInfo::getId).collect(Collectors.toList()).forEach(ids::remove);
+
+            int flags = ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER;
+            if ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0) {
+                flags = ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO;
+            } else if ((queryFlags & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
+                flags &= ~ShortcutInfo.CLONE_REMOVE_PERSON;
+            }
+            final int cloneFlag = flags;
+
+            p.getShortcutByIdsAsync(ids, shortcuts -> {
+                if (shortcuts != null) {
+                    shortcuts.stream().map(si -> si.clone(cloneFlag)).forEach(ret::add);
+                }
+                cb.complete(ret);
+            });
+        }
+
+        @Override
         public boolean isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
@@ -3047,10 +3076,30 @@ public class ShortcutService extends IShortcutService.Stub {
             }
 
             final ArrayList<ShortcutInfo> list = new ArrayList<>(1);
-            p.findAllByIds(list, Collections.singletonList(shortcutId),
-                    (ShortcutInfo si) -> shortcutId.equals(si.getId()),
+            p.findAll(list, (ShortcutInfo si) -> shortcutId.equals(si.getId()),
                     /* clone flags=*/ 0, callingPackage, launcherUserId, getPinnedByAnyLauncher);
             return list.size() == 0 ? null : list.get(0);
+        }
+
+        private void getShortcutInfoAsync(
+                int launcherUserId, @NonNull String packageName, @NonNull String shortcutId,
+                int userId, @NonNull Consumer<ShortcutInfo> cb) {
+            Preconditions.checkStringNotEmpty(packageName, "packageName");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
+
+            throwIfUserLockedL(userId);
+            throwIfUserLockedL(launcherUserId);
+
+            final ShortcutPackage p;
+            synchronized (mLock) {
+                p = getUserShortcutsLocked(userId).getPackageShortcutsIfExists(packageName);
+            }
+            if (p == null) {
+                cb.accept(null);
+                return;
+            }
+            p.getShortcutByIdsAsync(Collections.singleton(shortcutId), shortcuts ->
+                    cb.accept(shortcuts == null || shortcuts.isEmpty() ? null : shortcuts.get(0)));
         }
 
         @Override
@@ -3237,6 +3286,48 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public void createShortcutIntentsAsync(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull String shortcutId, int userId, int callingPid,
+                int callingUid, @NonNull AndroidFuture<Intent[]> cb) {
+            // Calling permission must be checked by LauncherAppsImpl.
+            Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
+            Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
+
+            // Check in memory shortcut first
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
+                        .attemptToRestoreIfNeededAndSave();
+
+                final boolean getPinnedByAnyLauncher =
+                        canSeeAnyPinnedShortcut(callingPackage, launcherUserId,
+                                callingPid, callingUid);
+
+                // Make sure the shortcut is actually visible to the launcher.
+                final ShortcutInfo si = getShortcutInfoLocked(
+                        launcherUserId, callingPackage, packageName, shortcutId, userId,
+                        getPinnedByAnyLauncher);
+                if (si != null) {
+                    if (!si.isEnabled() || !(si.isAlive() || getPinnedByAnyLauncher)) {
+                        Log.e(TAG, "Shortcut " + shortcutId + " does not exist or disabled");
+                        cb.complete(null);
+                        return;
+                    }
+                    cb.complete(si.getIntents());
+                    return;
+                }
+            }
+
+            // Otherwise check persisted shortcuts
+            getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
+                cb.complete(si == null ? null : si.getIntents());
+            });
+        }
+
+        @Override
         public void addListener(@NonNull ShortcutChangeListener listener) {
             synchronized (mLock) {
                 mListeners.add(Objects.requireNonNull(listener));
@@ -3326,22 +3417,67 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
 
                 final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
-                if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
+                if (shortcutInfo == null) {
                     return null;
                 }
-                final String path = mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcutInfo);
-                if (path == null) {
-                    Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
-                    return null;
+                return getShortcutIconParcelFileDescriptor(shortcutInfo);
+            }
+        }
+
+        @Override
+        public void getShortcutIconFdAsync(int launcherUserId, @NonNull String callingPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId,
+                @NonNull AndroidFuture<ParcelFileDescriptor> cb) {
+            Objects.requireNonNull(callingPackage, "callingPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
+
+            // Checks shortcuts in memory first
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
+                        .attemptToRestoreIfNeededAndSave();
+
+                final ShortcutPackage p = getUserShortcutsLocked(userId)
+                        .getPackageShortcutsIfExists(packageName);
+                if (p == null) {
+                    cb.complete(null);
+                    return;
                 }
-                try {
-                    return ParcelFileDescriptor.open(
-                            new File(path),
-                            ParcelFileDescriptor.MODE_READ_ONLY);
-                } catch (FileNotFoundException e) {
-                    Slog.e(TAG, "Icon file not found: " + path);
-                    return null;
+
+                final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
+                if (shortcutInfo != null) {
+                    cb.complete(getShortcutIconParcelFileDescriptor(shortcutInfo));
+                    return;
                 }
+            }
+
+            // Otherwise check persisted shortcuts
+            getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
+                cb.complete(getShortcutIconParcelFileDescriptor(si));
+            });
+        }
+
+        @Nullable
+        private ParcelFileDescriptor getShortcutIconParcelFileDescriptor(
+                @Nullable final ShortcutInfo shortcutInfo) {
+            if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
+                return null;
+            }
+            final String path = mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcutInfo);
+            if (path == null) {
+                Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
+                return null;
+            }
+            try {
+                return ParcelFileDescriptor.open(
+                        new File(path),
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+            } catch (FileNotFoundException e) {
+                Slog.e(TAG, "Icon file not found: " + path);
+                return null;
             }
         }
 
@@ -3366,34 +3502,82 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
 
                 final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
-                if (shortcutInfo == null || !shortcutInfo.hasIconUri()) {
+                if (shortcutInfo == null) {
                     return null;
                 }
-                String uri = shortcutInfo.getIconUri();
-                if (uri == null) {
-                    Slog.w(TAG, "null uri detected in getShortcutIconUri()");
-                    return null;
+                return getShortcutIconUriInternal(launcherUserId, launcherPackage,
+                        packageName, shortcutInfo, userId);
+            }
+        }
+
+        @Override
+        public void getShortcutIconUriAsync(int launcherUserId, @NonNull String launcherPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId,
+                @NonNull AndroidFuture<String> cb) {
+            Objects.requireNonNull(launcherPackage, "launcherPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
+
+            // Checks shortcuts in memory first
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                getLauncherShortcutsLocked(launcherPackage, userId, launcherUserId)
+                        .attemptToRestoreIfNeededAndSave();
+
+                final ShortcutPackage p = getUserShortcutsLocked(userId)
+                        .getPackageShortcutsIfExists(packageName);
+                if (p == null) {
+                    cb.complete(null);
+                    return;
                 }
 
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    int packageUid = mPackageManagerInternal.getPackageUid(packageName,
-                            PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
-                    // Grant read uri permission to the caller on behalf of the shortcut owner. All
-                    // granted permissions are revoked when the default launcher changes, or when
-                    // device is rebooted.
-                    mUriGrantsManager.grantUriPermissionFromOwner(mUriPermissionOwner, packageUid,
-                            launcherPackage, Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                            userId, launcherUserId);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Failed to grant uri access to " + launcherPackage + " for " + uri,
-                            e);
-                    uri = null;
-                } finally {
-                    Binder.restoreCallingIdentity(token);
+                final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
+                if (shortcutInfo != null) {
+                    cb.complete(getShortcutIconUriInternal(launcherUserId, launcherPackage,
+                            packageName, shortcutInfo, userId));
+                    return;
                 }
-                return uri;
             }
+
+            // Otherwise check persisted shortcuts
+            getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
+                cb.complete(getShortcutIconUriInternal(launcherUserId, launcherPackage,
+                        packageName, si, userId));
+            });
+        }
+
+        private String getShortcutIconUriInternal(int launcherUserId,
+                @NonNull String launcherPackage, @NonNull String packageName,
+                @NonNull ShortcutInfo shortcutInfo, int userId) {
+            if (!shortcutInfo.hasIconUri()) {
+                return null;
+            }
+            String uri = shortcutInfo.getIconUri();
+            if (uri == null) {
+                Slog.w(TAG, "null uri detected in getShortcutIconUri()");
+                return null;
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                int packageUid = mPackageManagerInternal.getPackageUid(packageName,
+                        PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
+                // Grant read uri permission to the caller on behalf of the shortcut owner. All
+                // granted permissions are revoked when the default launcher changes, or when
+                // device is rebooted.
+                mUriGrantsManager.grantUriPermissionFromOwner(mUriPermissionOwner, packageUid,
+                        launcherPackage, Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        userId, launcherUserId);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to grant uri access to " + launcherPackage + " for " + uri,
+                        e);
+                uri = null;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return uri;
         }
 
         @Override
@@ -3546,13 +3730,17 @@ public class ShortcutService extends IShortcutService.Stub {
     private final BroadcastReceiver mShutdownReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG || DEBUG_REBOOT) {
+                Slog.d(TAG, "Shutdown broadcast received.");
+            }
             // Since it cleans up the shortcut directory and rewrite the ShortcutPackageItems
             // in odrder during saveToXml(), it could lead to shortcuts missing when shutdown.
             // We need it so that it can finish up saving before shutdown.
             synchronized (mLock) {
                 if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
                     mHandler.removeCallbacks(mSaveDirtyInfoRunner);
-                    saveDirtyInfo();
+                    forEachLoadedUserLocked(ShortcutUser::cancelAllInFlightTasks);
+                    saveDirtyInfo(false);
                 }
                 mShutdown.set(true);
             }
@@ -4221,7 +4409,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Save to the filesystem.
             scheduleSaveUser(userId);
-            saveDirtyInfo();
+            saveDirtyInfo(false);
 
             // Note, in case of backup, we don't have to wait on bitmap saving, because we don't
             // back up bitmaps anyway.
@@ -5154,7 +5342,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         List<ShortcutInfo> result = new ArrayList<>();
-        ps.findAllByIds(result, resultIds, (ShortcutInfo si) -> resultIds.contains(si.getId()),
+        ps.findAll(result, (ShortcutInfo si) -> resultIds.contains(si.getId()),
                 ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
         return result;
     }

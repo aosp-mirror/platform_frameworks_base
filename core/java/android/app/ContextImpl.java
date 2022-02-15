@@ -113,6 +113,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -310,6 +311,14 @@ class ContextImpl extends Context {
 
     @ContextType
     private int mContextType;
+
+    /**
+     * {@code true} to indicate that the {@link Context} owns the {@link #getWindowContextToken()}
+     * and is responsible for detaching the token when the Context is released.
+     *
+     * @see #finalize()
+     */
+    private boolean mOwnsToken = false;
 
     @GuardedBy("mSync")
     private File mDatabasesDir;
@@ -1272,12 +1281,22 @@ class ContextImpl extends Context {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
+        String[] excludedPermissions = null;
+        if (options != null) {
+            String[] receiverPermissionsBundle = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_ALL_OF_PERMISSIONS);
+            if (receiverPermissionsBundle != null) {
+                receiverPermissions = receiverPermissionsBundle;
+            }
+            excludedPermissions = options.getStringArray(
+                    BroadcastOptions.KEY_REQUIRE_NONE_OF_PERMISSIONS);
+        }
         try {
             intent.prepareToLeaveProcess(this);
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions,
-                    null /*excludedPermissions=*/, AppOpsManager.OP_NONE, options, false, false,
+                    excludedPermissions, AppOpsManager.OP_NONE, options, false, false,
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1978,7 +1997,8 @@ class ContextImpl extends Context {
 
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             String instanceName, Handler handler, Executor executor, UserHandle user) {
-        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
+        // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser and
+        // ActivityManagerLocal.bindSupplementalProcessService
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
@@ -2004,10 +2024,10 @@ class ContextImpl extends Context {
                 flags |= BIND_WAIVE_PRIORITY;
             }
             service.prepareToLeaveProcess(this);
-            int res = ActivityManager.getService().bindIsolatedService(
-                mMainThread.getApplicationThread(), getActivityToken(), service,
-                service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
+            int res = ActivityManager.getService().bindServiceInstance(
+                    mMainThread.getApplicationThread(), getActivityToken(), service,
+                    service.resolveTypeIfNeeded(getContentResolver()),
+                    sd, flags, instanceName, getOpPackageName(), user.getIdentifier());
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);
@@ -2157,6 +2177,11 @@ class ContextImpl extends Context {
             return PERMISSION_DENIED;
         }
         return checkPermission(permission, pid, uid);
+    }
+
+    @Override
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionManager.class).revokeOwnPermissionsOnKill(permissions);
     }
 
     @Override
@@ -2875,6 +2900,14 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getAssociatedDisplayId()  {
+        return isAssociatedWithDisplay() ? getDisplayId() : Display.INVALID_DISPLAY;
+    }
+
     @Override
     public Display getDisplayNoVerify() {
         if (mDisplay == null) {
@@ -2999,7 +3032,7 @@ class ContextImpl extends Context {
         // WindowContainer. We should detach from WindowContainer when the Context is finalized
         // if this Context is not a WindowContext. WindowContext finalization is handled in
         // WindowContext class.
-        if (mToken instanceof WindowTokenClient && mContextType != CONTEXT_TYPE_WINDOW_CONTEXT) {
+        if (mToken instanceof WindowTokenClient && mOwnsToken) {
             ((WindowTokenClient) mToken).detachFromWindowContainerIfNeeded();
         }
         super.finalize();
@@ -3030,6 +3063,7 @@ class ContextImpl extends Context {
         token.attachContext(context);
         token.attachToDisplayContent(displayId);
         context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
+        context.mOwnsToken = true;
 
         return context;
     }

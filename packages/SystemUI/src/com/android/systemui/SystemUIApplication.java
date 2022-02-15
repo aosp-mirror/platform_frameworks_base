@@ -32,6 +32,9 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.Dumpable;
+import android.util.DumpableContainer;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
@@ -46,20 +49,29 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.inject.Provider;
 
 /**
  * Application class for SystemUI.
  */
 public class SystemUIApplication extends Application implements
-        SystemUIAppComponentFactory.ContextInitializer {
+        SystemUIAppComponentFactory.ContextInitializer, DumpableContainer {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
 
     private ContextComponentHelper mComponentHelper;
     private BootCompleteCacheImpl mBootCompleteCache;
+    private DumpManager mDumpManager;
+
+    /**
+     * Map of dumpables added externally.
+     */
+    private final ArrayMap<String, Dumpable> mDumpables = new ArrayMap<>();
 
     /**
      * Hold a reference on the stuff we start.
@@ -172,17 +184,16 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        final String[] names = SystemUIFactory.getInstance()
-                .getSystemUIServiceComponents(getResources());
-        final String[] additionalNames = SystemUIFactory.getInstance()
-                .getAdditionalSystemUIServiceComponents(getResources());
+        final String vendorComponent = SystemUIFactory.getInstance()
+                .getVendorComponent(getResources());
 
-        final ArrayList<String> serviceComponents = new ArrayList<>();
-        Collections.addAll(serviceComponents, names);
-        Collections.addAll(serviceComponents, additionalNames);
-
-        startServicesIfNeeded(/* metricsPrefix= */ "StartServices",
-                serviceComponents.toArray(new String[serviceComponents.size()]));
+        // Sort the startables so that we get a deterministic ordering.
+        // TODO: make #start idempotent and require users of CoreStartable to call it.
+        Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
+                Comparator.comparing(Class::getName));
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
+        startServicesIfNeeded(
+                sortedStartables, "StartServices", vendorComponent);
     }
 
     /**
@@ -192,16 +203,22 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponentsPerUser(
-                getResources());
-        startServicesIfNeeded(/* metricsPrefix= */ "StartSecondaryServices", names);
+        // Sort the startables so that we get a deterministic ordering.
+        Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
+                Comparator.comparing(Class::getName));
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
+        startServicesIfNeeded(
+                sortedStartables, "StartSecondaryServices", null);
     }
 
-    private void startServicesIfNeeded(String metricsPrefix, String[] services) {
+    private void startServicesIfNeeded(
+            Map<Class<?>, Provider<CoreStartable>> startables,
+            String metricsPrefix,
+            String vendorComponent) {
         if (mServicesStarted) {
             return;
         }
-        mServices = new CoreStartable[services.length];
+        mServices = new CoreStartable[startables.size() + (vendorComponent == null ? 0 : 1)];
 
         if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
@@ -214,53 +231,121 @@ public class SystemUIApplication extends Application implements
             }
         }
 
-        final DumpManager dumpManager = mSysUIComponent.createDumpManager();
+        mDumpManager = mSysUIComponent.createDumpManager();
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
         log.traceBegin(metricsPrefix);
-        final int N = services.length;
-        for (int i = 0; i < N; i++) {
-            String clsName = services[i];
-            if (DEBUG) Log.d(TAG, "loading: " + clsName);
-            log.traceBegin(metricsPrefix + clsName);
-            long ti = System.currentTimeMillis();
-            try {
-                CoreStartable obj = mComponentHelper.resolveCoreStartable(clsName);
-                if (obj == null) {
-                    Constructor constructor = Class.forName(clsName).getConstructor(Context.class);
-                    obj = (CoreStartable) constructor.newInstance(this);
-                }
-                mServices[i] = obj;
-            } catch (ClassNotFoundException
-                    | NoSuchMethodException
-                    | IllegalAccessException
-                    | InstantiationException
-                    | InvocationTargetException ex) {
-                throw new RuntimeException(ex);
-            }
 
-            if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
-            mServices[i].start();
-            log.traceEnd();
+        int i = 0;
+        for (Map.Entry<Class<?>, Provider<CoreStartable>> entry : startables.entrySet()) {
+            String clsName = entry.getKey().getName();
+            int j = i;  // Copied to make lambda happy.
+            timeInitialization(
+                    clsName,
+                    () -> mServices[j] = startStartable(clsName, entry.getValue()),
+                    log,
+                    metricsPrefix);
+            i++;
+        }
 
-            // Warn if initialization of component takes too long
-            ti = System.currentTimeMillis() - ti;
-            if (ti > 1000) {
-                Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
-            }
+        if (vendorComponent != null) {
+            timeInitialization(
+                    vendorComponent,
+                    () -> mServices[mServices.length - 1] =
+                            startAdditionalStartable(vendorComponent),
+                    log,
+                    metricsPrefix);
+        }
+
+        for (i = 0; i < mServices.length; i++) {
             if (mBootCompleteCache.isBootComplete()) {
                 mServices[i].onBootCompleted();
             }
 
-            dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
+            mDumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
         }
         mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();
 
         mServicesStarted = true;
+    }
+
+    private void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
+            String metricsPrefix) {
+        long ti = System.currentTimeMillis();
+        log.traceBegin(metricsPrefix + " " + clsName);
+        init.run();
+        log.traceEnd();
+
+        // Warn if initialization of component takes too long
+        ti = System.currentTimeMillis() - ti;
+        if (ti > 1000) {
+            Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
+        }
+    }
+
+    private CoreStartable startAdditionalStartable(String clsName) {
+        CoreStartable startable;
+        if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        try {
+            Constructor<?> constructor = Class.forName(clsName).getConstructor(
+                    Context.class);
+            startable = (CoreStartable) constructor.newInstance(this);
+        } catch (ClassNotFoundException
+                | NoSuchMethodException
+                | IllegalAccessException
+                | InstantiationException
+                | InvocationTargetException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return startStartable(startable);
+    }
+
+    private CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
+        if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        return startStartable(provider.get());
+    }
+
+    private CoreStartable startStartable(CoreStartable startable) {
+        if (DEBUG) Log.d(TAG, "running: " + startable);
+        startable.start();
+
+        return startable;
+    }
+
+    // TODO(b/217567642): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
+    @Override
+    public boolean addDumpable(Dumpable dumpable) {
+        String name = dumpable.getDumpableName();
+        if (mDumpables.containsKey(name)) {
+            // This is normal because SystemUIApplication is an application context that is shared
+            // among multiple components
+            if (DEBUG) {
+                Log.d(TAG, "addDumpable(): ignoring " + dumpable + " as there is already a dumpable"
+                        + " with that name (" + name + "): " + mDumpables.get(name));
+            }
+            return false;
+        }
+        if (DEBUG) Log.d(TAG, "addDumpable(): adding '" + name + "' = " + dumpable);
+        mDumpables.put(name, dumpable);
+
+        // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
+        // com.android.util.Dumpable and get rid of the intermediate lambda
+        mDumpManager.registerDumpable(dumpable.getDumpableName(),
+                (fd, pw, args) -> dumpable.dump(pw, args));
+        return true;
+    }
+
+    // TODO(b/217567642): implement
+    @Override
+    public boolean removeDumpable(Dumpable dumpable) {
+        Log.w(TAG, "removeDumpable(" + dumpable + "): not implemented");
+
+        return false;
     }
 
     @Override

@@ -16,11 +16,14 @@
 
 package com.android.server;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_TITLE;
+
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -126,8 +129,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
     private boolean wipeUser(Context context, @UserIdInt int userId, String wipeReason) {
         final UserManager userManager = context.getSystemService(UserManager.class);
-        final int result = userManager.removeUserOrSetEphemeral(
-                userId, /* evenWhenDisallowed= */ false);
+        final int result = userManager.removeUserWhenPossible(
+                UserHandle.of(userId), /* overrideDevicePolicy= */ false);
         if (result == UserManager.REMOVE_RESULT_ERROR) {
             Slogf.e(TAG, "Can't remove user %d", userId);
             return false;
@@ -155,13 +158,19 @@ public class MasterClearReceiver extends BroadcastReceiver {
         final Notification notification =
                 new Notification.Builder(context, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
-                        .setContentTitle(context.getString(R.string.work_profile_deleted))
+                        .setContentTitle(getWorkProfileDeletedTitle(context))
                         .setContentText(wipeReason)
                         .setColor(context.getColor(R.color.system_notification_accent_color))
                         .setStyle(new Notification.BigTextStyle().bigText(wipeReason))
                         .build();
         context.getSystemService(NotificationManager.class).notify(
                 SystemMessageProto.SystemMessage.NOTE_PROFILE_WIPED, notification);
+    }
+
+    private String getWorkProfileDeletedTitle(Context context) {
+        final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getString(WORK_PROFILE_DELETED_TITLE,
+                () -> context.getString(R.string.work_profile_deleted));
     }
 
     private @UserIdInt int getCurrentForegroundUserId() {

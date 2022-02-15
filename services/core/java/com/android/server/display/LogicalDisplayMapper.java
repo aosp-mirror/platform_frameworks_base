@@ -397,12 +397,16 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 // We already told the displays to turn off, now we need to wake the device as
                 // we transition to this new state. We do it here so that the waking happens
                 // between the transition from one layout to another.
-                mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_UNFOLD_DEVICE, "server.display:unfold");
+                mHandler.post(() -> {
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                            PowerManager.WAKE_REASON_UNFOLD_DEVICE, "server.display:unfold");
+                });
             } else if (sleepDevice) {
                 // Send the device to sleep when required.
-                mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                        PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+                mHandler.post(() -> {
+                    mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+                });
             }
         }
 
@@ -821,7 +825,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      *
      * @param device The device to associate with the LogicalDisplay.
      * @param displayId The display ID to give the new display. If invalid, a new ID is assigned.
-     * @param isDefault Indicates if we are creating the default display.
      * @return The new logical display if created, null otherwise.
      */
     private LogicalDisplay createNewLogicalDisplayLocked(DisplayDevice device, int displayId) {

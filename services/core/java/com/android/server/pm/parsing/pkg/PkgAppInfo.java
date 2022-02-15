@@ -18,7 +18,7 @@ package com.android.server.pm.parsing.pkg;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.parsing.PkgWithoutStateAppInfo;
+import com.android.server.pm.pkg.parsing.PkgWithoutStateAppInfo;
 
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.pkg.PackageState;

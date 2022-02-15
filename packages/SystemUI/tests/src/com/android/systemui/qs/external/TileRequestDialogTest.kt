@@ -130,4 +130,37 @@ class TileRequestDialogTest : SysuiTestCase() {
         val tile = content.getChildAt(1) as QSTileView
         assertThat((tile.icon.iconView as ImageView).drawable).isNotNull()
     }
+
+    @Test
+    fun setTileData_hasNoStateDescription() {
+        val icon = Icon.createWithResource(mContext, R.drawable.cloud)
+        val tileData = TileRequestDialog.TileData(APP_NAME, LABEL, icon)
+
+        dialog.setTileData(tileData)
+        dialog.show()
+
+        TestableLooper.get(this).processAllMessages()
+
+        val content = dialog.requireViewById<ViewGroup>(TileRequestDialog.CONTENT_ID)
+        val tile = content.getChildAt(1) as QSTileView
+
+        assertThat(tile.stateDescription).isEqualTo("")
+    }
+
+    @Test
+    fun setTileData_tileNotClickable() {
+        val icon = Icon.createWithResource(mContext, R.drawable.cloud)
+        val tileData = TileRequestDialog.TileData(APP_NAME, LABEL, icon)
+
+        dialog.setTileData(tileData)
+        dialog.show()
+
+        TestableLooper.get(this).processAllMessages()
+
+        val content = dialog.requireViewById<ViewGroup>(TileRequestDialog.CONTENT_ID)
+        val tile = content.getChildAt(1) as QSTileView
+
+        assertThat(tile.isClickable).isFalse()
+        assertThat(tile.isLongClickable).isFalse()
+    }
 }

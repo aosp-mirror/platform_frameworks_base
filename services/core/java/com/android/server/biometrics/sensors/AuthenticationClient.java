@@ -29,7 +29,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -39,9 +38,12 @@ import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the authentication state for a given client.
@@ -89,32 +91,16 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     //  the state. We should think of a way to improve this in the future.
     protected @State int mState = STATE_NEW;
 
-    /**
-     * Handles lifecycle, e.g. {@link BiometricScheduler},
-     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
-     * results are known. Note that this happens asynchronously from (but shortly after)
-     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
-     * {@link CoexCoordinator} a chance to invoke/delay this event.
-     * @param authenticated
-     */
-    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
-
-    /**
-     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
-     *         etc)
-     */
-    public abstract boolean wasUserDetected();
-
-    public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
+            int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
             boolean shouldVibrate, boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                statsClient);
+                shouldVibrate, biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
@@ -180,8 +166,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
-        super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
-                getTargetUserId(), isBiometricPrompt());
+        getLogger().logOnAuthenticated(getContext(), getOperationContext(),
+                authenticated, mRequireConfirmation, getTargetUserId(), isBiometricPrompt());
 
         final ClientMonitorCallbackConverter listener = getListener();
 
@@ -440,7 +426,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
      * Start authentication
      */
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         final @LockoutTracker.LockoutMode int lockoutMode =
@@ -473,6 +459,22 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
     }
+
+    /**
+     * Handles lifecycle, e.g. {@link BiometricScheduler},
+     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
+     * results are known. Note that this happens asynchronously from (but shortly after)
+     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
+     * {@link CoexCoordinator} a chance to invoke/delay this event.
+     * @param authenticated
+     */
+    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
+
+    /**
+     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
+     *         etc)
+     */
+    public abstract boolean wasUserDetected();
 
     public @State int getState() {
         return mState;

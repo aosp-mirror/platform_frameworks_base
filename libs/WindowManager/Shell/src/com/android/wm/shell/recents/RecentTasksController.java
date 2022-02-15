@@ -25,6 +25,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -33,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -40,6 +42,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.StagedSplitBounds;
 
@@ -127,6 +130,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mTaskSplitBoundsMap.put(taskId1, splitBounds);
         mTaskSplitBoundsMap.put(taskId2, splitBounds);
         notifyRecentTasksChanged();
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Add split pair: %d, %d, %s",
+                taskId1, taskId2, splitBounds);
     }
 
     /**
@@ -140,6 +145,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mTaskSplitBoundsMap.remove(taskId);
             mTaskSplitBoundsMap.remove(pairedTaskId);
             notifyRecentTasksChanged();
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Remove split pair: %d, %d",
+                    taskId, pairedTaskId);
         }
     }
 
@@ -181,6 +188,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     @VisibleForTesting
     void notifyRecentTasksChanged() {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Notify recent tasks changed");
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).run();
         }
@@ -311,6 +319,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
         @Override
         public GroupedRecentTaskInfo[] getRecentTasks(int maxNum, int flags, int userId)
                 throws RemoteException {
+            if (mController == null) {
+                // The controller is already invalidated -- just return an empty task list for now
+                return new GroupedRecentTaskInfo[0];
+            }
+
             final GroupedRecentTaskInfo[][] out = new GroupedRecentTaskInfo[][]{null};
             executeRemoteCallWithTaskPermission(mController, "getRecentTasks",
                     (controller) -> out[0] = controller.getRecentTasks(maxNum, flags, userId)

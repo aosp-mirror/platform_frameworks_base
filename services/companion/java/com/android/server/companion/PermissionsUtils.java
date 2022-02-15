@@ -22,6 +22,7 @@ import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Binder.getCallingPid;
@@ -35,6 +36,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
@@ -62,6 +64,7 @@ final class PermissionsUtils {
                 Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING);
         map.put(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION,
                 Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION);
+        map.put(DEVICE_PROFILE_COMPUTER, Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER);
 
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }
@@ -82,18 +85,6 @@ final class PermissionsUtils {
 
         if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)) {
             throw new IllegalArgumentException("Unsupported device profile: " + deviceProfile);
-        }
-
-        if (DEVICE_PROFILE_APP_STREAMING.equals(deviceProfile)) {
-            // TODO: remove, when properly supporting this profile.
-            throw new UnsupportedOperationException(
-                    "DEVICE_PROFILE_APP_STREAMING is not fully supported yet.");
-        }
-
-        if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
-            // TODO: remove, when properly supporting this profile.
-            throw new UnsupportedOperationException(
-                    "DEVICE_PROFILE_AUTOMOTIVE_PROJECTION is not fully supported yet.");
         }
 
         final String permission = DEVICE_PROFILE_TO_PERMISSION.get(deviceProfile);
@@ -122,6 +113,12 @@ final class PermissionsUtils {
         if (getCallingUserId() == userId) return;
 
         context.enforceCallingPermission(INTERACT_ACROSS_USERS, null);
+    }
+
+    static void enforceCallerIsSystemOrCanInteractWithUserId(@NonNull Context context, int userId) {
+        if (getCallingUid() == SYSTEM_UID) return;
+
+        enforceCallerCanInteractWithUserId(context, userId);
     }
 
     static boolean checkCallerIsSystemOr(@UserIdInt int userId, @NonNull String packageName) {
@@ -192,6 +189,19 @@ final class PermissionsUtils {
         if (!checkCallerCanInteractWithUserId(context, userId)) return false;
 
         return checkCallerCanManageCompanionDevice(context);
+    }
+
+    static @Nullable AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
+            @Nullable AssociationInfo association) {
+        if (association == null) return null;
+
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+        if (!checkCallerCanManageAssociationsForPackage(context, userId, packageName)) {
+            return null;
+        }
+
+        return association;
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {

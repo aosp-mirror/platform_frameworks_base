@@ -25,6 +25,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
+import android.os.Trace
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.util.Log
@@ -161,6 +162,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         updateResources()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, "QSTileViewImpl#onMeasure")
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Trace.endSection()
     }
 
     override fun resetOverride() {
@@ -653,7 +660,7 @@ internal object SubtitleArrayMapping {
         "qr_code_scanner" to R.array.tile_states_qr_code_scanner,
         "alarm" to R.array.tile_states_alarm,
         "onehanded" to R.array.tile_states_onehanded,
-        "fgsmanager" to R.array.tile_states_fgsmanager
+        "color_correction" to R.array.tile_states_color_correction
     )
 
     fun getSubtitleId(spec: String?): Int {

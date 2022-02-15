@@ -27,8 +27,6 @@ public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
     public long mNativeObject; // BLASTBufferQueue*
 
-    private static native long nativeCreateAndUpdate(String name, long surfaceControl, long width,
-            long height, int format);
     private static native long nativeCreate(String name);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
@@ -40,11 +38,15 @@ public final class BLASTBufferQueue {
                                                               long frameNumber);
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
     private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
+    private static native boolean nativeIsSameSurfaceControl(long ptr, long surfaceControlPtr);
+    private static native SurfaceControl.Transaction nativeGatherPendingTransactions(long ptr,
+            long frameNumber);
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        mNativeObject = nativeCreateAndUpdate(name, sc.mNativeObject, width, height, format);
+        this(name);
+        update(sc, width, height, format);
     }
 
     public BLASTBufferQueue(String name) {
@@ -151,5 +153,25 @@ public final class BLASTBufferQueue {
 
     public long getLastAcquiredFrameNum() {
         return nativeGetLastAcquiredFrameNum(mNativeObject);
+    }
+
+    /**
+     * @return True if the associated SurfaceControl has the same handle as {@param sc}.
+     */
+    public boolean isSameSurfaceControl(SurfaceControl sc) {
+        return nativeIsSameSurfaceControl(mNativeObject, sc.mNativeObject);
+    }
+
+    /**
+     * Get any transactions that were passed to {@link #mergeWithNextTransaction} with the
+     * specified frameNumber. This is intended to ensure transactions don't get stuck as pending
+     * if the specified frameNumber is never drawn.
+     *
+     * @param frameNumber The frameNumber used to determine which transactions to apply.
+     * @return a Transaction that contains the merge of all the transactions that were sent to
+     *         mergeWithNextTransaction
+     */
+    public SurfaceControl.Transaction gatherPendingTransactions(long frameNumber) {
+        return nativeGatherPendingTransactions(mNativeObject, frameNumber);
     }
 }

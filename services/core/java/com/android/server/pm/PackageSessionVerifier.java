@@ -28,7 +28,6 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;
@@ -43,10 +42,12 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 
 import java.io.File;
@@ -93,19 +94,23 @@ final class PackageSessionVerifier {
     /**
      * Runs verifications that are common to both staged and non-staged sessions.
      */
-    public void verifyNonStaged(PackageInstallerSession session, Callback callback) {
+    public void verify(PackageInstallerSession session, Callback callback) {
         mHandler.post(() -> {
             try {
                 storeSession(session.mStagedSession);
                 if (session.isMultiPackage()) {
                     for (PackageInstallerSession child : session.getChildSessions()) {
+                        checkApexUpdateAllowed(child);
                         checkRebootlessApex(child);
                     }
                 } else {
+                    checkApexUpdateAllowed(session);
                     checkRebootlessApex(session);
                 }
                 verifyAPK(session, callback);
             } catch (PackageManagerException e) {
+                String errorMessage = PackageManager.installStatusToString(e.error, e.getMessage());
+                session.setSessionFailed(SessionInfo.SESSION_VERIFICATION_FAILED, errorMessage);
                 callback.onResult(e.error, e.getMessage());
             }
         });
@@ -125,7 +130,19 @@ final class PackageSessionVerifier {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
-                callback.onResult(returnCode, msg);
+                if (session.isStaged() && returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                    // Continue verification for staged sessions
+                    verifyStaged(session.mStagedSession, callback);
+                    return;
+                }
+                if (returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                    String errorMessage = PackageManager.installStatusToString(returnCode, msg);
+                    session.setSessionFailed(SessionInfo.SESSION_VERIFICATION_FAILED, errorMessage);
+                    callback.onResult(returnCode, msg);
+                } else {
+                    session.setSessionReady();
+                    callback.onResult(PackageManager.INSTALL_SUCCEEDED, null);
+                }
             }
         };
         final VerificationParams verifyingSession = makeVerificationParams(session, observer);
@@ -168,7 +185,7 @@ final class PackageSessionVerifier {
      * Note it is the responsibility of the caller to ensure the staging files remain unchanged
      * while the verification is in progress.
      */
-    void verifyStaged(StagingManager.StagedSession session, Callback callback) {
+    private void verifyStaged(StagingManager.StagedSession session, Callback callback) {
         Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId());
         mHandler.post(() -> {
             try {
@@ -199,18 +216,18 @@ final class PackageSessionVerifier {
     }
 
     private void onVerificationSuccess(StagingManager.StagedSession session, Callback callback) {
-        callback.onResult(SessionInfo.STAGED_SESSION_NO_ERROR, null);
+        callback.onResult(PackageManager.INSTALL_SUCCEEDED, null);
     }
 
     private void onVerificationFailure(StagingManager.StagedSession session, Callback callback,
-            @SessionInfo.StagedSessionErrorCode int errorCode, String errorMessage) {
+            @SessionInfo.SessionErrorCode int errorCode, String errorMessage) {
         if (!ensureActiveApexSessionIsAborted(session)) {
             Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             // Safe to ignore active apex session abortion failure since session will be marked
             // failed on next step and staging directory for session will be deleted.
         }
         session.setSessionFailed(errorCode, errorMessage);
-        callback.onResult(errorCode, errorMessage);
+        callback.onResult(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMessage);
     }
 
     private void dispatchVerifyApex(StagingManager.StagedSession session, Callback callback) {
@@ -288,14 +305,14 @@ final class PackageSessionVerifier {
             throws PackageManagerException {
         // Before marking the session as ready, start checkpoint service if available
         try {
-            if (PackageHelper.getStorageManager().supportsCheckpoint()) {
-                PackageHelper.getStorageManager().startCheckpoint(2);
+            if (InstallLocationUtils.getStorageManager().supportsCheckpoint()) {
+                InstallLocationUtils.getStorageManager().startCheckpoint(2);
             }
         } catch (Exception e) {
             // Failed to get hold of StorageManager
             Slog.e(TAG, "Failed to get hold of StorageManager", e);
             throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_UNKNOWN,
+                    SessionInfo.SESSION_UNKNOWN_ERROR,
                     "Failed to get hold of StorageManager");
         }
         // Proactively mark session as ready before calling apexd. Although this call order
@@ -333,7 +350,7 @@ final class PackageSessionVerifier {
         final ParseResult<SigningDetails> newResult = ApkSignatureVerifier.verify(
                 input.reset(), apexPath, minSignatureScheme);
         if (newResult.isError()) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+            throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + apexPath + " : "
                             + newResult.getException(), newResult.getException());
         }
@@ -352,7 +369,7 @@ final class PackageSessionVerifier {
                 input.reset(), existingApexPkg.applicationInfo.sourceDir,
                 SigningDetails.SignatureSchemeVersion.JAR);
         if (existingResult.isError()) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+            throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir
                             + " : " + existingResult.getException(), existingResult.getException());
         }
@@ -366,7 +383,7 @@ final class PackageSessionVerifier {
             return;
         }
 
-        throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+        throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                 "APK-container signature of APEX package " + packageName + " with version "
                         + newApexPkg.versionCodeMajor + " and path " + apexPath + " is not"
                         + " compatible with the one currently installed on device");
@@ -409,11 +426,11 @@ final class PackageSessionVerifier {
                 packageInfo = PackageInfoWithoutStateUtils.generate(parsedPackage, apexInfo, flags);
                 if (packageInfo == null) {
                     throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            SessionInfo.SESSION_VERIFICATION_FAILED,
                             "Unable to generate package info: " + apexInfo.modulePath);
                 }
             } catch (PackageManagerException e) {
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                         "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);
             }
             result.add(packageInfo);
@@ -435,7 +452,7 @@ final class PackageSessionVerifier {
             }
         }
         throw new PackageManagerException(
-                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                SessionInfo.SESSION_VERIFICATION_FAILED,
                 "Could not find rollback id for commit session: " + sessionId);
     }
 
@@ -459,6 +476,51 @@ final class PackageSessionVerifier {
             return true;
         }
         return mApexManager.abortStagedSession(sessionId);
+    }
+
+    private boolean isApexUpdateAllowed(String apexPackageName, String installerPackageName) {
+        if (mPm.getModuleInfo(apexPackageName, 0) != null) {
+            final String modulesInstaller =
+                    SystemConfig.getInstance().getModulesInstallerPackageName();
+            if (modulesInstaller == null) {
+                Slog.w(TAG, "No modules installer defined");
+                return false;
+            }
+            return modulesInstaller.equals(installerPackageName);
+        }
+        final String vendorApexInstaller =
+                SystemConfig.getInstance().getAllowedVendorApexes().get(apexPackageName);
+        if (vendorApexInstaller == null) {
+            Slog.w(TAG, apexPackageName + " is not allowed to be updated");
+            return false;
+        }
+        return vendorApexInstaller.equals(installerPackageName);
+    }
+
+    /**
+     * Checks if APEX update is allowed.
+     *
+     * This phase is shared between staged and non-staged sessions and should be called after
+     * boot is completed since this check depends on the ModuleInfoProvider, which is only populated
+     * after device has booted.
+     */
+    private void checkApexUpdateAllowed(PackageInstallerSession session)
+            throws PackageManagerException {
+        if (!session.isApexSession()) {
+            return;
+        }
+        final int installFlags = session.params.installFlags;
+        if ((installFlags & PackageManager.INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK) != 0) {
+            return;
+        }
+        final String packageName = session.getPackageName();
+        final String installerPackageName = session.getInstallSource().installerPackageName;
+        if (!isApexUpdateAllowed(packageName, installerPackageName)) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "Update of APEX package " + packageName + " is not allowed for "
+                            + installerPackageName);
+        }
     }
 
     /**
@@ -496,9 +558,9 @@ final class PackageSessionVerifier {
      */
     private void checkActiveSessions() throws PackageManagerException {
         try {
-            checkActiveSessions(PackageHelper.getStorageManager().supportsCheckpoint());
+            checkActiveSessions(InstallLocationUtils.getStorageManager().supportsCheckpoint());
         } catch (RemoteException e) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+            throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Can't query fs-checkpoint status : " + e);
         }
     }
@@ -514,7 +576,7 @@ final class PackageSessionVerifier {
         }
         if (!supportsCheckpoint && activeSessions > 1) {
             throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                    SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Cannot stage multiple sessions without checkpoint support");
         }
     }
@@ -545,13 +607,13 @@ final class PackageSessionVerifier {
                     // will be deleted.
                 }
                 stagedSession.setSessionFailed(
-                        SessionInfo.STAGED_SESSION_CONFLICT,
+                        SessionInfo.SESSION_CONFLICT,
                         "Session was failed by rollback session: " + session.sessionId());
                 Slog.i(TAG, "Session " + stagedSession.sessionId() + " is marked failed due to "
                         + "rollback session: " + session.sessionId());
             } else if (!isRollback(session) && isRollback(stagedSession)) {
                 throw new PackageManagerException(
-                        SessionInfo.STAGED_SESSION_CONFLICT,
+                        SessionInfo.SESSION_CONFLICT,
                         "Session was failed by rollback session: " + stagedSession.sessionId());
 
             }
@@ -574,7 +636,7 @@ final class PackageSessionVerifier {
         final String packageName = child.getPackageName();
         if (packageName == null) {
             throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                    SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Cannot stage session " + child.sessionId() + " with package name null");
         }
         for (StagingManager.StagedSession stagedSession : mStagedSessions) {
@@ -586,14 +648,14 @@ final class PackageSessionVerifier {
                 if (stagedSession.getCommittedMillis() < parent.getCommittedMillis()) {
                     // Fail the session committed later when there are overlapping packages
                     throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            SessionInfo.SESSION_VERIFICATION_FAILED,
                             "Package: " + packageName + " in session: "
                                     + child.sessionId()
                                     + " has been staged already by session: "
                                     + stagedSession.sessionId());
                 } else {
                     stagedSession.setSessionFailed(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            SessionInfo.SESSION_VERIFICATION_FAILED,
                             "Package: " + packageName + " in session: "
                                     + stagedSession.sessionId()
                                     + " has been staged already by session: "

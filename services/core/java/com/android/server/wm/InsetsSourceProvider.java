@@ -297,6 +297,14 @@ class InsetsSourceProvider {
     }
 
     private Point getWindowFrameSurfacePosition() {
+        if (mControl != null) {
+            final AsyncRotationController controller =
+                    mWin.mDisplayContent.getAsyncRotationController();
+            if (controller != null && controller.shouldFreezeInsetsPosition(mWin)) {
+                // Use previous position because the fade-out animation runs in old rotation.
+                return mControl.getSurfacePosition();
+            }
+        }
         final Rect frame = mWin.getFrame();
         final Point position = new Point();
         mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);

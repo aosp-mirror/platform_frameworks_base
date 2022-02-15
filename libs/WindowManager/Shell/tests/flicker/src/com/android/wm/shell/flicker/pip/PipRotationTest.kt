@@ -32,7 +32,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import org.junit.Assume.assumeFalse
+import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -64,10 +64,16 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+@FlakyTest(bugId = 218604389)
+open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
+
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {
@@ -83,12 +89,6 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
                 setRotation(testSpec.endRotation)
             }
         }
-
-    @Before
-    fun onBefore() {
-        // This CUJ don't work in shell transitions because of b/204570898 b/204562589 b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-    }
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
@@ -107,7 +107,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -191,7 +191,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigRotationTests(
                 supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                repetitions = 5)
+                repetitions = 3)
         }
     }
 }

@@ -63,7 +63,6 @@ public final class DozeServiceHost implements DozeHost {
     private final DozeLog mDozeLog;
     private final PowerManager mPowerManager;
     private boolean mAnimateWakeup;
-    private boolean mAnimateScreenOff;
     private boolean mIgnoreTouchWhilePulsing;
     private Runnable mPendingScreenOffCallback;
     @VisibleForTesting
@@ -215,6 +214,7 @@ public final class DozeServiceHost implements DozeHost {
         }
 
         mStatusBarStateController.setIsDozing(dozing);
+        mNotificationShadeWindowViewController.setDozing(dozing);
     }
 
     @Override
@@ -255,7 +255,6 @@ public final class DozeServiceHost implements DozeHost {
 
             private void setPulsing(boolean pulsing) {
                 mStatusBarKeyguardViewManager.setPulsing(pulsing);
-                mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
                 mStatusBarStateController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;
@@ -296,6 +295,7 @@ public final class DozeServiceHost implements DozeHost {
     public void dozeTimeTick() {
         mNotificationPanel.dozeTimeTick();
         mAuthController.dozeTimeTick();
+        mNotificationShadeWindowViewController.dozeTimeTick();
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }
@@ -354,11 +354,6 @@ public final class DozeServiceHost implements DozeHost {
             return;
         }
         mAnimateWakeup = animateWakeup;
-    }
-
-    @Override
-    public void setAnimateScreenOff(boolean animateScreenOff) {
-        mAnimateScreenOff = animateScreenOff;
     }
 
     @Override
@@ -438,10 +433,6 @@ public final class DozeServiceHost implements DozeHost {
 
     boolean shouldAnimateWakeup() {
         return mAnimateWakeup;
-    }
-
-    boolean shouldAnimateScreenOff() {
-        return mAnimateScreenOff;
     }
 
     boolean getIgnoreTouchWhilePulsing() {

@@ -20,13 +20,11 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
-import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.TaskViewFactory
-import dagger.Lazy
-import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,15 +39,14 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class ControlActionCoordinatorImplTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var uiController: ControlsUiController
-    @Mock
-    private lateinit var lazyUiController: Lazy<ControlsUiController>
+    private lateinit var vibratorHelper: VibratorHelper
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
     @Mock
@@ -58,8 +55,6 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     private lateinit var uiExecutor: DelayableExecutor
     @Mock
     private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var globalActionsComponent: GlobalActionsComponent
     @Mock
     private lateinit var taskViewFactory: Optional<TaskViewFactory>
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -86,11 +81,9 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
             uiExecutor,
             activityStarter,
             keyguardStateController,
-            globalActionsComponent,
             taskViewFactory,
-            getFakeBroadcastDispatcher(),
-            lazyUiController,
-            metricsLogger
+            metricsLogger,
+            vibratorHelper
         ))
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)

@@ -391,6 +391,21 @@ public final class Settings {
             "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Color correction.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COLOR_CORRECTION_SETTINGS =
+            "com.android.settings.ACCESSIBILITY_COLOR_SPACE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Color inversion.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -948,6 +963,19 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_LOCALE_SETTINGS =
             "android.settings.LOCALE_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of per application locale.
+     * <p>
+     * Input: The Intent's data URI can specify the application package name to directly invoke the
+     * app locale details GUI specific to the package name.
+     * For example "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_LOCALE_SETTINGS =
+            "android.settings.APP_LOCALE_SETTINGS";
 
     /**
      * Activity Action: Show settings to allow configuration of lockscreen.
@@ -2358,6 +2386,15 @@ public final class Settings {
             "android.settings.ENABLE_MMS_DATA_REQUEST";
 
     /**
+     * Shows restrict settings dialog when settings is blocked.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG =
+            "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
+
+    /**
      * Integer value that specifies the reason triggering enable MMS data notification.
      * This must be passed as an extra field to the {@link #ACTION_ENABLE_MMS_DATA_REQUEST}.
      * Extra with value of EnableMmsDataReason interface.
@@ -2398,6 +2435,23 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MMS_MESSAGE_SETTING = "android.settings.MMS_MESSAGE_SETTING";
+
+    /**
+     * Activity Action: Show a screen of bedtime settings, which is provided by the wellbeing app.
+     * <p>
+     * The handler of this intent action may not exist.
+     * <p>
+     * To start an activity with this intent, apps should set the wellbeing package explicitly in
+     * the intent together with this action. The wellbeing package is defined in
+     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
 
     // End of Intent actions for Settings
 
@@ -4447,6 +4501,13 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
+         * The amount of time in milliseconds before the device goes to sleep or begins to dream
+         * after a period of inactivity while it is docked.
+         * @hide
+         */
+        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
+
+        /**
          * The screen backlight brightness between 0 and 255.
          */
         @Readable
@@ -4575,6 +4636,43 @@ public final class Settings {
         public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
 
         /**
+         * The intensity of alarm vibrations, if configurable.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String ALARM_VIBRATION_INTENSITY =
+                "alarm_vibration_intensity";
+
+        /**
+         * The intensity of media vibrations, if configurable.
+         *
+         * This includes any vibration that is part of media, such as music, movie, soundtrack,
+         * game or animations.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String MEDIA_VIBRATION_INTENSITY =
+                "media_vibration_intensity";
+
+        /**
          * The intensity of notification vibrations, if configurable.
          *
          * Not all devices are capable of changing their vibration intensity; on these devices
@@ -4591,6 +4689,7 @@ public final class Settings {
         @Readable
         public static final String NOTIFICATION_VIBRATION_INTENSITY =
                 "notification_vibration_intensity";
+
         /**
          * The intensity of ringtone vibrations, if configurable.
          *
@@ -4642,7 +4741,6 @@ public final class Settings {
          * 3 - Strong vibrations
          * @hide
          */
-        @Readable
         public static final String HARDWARE_HAPTIC_FEEDBACK_INTENSITY =
                 "hardware_haptic_feedback_intensity";
 
@@ -5055,7 +5153,12 @@ public final class Settings {
          * It was about AudioManager's setting and thus affected all the applications which
          * relied on the setting, while this is purely about the vibration setting for incoming
          * calls.
+         *
+         * @deprecated Replaced by using {@link android.os.VibrationAttributes#USAGE_RINGTONE} on
+         * vibrations for incoming calls. User settings are applied automatically by the service and
+         * should not be applied by individual apps.
          */
+        @Deprecated
         @Readable
         public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
 
@@ -5116,7 +5219,12 @@ public final class Settings {
         /**
          * Whether haptic feedback (Vibrate on tap) is enabled. The value is
          * boolean (1 or 0).
+         *
+         * @deprecated Replaced by using {@link android.os.VibrationAttributes#USAGE_TOUCH} on
+         * vibrations. User settings are applied automatically by the service and should not be
+         * applied by individual apps.
          */
+        @Deprecated
         @Readable
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
 
@@ -5945,7 +6053,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.CONNECTIVITY_CHANGE_DELAY);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.CAPTIVE_PORTAL_SERVER);
-            MOVED_TO_GLOBAL.add(Settings.Global.NSD_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.SET_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_INSTALL_LOCATION);
             MOVED_TO_GLOBAL.add(Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY);
@@ -6496,6 +6603,33 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
+         * This is used by Bluetooth Manager to store adapter name
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
+        public static final String BLUETOOTH_NAME = "bluetooth_name";
+
+        /**
+         * This is used by Bluetooth Manager to store adapter address
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
+        public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
+
+        /**
+         * This is used by Bluetooth Manager to store whether adapter address is valid
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
+        public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
+
+        /**
          * Setting to indicate that on device captions are enabled.
          *
          * @hide
@@ -6503,6 +6637,16 @@ public final class Settings {
         @SystemApi
         @Readable
         public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
+
+
+        /**
+         * Setting to indicate live caption button show or hide in the volume
+         * rocker.
+         *
+         * @hide
+         */
+        public static final String ODI_CAPTIONS_VOLUME_UI_ENABLED =
+                "odi_captions_volume_ui_enabled";
 
         /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
@@ -7061,6 +7205,12 @@ public final class Settings {
          */
         @Readable
         public static final String LOCATION_COARSE_ACCURACY_M = "locationCoarseAccuracy";
+
+        /**
+         * Whether or not to show display system location accesses.
+         * @hide
+         */
+        public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
         /**
          * A flag containing settings used for biometric weak
@@ -8879,6 +9029,15 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
+         * The current night mode custom type that has been selected by the user.  Owned
+         * and controlled by UiModeManagerService. Constants are as per UiModeManager.
+         * @hide
+         */
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String UI_NIGHT_MODE_CUSTOM_TYPE = "ui_night_mode_custom_type";
+
+        /**
          * The current night mode that has been overridden to turn on by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -8941,6 +9100,16 @@ public final class Settings {
          */
         @Readable
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
+
+        /**
+         * The complications that are enabled to be shown over the screensaver by the user. Holds
+         * a comma separated list of
+         * {@link com.android.settingslib.dream.DreamBackend.ComplicationType}.
+         *
+         * @hide
+         */
+        public static final String SCREENSAVER_ENABLED_COMPLICATIONS =
+                "screensaver_enabled_complications";
 
         /**
          * The default NFC payment component
@@ -9325,16 +9494,6 @@ public final class Settings {
          */
         public static final String EMERGENCY_GESTURE_SOUND_ENABLED =
                 "emergency_gesture_sound_enabled";
-
-        /**
-         * The power button "cooldown" period in milliseconds after the Emergency gesture is
-         * triggered, during which single-key actions on the power button are suppressed. Cooldown
-         * period is disabled if set to zero.
-         *
-         * @hide
-         */
-        public static final String EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS =
-                "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
@@ -9901,6 +10060,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String NOTIFICATION_PERMISSION_ENABLED =
                 "notification_permission_enabled";
 
@@ -9910,6 +10070,13 @@ public final class Settings {
          */
         @Readable
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
+
+        /**
+         * The duration of timeout, in milliseconds, to switch from a non-primary user to the
+         * primary user when the device is docked.
+         * @hide
+         */
+        public static final String TIMEOUT_TO_USER_ZERO = "timeout_to_user_zero";
 
         /**
          * Backup manager behavioral parameters.
@@ -10063,12 +10230,43 @@ public final class Settings {
          * category, formatted as a serialized {@link org.json.JSONObject}. If there is no
          * corresponding package included for a category, then all overlay packages in that
          * category must be disabled.
+         *
+         * A few category keys have special meaning and are used for Material You theming.
+         *
+         * A {@code FabricatedOverlay} containing Material You tonal palettes will be generated
+         * in case {@code android.theme.customization.system_palette} contains a
+         * {@link android.annotation.ColorInt}.
+         *
+         * The strategy used for generating the tonal palettes can be defined with the
+         * {@code android.theme.customization.theme_style} key, with one of the following options:
+         * <ul>
+         *   <li> TONAL_SPOT = Default Material You theme since Android S.</li>
+         *   <li> VIBRANT = Theme where accent 2 and 3 are analogous to accent 1.</li>
+         *   <li> EXPRESSIVE = Highly chromatic theme.</li>
+         *   <li> SPRITZ = Desaturated theme, almost greyscale.</li>
+         * </ul>
+         *
+         * Example of valid fabricated theme specification:
+         * <pre>
+         * {
+         *     "android.theme.customization.system_palette":"B1611C",
+         *     "android.theme.customization.theme_style":"EXPRESSIVE"
+         * }
+         * </pre>
          * @hide
          */
         @SystemApi
         @Readable
         public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
                 "theme_customization_overlay_packages";
+
+        /**
+         * Indicates whether the device is in kids nav mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_KIDS_MODE = "nav_bar_kids_mode";
 
         /**
          * Navigation bar mode.
@@ -10105,6 +10303,50 @@ public final class Settings {
          */
         @Readable
         public static final String NEARBY_SHARING_COMPONENT = "nearby_sharing_component";
+
+        /**
+         * Nearby Sharing Slice URI for the SliceProvider to
+         * read Nearby Sharing scan results and then draw the UI.
+         * @hide
+         */
+        public static final String NEARBY_SHARING_SLICE_URI = "nearby_sharing_slice_uri";
+
+        /**
+         * Current provider of Fast Pair saved devices page.
+         * Default value in @string/config_defaultNearbyFastPairSettingsDevicesComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String NEARBY_FAST_PAIR_SETTINGS_DEVICES_COMPONENT =
+                "nearby_fast_pair_settings_devices_component";
+
+        /**
+         * Current provider of the component for requesting ambient context consent.
+         * Default value in @string/config_defaultAmbientContextConsentComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_CONSENT_COMPONENT =
+                "ambient_context_consent_component";
+
+        /**
+         * Current provider of the intent extra key for the caller's package name while
+         * requesting ambient context consent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_PACKAGE_NAME_EXTRA_KEY =
+                "ambient_context_package_name_key";
+
+        /**
+         * Current provider of the intent extra key for the event code int array while
+         * requesting ambient context consent.
+         * Default value in @string/config_ambientContextEventArrayExtraKey.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_EVENT_ARRAY_EXTRA_KEY =
+                "ambient_context_event_array_key";
 
         /**
          * Controls whether aware is enabled.
@@ -10190,6 +10432,13 @@ public final class Settings {
          */
         @TestApi
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_ALL = 0x3;
+
+        /**
+         * Whether the following typing focus feature for magnification is enabled.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED =
+                "accessibility_magnification_follow_typing_enabled";
 
         /**
          * Controls magnification capability. Accessibility magnification is capable of at least one
@@ -10401,7 +10650,7 @@ public final class Settings {
                 DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
         })
         @Retention(RetentionPolicy.SOURCE)
-        @interface DeviceStateRotationLockSetting {
+        public @interface DeviceStateRotationLockSetting {
         }
 
         /**
@@ -10434,13 +10683,6 @@ public final class Settings {
         public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
 
         /**
-         * An array of all the packages which have been enabled for hub mode by the user.
-         *
-         * @hide
-         */
-        public static final String COMMUNAL_MODE_PACKAGES = "communal_mode_packages";
-
-        /**
          * An array of SSIDs of Wi-Fi networks that, when connected, are considered safe to enable
          * the communal mode.
          *
@@ -10448,6 +10690,36 @@ public final class Settings {
          */
         public static final String COMMUNAL_MODE_TRUSTED_NETWORKS =
                 "communal_mode_trusted_networks";
+
+        /**
+         * Setting to allow Fast Pair scans to be enabled.
+         * @hide
+         */
+        @SystemApi
+        @Readable
+        public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
+
+        /**
+         * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
+         * confirmation dialog.
+         *
+         * @hide
+         */
+        public static final String HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST =
+                "hdmi_cec_set_menu_language_denylist";
+
+        /**
+         * Whether the Taskbar Education is about to be shown or is currently showing.
+         *
+         * <p>1 if true, 0 or unset otherwise.
+         *
+         * <p>This setting is used to inform other components that the Taskbar Education is
+         * currently showing, which can prevent them from showing something else to the user.
+         *
+         * @hide
+         */
+        public static final String LAUNCHER_TASKBAR_EDUCATION_SHOWING =
+                "launcher_taskbar_education_showing";
 
         /**
          * These entries are considered common between the personal and the managed profile,
@@ -10666,6 +10938,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
 
         /**
@@ -10674,6 +10948,8 @@ public final class Settings {
          * {@hide}
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_DISABLED_PROFILES = "bluetooth_disabled_profiles";
 
         /**
@@ -11138,15 +11414,6 @@ public final class Settings {
                 "use_blast_adapter_vr";
 
         /**
-         * If true, submit buffers using blast in SurfaceView.
-         * (0 = false, 1 = true)
-         * @hide
-         */
-        @Readable
-        public static final String DEVELOPMENT_USE_BLAST_ADAPTER_SV =
-                "use_blast_adapter_sv";
-
-        /**
          * Path to the WindowManager display settings file. If unset, the default file path will
          * be used.
          *
@@ -11453,8 +11720,8 @@ public final class Settings {
                 "night_display_forced_auto_mode_available";
 
         /**
-         * If UTC time between two NITZ signals is greater than this value then the second signal
-         * cannot be ignored.
+         * If Unix epoch time between two NITZ signals is greater than this value then the second
+         * signal cannot be ignored.
          *
          * <p>This value is in milliseconds. It is used for telephony-based time and time zone
          * detection.
@@ -11557,6 +11824,12 @@ public final class Settings {
         * @hide */
         @Readable
         public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
+
+        /** Timeout for package verification during streaming installations.
+         * @hide */
+        @Readable
+        public static final String PACKAGE_STREAMING_VERIFIER_TIMEOUT =
+                "streaming_verifier_timeout";
 
         /** Timeout for app integrity verification.
          * @hide */
@@ -12205,6 +12478,8 @@ public final class Settings {
         * @hide
         */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
 
         /**
@@ -12212,6 +12487,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
 
         /**
@@ -12219,6 +12496,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
 
         /**
@@ -12226,6 +12505,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
                 "ble_scan_low_latency_window_ms";
 
@@ -12234,6 +12515,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
                 "ble_scan_low_power_interval_ms";
 
@@ -12242,6 +12525,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
                 "ble_scan_balanced_interval_ms";
 
@@ -12250,6 +12535,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
@@ -12258,6 +12545,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
 
         /**
@@ -12675,16 +12964,6 @@ public final class Settings {
                 SYS_STORAGE_CACHE_PERCENTAGE = "sys_storage_cache_percentage";
 
         /**
-         * Maximum bytes of storage on the device that is reserved for cached
-         * data.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String
-                SYS_STORAGE_CACHE_MAX_BYTES = "sys_storage_cache_max_bytes";
-
-        /**
          * The maximum reconnect delay for short network outages or when the
          * network is suspended due to phone use.
          *
@@ -12861,13 +13140,6 @@ public final class Settings {
         @Readable
         public static final String MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS =
                 "min_duration_between_recovery_steps";
-        /**
-         * Whether network service discovery is enabled.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NSD_ON = "nsd_on";
 
         /**
          * Let user pick default install location.
@@ -13007,6 +13279,8 @@ public final class Settings {
 
         /** {@hide} */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String
                 BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
         /** {@hide} */
@@ -13917,6 +14191,16 @@ public final class Settings {
          */
         @Readable
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
+         * The power button "cooldown" period in milliseconds after the Emergency gesture is
+         * triggered, during which single-key actions on the power button are suppressed. Cooldown
+         * period is disabled if set to zero.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS =
+                "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
@@ -15159,7 +15443,10 @@ public final class Settings {
          * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
          *
          * @hide
+         * @deprecated Use {@link android.view.autofill.AutofillManager
+         * #DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES} instead.
          */
+        @Deprecated
         @SystemApi
         @Readable
         public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
@@ -16544,6 +16831,48 @@ public final class Settings {
         public static final String RESTRICTED_NETWORKING_MODE = "restricted_networking_mode";
 
         /**
+         * Setting indicating whether Low Power Standby is enabled, if supported.
+         *
+         * Values are:
+         * 0: disabled
+         * 1: enabled
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ENABLED = "low_power_standby_enabled";
+
+        /**
+         * Setting indicating whether Low Power Standby is allowed to be active during doze
+         * maintenance mode.
+         *
+         * Values are:
+         * 0: Low Power Standby will be disabled during doze maintenance mode
+         * 1: Low Power Standby can be active during doze maintenance mode
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE =
+                "low_power_standby_active_during_maintenance";
+
+        /**
+         * Timeout for the system server watchdog.
+         *
+         * @see {@link com.android.server.Watchdog}.
+         *
+         * @hide
+         */
+        public static final String WATCHDOG_TIMEOUT_MILLIS =
+                "system_server_watchdog_timeout_ms";
+
+        /**
+         * Whether to enable managed device provisioning via the role holder.
+         *
+         * @hide
+         */
+        public static final String MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER =
+                "managed_provisioning_defer_provisioning_to_role_holder";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
@@ -17039,6 +17368,27 @@ public final class Settings {
              */
             public static final String CLOCKWORK_SYSUI_MAIN_ACTIVITY =
                     "clockwork_sysui_main_activity";
+
+            /**
+             * Setting to disable power button long press launching Assistant. It's boolean, i.e.
+             * enabled = 1, disabled = 0. By default, this setting is enabled.
+             *
+             * @hide
+             */
+            public static final String CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED =
+                    "clockwork_long_press_to_assistant_enabled";
+
+            /*
+             * Whether the device has Cooldown Mode enabled.
+             * @hide
+             */
+            public static final String COOLDOWN_MODE_ON = "cooldown_mode_on";
+
+            /*
+             * Whether the device has Wet Mode/ Touch Lock Mode enabled.
+             * @hide
+             */
+            public static final String WET_MODE_ON = "wet_mode_on";
         }
     }
 

@@ -494,6 +494,7 @@
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"પ્રતિબંધિત સેટિંગ દ્વારા નિયંત્રિત"</string>
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"મંજૂરી છે"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"મંજૂરી નથી"</string>
@@ -526,10 +527,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"રજિસ્ટર કરેલ નથી"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"અનુપલબ્ધ"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MACને રેન્ડમ કરેલ છે"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$d ડિવાઇસ કનેક્ટ કર્યું</item>
-      <item quantity="other">%1$d ડિવાઇસ કનેક્ટ કર્યા</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{કોઈ ડિવાઇસ કનેક્ટેડ નથી}=1{1 ડિવાઇસ કનેક્ટેડ છે}one{# ડિવાઇસ કનેક્ટેડ છે}other{# ડિવાઇસ કનેક્ટેડ છે}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"વધુ સમય."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ઓછો સમય."</string>
     <string name="cancel" msgid="5665114069455378395">"રદ કરો"</string>
@@ -540,7 +538,6 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ક્યારેય નહીં"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"માત્ર પ્રાધાન્યતા"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -552,7 +549,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"દર વખતે પૂછો"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ફોન સ્પીકર"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
@@ -638,4 +635,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ઇથરનેટ ડિસ્કનેક્ટ થયું."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ઇથરનેટ."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"કોઈ કૉલિંગ નહીં."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"સમય"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"તારીખ"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"હવામાન"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"હવાની ક્વૉલિટી"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"કાસ્ટ વિશેની માહિતી"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"પ્રોફાઇલ ફોટો પસંદ કરો"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"ડિફૉલ્ટ વપરાશકર્તાનું આઇકન"</string>
 </resources>

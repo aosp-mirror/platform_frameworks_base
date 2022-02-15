@@ -20,10 +20,12 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -38,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -69,7 +72,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -105,6 +107,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -126,7 +129,7 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(includes = {StatusBarPhoneDependenciesModule.class})
+@Module
 public interface StatusBarPhoneModule {
     /**
      * Provides our instance of StatusBar which is considered optional.
@@ -140,6 +143,7 @@ public interface StatusBarPhoneModule {
             LightBarController lightBarController,
             AutoHideController autoHideController,
             StatusBarWindowController statusBarWindowController,
+            StatusBarWindowStateController statusBarWindowStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
@@ -148,7 +152,6 @@ public interface StatusBarPhoneModule {
             KeyguardStateController keyguardStateController,
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
-            BypassHeadsUpNotifier bypassHeadsUpNotifier,
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
@@ -227,7 +230,10 @@ public interface StatusBarPhoneModule {
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
             ActivityLaunchAnimator activityLaunchAnimator,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            InteractionJankMonitor jankMonitor,
+            DeviceStateManager deviceStateManager,
+            DreamOverlayStateController dreamOverlayStateController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -235,6 +241,7 @@ public interface StatusBarPhoneModule {
                 lightBarController,
                 autoHideController,
                 statusBarWindowController,
+                statusBarWindowStateController,
                 keyguardUpdateMonitor,
                 statusBarSignalPolicy,
                 pulseExpansionHandler,
@@ -243,7 +250,6 @@ public interface StatusBarPhoneModule {
                 keyguardStateController,
                 headsUpManagerPhone,
                 dynamicPrivacyController,
-                bypassHeadsUpNotifier,
                 falsingManager,
                 falsingCollector,
                 broadcastDispatcher,
@@ -321,7 +327,10 @@ public interface StatusBarPhoneModule {
                 wallpaperManager,
                 startingSurfaceOptional,
                 activityLaunchAnimator,
-                notifPipelineFlags
+                notifPipelineFlags,
+                jankMonitor,
+                deviceStateManager,
+                dreamOverlayStateController
         );
     }
 }

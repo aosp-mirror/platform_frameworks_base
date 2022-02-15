@@ -17,10 +17,9 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedComponent
-import android.content.pm.parsing.component.ParsedComponentImpl
-import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedComponent
+import com.android.server.pm.pkg.component.ParsedComponentImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.os.Bundle
 import android.os.Parcelable
 import kotlin.contracts.ExperimentalContracts
@@ -65,7 +64,8 @@ abstract class ParsedComponentTest(getterType: KClass<*>, setterType: KClass<out
             ParsedComponentImpl::addIntent,
             "TestLabel",
             transformGet = { it.singleOrNull()?.nonLocalizedLabel },
-            transformSet = { ParsedIntentInfoImpl().setNonLocalizedLabel(it!!) },
+            transformSet = { ParsedIntentInfoImpl()
+                .setNonLocalizedLabel(it!!) },
         ),
         getSetByValue(
             ParsedComponent::getProperties,

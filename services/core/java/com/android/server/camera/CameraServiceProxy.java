@@ -36,6 +36,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -46,6 +47,8 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
@@ -303,6 +306,10 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public void onFixedRotationFinished(int displayId) { }
+
+        @Override
+        public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) { }
     }
 
 
@@ -333,6 +340,16 @@ public class CameraServiceProxy extends SystemService
                         // Return immediately if we haven't seen any users start yet
                         if (mEnabledCameraUsers == null) return;
                         switchUserLocked(mLastUser);
+                    }
+                    break;
+                case UsbManager.ACTION_USB_DEVICE_ATTACHED:
+                case UsbManager.ACTION_USB_DEVICE_DETACHED:
+                    synchronized (mLock) {
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                        if (device != null) {
+                            notifyUsbDeviceHotplugLocked(device,
+                                    action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+                        }
                     }
                     break;
                 default:
@@ -645,6 +662,8 @@ public class CameraServiceProxy extends SystemService
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         mContext.registerReceiver(mIntentReceiver, filter);
 
         publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
@@ -788,6 +807,8 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].histogramType = streamStats.getHistogramType();
                     streamProtos[i].histogramBins = streamStats.getHistogramBins();
                     streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
+                    streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
+                    streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
 
                     if (CameraServiceProxy.DEBUG) {
                         String histogramTypeName =
@@ -807,7 +828,9 @@ public class CameraServiceProxy extends SystemService
                                 + ", histogramBins "
                                 + Arrays.toString(streamProtos[i].histogramBins)
                                 + ", histogramCounts "
-                                + Arrays.toString(streamProtos[i].histogramCounts));
+                                + Arrays.toString(streamProtos[i].histogramCounts)
+                                + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
+                                + ", streamUseCase " + streamProtos[i].streamUseCase);
                     }
                 }
             }
@@ -959,6 +982,32 @@ public class CameraServiceProxy extends SystemService
         }
         mLastReportedDeviceState = deviceState;
         return true;
+    }
+
+    private boolean notifyUsbDeviceHotplugLocked(@NonNull UsbDevice device, boolean attached) {
+        // Only handle external USB camera devices
+        if (device.getHasVideoCapture()) {
+            // Forward the usb hotplug event to the native camera service running in the
+            // cameraserver
+            // process.
+            ICameraService cameraService = getCameraServiceRawLocked();
+            if (cameraService == null) {
+                Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
+                return false;
+            }
+
+            try {
+                int eventType = attached ? ICameraService.EVENT_USB_DEVICE_ATTACHED
+                        : ICameraService.EVENT_USB_DEVICE_DETACHED;
+                mCameraServiceRaw.notifySystemEvent(eventType, new int[]{device.getDeviceId()});
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not notify cameraserver, remote exception: " + e);
+                // Not much we can do if camera service is dead.
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void updateActivityCount(CameraSessionStats cameraState) {

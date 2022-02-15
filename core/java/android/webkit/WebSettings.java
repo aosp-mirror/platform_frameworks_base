@@ -19,6 +19,8 @@ package android.webkit;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 
@@ -135,6 +137,20 @@ public abstract class WebSettings {
     public @interface CacheMode {}
 
     /**
+     * Enable web content to apply light or dark style according to the app's theme
+     * and WebView to attempt to darken web content by algorithmic darkening when
+     * appropriate.
+     *
+     * Refer to {@link #setAlgorithmicDarkeningAllowed} for detail.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
+    @SystemApi
+    public static final long ENABLE_SIMPLIFIED_DARK_MODE = 214741472L;
+
+    /**
      * Default cache usage mode. If the navigation type doesn't impose any
      * specific behavior, use cached resources when they are available
      * and not expired, otherwise load resources from the network.
@@ -239,6 +255,7 @@ public abstract class WebSettings {
      * automatically darkened.
      *
      * @see #setForceDark
+     * @deprecated refer to {@link #setForceDark}
      */
     public static final int FORCE_DARK_OFF = 0;
 
@@ -250,6 +267,7 @@ public abstract class WebSettings {
      * be inverted.
      *
      * @see #setForceDark
+     * @deprecated refer to {@link #setForceDark}
      */
     public static final int FORCE_DARK_AUTO = 1;
 
@@ -258,6 +276,7 @@ public abstract class WebSettings {
      * as to emulate a dark theme.
      *
      * @see #setForceDark
+     * @deprecated refer to {@link #setForceDark}
      */
     public static final int FORCE_DARK_ON = 2;
 
@@ -1533,6 +1552,13 @@ public abstract class WebSettings {
      *
      * @param forceDark the force dark mode to set.
      * @see #getForceDark
+     * @deprecated The "force dark" model previously implemented by WebView was complex
+     * and didn't interoperate well with current Web standards for
+     * prefers-color-scheme and color-scheme. In apps with
+     * {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU}
+     * this API is a no-op and WebView will always use the dark style defined by web content
+     * authors if the app's theme is dark. To customize the behavior, refer to
+     * {@link #setAlgorithmicDarkeningAllowed}.
      */
     public void setForceDark(@ForceDark int forceDark) {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
@@ -1544,10 +1570,54 @@ public abstract class WebSettings {
      *
      * @return the currently set force dark mode.
      * @see #setForceDark
+     * @deprecated refer to {@link #setForceDark}.
      */
     public @ForceDark int getForceDark() {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
         return FORCE_DARK_AUTO;
+    }
+
+    /**
+     * Control whether algorithmic darkening is allowed.
+     *
+     * <p class="note">
+     * <b>Note:</b> This API and the behaviour described only apply to apps with
+     * {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+     *
+     * <p>
+     * WebView always sets the media query {@code prefers-color-scheme} according to the app's
+     * theme attribute {@link android.R.styleable#Theme_isLightTheme isLightTheme}, i.e.
+     * {@code prefers-color-scheme} is {@code light} if isLightTheme is true or not specified,
+     * otherwise it is {@code dark}. This means that the web content's light or dark style will
+     * be applied automatically to match the app's theme if the content supports it.
+     *
+     * <p>
+     * Algorithmic darkening is disallowed by default.
+     * <p>
+     * If the app's theme is dark and it allows algorithmic darkening, WebView will attempt to
+     * darken web content using an algorithm, if the content doesn't define its own dark styles
+     * and doesn't explicitly disable darkening.
+     *
+     * <p>
+     * If Android is applying Force Dark to WebView then WebView will ignore the value of
+     * this setting and behave as if it were set to true.
+     *
+     * @param allow allow algorithmic darkening or not.
+     */
+    public void setAlgorithmicDarkeningAllowed(boolean allow) {
+        // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
+    }
+
+    /**
+     * Get if algorithmic darkening is allowed or not for this WebView.
+     * The default is false.
+     *
+     * @return if the algorithmic darkening is allowed or not.
+     * @see #setAlgorithmicDarkeningAllowed
+     */
+    public boolean isAlgorithmicDarkeningAllowed() {
+        // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
+        return false;
     }
 
     /**

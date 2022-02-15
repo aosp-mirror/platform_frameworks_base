@@ -376,14 +376,12 @@ public class Instrumentation {
             Debug.stopMethodTracing();
         }
     }
-    
+
     /**
-     * Force the global system in or out of touch mode.  This can be used if
-     * your instrumentation relies on the UI being in one more or the other
-     * when it starts.
-     * 
-     * @param inTouch Set to true to be in touch mode, false to be in
-     * focus mode.
+     * Force the global system in or out of touch mode. This can be used if your
+     * instrumentation relies on the UI being in one more or the other when it starts.
+     *
+     * @param inTouch Set to true to be in touch mode, false to be in focus mode.
      */
     public void setInTouchMode(boolean inTouch) {
         try {
@@ -393,11 +391,11 @@ public class Instrumentation {
             // Shouldn't happen!
         }
     }
-    
+
     /**
      * Schedule a callback for when the application's main thread goes idle
      * (has no more events to process).
-     * 
+     *
      * @param recipient Called the next time the thread's message queue is
      *                  idle.
      */
@@ -1259,7 +1257,7 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */, null /*assistToken*/,
+                null /* window */, null /* activityCallback */, null /*assistToken*/,
                 null /*shareableActivityToken*/);
         return activity;
     }

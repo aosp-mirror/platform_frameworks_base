@@ -136,7 +136,8 @@ public interface StatusBarManagerInternal {
             @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
-    void showTransient(int displayId, @InternalInsetsType int[] types);
+    void showTransient(int displayId, @InternalInsetsType int[] types,
+            boolean isGestureOnSystemBar);
 
     /** @see com.android.internal.statusbar.IStatusBar#abortTransient */
     void abortTransient(int displayId, @InternalInsetsType int[] types);

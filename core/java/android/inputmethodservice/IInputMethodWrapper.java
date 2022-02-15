@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -50,6 +52,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -67,13 +70,16 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
+    private static final int DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED = 35;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
-    private static final int DO_REVOKE_SESSION = 50;
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
     private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
+    private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
+    private static final int DO_START_STYLUS_HANDWRITING = 110;
+    private static final int DO_INIT_INK_WINDOW = 120;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -169,7 +175,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1,
-                            (IInputMethodPrivilegedOperations) args.arg2, msg.arg1);
+                            (IInputMethodPrivilegedOperations) args.arg2, msg.arg1,
+                            (boolean) args.arg3, msg.arg2 != 0);
                 } finally {
                     args.recycle();
                 }
@@ -189,12 +196,20 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 final boolean restarting = args.argi5 == 1;
+                final boolean shouldShowImeSwitcherWhenImeIsShown = args.argi6 != 0;
                 final InputConnection ic = inputContext != null
                         ? new RemoteInputConnection(mTarget, inputContext, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
-                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken);
+                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
+                        shouldShowImeSwitcherWhenImeIsShown);
                 args.recycle();
+                return;
+            }
+            case DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED: {
+                final boolean shouldShowImeSwitcherWhenImeIsShown = msg.arg1 != 0;
+                inputMethod.onShouldShowImeSwitcherWhenImeIsShownChanged(
+                        shouldShowImeSwitcherWhenImeIsShown);
                 return;
             }
             case DO_CREATE_SESSION: {
@@ -208,9 +223,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_SET_SESSION_ENABLED:
                 inputMethod.setSessionEnabled((InputMethodSession)msg.obj,
                         msg.arg1 != 0);
-                return;
-            case DO_REVOKE_SESSION:
-                inputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs)msg.obj;
@@ -229,13 +241,29 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_CHANGE_INPUTMETHOD_SUBTYPE:
                 inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
                 return;
-            case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
+            case DO_CREATE_INLINE_SUGGESTIONS_REQUEST: {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 inputMethod.onCreateInlineSuggestionsRequest(
                         (InlineSuggestionsRequestInfo) args.arg1,
                         (IInlineSuggestionsRequestCallback) args.arg2);
                 args.recycle();
                 return;
+            }
+            case DO_CAN_START_STYLUS_HANDWRITING: {
+                inputMethod.canStartStylusHandwriting(msg.arg1);
+                return;
+            }
+            case DO_START_STYLUS_HANDWRITING: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                inputMethod.startStylusHandwriting(msg.arg1, (InputChannel) args.arg1,
+                        (List<MotionEvent>) args.arg2);
+                args.recycle();
+                return;
+            }
+            case DO_INIT_INK_WINDOW: {
+                inputMethod.initInkWindow();
+                return;
+            }
 
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
@@ -272,9 +300,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges) {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageIOO(DO_INITIALIZE_INTERNAL, configChanges, token, privOps));
+            int configChanges, boolean stylusHwSupported,
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_INITIALIZE_INTERNAL,
+                configChanges, shouldShowImeSwitcherWhenImeIsShown ? 1 : 0, token, privOps,
+                stylusHwSupported));
     }
 
     @BinderThread
@@ -314,13 +344,23 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
-            EditorInfo attribute, boolean restarting) {
+            EditorInfo attribute, boolean restarting, boolean shouldShowImeSwitcherWhenImeIsShown) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
-                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0, 0 /* unused */));
+                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0,
+                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
+    }
+
+    @BinderThread
+    @Override
+    public void onShouldShowImeSwitcherWhenImeIsShownChanged(
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(
+                DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED,
+                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
     }
 
     @BinderThread
@@ -349,22 +389,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void revokeSession(IInputMethodSession session) {
-        try {
-            InputMethodSession ls = ((IInputMethodSessionWrapper)
-                    session).getInternalInputMethodSession();
-            if (ls == null) {
-                Log.w(TAG, "Session is already finished: " + session);
-                return;
-            }
-            mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REVOKE_SESSION, ls));
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Incoming session not of correct type: " + session, e);
-        }
-    }
-
-    @BinderThread
-    @Override
     public void showSoftInput(IBinder showInputToken, int flags, ResultReceiver resultReceiver) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_SHOW_SOFT_INPUT,
                 flags, showInputToken, resultReceiver));
@@ -382,5 +406,29 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void changeInputMethodSubtype(InputMethodSubtype subtype) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CHANGE_INPUTMETHOD_SUBTYPE,
                 subtype));
+    }
+
+    @BinderThread
+    @Override
+    public void canStartStylusHandwriting(int requestId)
+            throws RemoteException {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_CAN_START_STYLUS_HANDWRITING, requestId));
+    }
+
+    @BinderThread
+    @Override
+    public void startStylusHandwriting(int requestId, @NonNull InputChannel channel,
+            @Nullable List<MotionEvent> stylusEvents)
+            throws RemoteException {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageIOO(DO_START_STYLUS_HANDWRITING, requestId, channel,
+                        stylusEvents));
+    }
+
+    @BinderThread
+    @Override
+    public void initInkWindow() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_INIT_INK_WINDOW));
     }
 }

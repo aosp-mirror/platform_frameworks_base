@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
@@ -77,6 +78,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -268,6 +270,22 @@ public class WindowContainerTests extends WindowTestsBase {
             assertEquals(0, child11.getLastSurfacePosition().x);
             assertEquals(0, child11.getLastSurfacePosition().y);
         }
+    }
+
+    @Test
+    public void testRemoveImmediatelyClearsLeash() {
+        final AnimationAdapter animAdapter = mock(AnimationAdapter.class);
+        final WindowToken token = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        final SurfaceControl.Transaction t = token.getPendingTransaction();
+        token.startAnimation(t, animAdapter, false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        final ArgumentCaptor<SurfaceControl> leashCaptor =
+                ArgumentCaptor.forClass(SurfaceControl.class);
+        verify(animAdapter).startAnimation(leashCaptor.capture(), eq(t), anyInt(), any());
+        assertTrue(token.mSurfaceAnimator.hasLeash());
+        token.removeImmediately();
+        assertFalse(token.mSurfaceAnimator.hasLeash());
+        verify(t).remove(eq(leashCaptor.getValue()));
     }
 
     @Test
@@ -852,6 +870,24 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+
+        // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
+        // once it no longer animates.
+        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
+                displayContent, "exiting window");
+        exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
+                mock(AnimationAdapter.class), false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        exitingWindow.mRemoveOnExit = true;
+        exitingWindow.handleCompleteDeferredRemoval();
+        // The animation has not finished so the window is not removed.
+        assertTrue(exitingWindow.isAnimating());
+        assertTrue(exitingWindow.isAttached());
+        exitingWindow.cancelAnimation();
+        // The window is removed because the animation is gone.
+        exitingWindow.handleCompleteDeferredRemoval();
+        assertFalse(exitingWindow.isAttached());
+
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.

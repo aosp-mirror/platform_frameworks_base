@@ -1,5 +1,7 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -83,7 +85,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     @Test
     public void getItemCount_returnWifiEntriesCount() {
-        for (int i = 0; i < InternetDialogController.MAX_WIFI_ENTRY_COUNT; i++) {
+        for (int i = 0; i < MAX_WIFI_ENTRY_COUNT; i++) {
             mInternetAdapter.setWifiEntries(mWifiEntries, i /* wifiEntriesCount */);
 
             assertThat(mInternetAdapter.getItemCount()).isEqualTo(i);
@@ -138,6 +140,60 @@ public class InternetAdapterTest extends SysuiTestCase {
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
         verify(mWifiIconInjector).getIcon(eq(true) /* noInternet */, anyInt());
+    }
+
+    @Test
+    public void setWifiEntries_wifiCountLessThenMaxCount_setWifiCount() {
+        final int wifiCount = MAX_WIFI_ENTRY_COUNT - 1;
+        mInternetAdapter.mMaxEntriesCount = MAX_WIFI_ENTRY_COUNT;
+
+        mInternetAdapter.setWifiEntries(mWifiEntries, wifiCount);
+
+        assertThat(mInternetAdapter.mWifiEntriesCount).isEqualTo(wifiCount);
+    }
+
+    @Test
+    public void setWifiEntries_wifiCountGreaterThenMaxCount_setMaxCount() {
+        final int wifiCount = MAX_WIFI_ENTRY_COUNT;
+        mInternetAdapter.mMaxEntriesCount = MAX_WIFI_ENTRY_COUNT - 1;
+
+        mInternetAdapter.setWifiEntries(mWifiEntries, wifiCount);
+
+        assertThat(mInternetAdapter.mWifiEntriesCount).isEqualTo(mInternetAdapter.mMaxEntriesCount);
+    }
+
+    @Test
+    public void setMaxEntriesCount_maxCountLessThenZero_doNothing() {
+        mInternetAdapter.mMaxEntriesCount = MAX_WIFI_ENTRY_COUNT;
+        final int maxCount = -1;
+
+        mInternetAdapter.setMaxEntriesCount(maxCount);
+
+        assertThat(mInternetAdapter.mMaxEntriesCount).isEqualTo(MAX_WIFI_ENTRY_COUNT);
+    }
+
+    @Test
+    public void setMaxEntriesCount_maxCountGreaterThenWifiCount_updateMaxCount() {
+        mInternetAdapter.mWifiEntriesCount = MAX_WIFI_ENTRY_COUNT - 2;
+        mInternetAdapter.mMaxEntriesCount = MAX_WIFI_ENTRY_COUNT;
+        final int maxCount = MAX_WIFI_ENTRY_COUNT - 1;
+
+        mInternetAdapter.setMaxEntriesCount(maxCount);
+
+        assertThat(mInternetAdapter.mWifiEntriesCount).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+        assertThat(mInternetAdapter.mMaxEntriesCount).isEqualTo(maxCount);
+    }
+
+    @Test
+    public void setMaxEntriesCount_maxCountLessThenWifiCount_updateBothCount() {
+        mInternetAdapter.mWifiEntriesCount = MAX_WIFI_ENTRY_COUNT;
+        mInternetAdapter.mMaxEntriesCount = MAX_WIFI_ENTRY_COUNT;
+        final int maxCount = MAX_WIFI_ENTRY_COUNT - 1;
+
+        mInternetAdapter.setMaxEntriesCount(maxCount);
+
+        assertThat(mInternetAdapter.mWifiEntriesCount).isEqualTo(maxCount);
+        assertThat(mInternetAdapter.mMaxEntriesCount).isEqualTo(maxCount);
     }
 
     @Test

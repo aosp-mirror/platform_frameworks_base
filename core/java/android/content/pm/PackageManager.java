@@ -50,6 +50,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -74,6 +75,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.PermissionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.UiccCardInfo;
 import android.telephony.gba.GbaService;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.ProvisioningManager;
@@ -88,6 +90,7 @@ import com.android.internal.util.DataClass;
 
 import dalvik.system.VMRuntime;
 
+import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -143,6 +146,20 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_MEDIA_CAPABILITIES =
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
+
+    /**
+     * Application level property that an app can specify to opt-out from having private data
+     * directories both on the internal and external storages.
+     *
+     * <p>Changing the value of this property during app update is not supported, and such updates
+     * will be rejected.
+     *
+     * <p>This should only be set by platform apps that know what they are doing.
+     *
+     * @hide
+     */
+    public static final String PROPERTY_NO_APP_DATA_STORAGE =
+            "android.internal.PROPERTY_NO_APP_DATA_STORAGE";
 
     /**
      * A property value set within the manifest.
@@ -313,7 +330,8 @@ public abstract class PackageManager {
          * @hide
          */
         public Bundle toBundle(Bundle outBundle) {
-            final Bundle b = outBundle == null ? new Bundle() : outBundle;
+            final Bundle b = outBundle == null || outBundle == Bundle.EMPTY
+                    ? new Bundle() : outBundle;
             if (mType == TYPE_BOOLEAN) {
                 b.putBoolean(mName, mBooleanValue);
             } else if (mType == TYPE_FLOAT) {
@@ -1046,6 +1064,7 @@ public abstract class PackageManager {
      * via this flag.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 0x04000000;
 
     /**
@@ -2720,6 +2739,8 @@ public abstract class PackageManager {
      * API shipped in Android 11.
      * <li><code>202101</code>: corresponds to the features included in the Identity Credential
      * API shipped in Android 12.
+     * <li><code>202201</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 13.
      * </ul>
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3069,6 +3090,38 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a limited axes accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES =
+                "android.hardware.sensor.accelerometer_limited_axes";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a limited axes gyroscope.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES =
+                "android.hardware.sensor.gyroscope_limited_axes";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an uncalibrated limited axes accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED =
+                "android.hardware.sensor.accelerometer_limited_axes_uncalibrated";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an uncalibrated limited axes gyroscope.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES_UNCALIBRATED =
+                "android.hardware.sensor.gyroscope_limited_axes_uncalibrated";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a light sensor.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3133,6 +3186,21 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";
 
+     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a heading sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_HEADING = "android.hardware.sensor.heading";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports exposing head tracker sensors from peripheral
+     * devices via the dynamic sensors API.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_DYNAMIC_HEAD_TRACKER = "android.hardware.sensor.dynamic.head_tracker";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports high fidelity sensor processing
@@ -3162,6 +3230,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a CDMA telephony stack.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY} has been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
@@ -3169,6 +3239,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a GSM telephony stack.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY} has been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
@@ -3180,6 +3252,9 @@ public abstract class PackageManager {
      * <p>Devices declaring this feature must have an implementation of the
      * {@link android.telephony.TelephonyManager#getAllowedCarriers} and
      * {@link android.telephony.TelephonyManager#setAllowedCarriers}.
+     *
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_SUBSCRIPTION}
+     * has been defined.
      * @hide
      */
     @SystemApi
@@ -3190,13 +3265,33 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports embedded subscriptions on eUICCs.
+     *
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_SUBSCRIPTION}
+     * has been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports multiple enabled profiles on eUICCs.
+     *
+     * <p>Devices declaring this feature must have an implementation of the
+     *  {@link UiccCardInfo#getPorts},
+     *  {@link UiccCardInfo#isMultipleEnabledProfilesSupported} and
+     *  {@link android.telephony.euicc.EuiccManager#switchToSubscription (with portIndex)}.
+     *
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_EUICC} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_EUICC_MEP = "android.hardware.telephony.euicc.mep";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports cell-broadcast reception using the MBMS APIs.
+     *
+     * <p>This feature should only be defined if both {@link #FEATURE_TELEPHONY_SUBSCRIPTION}
+     * and {@link #FEATURE_TELEPHONY_RADIO_ACCESS} have been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
@@ -3204,6 +3299,8 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
      * supports attaching to IMS implementations using the ImsService API in telephony.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY_DATA} has been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
@@ -3238,6 +3335,63 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION =
             "android.hardware.telephony.ims.singlereg";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telecom Service APIs.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELECOM = "android.software.telecom";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telephony APIs for calling service.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY_RADIO_ACCESS},
+     * {@link #FEATURE_TELEPHONY_SUBSCRIPTION}, and {@link #FEATURE_TELECOM} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_CALLING = "android.hardware.telephony.calling";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telephony APIs for data service.
+     *
+     * <p>This feature should only be defined if both {@link #FEATURE_TELEPHONY_SUBSCRIPTION}
+     * and {@link #FEATURE_TELEPHONY_RADIO_ACCESS} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_DATA = "android.hardware.telephony.data";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telephony APIs for SMS and MMS.
+     *
+     * <p>This feature should only be defined if both {@link #FEATURE_TELEPHONY_SUBSCRIPTION}
+     * and {@link #FEATURE_TELEPHONY_RADIO_ACCESS} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_MESSAGING = "android.hardware.telephony.messaging";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telephony APIs for the radio access.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY} has been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_RADIO_ACCESS =
+            "android.hardware.telephony.radio.access";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports Telephony APIs for the subscription.
+     *
+     * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY} has been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_SUBSCRIPTION =
+            "android.hardware.telephony.subscription";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -3280,7 +3434,9 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The Connection Service API is enabled on the device.
+     * @deprecated use {@link #FEATURE_TELECOM} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
 
@@ -3641,6 +3797,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports expanded picture-in-picture multi-window mode.
+     *
+     * @see android.app.PictureInPictureParams.Builder#setExpandedAspectRatio
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE
+            = "android.software.expanded_picture_in_picture";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports running activities on secondary displays.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3660,14 +3826,6 @@ public abstract class PackageManager {
      * TODO: Remove after dependencies updated b/17392243
      */
     public static final String FEATURE_MANAGED_PROFILES = "android.software.managed_users";
-
-    /**
-     * @hide
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports Nearby mainline feature.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_NEARBY = "android.software.nearby";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
@@ -3985,6 +4143,23 @@ public abstract class PackageManager {
     @TestApi
     public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports dream overlay feature, which is an informational layer shown on top of dreams.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DREAM_OVERLAY = "android.software.dream_overlay";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports window magnification.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WINDOW_MAGNIFICATION =
+            "android.software.window_magnification";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
@@ -4142,6 +4317,17 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS";
 
     /**
+     * The action used to request that the user approve a permission request
+     * from the application. Sent from an application other than the one whose permissions
+     * will be granted. Can only be used by the system server.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_REQUEST_PERMISSIONS_FOR_OTHER =
+            "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
+
+    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
@@ -4164,6 +4350,21 @@ public abstract class PackageManager {
     @SystemApi
     public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS
             = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
+
+    /**
+     * Indicates that the package requesting permissions has legacy access for some permissions,
+     * or had it, but it was recently revoked. These request dialogs may show different text,
+     * indicating that the app is requesting continued access to a permission. Will be cleared
+     * from any permission request intent, if set by a non-system server app.
+     * <p>
+     * <strong>Type:</strong> String[]
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES
+            = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
 
     /**
      * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
@@ -4249,8 +4450,9 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**
-     * Permission flag: The permission has to be reviewed before any of
-     * the app components can run.
+     * Permission flag: If app targetSDK < M, then the permission has to be reviewed before any of
+     * the app components can run. If app targetSDK >= M, then the system might need to show a
+     * request dialog for this permission on behalf of an app.
      *
      * @hide
      */
@@ -5566,6 +5768,20 @@ public abstract class PackageManager {
     @TestApi
     @UnsupportedAppUsage
     public String getPermissionControllerPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Returns the package name of the component implementing supplemental process service.
+     *
+     * @return the package name of the component implementing supplemental process service
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public String getSupplementalProcessPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7789,8 +8005,7 @@ public abstract class PackageManager {
     @Deprecated
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
-        throw new UnsupportedOperationException(
-                "getPackageArchiveInfo() not implemented in subclass");
+        return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
     }
 
     /**
@@ -7799,8 +8014,29 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @NonNull PackageInfoFlags flags) {
-        throw new UnsupportedOperationException(
-                "getPackageArchiveInfo() not implemented in subclass");
+        long flagsBits = flags.getValue();
+        final PackageParser parser = new PackageParser();
+        parser.setCallback(new PackageParser.CallbackImpl(this));
+        final File apkFile = new File(archiveFilePath);
+        try {
+            if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
+                // Caller expressed an explicit opinion about what encryption
+                // aware/unaware components they want to see, so fall through and
+                // give them what they want
+            } else {
+                // Caller expressed no opinion, so match everything
+                flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            }
+
+            PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
+            if ((flagsBits & GET_SIGNATURES) != 0) {
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
+            }
+            return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
+                    FrameworkPackageUserState.DEFAULT);
+        } catch (PackageParser.PackageParserException e) {
+            return null;
+        }
     }
 
     /**
@@ -10108,16 +10344,15 @@ public abstract class PackageManager {
                     16, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getApplicationInfo") {
                 @Override
-                protected ApplicationInfo recompute(ApplicationInfoQuery query) {
+                public ApplicationInfo recompute(ApplicationInfoQuery query) {
                     return getApplicationInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected ApplicationInfo maybeCheckConsistency(
-                        ApplicationInfoQuery query, ApplicationInfo proposedResult) {
+                public boolean resultEquals(ApplicationInfo cached, ApplicationInfo fetched) {
                     // Implementing this debug check for ApplicationInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 
@@ -10210,16 +10445,15 @@ public abstract class PackageManager {
                     32, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getPackageInfo") {
                 @Override
-                protected PackageInfo recompute(PackageInfoQuery query) {
+                public PackageInfo recompute(PackageInfoQuery query) {
                     return getPackageInfoAsUserUncached(
                             query.packageName, query.flags, query.userId);
                 }
                 @Override
-                protected PackageInfo maybeCheckConsistency(
-                        PackageInfoQuery query, PackageInfo proposedResult) {
+                public boolean resultEquals(PackageInfo cached, PackageInfo fetched) {
                     // Implementing this debug check for PackageInfo would require a
                     // complicated deep comparison, so just bypass it for now.
-                    return proposedResult;
+                    return true;
                 }
             };
 

@@ -72,6 +72,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
+import android.util.PluralsMessageFormatter;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.IWindowManager;
@@ -111,7 +112,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -198,6 +201,15 @@ public class BugreportProgressService extends Service {
      * Must be a path supported by its FileProvider.
      */
     private static final String BUGREPORT_DIR = "bugreports";
+
+    /**
+     * The directory in which System Trace files from the native System Tracing app are stored for
+     * Wear devices.
+     */
+    private static final String WEAR_SYSTEM_TRACES_DIRECTORY_ON_DEVICE = "data/local/traces/";
+
+    /** The directory that contains System Traces in bugreports that include System Traces. */
+    private static final String WEAR_SYSTEM_TRACES_DIRECTORY_IN_BUGREPORT = "systraces/";
 
     private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
 
@@ -724,14 +736,16 @@ public class BugreportProgressService extends Service {
         nf.setMaximumFractionDigits(2);
         final String percentageText = nf.format((double) info.progress.intValue() / 100);
 
-        String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
-
-        // TODO: Remove this workaround when notification progress is implemented on Wear.
+        final String title;
         if (mIsWatch) {
+            // TODO: Remove this workaround when notification progress is implemented on Wear.
             nf.setMinimumFractionDigits(0);
             nf.setMaximumFractionDigits(0);
             final String watchPercentageText = nf.format((double) info.progress.intValue() / 100);
-            title = title + "\n" + watchPercentageText;
+            title = mContext.getString(
+                R.string.bugreport_in_progress_title, info.id, watchPercentageText);
+        } else {
+            title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
         }
 
         final String name =
@@ -932,9 +946,12 @@ public class BugreportProgressService extends Service {
         }
         setTakingScreenshot(true);
         collapseNotificationBar();
-        final String msg = mContext.getResources()
-                .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
-                        mScreenshotDelaySec, mScreenshotDelaySec);
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", mScreenshotDelaySec);
+        final String msg = PluralsMessageFormatter.format(
+                mContext.getResources(),
+                arguments,
+                com.android.internal.R.string.bugreport_countdown);
         Log.i(TAG, msg);
         // Show a toast just once, otherwise it might be captured in the screenshot.
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
@@ -1456,6 +1473,16 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    /** Returns an array of the system trace files collected by the System Tracing native app. */
+    private static File[] getSystemTraceFiles() {
+        try {
+            return new File(WEAR_SYSTEM_TRACES_DIRECTORY_ON_DEVICE).listFiles();
+        } catch (SecurityException e) {
+            Log.e(TAG, "Error getting system trace files.", e);
+            return new File[]{};
+        }
+    }
+
     /**
      * Adds the user-provided info into the bugreport zip file.
      * <p>
@@ -1475,8 +1502,17 @@ public class BugreportProgressService extends Service {
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
             return;
         }
-        if (TextUtils.isEmpty(info.getTitle()) && TextUtils.isEmpty(info.getDescription())) {
-            Log.d(TAG, "Not touching zip file since neither title nor description are set");
+
+        File[] systemTracesToIncludeInBugreport = new File[] {};
+        if (mIsWatch) {
+            systemTracesToIncludeInBugreport = getSystemTraceFiles();
+            Log.d(TAG, "Found " + systemTracesToIncludeInBugreport.length + " system traces.");
+        }
+
+        if (TextUtils.isEmpty(info.getTitle())
+                    && TextUtils.isEmpty(info.getDescription())
+                    && systemTracesToIncludeInBugreport.length == 0) {
+            Log.d(TAG, "Not touching zip file: no detail to add.");
             return;
         }
         if (info.addedDetailsToZip || info.addingDetailsToZip) {
@@ -1487,7 +1523,10 @@ public class BugreportProgressService extends Service {
 
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
-        sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
+        if (!mIsWatch) {
+            // TODO(b/184854609): re-introduce this notification for Wear.
+            sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
+        }
 
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
@@ -1508,6 +1547,13 @@ public class BugreportProgressService extends Service {
             }
 
             // Then add the user-provided info.
+            if (systemTracesToIncludeInBugreport.length != 0) {
+                for (File trace : systemTracesToIncludeInBugreport) {
+                    addEntry(zos,
+                            WEAR_SYSTEM_TRACES_DIRECTORY_IN_BUGREPORT + trace.getName(),
+                            new FileInputStream(trace));
+                }
+            }
             addEntry(zos, "title.txt", info.getTitle());
             addEntry(zos, "description.txt", info.getDescription());
         } catch (IOException e) {

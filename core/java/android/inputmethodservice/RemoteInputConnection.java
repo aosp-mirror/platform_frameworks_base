@@ -53,8 +53,11 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>See also {@link IInputContext} for the actual {@link android.os.Binder} IPC protocols under
  * the hood.</p>
+ *
+ * @hide
  */
-final class RemoteInputConnection implements InputConnection {
+// TODO(b/215636776): move RemoteInputConnection to proper package
+public final class RemoteInputConnection implements InputConnection {
     private static final String TAG = "RemoteInputConnection";
 
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
@@ -95,7 +98,7 @@ final class RemoteInputConnection implements InputConnection {
     @NonNull
     private final CancellationGroup mCancellationGroup;
 
-    RemoteInputConnection(
+    public RemoteInputConnection(
             @NonNull WeakReference<InputMethodServiceInternal> inputMethodService,
             IInputContext inputContext, @NonNull CancellationGroup cancellationGroup) {
         mImsInternal = new InputMethodServiceInternalHolder(inputMethodService);
@@ -108,7 +111,7 @@ final class RemoteInputConnection implements InputConnection {
         return mInvoker.isSameConnection(inputContext);
     }
 
-    RemoteInputConnection(@NonNull RemoteInputConnection original, int sessionId) {
+    public RemoteInputConnection(@NonNull RemoteInputConnection original, int sessionId) {
         mImsInternal = original.mImsInternal;
         mInvoker = original.mInvoker.cloneWithSessionId(sessionId);
         mCancellationGroup = original.mCancellationGroup;

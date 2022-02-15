@@ -82,7 +82,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,fgsmanager
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -97,9 +97,13 @@
          The syntax is setting-name:spec. If the tile is a TileService, the spec should be specified
          as custom(package/class). Relative class name is supported. -->
     <string-array name="config_quickSettingsAutoAdd" translatable="false">
+        <item>accessibility_display_daltonizer_enabled:color_correction</item>
         <item>accessibility_display_inversion_enabled:inversion</item>
         <item>one_handed_mode_enabled:onehanded</item>
     </string-array>
+
+    <!-- Use collapsed layout for media player in landscape QQS -->
+    <bool name="config_quickSettingsMediaLandscapeCollapsed">true</bool>
 
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
@@ -287,40 +291,6 @@
 
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
-
-    <!-- SystemUI Services: The classes of base stuff to start by default for all
-         configurations. -->
-    <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
-        <item>com.android.systemui.recents.Recents</item>
-        <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.statusbar.phone.StatusBar</item>
-        <item>com.android.systemui.usb.StorageNotification</item>
-        <item>com.android.systemui.power.PowerUI</item>
-        <item>com.android.systemui.media.RingtonePlayer</item>
-        <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
-        <item>@string/config_systemUIVendorServiceComponent</item>
-        <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
-        <item>com.android.systemui.LatencyTester</item>
-        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.biometrics.AuthController</item>
-        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
-        <item>com.android.systemui.theme.ThemeOverlayController</item>
-        <item>com.android.systemui.accessibility.WindowMagnification</item>
-        <item>com.android.systemui.accessibility.SystemActions</item>
-        <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.wmshell.WMShell</item>
-    </string-array>
-
-    <!-- SystemUI Services: The classes of the additional stuff to start. Services here are
-                            specified as an overlay to provide configuration-specific services that
-                            supplement those listed in config_systemUIServiceComponents. -->
-    <string-array name="config_additionalSystemUIServiceComponents" translatable="false">
-    </string-array>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
     <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
@@ -578,6 +548,9 @@
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
 
+    <!-- Whether notification header should never show section headers. -->
+    <bool name="config_notification_never_show_section_headers">false</bool>
+
     <!-- Default udfps icon. Same path as ic_fingerprint.xml -->
     <string name="config_udfpsIcon" translatable="false">
         M25.5,16.3283C28.47,14.8433 31.9167,14 35.5834,14C39.2501,14 42.6968,14.8433 45.6668,16.3283
@@ -676,7 +649,7 @@
     <integer name="config_connectionMinDuration">1000</integer>
 
     <!-- Flag to activate notification to contents feature -->
-    <bool name="config_notificationToContents">false</bool>
+    <bool name="config_notificationToContents">true</bool>
 
     <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
          customization for secondary display-->
@@ -713,26 +686,12 @@
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
 
-    <!-- The positions widgets can be in defined as View.Gravity constants -->
-    <integer-array name="config_dreamOverlayPositions">
-    </integer-array>
-
-    <!-- Widget components to show as dream overlays -->
-    <string-array name="config_dreamOverlayComponents" translatable="false">
-    </string-array>
-
-    <!-- Width percentage of dream overlay components -->
-    <item name="config_dreamOverlayComponentWidthPercent" translatable="false" format="float"
-          type="dimen">0.33</item>
-
-    <!-- Height percentage of dream overlay components -->
-    <item name="config_dreamOverlayComponentHeightPercent" translatable="false" format="float"
-          type="dimen">0.25</item>
-
     <!-- Flag to enable dream overlay service and its registration -->
     <bool name="config_dreamOverlayServiceEnabled">false</bool>
 
     <!-- Class for the communal source connector to be used -->
     <string name="config_communalSourceConnector" translatable="false"></string>
 
+    <!-- How often in milliseconds to jitter the dream overlay in order to avoid burn-in. -->
+    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">500</integer>
 </resources>

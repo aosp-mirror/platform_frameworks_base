@@ -36,14 +36,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.parsing.component.ComponentMutateUtils;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedIntentInfo;
-import android.content.pm.parsing.component.ParsedMainComponent;
-import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedProviderImpl;
-import android.content.pm.parsing.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -62,7 +54,15 @@ import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGener
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedProviderImpl;
+import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchableImpl;
@@ -380,14 +380,13 @@ public class ComponentResolver
                     continue;
                 }
                 // See PM.queryContentProviders()'s javadoc for why we have the metaData parameter.
-                if (metaDataKey != null
-                        && (p.getMetaData() == null || !p.getMetaData().containsKey(metaDataKey))) {
+                if (metaDataKey != null && !p.getMetaData().containsKey(metaDataKey)) {
                     continue;
                 }
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.getUserStateOrDefault(userId);
+                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, flags, state, userId, ps);
                 if (appInfo == null) {
@@ -424,7 +423,7 @@ public class ComponentResolver
             if (pkg == null) {
                 return null;
             }
-            final PackageUserState state = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
                     pkg, flags, state, userId, ps);
             if (appInfo == null) {
@@ -461,7 +460,7 @@ public class ComponentResolver
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.getUserStateOrDefault(userId);
+                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, 0, state, userId, ps);
                 if (appInfo == null) {
@@ -617,98 +616,113 @@ public class ComponentResolver
     }
 
     void dumpActivityResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
-                : "Activity Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
+                            : "Activity Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpProviderResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
-                : "Provider Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
+                            : "Provider Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpReceiverResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
-                : "Receiver Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
+                            : "Receiver Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpServiceResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
-                : "Service Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
+                            : "Service Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpContentProviders(PrintWriter pw, DumpState dumpState, String packageName) {
-        boolean printedSomething = false;
-        for (ParsedProvider p : mProviders.mProviders.values()) {
-            if (packageName != null && !packageName.equals(p.getPackageName())) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println();
+        synchronized (mLock) {
+            boolean printedSomething = false;
+            for (ParsedProvider p : mProviders.mProviders.values()) {
+                if (packageName != null && !packageName.equals(p.getPackageName())) {
+                    continue;
                 }
-                pw.println("Registered ContentProviders:");
-                printedSomething = true;
-            }
-            pw.print("  ");
-            ComponentName.printShortString(pw, p.getPackageName(), p.getName());
-            pw.println(":");
-            pw.print("    ");
-            pw.println(p.toString());
-        }
-        printedSomething = false;
-        for (Map.Entry<String, ParsedProvider> entry :
-                mProvidersByAuthority.entrySet()) {
-            ParsedProvider p = entry.getValue();
-            if (packageName != null && !packageName.equals(p.getPackageName())) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println();
+                if (!printedSomething) {
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
+                    pw.println("Registered ContentProviders:");
+                    printedSomething = true;
                 }
-                pw.println("ContentProvider Authorities:");
-                printedSomething = true;
+                pw.print("  ");
+                ComponentName.printShortString(pw, p.getPackageName(), p.getName());
+                pw.println(":");
+                pw.print("    ");
+                pw.println(p.toString());
             }
-            pw.print("  ["); pw.print(entry.getKey()); pw.println("]:");
-            pw.print("    "); pw.println(p.toString());
+            printedSomething = false;
+            for (Map.Entry<String, ParsedProvider> entry :
+                    mProvidersByAuthority.entrySet()) {
+                ParsedProvider p = entry.getValue();
+                if (packageName != null && !packageName.equals(p.getPackageName())) {
+                    continue;
+                }
+                if (!printedSomething) {
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
+                    pw.println("ContentProvider Authorities:");
+                    printedSomething = true;
+                }
+                pw.print("  [");
+                pw.print(entry.getKey());
+                pw.println("]:");
+                pw.print("    ");
+                pw.println(p.toString());
 
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
+                AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
-            if (pkg != null) {
-                pw.print("      applicationInfo=");
-                pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                if (pkg != null) {
+                    pw.print("      applicationInfo=");
+                    pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                }
             }
         }
     }
 
     void dumpServicePermissions(PrintWriter pw, DumpState dumpState) {
-        if (dumpState.onTitlePrinted()) pw.println();
-        pw.println("Service permissions:");
+        synchronized (mLock) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            pw.println("Service permissions:");
 
-        final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
-                mServices.filterIterator();
-        while (filterIterator.hasNext()) {
-            final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
-            ParsedService service = pair.first;
+            final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
+                    mServices.filterIterator();
+            while (filterIterator.hasNext()) {
+                final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
+                ParsedService service = pair.first;
 
-            final String permission = service.getPermission();
-            if (permission != null) {
-                pw.print("    ");
-                pw.print(service.getComponentName().flattenToShortString());
-                pw.print(": ");
-                pw.println(permission);
+                final String permission = service.getPermission();
+                if (permission != null) {
+                    pw.print("    ");
+                    pw.print(service.getComponentName().flattenToShortString());
+                    pw.print(": ");
+                    pw.println(permission);
+                }
             }
         }
     }
@@ -1537,7 +1551,7 @@ public class ComponentResolver
                 }
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
                     userState, userId, ps);
             if (ai == null) {
@@ -1854,7 +1868,7 @@ public class ComponentResolver
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             final boolean matchVisibleToInstantApp = (mFlags
                     & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
@@ -2099,7 +2113,7 @@ public class ComponentResolver
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
                     userState, userId, ps);
             if (si == null) {

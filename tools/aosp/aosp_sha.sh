@@ -1,7 +1,7 @@
 #!/bin/bash
 LOCAL_DIR="$( dirname "${BASH_SOURCE}" )"
 
-if git branch -vv | grep -q -E "^\*[^\[]+\[aosp/"; then
+if git log -n 1 --format='%D' HEAD@{upstream} | grep -q aosp/; then
     # Change appears to be in AOSP
     exit 0
 elif git log -n 1 --format='%B' $1 | grep -q -E "^Ignore-AOSP-First: .+" ; then

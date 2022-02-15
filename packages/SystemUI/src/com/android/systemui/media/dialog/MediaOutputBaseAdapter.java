@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.WallpaperColors;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -56,7 +57,7 @@ public abstract class MediaOutputBaseAdapter extends
     static final int CUSTOMIZED_ITEM_GROUP = 2;
     static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
-    final MediaOutputController mController;
+    protected final MediaOutputController mController;
 
     private int mMargin;
     private boolean mIsAnimating;
@@ -84,6 +85,10 @@ public abstract class MediaOutputBaseAdapter extends
         return null;
     }
 
+    void updateColorScheme(WallpaperColors wallpaperColors, boolean isDarkTheme) {
+        mController.setCurrentColorScheme(wallpaperColors, isDarkTheme);
+    }
+
     CharSequence getItemTitle(MediaDevice device) {
         return device.getName();
     }
@@ -105,6 +110,10 @@ public abstract class MediaOutputBaseAdapter extends
         return mCurrentActivePosition;
     }
 
+    public MediaOutputController getController() {
+        return mController;
+    }
+
     /**
      * ViewHolder for binding device view.
      */
@@ -118,7 +127,6 @@ public abstract class MediaOutputBaseAdapter extends
         final TextView mTwoLineTitleText;
         final TextView mSubTitleText;
         final ImageView mTitleIcon;
-        final ImageView mAddIcon;
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
         final RelativeLayout mTwoLineLayout;
@@ -137,7 +145,6 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleIcon = view.requireViewById(R.id.title_icon);
             mProgressBar = view.requireViewById(R.id.volume_indeterminate_progress);
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
-            mAddIcon = view.requireViewById(R.id.add_icon);
             mStatusIcon = view.requireViewById(R.id.media_output_item_status);
             mCheckBox = view.requireViewById(R.id.check_box);
         }

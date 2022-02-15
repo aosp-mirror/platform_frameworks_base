@@ -18,12 +18,12 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 /** A package to be scanned */
 @VisibleForTesting
@@ -32,14 +32,16 @@ final class ScanRequest {
     @NonNull public final ParsedPackage mParsedPackage;
     /** The package this package replaces */
     @Nullable public final AndroidPackage mOldPkg;
-    /** Shared user settings, if the package has a shared user */
-    @Nullable public final SharedUserSetting mSharedUserSetting;
+    /** Shared user settings, if the old package has a shared user */
+    @Nullable public final SharedUserSetting mOldSharedUserSetting;
     /**
      * Package settings of the currently installed version.
      * <p><em>IMPORTANT:</em> The contents of this object may be modified
      * during scan.
      */
     @Nullable public final PackageSetting mPkgSetting;
+    /** Shared user settings of the currently installed package */
+    @Nullable public final SharedUserSetting mSharedUserSetting;
     /** A copy of the settings for the currently installed version */
     @Nullable public final PackageSetting mOldPkgSetting;
     /** Package settings for the disabled version on the /system partition */
@@ -59,9 +61,10 @@ final class ScanRequest {
 
     ScanRequest(
             @NonNull ParsedPackage parsedPackage,
-            @Nullable SharedUserSetting sharedUserSetting,
+            @Nullable SharedUserSetting oldSharedUserSetting,
             @Nullable AndroidPackage oldPkg,
             @Nullable PackageSetting pkgSetting,
+            @Nullable SharedUserSetting sharedUserSetting,
             @Nullable PackageSetting disabledPkgSetting,
             @Nullable PackageSetting originalPkgSetting,
             @Nullable String realPkgName,
@@ -73,6 +76,7 @@ final class ScanRequest {
         mParsedPackage = parsedPackage;
         mOldPkg = oldPkg;
         mPkgSetting = pkgSetting;
+        mOldSharedUserSetting = oldSharedUserSetting;
         mSharedUserSetting = sharedUserSetting;
         mOldPkgSetting = pkgSetting == null ? null : new PackageSetting(pkgSetting);
         mDisabledPkgSetting = disabledPkgSetting;

@@ -142,7 +142,7 @@ public class CommunalSourcePrimer extends CoreStartable {
 
     private void connect() {
         if (DEBUG) {
-            Log.d(TAG, "attempting to communal to communal source");
+            Log.d(TAG, "attempting to connect to communal source");
         }
 
         if (mCurrentConnection != null) {

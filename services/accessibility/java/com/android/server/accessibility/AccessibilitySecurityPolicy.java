@@ -16,13 +16,18 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_BY_ADMIN;
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
 import static android.content.pm.PackageManagerInternal.PACKAGE_INSTALLER;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,13 +46,17 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.settingslib.RestrictedLockUtils;
 
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -361,6 +370,115 @@ public class AccessibilitySecurityPolicy {
             @NonNull AbstractAccessibilityServiceConnection service) {
         return (service.getCapabilities()
                 & AccessibilityServiceInfo.CAPABILITY_CAN_TAKE_SCREENSHOT) != 0;
+    }
+
+    /**
+     * Check whether the input method can be enabled or disabled by the accessibility service.
+     *
+     * @param imeId The id of the input method.
+     * @param service The accessibility service connection.
+     * @return Whether the input method can be enabled/disabled or the reason why it can't be
+     *         enabled/disabled.
+     * @throws SecurityException if the input method is not in the same package as the service.
+     */
+    @AccessibilityService.SoftKeyboardController.EnableImeResult
+    int canEnableDisableInputMethod(String imeId, AbstractAccessibilityServiceConnection service)
+            throws SecurityException {
+        final String servicePackageName = service.getComponentName().getPackageName();
+        final int callingUserId = UserHandle.getCallingUserId();
+
+        InputMethodInfo inputMethodInfo = null;
+        List<InputMethodInfo> inputMethodInfoList =
+                InputMethodManagerInternal.get().getInputMethodListAsUser(callingUserId);
+        if (inputMethodInfoList != null) {
+            for (InputMethodInfo info : inputMethodInfoList) {
+                if (info.getId().equals(imeId)) {
+                    inputMethodInfo = info;
+                    break;
+                }
+            }
+        }
+
+        if (inputMethodInfo == null
+                || !inputMethodInfo.getPackageName().equals(servicePackageName)) {
+            throw new SecurityException("The input method is in a different package with the "
+                    + "accessibility service");
+        }
+
+        // TODO(b/207697949, b/208872785): Add cts test for managed device.
+        //  Use RestrictedLockUtilsInternal in AccessibilitySecurityPolicy
+        if (checkIfInputMethodDisallowed(
+                mContext, inputMethodInfo.getPackageName(), callingUserId) != null) {
+            return ENABLE_IME_FAIL_BY_ADMIN;
+        }
+
+        return ENABLE_IME_SUCCESS;
+    }
+
+    /**
+     * @return the UserHandle for a userId. Return null for USER_NULL
+     */
+    private static UserHandle getUserHandleOf(@UserIdInt int userId) {
+        if (userId == UserHandle.USER_NULL) {
+            return null;
+        } else {
+            return UserHandle.of(userId);
+        }
+    }
+
+    private static int getManagedProfileId(Context context, int userId) {
+        UserManager um = context.getSystemService(UserManager.class);
+        List<UserInfo> userProfiles = um.getProfiles(userId);
+        for (UserInfo uInfo : userProfiles) {
+            if (uInfo.id == userId) {
+                continue;
+            }
+            if (uInfo.isManagedProfile()) {
+                return uInfo.id;
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
+    private static RestrictedLockUtils.EnforcedAdmin checkIfInputMethodDisallowed(Context context,
+            String packageName, int userId) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        if (dpm == null) {
+            return null;
+        }
+        RestrictedLockUtils.EnforcedAdmin admin =
+                RestrictedLockUtils.getProfileOrDeviceOwner(context, getUserHandleOf(userId));
+        boolean permitted = true;
+        if (admin != null) {
+            permitted = dpm.isInputMethodPermittedByAdmin(admin.component,
+                    packageName, userId);
+        }
+
+        boolean permittedByParentAdmin = true;
+        RestrictedLockUtils.EnforcedAdmin profileAdmin = null;
+        int managedProfileId = getManagedProfileId(context, userId);
+        if (managedProfileId != UserHandle.USER_NULL) {
+            profileAdmin = RestrictedLockUtils.getProfileOrDeviceOwner(
+                    context, getUserHandleOf(managedProfileId));
+            // If the device is an organization-owned device with a managed profile, the
+            // managedProfileId will be used instead of the affected userId. This is because
+            // isInputMethodPermittedByAdmin is called on the parent DPM instance, which will
+            // return results affecting the personal profile.
+            if (profileAdmin != null && dpm.isOrganizationOwnedDeviceWithManagedProfile()) {
+                DevicePolicyManager parentDpm = dpm.getParentProfileInstance(
+                        UserManager.get(context).getUserInfo(managedProfileId));
+                permittedByParentAdmin = parentDpm.isInputMethodPermittedByAdmin(
+                        profileAdmin.component, packageName, managedProfileId);
+            }
+        }
+        if (!permitted && !permittedByParentAdmin) {
+            return RestrictedLockUtils.EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+        } else if (!permitted) {
+            return admin;
+        } else if (!permittedByParentAdmin) {
+            return profileAdmin;
+        }
+        return null;
     }
 
     /**

@@ -148,4 +148,9 @@ oneway interface IAutoFillManagerClient {
      */
     void requestFillFromClient(int id, in InlineSuggestionsRequest request,
             in IFillCallback callback);
+
+    /**
+     * Notifies autofill ids that require to show the fill dialog.
+     */
+    void notifyFillDialogTriggerIds(in List<AutofillId> ids);
 }

@@ -17,11 +17,23 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನ ನಿರ್ವಾಹಕರು"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ಮೂಲಕ ನಿರ್ವಹಿಸಬೇಕಾದ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="profile_name_generic" msgid="6851028682723034988">"ಸಾಧನ"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"ವೀಕ್ಷಿಸಿ"</string>
     <string name="confirmation_title" msgid="8455544820286920304">"ನಿಮ್ಮ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಅನ್ನು ನಿರ್ವಹಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಅನ್ನು ಅನುಮತಿಸಿ"</string>
-    <string name="profile_summary" msgid="2059360676631420073">"ನಿಮ್ಮ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. ಅನ್ನು ನಿರ್ವಹಿಸಲು ಈ ಆ್ಯಪ್‌ನ ಅಗತ್ಯವಿದೆ. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"ವೀಕ್ಷಿಸಿ"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ಮೂಲಕ ನಿರ್ವಹಿಸಬೇಕಾದ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು ಮತ್ತು ನಿಮ್ಮ ಫೋನ್, SMS, ಸಂಪರ್ಕಗಳು ಮತ್ತು Calendar ಅನುಮತಿಗಳನ್ನು ಪ್ರವೇಶಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು ಮತ್ತು ನಿಮ್ಮ ಫೋನ್, SMS, ಸಂಪರ್ಕಗಳು ಮತ್ತು Calendar ಅನುಮತಿಗಳನ್ನು ಪ್ರವೇಶಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="title_app_streaming" msgid="4459136600249308574">"ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಿ?"</string>
+    <string name="summary_app_streaming" product="default" msgid="6105916810614498138">"ಕನೆಕ್ಟ್ ಆದಾಗ ಈ ಫೋನ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸುವುದಕ್ಕಾಗಿ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಗೆ ರಿಮೋಟ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ."</string>
+    <string name="summary_app_streaming" product="tablet" msgid="2996373715966272792">"ಕನೆಕ್ಟ್ ಆದಾಗ ಈ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸುವುದಕ್ಕಾಗಿ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಗೆ ರಿಮೋಟ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ."</string>
+    <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"ಕನೆಕ್ಟ್ ಆದಾಗ ಈ ಸಾಧನದಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸುವುದಕ್ಕಾಗಿ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಗೆ ರಿಮೋಟ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ."</string>
+    <string name="title_automotive_projection" msgid="3296005598978412847"></string>
+    <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ಸಾಧನ"</string>
+    <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ಅನುಮತಿಸಿ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ಅನುಮತಿಸಬೇಡಿ"</string>
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ಆ್ಯಪ್ ಅನುಮತಿಗಳನ್ನು ನಿಮ್ಮ ವಾಚ್‌ಗೆ ವರ್ಗಾವಣೆ ಮಾಡಿ"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"ನಿಮ್ಮ ವಾಚ್ ಸೆಟಪ್ ಮಾಡುವುದನ್ನು ಸುಲಭವಾಗಿಸಲು, ಸೆಟಪ್‌ನ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ವಾಚ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಅನುಮತಿಗಳನ್ನೇ ಬಳಸಿಕೊಳ್ಳುತ್ತವೆ.\n\n ಈ ಅನುಮತಿಗಳು ನಿಮ್ಮ ವಾಚ್‌ನ ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಸ್ಥಳದ ಪ್ರವೇಶವನ್ನು ಒಳಗೊಳ್ಳಬಹುದು."</string>
 </resources>

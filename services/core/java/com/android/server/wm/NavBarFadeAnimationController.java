@@ -80,8 +80,8 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
      * @param show true for fade-in, otherwise for fade-out.
      */
     public void fadeWindowToken(boolean show) {
-        final FadeRotationAnimationController controller =
-                mDisplayContent.getFadeRotationAnimationController();
+        final AsyncRotationController controller =
+                mDisplayContent.getAsyncRotationController();
         final Runnable fadeAnim = () -> fadeWindowToken(show, mNavigationBar.mToken,
                 ANIMATION_TYPE_APP_TRANSITION);
         if (controller == null) {
@@ -94,14 +94,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
                 controller.setOnShowRunnable(fadeAnim);
             } else {
                 fadeAnim.run();
-            }
-        } else {
-            // If fade rotation animation is running and controlling the nav bar, make sure we empty
-            // the mDeferredFinishCallbacks and defer the runnable until fade rotation animation
-            // finishes.
-            final Runnable runnable = mDeferredFinishCallbacks.remove(mNavigationBar.mToken);
-            if (runnable != null) {
-                controller.setOnShowRunnable(runnable);
             }
         }
     }

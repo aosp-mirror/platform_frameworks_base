@@ -1067,7 +1067,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.packageName = source.readString();
-                    res.autofillId = source.readParcelable(AutofillId.class.getClassLoader());
+                    res.autofillId = source.readParcelable(AutofillId.class.getClassLoader(), android.view.autofill.AutofillId.class);
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();

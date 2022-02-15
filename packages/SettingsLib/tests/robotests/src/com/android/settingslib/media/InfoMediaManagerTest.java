@@ -46,6 +46,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -731,6 +732,7 @@ public class InfoMediaManagerTest {
     }
 
     @Test
+    @Ignore
     public void shouldDisableMediaOutput_infosSizeEqual1_returnsTrue() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         final List<MediaRoute2Info> infos = new ArrayList<>();

@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -117,8 +114,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_RECENTS,
                 mFinishedCallback);
 
-        // Remove the app window so that the animation target can not be created
-        activity.removeImmediately();
+        // The activity doesn't contain window so the animation target cannot be created.
         mController.startAnimation();
 
         // Verify that the finish callback to reparent the leash is called
@@ -622,9 +618,9 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testNotAttachNavigationBar_controlledByFadeRotationAnimation() {
         setupForShouldAttachNavBarDuringTransition();
-        FadeRotationAnimationController mockController =
-                mock(FadeRotationAnimationController.class);
-        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
+        AsyncRotationController mockController =
+                mock(AsyncRotationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getAsyncRotationController();
         final ActivityRecord homeActivity = createHomeActivity();
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(mController.isNavigationBarAttachedToApp());
@@ -633,10 +629,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testAttachNavBarInSplitScreenMode() {
         setupForShouldAttachNavBarDuringTransition();
-        final ActivityRecord primary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord secondary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD);
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
+        final ActivityRecord primary = createActivityRecordWithParentTask(
+                organizer.createTaskToPrimary(true));
+        final ActivityRecord secondary = createActivityRecordWithParentTask(
+                organizer.createTaskToSecondary(true));
         final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setVisibility(true);
         initializeRecentsAnimationController(mController, homeActivity);

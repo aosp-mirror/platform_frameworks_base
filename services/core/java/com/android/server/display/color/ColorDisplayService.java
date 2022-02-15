@@ -1453,7 +1453,7 @@ public final class ColorDisplayService extends SystemService {
     /**
      * Local service that allows color transforms to be enabled from other system services.
      */
-    public final class ColorDisplayServiceInternal {
+    public class ColorDisplayServiceInternal {
 
         /**
          * Set the current CCT value for the display white balance transform, and if the transform
@@ -1470,6 +1470,11 @@ public final class ColorDisplayService extends SystemService {
                 return true;
             }
             return false;
+        }
+
+        /** Get the luminance of the current chromatic adaptation matrix. */
+        public float getDisplayWhiteBalanceLuminance() {
+            return mDisplayWhiteBalanceTintController.getLuminance();
         }
 
         /**

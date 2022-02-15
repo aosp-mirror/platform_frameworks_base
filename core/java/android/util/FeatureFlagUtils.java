@@ -44,8 +44,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
     /** @hide */
-    public static final String SETTINGS_PROVIDER_MODEL = "settings_provider_model";
-    /** @hide */
     public static final String SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES
             = "settings_use_new_backup_eligibility_rules";
     /** @hide */
@@ -61,6 +59,13 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
             "settings_enable_monitor_phantom_procs";
+
+    /**
+     * Support dark theme activation at Bedtime.
+     * @hide
+     */
+    public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
+            "settings_app_allow_dark_theme_activation_at_bedtime";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -80,21 +85,22 @@ public class FeatureFlagUtils {
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
-        DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "true");
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
-        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "false");
+        DEFAULT_FLAGS.put("settings_search_always_expand", "false");
+        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
+        DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
     static {
         PERSISTENT_FLAGS = new HashSet<>();
         PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
-        PERSISTENT_FLAGS.add(SETTINGS_PROVIDER_MODEL);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
+        PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
     }
 
     /**

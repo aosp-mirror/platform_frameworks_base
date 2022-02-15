@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.UNDEFINED;
+
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.ColorInt;
@@ -95,8 +98,8 @@ public class UserManager {
     /** The userId of the constructor param context. To be used instead of mContext.getUserId(). */
     private final @UserIdInt int mUserId;
 
-    private Boolean mIsManagedProfileCached;
-    private Boolean mIsProfileCached;
+    /** The userType of UserHandle.myUserId(); empty string if not a profile; null until cached. */
+    private String mProfileTypeOfProcessUser = null;
 
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
@@ -820,6 +823,20 @@ public class UserManager {
     public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
+     * Specifies if a user is disallowed from creating clone profile.
+     * <p>The default value for an unmanaged user is <code>false</code>.
+     * For users with a device owner set, the default is <code>true</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_ADD_CLONE_PROFILE = "no_add_clone_profile";
+
+    /**
      * Specifies if a user is disallowed from disabling application verification. The default
      * value is <code>false</code>.
      *
@@ -1497,6 +1514,7 @@ public class UserManager {
             DISALLOW_FACTORY_RESET,
             DISALLOW_ADD_USER,
             DISALLOW_ADD_MANAGED_PROFILE,
+            DISALLOW_ADD_CLONE_PROFILE,
             ENSURE_VERIFY_APPS,
             DISALLOW_CONFIG_CELL_BROADCASTS,
             DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -1544,6 +1562,17 @@ public class UserManager {
     public @interface UserRestrictionKey {}
 
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
+
+    /**
+     * Action to start an activity to create a supervised user.
+     * Only devices with non-empty config_supervisedUserCreationPackage support this.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USERS)
+    public static final String ACTION_CREATE_SUPERVISED_USER =
+            "android.os.action.CREATE_SUPERVISED_USER";
 
     /**
      * Extra containing a name for the user being created. Optional parameter passed to
@@ -1646,41 +1675,49 @@ public class UserManager {
     public @interface UserSwitchabilityResult {}
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has been successfully removed.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user has been successfully removed.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_REMOVED = 0;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has had its {@link UserInfo#FLAG_EPHEMERAL} flag set to {@code true}, so that it will be
-     * removed when the user is stopped or on boot.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user is marked so that it will be removed when the user is stopped or on boot.
+     *
      * @hide
      */
-    public static final int REMOVE_RESULT_SET_EPHEMERAL = 1;
+    @SystemApi
+    public static final int REMOVE_RESULT_DEFERRED = 1;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user is already in the process of being removed.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user is already in the process of being removed.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that an error occurred
-     * that prevented the user from being removed or set as ephemeral.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * an error occurred that prevented the user from being removed or set as ephemeral.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_ERROR = 3;
 
     /**
-     * Possible response codes from {@link #removeUserOrSetEphemeral(int)}.
+     * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
+     *
      * @hide
      */
     @IntDef(prefix = { "REMOVE_RESULT_" }, value = {
             REMOVE_RESULT_REMOVED,
-            REMOVE_RESULT_SET_EPHEMERAL,
+            REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
             REMOVE_RESULT_ERROR,
     })
@@ -2239,7 +2276,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_PROFILE_MANAGED managed profile}.
      * @hide
      */
-    public static boolean isUserTypeManagedProfile(String userType) {
+    public static boolean isUserTypeManagedProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_MANAGED.equals(userType);
     }
 
@@ -2247,7 +2284,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_GUEST guest user}.
      * @hide
      */
-    public static boolean isUserTypeGuest(String userType) {
+    public static boolean isUserTypeGuest(@Nullable String userType) {
         return USER_TYPE_FULL_GUEST.equals(userType);
     }
 
@@ -2256,7 +2293,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_FULL_RESTRICTED restricted user}.
      * @hide
      */
-    public static boolean isUserTypeRestricted(String userType) {
+    public static boolean isUserTypeRestricted(@Nullable String userType) {
         return USER_TYPE_FULL_RESTRICTED.equals(userType);
     }
 
@@ -2264,7 +2301,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_DEMO demo user}.
      * @hide
      */
-    public static boolean isUserTypeDemo(String userType) {
+    public static boolean isUserTypeDemo(@Nullable String userType) {
         return USER_TYPE_FULL_DEMO.equals(userType);
     }
 
@@ -2272,7 +2309,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_PROFILE_CLONE clone user}.
      * @hide
      */
-    public static boolean isUserTypeCloneProfile(String userType) {
+    public static boolean isUserTypeCloneProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_CLONE.equals(userType);
     }
 
@@ -2472,12 +2509,12 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user is running in a profile.
+     * Checks if the calling context user is running in a profile. A profile is a user that
+     * typically has its own separate data but shares its UI with some parent user. For example, a
+     * {@link #isManagedProfile() managed profile} is a type of profile.
      *
      * @return whether the caller is in a profile.
-     * @hide
      */
-    @SystemApi
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     android.Manifest.permission.MANAGE_USERS,
@@ -2488,25 +2525,50 @@ public class UserManager {
     }
 
     private boolean isProfile(@UserIdInt int userId) {
-        if (userId == mUserId) {
+        final String profileType = getProfileType(userId);
+        return profileType != null && !profileType.equals("");
+    }
+
+    /**
+     * Returns the user type of the context user if it is a profile.
+     *
+     * This is a more specific form of {@link #getUserType()} with relaxed permission requirements.
+     *
+     * @return the user type of the context user if it is a {@link #isProfile() profile},
+     *         an empty string if it is not a profile,
+     *         or null if the user doesn't exist.
+     */
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    private @Nullable String getProfileType() {
+        return getProfileType(mUserId);
+    }
+
+    /** @see #getProfileType() */
+    private @Nullable String getProfileType(@UserIdInt int userId) {
+        // First, the typical case (i.e. the *process* user, not necessarily the context user).
+        // This cache cannot be become invalidated since it's about the calling process itself.
+        if (userId == UserHandle.myUserId()) {
             // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
             // Worst case we might end up calling the AIDL method multiple times but that's fine.
-            if (mIsProfileCached != null) {
-                return mIsProfileCached;
+            if (mProfileTypeOfProcessUser != null) {
+                return mProfileTypeOfProcessUser;
             }
             try {
-                mIsProfileCached = mService.isProfile(mUserId);
-                return mIsProfileCached;
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        } else {
-            try {
-                return mService.isProfile(userId);
+                final String profileType = mService.getProfileType(userId);
+                if (profileType != null) {
+                    return mProfileTypeOfProcessUser = profileType.intern();
+                }
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
         }
+
+        // The userId is not for the process's user. Use a slower cache that handles invalidation.
+        return mProfileTypeCache.query(userId);
     }
 
     /**
@@ -2540,33 +2602,11 @@ public class UserManager {
             android.Manifest.permission.QUERY_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isManagedProfile(@UserIdInt int userId) {
-        if (userId == mUserId) {
-            // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
-            // Worst case we might end up calling the AIDL method multiple times but that's fine.
-            if (mIsManagedProfileCached != null) {
-                return mIsManagedProfileCached;
-            }
-            try {
-                mIsManagedProfileCached = mService.isManagedProfile(mUserId);
-                return mIsManagedProfileCached;
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        } else {
-            try {
-                return mService.isManagedProfile(userId);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        }
+        return isUserTypeManagedProfile(getProfileType(userId));
     }
 
     /**
      * Checks if the context user is a clone profile.
-     *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the caller
-     * must be in the same profile group of the user.
      *
      * @return whether the context user is a clone profile.
      *
@@ -2574,16 +2614,14 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isCloneProfile() {
-        try {
-            return mService.isCloneProfile(mUserId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return isUserTypeCloneProfile(getProfileType());
     }
 
     /**
@@ -2743,7 +2781,7 @@ public class UserManager {
             new PropertyInvalidatedCache<Integer, Boolean>(
                 32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
                 @Override
-                protected Boolean recompute(Integer query) {
+                public Boolean recompute(Integer query) {
                     try {
                         return mService.isUserUnlocked(query);
                     } catch (RemoteException re) {
@@ -2751,7 +2789,7 @@ public class UserManager {
                     }
                 }
                 @Override
-                protected boolean bypass(Integer query) {
+                public boolean bypass(Integer query) {
                     return query < 0;
                 }
             };
@@ -2761,7 +2799,7 @@ public class UserManager {
             new PropertyInvalidatedCache<Integer, Boolean>(
                 32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
                 @Override
-                protected Boolean recompute(Integer query) {
+                public Boolean recompute(Integer query) {
                     try {
                         return mService.isUserUnlockingOrUnlocked(query);
                     } catch (RemoteException re) {
@@ -2769,7 +2807,7 @@ public class UserManager {
                     }
                 }
                 @Override
-                protected boolean bypass(Integer query) {
+                public boolean bypass(Integer query) {
                     return query < 0;
                 }
             };
@@ -3992,6 +4030,53 @@ public class UserManager {
     }
 
     /**
+     * Returns the remaining number of users of the given type that can be created.
+     *
+     * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_SECONDARY}.
+     * @return how many additional users can be created.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
+    public int getRemainingCreatableUserCount(@NonNull String userType) {
+        Objects.requireNonNull(userType, "userType must not be null");
+        try {
+            return mService.getRemainingCreatableUserCount(userType);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the remaining number of profiles that can be added to the context user.
+     * <p>Note that is applicable to any profile type (currently not including Restricted profiles).
+     *
+     * @param userType the type of profile, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
+     * @return how many additional profiles can be created.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
+    @UserHandleAware
+    public int getRemainingCreatableProfileCount(@NonNull String userType) {
+        Objects.requireNonNull(userType, "userType must not be null");
+        try {
+            // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
+            return mService.getRemainingCreatableProfileCount(userType, mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether it's possible to add more managed profiles.
      * if allowedToRemoveOne is true and if the user already has a managed profile, then return if
      * we could add a new managed profile to this user after removing the existing one.
@@ -4001,6 +4086,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
             android.Manifest.permission.QUERY_USERS
     })
     public boolean canAddMoreManagedProfiles(@UserIdInt int userId, boolean allowedToRemoveOne) {
@@ -4020,6 +4106,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
             android.Manifest.permission.QUERY_USERS
     })
     public boolean canAddMoreProfilesToUser(@NonNull String userType, @UserIdInt int userId) {
@@ -4626,6 +4713,18 @@ public class UserManager {
         if (!hasBadge(userId)) {
             return label;
         }
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        return dpm.getString(
+                getUpdatableUserBadgedLabelId(userId),
+                () -> getDefaultUserBadgedLabel(label, userId),
+                /* formatArgs= */ label);
+    }
+
+    private String getUpdatableUserBadgedLabelId(int userId) {
+        return isManagedProfile(userId) ? WORK_PROFILE_BADGED_LABEL : UNDEFINED;
+    }
+
+    private String getDefaultUserBadgedLabel(CharSequence label, int userId) {
         try {
             final int resourceId = mService.getUserBadgeLabelResId(userId);
             return Resources.getSystem().getString(resourceId, label);
@@ -4654,6 +4753,28 @@ public class UserManager {
     public boolean isMediaSharedWithParent() {
         try {
             return mService.isMediaSharedWithParent(mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if the user shares lock settings credential with its parent user
+     *
+     * This API only works for {@link UserManager#isProfile() profiles}
+     * and will always return false for any other user type.
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressAutoDoc
+    public boolean isCredentialSharedWithParent() {
+        try {
+            return mService.isCredentialSharedWithParent(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4717,18 +4838,22 @@ public class UserManager {
      * the current user, then set the user as ephemeral so that it will be removed when it is
      * stopped.
      *
-     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller user has the
-     * {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
+     * @param overrideDevicePolicy when {@code true}, user is removed even if the caller has
+     * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
-     * @return the {@link RemoveResult} code
+     * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
+     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or
+     * {@link #REMOVE_RESULT_ERROR}.
+     *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
-            boolean evenWhenDisallowed) {
+    public @RemoveResult int removeUserWhenPossible(@NonNull UserHandle user,
+            boolean overrideDevicePolicy) {
         try {
-            return mService.removeUserOrSetEphemeral(userId, evenWhenDisallowed);
+            return mService.removeUserWhenPossible(user.getIdentifier(), overrideDevicePolicy);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4852,8 +4977,8 @@ public class UserManager {
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
-        return SystemProperties.getInt("fw.max_users",
-                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
+        return Math.max(1, SystemProperties.getInt("fw.max_users",
+                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers)));
     }
 
     /**
@@ -5122,6 +5247,33 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /* Cache key for anything that assumes that userIds cannot be re-used without rebooting. */
+    private static final String CACHE_KEY_STATIC_USER_PROPERTIES = "cache_key.static_user_props";
+
+    private final PropertyInvalidatedCache<Integer, String> mProfileTypeCache =
+            new PropertyInvalidatedCache<Integer, String>(32, CACHE_KEY_STATIC_USER_PROPERTIES) {
+                @Override
+                public String recompute(Integer query) {
+                    try {
+                        // Will be null (and not cached) if invalid user; otherwise cache the type.
+                        String profileType = mService.getProfileType(query);
+                        if (profileType != null) profileType = profileType.intern();
+                        return profileType;
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query < 0;
+                }
+            };
+
+    /** {@hide} */
+    public static final void invalidateStaticUserProperties() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STATIC_USER_PROPERTIES);
     }
 
     /**

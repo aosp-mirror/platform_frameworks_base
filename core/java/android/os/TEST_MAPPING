@@ -31,15 +31,6 @@
       ]
     },
     {
-      "file_patterns": ["Environment\\.java"],
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.parsing.PackageInfoUserFieldsTest"
-        }
-      ]
-    },
-    {
       "file_patterns": [
         "BatteryStats[^/]*\\.java",
         "BatteryUsageStats[^/]*\\.java",

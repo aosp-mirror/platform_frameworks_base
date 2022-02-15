@@ -24,6 +24,7 @@ import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.app.Person;
 import android.app.TaskStackBuilder;
+import android.app.appsearch.GenericDocument;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +42,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureContext;
@@ -50,9 +52,15 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a shortcut that can be published via {@link ShortcutManager}.
@@ -463,6 +471,9 @@ public final class ShortcutInfo implements Parcelable {
 
     private int mExcludedSurfaces;
 
+    @Nullable
+    private Map<String, Map<String, List<String>>> mCapabilityBindings;
+
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
 
@@ -490,7 +501,7 @@ public final class ShortcutInfo implements Parcelable {
         mRank = b.mRank;
         mExtras = b.mExtras;
         mLocusId = b.mLocusId;
-
+        mCapabilityBindings = b.mCapabilityBindings;
         mStartingThemeResName = b.mStartingThemeResId != 0
                 ? b.mContext.getResources().getResourceName(b.mStartingThemeResId) : null;
         updateTimestamp();
@@ -602,7 +613,7 @@ public final class ShortcutInfo implements Parcelable {
         mLocusId = source.mLocusId;
         mExcludedSurfaces = source.mExcludedSurfaces;
 
-        // Just always keep it since it's cheep.
+        // Just always keep it since it's cheap.
         mIconResId = source.mIconResId;
 
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
@@ -641,7 +652,30 @@ public final class ShortcutInfo implements Parcelable {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
         }
+        mCapabilityBindings = source.mCapabilityBindings;
         mStartingThemeResName = source.mStartingThemeResName;
+    }
+
+    /**
+     * Convert a {@link GenericDocument} into a ShortcutInfo.
+     *
+     * @param context Client context
+     * @param document An instance of {@link GenericDocument} that represents the shortcut.
+     */
+    @NonNull
+    public static ShortcutInfo createFromGenericDocument(@NonNull final Context context,
+            @NonNull final GenericDocument document) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(document);
+        return createFromGenericDocument(context.getUserId(), document);
+    }
+
+    /**
+     * @hide
+     */
+    public static ShortcutInfo createFromGenericDocument(
+            final int userId, @NonNull final GenericDocument document) {
+        return new AppSearchShortcutInfo(document).toShortcutInfo(userId);
     }
 
     /**
@@ -968,6 +1002,9 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mStartingThemeResName != null && !source.mStartingThemeResName.isEmpty()) {
             mStartingThemeResName = source.mStartingThemeResName;
         }
+        if (source.mCapabilityBindings != null) {
+            mCapabilityBindings = source.mCapabilityBindings;
+        }
     }
 
     /**
@@ -1038,6 +1075,9 @@ public final class ShortcutInfo implements Parcelable {
         private LocusId mLocusId;
 
         private int mStartingThemeResId;
+
+        @Nullable
+        private Map<String, Map<String, List<String>>> mCapabilityBindings;
 
         private int mExcludedSurfaces;
 
@@ -1397,6 +1437,53 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
+            return this;
+        }
+
+        /**
+         * Associates a shortcut with a capability, and a parameter of that capability. Used when
+         * the shortcut is an instance of a capability.
+         *
+         * <P>This method can be called multiple times to add multiple parameters to the same
+         * capability.
+         *
+         * @param capability capability associated with the shortcut. e.g. actions.intent
+         *                   .START_EXERCISE.
+         * @param parameterName name of the parameter associated with given capability.
+         *                      e.g. exercise.name.
+         * @param parameterValues a list of values for that parameters. The first value will be
+         *                        the primary name, while the rest will be alternative names. If
+         *                        the values are empty, then the parameter will not be saved in
+         *                        the shortcut.
+         */
+        @NonNull
+        public Builder addCapabilityBinding(@NonNull String capability,
+                @Nullable String parameterName, @Nullable List<String> parameterValues) {
+            Objects.requireNonNull(capability);
+            if (capability.contains("/")) {
+                throw new IllegalArgumentException("Illegal character '/' is found in capability");
+            }
+            if (mCapabilityBindings == null) {
+                mCapabilityBindings = new ArrayMap<>(1);
+            }
+            if (!mCapabilityBindings.containsKey(capability)) {
+                mCapabilityBindings.put(capability, new ArrayMap<>(0));
+            }
+            if (parameterName == null || parameterValues == null || parameterValues.isEmpty()) {
+                return this;
+            }
+            if (parameterName.contains("/")) {
+                throw new IllegalArgumentException(
+                        "Illegal character '/' is found in parameter name");
+            }
+            final Map<String, List<String>> params = mCapabilityBindings.get(capability);
+            if (!params.containsKey(parameterName)) {
+                params.put(parameterName, parameterValues);
+                return this;
+            }
+            params.put(parameterName,
+                    Stream.of(params.get(parameterName), parameterValues)
+                            .flatMap(Collection::stream).collect(Collectors.toList()));
             return this;
         }
 
@@ -2176,13 +2263,51 @@ public final class ShortcutInfo implements Parcelable {
         return (mExcludedSurfaces & surface) == 0;
     }
 
+    /**
+     * @hide
+     */
+    public Map<String, Map<String, List<String>>> getCapabilityBindings() {
+        return mCapabilityBindings;
+    }
+
+    /**
+     * Return true if the shortcut is or can be used in specified capability.
+     */
+    public boolean hasCapability(@NonNull String capability) {
+        Objects.requireNonNull(capability);
+        return mCapabilityBindings != null && mCapabilityBindings.containsKey(capability);
+    }
+
+    /**
+     *  Returns the values of specified parameter in associated with given capability.
+     *
+     *  @param capability capability associated with the shortcut. e.g. actions.intent
+     *                   .START_EXERCISE.
+     *  @param parameterName name of the parameter associated with given capability.
+     *                       e.g. exercise.name.
+     */
+    @NonNull
+    public List<String> getCapabilityParameterValues(
+            @NonNull String capability, @NonNull String parameterName) {
+        Objects.requireNonNull(capability);
+        Objects.requireNonNull(parameterName);
+        if (mCapabilityBindings == null) {
+            return Collections.emptyList();
+        }
+        final Map<String, List<String>> param = mCapabilityBindings.get(capability);
+        if (param == null || !param.containsKey(parameterName)) {
+            return Collections.emptyList();
+        }
+        return param.get(parameterName);
+    }
+
     private ShortcutInfo(Parcel source) {
         final ClassLoader cl = getClass().getClassLoader();
 
         mUserId = source.readInt();
         mId = source.readString8();
         mPackageName = source.readString8();
-        mActivity = source.readParcelable(cl);
+        mActivity = source.readParcelable(cl, android.content.ComponentName.class);
         mFlags = source.readInt();
         mIconResId = source.readInt();
         mLastChangedTimestamp = source.readLong();
@@ -2192,7 +2317,7 @@ public final class ShortcutInfo implements Parcelable {
             return; // key information only.
         }
 
-        mIcon = source.readParcelable(cl);
+        mIcon = source.readParcelable(cl, android.graphics.drawable.Icon.class);
         mTitle = source.readCharSequence();
         mTitleResId = source.readInt();
         mText = source.readCharSequence();
@@ -2202,7 +2327,7 @@ public final class ShortcutInfo implements Parcelable {
         mIntents = source.readParcelableArray(cl, Intent.class);
         mIntentPersistableExtrases = source.readParcelableArray(cl, PersistableBundle.class);
         mRank = source.readInt();
-        mExtras = source.readParcelable(cl);
+        mExtras = source.readParcelable(cl, android.os.PersistableBundle.class);
         mBitmapPath = source.readString8();
 
         mIconResName = source.readString8();
@@ -2221,10 +2346,19 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         mPersons = source.readParcelableArray(cl, Person.class);
-        mLocusId = source.readParcelable(cl);
+        mLocusId = source.readParcelable(cl, android.content.LocusId.class);
         mIconUri = source.readString8();
         mStartingThemeResName = source.readString8();
         mExcludedSurfaces = source.readInt();
+
+        final Map<String, Map> rawCapabilityBindings = source.readHashMap(
+                /*loader*/ null, /*clazzKey*/ String.class, /*clazzValue*/ HashMap.class);
+        if (rawCapabilityBindings != null && !rawCapabilityBindings.isEmpty()) {
+            final Map<String, Map<String, List<String>>> capabilityBindings =
+                    new ArrayMap<>(rawCapabilityBindings.size());
+            rawCapabilityBindings.forEach(capabilityBindings::put);
+            mCapabilityBindings = capabilityBindings;
+        }
     }
 
     @Override
@@ -2278,6 +2412,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeString8(mIconUri);
         dest.writeString8(mStartingThemeResName);
         dest.writeInt(mExcludedSurfaces);
+        dest.writeMap(mCapabilityBindings);
     }
 
     public static final @NonNull Creator<ShortcutInfo> CREATOR =
@@ -2529,7 +2664,8 @@ public final class ShortcutInfo implements Parcelable {
             long lastChangedTimestamp,
             int flags, int iconResId, String iconResName, String bitmapPath, String iconUri,
             int disabledReason, Person[] persons, LocusId locusId,
-            @Nullable String startingThemeResName) {
+            @Nullable String startingThemeResName,
+            @Nullable Map<String, Map<String, List<String>>> capabilityBindings) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -2559,5 +2695,6 @@ public final class ShortcutInfo implements Parcelable {
         mPersons = persons;
         mLocusId = locusId;
         mStartingThemeResName = startingThemeResName;
+        mCapabilityBindings = capabilityBindings;
     }
 }

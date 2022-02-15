@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.HexDump;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -297,7 +296,7 @@ public final class IpSecAlgorithm implements Parcelable {
         return mTruncLenBits;
     }
 
-    /* Parcelable Implementation */
+    /** Parcelable Implementation */
     public int describeContents() {
         return 0;
     }
@@ -344,7 +343,7 @@ public final class IpSecAlgorithm implements Parcelable {
         // Load and validate the optional algorithm resource. Undefined or duplicate algorithms in
         // the resource are not allowed.
         final String[] resourceAlgos = systemResources.getStringArray(
-                com.android.internal.R.array.config_optionalIpSecAlgorithms);
+                android.R.array.config_optionalIpSecAlgorithms);
         for (String str : resourceAlgos) {
             if (!ALGO_TO_REQUIRED_FIRST_SDK.containsKey(str) || !enabledAlgos.add(str)) {
                 // This error should be caught by CTS and never be thrown to API callers
@@ -469,20 +468,12 @@ public final class IpSecAlgorithm implements Parcelable {
         }
     }
 
-    // Because encryption keys are sensitive and userdebug builds are used by large user pools
-    // such as beta testers, we only allow sensitive info such as keys on eng builds.
-    private static boolean isUnsafeBuild() {
-        return Build.IS_DEBUGGABLE && Build.IS_ENG;
-    }
-
     @Override
     @NonNull
     public String toString() {
         return new StringBuilder()
                 .append("{mName=")
                 .append(mName)
-                .append(", mKey=")
-                .append(isUnsafeBuild() ? HexDump.toHexString(mKey) : "<hidden>")
                 .append(", mTruncLenBits=")
                 .append(mTruncLenBits)
                 .append("}")

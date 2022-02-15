@@ -20,26 +20,30 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.os.UserHandle;
+import android.util.ArraySet;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The API surface for {@link PackageUserStateInternal}, for use by in-process mainline consumers.
  *
  * The parent of this class is {@link PackageState}, which handles non-user state, exposing this
  * interface for per-user state.
+ *
+ * @hide
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface PackageUserState extends FrameworkPackageUserState {
+public interface PackageUserState {
 
+    /** @hide */
+    @NonNull
     PackageUserState DEFAULT = PackageUserStateInternal.DEFAULT;
 
     /**
      * Combination of {@link #getOverlayPaths()} and {@link #getSharedLibraryOverlayPaths()}
+     * @hide
      */
     @Nullable
     OverlayPaths getAllOverlayPaths();
@@ -53,7 +57,7 @@ public interface PackageUserState extends FrameworkPackageUserState {
      * Fully qualified class names of components explicitly disabled.
      */
     @NonNull
-    Set<String> getDisabledComponents();
+    ArraySet<String> getDisabledComponents();
 
     @PackageManager.DistractionRestriction
     int getDistractionFlags();
@@ -62,7 +66,7 @@ public interface PackageUserState extends FrameworkPackageUserState {
      * Fully qualified class names of components explicitly enabled.
      */
     @NonNull
-    Set<String> getEnabledComponents();
+    ArraySet<String> getEnabledComponents();
 
     /**
      * Retrieve the effective enabled state of the package itself.
@@ -85,9 +89,11 @@ public interface PackageUserState extends FrameworkPackageUserState {
     @Nullable
     String getLastDisableAppCaller();
 
+    /** @hide */
     @Nullable
     OverlayPaths getOverlayPaths();
 
+    /** @hide */
     @NonNull
     Map<String, OverlayPaths> getSharedLibraryOverlayPaths();
 
@@ -150,4 +156,13 @@ public interface PackageUserState extends FrameworkPackageUserState {
      */
     @Nullable
     String getSplashScreenTheme();
+
+    /**
+     * In epoch milliseconds. The timestamp of the first install of the app of the particular user
+     * on the device, surviving past app updates. Different users might have a different first
+     * install time.
+     *
+     * This does not survive full removal of the app (i.e., uninstalls for all users).
+     */
+    long getFirstInstallTime();
 }

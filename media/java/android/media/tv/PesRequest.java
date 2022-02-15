@@ -20,9 +20,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
-public class PesRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.PES;
+/**
+ * A request for PES from broadcast signal.
+ */
+public final class PesRequest extends BroadcastInfoRequest implements Parcelable {
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
+            TvInputManager.BROADCAST_INFO_TYPE_PES;
 
     public static final @NonNull Parcelable.Creator<PesRequest> CREATOR =
             new Parcelable.Creator<PesRequest>() {
@@ -41,28 +44,39 @@ public class PesRequest extends BroadcastInfoRequest implements Parcelable {
     private final int mTsPid;
     private final int mStreamId;
 
-    public static PesRequest createFromParcelBody(Parcel in) {
+    static PesRequest createFromParcelBody(Parcel in) {
         return new PesRequest(in);
     }
 
-    public PesRequest(int requestId, int option, int tsPid, int streamId) {
-        super(requestType, requestId, option);
+    public PesRequest(int requestId, @RequestOption int option, int tsPid, int streamId) {
+        super(REQUEST_TYPE, requestId, option);
         mTsPid = tsPid;
         mStreamId = streamId;
     }
 
-    protected PesRequest(Parcel source) {
-        super(requestType, source);
+    PesRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         mTsPid = source.readInt();
         mStreamId = source.readInt();
     }
 
+    /**
+     * Gets the packet identifier (PID) of the TS (transport stream).
+     */
     public int getTsPid() {
         return mTsPid;
     }
 
+    /**
+     * Gets the StreamID of requested PES.
+     */
     public int getStreamId() {
         return mStreamId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

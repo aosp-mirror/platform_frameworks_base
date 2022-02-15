@@ -22,6 +22,9 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLAS
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
+
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -46,6 +49,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -54,6 +58,7 @@ import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.SplashScreenView;
+import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
 
 import com.android.internal.R;
@@ -138,8 +143,8 @@ public class SplashscreenContentDrawer {
      *                                 executed on splash screen thread. Note that the view can be
      *                                 null if failed.
      */
-    void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
-            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer,
+    void createContentView(Context context, @StartingWindowType int suggestType,
+            StartingWindowInfo info, Consumer<SplashScreenView> splashScreenViewConsumer,
             Consumer<Runnable> uiThreadInitConsumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
@@ -150,7 +155,7 @@ public class SplashscreenContentDrawer {
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "failed creating starting window content at taskId: "
-                        + taskId, e);
+                        + info.taskInfo.taskId, e);
                 contentView = null;
             }
             splashScreenViewConsumer.accept(contentView);
@@ -241,7 +246,7 @@ public class SplashscreenContentDrawer {
         return null;
     }
 
-    private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai,
+    private SplashScreenView makeSplashScreenContentView(Context context, StartingWindowInfo info,
             @StartingWindowType int suggestType, Consumer<Runnable> uiThreadInitConsumer) {
         updateDensity();
 
@@ -250,6 +255,9 @@ public class SplashscreenContentDrawer {
 
         final Drawable legacyDrawable = suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
                 ? peekLegacySplashscreenContent(context, mTmpAttrs) : null;
+        final ActivityInfo ai = info.targetActivityInfo != null
+                ? info.targetActivityInfo
+                : info.taskInfo.topActivityInfo;
         final int themeBGColor = legacyDrawable != null
                 ? getBGColorFromCache(ai, () -> estimateWindowBGColor(legacyDrawable))
                 : getBGColorFromCache(ai, () -> peekWindowBGColor(context, mTmpAttrs));
@@ -258,6 +266,7 @@ public class SplashscreenContentDrawer {
                 .overlayDrawable(legacyDrawable)
                 .chooseStyle(suggestType)
                 .setUiThreadInitConsumer(uiThreadInitConsumer)
+                .setAllowHandleEmpty(info.allowHandleEmptySplashScreen())
                 .build();
     }
 
@@ -317,6 +326,33 @@ public class SplashscreenContentDrawer {
         private int mAnimationDuration = 0;
     }
 
+    /**
+     * Get an optimal animation duration to keep the splash screen from showing.
+     *
+     * @param animationDuration The animation duration defined from app.
+     * @param appReadyDuration The real duration from the starting the app to the first app window
+     *                         drawn.
+     */
+    @VisibleForTesting
+    static long getShowingDuration(long animationDuration, long appReadyDuration) {
+        if (animationDuration <= appReadyDuration) {
+            // app window ready took longer time than animation, it can be removed ASAP.
+            return appReadyDuration;
+        }
+        if (appReadyDuration < MAX_ANIMATION_DURATION) {
+            if (animationDuration > MAX_ANIMATION_DURATION
+                    || appReadyDuration < MINIMAL_ANIMATION_DURATION) {
+                // animation is too long or too short, cut off with minimal duration
+                return MINIMAL_ANIMATION_DURATION;
+            }
+            // animation is longer than dOpt but shorter than max, allow it to play till finish
+            return MAX_ANIMATION_DURATION;
+        }
+        // the shortest duration is longer than dMax, cut off no matter how long the animation
+        // will be.
+        return appReadyDuration;
+    }
+
     private class StartingWindowViewBuilder {
         private final Context mContext;
         private final ActivityInfo mActivityInfo;
@@ -327,6 +363,7 @@ public class SplashscreenContentDrawer {
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
         private Consumer<Runnable> mUiThreadInitTask;
+        private boolean mAllowHandleEmpty;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
             mContext = context;
@@ -350,6 +387,11 @@ public class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
             mUiThreadInitTask = uiThreadInitTask;
+            return this;
+        }
+
+        StartingWindowViewBuilder setAllowHandleEmpty(boolean allowHandleEmpty) {
+            mAllowHandleEmpty = allowHandleEmpty;
             return this;
         }
 
@@ -491,7 +533,8 @@ public class SplashscreenContentDrawer {
                     .setIconBackground(background)
                     .setCenterViewDrawable(foreground)
                     .setAnimationDurationMillis(animationDuration)
-                    .setUiThreadInitConsumer(uiThreadInitTask);
+                    .setUiThreadInitConsumer(uiThreadInitTask)
+                    .setAllowHandleEmpty(mAllowHandleEmpty);
 
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {
@@ -965,9 +1008,27 @@ public class SplashscreenContentDrawer {
      * Create and play the default exit animation for splash screen view.
      */
     void applyExitAnimation(SplashScreenView view, SurfaceControl leash,
-            Rect frame, Runnable finishCallback) {
-        final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(mContext, view,
-                leash, frame, mMainWindowShiftLength, mTransactionPool, finishCallback);
-        animation.startAnimations();
+            Rect frame, Runnable finishCallback, long createTime) {
+        final Runnable playAnimation = () -> {
+            final SplashScreenExitAnimation animation = new SplashScreenExitAnimation(mContext,
+                    view, leash, frame, mMainWindowShiftLength, mTransactionPool, finishCallback);
+            animation.startAnimations();
+        };
+        if (view.getIconView() == null) {
+            playAnimation.run();
+            return;
+        }
+        final long appReadyDuration = SystemClock.uptimeMillis() - createTime;
+        final long animDuration = view.getIconAnimationDuration() != null
+                ? view.getIconAnimationDuration().toMillis() : 0;
+        final long minimumShowingDuration = getShowingDuration(animDuration, appReadyDuration);
+        final long delayed = minimumShowingDuration - appReadyDuration;
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "applyExitAnimation delayed: %s", delayed);
+        if (delayed > 0) {
+            view.postDelayed(playAnimation, delayed);
+        } else {
+            playAnimation.run();
+        }
     }
 }

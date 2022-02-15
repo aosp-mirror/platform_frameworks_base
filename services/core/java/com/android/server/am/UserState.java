@@ -56,7 +56,6 @@ public final class UserState {
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
     public boolean switching;
-    public boolean tokenProvided;
 
     /** Callback for key eviction. */
     public interface KeyEvictedCallback {
@@ -149,7 +148,6 @@ public final class UserState {
     @Override
     public String toString() {
         return "[UserState: id=" + mHandle.getIdentifier() + ", state=" + stateToString(state)
-            + ", lastState=" + stateToString(lastState) + ", switching=" + switching
-            + ", tokenProvided=" + tokenProvided + "]";
+            + ", lastState=" + stateToString(lastState) + ", switching=" + switching + "]";
     }
 }

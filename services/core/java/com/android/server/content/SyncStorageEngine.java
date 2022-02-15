@@ -2421,10 +2421,10 @@ public class SyncStorageEngine {
     public static final int STATISTICS_FILE_ITEM = 101;
 
     private void readStatsParcelLocked(File parcel) {
+        Parcel in = Parcel.obtain();
         try {
             final AtomicFile parcelFile = new AtomicFile(parcel);
             byte[] data = parcelFile.readFully();
-            Parcel in = Parcel.obtain();
             in.unmarshall(data, 0, data.length);
             in.setDataPosition(0);
             int token;
@@ -2452,6 +2452,8 @@ public class SyncStorageEngine {
             }
         } catch (IOException e) {
             Slog.i(TAG, "No initial statistics");
+        } finally {
+            in.recycle();
         }
     }
 

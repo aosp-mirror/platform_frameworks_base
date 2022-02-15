@@ -38,7 +38,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.inputmethodservice.SoftInputWindow;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -157,7 +156,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     TypedArray mThemeAttrs;
     View mRootView;
     FrameLayout mContentFrame;
-    SoftInputWindow mWindow;
+    VoiceInteractionWindow mWindow;
 
     boolean mUiEnabled = true;
     boolean mInitialized;
@@ -859,7 +858,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     static final int MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK = 110;
     static final int MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK = 111;
 
-    class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
+    class MyCallbacks implements HandlerCaller.Callback, VoiceInteractionWindow.Callback {
         @Override
         public void executeMessage(Message msg) {
             SomeArgs args = null;
@@ -1250,7 +1249,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mInitialized = true;
         mInflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
+        mWindow = new VoiceInteractionWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(0 /* types */);

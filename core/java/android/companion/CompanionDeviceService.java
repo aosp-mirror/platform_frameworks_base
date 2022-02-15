@@ -28,35 +28,70 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-
-import com.android.internal.util.function.pooled.PooledLambda;
-
 import java.util.Objects;
 
 /**
- * Service to be implemented by apps that manage a companion device.
+ * A service that receives calls from the system when the associated companion device appears
+ * nearby or is connected, as well as when the device is no longer "present" or connected.
+ * See {@link #onDeviceAppeared(AssociationInfo)}/{@link #onDeviceDisappeared(AssociationInfo)}.
  *
- * System will keep this service bound whenever an associated device is nearby for Bluetooth
- * devices or companion app manages the connectivity and reports disappeared, ensuring app stays
- * alive
+ * <p>
+ * Companion applications must create a service that {@code extends}
+ * {@link CompanionDeviceService}, and declare it in their AndroidManifest.xml with the
+ * "android.permission.BIND_COMPANION_DEVICE_SERVICE" permission
+ * (see {@link android.Manifest.permission#BIND_COMPANION_DEVICE_SERVICE}),
+ * as well as add an intent filter for the "android.companion.CompanionDeviceService" action
+ * (see {@link #SERVICE_INTERFACE}).
  *
- * An app must be {@link CompanionDeviceManager#associate associated} with at leas one device,
- * before it can take advantage of this service.
+ * <p>
+ * Following is an example of such declaration:
+ * <pre>{@code
+ * <service
+ *        android:name=".CompanionService"
+ *        android:label="@string/service_name"
+ *        android:exported="true"
+ *        android:permission="android.permission.BIND_COMPANION_DEVICE_SERVICE">
+ *    <intent-filter>
+ *        <action android:name="android.companion.CompanionDeviceService" />
+ *    </intent-filter>
+ * </service>
+ * }</pre>
  *
- * You must declare this service in your manifest with an
- * intent-filter action of {@link #SERVICE_INTERFACE} and
- * permission of {@link android.Manifest.permission#BIND_COMPANION_DEVICE_SERVICE}
+ * <p>
+ * If the companion application has requested observing device presence (see
+ * {@link CompanionDeviceManager#startObservingDevicePresence(String)}) the system will
+ * <a href="https://developer.android.com/guide/components/bound-services"> bind the service</a>
+ * when it detects the device nearby (for BLE devices) or when the device is connected
+ * (for Bluetooth devices).
  *
- * <p>If you want to declare more than one of these services, you must declare the meta-data in the
- * service of your manifest with the corresponding name and value to true to indicate the
- * primary service.
- * Only the primary one will get the callback from
- * {@link #onDeviceAppeared(AssociationInfo associationInfo)}.</p>
+ * <p>
+ * The system binding {@link CompanionDeviceService} elevates the priority of the process that
+ * the service is running in, and thus may prevent
+ * <a href="https://developer.android.com/topic/performance/memory-management#low-memory_killer">
+ * the Low-memory killer</a> from killing the process at expense of other processes with lower
+ * priority.
  *
- * Example:
- * <meta-data
- *   android:name="primary"
- *   android:value="true" />
+ * <p>
+ * It is possible for an application to declare multiple {@link CompanionDeviceService}-s.
+ * In such case, the system will bind all declared services, but will deliver
+ * {@link #onDeviceAppeared(AssociationInfo)} and {@link #onDeviceDisappeared(AssociationInfo)}
+ * only to one "primary" services.
+ * Applications that declare multiple {@link CompanionDeviceService}-s should indicate the "primary"
+ * service using "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE" service level
+ * property.
+ * <pre>{@code
+ * <property
+ *       android:name="android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE"
+ *       android:value="true" />
+ * }</pre>
+ *
+ * <p>
+ * If the application declares multiple {@link CompanionDeviceService}-s, but does not indicate
+ * the "primary" one, the system will pick one of the declared services to use as "primary".
+ *
+ * <p>
+ * If the application declares multiple "primary" {@link CompanionDeviceService}-s, the system
+ * will pick single one of them to use as "primary".
  */
 public abstract class CompanionDeviceService extends Service {
 
@@ -117,6 +152,8 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId system assigned id of the message to be sent
      * @param associationId association id of the associated device
      * @param message message to be sent
+     *
+     * @hide
      */
     @MainThread
     public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
@@ -133,6 +170,8 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId id of the message
      * @param associationId id of the associated device
      * @param message messaged received from the associated device
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
@@ -185,31 +224,24 @@ public abstract class CompanionDeviceService extends Service {
     public void onBindCompanionDeviceService(@NonNull Intent intent) {
     }
 
-    class Stub extends ICompanionDeviceService.Stub {
+    private class Stub extends ICompanionDeviceService.Stub {
+        final Handler mMainHandler = Handler.getMain();
+        final CompanionDeviceService mService = CompanionDeviceService.this;
 
         @Override
         public void onDeviceAppeared(AssociationInfo associationInfo) {
-            Handler.getMain().post(
-                    () -> CompanionDeviceService.this.onDeviceAppeared(associationInfo));
+            mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceAppeared(associationInfo));
         }
 
         @Override
         public void onDeviceDisappeared(AssociationInfo associationInfo) {
-            Handler.getMain().post(
-                    () -> CompanionDeviceService.this.onDeviceDisappeared(associationInfo));
+            mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceDisappeared(associationInfo));
         }
 
+        @Override
         public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::onDispatchMessage,
-                    CompanionDeviceService.this, messageId, associationId, message));
-        }
-
-        public final void dispatchMessage(int messageId, int associationId,
-                @NonNull byte[] message) {
-            Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::dispatchMessage,
-                    CompanionDeviceService.this, messageId, associationId, message));
+            mMainHandler.postAtFrontOfQueue(
+                    () -> mService.onDispatchMessage(messageId, associationId, message));
         }
     }
 }

@@ -40,4 +40,5 @@ enum AudioContentType {
   MUSIC = 2,
   MOVIE = 3,
   SONIFICATION = 4,
+  ULTRASOUND = 1997,
 }

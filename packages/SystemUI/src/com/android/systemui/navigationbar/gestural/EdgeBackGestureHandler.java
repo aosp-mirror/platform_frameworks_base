@@ -36,6 +36,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -79,6 +80,7 @@ import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
+import com.android.wm.shell.back.BackAnimation;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -102,7 +104,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private static final int MAX_NUM_LOGGED_PREDICTIONS = 10;
     private static final int MAX_NUM_LOGGED_GESTURES = 10;
 
-    static final boolean DEBUG_MISSING_GESTURE = false;
+    // Temporary log until b/202433017 is resolved
+    static final boolean DEBUG_MISSING_GESTURE = true;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
@@ -231,6 +234,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     private NavigationEdgeBackPlugin mEdgeBackPlugin;
+    private BackAnimation mBackAnimation;
     private int mLeftInset;
     private int mRightInset;
     private int mSysUiFlags;
@@ -259,11 +263,14 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     // Notify FalsingManager that an intentional gesture has occurred.
                     // TODO(b/186519446): use a different method than isFalseTouch
                     mFalsingManager.isFalseTouch(BACK_GESTURE);
-                    boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-                    boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-                    if (DEBUG_MISSING_GESTURE) {
-                        Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down=" + sendDown
-                                + ", up=" + sendUp);
+                    // Only inject back keycodes when ahead-of-time back dispatching is disabled.
+                    if (mBackAnimation == null) {
+                        boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                        boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                        if (DEBUG_MISSING_GESTURE) {
+                            Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down="
+                                    + sendDown + ", up=" + sendUp);
+                        }
                     }
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
@@ -315,7 +322,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             String recentsPackageName = recentsComponentName.getPackageName();
             PackageManager manager = context.getPackageManager();
             try {
-                Resources resources = manager.getResourcesForApplication(recentsPackageName);
+                Resources resources = manager.getResourcesForApplication(
+                        manager.getApplicationInfo(recentsPackageName,
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                        | PackageManager.MATCH_DISABLED_COMPONENTS
+                                        | PackageManager.GET_SHARED_LIBRARY_FILES));
                 int resId = resources.getIdentifier(
                         "gesture_blocking_activities", "array", recentsPackageName);
 
@@ -494,7 +505,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     Choreographer.getInstance(), this::onInputEvent);
 
             // Add a nav bar panel window
-            setEdgeBackPlugin(new NavigationBarEdgePanel(mContext));
+            setEdgeBackPlugin(new NavigationBarEdgePanel(mContext, mBackAnimation));
             mPluginManager.addPluginListener(
                     this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
         }
@@ -509,7 +520,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
     @Override
     public void onPluginDisconnected(NavigationEdgeBackPlugin plugin) {
-        setEdgeBackPlugin(new NavigationBarEdgePanel(mContext));
+        setEdgeBackPlugin(new NavigationBarEdgePanel(mContext, mBackAnimation));
     }
 
     private void setEdgeBackPlugin(NavigationEdgeBackPlugin edgeBackPlugin) {
@@ -576,7 +587,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mMLModelThreshold = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.BACK_GESTURE_ML_MODEL_THRESHOLD, 0.9f);
             if (mBackGestureTfClassifierProvider.isActive()) {
+                Trace.beginSection("EdgeBackGestureHandler#loadVocab");
                 mVocab = mBackGestureTfClassifierProvider.loadVocab(mContext.getAssets());
+                Trace.endSection();
                 mUseMLModel = true;
                 return;
             }
@@ -928,6 +941,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             proto.edgeBackGestureHandler = new EdgeBackGestureHandlerProto();
         }
         proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
+    }
+
+    public void setBackAnimation(BackAnimation backAnimation) {
+        mBackAnimation = backAnimation;
     }
 
     /**

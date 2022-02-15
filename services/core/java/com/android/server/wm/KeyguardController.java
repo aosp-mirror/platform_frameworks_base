@@ -235,7 +235,7 @@ class KeyguardController {
      */
     void keyguardGoingAway(int displayId, int flags) {
         final KeyguardDisplayState state = getDisplayState(displayId);
-        if (!state.mKeyguardShowing) {
+        if (!state.mKeyguardShowing || state.mKeyguardGoingAway) {
             return;
         }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "keyguardGoingAway");
@@ -448,16 +448,6 @@ class KeyguardController {
         // TODO(b/113840485): Handle docked stack for individual display.
         if (!getDisplayState(displayId).mKeyguardShowing || !isDisplayOccluded(DEFAULT_DISPLAY)) {
             return;
-        }
-
-        // Dismiss split screen
-        // The lock screen is currently showing, but is occluded by a window that can
-        // show on top of the lock screen. In this can we want to dismiss the docked
-        // stack since it will be complicated/risky to try to put the activity on top
-        // of the lock screen in the right fullscreen configuration.
-        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        if (taskDisplayArea.isSplitScreenModeActivated()) {
-            taskDisplayArea.onSplitScreenModeDismissed();
         }
 
         // Dismiss freeform windowing mode

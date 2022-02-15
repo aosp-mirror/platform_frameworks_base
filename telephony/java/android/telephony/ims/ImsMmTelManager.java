@@ -21,11 +21,13 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -61,6 +63,7 @@ import java.util.function.Consumer;
  * Use {@link android.telephony.ims.ImsManager#getImsMmTelManager(int)} to get an instance of this
  * manager.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ImsMmTelManager implements RegistrationManager {
     private static final String TAG = "ImsMmTelManager";
 

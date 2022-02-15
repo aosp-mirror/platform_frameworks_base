@@ -309,14 +309,14 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_restrictedReturnsError() throws Exception {
+    public void testRemoveUserWhenPossible_restrictedReturnsError() throws Exception {
         final int currentUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
                 asHandle(currentUser));
         try {
-            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
-                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+            assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                    /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
                     asHandle(currentUser));
@@ -328,15 +328,15 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_evenWhenRestricted() throws Exception {
+    public void testRemoveUserWhenPossible_evenWhenRestricted() throws Exception {
         final int currentUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
                 asHandle(currentUser));
         try {
             synchronized (mUserRemoveLock) {
-                assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
-                        /* evenWhenDisallowed= */ true))
+                assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                        /* overrideDevicePolicy= */ true))
                                 .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
                 waitForUserRemovalLocked(user1.id);
             }
@@ -351,31 +351,31 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_systemUserReturnsError() throws Exception {
-        assertThat(mUserManager.removeUserOrSetEphemeral(UserHandle.USER_SYSTEM,
-                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+    public void testRemoveUserWhenPossible_systemUserReturnsError() throws Exception {
+        assertThat(mUserManager.removeUserWhenPossible(UserHandle.SYSTEM,
+                /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
 
         assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
     }
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_invalidUserReturnsError() throws Exception {
+    public void testRemoveUserWhenPossible_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
-        assertThat(mUserManager.removeUserOrSetEphemeral(Integer.MAX_VALUE,
-                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
+        assertThat(mUserManager.removeUserWhenPossible(UserHandle.of(Integer.MAX_VALUE),
+                /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
     }
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_currentUserSetEphemeral() throws Exception {
+    public void testRemoveUserWhenPossible_currentUserSetEphemeral() throws Exception {
         final int startUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         // Switch to the user just created.
         switchUser(user1.id, null, /* ignoreHandle= */ true);
 
-        assertThat(mUserManager.removeUserOrSetEphemeral(user1.id, /* evenWhenDisallowed= */ false))
-                .isEqualTo(UserManager.REMOVE_RESULT_SET_EPHEMERAL);
+        assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
 
         assertThat(hasUser(user1.id)).isTrue();
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
@@ -392,11 +392,12 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_nonCurrentUserRemoved() throws Exception {
+    public void testRemoveUserWhenPossible_nonCurrentUserRemoved() throws Exception {
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         synchronized (mUserRemoveLock) {
-            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
-                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+            assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                    /* overrideDevicePolicy= */ false))
+                            .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
             waitForUserRemovalLocked(user1.id);
         }
 
@@ -660,6 +661,24 @@ public final class UserManagerTest {
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
                     creatorHandle);
+        }
+    }
+
+    // Make sure createProfile would fail if we have DISALLOW_ADD_CLONE_PROFILE.
+    @MediumTest
+    @Test
+    public void testCreateUser_disallowAddClonedUserProfile() throws Exception {
+        final int primaryUserId = ActivityManager.getCurrentUser();
+        final UserHandle primaryUserHandle = asHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                true, primaryUserHandle);
+        try {
+            UserInfo cloneProfileUserInfo = createProfileForUser("Clone",
+                    UserManager.USER_TYPE_PROFILE_CLONE, primaryUserId);
+            assertThat(cloneProfileUserInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, false,
+                    primaryUserHandle);
         }
     }
 

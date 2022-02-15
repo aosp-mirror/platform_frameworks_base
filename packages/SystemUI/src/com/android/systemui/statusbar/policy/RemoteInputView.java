@@ -51,6 +51,7 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
+import android.view.WindowInsetsController;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
@@ -117,6 +118,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mColorized;
     private int mTint;
     private boolean mResetting;
+    private boolean mWasSpinning;
 
     // TODO(b/193539698): move these to a Controller
     private RemoteInputController mController;
@@ -438,6 +440,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 mEditText.requestFocus();
             }
         }
+        if (mWasSpinning) {
+            mController.addSpinning(mEntry.getKey(), mToken);
+            mWasSpinning = false;
+        }
     }
 
     @Override
@@ -446,6 +452,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.removeTextChangedListener(mTextWatcher);
         mEditText.setOnEditorActionListener(null);
         mEditText.mRemoteInputView = null;
+        mWasSpinning = mController.isSpinning(mEntry.getKey(), mToken);
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
@@ -532,6 +539,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (isActive() && mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
+
+        mWasSpinning = false;
     }
 
     private void reset() {
@@ -665,8 +674,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             }
             // Hide soft-keyboard when the input view became invisible
             // (i.e. The notification shade collapsed by pressing the home key)
-            if (visibility != VISIBLE && !mEditText.isVisibleToUser()
-                    && !mController.isRemoteInputActive()) {
+            if (visibility != VISIBLE && !mController.isRemoteInputActive()) {
                 mEditText.hideIme();
             }
         }
@@ -779,8 +787,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void hideIme() {
-            if (mInputMethodManager != null) {
-                mInputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            final WindowInsetsController insetsController = getWindowInsetsController();
+            if (insetsController != null) {
+                insetsController.hide(WindowInsets.Type.ime());
             }
         }
 

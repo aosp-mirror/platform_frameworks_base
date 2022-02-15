@@ -868,7 +868,7 @@ public class RippleDrawable extends LayerDrawable {
     private void drawPatterned(@NonNull Canvas canvas) {
         final Rect bounds = mHotspotBounds;
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
-        boolean useCanvasProps = shouldUseCanvasProps(canvas);
+        boolean useCanvasProps = !mForceSoftware;
         if (isBounded()) {
             canvas.clipRect(getDirtyBounds());
         }
@@ -914,7 +914,11 @@ public class RippleDrawable extends LayerDrawable {
         }
         for (int i = 0; i < mRunningAnimations.size(); i++) {
             RippleAnimationSession s = mRunningAnimations.get(i);
-            if (useCanvasProps) {
+            if (!canvas.isHardwareAccelerated()) {
+                Log.e(TAG, "The RippleDrawable.STYLE_PATTERNED animation is not supported for a "
+                        + "non-hardware accelerated Canvas. Skipping animation.");
+                break;
+            } else if (useCanvasProps) {
                 RippleAnimationSession.AnimationProperties<CanvasProperty<Float>,
                         CanvasProperty<Paint>>
                         p = s.getCanvasProperties();
@@ -1000,10 +1004,6 @@ public class RippleDrawable extends LayerDrawable {
             return  (color & 0x00FFFFFF) | 0x80000000;
         }
         return color;
-    }
-
-    private boolean shouldUseCanvasProps(Canvas c) {
-        return !mForceSoftware && c.isHardwareAccelerated();
     }
 
     @Override

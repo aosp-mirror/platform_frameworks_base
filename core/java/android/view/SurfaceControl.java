@@ -44,10 +44,12 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
+import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -197,6 +199,9 @@ public final class SurfaceControl implements Parcelable {
     private static native int[] nativeGetCompositionDataspaces();
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
             int colorMode);
+    private static native boolean nativeGetBootDisplayModeSupport();
+    private static native void nativeSetBootDisplayMode(IBinder displayToken, int displayMode);
+    private static native void nativeClearBootDisplayMode(IBinder displayToken);
     private static native void nativeSetAutoLowLatencyMode(IBinder displayToken, boolean on);
     private static native void nativeSetGameContentType(IBinder displayToken, boolean on);
     private static native void nativeSetDisplayPowerMode(
@@ -207,8 +212,8 @@ public final class SurfaceControl implements Parcelable {
             HardwareBuffer buffer);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
-    private static native void nativeSetColorSpace(long transactionObj, long nativeObject,
-            int colorSpace);
+    private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
+            @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
 
@@ -231,6 +236,8 @@ public final class SurfaceControl implements Parcelable {
             float shadowRadius);
     private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
+    private static native DisplayDecorationSupport nativeGetDisplayDecorationSupport(
+            IBinder displayToken);
 
     private static native void nativeSetFrameRate(long transactionObj, long nativeObject,
             float frameRate, int compatibility, int changeFrameRateStrategy);
@@ -253,6 +260,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetLayerId(long nativeObject);
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
+    private static native void nativeSanitize(long transactionObject);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -513,6 +521,15 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int ENABLE_BACKPRESSURE = 0x00000100;
+
+    /**
+     * Buffers from this SurfaceControl should be considered display decorations.
+     *
+     * If the hardware has optimizations for display decorations (e.g. rounded corners, camera
+     * cutouts, etc), it should use them for this layer.
+     * @hide
+     */
+    public static final int DISPLAY_DECORATION = 0x00000200;
 
     /**
      * Surface creation flag: Creates a surface where color components are interpreted
@@ -1821,13 +1838,15 @@ public final class SurfaceControl implements Parcelable {
         public float density;
         public boolean secure;
         public DeviceProductInfo deviceProductInfo;
+        public @Surface.Rotation int installOrientation;
 
         @Override
         public String toString() {
             return "StaticDisplayInfo{isInternal=" + isInternal
                     + ", density=" + density
                     + ", secure=" + secure
-                    + ", deviceProductInfo=" + deviceProductInfo + "}";
+                    + ", deviceProductInfo=" + deviceProductInfo
+                    + ", installOrientation=" + installOrientation + "}";
         }
 
         @Override
@@ -1838,12 +1857,13 @@ public final class SurfaceControl implements Parcelable {
             return isInternal == that.isInternal
                     && density == that.density
                     && secure == that.secure
-                    && Objects.equals(deviceProductInfo, that.deviceProductInfo);
+                    && Objects.equals(deviceProductInfo, that.deviceProductInfo)
+                    && installOrientation == that.installOrientation;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(isInternal, density, secure, deviceProductInfo);
+            return Objects.hash(isInternal, density, secure, deviceProductInfo, installOrientation);
         }
     }
 
@@ -1864,6 +1884,8 @@ public final class SurfaceControl implements Parcelable {
         public boolean autoLowLatencyModeSupported;
         public boolean gameContentTypeSupported;
 
+        public int preferredBootDisplayMode;
+
         @Override
         public String toString() {
             return "DynamicDisplayInfo{"
@@ -1873,7 +1895,8 @@ public final class SurfaceControl implements Parcelable {
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
                     + ", autoLowLatencyModeSupported=" + autoLowLatencyModeSupported
-                    + ", gameContentTypeSupported" + gameContentTypeSupported + "}";
+                    + ", gameContentTypeSupported" + gameContentTypeSupported
+                    + ", preferredBootDisplayMode" + preferredBootDisplayMode + "}";
         }
 
         @Override
@@ -1885,7 +1908,8 @@ public final class SurfaceControl implements Parcelable {
                 && activeDisplayModeId == that.activeDisplayModeId
                 && Arrays.equals(supportedColorModes, that.supportedColorModes)
                 && activeColorMode == that.activeColorMode
-                && Objects.equals(hdrCapabilities, that.hdrCapabilities);
+                && Objects.equals(hdrCapabilities, that.hdrCapabilities)
+                && preferredBootDisplayMode == that.preferredBootDisplayMode;
         }
 
         @Override
@@ -2247,6 +2271,36 @@ public final class SurfaceControl implements Parcelable {
             }
         }
         return colorSpaces;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean getBootDisplayModeSupport() {
+        return nativeGetBootDisplayModeSupport();
+    }
+
+    /** There is no associated getter for this method.  When this is set, the display is expected
+     * to start up in this mode next time the device reboots.
+     * @hide
+     */
+    public static void setBootDisplayMode(IBinder displayToken, int displayModeId) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeSetBootDisplayMode(displayToken, displayModeId);
+    }
+
+    /**
+     * @hide
+     */
+    public static void clearBootDisplayMode(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        nativeClearBootDisplayMode(displayToken);
     }
 
     /**
@@ -2642,6 +2696,22 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Returns whether/how a display supports DISPLAY_DECORATION.
+     *
+     * @param displayToken
+     *      The token for the display.
+     *
+     * @return A class describing how the display supports DISPLAY_DECORATION or null if it does
+     * not.
+     *
+     * TODO (b/218524164): Move this out of SurfaceControl.
+     * @hide
+     */
+    public static DisplayDecorationSupport getDisplayDecorationSupport(IBinder displayToken) {
+        return nativeGetDisplayDecorationSupport(displayToken);
+    }
+
+    /**
      * Adds a callback to be informed about SF's jank classification for a specific surface.
      * @hide
      */
@@ -2663,6 +2733,17 @@ public final class SurfaceControl implements Parcelable {
      */
     public static int getGPUContextPriority() {
         return nativeGetGPUContextPriority();
+    }
+
+    /**
+     * Interface to handle request to
+     * {@link SurfaceControl.Transaction#addTransactionCommittedListener(Executor, TransactionCommittedListener)}
+     */
+    public interface TransactionCommittedListener {
+        /**
+         * Invoked when the transaction has been committed in SurfaceFlinger.
+         */
+        void onTransactionCommitted();
     }
 
     /**
@@ -2702,9 +2783,13 @@ public final class SurfaceControl implements Parcelable {
          * is allowed as a convenience.
          */
         public Transaction() {
-            mNativeObject = nativeCreateTransaction();
-            mFreeNativeResources
-                = sRegistry.registerNativeAllocation(this, mNativeObject);
+            this(nativeCreateTransaction());
+        }
+
+        private Transaction(long nativeObject) {
+            mNativeObject = nativeObject;
+            mFreeNativeResources =
+                    sRegistry.registerNativeAllocation(this, mNativeObject);
         }
 
         private Transaction(Parcel in) {
@@ -3266,6 +3351,21 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Sets whether the surface should take advantage of display decoration optimizations.
+         * @hide
+         */
+        public Transaction setDisplayDecoration(SurfaceControl sc, boolean displayDecoration) {
+            checkPreconditions(sc);
+            if (displayDecoration) {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, DISPLAY_DECORATION,
+                        DISPLAY_DECORATION);
+            } else {
+                nativeSetFlags(mNativeObject, sc.mNativeObject, 0, DISPLAY_DECORATION);
+            }
+            return this;
+        }
+
+        /**
          * Indicates whether the surface must be considered opaque, even if its pixel format is
          * set to translucent. This can be useful if an application needs full RGBA 8888 support
          * for instance but will still draw every pixel opaque.
@@ -3600,21 +3700,32 @@ public final class SurfaceControl implements Parcelable {
         /**
          * Sets the buffer transform that should be applied to the current buffer.
          *
+         * This can be used in combination with
+         * {@link AttachedSurfaceControl#addOnBufferTransformHintChangedListener(AttachedSurfaceControl.OnBufferTransformHintChangedListener)}
+         * to pre-rotate the buffer for the current display orientation. This can
+         * improve the performance of displaying the associated buffer.
+         *
          * @param sc The SurfaceControl to update
          * @param transform The transform to apply to the buffer.
          * @return this
          */
         public @NonNull Transaction setBufferTransform(@NonNull SurfaceControl sc,
-                /* TODO: Mark the intdef */ int transform) {
+                @SurfaceControl.BufferTransform int transform) {
             checkPreconditions(sc);
             nativeSetBufferTransform(mNativeObject, sc.mNativeObject, transform);
             return this;
         }
 
         /**
-         * Updates the region for the content on this surface updated in this transaction.
+         * Updates the region for the content on this surface updated in this transaction. The
+         * damage region is the area of the buffer that has changed since the previously
+         * sent buffer. This can be used to reduce the amount of recomposition that needs
+         * to happen when only a small region of the buffer is being updated, such as for
+         * a small blinking cursor or a loading indicator.
          *
-         * If unspecified, the complete surface is assumed to be damaged.
+         * @param sc The SurfaceControl on which to set the damage region
+         * @param region The region to set. If null, the entire buffer is assumed dirty. This is
+         *               equivalent to not setting a damage region at all.
          */
         public @NonNull Transaction setDamageRegion(@NonNull SurfaceControl sc,
                 @Nullable Region region) {
@@ -3628,10 +3739,31 @@ public final class SurfaceControl implements Parcelable {
          * SurfaceControls that were created as type {@link #FX_SURFACE_BLAST}
          *
          * @hide
+         * @deprecated use {@link #setDataSpace(SurfaceControl, long)} instead
          */
+        @Deprecated
         public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
             checkPreconditions(sc);
-            nativeSetColorSpace(mNativeObject, sc.mNativeObject, colorSpace.getId());
+            if (colorSpace.getId() == ColorSpace.Named.DCI_P3.ordinal()) {
+                setDataSpace(sc, DataSpace.DATASPACE_DCI_P3);
+            } else {
+                setDataSpace(sc, DataSpace.DATASPACE_SRGB);
+            }
+            return this;
+        }
+
+        /**
+         * Set the dataspace for the SurfaceControl. This will control how the buffer
+         * set with {@link #setBuffer(SurfaceControl, HardwareBuffer)} is displayed.
+         *
+         * @param sc The SurfaceControl to update
+         * @param dataspace The dataspace to set it to
+         * @return this
+         */
+        public @NonNull Transaction setDataSpace(@NonNull SurfaceControl sc,
+                @DataSpace.NamedDataSpace int dataspace) {
+            checkPreconditions(sc);
+            nativeSetDataSpace(mNativeObject, sc.mNativeObject, dataspace);
             return this;
         }
 
@@ -3655,6 +3787,13 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
             return this;
+        }
+
+        /**
+         * @hide
+         */
+        public void sanitize() {
+            nativeSanitize(mNativeObject);
         }
 
         /**

@@ -83,6 +83,16 @@ public class SysuiTestableContext extends TestableContext {
     }
 
     @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter, int flags) {
+        if (receiver != null) {
+            synchronized (mRegisteredReceivers) {
+                mRegisteredReceivers.add(receiver);
+            }
+        }
+        return super.registerReceiver(receiver, filter, flags);
+    }
+
+    @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
         if (receiver != null) {
@@ -94,6 +104,17 @@ public class SysuiTestableContext extends TestableContext {
     }
 
     @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler, int flags) {
+        if (receiver != null) {
+            synchronized (mRegisteredReceivers) {
+                mRegisteredReceivers.add(receiver);
+            }
+        }
+        return super.registerReceiver(receiver, filter, broadcastPermission, scheduler, flags);
+    }
+
+    @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         if (receiver != null) {
@@ -102,6 +123,18 @@ public class SysuiTestableContext extends TestableContext {
             }
         }
         return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler, int flags) {
+        if (receiver != null) {
+            synchronized (mRegisteredReceivers) {
+                mRegisteredReceivers.add(receiver);
+            }
+        }
+        return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler,
+                flags);
     }
 
     @Override

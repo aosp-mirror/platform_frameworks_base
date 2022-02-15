@@ -37,6 +37,7 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import java.io.IOException;
@@ -72,6 +73,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * {@link WindowManager#getMaximumWindowMetrics()}.
      */
     private final Rect mMaxBounds = new Rect();
+
+    /**
+     * The rotation of this window's apparent display. This can differ from mRotation in some
+     * situations (like letterbox).
+     */
+    @Surface.Rotation
+    private int mDisplayRotation = ROTATION_UNDEFINED;
 
     /**
      * The current rotation of this window container relative to the default
@@ -196,6 +204,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Bit that indicates that the {@link #mDisplayWindowingMode} changed.
      * @hide */
     public static final int WINDOW_CONFIG_DISPLAY_WINDOWING_MODE = 1 << 7;
+    /** Bit that indicates that the apparent-display changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_DISPLAY_ROTATION = 1 << 8;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "WINDOW_CONFIG_" }, value = {
@@ -207,6 +218,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOW_CONFIG_ALWAYS_ON_TOP,
             WINDOW_CONFIG_ROTATION,
             WINDOW_CONFIG_DISPLAY_WINDOWING_MODE,
+            WINDOW_CONFIG_DISPLAY_ROTATION,
     })
     public @interface WindowConfig {}
 
@@ -237,6 +249,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         dest.writeInt(mAlwaysOnTop);
         dest.writeInt(mRotation);
         dest.writeInt(mDisplayWindowingMode);
+        dest.writeInt(mDisplayRotation);
     }
 
     /** @hide */
@@ -249,6 +262,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mAlwaysOnTop = source.readInt();
         mRotation = source.readInt();
         mDisplayWindowingMode = source.readInt();
+        mDisplayRotation = source.readInt();
     }
 
     @Override
@@ -318,6 +332,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
+     * Sets the apparent display cutout.
+     * @hide
+     */
+    public void setDisplayRotation(@Surface.Rotation int rotation) {
+        mDisplayRotation = rotation;
+    }
+
+    /**
      * Sets whether this window should be always on top.
      * @param alwaysOnTop {@code true} to set window always on top, otherwise {@code false}
      * @hide
@@ -357,6 +379,14 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     @NonNull
     public Rect getMaxBounds() {
         return mMaxBounds;
+    }
+
+    /**
+     * @see #setDisplayRotation
+     * @hide
+     */
+    public @Surface.Rotation int getDisplayRotation() {
+        return mDisplayRotation;
     }
 
     public int getRotation() {
@@ -413,6 +443,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setBounds(other.mBounds);
         setAppBounds(other.mAppBounds);
         setMaxBounds(other.mMaxBounds);
+        setDisplayRotation(other.mDisplayRotation);
         setWindowingMode(other.mWindowingMode);
         setActivityType(other.mActivityType);
         setAlwaysOnTop(other.mAlwaysOnTop);
@@ -431,6 +462,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setAppBounds(null);
         setBounds(null);
         setMaxBounds(null);
+        setDisplayRotation(ROTATION_UNDEFINED);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
         setActivityType(ACTIVITY_TYPE_UNDEFINED);
         setAlwaysOnTop(ALWAYS_ON_TOP_UNDEFINED);
@@ -485,6 +517,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changed |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
             setDisplayWindowingMode(delta.mDisplayWindowingMode);
         }
+        if (delta.mDisplayRotation != ROTATION_UNDEFINED
+                && delta.mDisplayRotation != mDisplayRotation) {
+            changed |= WINDOW_CONFIG_DISPLAY_ROTATION;
+            setDisplayRotation(delta.mDisplayRotation);
+        }
         return changed;
     }
 
@@ -516,6 +553,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
         if ((mask & WINDOW_CONFIG_DISPLAY_WINDOWING_MODE) != 0) {
             setDisplayWindowingMode(delta.mDisplayWindowingMode);
+        }
+        if ((mask & WINDOW_CONFIG_DISPLAY_ROTATION) != 0) {
+            setDisplayRotation(delta.mDisplayRotation);
         }
     }
 
@@ -573,6 +613,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             changes |= WINDOW_CONFIG_DISPLAY_WINDOWING_MODE;
         }
 
+        if ((compareUndefined || other.mDisplayRotation != ROTATION_UNDEFINED)
+                && mDisplayRotation != other.mDisplayRotation) {
+            changes |= WINDOW_CONFIG_DISPLAY_ROTATION;
+        }
+
         return changes;
     }
 
@@ -620,7 +665,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (n != 0) return n;
         n = mRotation - that.mRotation;
         if (n != 0) return n;
+
         n = mDisplayWindowingMode - that.mDisplayWindowingMode;
+        if (n != 0) return n;
+        n = mDisplayRotation - that.mDisplayRotation;
         if (n != 0) return n;
 
         // if (n != 0) return n;
@@ -650,6 +698,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         result = 31 * result + mAlwaysOnTop;
         result = 31 * result + mRotation;
         result = 31 * result + mDisplayWindowingMode;
+        result = 31 * result + mDisplayRotation;
         return result;
     }
 
@@ -659,6 +708,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return "{ mBounds=" + mBounds
                 + " mAppBounds=" + mAppBounds
                 + " mMaxBounds=" + mMaxBounds
+                + " mDisplayRotation=" + (mRotation == ROTATION_UNDEFINED
+                        ? "undefined" : rotationToString(mDisplayRotation))
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
                 + " mDisplayWindowingMode=" + windowingModeToString(mDisplayWindowingMode)
                 + " mActivityType=" + activityTypeToString(mActivityType)

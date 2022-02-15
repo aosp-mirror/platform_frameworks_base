@@ -30,7 +30,8 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
-import org.junit.Assume.assumeFalse
+import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,18 +40,24 @@ import org.junit.runners.Parameterized
 
 /**
  * Test Pip with orientation changes.
- * To run this test: `atest WMShellFlickerTests:PipOrientationTest`
+ * To run this test: `atest WMShellFlickerTests:SetRequestedOrientationWhilePinnedTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class SetRequestedOrientationWhilePinnedTest(
+@FlakyTest(bugId = 218604389)
+open class SetRequestedOrientationWhilePinnedTest(
     testSpec: FlickerTestParameter
 ) : PipTransition(testSpec) {
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
+
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -84,8 +91,6 @@ class SetRequestedOrientationWhilePinnedTest(
     @Presubmit
     @Test
     fun displayEndsAt90Degrees() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWmEnd {
             hasRotation(Surface.ROTATION_90)
         }
@@ -93,41 +98,23 @@ class SetRequestedOrientationWhilePinnedTest(
 
     @Presubmit
     @Test
-    override fun navBarLayerIsVisible() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
-        super.navBarLayerIsVisible()
-    }
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    override fun statusBarLayerIsVisible() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerIsVisible()
-    }
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
-        super.navBarLayerRotatesAndScales()
-    }
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
     fun pipWindowInsideDisplay() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWmStart {
             frameRegion(pipApp.component).coversAtMost(startingBounds)
         }
@@ -136,8 +123,6 @@ class SetRequestedOrientationWhilePinnedTest(
     @Presubmit
     @Test
     fun pipAppShowsOnTop() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWmEnd {
             isAppWindowOnTop(pipApp.component)
         }
@@ -146,8 +131,6 @@ class SetRequestedOrientationWhilePinnedTest(
     @Presubmit
     @Test
     fun pipLayerInsideDisplay() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayersStart {
             visibleRegion(pipApp.component).coversAtMost(startingBounds)
         }
@@ -156,8 +139,6 @@ class SetRequestedOrientationWhilePinnedTest(
     @Presubmit
     @Test
     fun pipAlwaysVisible() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWm {
             this.isAppWindowVisible(pipApp.component)
         }
@@ -166,8 +147,6 @@ class SetRequestedOrientationWhilePinnedTest(
     @Presubmit
     @Test
     fun pipAppLayerCoversFullScreen() {
-        // This test doesn't work in shell transitions because of b/208576418
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayersEnd {
             visibleRegion(pipApp.component).coversExactly(endingBounds)
         }

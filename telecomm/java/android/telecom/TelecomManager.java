@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -31,6 +32,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -70,6 +72,7 @@ import java.util.concurrent.Executor;
  */
 @SuppressAutoDoc
 @SystemService(Context.TELECOM_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELECOM)
 public class TelecomManager {
 
     /**
@@ -351,13 +354,17 @@ public class TelecomManager {
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
-     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
-     * Ringtone is enabled to prevent two ringers from being generated.
+     * Optional extra for {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} used to indicate
+     * that a call has an in-band ringtone associated with it.  This is used when the device is
+     * acting as an HFP headset and the Bluetooth stack has received an in-band ringtone from the
+     * the HFP host which must be played instead of any local ringtone the device would otherwise
+     * have generated.
+     *
      * @hide
      */
-    public static final String EXTRA_CALL_EXTERNAL_RINGER =
-            "android.telecom.extra.CALL_EXTERNAL_RINGER";
+    @SystemApi
+    public static final String EXTRA_CALL_HAS_IN_BAND_RINGTONE =
+            "android.telecom.extra.CALL_HAS_IN_BAND_RINGTONE";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
@@ -987,6 +994,11 @@ public class TelecomManager {
      */
     public static final int PRESENTATION_PAYPHONE = 4;
 
+    /**
+     * Indicates that the address or number of a call is unavailable.
+     */
+    public static final int PRESENTATION_UNAVAILABLE = 5;
+
 
     /*
      * Values for the adb property "persist.radio.videocall.audio.output"
@@ -1003,7 +1015,7 @@ public class TelecomManager {
     @IntDef(
             prefix = { "PRESENTATION_" },
             value = {PRESENTATION_ALLOWED, PRESENTATION_RESTRICTED, PRESENTATION_UNKNOWN,
-            PRESENTATION_PAYPHONE})
+            PRESENTATION_PAYPHONE, PRESENTATION_UNAVAILABLE})
     public @interface Presentation {}
 
 
@@ -1286,14 +1298,24 @@ public class TelecomManager {
      * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
      * <p>
      * Requires permission {@link android.Manifest.permission#READ_PHONE_STATE}, or that the caller
-     * is the default dialer app.
+     * is the default dialer app to get all phone account handles.
+     * <P>
+     * If the caller doesn't meet any of the above requirements and has {@link
+     * android.Manifest.permission#MANAGE_OWN_CALLS}, the caller can get only the phone account
+     * handles they have registered.
      * <p>
-     * A {@link SecurityException} will be thrown if a called is not the default dialer, or lacks
-     * the {@link android.Manifest.permission#READ_PHONE_STATE} permission.
+     * A {@link SecurityException} will be thrown if the caller is not the default dialer
+     * or the caller does not have at least one of the following permissions:
+     * {@link android.Manifest.permission#READ_PHONE_STATE} permission,
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission
      *
      * @return A list of {@code PhoneAccountHandle} objects.
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MANAGE_OWN_CALLS
+    })
     public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1444,9 +1466,14 @@ public class TelecomManager {
      * when placing calls. The user may still need to enable the {@link PhoneAccount} within
      * the phone app settings before the account is usable.
      * <p>
+     * Note: Each package is limited to 10 {@link PhoneAccount} registrations.
+     * <p>
      * A {@link SecurityException} will be thrown if an app tries to register a
      * {@link PhoneAccountHandle} where the package name specified within
      * {@link PhoneAccountHandle#getComponentName()} does not match the package name of the app.
+     * <p>
+     * A {@link IllegalArgumentException} will be thrown if an app tries to register a
+     * {@link PhoneAccount} when the upper bound limit, 10, has already been reached.
      *
      * @param account The complete {@link PhoneAccount}.
      */

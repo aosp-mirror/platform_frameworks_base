@@ -18,11 +18,13 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.MediaControlPanel.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.shared.system.SysUiStatsLog
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager
+import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
@@ -47,7 +49,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 class MediaCarouselController @Inject constructor(
     private val context: Context,
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,
-    private val visualStabilityManager: VisualStabilityManager,
+    private val visualStabilityProvider: VisualStabilityProvider,
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val activityStarter: ActivityStarter,
     private val systemClock: SystemClock,
@@ -56,7 +58,8 @@ class MediaCarouselController @Inject constructor(
     configurationController: ConfigurationController,
     falsingCollector: FalsingCollector,
     falsingManager: FalsingManager,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val mediaFlags: MediaFlags
 ) : Dumpable {
     /**
      * The current width of the carousel
@@ -119,7 +122,7 @@ class MediaCarouselController @Inject constructor(
     private lateinit var settingsButton: View
     private val mediaContent: ViewGroup
     private val pageIndicator: PageIndicator
-    private val visualStabilityCallback: VisualStabilityManager.Callback
+    private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     private var bgColor = getBackgroundColor()
@@ -170,6 +173,9 @@ class MediaCarouselController @Inject constructor(
      */
     lateinit var updateUserVisibility: () -> Unit
 
+    private val isReorderingAllowed: Boolean
+        get() = visualStabilityProvider.isReorderingAllowed
+
     init {
         dumpManager.registerDumpable(TAG, this)
         mediaFrame = inflateMediaCarousel()
@@ -182,8 +188,7 @@ class MediaCarouselController @Inject constructor(
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
         configurationController.addCallback(configListener)
-        // TODO (b/162832756): remove visual stability manager when migrating to new pipeline
-        visualStabilityCallback = VisualStabilityManager.Callback {
+        visualStabilityCallback = OnReorderingAllowedListener {
             if (needsReordering) {
                 needsReordering = false
                 reorderAllPlayers(previousVisiblePlayerKey = null)
@@ -201,8 +206,7 @@ class MediaCarouselController @Inject constructor(
             // Let's reset our scroll position
             mediaCarouselScrollHandler.scrollToStart()
         }
-        visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback,
-                true /* persistent */)
+        visualStabilityProvider.addPersistentReorderingAllowedListener(visualStabilityCallback)
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(
                 key: String,
@@ -264,7 +268,7 @@ class MediaCarouselController @Inject constructor(
                     // This view isn't playing, let's remove this! This happens e.g when
                     // dismissing/timing out a view. We still have the data around because
                     // resumption could be on, but we should save the resources and release this.
-                    if (visualStabilityManager.isReorderingAllowed) {
+                    if (isReorderingAllowed) {
                         onMediaDataRemoved(key)
                     } else {
                         keysNeedRemoval.add(key)
@@ -334,7 +338,7 @@ class MediaCarouselController @Inject constructor(
 
             override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
                 if (DEBUG) Log.d(TAG, "My Smartspace media removal request is received")
-                if (immediately || visualStabilityManager.isReorderingAllowed) {
+                if (immediately || isReorderingAllowed) {
                     onMediaDataRemoved(key)
                 } else {
                     keysNeedRemoval.add(key)
@@ -382,7 +386,7 @@ class MediaCarouselController @Inject constructor(
     private fun reorderAllPlayers(previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?) {
         mediaContent.removeAllViews()
         for (mediaPlayer in MediaPlayerData.players()) {
-            mediaPlayer.playerViewHolder?.let {
+            mediaPlayer.mediaViewHolder?.let {
                 mediaContent.addView(it.player)
             } ?: mediaPlayer.recommendationViewHolder?.let {
                 mediaContent.addView(it.recommendations)
@@ -409,28 +413,34 @@ class MediaCarouselController @Inject constructor(
 
     // Returns true if new player is added
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData): Boolean {
-        val dataCopy = data.copy(backgroundColor = bgColor)
         MediaPlayerData.moveIfExists(oldKey, key)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
-            newPlayer.attachPlayer(
-                    PlayerViewHolder.create(LayoutInflater.from(context), mediaContent))
+            if (mediaFlags.useMediaSessionLayout()) {
+                newPlayer.attachPlayer(
+                        PlayerSessionViewHolder.create(LayoutInflater.from(context), mediaContent),
+                        MediaViewController.TYPE.PLAYER_SESSION)
+            } else {
+                newPlayer.attachPlayer(
+                        PlayerViewHolder.create(LayoutInflater.from(context), mediaContent),
+                        MediaViewController.TYPE.PLAYER)
+            }
             newPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            newPlayer.playerViewHolder?.player?.setLayoutParams(lp)
-            newPlayer.bindPlayer(dataCopy, key)
+            newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
+            newPlayer.bindPlayer(data, key)
             newPlayer.setListening(currentlyExpanded)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer, systemClock)
+            MediaPlayerData.addMediaPlayer(key, data, newPlayer, systemClock)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
         } else {
-            existingPlayer.bindPlayer(dataCopy, key)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer, systemClock)
-            if (visualStabilityManager.isReorderingAllowed || shouldScrollToActivePlayer) {
+            existingPlayer.bindPlayer(data, key)
+            MediaPlayerData.addMediaPlayer(key, data, existingPlayer, systemClock)
+            if (isReorderingAllowed || shouldScrollToActivePlayer) {
                 reorderAllPlayers(curVisibleMediaKey)
             } else {
                 needsReordering = true
@@ -493,7 +503,7 @@ class MediaCarouselController @Inject constructor(
         val removed = MediaPlayerData.removeMediaPlayer(key)
         removed?.apply {
             mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
-            mediaContent.removeView(removed.playerViewHolder?.player)
+            mediaContent.removeView(removed.mediaViewHolder?.player)
             mediaContent.removeView(removed.recommendationViewHolder?.recommendations)
             removed.onDestroy()
             mediaCarouselScrollHandler.onPlayersChanged()
@@ -534,7 +544,11 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun getForegroundColor(): Int {
-        return context.getColor(android.R.color.system_accent2_900)
+        return if (mediaFlags.useMediaSessionLayout()) {
+            context.getColor(android.R.color.system_neutral2_200)
+        } else {
+            context.getColor(android.R.color.system_accent2_900)
+        }
     }
 
     private fun updatePageIndicator() {
@@ -836,7 +850,7 @@ class MediaCarouselController @Inject constructor(
         MediaPlayerData.players().forEachIndexed {
             index, it ->
             if (it.mIsImpressed) {
-                logSmartspaceCardReported(761, // SMARTSPACE_CARD_DISMISS
+                logSmartspaceCardReported(SMARTSPACE_CARD_DISMISS_EVENT,
                         it.mInstanceId,
                         it.mUid,
                         it.recommendationViewHolder != null,
@@ -856,6 +870,10 @@ class MediaCarouselController @Inject constructor(
             println("playerKeys: ${MediaPlayerData.playerKeys()}")
             println("smartspaceMediaData: ${MediaPlayerData.smartspaceMediaData}")
             println("shouldPrioritizeSs: ${MediaPlayerData.shouldPrioritizeSs}")
+            println("current size: $currentCarouselWidth x $currentCarouselHeight")
+            println("location: $desiredLocation")
+            println("state: ${desiredHostState?.expansion}, " +
+                "only active ${desiredHostState?.showsOnlyActiveMedia}")
         }
     }
 }

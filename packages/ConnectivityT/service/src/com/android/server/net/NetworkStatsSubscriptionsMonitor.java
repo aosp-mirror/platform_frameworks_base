@@ -16,24 +16,26 @@
 
 package com.android.server.net;
 
-import static android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA;
-import static android.net.NetworkTemplate.getCollapsedRatType;
+import static android.app.usage.NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+import static android.app.usage.NetworkStatsManager.getCollapsedRatType;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED;
+import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 
 import android.annotation.NonNull;
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Looper;
-import android.telephony.Annotation;
-import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
+import android.os.Build;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.CollectionUtils;
+import com.android.net.module.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,7 @@ import java.util.concurrent.Executor;
 /**
  * Helper class that watches for events that are triggered per subscription.
  */
+@TargetApi(Build.VERSION_CODES.TIRAMISU)
 public class NetworkStatsSubscriptionsMonitor extends
         SubscriptionManager.OnSubscriptionsChangedListener {
 
@@ -56,15 +59,14 @@ public class NetworkStatsSubscriptionsMonitor extends
          *
          * @param subscriberId IMSI of the subscription.
          * @param collapsedRatType collapsed RAT type.
-         *                         @see android.net.NetworkTemplate#getCollapsedRatType(int).
+         *                     @see android.app.usage.NetworkStatsManager#getCollapsedRatType(int).
          */
-        void onCollapsedRatTypeChanged(@NonNull String subscriberId,
-                @Annotation.NetworkType int collapsedRatType);
+        void onCollapsedRatTypeChanged(@NonNull String subscriberId, int collapsedRatType);
     }
     private final Delegate mDelegate;
 
     /**
-     * Receivers that watches for {@link ServiceState} changes for each subscription, to
+     * Receivers that watches for {@link TelephonyDisplayInfo} changes for each subscription, to
      * monitor the transitioning between Radio Access Technology(RAT) types for each sub.
      */
     @NonNull
@@ -79,9 +81,9 @@ public class NetworkStatsSubscriptionsMonitor extends
     @NonNull
     private final Executor mExecutor;
 
-    NetworkStatsSubscriptionsMonitor(@NonNull Context context, @NonNull Looper looper,
+    NetworkStatsSubscriptionsMonitor(@NonNull Context context,
             @NonNull Executor executor, @NonNull Delegate delegate) {
-        super(looper);
+        super();
         mSubscriptionManager = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mTeleManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -99,35 +101,36 @@ public class NetworkStatsSubscriptionsMonitor extends
         // prevent binder call to telephony when querying RAT. Keep listener registration with empty
         // IMSI is meaningless since the RAT type changed is ambiguous for multi-SIM if reported
         // with empty IMSI. So filter the subs w/o a valid IMSI to prevent such registration.
-        final List<Pair<Integer, String>> filteredNewSubs =
-                CollectionUtils.mapNotNull(newSubs, subId -> {
-                    final String subscriberId = mTeleManager.getSubscriberId(subId);
-                    return TextUtils.isEmpty(subscriberId) ? null : new Pair(subId, subscriberId);
-                });
+        final List<Pair<Integer, String>> filteredNewSubs = new ArrayList<>();
+        for (final int subId : newSubs) {
+            final String subscriberId =
+                    mTeleManager.createForSubscriptionId(subId).getSubscriberId();
+            if (!TextUtils.isEmpty(subscriberId)) {
+                filteredNewSubs.add(new Pair(subId, subscriberId));
+            }
+        }
 
         for (final Pair<Integer, String> sub : filteredNewSubs) {
             // Fully match listener with subId and IMSI, since in some rare cases, IMSI might be
             // suddenly change regardless of subId, such as switch IMSI feature in modem side.
             // If that happens, register new listener with new IMSI and remove old one later.
-            if (CollectionUtils.find(mRatListeners,
-                    it -> it.equalsKey(sub.first, sub.second)) != null) {
+            if (CollectionUtils.any(mRatListeners, it -> it.equalsKey(sub.first, sub.second))) {
                 continue;
             }
 
-            final RatTypeListener listener =
-                    new RatTypeListener(mExecutor, this, sub.first, sub.second);
+            final RatTypeListener listener = new RatTypeListener(this, sub.first, sub.second);
             mRatListeners.add(listener);
 
             // Register listener to the telephony manager that associated with specific sub.
             mTeleManager.createForSubscriptionId(sub.first)
-                    .listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE);
+                    .registerTelephonyCallback(mExecutor, listener);
             Log.d(NetworkStatsService.TAG, "RAT type listener registered for sub " + sub.first);
         }
 
         for (final RatTypeListener listener : new ArrayList<>(mRatListeners)) {
             // If there is no subId and IMSI matched the listener, removes it.
-            if (CollectionUtils.find(filteredNewSubs,
-                    it -> listener.equalsKey(it.first, it.second)) == null) {
+            if (!CollectionUtils.any(filteredNewSubs,
+                    it -> listener.equalsKey(it.first, it.second))) {
                 handleRemoveRatTypeListener(listener);
             }
         }
@@ -148,9 +151,10 @@ public class NetworkStatsSubscriptionsMonitor extends
      * @return collapsed RatType for the given subscriberId
      */
     public int getRatTypeForSubscriberId(@NonNull String subscriberId) {
-        final RatTypeListener match = CollectionUtils.find(mRatListeners,
+        final int index = CollectionUtils.indexOf(mRatListeners,
                 it -> TextUtils.equals(subscriberId, it.mSubscriberId));
-        return match != null ? match.mLastCollapsedRatType : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        return index != -1 ? mRatListeners.get(index).mLastCollapsedRatType
+                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     /**
@@ -173,7 +177,7 @@ public class NetworkStatsSubscriptionsMonitor extends
 
     private void handleRemoveRatTypeListener(@NonNull RatTypeListener listener) {
         mTeleManager.createForSubscriptionId(listener.mSubId)
-                .listen(listener, PhoneStateListener.LISTEN_NONE);
+                .unregisterTelephonyCallback(listener);
         Log.d(NetworkStatsService.TAG, "RAT type listener unregistered for sub " + listener.mSubId);
         mRatListeners.remove(listener);
 
@@ -183,7 +187,8 @@ public class NetworkStatsSubscriptionsMonitor extends
                 listener.mSubscriberId, TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }
 
-    static class RatTypeListener extends PhoneStateListener {
+    static class RatTypeListener extends TelephonyCallback
+            implements TelephonyCallback.DisplayInfoListener {
         // Unique id for the subscription. See {@link SubscriptionInfo#getSubscriptionId}.
         @NonNull
         private final int mSubId;
@@ -197,29 +202,27 @@ public class NetworkStatsSubscriptionsMonitor extends
         @NonNull
         private final NetworkStatsSubscriptionsMonitor mMonitor;
 
-        RatTypeListener(@NonNull Executor executor,
-                @NonNull NetworkStatsSubscriptionsMonitor monitor, int subId,
+        RatTypeListener(@NonNull NetworkStatsSubscriptionsMonitor monitor, int subId,
                 @NonNull String subscriberId) {
-            super(executor);
             mSubId = subId;
             mSubscriberId = subscriberId;
             mMonitor = monitor;
         }
 
         @Override
-        public void onServiceStateChanged(@NonNull ServiceState ss) {
+        public void onDisplayInfoChanged(TelephonyDisplayInfo displayInfo) {
             // In 5G SA (Stand Alone) mode, the primary cell itself will be 5G hence telephony
             // would report RAT = 5G_NR.
             // However, in 5G NSA (Non Stand Alone) mode, the primary cell is still LTE and
             // network allocates a secondary 5G cell so telephony reports RAT = LTE along with
             // NR state as connected. In such case, attributes the data usage to NR.
             // See b/160727498.
-            final boolean is5GNsa = (ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE
-                    || ss.getDataNetworkType() == TelephonyManager.NETWORK_TYPE_LTE_CA)
-                    && ss.getNrState() == NetworkRegistrationInfo.NR_STATE_CONNECTED;
+            final boolean is5GNsa = displayInfo.getNetworkType() == NETWORK_TYPE_LTE
+                    && (displayInfo.getOverrideNetworkType() == OVERRIDE_NETWORK_TYPE_NR_NSA
+                    || displayInfo.getOverrideNetworkType() == OVERRIDE_NETWORK_TYPE_NR_ADVANCED);
 
             final int networkType =
-                    (is5GNsa ? NETWORK_TYPE_5G_NSA : ss.getDataNetworkType());
+                    (is5GNsa ? NETWORK_TYPE_5G_NSA : displayInfo.getNetworkType());
             final int collapsedRatType = getCollapsedRatType(networkType);
             if (collapsedRatType == mLastCollapsedRatType) return;
 

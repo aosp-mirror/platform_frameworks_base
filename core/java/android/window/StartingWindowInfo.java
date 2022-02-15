@@ -116,6 +116,7 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
             TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN,
+            TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN,
             TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
@@ -140,6 +141,11 @@ public final class StartingWindowInfo implements Parcelable {
      * @hide
      */
     public static final int TYPE_PARAMETER_ACTIVITY_DRAWN = 0x00000040;
+    /**
+     * Application is allowed to handle empty splash screen.
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN = 0x00000080;
     /**
      * Application is allowed to use the legacy splash screen
      * @hide
@@ -183,6 +189,13 @@ public final class StartingWindowInfo implements Parcelable {
 
     private StartingWindowInfo(@NonNull Parcel source) {
         readFromParcel(source);
+    }
+
+    /**
+     * Return whether the application allow to handle the empty style splash screen.
+     */
+    public boolean allowHandleEmptySplashScreen() {
+        return (startingWindowTypeParameter & TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN) != 0;
     }
 
     @Override

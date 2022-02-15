@@ -419,7 +419,7 @@ public final class ContentCaptureContext implements Parcelable {
             final ContentCaptureContext clientContext;
             if (hasClientContext) {
                 // Must reconstruct the client context using the Builder API
-                final LocusId id = parcel.readParcelable(null);
+                final LocusId id = parcel.readParcelable(null, android.content.LocusId.class);
                 final Bundle extras = parcel.readBundle();
                 final Builder builder = new Builder(id);
                 if (extras != null) builder.setExtras(extras);
@@ -427,7 +427,7 @@ public final class ContentCaptureContext implements Parcelable {
             } else {
                 clientContext = null;
             }
-            final ComponentName componentName = parcel.readParcelable(null);
+            final ComponentName componentName = parcel.readParcelable(null, android.content.ComponentName.class);
             if (componentName == null) {
                 // Client-state only
                 return clientContext;

@@ -787,7 +787,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     private SparseArray<long[]> getUidProcStateStatsOverTime(long minTime) {
-        final Parcel current = Parcel.obtain();
         final ProcessStats stats = new ProcessStats();
         long curTime;
         synchronized (mLock) {

@@ -29,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -98,6 +97,10 @@ public class TransitionAnimation {
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
     private static final String DEFAULT_PACKAGE = "android";
+
+    // TODO (b/215515255): remove once we full migrate to shell transitions
+    private static final boolean SHELL_TRANSITIONS_ENABLED =
+            SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
     private final Context mContext;
     private final String mTag;
@@ -253,7 +256,54 @@ public class TransitionAnimation {
                 resId = ent.array.getResourceId(animAttr, 0);
             }
         }
+        if (!SHELL_TRANSITIONS_ENABLED) {
+            resId = updateToLegacyIfNeeded(resId);
+        }
         resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        if (ResourceId.isValid(resId)) {
+            return loadAnimationSafely(context, resId, mTag);
+        }
+        return null;
+    }
+
+    /**
+     * Replace animations that are not compatible with the legacy transition system with ones that
+     * are compatible with it.
+     * TODO (b/215515255): remove once we full migrate to shell transitions
+     */
+    private int updateToLegacyIfNeeded(int anim) {
+        if (anim == R.anim.activity_open_enter) {
+            return R.anim.activity_open_enter_legacy;
+        } else if (anim == R.anim.activity_open_exit) {
+            return R.anim.activity_open_exit_legacy;
+        } else if (anim == R.anim.activity_close_enter) {
+            return R.anim.activity_close_enter_legacy;
+        } else if (anim == R.anim.activity_close_exit) {
+            return R.anim.activity_close_exit_legacy;
+        }
+        return anim;
+    }
+
+    /** Load animation by attribute Id from a specific AnimationStyle resource. */
+    @Nullable
+    public Animation loadAnimationAttr(String packageName, int animStyleResId, int animAttr,
+            boolean translucent) {
+        if (animStyleResId == 0) {
+            return null;
+        }
+        int resId = Resources.ID_NULL;
+        Context context = mContext;
+        if (animAttr >= 0) {
+            packageName = packageName != null ? packageName : DEFAULT_PACKAGE;
+            AttributeCache.Entry ent = getCachedAnimations(packageName, animStyleResId);
+            if (ent != null) {
+                context = ent.context;
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
+        if (translucent) {
+            resId = updateToTranslucentAnimIfNeeded(resId);
+        }
         if (ResourceId.isValid(resId)) {
             return loadAnimationSafely(context, resId, mTag);
         }
@@ -263,20 +313,8 @@ public class TransitionAnimation {
     /** Load animation by attribute Id from android package. */
     @Nullable
     public Animation loadDefaultAnimationAttr(int animAttr) {
-        int resId = Resources.ID_NULL;
-        Context context = mContext;
-        if (animAttr >= 0) {
-            AttributeCache.Entry ent = getCachedAnimations(DEFAULT_PACKAGE,
-                    mDefaultWindowAnimationStyleResId);
-            if (ent != null) {
-                context = ent.context;
-                resId = ent.array.getResourceId(animAttr, 0);
-            }
-        }
-        if (ResourceId.isValid(resId)) {
-            return loadAnimationSafely(context, resId, mTag);
-        }
-        return null;
+        return loadAnimationAttr(DEFAULT_PACKAGE, mDefaultWindowAnimationStyleResId, animAttr,
+                false /* translucent */);
     }
 
     @Nullable
@@ -901,7 +939,7 @@ public class TransitionAnimation {
      * animation.
      */
     public HardwareBuffer createCrossProfileAppsThumbnail(
-            @DrawableRes int thumbnailDrawableRes, Rect frame) {
+            Drawable thumbnailDrawable, Rect frame) {
         final int width = frame.width();
         final int height = frame.height();
 
@@ -910,14 +948,13 @@ public class TransitionAnimation {
         canvas.drawColor(Color.argb(0.6f, 0, 0, 0));
         final int thumbnailSize = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.cross_profile_apps_thumbnail_size);
-        final Drawable drawable = mContext.getDrawable(thumbnailDrawableRes);
-        drawable.setBounds(
+        thumbnailDrawable.setBounds(
                 (width - thumbnailSize) / 2,
                 (height - thumbnailSize) / 2,
                 (width + thumbnailSize) / 2,
                 (height + thumbnailSize) / 2);
-        drawable.setTint(mContext.getColor(android.R.color.white));
-        drawable.draw(canvas);
+        thumbnailDrawable.setTint(mContext.getColor(android.R.color.white));
+        thumbnailDrawable.draw(canvas);
         picture.endRecording();
 
         return Bitmap.createBitmap(picture).getHardwareBuffer();
@@ -1019,6 +1056,16 @@ public class TransitionAnimation {
         }
         if (transit == TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE
                 && anim == R.anim.activity_close_exit) {
+            return R.anim.activity_translucent_close_exit;
+        }
+        return anim;
+    }
+
+    private static int updateToTranslucentAnimIfNeeded(int anim) {
+        if (anim == R.anim.activity_open_enter) {
+            return R.anim.activity_translucent_open_enter;
+        }
+        if (anim == R.anim.activity_close_exit) {
             return R.anim.activity_translucent_close_exit;
         }
         return anim;

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.INearbyMediaDevicesUpdateCallback;
+import android.media.MediaRoute2Info;
+import android.media.NearbyDevice;
+import android.media.NearbyMediaDevicesProvider;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,11 +45,16 @@ import android.view.View;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.NotificationVisibility;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -176,6 +187,8 @@ public class StatusBarManager {
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
     /** @hide */
     public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
+    /** @hide */
+    public static final int NAVIGATION_HINT_IME_SWITCHER_SHOWN = 1 << 2;
 
     /** @hide */
     public static final int WINDOW_STATUS_BAR = 1;
@@ -212,6 +225,34 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     /** @hide */
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
+
+    /**
+     * Session flag for {@link #registerSessionListener} indicating the listener
+     * is interested in sessions on the keygaurd
+     * @hide
+     */
+    public static final int SESSION_KEYGUARD = 1 << 0;
+
+    /**
+     * Session flag for {@link #registerSessionListener} indicating the current session
+     * is interested in session on the biometric prompt.
+     * @hide
+     */
+    public static final int SESSION_BIOMETRIC_PROMPT = 1 << 1;
+
+    /** @hide */
+    public static final Set<Integer> ALL_SESSIONS = Set.of(
+            SESSION_KEYGUARD,
+            SESSION_BIOMETRIC_PROMPT
+    );
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SESSION_KEYGUARD" }, value = {
+            SESSION_KEYGUARD,
+            SESSION_BIOMETRIC_PROMPT,
+    })
+    public @interface SessionFlags {}
 
     /**
      * Response indicating that the tile was not added.
@@ -281,6 +322,203 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestResult {}
+
+    /**
+     * Constant for {@link #setNavBarModeOverride(int)} indicating the default navbar mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0;
+
+    /**
+     * Constant for {@link #setNavBarModeOverride(int)} indicating kids navbar mode.
+     *
+     * <p>When used, back and home icons will change drawables and layout, recents will be hidden,
+     * and the navbar will remain visible when apps are in immersive mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"NAV_BAR_MODE_OVERRIDE_"}, value = {
+            NAV_BAR_MODE_OVERRIDE_NONE,
+            NAV_BAR_MODE_OVERRIDE_KIDS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NavBarModeOverride {}
+
+    /**
+     * State indicating that this sender device is close to a receiver device, so the user can
+     * potentially *start* a cast to the receiver device if the user moves their device a bit
+     * closer.
+     * <p>
+     * Important notes:
+     * <ul>
+     *     <li>This state represents that the device is close enough to inform the user that
+     *     transferring is an option, but the device is *not* close enough to actually initiate a
+     *     transfer yet.</li>
+     *     <li>This state is for *starting* a cast. It should be used when this device is currently
+     *     playing media locally and the media should be transferred to be played on the receiver
+     *     device instead.</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST = 0;
+
+    /**
+     * State indicating that this sender device is close to a receiver device, so the user can
+     * potentially *end* a cast on the receiver device if the user moves this device a bit closer.
+     * <p>
+     * Important notes:
+     * <ul>
+     *     <li>This state represents that the device is close enough to inform the user that
+     *     transferring is an option, but the device is *not* close enough to actually initiate a
+     *     transfer yet.</li>
+     *     <li>This state is for *ending* a cast. It should be used when media is currently being
+     *     played on the receiver device and the media should be transferred to play locally
+     *     instead.</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST = 1;
+
+    /**
+     * State indicating that a media transfer from this sender device to a receiver device has been
+     * started.
+     * <p>
+     * Important note: This state is for *starting* a cast. It should be used when this device is
+     * currently playing media locally and the media has started being transferred to the receiver
+     * device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED = 2;
+
+    /**
+     * State indicating that a media transfer from the receiver and back to this sender device
+     * has been started.
+     * <p>
+     * Important note: This state is for *ending* a cast. It should be used when media is currently
+     * being played on the receiver device and the media has started being transferred to play
+     * locally instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED = 3;
+
+    /**
+     * State indicating that a media transfer from this sender device to a receiver device has
+     * finished successfully.
+     * <p>
+     * Important note: This state is for *starting* a cast. It should be used when this device had
+     * previously been playing media locally and the media has successfully been transferred to the
+     * receiver device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 4;
+
+    /**
+     * State indicating that a media transfer from the receiver and back to this sender device has
+     * finished successfully.
+     * <p>
+     * Important note: This state is for *ending* a cast. It should be used when media was
+     * previously being played on the receiver device and has been successfully transferred to play
+     * locally on this device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED = 5;
+
+    /**
+     * State indicating that the attempted transfer to the receiver device has failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED = 6;
+
+    /**
+     * State indicating that the attempted transfer back to this device has failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED = 7;
+
+    /**
+     * State indicating that this sender device is no longer close to the receiver device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER = 8;
+
+    /** @hide */
+    @IntDef(prefix = {"MEDIA_TRANSFER_SENDER_STATE_"}, value = {
+            MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+            MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaTransferSenderState {}
+
+    /**
+     * State indicating that this receiver device is close to a sender device, so the user can
+     * potentially start or end a cast to the receiver device if the user moves the sender device a
+     * bit closer.
+     * <p>
+     * Important note: This state represents that the device is close enough to inform the user that
+     * transferring is an option, but the device is *not* close enough to actually initiate a
+     * transfer yet.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER = 0;
+
+    /**
+     * State indicating that this receiver device is no longer close to the sender device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"MEDIA_TRANSFER_RECEIVER_STATE_"}, value = {
+            MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaTransferReceiverState {}
+
+    /**
+     * A map from a provider registered in
+     * {@link #registerNearbyMediaDevicesProvider(NearbyMediaDevicesProvider)} to the wrapper
+     * around the provider that was created internally. We need the wrapper to make the provider
+     * binder-compatible, and we need to store a reference to the wrapper so that when the provider
+     * is un-registered, we un-register the saved wrapper instance.
+     */
+    private final Map<NearbyMediaDevicesProvider, NearbyMediaDevicesProviderWrapper>
+            nearbyMediaDevicesProviderMap = new HashMap<>();
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -687,6 +925,192 @@ public class StatusBarManager {
         }
     }
 
+    /**
+     * Sets or removes the navigation bar mode override.
+     *
+     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
+        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
+                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
+            throw new IllegalArgumentException(
+                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+        }
+
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.setNavBarModeOverride(navBarModeOverride);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the navigation bar mode override. Returns default value if no override is set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    public @NavBarModeOverride int getNavBarModeOverride() {
+        int navBarModeOverride = NAV_BAR_MODE_OVERRIDE_NONE;
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                navBarModeOverride = svc.getNavBarModeOverride();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return navBarModeOverride;
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the <b>sender</b> device.
+     *
+     * <p>The callback should only be provided for the {@link
+     * MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED} or {@link
+     * MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED} states, since those are the
+     * only states where an action can be un-done.
+     *
+     * @param displayState the new state for media tap-to-transfer.
+     * @param routeInfo the media route information for the media being transferred.
+     * @param undoExecutor an executor to run the callback on and must be provided if the
+     *                     callback is non-null.
+     * @param undoCallback a callback that will be triggered if the user elects to undo a media
+     *                     transfer.
+     *
+     * @throws IllegalArgumentException if an undo callback is provided for states that are not a
+     *   succeeded state.
+     * @throws IllegalArgumentException if an executor is not provided when a callback is.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void updateMediaTapToTransferSenderDisplay(
+            @MediaTransferSenderState int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Executor undoExecutor,
+            @Nullable Runnable undoCallback
+    ) {
+        Objects.requireNonNull(routeInfo);
+        if (displayState != MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED
+                && displayState != MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED
+                && undoCallback != null) {
+            throw new IllegalArgumentException(
+                    "The undoCallback should only be provided when the state is a "
+                            + "transfer succeeded state");
+        }
+        if (undoCallback != null && undoExecutor == null) {
+            throw new IllegalArgumentException(
+                    "You must pass an executor when you pass an undo callback");
+        }
+        IStatusBarService svc = getService();
+        try {
+            UndoCallback callbackProxy = null;
+            if (undoExecutor != null) {
+                callbackProxy = new UndoCallback(undoExecutor, undoCallback);
+            }
+            svc.updateMediaTapToTransferSenderDisplay(displayState, routeInfo, callbackProxy);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the <b>receiver</b> device.
+     *
+     * @param displayState the new state for media tap-to-transfer.
+     * @param routeInfo the media route information for the media being transferred.
+     * @param appIcon the icon of the app playing the media.
+     * @param appName the name of the app playing the media.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void updateMediaTapToTransferReceiverDisplay(
+            @MediaTransferReceiverState int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
+        Objects.requireNonNull(routeInfo);
+        IStatusBarService svc = getService();
+        try {
+            svc.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo, appIcon, appName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a provider that notifies callbacks about the status of nearby devices that are able
+     * to play media.
+     * <p>
+     * If multiple providers are registered, all the providers will be used for nearby device
+     * information.
+     * <p>
+     * @param provider the nearby device information provider to register
+     * <p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void registerNearbyMediaDevicesProvider(
+            @NonNull NearbyMediaDevicesProvider provider
+    ) {
+        Objects.requireNonNull(provider);
+        if (nearbyMediaDevicesProviderMap.containsKey(provider)) {
+            return;
+        }
+        try {
+            final IStatusBarService svc = getService();
+            NearbyMediaDevicesProviderWrapper providerWrapper =
+                    new NearbyMediaDevicesProviderWrapper(provider);
+            nearbyMediaDevicesProviderMap.put(provider, providerWrapper);
+            svc.registerNearbyMediaDevicesProvider(providerWrapper);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+   /**
+     * Unregisters a provider that gives information about nearby devices that are able to play
+     * media.
+     * <p>
+     * See {@link registerNearbyMediaDevicesProvider}.
+     * <p>
+     * @param provider the nearby device information provider to unregister
+     * <p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull NearbyMediaDevicesProvider provider
+    ) {
+        Objects.requireNonNull(provider);
+        if (!nearbyMediaDevicesProviderMap.containsKey(provider)) {
+            return;
+        }
+        try {
+            final IStatusBarService svc = getService();
+            NearbyMediaDevicesProviderWrapper providerWrapper =
+                    nearbyMediaDevicesProviderMap.get(provider);
+            nearbyMediaDevicesProviderMap.remove(provider);
+            svc.unregisterNearbyMediaDevicesProvider(providerWrapper);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public static String windowStateToString(int state) {
         if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
@@ -967,6 +1391,75 @@ public class StatusBarManager {
         @Override
         public void onTileRequest(int userResponse) {
             mExecutor.execute(() -> mCallback.accept(userResponse));
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static final class UndoCallback extends IUndoMediaTransferCallback.Stub {
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final Runnable mCallback;
+
+        UndoCallback(@NonNull Executor executor, @NonNull Runnable callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onUndoTriggered() {
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(mCallback);
+            } finally {
+                restoreCallingIdentity(callingIdentity);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static final class NearbyMediaDevicesProviderWrapper extends INearbyMediaDevicesProvider.Stub {
+        @NonNull
+        private final NearbyMediaDevicesProvider mProvider;
+        // Because we're wrapping a {@link NearbyMediaDevicesProvider} in a binder-compatible
+        // interface, we also need to wrap the callbacks that the provider receives. We use
+        // this map to keep track of the original callback and the wrapper callback so that
+        // unregistering the callback works correctly.
+        @NonNull
+        private final Map<INearbyMediaDevicesUpdateCallback, Consumer<List<NearbyDevice>>>
+                mRegisteredCallbacks = new HashMap<>();
+
+        NearbyMediaDevicesProviderWrapper(@NonNull NearbyMediaDevicesProvider provider) {
+            mProvider = provider;
+        }
+
+        @Override
+        public void registerNearbyDevicesCallback(
+                @NonNull INearbyMediaDevicesUpdateCallback callback) {
+            Consumer<List<NearbyDevice>> callbackAsConsumer = nearbyDevices -> {
+                try {
+                    callback.onDevicesUpdated(nearbyDevices);
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            };
+
+            mRegisteredCallbacks.put(callback, callbackAsConsumer);
+            mProvider.registerNearbyDevicesCallback(callbackAsConsumer);
+        }
+
+        @Override
+        public void unregisterNearbyDevicesCallback(
+                @NonNull INearbyMediaDevicesUpdateCallback callback) {
+            if (!mRegisteredCallbacks.containsKey(callback)) {
+                return;
+            }
+            mProvider.unregisterNearbyDevicesCallback(mRegisteredCallbacks.get(callback));
+            mRegisteredCallbacks.remove(callback);
         }
     }
 }

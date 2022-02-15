@@ -86,7 +86,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
     @Override
     public ICancellationSignal startCapture(@NonNull Surface surface,
             @NonNull IScrollCaptureCallbacks remote) throws RemoteException {
-        mCloseGuard.open("close");
+        mCloseGuard.open("ScrollCaptureConnection.close");
 
         if (!surface.isValid()) {
             throw new RemoteException(new IllegalArgumentException("surface must be valid"));

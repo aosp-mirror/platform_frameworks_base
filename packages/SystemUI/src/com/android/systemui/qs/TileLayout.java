@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
@@ -49,7 +51,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         this(context, null);
     }
 
-    public TileLayout(Context context, AttributeSet attrs) {
+    public TileLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setFocusableInTouchMode(true);
         mLessRows = ((Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0)
@@ -67,7 +69,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     @Override
-    public void setListening(boolean listening, UiEventLogger uiEventLogger) {
+    public void setListening(boolean listening, @Nullable UiEventLogger uiEventLogger) {
         if (mListening == listening) return;
         mListening = listening;
         for (TileRecord record : mRecords) {

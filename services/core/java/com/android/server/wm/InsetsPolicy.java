@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
@@ -32,6 +33,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -134,7 +136,7 @@ class InsetsPolicy {
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
-        if (mFocusedWin != focusedWin){
+        if (mFocusedWin != focusedWin) {
             abortTransient();
         }
         mFocusedWin = focusedWin;
@@ -142,25 +144,31 @@ class InsetsPolicy {
                 getStatusControlTarget(focusedWin, false /* fake */);
         final InsetsControlTarget navControlTarget =
                 getNavControlTarget(focusedWin, false /* fake */);
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        final WindowState topApp = mPolicy.getTopFullscreenOpaqueWindow();
         mStateController.onBarControlTargetChanged(
                 statusControlTarget,
                 statusControlTarget == mDummyControlTarget
                         ? getStatusControlTarget(focusedWin, true /* fake */)
-                        : null,
+                        : statusControlTarget == notificationShade
+                                ? getStatusControlTarget(topApp, true /* fake */)
+                                : null,
                 navControlTarget,
                 navControlTarget == mDummyControlTarget
                         ? getNavControlTarget(focusedWin, true /* fake */)
-                        : null);
+                        : navControlTarget == notificationShade
+                                ? getNavControlTarget(topApp, true /* fake */)
+                                : null);
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
     }
 
     boolean isHidden(@InternalInsetsType int type) {
-        final InsetsSourceProvider provider =  mStateController.peekSourceProvider(type);
+        final InsetsSourceProvider provider = mStateController.peekSourceProvider(type);
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
-    void showTransient(@InternalInsetsType int[] types) {
+    void showTransient(@InternalInsetsType int[] types, boolean isGestureOnSystemBar) {
         boolean changed = false;
         for (int i = types.length - 1; i >= 0; i--) {
             final @InternalInsetsType int type = types[i];
@@ -177,10 +185,14 @@ class InsetsPolicy {
             StatusBarManagerInternal statusBarManagerInternal =
                     mPolicy.getStatusBarManagerInternal();
             if (statusBarManagerInternal != null) {
-                statusBarManagerInternal.showTransient(
-                        mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
+                statusBarManagerInternal.showTransient(mDisplayContent.getDisplayId(),
+                        mShowingTransientTypes.toArray(), isGestureOnSystemBar);
             }
             updateBarControlTarget(mFocusedWin);
+            dispatchTransientSystemBarsVisibilityChanged(
+                    mFocusedWin,
+                    isTransient(ITYPE_STATUS_BAR) || isTransient(ITYPE_NAVIGATION_BAR),
+                    isGestureOnSystemBar);
 
             // The leashes can be created while updating bar control target. The surface transaction
             // of the new leashes might not be applied yet. The callback posted here ensures we can
@@ -198,6 +210,12 @@ class InsetsPolicy {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
+
+        dispatchTransientSystemBarsVisibilityChanged(
+                mFocusedWin,
+                /* areVisible= */ false,
+                /* wereRevealedFromSwipeOnSystemBar= */ false);
+
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
                 for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
@@ -219,12 +237,22 @@ class InsetsPolicy {
     /**
      * @see InsetsStateController#getInsetsForWindow
      */
-    InsetsState getInsetsForWindow(WindowState target) {
+    InsetsState getInsetsForWindow(WindowState target, boolean includesTransient) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
-        InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        InsetsState state;
+        if (!includesTransient) {
+            state = adjustVisibilityForTransientTypes(originalState);
+        } else {
+            state = originalState;
+        }
         state = adjustVisibilityForIme(target, state, state == originalState);
         return adjustInsetsForRoundedCorners(target, state, state == originalState);
     }
+
+    InsetsState getInsetsForWindow(WindowState target) {
+        return getInsetsForWindow(target, false);
+    }
+
 
     /**
      * @see InsetsStateController#getInsetsForWindowMetrics
@@ -363,6 +391,11 @@ class InsetsPolicy {
                     mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
         }
         mShowingTransientTypes.clear();
+
+        dispatchTransientSystemBarsVisibilityChanged(
+                mFocusedWin,
+                /* areVisible= */ false,
+                /* wereRevealedFromSwipeOnSystemBar= */ false);
     }
 
     private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin,
@@ -423,6 +456,14 @@ class InsetsPolicy {
         if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
+        }
+        if (mPolicy.isForceShowNavigationBarEnabled()
+                && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+            // When "force show navigation bar" is enabled, it means we are in kid navigation bar
+            // and 3-button navigation bar mode. In this mode, the navigation bar is forcibly shown
+            // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
+            // still control the navigation bar in this mode.
+            return null;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
@@ -509,6 +550,32 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlListener listener =
                 new InsetsPolicyAnimationControlListener(show, callback, typesReady);
         listener.mControlCallbacks.controlAnimationUnchecked(typesReady, controls, show);
+    }
+
+    private void dispatchTransientSystemBarsVisibilityChanged(
+            @Nullable WindowState focusedWindow,
+            boolean areVisible,
+            boolean wereRevealedFromSwipeOnSystemBar) {
+        if (focusedWindow == null) {
+            return;
+        }
+
+        Task task = focusedWindow.getTask();
+        if (task == null) {
+            return;
+        }
+
+        int taskId = task.mTaskId;
+        boolean isValidTaskId = taskId != ActivityTaskManager.INVALID_TASK_ID;
+        if (!isValidTaskId) {
+            return;
+        }
+
+        mDisplayContent.mWmService.mTaskSystemBarsListenerController
+                .dispatchTransientSystemBarVisibilityChanged(
+                        taskId,
+                        areVisible,
+                        wereRevealedFromSwipeOnSystemBar);
     }
 
     private class BarWindow {

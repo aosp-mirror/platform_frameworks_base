@@ -185,4 +185,32 @@ sp<FilterClient> TunerClient::openSharedFilter(const string& filterToken,
     return nullptr;
 }
 
+Result TunerClient::setLna(bool bEnable) {
+    if (mTunerService != nullptr) {
+        Status s = mTunerService->setLna(bEnable);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+Result TunerClient::setMaxNumberOfFrontends(FrontendType frontendType, int32_t maxNumber) {
+    if (mTunerService != nullptr) {
+        Status s = mTunerService->setMaxNumberOfFrontends(frontendType, maxNumber);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+int TunerClient::getMaxNumberOfFrontends(FrontendType frontendType) {
+    if (mTunerService != nullptr) {
+        int32_t maxNumber;
+        mTunerService->getMaxNumberOfFrontends(frontendType, &maxNumber);
+        return maxNumber;
+    }
+
+    return -1;
+}
+
 }  // namespace android

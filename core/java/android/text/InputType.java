@@ -18,7 +18,7 @@ package android.text;
 
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.TextAttribute;
-import android.view.inputmethod.TextAttribute.TextAttributeBuilder;
+import android.view.inputmethod.TextAttribute.Builder;
 
 import java.util.List;
 
@@ -200,7 +200,7 @@ public interface InputType {
      * which has pronunciation characters and target characters. When the user is typing the
      * pronunciation charactes, the IME could provide the possible target characters to the user.
      * When this flag is set, the IME should insert the text conversion suggestions through
-     * {@link TextAttributeBuilder#setTextConversionSuggestions(List)} and
+     * {@link Builder#setTextConversionSuggestions(List)} and
      * the {@link TextAttribute} with initialized with the text conversion suggestions is provided
      * by the IME to the application. To receive the additional information, the application needs
      * to implement {@link InputConnection#setComposingText(CharSequence, int, TextAttribute)},

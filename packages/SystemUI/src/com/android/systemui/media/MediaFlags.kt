@@ -29,4 +29,23 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     fun areMediaSessionActionsEnabled(): Boolean {
         return featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
     }
+
+    /**
+     * Check whether media controls should use the new session-based layout
+     */
+    fun useMediaSessionLayout(): Boolean {
+        return featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS) &&
+            featureFlags.isEnabled(Flags.MEDIA_SESSION_LAYOUT)
+    }
+
+    /**
+     * Check whether we support displaying information about mute await connections.
+     */
+    fun areMuteAwaitConnectionsEnabled() = featureFlags.isEnabled(Flags.MEDIA_MUTE_AWAIT)
+
+    /**
+     * Check whether we enable support for nearby media devices. See
+     * [android.app.StatusBarManager.registerNearbyMediaDevicesProvider] for more information.
+     */
+    fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
 }

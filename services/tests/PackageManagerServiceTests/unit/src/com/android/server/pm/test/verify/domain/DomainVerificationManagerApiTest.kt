@@ -19,8 +19,8 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo
@@ -301,6 +301,7 @@ class DomainVerificationManagerApiTest {
                 whenever(isInstalled) { true }
                 whenever(isSuspended) { false }
                 whenever(isInstantApp) { false }
+                whenever(firstInstallTime) {0L}
             }
         })
         val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))
@@ -525,7 +526,8 @@ class DomainVerificationManagerApiTest {
                 ParsedActivityImpl().apply {
                     domains.forEach {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     autoVerify = true
                                     addAction(Intent.ACTION_VIEW)
@@ -548,7 +550,6 @@ class DomainVerificationManagerApiTest {
         whenever(getPkg()) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(firstInstallTime) { 0L }
         whenever(getUserStateOrDefault(0)) { pkgUserState0() }
         whenever(getUserStateOrDefault(1)) { pkgUserState1() }
         whenever(userStates) {

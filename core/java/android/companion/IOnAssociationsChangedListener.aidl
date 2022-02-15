@@ -20,5 +20,22 @@ import android.companion.AssociationInfo;
 
 /** @hide */
 interface IOnAssociationsChangedListener {
-    oneway void onAssociationsChanged(in List<AssociationInfo> associations);
+
+    /*
+     * IMPORTANT: This method is intentionally NOT "oneway".
+     *
+     * The method is intentionally "blocking" to make sure that the clients of the
+     * addOnAssociationsChangedListener() API (@SystemAPI guarded by a "signature" permission) are
+     * able to prevent race conditions that may arise if their own clients (applications)
+     * effectively get notified about the changes before system services do.
+     *
+     * This is safe for 2 reasons:
+     *  1. The addOnAssociationsChangedListener() is only available to the system components
+     *     (guarded by a "signature" permission).
+     *     See android.permission.MANAGE_COMPANION_DEVICES.
+     *  2. On the Java side addOnAssociationsChangedListener() in CDM takes an Executor, and the
+     *     proxy implementation of onAssociationsChanged() simply "post" a Runnable to it.
+     *     See CompanionDeviceManager.OnAssociationsChangedListenerProxy class.
+     */
+    void onAssociationsChanged(in List<AssociationInfo> associations);
 }

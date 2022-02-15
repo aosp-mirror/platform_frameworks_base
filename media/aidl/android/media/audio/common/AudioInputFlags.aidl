@@ -59,4 +59,8 @@ enum AudioInputFlags {
      * Input contains an encoded audio stream.
      */
     DIRECT = 7,
+    /**
+     * Input is for capturing "ultrasound" audio commands.
+     */
+    ULTRASOUND = 8,
 }

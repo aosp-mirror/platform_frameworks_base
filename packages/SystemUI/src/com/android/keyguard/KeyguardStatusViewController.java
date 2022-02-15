@@ -22,7 +22,6 @@ import android.util.Slog;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -55,7 +54,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final KeyguardStateController mKeyguardStateController;
-    private SmartspaceTransitionController mSmartspaceTransitionController;
     private final Rect mClipBounds = new Rect();
 
     @Inject
@@ -69,7 +67,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            SmartspaceTransitionController smartspaceTransitionController,
             ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
@@ -82,7 +79,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 keyguardStateController, dozeParameters, screenOffAnimationController,
                 /* animateYPos= */ true, /* visibleOnCommunal= */ false);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
-        mSmartspaceTransitionController = smartspaceTransitionController;
     }
 
     @Override

@@ -281,11 +281,11 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * Sets the file pointer offset of the file descriptor.
      *
-     * @param pos the offset position, measured in bytes from the beginning of the file.
-     * @return the new offset position.
+     * @param position the offset position, measured in bytes from the beginning of the file.
+     * @return the new offset position. On error, {@code -1} is returned.
      */
     @BytesLong
-    public long seek(@BytesLong long pos) {
-        return nativeSeek(pos);
+    public long seek(@BytesLong long position) {
+        return nativeSeek(position);
     }
 }

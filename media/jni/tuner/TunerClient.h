@@ -32,6 +32,7 @@ using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::hardware::tv::tuner::DemuxCapabilities;
 using ::aidl::android::hardware::tv::tuner::FrontendInfo;
+using ::aidl::android::hardware::tv::tuner::FrontendType;
 using ::aidl::android::hardware::tv::tuner::Result;
 using ::aidl::android::media::tv::tuner::ITunerService;
 
@@ -126,6 +127,26 @@ public:
      * @return a newly created TunerFilter interface.
      */
     sp<FilterClient> openSharedFilter(const string& filterToken, sp<FilterClientCallback> cb);
+
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     */
+    Result setLna(bool bEnable);
+
+    /**
+     * Set the maximum frontend number of a given frontend type.
+     *
+     * @param frontendType the frontend type which maximum number will be set.
+     * @param maxNumber the new maximum number.
+     */
+    Result setMaxNumberOfFrontends(FrontendType frontendType, int32_t maxNumber);
+
+    /**
+     * Get the maximum frontend number of a given frontend type.
+     *
+     * @param frontendType the frontend type which maximum number will be queried.
+     */
+    int getMaxNumberOfFrontends(FrontendType frontendType);
 
 private:
     /**

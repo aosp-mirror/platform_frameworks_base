@@ -100,9 +100,10 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
-        ":android.hardware.biometrics.face-V1-java-source",
+        ":android.hardware.biometrics.face-V2-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
+        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex is ready
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
@@ -129,12 +130,11 @@ java_library_static {
         "android.hardware.common-V2-java",
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
-        "android.hardware.power-V1-java",
-        "android.hardware.power-V1.0-java",
         "android.hardware.vibrator-V2-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
+        "service-supplementalprocess.stubs.system_server",
     ],
 
     required: [
@@ -165,9 +165,11 @@ java_library_static {
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.soundtrigger-V2.3-java",
         "android.hardware.power.stats-V1-java",
+        "android.hardware.power-V3-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
         "icu4j_calendar_astronomer",
@@ -175,6 +177,9 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
+        // This is used for services.connectivity-tiramisu-sources.
+        // TODO: delete when NetworkStatsService is moved to the mainline module.
+        "net-utils-device-common-bpf",
     ],
     javac_shard_size: 50,
 }

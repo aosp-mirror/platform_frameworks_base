@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import static android.os.BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
+import static android.os.BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
@@ -30,6 +31,12 @@ import android.os.BatteryStats.Uid.Sensor;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.telephony.Annotation;
+import android.telephony.CellSignalStrength;
+import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.view.Display;
 
@@ -1165,6 +1172,185 @@ public class BatteryStatsNoteTest extends TestCase {
                 "D", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
     }
 
+    @SmallTest
+    public void testGetPerStateActiveRadioDurationMs() {
+        final MockClock clock = new MockClock(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
+        final int ratCount = BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT;
+        final int frequencyCount = ServiceState.FREQUENCY_RANGE_MMWAVE + 1;
+        final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
+
+        final long[][][] expectedDurationsMs = new long[ratCount][frequencyCount][txLevelCount];
+        for (int rat = 0; rat < ratCount; rat++) {
+            for (int freq = 0; freq < frequencyCount; freq++) {
+                for (int txLvl = 0; txLvl < txLevelCount; txLvl++) {
+                    expectedDurationsMs[rat][freq][txLvl] = 0;
+                }
+            }
+        }
+
+        class ModemAndBatteryState {
+            public long currentTimeMs = 100;
+            public boolean onBattery = false;
+            public boolean modemActive = false;
+            @Annotation.NetworkType
+            public int currentNetworkDataType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            @BatteryStats.RadioAccessTechnology
+            public int currentRat = BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER;
+            @ServiceState.FrequencyRange
+            public int currentFrequencyRange = ServiceState.FREQUENCY_RANGE_UNKNOWN;
+            public SparseIntArray currentSignalStrengths = new SparseIntArray();
+
+            void setOnBattery(boolean onBattery) {
+                this.onBattery = onBattery;
+                bi.updateTimeBasesLocked(onBattery, Display.STATE_OFF, currentTimeMs * 1000,
+                        currentTimeMs * 1000);
+            }
+
+            void setModemActive(boolean active) {
+                modemActive = active;
+                final int state = active ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                        : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+                bi.noteMobileRadioPowerStateLocked(state, currentTimeMs * 1000_000L, UID);
+            }
+
+            void setRatType(@Annotation.NetworkType int dataType,
+                    @BatteryStats.RadioAccessTechnology int rat) {
+                currentNetworkDataType = dataType;
+                currentRat = rat;
+                bi.notePhoneDataConnectionStateLocked(dataType, true, ServiceState.STATE_IN_SERVICE,
+                        currentFrequencyRange);
+            }
+
+            void setFrequencyRange(@ServiceState.FrequencyRange int frequency) {
+                currentFrequencyRange = frequency;
+                bi.notePhoneDataConnectionStateLocked(currentNetworkDataType, true,
+                        ServiceState.STATE_IN_SERVICE, frequency);
+            }
+
+            void setSignalStrength(@BatteryStats.RadioAccessTechnology int rat, int strength) {
+                currentSignalStrengths.put(rat, strength);
+                final int size = currentSignalStrengths.size();
+                final int newestGenSignalStrength = currentSignalStrengths.valueAt(size - 1);
+                bi.notePhoneSignalStrengthLocked(newestGenSignalStrength, currentSignalStrengths);
+            }
+        }
+        final ModemAndBatteryState state = new ModemAndBatteryState();
+
+        IntConsumer incrementTime = inc -> {
+            state.currentTimeMs += inc;
+            clock.realtime = clock.uptime = state.currentTimeMs;
+
+            // If the device is not on battery, no timers should increment.
+            if (!state.onBattery) return;
+            // If the modem is not active, no timers should increment.
+            if (!state.modemActive) return;
+
+            final int currentRat = state.currentRat;
+            final int currentFrequencyRange =
+                    currentRat == RADIO_ACCESS_TECHNOLOGY_NR ? state.currentFrequencyRange : 0;
+            int currentSignalStrength = state.currentSignalStrengths.get(currentRat);
+            expectedDurationsMs[currentRat][currentFrequencyRange][currentSignalStrength] += inc;
+        };
+
+        state.setOnBattery(false);
+        state.setModemActive(false);
+        state.setRatType(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER);
+        state.setFrequencyRange(ServiceState.FREQUENCY_RANGE_UNKNOWN);
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER,
+                CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // While not on battery, the timers should not increase.
+        state.setModemActive(true);
+        incrementTime.accept(100);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setRatType(TelephonyManager.NETWORK_TYPE_NR, BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR);
+        incrementTime.accept(200);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR,
+                CellSignalStrength.SIGNAL_STRENGTH_GOOD);
+        incrementTime.accept(500);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setFrequencyRange(ServiceState.FREQUENCY_RANGE_MMWAVE);
+        incrementTime.accept(300);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setRatType(TelephonyManager.NETWORK_TYPE_LTE,
+                BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE);
+        incrementTime.accept(400);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
+                CellSignalStrength.SIGNAL_STRENGTH_MODERATE);
+        incrementTime.accept(500);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // When set on battery, currently active state (RAT:LTE, Signal Strength:Moderate) should
+        // start counting up.
+        state.setOnBattery(true);
+        incrementTime.accept(600);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Changing LTE signal strength should be tracked.
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
+                CellSignalStrength.SIGNAL_STRENGTH_POOR);
+        incrementTime.accept(700);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
+                CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        incrementTime.accept(800);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
+                CellSignalStrength.SIGNAL_STRENGTH_GOOD);
+        incrementTime.accept(900);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
+                CellSignalStrength.SIGNAL_STRENGTH_GREAT);
+        incrementTime.accept(1000);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Change in the signal strength of nonactive RAT should not affect anything.
+        state.setSignalStrength(BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER,
+                CellSignalStrength.SIGNAL_STRENGTH_POOR);
+        incrementTime.accept(1100);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Changing to OTHER Rat should start tracking the poor signal strength.
+        state.setRatType(TelephonyManager.NETWORK_TYPE_CDMA,
+                BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER);
+        incrementTime.accept(1200);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Noting frequency change should not affect non NR Rat.
+        state.setFrequencyRange(ServiceState.FREQUENCY_RANGE_HIGH);
+        incrementTime.accept(1300);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Now the NR Rat, HIGH frequency range, good signal strength should start counting.
+        state.setRatType(TelephonyManager.NETWORK_TYPE_NR, BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR);
+        incrementTime.accept(1400);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Noting frequency change should not affect non NR Rat.
+        state.setFrequencyRange(ServiceState.FREQUENCY_RANGE_LOW);
+        incrementTime.accept(1500);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+        // Modem no longer active, should not be tracking any more.
+        state.setModemActive(false);
+        incrementTime.accept(1500);
+        checkPerStateActiveRadioDurations(expectedDurationsMs, bi, state.currentTimeMs);
+
+    }
+
     private void setFgState(int uid, boolean fgOn, MockBatteryStatsImpl bi) {
         // Note that noteUidProcessStateLocked uses ActivityManager process states.
         if (fgOn) {
@@ -1236,6 +1422,32 @@ public class BatteryStatsNoteTest extends TestCase {
             assertEquals("Failure for overall screen brightness bin " + bin,
                     overallExpected[bin] * 1000,
                     bi.getScreenBrightnessTime(bin, currentTimeMs * 1000, STATS_SINCE_CHARGED));
+        }
+    }
+
+    private void checkPerStateActiveRadioDurations(long[][][] expectedDurationsMs,
+            BatteryStatsImpl bi, long currentTimeMs) {
+        for (int rat = 0; rat < expectedDurationsMs.length; rat++) {
+            final long[][] expectedRatDurationsMs = expectedDurationsMs[rat];
+            for (int freq = 0; freq < expectedRatDurationsMs.length; freq++) {
+                final long[] expectedFreqDurationsMs = expectedRatDurationsMs[freq];
+                for (int strength = 0; strength < expectedFreqDurationsMs.length; strength++) {
+                    final long expectedSignalStrengthDurationMs = expectedFreqDurationsMs[strength];
+                    final long actualDurationMs = bi.getActiveRadioDurationMs(rat, freq,
+                            strength, currentTimeMs);
+
+                    // Build a verbose fail message, just in case.
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append("Wrong time in state for RAT:");
+                    sb.append(BatteryStats.RADIO_ACCESS_TECHNOLOGY_NAMES[rat]);
+                    sb.append(", frequency:");
+                    sb.append(ServiceState.frequencyRangeToString(freq));
+                    sb.append(", strength:");
+                    sb.append(strength);
+
+                    assertEquals(sb.toString(), expectedSignalStrengthDurationMs, actualDurationMs);
+                }
+            }
         }
     }
 }

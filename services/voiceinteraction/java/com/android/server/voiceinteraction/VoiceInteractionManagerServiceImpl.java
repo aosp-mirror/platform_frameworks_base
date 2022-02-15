@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -102,6 +103,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
+    int mDetectorType;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -457,7 +459,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             @NonNull Identity voiceInteractorIdentity,
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            IHotwordRecognitionStatusCallback callback) {
+            IHotwordRecognitionStatusCallback callback,
+            int detectorType) {
         Slog.v(TAG, "updateStateLocked");
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
@@ -494,11 +497,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             throw new IllegalStateException("Can't set sharedMemory to be read-only");
         }
 
+        mDetectorType = detectorType;
+
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    options, sharedMemory, callback);
+                    options, sharedMemory, callback, detectorType);
         } else {
             mHotwordDetectionConnection.updateStateLocked(options, sharedMemory);
         }
@@ -668,6 +673,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println(Integer.toHexString(mDisabledShowContext));
         }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
+        pw.print("  mDetectorType=");
+        pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);

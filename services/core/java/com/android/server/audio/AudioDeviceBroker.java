@@ -29,7 +29,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioRoutesObserver;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -499,12 +500,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ void setWiredDeviceConnectionState(int type,
-            @AudioService.ConnectionState int state, String address, String name,
-            String caller) {
+    /*package*/ void setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @AudioService.ConnectionState int state, String caller) {
         //TODO move logging here just like in setBluetooth* methods
         synchronized (mDeviceStateLock) {
-            mDeviceInventory.setWiredDeviceConnectionState(type, state, address, name, caller);
+            mDeviceInventory.setWiredDeviceConnectionState(attributes, state, caller);
         }
     }
 
@@ -530,12 +530,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ static final class BtDeviceChangedData {
         final @Nullable BluetoothDevice mNewDevice;
         final @Nullable BluetoothDevice mPreviousDevice;
-        final @NonNull BtProfileConnectionInfo mInfo;
+        final @NonNull BluetoothProfileConnectionInfo mInfo;
         final @NonNull String mEventSource;
 
         BtDeviceChangedData(@Nullable BluetoothDevice newDevice,
                 @Nullable BluetoothDevice previousDevice,
-                @NonNull BtProfileConnectionInfo info, @NonNull String eventSource) {
+                @NonNull BluetoothProfileConnectionInfo info, @NonNull String eventSource) {
             mNewDevice = newDevice;
             mPreviousDevice = previousDevice;
             mInfo = info;
@@ -567,9 +567,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
             mDevice = device;
             mState = state;
             mProfile = d.mInfo.getProfile();
-            mSupprNoisy = d.mInfo.getSuppressNoisyIntent();
+            mSupprNoisy = d.mInfo.isSuppressNoisyIntent();
             mVolume = d.mInfo.getVolume();
-            mIsLeOutput = d.mInfo.getIsLeOutput();
+            mIsLeOutput = d.mInfo.isLeOutput();
             mEventSource = d.mEventSource;
             mAudioSystemDevice = audioDevice;
             mMusicDevice = AudioSystem.DEVICE_NONE;
@@ -640,7 +640,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 audioDevice = AudioSystem.DEVICE_OUT_HEARING_AID;
                 break;
             case BluetoothProfile.LE_AUDIO:
-                if (d.mInfo.getIsLeOutput()) {
+                if (d.mInfo.isLeOutput()) {
                     audioDevice = AudioSystem.DEVICE_OUT_BLE_HEADSET;
                 } else {
                     audioDevice = AudioSystem.DEVICE_IN_BLE_HEADSET;
@@ -1012,11 +1012,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
-                                                       String deviceName) {
+    /*package*/ boolean handleDeviceConnection(AudioDeviceAttributes attributes, boolean connect) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName,
-                    false /*for test*/);
+            return mDeviceInventory.handleDeviceConnection(attributes, connect, false /*for test*/);
         }
     }
 
@@ -1219,6 +1217,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         mDeviceInventory.onSetBtActiveDevice((BtDeviceInfo) msg.obj,
                                 mAudioService.getBluetoothContextualVolumeStream());
                     }
+                    break;
                 case MSG_BT_HEADSET_CNCT_FAILED:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
@@ -1792,5 +1791,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
             }
         }
         return null;
+    }
+
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.getDeviceSensorUuid(device);
+        }
     }
 }

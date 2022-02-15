@@ -45,6 +45,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -258,6 +259,15 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return null;
     }
 
+    QSTileView getTileView(String spec) {
+        for (QSPanelControllerBase.TileRecord r : mRecords) {
+            if (Objects.equals(r.tile.getTileSpec(), spec)) {
+                return r.tileView;
+            }
+        }
+        return null;
+    }
+
     private String getTilesSpecs() {
         return mRecords.stream()
                 .map(tileRecord ->  tileRecord.tile.getTileSpec())
@@ -288,20 +298,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsCustomizerController.hide();
             return;
         }
-        mView.closeDetail();
     }
-
-    /** */
-    public void openDetails(String subPanel) {
-        QSTile tile = getTile(subPanel);
-        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
-        // QSFactory will not be able to create a tile and getTile will return null
-        if (tile != null) {
-            mView.showDetailAdapter(
-                    true, tile.getDetailAdapter(), new int[]{mView.getWidth() / 2, 0});
-        }
-    }
-
 
     void setListening(boolean listening) {
         mView.setListening(listening);
@@ -391,6 +388,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 pw.print("    "); pw.println(record.tileView.toString());
             }
         }
+        if (mMediaHost != null) {
+            pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+        }
     }
 
     public QSPanel.QSTileLayout getTileLayout() {
@@ -416,7 +416,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     /** */
-    public static final class TileRecord extends QSPanel.Record {
+    public static final class TileRecord {
         public TileRecord(QSTile tile, com.android.systemui.plugins.qs.QSTileView tileView) {
             this.tile = tile;
             this.tileView = tileView;

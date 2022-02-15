@@ -57,8 +57,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mUserSwitchPreferredY;
 
     /**
-     * Minimum top margin to avoid overlap with status bar, lock icon, or multi-user switcher
-     * avatar.
+     * Minimum top margin to avoid overlap with status bar or multi-user switcher avatar.
      */
     private int mMinTopMargin;
 
@@ -203,7 +202,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {
-            return getClockY(1.0f, mDarkAmount);
+            return getClockY(1.0f, mDarkAmount) + mUserSwitchHeight;
         } else {
             return getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
         }
@@ -213,7 +212,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return (int) (mUnlockedStackScrollerPadding + mOverStretchAmount);
         } else if (mIsSplitShade) {
-            return Math.max(0, clockYPosition - mSplitShadeTopNotificationsMargin);
+            return clockYPosition - mSplitShadeTopNotificationsMargin + mUserSwitchHeight;
         } else {
             return clockYPosition + mKeyguardStatusHeight;
         }
@@ -223,7 +222,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {
-            return Math.max(mSplitShadeTargetTopMargin, mMinTopMargin);
+            return mSplitShadeTargetTopMargin + mUserSwitchHeight;
         } else {
             return mMinTopMargin + mKeyguardStatusHeight;
         }
@@ -231,7 +230,7 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getExpandedPreferredClockY() {
         if (mIsSplitShade) {
-            return Math.max(mSplitShadeTargetTopMargin, mMinTopMargin);
+            return mSplitShadeTargetTopMargin;
         } else {
             return mMinTopMargin;
         }

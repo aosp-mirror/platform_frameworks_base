@@ -58,6 +58,14 @@ public interface UiEventLogger {
     void log(@NonNull UiEventEnum event);
 
     /**
+     * Log a simple event with an instance id, without package information.
+     * Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param instance An identifier obtained from an InstanceIdSequence. If null, reduces to log().
+     */
+    void log(@NonNull UiEventEnum event, @Nullable InstanceId instance);
+
+    /**
      * Log an event with package information. Does nothing if event.getId() <= 0.
      * Give both uid and packageName if both are known, but one may be omitted if unknown.
      * @param event an enum implementing UiEventEnum interface.

@@ -22,10 +22,10 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.os.IBinder;
 import android.os.InputConstants;
 import android.os.Looper;
+import android.os.Process;
 import android.util.Slog;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -46,7 +46,6 @@ class ActivityRecordInputSink {
      * Feature flag for making Activities consume all touches within their task bounds.
      */
     @ChangeId
-    @Disabled
     static final long ENABLE_TOUCH_OPAQUE_ACTIVITIES = 194480991L;
 
     private static final String TAG = "ActivityRecordInputSink";
@@ -55,12 +54,12 @@ class ActivityRecordInputSink {
 
     private final ActivityRecord mActivityRecord;
     private final boolean mIsCompatEnabled;
+    private final String mName;
 
     // Hold on to InputEventReceiver to prevent it from getting GCd.
     private InputEventReceiver mInputEventReceiver;
     private InputWindowHandleWrapper mInputWindowHandleWrapper;
-    private final String mName = Integer.toHexString(System.identityHashCode(this))
-            + " ActivityRecordInputSink";
+    private SurfaceControl mSurfaceControl;
     private int mRapidTouchCount = 0;
     private IBinder mToken;
     private boolean mDisabled = false;
@@ -69,14 +68,29 @@ class ActivityRecordInputSink {
         mActivityRecord = activityRecord;
         mIsCompatEnabled = CompatChanges.isChangeEnabled(ENABLE_TOUCH_OPAQUE_ACTIVITIES,
                 mActivityRecord.getUid());
+        mName = Integer.toHexString(System.identityHashCode(this)) + " ActivityRecordInputSink "
+                + mActivityRecord.mActivityComponent.getShortClassName();
     }
 
-    public void applyChangesToSurfaceIfChanged(
-            SurfaceControl.Transaction transaction, SurfaceControl surfaceControl) {
+    public void applyChangesToSurfaceIfChanged(SurfaceControl.Transaction transaction) {
         InputWindowHandleWrapper inputWindowHandleWrapper = getInputWindowHandleWrapper();
-        if (inputWindowHandleWrapper.isChanged()) {
-            inputWindowHandleWrapper.applyChangesToSurface(transaction, surfaceControl);
+        if (mSurfaceControl == null) {
+            mSurfaceControl = createSurface(transaction);
         }
+        if (inputWindowHandleWrapper.isChanged()) {
+            inputWindowHandleWrapper.applyChangesToSurface(transaction, mSurfaceControl);
+        }
+    }
+
+    private SurfaceControl createSurface(SurfaceControl.Transaction t) {
+        SurfaceControl surfaceControl = mActivityRecord.makeChildSurface(null)
+                .setName(mName)
+                .setHidden(false)
+                .setCallsite("ActivityRecordInputSink.createSurface")
+                .build();
+        // Put layer below all siblings (and the parent surface too)
+        t.setLayer(surfaceControl, Integer.MIN_VALUE);
+        return surfaceControl;
     }
 
     private InputWindowHandleWrapper getInputWindowHandleWrapper() {
@@ -91,11 +105,6 @@ class ActivityRecordInputSink {
                 ANIMATION_TYPE_APP_TRANSITION)) {
             // TODO(b/208662670): Investigate if we can have feature active during animations.
             mInputWindowHandleWrapper.setToken(null);
-        } else if (mActivityRecord.mStartingData != null) {
-            // TODO(b/208659130): Remove this special case
-            // Don't block touches during splash screen. This is done to not show toasts for
-            // touches passing through splash screens. b/171772640
-            mInputWindowHandleWrapper.setToken(null);
         } else {
             mInputWindowHandleWrapper.setToken(mToken);
         }
@@ -103,14 +112,12 @@ class ActivityRecordInputSink {
     }
 
     private InputWindowHandle createInputWindowHandle() {
-        InputWindowHandle inputWindowHandle = new InputWindowHandle(
-                mActivityRecord.getInputApplicationHandle(false),
+        InputWindowHandle inputWindowHandle = new InputWindowHandle(null,
                 mActivityRecord.getDisplayId());
-        inputWindowHandle.replaceTouchableRegionWithCrop(
-                mActivityRecord.getParentSurfaceControl());
+        inputWindowHandle.replaceTouchableRegionWithCrop = true;
         inputWindowHandle.name = mName;
-        inputWindowHandle.ownerUid = mActivityRecord.getUid();
-        inputWindowHandle.ownerPid = mActivityRecord.getPid();
+        inputWindowHandle.ownerUid = Process.myUid();
+        inputWindowHandle.ownerPid = Process.myPid();
         inputWindowHandle.layoutParamsFlags =
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;

@@ -120,6 +120,13 @@ public class SystemActions extends CoreStartable {
             AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT; // = 9
 
     /**
+     * Action ID to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
+     * play/stop media
+     */
+    private static final int SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK =
+            AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK; // = 10
+
+    /**
      * Action ID to trigger the accessibility button
      */
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON =
@@ -136,6 +143,36 @@ public class SystemActions extends CoreStartable {
 
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
             AccessibilityService.GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE; // 15
+
+    /**
+     * Action ID to trigger the dpad up button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_UP =
+            AccessibilityService.GLOBAL_ACTION_DPAD_UP; // 16
+
+    /**
+     * Action ID to trigger the dpad down button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_DOWN =
+            AccessibilityService.GLOBAL_ACTION_DPAD_DOWN; // 17
+
+    /**
+     * Action ID to trigger the dpad left button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_LEFT =
+            AccessibilityService.GLOBAL_ACTION_DPAD_LEFT; // 18
+
+    /**
+     * Action ID to trigger the dpad right button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_RIGHT =
+            AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT; // 19
+
+    /**
+     * Action ID to trigger dpad center keyevent
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_CENTER =
+            AccessibilityService.GLOBAL_ACTION_DPAD_CENTER; // 20
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
@@ -222,9 +259,33 @@ public class SystemActions extends CoreStartable {
                 R.string.accessibility_system_action_screenshot_label,
                 SystemActionsBroadcastReceiver.INTENT_ACTION_TAKE_SCREENSHOT);
 
+        RemoteAction actionHeadsetHook = createRemoteAction(
+                R.string.accessibility_system_action_headset_hook_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_HEADSET_HOOK);
+
         RemoteAction actionAccessibilityShortcut = createRemoteAction(
                 R.string.accessibility_system_action_hardware_a11y_shortcut_label,
                 SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_SHORTCUT);
+
+        RemoteAction actionDpadUp = createRemoteAction(
+                R.string.accessibility_system_action_dpad_up_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_UP);
+
+        RemoteAction actionDpadDown = createRemoteAction(
+                R.string.accessibility_system_action_dpad_down_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_DOWN);
+
+        RemoteAction actionDpadLeft = createRemoteAction(
+                R.string.accessibility_system_action_dpad_left_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_LEFT);
+
+        RemoteAction actionDpadRight = createRemoteAction(
+                R.string.accessibility_system_action_dpad_right_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_RIGHT);
+
+        RemoteAction actionDpadCenter = createRemoteAction(
+                R.string.accessibility_system_action_dpad_center_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_CENTER);
 
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
@@ -234,8 +295,14 @@ public class SystemActions extends CoreStartable {
         mA11yManager.registerSystemAction(actionPowerDialog, SYSTEM_ACTION_ID_POWER_DIALOG);
         mA11yManager.registerSystemAction(actionLockScreen, SYSTEM_ACTION_ID_LOCK_SCREEN);
         mA11yManager.registerSystemAction(actionTakeScreenshot, SYSTEM_ACTION_ID_TAKE_SCREENSHOT);
+        mA11yManager.registerSystemAction(actionHeadsetHook, SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK);
         mA11yManager.registerSystemAction(
                 actionAccessibilityShortcut, SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT);
+        mA11yManager.registerSystemAction(actionDpadUp, SYSTEM_ACTION_ID_DPAD_UP);
+        mA11yManager.registerSystemAction(actionDpadDown, SYSTEM_ACTION_ID_DPAD_DOWN);
+        mA11yManager.registerSystemAction(actionDpadLeft, SYSTEM_ACTION_ID_DPAD_LEFT);
+        mA11yManager.registerSystemAction(actionDpadRight, SYSTEM_ACTION_ID_DPAD_RIGHT);
+        mA11yManager.registerSystemAction(actionDpadCenter, SYSTEM_ACTION_ID_DPAD_CENTER);
         registerOrUnregisterDismissNotificationShadeAction();
     }
 
@@ -305,6 +372,10 @@ public class SystemActions extends CoreStartable {
                 labelId = R.string.accessibility_system_action_screenshot_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_TAKE_SCREENSHOT;
                 break;
+            case SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK:
+                labelId = R.string.accessibility_system_action_headset_hook_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_HEADSET_HOOK;
+                break;
             case SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON:
                 labelId = R.string.accessibility_system_action_on_screen_a11y_shortcut_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_BUTTON;
@@ -322,6 +393,26 @@ public class SystemActions extends CoreStartable {
                 labelId = R.string.accessibility_system_action_dismiss_notification_shade;
                 intent = SystemActionsBroadcastReceiver
                         .INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_UP:
+                labelId = R.string.accessibility_system_action_dpad_up_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_UP;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_DOWN:
+                labelId = R.string.accessibility_system_action_dpad_down_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_DOWN;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_LEFT:
+                labelId = R.string.accessibility_system_action_dpad_left_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_LEFT;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_RIGHT:
+                labelId = R.string.accessibility_system_action_dpad_right_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_RIGHT;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_CENTER:
+                labelId = R.string.accessibility_system_action_dpad_center_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_CENTER;
                 break;
             default:
                 return;
@@ -411,6 +502,10 @@ public class SystemActions extends CoreStartable {
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
+    private void handleHeadsetHook() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+    }
+
     private void handleAccessibilityButton() {
         AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
                 Display.DEFAULT_DISPLAY);
@@ -434,6 +529,26 @@ public class SystemActions extends CoreStartable {
                         CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
     }
 
+    private void handleDpadUp() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP);
+    }
+
+    private void handleDpadDown() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN);
+    }
+
+    private void handleDpadLeft() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
+    }
+
+    private void handleDpadRight() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT);
+    }
+
+    private void handleDpadCenter() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER);
+    }
+
     private class SystemActionsBroadcastReceiver extends BroadcastReceiver {
         private static final String INTENT_ACTION_BACK = "SYSTEM_ACTION_BACK";
         private static final String INTENT_ACTION_HOME = "SYSTEM_ACTION_HOME";
@@ -443,6 +558,7 @@ public class SystemActions extends CoreStartable {
         private static final String INTENT_ACTION_POWER_DIALOG = "SYSTEM_ACTION_POWER_DIALOG";
         private static final String INTENT_ACTION_LOCK_SCREEN = "SYSTEM_ACTION_LOCK_SCREEN";
         private static final String INTENT_ACTION_TAKE_SCREENSHOT = "SYSTEM_ACTION_TAKE_SCREENSHOT";
+        private static final String INTENT_ACTION_HEADSET_HOOK = "SYSTEM_ACTION_HEADSET_HOOK";
         private static final String INTENT_ACTION_ACCESSIBILITY_BUTTON =
                 "SYSTEM_ACTION_ACCESSIBILITY_BUTTON";
         private static final String INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER =
@@ -451,6 +567,11 @@ public class SystemActions extends CoreStartable {
                 "SYSTEM_ACTION_ACCESSIBILITY_SHORTCUT";
         private static final String INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
                 "SYSTEM_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE";
+        private static final String INTENT_ACTION_DPAD_UP = "SYSTEM_ACTION_DPAD_UP";
+        private static final String INTENT_ACTION_DPAD_DOWN = "SYSTEM_ACTION_DPAD_DOWN";
+        private static final String INTENT_ACTION_DPAD_LEFT = "SYSTEM_ACTION_DPAD_LEFT";
+        private static final String INTENT_ACTION_DPAD_RIGHT = "SYSTEM_ACTION_DPAD_RIGHT";
+        private static final String INTENT_ACTION_DPAD_CENTER = "SYSTEM_ACTION_DPAD_CENTER";
 
         private PendingIntent createPendingIntent(Context context, String intentAction) {
             switch (intentAction) {
@@ -462,10 +583,16 @@ public class SystemActions extends CoreStartable {
                 case INTENT_ACTION_POWER_DIALOG:
                 case INTENT_ACTION_LOCK_SCREEN:
                 case INTENT_ACTION_TAKE_SCREENSHOT:
+                case INTENT_ACTION_HEADSET_HOOK:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER:
                 case INTENT_ACTION_ACCESSIBILITY_SHORTCUT:
-                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
+                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE:
+                case INTENT_ACTION_DPAD_UP:
+                case INTENT_ACTION_DPAD_DOWN:
+                case INTENT_ACTION_DPAD_LEFT:
+                case INTENT_ACTION_DPAD_RIGHT:
+                case INTENT_ACTION_DPAD_CENTER: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
                     return PendingIntent.getBroadcast(context, 0, intent,
@@ -487,10 +614,16 @@ public class SystemActions extends CoreStartable {
             intentFilter.addAction(INTENT_ACTION_POWER_DIALOG);
             intentFilter.addAction(INTENT_ACTION_LOCK_SCREEN);
             intentFilter.addAction(INTENT_ACTION_TAKE_SCREENSHOT);
+            intentFilter.addAction(INTENT_ACTION_HEADSET_HOOK);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_SHORTCUT);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE);
+            intentFilter.addAction(INTENT_ACTION_DPAD_UP);
+            intentFilter.addAction(INTENT_ACTION_DPAD_DOWN);
+            intentFilter.addAction(INTENT_ACTION_DPAD_LEFT);
+            intentFilter.addAction(INTENT_ACTION_DPAD_RIGHT);
+            intentFilter.addAction(INTENT_ACTION_DPAD_CENTER);
             return intentFilter;
         }
 
@@ -530,6 +663,10 @@ public class SystemActions extends CoreStartable {
                     handleTakeScreenshot();
                     break;
                 }
+                case INTENT_ACTION_HEADSET_HOOK: {
+                    handleHeadsetHook();
+                    break;
+                }
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON: {
                     handleAccessibilityButton();
                     break;
@@ -544,6 +681,26 @@ public class SystemActions extends CoreStartable {
                 }
                 case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
                     handleAccessibilityDismissNotificationShade();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_UP: {
+                    handleDpadUp();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_DOWN: {
+                    handleDpadDown();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_LEFT: {
+                    handleDpadLeft();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_RIGHT: {
+                    handleDpadRight();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_CENTER: {
+                    handleDpadCenter();
                     break;
                 }
                 default:

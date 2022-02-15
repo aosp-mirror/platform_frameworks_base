@@ -22,6 +22,7 @@ import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.INVALID_UID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
@@ -85,7 +86,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -147,6 +148,7 @@ import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.MathUtils;
@@ -190,6 +192,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -328,6 +331,9 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
     private static final int MSG_PERSIST_SPATIAL_AUDIO_ENABLED = 43;
+    private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
+    private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
+    private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -339,6 +345,9 @@ public class AudioService extends IAudioService.Stub
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
     private static final int INDICATE_SYSTEM_READY_RETRY_DELAY_MS = 1000;
+
+    // List of empty UIDs used to reset the active assistant list
+    private static final int[] NO_ACTIVE_ASSISTANT_SERVICE_UIDS = new int[0];
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -602,7 +611,6 @@ public class AudioService extends IAudioService.Stub
 
     // Devices for which the volume is fixed (volume is either max or muted)
     Set<Integer> mFixedVolumeDevices = new HashSet<>(Arrays.asList(
-            AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_AUX_LINE));
     // Devices for which the volume is always max, no volume panel
@@ -756,10 +764,15 @@ public class AudioService extends IAudioService.Stub
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
 
-    // Uid of the active hotword detection service to check if caller is the one or not.
-    @GuardedBy("mHotwordDetectionServiceUidLock")
-    private int mHotwordDetectionServiceUid = android.os.Process.INVALID_UID;
-    private final Object mHotwordDetectionServiceUidLock = new Object();
+    // Array of Uids of valid assistant services to check if caller is one of them
+    @GuardedBy("mSettingsLock")
+    private final ArraySet<Integer> mAssistantUids = new ArraySet<>();
+    @GuardedBy("mSettingsLock")
+    private int mPrimaryAssistantUid = INVALID_UID;
+
+    // Array of Uids of valid active assistant service to check if caller is one of them
+    @GuardedBy("mSettingsLock")
+    private int[] mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
 
     // Array of Uids of valid accessibility services to check if caller is one of them
     private final Object mAccessibilityServiceUidsLock = new Object();
@@ -785,9 +798,6 @@ public class AudioService extends IAudioService.Stub
 
     private boolean mNavigationRepeatSoundEffectsEnabled;
     private boolean mHomeSoundEffectEnabled;
-
-    @GuardedBy("mSettingsLock")
-    private int mAssistantUid;
 
     @GuardedBy("mSettingsLock")
     private int mCurrentImeUid;
@@ -1395,12 +1405,10 @@ public class AudioService extends IAudioService.Stub
             mDeviceBroker.setForceUse_Async(AudioSystem.FOR_DOCK, forDock, "onAudioServerDied");
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
-            updateAssistantUId(true);
             AudioSystem.setRttEnabled(mRttEnabled);
+            updateAssistantServicesUidsLocked();
         }
-        synchronized (mHotwordDetectionServiceUidLock) {
-            AudioSystem.setHotwordDetectionServiceUid(mHotwordDetectionServiceUid);
-        }
+
         synchronized (mAccessibilityServiceUidsLock) {
             AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
         }
@@ -1476,6 +1484,68 @@ public class AudioService extends IAudioService.Stub
 
         // Restore vibrator info
         updateVibratorInfos();
+    }
+
+    private void onRemoveAssistantServiceUids(int[] uids) {
+        synchronized (mSettingsLock) {
+            removeAssistantServiceUidsLocked(uids);
+        }
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void removeAssistantServiceUidsLocked(int[] uids) {
+        boolean changed = false;
+        for (int index = 0; index < uids.length; index++) {
+            if (!mAssistantUids.remove(uids[index])) {
+                Slog.e(TAG, TextUtils.formatSimple(
+                        "Cannot remove assistant service, uid(%d) not present", uids[index]));
+                continue;
+            }
+            changed = true;
+        }
+        if (changed) {
+            updateAssistantServicesUidsLocked();
+        }
+    }
+
+    private void onAddAssistantServiceUids(int[] uids) {
+        synchronized (mSettingsLock) {
+            addAssistantServiceUidsLocked(uids);
+        }
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void addAssistantServiceUidsLocked(int[] uids) {
+        boolean changed = false;
+        for (int index = 0; index < uids.length; index++) {
+            if (uids[index] == INVALID_UID) {
+                continue;
+            }
+            if (!mAssistantUids.add(uids[index])) {
+                Slog.e(TAG, TextUtils.formatSimple(
+                                "Cannot add assistant service, uid(%d) already present",
+                                uids[index]));
+                continue;
+            }
+            changed = true;
+        }
+        if (changed) {
+            updateAssistantServicesUidsLocked();
+        }
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void updateAssistantServicesUidsLocked() {
+        int[] assistantUids = mAssistantUids.stream().mapToInt(Integer::intValue).toArray();
+        AudioSystem.setAssistantServicesUids(assistantUids);
+    }
+
+    private void updateActiveAssistantServiceUids() {
+        int [] activeAssistantServiceUids;
+        synchronized (mSettingsLock) {
+            activeAssistantServiceUids = mActiveAssistantServiceUids;
+        }
+        AudioSystem.setActiveAssistantServicesUids(activeAssistantServiceUids);
     }
 
     private void onReinitVolumes(@NonNull String caller) {
@@ -2243,8 +2313,7 @@ public class AudioService extends IAudioService.Stub
 
     @GuardedBy("mSettingsLock")
     private void updateAssistantUId(boolean forceUpdate) {
-        int assistantUid = 0;
-
+        int assistantUid = INVALID_UID;
         // Consider assistants in the following order of priority:
         // 1) apk in assistant role
         // 2) voice interaction service
@@ -2288,10 +2357,10 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
-
-        if (assistantUid != mAssistantUid || forceUpdate) {
-            AudioSystem.setAssistantUid(assistantUid);
-            mAssistantUid = assistantUid;
+        if ((mPrimaryAssistantUid != assistantUid) || forceUpdate) {
+            mAssistantUids.remove(mPrimaryAssistantUid);
+            mPrimaryAssistantUid = assistantUid;
+            addAssistantServiceUidsLocked(new int[]{mPrimaryAssistantUid});
         }
     }
 
@@ -2342,6 +2411,7 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
             updateAssistantUId(true);
+            resetActiveAssistantUidsLocked();
             AudioSystem.setRttEnabled(mRttEnabled);
         }
 
@@ -2365,6 +2435,12 @@ public class AudioService extends IAudioService.Stub
 
         // Load settings for the volume controller
         mVolumeController.loadSettings(cr);
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void resetActiveAssistantUidsLocked() {
+        mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
+        updateActiveAssistantServiceUids();
     }
 
     private void readUserRestrictions() {
@@ -2608,6 +2684,16 @@ public class AudioService extends IAudioService.Stub
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         enforceQueryStateOrModifyRoutingPermission();
+        return getDevicesForAttributesInt(attributes);
+    }
+
+    /** @see AudioManager#getAudioDevicesForAttributes(AudioAttributes)
+     * This method is similar with AudioService#getDevicesForAttributes,
+     * only it doesn't enforce permissions because it is used by an unprivileged public API
+     * instead of the system API.
+     */
+    public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesUnprotected(
+            @NonNull AudioAttributes attributes) {
         return getDevicesForAttributesInt(attributes);
     }
 
@@ -2882,8 +2968,9 @@ public class AudioService extends IAudioService.Stub
         int step;
 
         // skip a2dp absolute volume control request when the device
-        // is not an a2dp device
-        if (!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+        // is neither an a2dp device nor BLE device
+        if ((!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+                && !AudioSystem.DEVICE_OUT_ALL_BLE_SET.contains(device))
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
             return;
         }
@@ -3021,7 +3108,8 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    && streamType == getBluetoothContextualVolumeStream()) {
+                    && streamType == getBluetoothContextualVolumeStream()
+                    && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
                             + newIndex + " stream=" + streamType);
@@ -3236,6 +3324,13 @@ public class AudioService extends IAudioService.Stub
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
+        }
+    }
+
+    private void enforceQueryStatePermission() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.QUERY_AUDIO_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing QUERY_AUDIO_STATE permissions");
         }
     }
 
@@ -3614,8 +3709,9 @@ public class AudioService extends IAudioService.Stub
         int oldIndex;
 
         // skip a2dp absolute volume control request when the device
-        // is not an a2dp device
-        if (!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+        // is neither an a2dp device nor BLE device
+        if ((!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+                && !AudioSystem.DEVICE_OUT_ALL_BLE_SET.contains(device))
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
             return;
         }
@@ -3658,7 +3754,8 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    && streamType == getBluetoothContextualVolumeStream()) {
+                    && streamType == getBluetoothContextualVolumeStream()
+                    && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
                             + index + " stream=" + streamType);
@@ -4143,6 +4240,7 @@ public class AudioService extends IAudioService.Stub
 
     /** Get last audible volume before stream was muted. */
     public int getLastAudibleStreamVolume(int streamType) {
+        enforceQueryStatePermission();
         ensureValidStreamType(streamType);
         int device = getDeviceForStream(streamType);
         return (mStreamStates[streamType].getIndex(device) + 5) / 10;
@@ -4366,12 +4464,6 @@ public class AudioService extends IAudioService.Stub
         if (!mHasVibrator) {
             return false;
         }
-        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
-        if (hapticsDisabled) {
-            return false;
-        }
-
         if (effect == null) {
             return false;
         }
@@ -6359,23 +6451,23 @@ public class AudioService extends IAudioService.Stub
     /**
      * see AudioManager.setWiredDeviceConnectionState()
      */
-    public void setWiredDeviceConnectionState(int type,
-            @ConnectionState int state, String address, String name,
-            String caller) {
+    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @ConnectionState int state, String caller) {
         enforceModifyAudioRoutingPermission();
         if (state != CONNECTION_STATE_CONNECTED
                 && state != CONNECTION_STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
         new MediaMetrics.Item(mMetricsId + "setWiredDeviceConnectionState")
-                .set(MediaMetrics.Property.ADDRESS, address)
+                .set(MediaMetrics.Property.ADDRESS, attributes.getAddress())
                 .set(MediaMetrics.Property.CLIENT_NAME, caller)
-                .set(MediaMetrics.Property.DEVICE, AudioSystem.getDeviceName(type))
-                .set(MediaMetrics.Property.NAME, name)
+                .set(MediaMetrics.Property.DEVICE,
+                        AudioSystem.getDeviceName(attributes.getInternalType()))
+                .set(MediaMetrics.Property.NAME, attributes.getName())
                 .set(MediaMetrics.Property.STATE,
                         state == CONNECTION_STATE_CONNECTED ? "connected" : "disconnected")
                 .record();
-        mDeviceBroker.setWiredDeviceConnectionState(type, state, address, name, caller);
+        mDeviceBroker.setWiredDeviceConnectionState(attributes, state, caller);
     }
 
     /** @see AudioManager#setTestDeviceConnectionState(AudioDeviceAttributes, boolean) */
@@ -6422,14 +6514,14 @@ public class AudioService extends IAudioService.Stub
      * See AudioManager.handleBluetoothActiveDeviceChanged(...)
      */
     public void handleBluetoothActiveDeviceChanged(BluetoothDevice newDevice,
-            BluetoothDevice previousDevice, @NonNull BtProfileConnectionInfo info) {
+            BluetoothDevice previousDevice, @NonNull BluetoothProfileConnectionInfo info) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.BLUETOOTH_STACK)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Bluetooth is the only caller allowed");
         }
         if (info == null) {
-            throw new IllegalArgumentException("Illegal null BtProfileConnectionInfo for device "
-                    + previousDevice + " -> " + newDevice);
+            throw new IllegalArgumentException("Illegal null BluetoothProfileConnectionInfo for"
+                    + " device " + previousDevice + " -> " + newDevice);
         }
         final int profile = info.getProfile();
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
@@ -7831,6 +7923,17 @@ public class AudioService extends IAudioService.Stub
                 case MSG_PERSIST_SPATIAL_AUDIO_ENABLED:
                     onPersistSpatialAudioEnabled(msg.arg1 == 1);
                     break;
+
+                case MSG_ADD_ASSISTANT_SERVICE_UID:
+                    onAddAssistantServiceUids(new int[]{msg.arg1});
+                    break;
+
+                case MSG_REMOVE_ASSISTANT_SERVICE_UID:
+                    onRemoveAssistantServiceUids(new int[]{msg.arg1});
+                    break;
+                case MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID:
+                    updateActiveAssistantServiceUids();
+                    break;
             }
         }
     }
@@ -8471,6 +8574,30 @@ public class AudioService extends IAudioService.Stub
         return mSpatializerHelper.isAvailable();
     }
 
+    /** @see Spatializer#isAvailableForDevice(AudioDeviceAttributes) */
+    public boolean isSpatializerAvailableForDevice(@NonNull AudioDeviceAttributes device)  {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.isAvailableForDevice(Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#hasHeadTracker(AudioDeviceAttributes) */
+    public boolean hasHeadTracker(@NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.hasHeadTracker(Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#setHeadTrackerEnabled(boolean, AudioDeviceAttributes) */
+    public void setHeadTrackerEnabled(boolean enabled, @NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        mSpatializerHelper.setHeadTrackerEnabled(enabled, Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#isHeadTrackerEnabled(AudioDeviceAttributes) */
+    public boolean isHeadTrackerEnabled(@NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.isHeadTrackerEnabled(Objects.requireNonNull(device));
+    }
+
     /** @see Spatializer#setSpatializerEnabled(boolean) */
     public void setSpatializerEnabled(boolean enabled) {
         enforceModifyDefaultAudioEffectsPermission();
@@ -8533,7 +8660,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see Spatializer#getSpatializerCompatibleAudioDevices() */
     public @NonNull List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices() {
-        enforceModifyAudioRoutingPermission();
+        enforceModifyDefaultAudioEffectsPermission();
         return mSpatializerHelper.getCompatibleAudioDevices();
     }
 
@@ -9311,8 +9438,6 @@ public class AudioService extends IAudioService.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mAudioSystem.dump(pw);
-
         sLifecycleLogger.dump(pw);
         if (mAudioHandler != null) {
             pw.println("\nMessage handler (watch for unhandled messages):");
@@ -9341,7 +9466,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
-        pw.print("  mCameraSoundForced="); pw.println(mCameraSoundForced);
+        pw.print("  mCameraSoundForced="); pw.println(isCameraSoundForced());
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
         pw.print("  mAvrcpAbsVolSupported="); pw.println(mAvrcpAbsVolSupported);
@@ -9361,9 +9486,9 @@ public class AudioService extends IAudioService.Stub
                         + " FromRestrictions=" + mMicMuteFromRestrictions
                         + " FromApi=" + mMicMuteFromApi
                         + " from system=" + mMicMuteFromSystemCached);
-        pw.print("\n  mAssistantUid="); pw.println(mAssistantUid);
         pw.print("  mCurrentImeUid="); pw.println(mCurrentImeUid);
         dumpAccessibilityServiceUids(pw);
+        dumpAssistantServicesUids(pw);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
@@ -9392,6 +9517,9 @@ public class AudioService extends IAudioService.Stub
         pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect);
         pw.println("isSpatializerEnabled:" + isSpatializerEnabled());
         pw.println("isSpatialAudioEnabled:" + isSpatialAudioEnabled());
+        mSpatializerHelper.dump(pw);
+
+        mAudioSystem.dump(pw);
     }
 
     private void dumpSupportedSystemUsage(PrintWriter pw) {
@@ -9399,6 +9527,19 @@ public class AudioService extends IAudioService.Stub
         synchronized (mSupportedSystemUsagesLock) {
             for (int i = 0; i < mSupportedSystemUsages.length; i++) {
                 pw.printf("\t%s\n", AudioAttributes.usageToString(mSupportedSystemUsages[i]));
+            }
+        }
+    }
+
+    private void dumpAssistantServicesUids(PrintWriter pw) {
+        synchronized (mSettingsLock) {
+            if (mAssistantUids.size() > 0) {
+                pw.println("  Assistant service UIDs:");
+                for (int uid : mAssistantUids) {
+                    pw.println("  - " + uid);
+                }
+            } else {
+                pw.println("  No Assistant service Uids.");
             }
         }
     }
@@ -9701,13 +9842,40 @@ public class AudioService extends IAudioService.Stub
         }
 
         @Override
-        public void setHotwordDetectionServiceUid(int uid) {
-            synchronized (mHotwordDetectionServiceUidLock) {
-                if (mHotwordDetectionServiceUid != uid) {
-                    mHotwordDetectionServiceUid = uid;
-                    AudioSystem.setHotwordDetectionServiceUid(mHotwordDetectionServiceUid);
+        public void addAssistantServiceUid(int uid) {
+            sendMsg(mAudioHandler, MSG_ADD_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
+                    uid, 0, null, 0);
+        }
+
+        @Override
+        public void removeAssistantServiceUid(int uid) {
+            sendMsg(mAudioHandler, MSG_REMOVE_ASSISTANT_SERVICE_UID, SENDMSG_QUEUE,
+                    uid, 0, null, 0);
+        }
+
+        @Override
+        public void setActiveAssistantServicesUids(IntArray activeUids) {
+            synchronized (mSettingsLock) {
+                if (activeUids.size() == 0) {
+                    mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
+                } else {
+                    boolean changed = (mActiveAssistantServiceUids == null)
+                            || (mActiveAssistantServiceUids.length != activeUids.size());
+                    if (!changed) {
+                        for (int i = 0; i < mActiveAssistantServiceUids.length; i++) {
+                            if (activeUids.get(i) != mActiveAssistantServiceUids[i]) {
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        mActiveAssistantServiceUids = activeUids.toArray();
+                    }
                 }
             }
+            sendMsg(mAudioHandler, MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID, SENDMSG_REPLACE,
+                    0, 0, null, 0);
         }
 
         @Override
@@ -9771,7 +9939,7 @@ public class AudioService extends IAudioService.Stub
                                      projection)) {
             Slog.w(TAG, "Permission denied to register audio policy for pid "
                     + Binder.getCallingPid() + " / uid " + Binder.getCallingUid()
-                    + ", need MODIFY_AUDIO_ROUTING or MediaProjection that can project audio");
+                    + ", need system permission or a MediaProjection that can project audio");
             return null;
         }
 
@@ -11002,6 +11170,63 @@ public class AudioService extends IAudioService.Stub
             delayMillis = 0;
         }
         return delayMillis;
+    }
+
+    /** @see AudioManager#addAssistantServicesUids(int []) */
+    @Override
+    public void addAssistantServicesUids(int [] assistantUids) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(assistantUids);
+
+        synchronized (mSettingsLock) {
+            addAssistantServiceUidsLocked(assistantUids);
+        }
+    }
+
+    /** @see AudioManager#removeAssistantServicesUids(int []) */
+    @Override
+    public void removeAssistantServicesUids(int [] assistantUids) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(assistantUids);
+        synchronized (mSettingsLock) {
+            removeAssistantServiceUidsLocked(assistantUids);
+        }
+    }
+
+    /** @see AudioManager#getAssistantServicesUids() */
+    @Override
+    public int[] getAssistantServicesUids() {
+        enforceModifyAudioRoutingPermission();
+        int [] assistantUids;
+        synchronized (mSettingsLock) {
+            assistantUids = mAssistantUids.stream().mapToInt(Integer::intValue).toArray();
+        }
+        return assistantUids;
+    }
+
+    /** @see AudioManager#setActiveAssistantServiceUids(int []) */
+    @Override
+    public void setActiveAssistantServiceUids(int [] activeAssistantUids) {
+        enforceModifyAudioRoutingPermission();
+        synchronized (mSettingsLock) {
+            mActiveAssistantServiceUids = activeAssistantUids;
+        }
+        updateActiveAssistantServiceUids();
+    }
+
+    /** @see AudioManager#getActiveAssistantServiceUids() */
+    @Override
+    public int[] getActiveAssistantServiceUids() {
+        enforceModifyAudioRoutingPermission();
+        int [] activeAssistantUids;
+        synchronized (mSettingsLock) {
+            activeAssistantUids = mActiveAssistantServiceUids.clone();
+        }
+        return activeAssistantUids;
+    }
+
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        return mDeviceBroker.getDeviceSensorUuid(device);
     }
 
     //======================

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -88,6 +89,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -103,6 +105,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Service that manages requests and callbacks for launchers that support
@@ -728,9 +731,16 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
-            final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
-                    getCallingUserId(), callingPackage, packageName, shortcutId,
-                    user.getIdentifier(), injectBinderCallingPid(), injectBinderCallingUid());
+            final AndroidFuture<Intent[]> ret = new AndroidFuture<>();
+            Intent[] intents;
+            mShortcutServiceInternal.createShortcutIntentsAsync(getCallingUserId(),
+                    callingPackage, packageName, shortcutId, user.getIdentifier(),
+                    injectBinderCallingPid(), injectBinderCallingUid(), ret);
+            try {
+                intents = ret.get();
+            } catch (InterruptedException | ExecutionException e) {
+                return null;
+            }
             if (intents == null || intents.length == 0) {
                 return null;
             }
@@ -863,7 +873,7 @@ public class LauncherAppsService extends SystemService {
         PendingIntent injectCreatePendingIntent(int requestCode, @NonNull Intent[] intents,
                 int flags, Bundle options, String ownerPackage, int ownerUserId) {
             return mActivityManagerInternal.getPendingIntentActivityAsApp(requestCode, intents,
-                    flags, options, ownerPackage, ownerUserId);
+                    flags, null /* options */, ownerPackage, ownerUserId);
         }
 
         @Override
@@ -898,6 +908,40 @@ public class LauncherAppsService extends SystemService {
                             callingPackage, changedSince, packageName, shortcutIds, locusIds,
                             componentName, flags, targetUser.getIdentifier(),
                             injectBinderCallingPid(), injectBinderCallingUid()));
+        }
+
+        @Override
+        public void getShortcutsAsync(@NonNull final String callingPackage,
+                @NonNull final ShortcutQueryWrapper query, @NonNull final UserHandle targetUser,
+                @NonNull final AndroidFuture<List<ShortcutInfo>> cb) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
+                cb.complete(Collections.EMPTY_LIST);
+                return;
+            }
+
+            final long changedSince = query.getChangedSince();
+            final String packageName = query.getPackage();
+            final List<String> shortcutIds = query.getShortcutIds();
+            final List<LocusId> locusIds = query.getLocusIds();
+            final ComponentName componentName = query.getActivity();
+            final int flags = query.getQueryFlags();
+            if (shortcutIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by shortcut ID, package name must also be set");
+            }
+            if (locusIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by locus ID, package name must also be set");
+            }
+            if ((query.getQueryFlags() & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
+                ensureStrictAccessShortcutsPermission(callingPackage);
+            }
+
+            mShortcutServiceInternal.getShortcutsAsync(getCallingUserId(),
+                    callingPackage, changedSince, packageName, shortcutIds, locusIds,
+                    componentName, flags, targetUser.getIdentifier(),
+                    injectBinderCallingPid(), injectBinderCallingUid(), cb);
         }
 
         @Override
@@ -991,8 +1035,14 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
-            return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
-                    callingPackage, packageName, id, targetUserId);
+            final AndroidFuture<ParcelFileDescriptor> ret = new AndroidFuture<>();
+            mShortcutServiceInternal.getShortcutIconFdAsync(getCallingUserId(),
+                    callingPackage, packageName, id, targetUserId, ret);
+            try {
+                return ret.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -1003,8 +1053,14 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
-            return mShortcutServiceInternal.getShortcutIconUri(getCallingUserId(), callingPackage,
-                    packageName, shortcutId, userId);
+            final AndroidFuture<String> ret = new AndroidFuture<>();
+            mShortcutServiceInternal.getShortcutIconUriAsync(getCallingUserId(), callingPackage,
+                    packageName, shortcutId, userId, ret);
+            try {
+                return ret.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -1037,9 +1093,16 @@ public class LauncherAppsService extends SystemService {
                 ensureShortcutPermission(callerUid, callerPid, callingPackage);
             }
 
-            final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
-                    callingUserId, callingPackage, packageName, shortcutId, targetUserId,
-                    callerPid, callerUid);
+            final AndroidFuture<Intent[]> ret = new AndroidFuture<>();
+            Intent[] intents;
+            mShortcutServiceInternal.createShortcutIntentsAsync(getCallingUserId(), callingPackage,
+                    packageName, shortcutId, targetUserId,
+                    injectBinderCallingPid(), injectBinderCallingUid(), ret);
+            try {
+                intents = ret.get();
+            } catch (InterruptedException | ExecutionException e) {
+                return false;
+            }
             if (intents == null || intents.length == 0) {
                 return false;
             }
@@ -1156,8 +1219,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public PendingIntent getActivityLaunchIntent(ComponentName component, Bundle opts,
+        public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
+            ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
@@ -1175,7 +1239,7 @@ public class LauncherAppsService extends SystemService {
                 // calling identity to mirror the startActivityAsUser() call which does not validate
                 // the calling user
                 return PendingIntent.getActivityAsUser(mContext, 0 /* requestCode */, launchIntent,
-                        FLAG_IMMUTABLE, opts, user);
+                        FLAG_MUTABLE, null /* opts */, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1685,14 +1749,12 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
-                                getFilteredPackageNames(packages, cookie);
-                        // If all packages are filtered, skip notifying listener.
-                        if (ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
-                            continue;
-                        }
+                                getFilteredPackageNames(packagesNullExtras, cookie);
                         try {
-                            listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
-                                    /* launcherExtras= */ null);
+                            if (!ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
+                                listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
+                                        /* launcherExtras= */ null);
+                            }
                             for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
                                 Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
                                 if (!isPackageVisibleToListener(packageExtraPair.first, cookie)) {

@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -829,16 +830,12 @@ public class LocationManagerService extends ILocationManager.Stub implements
                         "only verified adas packages may use adas gnss bypass requests");
             }
             if (!isLocationProvider) {
-                mContext.enforceCallingOrSelfPermission(
-                        permission.WRITE_SECURE_SETTINGS,
-                        "adas gnss bypass requires " + permission.WRITE_SECURE_SETTINGS);
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
             }
         }
         if (request.isLocationSettingsIgnored()) {
             if (!isLocationProvider) {
-                mContext.enforceCallingOrSelfPermission(
-                        permission.WRITE_SECURE_SETTINGS,
-                        "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
             }
         }
 
@@ -933,16 +930,12 @@ public class LocationManagerService extends ILocationManager.Stub implements
                         "only verified adas packages may use adas gnss bypass requests");
             }
             if (!isLocationProvider) {
-                mContext.enforceCallingOrSelfPermission(
-                        permission.WRITE_SECURE_SETTINGS,
-                        "adas gnss bypass requires " + permission.WRITE_SECURE_SETTINGS);
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
             }
         }
         if (request.isLocationSettingsIgnored()) {
             if (!isLocationProvider) {
-                mContext.enforceCallingOrSelfPermission(
-                        permission.WRITE_SECURE_SETTINGS,
-                        "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
             }
         }
 
@@ -1202,7 +1195,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false, "setLocationEnabledForUser", null);
 
-        mContext.enforceCallingOrSelfPermission(permission.WRITE_SECURE_SETTINGS, null);
+        mContext.enforceCallingOrSelfPermission(WRITE_SECURE_SETTINGS, null);
 
         LocationManager.invalidateLocalLocationEnabledCaches();
         mInjector.getSettingsHelper().setLocationEnabled(enabled, userId);
@@ -1220,7 +1213,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false, "setAdasGnssLocationEnabledForUser", null);
 
-        mContext.enforceCallingOrSelfPermission(permission.WRITE_SECURE_SETTINGS, null);
+        LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
 
         mInjector.getLocationSettings().updateUserSettings(userId,
                 settings -> settings.withAdasGnssLocationEnabled(enabled));
@@ -1239,29 +1232,29 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public void setAutoGnssSuspended(boolean suspended) {
-        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
 
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
             throw new IllegalStateException(
-                    "setAutoGnssSuspended only allowed on automotive devices");
+                    "setAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        mGnssManagerService.setAutoGnssSuspended(suspended);
+        mGnssManagerService.setAutomotiveGnssSuspended(suspended);
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public boolean isAutoGnssSuspended() {
-        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public boolean isAutomotiveGnssSuspended() {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
 
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
             throw new IllegalStateException(
-                    "isAutoGnssSuspended only allowed on automotive devices");
+                    "isAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        return mGnssManagerService.isAutoGnssSuspended();
+        return mGnssManagerService.isAutomotiveGnssSuspended();
     }
 
     @Override

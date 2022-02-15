@@ -68,6 +68,7 @@ public class BatteryUsageStatsPulledTest {
                 bus.getStatsEndTimestamp() - bus.getStatsStartTimestamp(),
                 proto.sessionDurationMillis);
         assertEquals(bus.getDischargePercentage(), proto.sessionDischargePercentage);
+        assertEquals(bus.getDischargeDurationMs(), proto.dischargeDurationMillis);
 
         assertEquals(3, proto.deviceBatteryConsumer.powerComponents.length); // Only 3 are non-empty
         assertSameBatteryConsumer("For deviceBatteryConsumer",
@@ -215,6 +216,7 @@ public class BatteryUsageStatsPulledTest {
                         /* includeProcessStats */true)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
+                        .setDischargeDurationMs(1234)
                         .setStatsStartTimestamp(1000);
         final UidBatteryConsumer.Builder uidBuilder = builder.getOrCreateUidBatteryConsumerBuilder(
                 batteryStatsUid0)

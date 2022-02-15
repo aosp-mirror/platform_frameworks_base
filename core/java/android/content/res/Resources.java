@@ -53,6 +53,7 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -78,12 +79,15 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -143,9 +147,6 @@ public class Resources {
     @UnsupportedAppUsage
     private DrawableInflater mDrawableInflater;
 
-    /** Used to override the returned adjustments of {@link #getDisplayAdjustments}. */
-    private DisplayAdjustments mOverrideDisplayAdjustments;
-
     /** Lock object used to protect access to {@link #mTmpValue}. */
     private final Object mTmpValueLock = new Object();
 
@@ -175,6 +176,11 @@ public class Resources {
     private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
 
     private int mBaseApkAssetsSize;
+
+    /** @hide */
+    private static Set<Resources> sResourcesHistory = Collections.synchronizedSet(
+            Collections.newSetFromMap(
+                    new WeakHashMap<>()));
 
     /**
      * Returns the most appropriate default theme for the specified target SDK version.
@@ -322,6 +328,7 @@ public class Resources {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
+        sResourcesHistory.add(this);
     }
 
     /**
@@ -2080,7 +2087,7 @@ public class Resources {
 
             // Clean up references to garbage collected themes
             if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
-                mThemeRefs.removeIf(ref -> ref.get() == null);
+                mThemeRefs.removeIf(ref -> ref.refersTo(null));
                 mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
                         2 * mThemeRefs.size());
             }
@@ -2174,30 +2181,7 @@ public class Resources {
     /** @hide */
     @UnsupportedAppUsage(trackingBug = 176190631)
     public DisplayAdjustments getDisplayAdjustments() {
-        final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
-        if (overrideDisplayAdjustments != null) {
-            return overrideDisplayAdjustments;
-        }
         return mResourcesImpl.getDisplayAdjustments();
-    }
-
-    /**
-     * Customize the display adjustments based on the current one in {@link #mResourcesImpl}, in
-     * order to isolate the effect with other instances of {@link Resource} that may share the same
-     * instance of {@link ResourcesImpl}.
-     *
-     * @param override The operation to override the existing display adjustments. If it is null,
-     *                 the override adjustments will be cleared.
-     * @hide
-     */
-    public void overrideDisplayAdjustments(@Nullable Consumer<DisplayAdjustments> override) {
-        if (override != null) {
-            mOverrideDisplayAdjustments = new DisplayAdjustments(
-                    mResourcesImpl.getDisplayAdjustments());
-            override.accept(mOverrideDisplayAdjustments);
-        } else {
-            mOverrideDisplayAdjustments = null;
-        }
     }
 
     /**
@@ -2205,7 +2189,7 @@ public class Resources {
      * @hide
      */
     public boolean hasOverrideDisplayAdjustments() {
-        return mOverrideDisplayAdjustments != null;
+        return false;
     }
 
     /**
@@ -2673,6 +2657,31 @@ public class Resources {
             mCallbacks.onLoadersChanged(this, newLoaders);
             for (ResourcesLoader loader : oldLoaders) {
                 loader.unregisterOnProvidersChangedCallback(this);
+            }
+        }
+    }
+
+    /** @hide */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "class=" + getClass());
+        pw.println(prefix + "resourcesImpl");
+        mResourcesImpl.dump(pw, prefix + "  ");
+    }
+
+    /** @hide */
+    public static void dumpHistory(PrintWriter pw, String prefix) {
+        pw.println(prefix + "history");
+        // Putting into a map keyed on the apk assets to deduplicate resources that are different
+        // objects but ultimately represent the same assets
+        Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
+        for (Resources r : sResourcesHistory) {
+            history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r);
+        }
+        int i = 0;
+        for (Resources r : history.values()) {
+            if (r != null) {
+                pw.println(prefix + i++);
+                r.dump(pw, prefix + "  ");
             }
         }
     }

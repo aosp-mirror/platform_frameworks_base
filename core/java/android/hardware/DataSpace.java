@@ -15,7 +15,7 @@
  */
 package android.hardware;
 
-import android.annotation.LongDef;
+import android.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -62,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class DataSpace {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @LongDef(flag = true, value = {
+    @IntDef(flag = true, value = {
         STANDARD_UNSPECIFIED,
         STANDARD_BT709,
         STANDARD_BT601_625,
@@ -78,12 +78,12 @@ public final class DataSpace {
     })
     public @interface DataSpaceStandard {};
 
-    private static final long STANDARD_MASK = 63 << 16;
+    private static final int STANDARD_MASK = 63 << 16;
 
     /**
      * Chromacity coordinates are unknown or are determined by the application.
      */
-    public static final long STANDARD_UNSPECIFIED  = 0 << 16;
+    public static final int STANDARD_UNSPECIFIED  = 0 << 16;
     /**
      * Use the unadjusted {@code KR = 0.2126}, {@code KB = 0.0722} luminance interpretation
      * for RGB conversion.
@@ -95,7 +95,7 @@ public final class DataSpace {
      *  red             0.640   0.330
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT709 = 1 << 16;
+    public static final int STANDARD_BT709 = 1 << 16;
     /**
      * Use the adjusted {@code KR = 0.299}, {@code KB = 0.114} luminance interpretation
      * for RGB conversion from the one purely determined by the primaries
@@ -109,7 +109,7 @@ public final class DataSpace {
      *  red             0.640   0.330
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT601_625 = 2 << 16;
+    public static final int STANDARD_BT601_625 = 2 << 16;
     /**
      * Use the unadjusted {@code KR = 0.222}, {@code KB = 0.071} luminance interpretation
      * for RGB conversion.
@@ -121,7 +121,7 @@ public final class DataSpace {
      *  red             0.640   0.330
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT601_625_UNADJUSTED = 3 << 16;
+    public static final int STANDARD_BT601_625_UNADJUSTED = 3 << 16;
     /**
      * Use the adjusted {@code KR = 0.299}, {@code KB = 0.114} luminance interpretation
      * for RGB conversion from the one purely determined by the primaries
@@ -135,7 +135,7 @@ public final class DataSpace {
      *  red             0.630   0.340
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT601_525 = 4 << 16;
+    public static final int STANDARD_BT601_525 = 4 << 16;
     /**
      * Use the unadjusted {@code KR = 0.212}, {@code KB = 0.087} luminance interpretation
      * for RGB conversion (as in SMPTE 240M).
@@ -147,7 +147,7 @@ public final class DataSpace {
      *  red             0.630   0.340
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT601_525_UNADJUSTED = 5 << 16;
+    public static final int STANDARD_BT601_525_UNADJUSTED = 5 << 16;
     /**
      * Use the unadjusted {@code KR = 0.2627}, {@code KB = 0.0593} luminance interpretation
      * for RGB conversion.
@@ -159,7 +159,7 @@ public final class DataSpace {
      *  red             0.708   0.292
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT2020 = 6 << 16;
+    public static final int STANDARD_BT2020 = 6 << 16;
     /**
      * Use the unadjusted {@code KR = 0.2627}, {@code KB = 0.0593} luminance interpretation
      * for RGB conversion using the linear domain.
@@ -171,7 +171,7 @@ public final class DataSpace {
      *  red             0.708   0.292
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_BT2020_CONSTANT_LUMINANCE = 7 << 16;
+    public static final int STANDARD_BT2020_CONSTANT_LUMINANCE = 7 << 16;
     /**
      * Use the unadjusted {@code KR = 0.30}, {@code KB = 0.11} luminance interpretation
      * for RGB conversion.
@@ -183,7 +183,7 @@ public final class DataSpace {
      *  red             0.67   0.33
      *  white (C)       0.310  0.316 </pre>
      */
-    public static final long STANDARD_BT470M = 8 << 16;
+    public static final int STANDARD_BT470M = 8 << 16;
     /**
      * Use the unadjusted {@code KR = 0.254}, {@code KB = 0.068} luminance interpretation
      * for RGB conversion.
@@ -195,7 +195,7 @@ public final class DataSpace {
      *  red             0.681   0.319
      *  white (C)       0.310   0.316 </pre>
      */
-    public static final long STANDARD_FILM = 9 << 16;
+    public static final int STANDARD_FILM = 9 << 16;
     /**
      * SMPTE EG 432-1 and SMPTE RP 431-2.
      *
@@ -206,7 +206,7 @@ public final class DataSpace {
      *  red             0.680   0.320
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_DCI_P3 = 10 << 16;
+    public static final int STANDARD_DCI_P3 = 10 << 16;
     /**
      * Adobe RGB primaries.
      *
@@ -217,11 +217,11 @@ public final class DataSpace {
      *  red             0.640   0.330
      *  white (D65)     0.3127  0.3290 </pre>
      */
-    public static final long STANDARD_ADOBE_RGB = 11 << 16;
+    public static final int STANDARD_ADOBE_RGB = 11 << 16;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @LongDef(flag = true, value = {
+    @IntDef(flag = true, value = {
         TRANSFER_UNSPECIFIED,
         TRANSFER_LINEAR,
         TRANSFER_SRGB,
@@ -234,13 +234,13 @@ public final class DataSpace {
     })
     public @interface DataSpaceTransfer {};
 
-    private static final long TRANSFER_MASK = 31 << 22;
+    private static final int TRANSFER_MASK = 31 << 22;
 
     /**
      * Transfer characteristics are unknown or are determined by the
      * application.
      */
-    public static final long TRANSFER_UNSPECIFIED = 0 << 22;
+    public static final int TRANSFER_UNSPECIFIED = 0 << 22;
     /**
      * Linear transfer.
      *
@@ -250,7 +250,7 @@ public final class DataSpace {
      *      L - luminance of image 0 <= L <= 1 for conventional colorimetry
      *      E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_LINEAR = 1 << 22;
+    public static final int TRANSFER_LINEAR = 1 << 22;
     /**
      * sRGB transfer.
      *
@@ -263,7 +263,7 @@ public final class DataSpace {
      *
      * Use for RGB formats.
      */
-    public static final long TRANSFER_SRGB = 2 << 22;
+    public static final int TRANSFER_SRGB = 2 << 22;
     /**
      * SMPTE 170M transfer.
      *
@@ -276,7 +276,7 @@ public final class DataSpace {
      *
      * Use for YCbCr formats.
      */
-    public static final long TRANSFER_SMPTE_170M = 3 << 22;
+    public static final int TRANSFER_SMPTE_170M = 3 << 22;
     /**
      * Display gamma 2.2.
      *
@@ -286,7 +286,7 @@ public final class DataSpace {
      *     L - luminance of image 0 <= L <= 1 for conventional colorimetry
      *     E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_GAMMA2_2 = 4 << 22;
+    public static final int TRANSFER_GAMMA2_2 = 4 << 22;
     /**
      *  Display gamma 2.6.
      *
@@ -296,7 +296,7 @@ public final class DataSpace {
      *     L - luminance of image 0 <= L <= 1 for conventional colorimetry
      *     E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_GAMMA2_6 = 5 << 22;
+    public static final int TRANSFER_GAMMA2_6 = 5 << 22;
     /**
      *  Display gamma 2.8.
      *
@@ -306,7 +306,7 @@ public final class DataSpace {
      *     L - luminance of image 0 <= L <= 1 for conventional colorimetry
      *     E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_GAMMA2_8 = 6 << 22;
+    public static final int TRANSFER_GAMMA2_8 = 6 << 22;
     /**
      * SMPTE ST 2084 (Dolby Perceptual Quantizer).
      *
@@ -322,7 +322,7 @@ public final class DataSpace {
      *         L = 1 corresponds to 10000 cd/m2
      *     E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_ST2084 = 7 << 22;
+    public static final int TRANSFER_ST2084 = 7 << 22;
     /**
      * ARIB STD-B67 Hybrid Log Gamma.
      *
@@ -338,11 +338,11 @@ public final class DataSpace {
      *         to reference white level of 100 cd/m2
      *     E - corresponding electrical signal}</pre>
      */
-    public static final long TRANSFER_HLG = 8 << 22;
+    public static final int TRANSFER_HLG = 8 << 22;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @LongDef(flag = true, value = {
+    @IntDef(flag = true, value = {
         RANGE_UNSPECIFIED,
         RANGE_FULL,
         RANGE_LIMITED,
@@ -350,17 +350,17 @@ public final class DataSpace {
     })
     public @interface DataSpaceRange {};
 
-    private static final long RANGE_MASK = 7 << 27;
+    private static final int RANGE_MASK = 7 << 27;
 
     /**
      * Range characteristics are unknown or are determined by the application.
      */
-    public static final long RANGE_UNSPECIFIED = 0 << 27;
+    public static final int RANGE_UNSPECIFIED = 0 << 27;
     /**
      * Full range uses all values for Y, Cb and Cr from
      * {@code 0} to {@code 2^b-1}, where b is the bit depth of the color format.
      */
-    public static final long RANGE_FULL = 1 << 27;
+    public static final int RANGE_FULL = 1 << 27;
     /**
      * Limited range uses values {@code 16/256*2^b} to {@code 235/256*2^b} for Y, and
      * {@code 1/16*2^b} to {@code 15/16*2^b} for Cb, Cr, R, G and B, where b is the bit depth of
@@ -374,7 +374,7 @@ public final class DataSpace {
      * Luma (Y) samples should range from 64 to 940, inclusive
      * Chroma (Cb, Cr) samples should range from 64 to 960, inclusive. </p>
      */
-    public static final long RANGE_LIMITED = 2 << 27;
+    public static final int RANGE_LIMITED = 2 << 27;
     /**
      * Extended range is used for scRGB only.
      *
@@ -383,11 +383,11 @@ public final class DataSpace {
      * color outside the sRGB gamut. [-0.5, 7.5] is the scRGB range.
      * Used to blend/merge multiple dataspaces on a single display.</p>
      */
-    public static final long RANGE_EXTENDED = 3 << 27;
+    public static final int RANGE_EXTENDED = 3 << 27;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @LongDef(flag = true, value = {
+    @IntDef(flag = true, value = {
         DATASPACE_UNKNOWN,
         DATASPACE_SCRGB_LINEAR,
         DATASPACE_SRGB,
@@ -414,7 +414,7 @@ public final class DataSpace {
      * expected, except for a possible display gamma transform when drawn to a
      * screen.</p>
      */
-    public static final long DATASPACE_UNKNOWN = 0;
+    public static final int DATASPACE_UNKNOWN = 0;
     /**
      * scRGB linear encoding.
      *
@@ -429,7 +429,7 @@ public final class DataSpace {
      * Values beyond the range [0.0 - 1.0] would correspond to other colors
      * spaces and/or HDR content.
      */
-    public static final long DATASPACE_SCRGB_LINEAR = 406913024;
+    public static final int DATASPACE_SCRGB_LINEAR = 406913024;
     /**
      * sRGB gamma encoding.
      *
@@ -444,7 +444,7 @@ public final class DataSpace {
      * The alpha component, if present, is always stored in linear space and
      * is left unmodified when read or written.
      */
-    public static final long DATASPACE_SRGB = 142671872;
+    public static final int DATASPACE_SRGB = 142671872;
     /**
      * scRGB gamma encoding.
      *
@@ -460,7 +460,7 @@ public final class DataSpace {
      * Values beyond the range [0.0 - 1.0] would correspond to other colors
      * spaces and/or HDR content.
      */
-    public static final long DATASPACE_SCRGB = 411107328;
+    public static final int DATASPACE_SCRGB = 411107328;
     /**
      * Display P3 encoding.
      *
@@ -470,7 +470,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_SRGB
      *   Range: RANGE_FULL</pre>
      */
-    public static final long DATASPACE_DISPLAY_P3 = 143261696;
+    public static final int DATASPACE_DISPLAY_P3 = 143261696;
     /**
      * ITU-R Recommendation 2020 (BT.2020)
      *
@@ -482,7 +482,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_ST2084
      *   Range: RANGE_FULL</pre>
      */
-    public static final long DATASPACE_BT2020_PQ = 163971072;
+    public static final int DATASPACE_BT2020_PQ = 163971072;
     /**
      * Adobe RGB encoding.
      *
@@ -494,7 +494,7 @@ public final class DataSpace {
      *
      * Note: Application is responsible for gamma encoding the data.
      */
-    public static final long DATASPACE_ADOBE_RGB = 151715840;
+    public static final int DATASPACE_ADOBE_RGB = 151715840;
     /**
      * JPEG File Interchange Format (JFIF).
      *
@@ -506,7 +506,7 @@ public final class DataSpace {
      *
      * Same model as BT.601-625, but all values (Y, Cb, Cr) range from {@code 0} to {@code 255}
      */
-    public static final long DATASPACE_JFIF = 146931712;
+    public static final int DATASPACE_JFIF = 146931712;
     /**
      * ITU-R Recommendation 601 (BT.601) - 525-line
      *
@@ -518,7 +518,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_SMPTE_170M
      *   Range: RANGE_LIMITED</pre>
      */
-    public static final long DATASPACE_BT601_625 = 281149440;
+    public static final int DATASPACE_BT601_625 = 281149440;
     /**
      * ITU-R Recommendation 709 (BT.709)
      *
@@ -530,7 +530,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_SMPTE_170M
      *   Range: RANGE_LIMITED</pre>
      */
-    public static final long DATASPACE_BT601_525 = 281280512;
+    public static final int DATASPACE_BT601_525 = 281280512;
     /**
      * ITU-R Recommendation 2020 (BT.2020)
      *
@@ -542,7 +542,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_SMPTE_170M
      *   Range: RANGE_FULL</pre>
      */
-    public static final long DATASPACE_BT2020 = 147193856;
+    public static final int DATASPACE_BT2020 = 147193856;
     /**
      * ITU-R Recommendation 709 (BT.709)
      *
@@ -554,7 +554,7 @@ public final class DataSpace {
      *   Transfer: TRANSFER_SMPTE_170M
      *   Range: RANGE_LIMITED</pre>
      */
-    public static final long DATASPACE_BT709 = 281083904;
+    public static final int DATASPACE_BT709 = 281083904;
     /**
      * SMPTE EG 432-1 and SMPTE RP 431-2
      *
@@ -569,7 +569,7 @@ public final class DataSpace {
      * Note: Application is responsible for gamma encoding the data as
      * a 2.6 gamma encoding is not supported in HW.
      */
-    public static final long DATASPACE_DCI_P3 = 155844608;
+    public static final int DATASPACE_DCI_P3 = 155844608;
     /**
      * sRGB linear encoding.
      *
@@ -582,7 +582,7 @@ public final class DataSpace {
      * The values are encoded using the full range ([0,255] for 8-bit) for all
      * components.
      */
-    public static final long DATASPACE_SRGB_LINEAR = 138477568;
+    public static final int DATASPACE_SRGB_LINEAR = 138477568;
 
     private DataSpace() {}
 
@@ -594,11 +594,11 @@ public final class DataSpace {
      * @param transfer Opto-electronic transfer characteristic at the source
      * @param range The range of values
      *
-     * @return The long dataspace packed by standard, transfer and range value
+     * @return The int dataspace packed by standard, transfer and range value
      */
-    public static @NamedDataSpace long pack(@DataSpaceStandard long standard,
-                                        @DataSpaceTransfer long transfer,
-                                        @DataSpaceRange long range) {
+    public static @NamedDataSpace int pack(@DataSpaceStandard int standard,
+                                        @DataSpaceTransfer int transfer,
+                                        @DataSpaceRange int range) {
         if ((standard & STANDARD_MASK) != standard) {
             throw new IllegalArgumentException("Invalid standard " + standard);
         }
@@ -618,8 +618,8 @@ public final class DataSpace {
      *
      * @return The standard aspect
      */
-    public static @DataSpaceStandard long getStandard(@NamedDataSpace long dataSpace) {
-        @DataSpaceStandard long standard = dataSpace & STANDARD_MASK;
+    public static @DataSpaceStandard int getStandard(@NamedDataSpace int dataSpace) {
+        @DataSpaceStandard int standard = dataSpace & STANDARD_MASK;
         return standard;
     }
 
@@ -630,8 +630,8 @@ public final class DataSpace {
      *
      * @return The transfer aspect
      */
-    public static @DataSpaceTransfer long getTransfer(@NamedDataSpace long dataSpace) {
-        @DataSpaceTransfer long transfer = dataSpace & TRANSFER_MASK;
+    public static @DataSpaceTransfer int getTransfer(@NamedDataSpace int dataSpace) {
+        @DataSpaceTransfer int transfer = dataSpace & TRANSFER_MASK;
         return transfer;
     }
 
@@ -642,8 +642,8 @@ public final class DataSpace {
      *
      * @return The range aspect
      */
-    public static @DataSpaceRange long getRange(@NamedDataSpace long dataSpace) {
-        @DataSpaceRange long range = dataSpace & RANGE_MASK;
+    public static @DataSpaceRange int getRange(@NamedDataSpace int dataSpace) {
+        @DataSpaceRange int range = dataSpace & RANGE_MASK;
         return range;
     }
 }

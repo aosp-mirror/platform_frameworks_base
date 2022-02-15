@@ -21,9 +21,12 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.app.NotificationChannel;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -191,8 +194,24 @@ public interface Bubbles {
      * @param entryDataByKey a map of ranking key to bubble entry and whether the entry should
      *                       bubble up
      */
-    void onRankingUpdated(RankingMap rankingMap,
+    void onRankingUpdated(
+            RankingMap rankingMap,
             HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey);
+
+    /**
+     * Called when a notification channel is modified, in response to
+     * {@link NotificationListenerService#onNotificationChannelModified}.
+     *
+     * @param pkg the package the notification channel belongs to.
+     * @param user the user the notification channel belongs to.
+     * @param channel the channel being modified.
+     * @param modificationType the type of modification that occurred to the channel.
+     */
+    void onNotificationChannelModified(
+            String pkg,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType);
 
     /**
      * Called when the status bar has become visible or invisible (either permanently or

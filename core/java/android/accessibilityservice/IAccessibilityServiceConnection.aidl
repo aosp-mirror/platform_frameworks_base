@@ -88,7 +88,11 @@ interface IAccessibilityServiceConnection {
 
     Region getMagnificationRegion(int displayId);
 
+    Region getCurrentMagnificationRegion(int displayId);
+
     boolean resetMagnification(int displayId, boolean animate);
+
+    boolean resetCurrentMagnification(int displayId, boolean animate);
 
     boolean setMagnificationConfig(int displayId, in MagnificationConfig config, boolean animate);
 
@@ -101,6 +105,8 @@ interface IAccessibilityServiceConnection {
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
     boolean switchToInputMethod(String imeId);
+
+    int setInputMethodEnabled(String imeId, boolean enabled);
 
     boolean isAccessibilityButtonAvailable();
 
@@ -122,6 +128,8 @@ interface IAccessibilityServiceConnection {
 
     void setFocusAppearance(int strokeWidth, int color);
 
+    void setCacheEnabled(boolean enabled);
+
     oneway void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
         int processId, long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
 
@@ -136,4 +144,6 @@ interface IAccessibilityServiceConnection {
     void onDoubleTap(int displayId);
 
     void onDoubleTapAndHold(int displayId);
+
+    void setAnimationScale(float scale);
 }

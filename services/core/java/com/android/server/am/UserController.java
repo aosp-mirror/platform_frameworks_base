@@ -26,10 +26,10 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
-import static android.app.ActivityManagerInternal.ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
+import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
 import static android.os.PowerWhitelistManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -109,6 +109,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService.UserCompletedEventType;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerInternal;
@@ -166,6 +167,7 @@ class UserController implements Handler.Callback {
     static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 110;
     static final int START_USER_SWITCH_FG_MSG = 120;
     static final int COMPLETE_USER_SWITCH_MSG = 130;
+    static final int USER_COMPLETED_EVENT_MSG = 140;
 
     // Message constant to clear {@link UserJourneySession} from {@link mUserIdToUserJourneyMap} if
     // the user journey, defined in the UserLifecycleJourneyReported atom for statsd, is not
@@ -183,6 +185,14 @@ class UserController implements Handler.Callback {
     // USER_SWITCH_TIMEOUT_MS, an error is reported. Usually it indicates a problem in the observer
     // when it never calls back.
     private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
+
+    /**
+     * Time after last scheduleOnUserCompletedEvent() call at which USER_COMPLETED_EVENT_MSG will be
+     * scheduled (although it may fire sooner instead).
+     * When it fires, {@link #reportOnUserCompletedEvent} will be processed.
+     */
+    // TODO(b/197344658): Increase to 10s or 15s once we have a switch-UX-is-done invocation too.
+    private static final int USER_COMPLETED_EVENT_DELAY_MS = 5 * 1000;
 
     // Used for statsd logging with UserLifecycleJourneyReported + UserLifecycleEventOccurred atoms
     private static final long INVALID_SESSION_ID = 0;
@@ -363,6 +373,13 @@ class UserController implements Handler.Callback {
      */
     @GuardedBy("mUserIdToUserJourneyMap")
     private final SparseArray<UserJourneySession> mUserIdToUserJourneyMap = new SparseArray<>();
+
+    /**
+     * Map of userId to {@link UserCompletedEventType} event flags, indicating which as-yet-
+     * unreported user-starting events have transpired for the given user.
+     */
+    @GuardedBy("mCompletedEventTypes")
+    private final SparseIntArray mCompletedEventTypes = new SparseIntArray();
 
     /**
      * Sets on {@link #setInitialConfig(boolean, int, boolean)}, which is called by
@@ -724,15 +741,9 @@ class UserController implements Handler.Callback {
         if (!Objects.equals(info.lastLoggedInFingerprint, PackagePartitions.FINGERPRINT)
                 || SystemProperties.getBoolean("persist.pm.mock-upgrade", false)) {
             // Suppress double notifications for managed profiles that
-            // were unlocked automatically as part of their parent user
-            // being unlocked.
-            final boolean quiet;
-            if (info.isManagedProfile()) {
-                quiet = !uss.tokenProvided
-                        || !mLockPatternUtils.isSeparateProfileChallengeEnabled(userId);
-            } else {
-                quiet = false;
-            }
+            // were unlocked automatically as part of their parent user being
+            // unlocked.  TODO(b/217442918): this code doesn't work correctly.
+            final boolean quiet = info.isManagedProfile();
             mInjector.sendPreBootBroadcast(userId, quiet,
                     () -> finishUserUnlockedCompleted(uss));
         } else {
@@ -1673,27 +1684,25 @@ class UserController implements Handler.Callback {
         }
     }
 
-    boolean unlockUser(final @UserIdInt int userId, byte[] token, byte[] secret,
-            IProgressListener listener) {
+    boolean unlockUser(final @UserIdInt int userId, byte[] secret, IProgressListener listener) {
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "unlockUser");
         EventLog.writeEvent(EventLogTags.UC_UNLOCK_USER, userId);
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, token, secret, listener);
+            return unlockUserCleared(userId, secret, listener);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
     }
 
     /**
-     * Attempt to unlock user without a credential token. This typically
-     * succeeds when the device doesn't have credential-encrypted storage, or
-     * when the credential-encrypted storage isn't tied to a user-provided
-     * PIN or pattern.
+     * Attempt to unlock user without a secret. This typically succeeds when the
+     * device doesn't have credential-encrypted storage, or when the
+     * credential-encrypted storage isn't tied to a user-provided PIN or
+     * pattern.
      */
     private boolean maybeUnlockUser(final @UserIdInt int userId) {
-        // Try unlocking storage using empty token
-        return unlockUserCleared(userId, null, null, null);
+        return unlockUserCleared(userId, null, null);
     }
 
     private static void notifyFinished(@UserIdInt int userId, IProgressListener listener) {
@@ -1704,7 +1713,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] token, byte[] secret,
+    private boolean unlockUserCleared(final @UserIdInt int userId, byte[] secret,
             IProgressListener listener) {
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
@@ -1712,7 +1721,7 @@ class UserController implements Handler.Callback {
             final IStorageManager storageManager = mInjector.getStorageManager();
             try {
                 // We always want to unlock user storage, even user is not started yet
-                storageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+                storageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
             } catch (RemoteException | RuntimeException e) {
                 Slogf.w(TAG, "Failed to unlock: " + e.getMessage());
             }
@@ -1722,7 +1731,6 @@ class UserController implements Handler.Callback {
             uss = mStartedUsers.get(userId);
             if (uss != null) {
                 uss.mUnlockProgress.addListener(listener);
-                uss.tokenProvided = (token != null);
             }
         }
         // Bail if user isn't actually running
@@ -2017,6 +2025,11 @@ class UserController implements Handler.Callback {
         }
     }
 
+    /**
+     * Tell WindowManager we're ready to unfreeze the screen, at its leisure. Note that there is
+     * likely a lot going on, and WM won't unfreeze until the drawing is all done, so
+     * the actual unfreeze may still not happen for a long time; this is expected.
+     */
     @VisibleForTesting
     void unfreezeScreen() {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
@@ -2153,11 +2166,10 @@ class UserController implements Handler.Callback {
                     callingUid, -1, true) != PackageManager.PERMISSION_GRANTED) {
                 // If the caller does not have either permission, they are always doomed.
                 allow = false;
-            } else if (allowMode == ALLOW_NON_FULL) {
+            } else if (allowMode == ALLOW_NON_FULL || allowMode == ALLOW_PROFILES_OR_NON_FULL) {
                 // We are blanket allowing non-full access, you lucky caller!
                 allow = true;
-            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE
-                        || allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+            } else if (allowMode == ALLOW_NON_FULL_IN_PROFILE) {
                 // We may or may not allow this depending on whether the two users are
                 // in the same profile.
                 allow = isSameProfileGroup;
@@ -2184,12 +2196,13 @@ class UserController implements Handler.Callback {
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {
-                        if (allowMode == ALLOW_NON_FULL || isSameProfileGroup) {
+                        if (allowMode == ALLOW_NON_FULL
+                                || allowMode == ALLOW_PROFILES_OR_NON_FULL
+                                || (allowMode == ALLOW_NON_FULL_IN_PROFILE && isSameProfileGroup)) {
                             builder.append(" or ");
                             builder.append(INTERACT_ACROSS_USERS);
                         }
-                        if (isSameProfileGroup
-                                && allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+                        if (isSameProfileGroup && allowMode == ALLOW_PROFILES_OR_NON_FULL) {
                             builder.append(" or ");
                             builder.append(INTERACT_ACROSS_PROFILES);
                         }
@@ -2216,19 +2229,14 @@ class UserController implements Handler.Callback {
     private boolean canInteractWithAcrossProfilesPermission(
             int allowMode, boolean isSameProfileGroup, int callingPid, int callingUid,
             String callingPackage) {
-        if (allowMode != ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
+        if (allowMode != ALLOW_PROFILES_OR_NON_FULL) {
             return false;
         }
         if (!isSameProfileGroup) {
             return false;
         }
-        return  PermissionChecker.PERMISSION_GRANTED
-                == PermissionChecker.checkPermissionForPreflight(
-                        mInjector.getContext(),
-                        INTERACT_ACROSS_PROFILES,
-                        callingPid,
-                        callingUid,
-                        callingPackage);
+        return mInjector.checkPermissionForPreflight(INTERACT_ACROSS_PROFILES, callingPid,
+                callingUid, callingPackage);
     }
 
     int unsafeConvertIncomingUser(@UserIdInt int userId) {
@@ -2783,6 +2791,9 @@ class UserController implements Handler.Callback {
 
                 mInjector.getSystemServiceManager().onUserStarting(
                         TimingsTraceAndSlog.newAsyncLog(), msg.arg1);
+                scheduleOnUserCompletedEvent(msg.arg1,
+                        UserCompletedEventType.EVENT_TYPE_USER_STARTING,
+                        USER_COMPLETED_EVENT_DELAY_MS);
 
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
@@ -2807,6 +2818,13 @@ class UserController implements Handler.Callback {
                 break;
             case USER_UNLOCKED_MSG:
                 mInjector.getSystemServiceManager().onUserUnlocked(msg.arg1);
+                scheduleOnUserCompletedEvent(msg.arg1,
+                        UserCompletedEventType.EVENT_TYPE_USER_UNLOCKED,
+                        // If it's the foreground user, we wait longer to let it fully load.
+                        // Else, there's nothing specific to wait for, so we basically just proceed.
+                        // (No need to acquire lock to read mCurrentUserId since it is volatile.)
+                        // TODO: Find something to wait for in the case of a profile.
+                        mCurrentUserId == msg.arg1 ? USER_COMPLETED_EVENT_DELAY_MS : 1000);
                 logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_UNLOCKED_USER,
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
                 clearSessionId(msg.arg1);
@@ -2820,6 +2838,12 @@ class UserController implements Handler.Callback {
                         Integer.toString(msg.arg1), msg.arg1);
 
                 mInjector.getSystemServiceManager().onUserSwitching(msg.arg2, msg.arg1);
+                scheduleOnUserCompletedEvent(msg.arg1,
+                        UserCompletedEventType.EVENT_TYPE_USER_SWITCHING,
+                        USER_COMPLETED_EVENT_DELAY_MS);
+                break;
+            case USER_COMPLETED_EVENT_MSG:
+                reportOnUserCompletedEvent((Integer) msg.obj);
                 break;
             case FOREGROUND_PROFILE_CHANGED_MSG:
                 dispatchForegroundProfileChanged(msg.arg1);
@@ -2849,6 +2873,71 @@ class UserController implements Handler.Callback {
                 break;
         }
         return false;
+    }
+
+    /**
+     * Schedules {@link SystemServiceManager#onUserCompletedEvent()} with the given
+     * {@link UserCompletedEventType} event, which will be combined with any other events for that
+     * user already scheduled.
+     * If it isn't rescheduled first, it will fire after a delayMs delay.
+     *
+     * @param eventType event type flags from {@link UserCompletedEventType} to append to the
+     *                  schedule. Use 0 to schedule the ssm call without modifying the event types.
+     */
+    // TODO(b/197344658): Also call scheduleOnUserCompletedEvent(userId, 0, 0) after switch UX done.
+    @VisibleForTesting
+    void scheduleOnUserCompletedEvent(
+            int userId, @UserCompletedEventType.EventTypesFlag int eventType, int delayMs) {
+
+        if (eventType != 0) {
+            synchronized (mCompletedEventTypes) {
+                mCompletedEventTypes.put(userId, mCompletedEventTypes.get(userId, 0) | eventType);
+            }
+        }
+
+        final Object msgObj = userId;
+        mHandler.removeEqualMessages(USER_COMPLETED_EVENT_MSG, msgObj);
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(USER_COMPLETED_EVENT_MSG, msgObj),
+                delayMs);
+    }
+
+    /**
+     * Calls {@link SystemServiceManager#onUserCompletedEvent()} for the given user, sending all the
+     * {@link UserCompletedEventType} events that have been scheduled for it if they are still
+     * applicable.
+     *
+     * Called on the mHandler thread.
+     */
+    @VisibleForTesting
+    void reportOnUserCompletedEvent(Integer userId) {
+        mHandler.removeEqualMessages(USER_COMPLETED_EVENT_MSG, userId);
+
+        int eventTypes;
+        synchronized (mCompletedEventTypes) {
+            eventTypes = mCompletedEventTypes.get(userId, 0);
+            mCompletedEventTypes.delete(userId);
+        }
+
+        // Now, remove any eventTypes that are no longer true.
+        int eligibleEventTypes = 0;
+        synchronized (mLock) {
+            final UserState uss = mStartedUsers.get(userId);
+            if (uss != null && uss.state != UserState.STATE_SHUTDOWN) {
+                eligibleEventTypes |= UserCompletedEventType.EVENT_TYPE_USER_STARTING;
+            }
+            if (uss != null && uss.state == STATE_RUNNING_UNLOCKED) {
+                eligibleEventTypes |= UserCompletedEventType.EVENT_TYPE_USER_UNLOCKED;
+            }
+            if (userId == mCurrentUserId) {
+                eligibleEventTypes |= UserCompletedEventType.EVENT_TYPE_USER_SWITCHING;
+            }
+        }
+        Slogf.i(TAG, "reportOnUserCompletedEvent(%d): stored=%s, eligible=%s", userId,
+                Integer.toBinaryString(eventTypes), Integer.toBinaryString(eligibleEventTypes));
+        eventTypes &= eligibleEventTypes;
+
+        mInjector.systemServiceManagerOnUserCompletedEvent(userId, eventTypes);
     }
 
     /**
@@ -2908,7 +2997,7 @@ class UserController implements Handler.Callback {
              */
             mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG);
             mHandler.sendMessageDelayed(mHandler.obtainMessage(CLEAR_USER_JOURNEY_SESSION_MSG,
-                    target.id), USER_JOURNEY_TIMEOUT_MS);
+                    target.id, /* arg2= */ 0), USER_JOURNEY_TIMEOUT_MS);
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, newSessionId,
@@ -3091,7 +3180,11 @@ class UserController implements Handler.Callback {
         }
 
         void systemServiceManagerOnUserStopped(@UserIdInt int userId) {
-            mService.mSystemServiceManager.onUserStopped(userId);
+            getSystemServiceManager().onUserStopped(userId);
+        }
+
+        void systemServiceManagerOnUserCompletedEvent(@UserIdInt int userId, int eventTypes) {
+            getSystemServiceManager().onUserCompletedEvent(userId, eventTypes);
         }
 
         protected UserManagerService getUserManager() {
@@ -3118,7 +3211,7 @@ class UserController implements Handler.Callback {
         }
 
         boolean isRuntimeRestarted() {
-            return mService.mSystemServiceManager.isRuntimeRestarted();
+            return getSystemServiceManager().isRuntimeRestarted();
         }
 
         SystemServiceManager getSystemServiceManager() {
@@ -3155,6 +3248,12 @@ class UserController implements Handler.Callback {
         int checkComponentPermission(String permission, int pid, int uid, int owningUid,
                 boolean exported) {
             return mService.checkComponentPermission(permission, pid, uid, owningUid, exported);
+        }
+
+        boolean checkPermissionForPreflight(String permission, int pid, int uid, String pkg) {
+            return  PermissionChecker.PERMISSION_GRANTED
+                    == PermissionChecker.checkPermissionForPreflight(
+                            getContext(), permission, pid, uid, pkg);
         }
 
         protected void startHomeActivity(@UserIdInt int userId, String reason) {
@@ -3234,7 +3333,7 @@ class UserController implements Handler.Callback {
             mService.mAtmInternal.clearLockedTasks(reason);
         }
 
-        protected boolean isCallerRecents(int callingUid) {
+        boolean isCallerRecents(int callingUid) {
             return mService.mAtmInternal.isCallerRecents(callingUid);
         }
 

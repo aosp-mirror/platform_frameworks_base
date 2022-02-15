@@ -92,7 +92,6 @@ class CustomTileTest : SysuiTestCase() {
 
         mContext.addMockSystemService("window", windowService)
         mContext.setMockPackageManager(packageManager)
-        `when`(tileHost.tileServices).thenReturn(tileServices)
         `when`(tileHost.context).thenReturn(mContext)
         `when`(tileServices.getTileWrapper(any(CustomTile::class.java)))
                 .thenReturn(tileServiceManager)
@@ -113,7 +112,8 @@ class CustomTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                customTileStatePersister
+                customTileStatePersister,
+                tileServices
         )
 
         customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)

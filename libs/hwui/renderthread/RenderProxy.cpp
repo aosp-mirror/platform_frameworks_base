@@ -327,7 +327,8 @@ void RenderProxy::setPrepareSurfaceControlForWebviewCallback(
             [this, cb = callback]() { mContext->setPrepareSurfaceControlForWebviewCallback(cb); });
 }
 
-void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCallback(
+        std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 

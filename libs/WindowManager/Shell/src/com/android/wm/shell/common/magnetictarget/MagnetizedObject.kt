@@ -17,13 +17,10 @@ package com.android.wm.shell.common.magnetictarget
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.database.ContentObserver
 import android.graphics.PointF
-import android.os.Handler
-import android.os.UserHandle
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.provider.Settings
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -147,6 +144,8 @@ abstract class MagnetizedObject<T : Any>(
 
     private val velocityTracker: VelocityTracker = VelocityTracker.obtain()
     private val vibrator: Vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    private val vibrationAttributes: VibrationAttributes = VibrationAttributes.createForUsage(
+            VibrationAttributes.USAGE_TOUCH)
 
     private var touchDown = PointF()
     private var touchSlop = 0
@@ -267,10 +266,6 @@ abstract class MagnetizedObject<T : Any>(
      * towards (rather than dragged near) it.
      */
     var flungIntoTargetSpringConfig = springConfig
-
-    init {
-        initHapticSettingObserver(context)
-    }
 
     /**
      * Adds the provided MagneticTarget to this object. The object will now be attracted to the
@@ -468,8 +463,8 @@ abstract class MagnetizedObject<T : Any>(
     /** Plays the given vibration effect if haptics are enabled. */
     @SuppressLint("MissingPermission")
     private fun vibrateIfEnabled(effectId: Int) {
-        if (hapticsEnabled && systemHapticsEnabled) {
-            vibrator.vibrate(VibrationEffect.createPredefined(effectId))
+        if (hapticsEnabled) {
+            vibrator.vibrate(VibrationEffect.createPredefined(effectId), vibrationAttributes)
         }
     }
 
@@ -622,44 +617,6 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     companion object {
-
-        /**
-         * Whether the HAPTIC_FEEDBACK_ENABLED setting is true.
-         *
-         * We put it in the companion object because we need to register a settings observer and
-         * [MagnetizedObject] doesn't have an obvious lifecycle so we don't have a good time to
-         * remove that observer. Since this settings is shared among all instances we just let all
-         * instances read from this value.
-         */
-        private var systemHapticsEnabled = false
-        private var hapticSettingObserverInitialized = false
-
-        private fun initHapticSettingObserver(context: Context) {
-            if (hapticSettingObserverInitialized) {
-                return
-            }
-
-            val hapticSettingObserver =
-                    object : ContentObserver(Handler.getMain()) {
-                        override fun onChange(selfChange: Boolean) {
-                            systemHapticsEnabled =
-                                    Settings.System.getIntForUser(
-                                            context.contentResolver,
-                                            Settings.System.HAPTIC_FEEDBACK_ENABLED,
-                                            0,
-                                            UserHandle.USER_CURRENT) != 0
-                        }
-                    }
-
-            context.contentResolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
-                    true /* notifyForDescendants */, hapticSettingObserver)
-
-            // Trigger the observer once to initialize systemHapticsEnabled.
-            hapticSettingObserver.onChange(false /* selfChange */)
-            hapticSettingObserverInitialized = true
-        }
-
         /**
          * Magnetizes the given view. Magnetized views are attracted to one or more magnetic
          * targets. Magnetic targets attract objects that are dragged near them, and hold them there

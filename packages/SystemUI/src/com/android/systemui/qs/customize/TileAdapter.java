@@ -181,6 +181,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private void clearAccessibilityState() {
+        mNeedsFocus = false;
         if (mAccessibilityAction == ACTION_ADD) {
             // Remove blank tile from last spot
             mTiles.remove(--mEditIndex);
@@ -414,10 +415,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 public void onLayoutChange(View v, int left, int top, int right, int bottom,
                         int oldLeft, int oldTop, int oldRight, int oldBottom) {
                     holder.mTileView.removeOnLayoutChangeListener(this);
-                    holder.mTileView.requestFocus();
-                    if (mAccessibilityAction == ACTION_NONE) {
-                        holder.mTileView.clearFocus();
-                    }
+                    holder.mTileView.requestAccessibilityFocus();
                 }
             });
             mNeedsFocus = false;
@@ -449,12 +447,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         // Update the tile divider position
         mTileDividerIndex++;
         mFocusIndex = mEditIndex - 1;
+        final int focus = mFocusIndex;
         mNeedsFocus = true;
         if (mRecyclerView != null) {
             mRecyclerView.post(() -> {
                 final RecyclerView recyclerView = mRecyclerView;
                 if (recyclerView != null) {
-                    recyclerView.smoothScrollToPosition(mFocusIndex);
+                    recyclerView.smoothScrollToPosition(focus);
                 }
             });
         }

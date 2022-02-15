@@ -23,12 +23,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.parsing.ParsingPackageRead;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedService;
+import com.android.server.pm.pkg.parsing.ParsingPackageRead;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.incremental.IncrementalManager;
@@ -92,7 +92,7 @@ public class AndroidPackageUtils {
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 pkg.getSdkLibName(),
                 pkg.getSdkLibVersionMajor(),
-                SharedLibraryInfo.TYPE_SDK,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
                 new VersionedPackage(pkg.getManifestPackageName(),
                         pkg.getLongVersionCode()),
                 null, null, false /* isNative */);

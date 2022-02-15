@@ -130,23 +130,20 @@ public class BatteryConsumerData {
                     || powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) {
                 addEntry(metricTitle, EntryType.UID_POWER_MODELED,
                         requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]
-                );
+                        totalPowerByComponentMah[component]);
+                addProcessStateEntries(metricTitle, EntryType.UID_POWER_MODELED_PROCESS_STATE,
+                        requestedBatteryConsumer, component);
             } else {
                 addEntry(metricTitle + " (measured)", EntryType.UID_POWER_MEASURED,
                         requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]
-                );
+                        totalPowerByComponentMah[component]);
                 addProcessStateEntries(metricTitle, EntryType.UID_POWER_MEASURED_PROCESS_STATE,
-                        requestedBatteryConsumer, component
-                );
+                        requestedBatteryConsumer, component);
                 addEntry(metricTitle + " (modeled)", EntryType.UID_POWER_MODELED,
                         requestedModeledBatteryConsumer.getConsumedPower(component),
-                        totalModeledPowerByComponentMah[component]
-                );
+                        totalModeledPowerByComponentMah[component]);
                 addProcessStateEntries(metricTitle, EntryType.UID_POWER_MODELED_PROCESS_STATE,
-                        requestedModeledBatteryConsumer, component
-                );
+                        requestedModeledBatteryConsumer, component);
             }
         }
 

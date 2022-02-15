@@ -71,7 +71,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_PAUSE_RECORDING = 22;
     private static final int DO_RESUME_RECORDING = 23;
     private static final int DO_REQUEST_BROADCAST_INFO = 24;
-    private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 25;
+    private static final int DO_REMOVE_BROADCAST_INFO = 25;
+    private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 26;
+    private static final int DO_REQUEST_AD = 27;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -240,8 +242,16 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.requestBroadcastInfo((BroadcastInfoRequest) msg.obj);
                 break;
             }
+            case DO_REMOVE_BROADCAST_INFO: {
+                mTvInputSessionImpl.removeBroadcastInfo(msg.arg1);
+                break;
+            }
             case DO_SET_IAPP_NOTIFICATION_ENABLED: {
-                mTvInputSessionImpl.setIAppNotificationEnabled((Boolean) msg.obj);
+                mTvInputSessionImpl.setInteractiveAppNotificationEnabled((Boolean) msg.obj);
+                break;
+            }
+            case DO_REQUEST_AD: {
+                mTvInputSessionImpl.requestAd((AdRequest) msg.obj);
                 break;
             }
             default: {
@@ -312,7 +322,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void setIAppNotificationEnabled(boolean enabled) {
+    public void setInteractiveAppNotificationEnabled(boolean enabled) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SET_IAPP_NOTIFICATION_ENABLED, enabled));
     }
@@ -402,6 +412,16 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void requestBroadcastInfo(BroadcastInfoRequest request) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REQUEST_BROADCAST_INFO, request));
+    }
+
+    @Override
+    public void removeBroadcastInfo(int requestId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_REMOVE_BROADCAST_INFO, requestId));
+    }
+
+    @Override
+    public void requestAd(AdRequest request) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REQUEST_AD, request));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

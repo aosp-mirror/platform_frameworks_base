@@ -112,7 +112,8 @@ public class SliceBroadcastRelayHandler extends CoreStartable {
 
         public void register(Context context, ComponentName receiver, IntentFilter filter) {
             mReceivers.add(receiver);
-            context.registerReceiver(this, filter);
+            context.registerReceiver(this, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         public void unregister(Context context) {

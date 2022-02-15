@@ -102,15 +102,6 @@ Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
     return Result::INVALID_STATE;
 }
 
-Result FrontendClient::setLna(bool bEnable) {
-    if (mTunerFrontend != nullptr) {
-        Status s = mTunerFrontend->setLna(bEnable);
-        return ClientHelper::getServiceSpecificErrorCode(s);
-    }
-
-    return Result::INVALID_STATE;
-}
-
 int32_t FrontendClient::linkCiCamToFrontend(int32_t ciCamId) {
     int32_t ltsId = static_cast<int32_t>(Constant::INVALID_LTS_ID);
 
@@ -141,6 +132,34 @@ Result FrontendClient::close() {
     }
 
     return Result::INVALID_STATE;
+}
+
+Result FrontendClient::getHardwareInfo(string& info) {
+    if (mTunerFrontend != nullptr) {
+        Status s = mTunerFrontend->getHardwareInfo(&info);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+Result FrontendClient::removeOutputPid(int32_t pid) {
+    if (mTunerFrontend != nullptr) {
+        Status s = mTunerFrontend->removeOutputPid(pid);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+vector<FrontendStatusReadiness> FrontendClient::getStatusReadiness(
+        const std::vector<FrontendStatusType>& statusTypes) {
+    vector<FrontendStatusReadiness> readiness;
+    if (mTunerFrontend != nullptr) {
+        mTunerFrontend->getFrontendStatusReadiness(statusTypes, &readiness);
+    }
+
+    return readiness;
 }
 
 shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {

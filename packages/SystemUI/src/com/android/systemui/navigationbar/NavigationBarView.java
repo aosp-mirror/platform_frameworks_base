@@ -16,6 +16,7 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
@@ -90,6 +91,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -184,6 +186,17 @@ public class NavigationBarView extends FrameLayout implements
      */
     @Nullable
     private Rect mOrientedHandleSamplingRegion;
+
+    /**
+     * {@code true} if the IME can render the back button and the IME switcher button.
+     *
+     * <p>The value must be used when and only when
+     * {@link com.android.systemui.shared.system.QuickStepContract#isGesturalMode(int)} returns
+     * {@code true}</p>
+     *
+     * <p>Cache the value here for better performance.</p>
+     */
+    private final boolean mImeCanRenderGesturalNavButtons = canImeRenderGesturalNavButtons();
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -447,12 +460,17 @@ public class NavigationBarView extends FrameLayout implements
         mRegionSamplingHelper.setWindowHasBlurs(hasBlurs);
     }
 
-    void onTransientStateChanged(boolean isTransient) {
+    void onTransientStateChanged(boolean isTransient, boolean isGestureOnSystemBar) {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
 
         // The visibility of the navigation bar buttons is dependent on the transient state of
         // the navigation bar.
         if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            // Always allow the overlay if in non-gestural nav mode, otherwise, only allow showing
+            // the overlay if the user is swiping directly over a system bar
+            boolean allowNavBarOverlay = !QuickStepContract.isGesturalMode(mNavBarMode)
+                    || isGestureOnSystemBar;
+            isTransient = isTransient && allowNavBarOverlay;
             mNavBarOverlayController.setButtonState(isTransient, /* force */ false);
         }
     }
@@ -755,9 +773,15 @@ public class NavigationBarView extends FrameLayout implements
 
         updateRecentsIcon();
 
+        boolean isImeRenderingNavButtons = isGesturalMode(mNavBarMode)
+                && mImeCanRenderGesturalNavButtons
+                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
+
         // Update IME button visibility, a11y and rotate button always overrides the appearance
-        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher,
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
+        boolean disableImeSwitcher =
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN) == 0
+                || isImeRenderingNavButtons;
+        mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, !disableImeSwitcher);
 
         mBarTransitions.reapplyDarkIntensity();
 
@@ -772,7 +796,8 @@ public class NavigationBarView extends FrameLayout implements
                 && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         boolean disableBack = !useAltBack && (mEdgeBackGestureHandler.isHandlingGestures()
-                || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0));
+                || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0))
+                || isImeRenderingNavButtons;
 
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
@@ -1392,6 +1417,10 @@ public class NavigationBarView extends FrameLayout implements
 
     void removePipExclusionBoundsChangeListener(Pip pip) {
         pip.removePipExclusionBoundsChangeListener(mPipListener);
+    }
+
+    void registerBackAnimation(BackAnimation backAnimation) {
+        mEdgeBackGestureHandler.setBackAnimation(backAnimation);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {

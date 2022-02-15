@@ -178,8 +178,10 @@ struct JTuner : public RefBase {
     jobject getFrontendIds();
     jobject openFrontendByHandle(int feHandle);
     int shareFrontend(int feId);
+    int unshareFrontend();
     void registerFeCbListener(JTuner* jtuner);
     void unregisterFeCbListener(JTuner* jtuner);
+    void updateFrontend(JTuner* jtuner);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings);
@@ -200,6 +202,11 @@ struct JTuner : public RefBase {
     jint close();
     jint closeFrontend();
     jint closeDemux();
+    Result getFrontendHardwareInfo(string& info);
+    jint setMaxNumberOfFrontends(int32_t frontendType, int32_t maxNumber);
+    int32_t getMaxNumberOfFrontends(int32_t frontendType);
+    jint removeOutputPid(int32_t pid);
+    jobjectArray getFrontendStatusReadiness(jintArray types);
 
     jweak getObject();
 

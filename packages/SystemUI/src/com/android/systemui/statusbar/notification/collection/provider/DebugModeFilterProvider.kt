@@ -77,7 +77,7 @@ class DebugModeFilterProvider @Inject constructor(
         if (needsInitialization) {
             val filter = IntentFilter().apply { addAction(ACTION_SET_NOTIF_DEBUG_MODE) }
             val permission = NOTIF_DEBUG_MODE_PERMISSION
-            context.registerReceiver(mReceiver, filter, permission, null)
+            context.registerReceiver(mReceiver, filter, permission, null, Context.RECEIVER_EXPORTED)
             Log.d(TAG, "Registered: $mReceiver")
         }
     }

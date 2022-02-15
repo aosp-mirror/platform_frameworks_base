@@ -25,6 +25,7 @@ import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,8 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
-            HdmiCecMessage message = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+            HdmiCecMessage message = HdmiCecMessage.build(srcAddress, dstAddress, body[0],
+                    Arrays.copyOfRange(body, 1, body.length));
             mResultMessages.add(message);
             return mMessageSendResult.getOrDefault(message.getOpcode(), SendMessageResult.SUCCESS);
         }

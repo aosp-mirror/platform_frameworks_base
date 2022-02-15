@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.graphics.Region
 import android.util.Rational
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -30,7 +29,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.resizeSplitScreen
 import com.android.server.wm.flicker.helpers.setRotation
@@ -41,11 +39,11 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import com.android.wm.shell.flicker.testapp.Components
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -135,12 +133,9 @@ class ResizeLegacySplitScreen(
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
+    @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Test
     fun topAppLayerIsAlwaysVisible() {
@@ -171,9 +166,9 @@ class ResizeLegacySplitScreen(
             val dividerBounds =
                 layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
-            val topAppBounds = Region(0, 0, dividerBounds.right,
+            val topAppBounds = Region.from(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
-            val bottomAppBounds = Region(0,
+            val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
@@ -192,9 +187,9 @@ class ResizeLegacySplitScreen(
             val dividerBounds =
                 layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
-            val topAppBounds = Region(0, 0, dividerBounds.right,
+            val topAppBounds = Region.from(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
-            val bottomAppBounds = Region(0,
+            val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)

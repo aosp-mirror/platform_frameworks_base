@@ -8,7 +8,7 @@ package {
 }
 
 filegroup {
-    name: "framework-media-sources",
+    name: "framework-media-non-updatable-sources",
     srcs: [
         "**/*.java",
         "**/*.aidl",

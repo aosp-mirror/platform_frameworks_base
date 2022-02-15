@@ -22,6 +22,7 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNe
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.icu.text.MessageFormat;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
@@ -33,6 +34,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class WifiUtils {
@@ -332,5 +335,21 @@ public class WifiUtils {
         bundle.putString(KEY_CHOSEN_WIFIENTRY_KEY, key);
         intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, bundle);
         return intent;
+    }
+
+    /**
+     * Returns the string of Wi-Fi tethering summary for connected devices.
+     *
+     * @param context          The application context
+     * @param connectedDevices The count of connected devices
+     */
+    public static String getWifiTetherSummaryForConnectedDevices(Context context,
+            int connectedDevices) {
+        MessageFormat msgFormat = new MessageFormat(
+                context.getResources().getString(R.string.wifi_tether_connected_summary),
+                Locale.getDefault());
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", connectedDevices);
+        return msgFormat.format(arguments);
     }
 }

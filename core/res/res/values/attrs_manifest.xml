@@ -401,6 +401,15 @@
          and before. -->
     <attr name="sharedUserMaxSdkVersion" format="integer" />
 
+    <!-- Whether the application should inherit all AndroidKeyStore keys of its shared user
+         group in the case of leaving its shared user ID in an upgrade.  If set to false, all
+         AndroidKeyStore keys will remain in the shared user group, and the application will no
+         longer have access to those keys after the upgrade. If set to true, all AndroidKeyStore
+         keys owned by the shared user group will be transferred to the upgraded application;
+         other applications in the shared user group will no longer have access to those keys
+         after the migration. The default value is false if not explicitly set. -->
+    <attr name="inheritKeyStoreKeys" format="boolean" />
+
     <!-- Internal version code.  This is the number used to determine whether
          one version is more recent than another: it has no other meaning than
          that higher numbers are more recent.  You could use this number to
@@ -1039,6 +1048,24 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="allowEmbedded" format="boolean" />
 
+    <!-- A reference to an array resource containing the signing certificate digests, one of which a
+         client is required to be signed with in order to embed the activity. If the client is not
+         signed with one of the certificates in the set, and the activity does not allow embedding
+         by untrusted hosts via {@link android.R.attr#allowUntrustedActivityEmbedding} flag, the
+         embedding request will fail.
+         <p>The digest should be computed over the DER encoding of the trusted certificate using the
+         SHA-256 digest algorithm.
+         <p>If only a single signer is declared this can also be a string resource, or the digest
+         can be declared inline as the value for this attribute.
+         <p>If the attribute is declared both on the application and the activity level, the value
+         on the activity level takes precedence. -->
+    <attr name="knownActivityEmbeddingCerts" format="reference|string" />
+
+    <!-- Indicate that the activity can be embedded by untrusted hosts. In this case the
+         interactions and visibility of the embedded activity may be limited.
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="allowUntrustedActivityEmbedding" format="boolean" />
+
     <!-- Specifies whether this {@link android.app.Activity} should be shown on
          top of the lock screen whenever the lockscreen is up and this activity has another
          activity behind it with the {@link android.R.attr#showWhenLocked} attribute set. That
@@ -1519,6 +1546,9 @@
     <!-- An XML resource with the application's Network Security Config. -->
     <attr name="networkSecurityConfig" format="reference" />
 
+    <!-- An XML resource with the application's {@link android.app.LocaleConfig} -->
+    <attr name="localeConfig" format="reference" />
+
     <!-- When an application is partitioned into splits, this is the name of the
          split that contains the defined component. -->
     <attr name="splitName" format="string" />
@@ -1674,6 +1704,7 @@
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
         <attr name="sharedUserMaxSdkVersion" />
+        <attr name="inheritKeyStoreKeys" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />
@@ -1801,6 +1832,7 @@
         <attr name="maxAspectRatio" />
         <attr name="minAspectRatio" />
         <attr name="networkSecurityConfig" />
+        <attr name="localeConfig" />
         <!-- Declare the category of this app. Categories are used to cluster multiple apps
              together into meaningful groups, such as when summarizing battery, network, or
              disk usage. Apps should only define this value when they fit well into one of
@@ -1997,6 +2029,7 @@
              when the application's user data is cleared. The default value is false.
         -->
         <attr name="resetEnabledSettingsOnAppDataCleared" format="boolean" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -2825,6 +2858,14 @@
         <attr name="path" />
         <attr name="minSdkVersion" />
         <attr name="maxSdkVersion" />
+        <!-- The order in which the apex system services are initiated. When there are dependencies
+        among apex system services, setting this attribute for each of them ensures that they are
+        created in the order required by those dependencies. The apex-system-services that are
+        started manually within SystemServer ignore the initOrder and are not considered for
+        automatic starting of the other services.
+        The value is a simple integer, with higher number being initialized first. If not specified,
+        the default order is 0. -->
+        <attr name="initOrder" format="integer" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
@@ -3011,6 +3052,8 @@
         <!-- Indicates whether the activity can be displayed on a remote device which may or
              may not be running Android. -->
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -3051,6 +3094,8 @@
         <attr name="exported" />
         <attr name="parentActivityName" />
         <attr name="attributionTags" />
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>meta-data</code> tag is used to attach additional
@@ -3070,7 +3115,6 @@
     <declare-styleable name="AndroidManifestMetaData"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
-                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService
@@ -3105,7 +3149,6 @@
     <declare-styleable name="AndroidManifestProperty"
          parent="AndroidManifestApplication
                  AndroidManifestActivity
-                 AndroidManifestApexSystemService
                  AndroidManifestReceiver
                  AndroidManifestProvider
                  AndroidManifestService">

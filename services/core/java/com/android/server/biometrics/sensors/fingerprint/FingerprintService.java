@@ -83,6 +83,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -249,7 +250,7 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void enroll(final IBinder token, @NonNull final byte[] hardwareAuthToken,
+        public long enroll(final IBinder token, @NonNull final byte[] hardwareAuthToken,
                 final int userId, final IFingerprintServiceReceiver receiver,
                 final String opPackageName, @FingerprintManager.EnrollReason int enrollReason) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
@@ -257,15 +258,15 @@ public class FingerprintService extends SystemService {
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for enroll");
-                return;
+                return -1;
             }
 
-            provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
+            return provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
                     receiver, opPackageName, enrollReason);
         }
 
         @Override // Binder call
-        public void cancelEnrollment(final IBinder token) {
+        public void cancelEnrollment(final IBinder token, long requestId) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -274,7 +275,7 @@ public class FingerprintService extends SystemService {
                 return;
             }
 
-            provider.second.cancelEnrollment(provider.first, token);
+            provider.second.cancelEnrollment(provider.first, token, requestId);
         }
 
         @SuppressWarnings("deprecation")
@@ -815,10 +816,11 @@ public class FingerprintService extends SystemService {
                         UserHandle.USER_CURRENT) != 0) {
                     fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
                             mFingerprintStateCallback, hidlSensor,
-                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
+                            BiometricContext.getInstance(getContext()));
                 } else {
                     fingerprint21 = Fingerprint21.newInstance(getContext(),
-                            mFingerprintStateCallback, hidlSensor,
+                            mFingerprintStateCallback, hidlSensor, mHandler,
                             mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
                 }
                 mServiceProviders.add(fingerprint21);
@@ -843,7 +845,8 @@ public class FingerprintService extends SystemService {
                     final FingerprintProvider provider =
                             new FingerprintProvider(getContext(), mFingerprintStateCallback, props,
                                     instance, mLockoutResetDispatcher,
-                                    mGestureAvailabilityDispatcher);
+                                    mGestureAvailabilityDispatcher,
+                                    BiometricContext.getInstance(getContext()));
                     mServiceProviders.add(provider);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);

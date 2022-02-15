@@ -93,7 +93,7 @@ import static com.android.server.wm.WindowManagerInternal.KeyguardExitAnimationS
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
-import android.annotation.DrawableRes;
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -101,6 +101,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Debug;
@@ -198,6 +199,7 @@ public class AppTransition implements Dump {
     private IRemoteCallback mAnimationFinishedCallback;
     private int mNextAppTransitionEnter;
     private int mNextAppTransitionExit;
+    private @ColorInt int mNextAppTransitionBackgroundColor;
     private int mNextAppTransitionInPlace;
     private boolean mNextAppTransitionIsSync;
 
@@ -539,8 +541,8 @@ public class AppTransition implements Dump {
      * animation.
      */
     HardwareBuffer createCrossProfileAppsThumbnail(
-            @DrawableRes int thumbnailDrawableRes, Rect frame) {
-        return mTransitionAnimation.createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
+            Drawable thumbnailDrawable, Rect frame) {
+        return mTransitionAnimation.createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
     }
 
     Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {
@@ -829,6 +831,7 @@ public class AppTransition implements Dump {
                     break;
             }
             a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
+
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
                             + "Callers=%s",
@@ -836,6 +839,11 @@ public class AppTransition implements Dump {
                     Debug.getCallers(3));
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
+
+        if (mNextAppTransitionBackgroundColor != 0) {
+            a.setBackgroundColor(mNextAppTransitionBackgroundColor);
+        }
+
         return a;
     }
 
@@ -861,14 +869,15 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback, IRemoteCallback endedCallback,
-            boolean overrideTaskTransaction) {
+            @ColorInt int backgroundColor, IRemoteCallback startedCallback,
+            IRemoteCallback endedCallback, boolean overrideTaskTransaction) {
         if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionOverrideRequested = true;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionEnter = enterAnim;
             mNextAppTransitionExit = exitAnim;
+            mNextAppTransitionBackgroundColor = backgroundColor;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
             mAnimationFinishedCallback = endedCallback;

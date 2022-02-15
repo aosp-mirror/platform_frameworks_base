@@ -25,7 +25,6 @@ import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.SharedLibraryInfo;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.os.incremental.PerUidReadTimeouts;
@@ -37,10 +36,10 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.function.BiConsumer;
 
 /**
  * Dumps PackageManagerService internal states.
@@ -119,7 +118,7 @@ final class DumpHelper {
                 }
 
                 // Normalize package name to handle renamed packages and static libs
-                pkg = mPm.resolveInternalPackageNameLPr(pkg, PackageManager.VERSION_CODE_HIGHEST);
+                pkg = mPm.resolveInternalPackageName(pkg, PackageManager.VERSION_CODE_HIGHEST);
 
                 pw.println(mPm.checkPermission(perm, pkg, user));
                 return;
@@ -371,33 +370,20 @@ final class DumpHelper {
             }
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+            mPm.mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
         }
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+            mPm.mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
         }
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+            mPm.mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
         }
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+            mPm.mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
             mPm.dumpComputer(DumpState.DUMP_PREFERRED, fd, pw, dumpState);
         }
 
@@ -407,23 +393,16 @@ final class DumpHelper {
             mPm.dumpComputer(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
             mPm.dumpComputer(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
-            synchronized (mPm.mLock) {
-                mPm.mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
+            mPm.mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
         }
 
-        if (!checkin
-                && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+            mPm.mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
         }
 
         if (!checkin
@@ -463,28 +442,28 @@ final class DumpHelper {
                 pw.println();
             }
             pw.println("Package Changes:");
-            synchronized (mPm.mLock) {
-                pw.print("  Sequence number="); pw.println(mPm.mChangedPackagesSequenceNumber);
-                final int numChangedPackages = mPm.mChangedPackages.size();
+            mPm.mChangedPackagesTracker.iterateAll((sequenceNumber, values) -> {
+                pw.print("  Sequence number="); pw.println(sequenceNumber);
+                final int numChangedPackages = values.size();
                 for (int i = 0; i < numChangedPackages; i++) {
-                    final SparseArray<String> changes = mPm.mChangedPackages.valueAt(i);
-                    pw.print("  User "); pw.print(mPm.mChangedPackages.keyAt(i)); pw.println(":");
+                    final SparseArray<String> changes = values.valueAt(i);
+                    pw.print("  User "); pw.print(values.keyAt(i)); pw.println(":");
                     final int numChanges = changes.size();
                     if (numChanges == 0) {
                         pw.print("    "); pw.println("No packages changed");
                     } else {
                         for (int j = 0; j < numChanges; j++) {
                             final String pkgName = changes.valueAt(j);
-                            final int sequenceNumber = changes.keyAt(j);
+                            final int userSequenceNumber = changes.keyAt(j);
                             pw.print("    ");
                             pw.print("seq=");
-                            pw.print(sequenceNumber);
+                            pw.print(userSequenceNumber);
                             pw.print(", package=");
                             pw.println(pkgName);
                         }
                     }
                 }
-            }
+            });
         }
 
         if (!checkin
@@ -504,6 +483,9 @@ final class DumpHelper {
                     ipw.println("(none)");
                 } else {
                     for (int i = 0; i < mPm.mFrozenPackages.size(); i++) {
+                        ipw.print("package=");
+                        ipw.print(mPm.mFrozenPackages.keyAt(i));
+                        ipw.print(", refCounts=");
                         ipw.println(mPm.mFrozenPackages.valueAt(i));
                     }
                 }
@@ -536,9 +518,7 @@ final class DumpHelper {
         if (!checkin
                 && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
                 && packageName == null) {
-            synchronized (mPm.mLock) {
-                mPm.mComponentResolver.dumpServicePermissions(pw, dumpState);
-            }
+            mPm.mComponentResolver.dumpServicePermissions(pw, dumpState);
         }
 
         if (!checkin
@@ -557,9 +537,7 @@ final class DumpHelper {
                 if (dumpState.onTitlePrinted()) {
                     pw.println();
                 }
-                synchronized (mPm.mLock) {
-                    mPm.mSettings.dumpReadMessagesLPr(pw, dumpState);
-                }
+                mPm.mSettings.dumpReadMessages(pw, dumpState);
                 pw.println();
                 pw.println("Package warning messages:");
                 dumpCriticalInfo(pw, null);
@@ -707,7 +685,7 @@ final class DumpHelper {
                 proto.end(verifierPackageToken);
             }
 
-            dumpSharedLibrariesProto(proto);
+            mPm.mInjector.getSharedLibrariesImpl().dumpProto(proto);
             dumpFeaturesProto(proto);
             mPm.mSettings.dumpPackagesProto(proto);
             mPm.mSettings.dumpSharedUsersProto(proto);
@@ -722,35 +700,6 @@ final class DumpHelper {
             for (int i = 0; i < count; i++) {
                 mPm.mAvailableFeatures.valueAt(i).dumpDebug(proto,
                         PackageServiceDumpProto.FEATURES);
-            }
-        }
-    }
-
-    private void dumpSharedLibrariesProto(ProtoOutputStream proto) {
-        final int count = mPm.mSharedLibraries.size();
-        for (int i = 0; i < count; i++) {
-            final String libName = mPm.mSharedLibraries.keyAt(i);
-            WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
-                    mPm.mSharedLibraries.get(libName);
-            if (versionedLib == null) {
-                continue;
-            }
-            final int versionCount = versionedLib.size();
-            for (int j = 0; j < versionCount; j++) {
-                final SharedLibraryInfo libraryInfo = versionedLib.valueAt(j);
-                final long sharedLibraryToken =
-                        proto.start(PackageServiceDumpProto.SHARED_LIBRARIES);
-                proto.write(PackageServiceDumpProto.SharedLibraryProto.NAME, libraryInfo.getName());
-                final boolean isJar = (libraryInfo.getPath() != null);
-                proto.write(PackageServiceDumpProto.SharedLibraryProto.IS_JAR, isJar);
-                if (isJar) {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.PATH,
-                            libraryInfo.getPath());
-                } else {
-                    proto.write(PackageServiceDumpProto.SharedLibraryProto.APK,
-                            libraryInfo.getPackageName());
-                }
-                proto.end(sharedLibraryToken);
             }
         }
     }

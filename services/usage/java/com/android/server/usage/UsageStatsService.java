@@ -29,20 +29,27 @@ import static android.app.usage.UsageEvents.Event.USER_STOPPED;
 import static android.app.usage.UsageEvents.Event.USER_UNLOCKED;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_CURRENT_ACTIVITY;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_TASK_ROOT_ACTIVITY;
+import static android.content.Intent.ACTION_UID_REMOVED;
+import static android.content.Intent.EXTRA_UID;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessState;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppLaunchEstimateInfo;
 import android.app.usage.AppStandbyInfo;
+import android.app.usage.BroadcastResponseStats;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventStats;
 import android.app.usage.IUsageStatsManager;
@@ -83,6 +90,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -135,6 +143,7 @@ public class UsageStatsService extends SystemService implements
             = SystemProperties.getBoolean("persist.debug.time_correction", true);
 
     static final boolean DEBUG = false; // Never submit with true
+    static final boolean DEBUG_RESPONSE_STATS = DEBUG || Log.isLoggable(TAG, Log.DEBUG);
     static final boolean COMPRESS_TIME = false;
 
     private static final long TEN_SECONDS = 10 * 1000;
@@ -216,6 +225,8 @@ public class UsageStatsService extends SystemService implements
     private final CopyOnWriteArraySet<UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener>
             mEstimatedLaunchTimeChangedListeners = new CopyOnWriteArraySet<>();
 
+    private BroadcastResponseStatsTracker mResponseStatsTracker;
+
     private static class ActivityData {
         private final String mTaskRootPackage;
         private final String mTaskRootClass;
@@ -262,6 +273,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     @Override
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void onStart() {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
@@ -270,6 +282,7 @@ public class UsageStatsService extends SystemService implements
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
+        mResponseStatsTracker = new BroadcastResponseStatsTracker(mAppStandby);
 
         mAppTimeLimit = new AppTimeLimitController(getContext(),
                 new AppTimeLimitController.TimeLimitCallbackListener() {
@@ -313,6 +326,9 @@ public class UsageStatsService extends SystemService implements
         filter.addAction(Intent.ACTION_USER_STARTED);
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
+
+        getContext().registerReceiverAsUser(new UidRemovedReceiver(), UserHandle.ALL,
+                new IntentFilter(ACTION_UID_REMOVED), null, mHandler);
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
@@ -535,11 +551,26 @@ public class UsageStatsService extends SystemService implements
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 if (userId >= 0) {
                     mHandler.obtainMessage(MSG_REMOVE_USER, userId, 0).sendToTarget();
+                    mResponseStatsTracker.onUserRemoved(userId);
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >= 0) {
                     mAppStandby.postCheckIdleStates(userId);
                 }
+            }
+        }
+    }
+
+    private class UidRemovedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int uid = intent.getIntExtra(EXTRA_UID, -1);
+            if (uid == -1) {
+                return;
+            }
+
+            synchronized (mLock) {
+                mResponseStatsTracker.onUidRemoved(uid);
             }
         }
     }
@@ -1779,6 +1810,11 @@ public class UsageStatsService extends SystemService implements
                         }
                         return;
                     }
+                } else if ("broadcast-response-stats".equals(arg)) {
+                    synchronized (mLock) {
+                        mResponseStatsTracker.dump(idpw);
+                    }
+                    return;
                 } else if (arg != null && !arg.startsWith("-")) {
                     // Anything else that doesn't start with '-' is a pkg to filter
                     pkgs.add(arg);
@@ -1812,6 +1848,9 @@ public class UsageStatsService extends SystemService implements
             idpw.println();
 
             mAppTimeLimit.dump(null, pw);
+
+            idpw.println();
+            mResponseStatsTracker.dump(idpw);
         }
 
         mAppStandby.dumpUsers(idpw, userIds, pkgs);
@@ -2644,6 +2683,60 @@ public class UsageStatsService extends SystemService implements
                         / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1);
             }
         }
+
+        @Override
+        @NonNull
+        public BroadcastResponseStats queryBroadcastResponseStats(
+                @NonNull String packageName,
+                @IntRange(from = 1) long id,
+                @NonNull String callingPackage,
+                @UserIdInt int userId) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(callingPackage);
+            // TODO: Move to Preconditions utility class
+            if (id <= 0) {
+                throw new IllegalArgumentException("id needs to be >0");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException(
+                        "Caller does not have the permission needed to call this API; "
+                                + "callingPackage=" + callingPackage
+                                + ", callingUid=" + callingUid);
+            }
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
+                    userId, false /* allowAll */, false /* requireFull */,
+                    "queryBroadcastResponseStats" /* name */, callingPackage);
+            return mResponseStatsTracker.queryBroadcastResponseStats(
+                    callingUid, packageName, id, userId);
+        }
+
+        @Override
+        public void clearBroadcastResponseStats(
+                @NonNull String packageName,
+                @IntRange(from = 1) long id,
+                @NonNull String callingPackage,
+                @UserIdInt int userId) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(callingPackage);
+            if (id <= 0) {
+                throw new IllegalArgumentException("id needs to be >0");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException(
+                        "Caller does not have the permission needed to call this API; "
+                                + "callingPackage=" + callingPackage
+                                + ", callingUid=" + callingUid);
+            }
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
+                    userId, false /* allowAll */, false /* requireFull */,
+                    "clearBroadcastResponseStats" /* name */, callingPackage);
+            mResponseStatsTracker.clearBroadcastResponseStats(callingUid,
+                    packageName, id, userId);
+        }
     }
 
     void registerAppUsageObserver(int callingUid, int observerId, String[] packages,
@@ -2947,6 +3040,32 @@ public class UsageStatsService extends SystemService implements
                 @NonNull EstimatedLaunchTimeChangedListener listener) {
             UsageStatsService.this.unregisterLaunchTimeChangedListener(listener);
         }
+
+        @Override
+        public void reportBroadcastDispatched(int sourceUid, @NonNull String targetPackage,
+                @NonNull UserHandle targetUser, long idForResponseEvent,
+                @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState) {
+            mResponseStatsTracker.reportBroadcastDispatchEvent(sourceUid, targetPackage,
+                    targetUser, idForResponseEvent, timestampMs, targetUidProcState);
+        }
+
+        @Override
+        public void reportNotificationPosted(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+            mResponseStatsTracker.reportNotificationPosted(packageName, user, timestampMs);
+        }
+
+        @Override
+        public void reportNotificationUpdated(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+            mResponseStatsTracker.reportNotificationUpdated(packageName, user, timestampMs);
+        }
+
+        @Override
+        public void reportNotificationRemoved(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+            mResponseStatsTracker.reportNotificationCancelled(packageName, user, timestampMs);
+        }
     }
 
     private class MyPackageMonitor extends PackageMonitor {
@@ -2958,6 +3077,7 @@ public class UsageStatsService extends SystemService implements
                 mHandler.obtainMessage(MSG_PACKAGE_REMOVED, changingUserId, 0, packageName)
                         .sendToTarget();
             }
+            mResponseStatsTracker.onPackageRemoved(packageName, UserHandle.getUserId(uid));
             super.onPackageRemoved(packageName, uid);
         }
     }

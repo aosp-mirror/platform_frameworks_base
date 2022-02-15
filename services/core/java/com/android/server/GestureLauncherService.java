@@ -89,13 +89,13 @@ public class GestureLauncherService extends SystemService {
 
     /**
      * Default value of the power button "cooldown" period after the Emergency gesture is triggered.
-     * See {@link Settings.Secure#EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS}
+     * See {@link Settings.Global#EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS}
      */
     private static final int EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_DEFAULT = 3000;
 
     /**
      * Maximum value of the power button "cooldown" period after the Emergency gesture is triggered.
-     * The value read from {@link Settings.Secure#EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS}
+     * The value read from {@link Settings.Global#EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS}
      * is capped at this maximum.
      */
     @VisibleForTesting
@@ -284,8 +284,8 @@ public class GestureLauncherService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.EMERGENCY_GESTURE_ENABLED),
                 false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(
-                        Settings.Secure.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS),
+                Settings.Global.getUriFor(
+                        Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS),
                 false, mSettingObserver, mUserId);
     }
 
@@ -469,9 +469,10 @@ public class GestureLauncherService extends SystemService {
      */
     @VisibleForTesting
     static int getEmergencyGesturePowerButtonCooldownPeriodMs(Context context, int userId) {
-        int cooldown = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
-                EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_DEFAULT, userId);
+        int cooldown = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
+                EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_DEFAULT);
+
         return Math.min(cooldown, EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_MAX);
     }
 

@@ -177,6 +177,19 @@ interface ITunerResourceManager {
     void shareFrontend(in int selfClientId, in int targetClientId);
 
     /*
+     * Transfers the ownership of the shared resource.
+     *
+     * <p><strong>Note:</strong> Only the existing frontend sharee can be the new owner.
+     *
+     * @param resourceType the type of resource to transfer the ownership for.
+     * @param currentOwnerId the id of the current owner client.
+     * @param newOwnerId the id of the new owner client.
+     *
+     * @return true if successful. false otherwise.
+     */
+    boolean transferOwner(in int resourceType, in int currentOwnerId, in int newOwnerId);
+
+    /*
      * This API is used by the Tuner framework to request an available demux from the TunerHAL.
      *
      * <p>There are three possible scenarios:
@@ -442,4 +455,30 @@ interface ITunerResourceManager {
      * guaranteed to work and may be unrecoverrable. (This should not happen.)
      */
     boolean releaseLock(in int clientId);
+
+    /**
+     * Returns a priority for the given use case type and the client's foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param pid the pid of the client. When the pid is invalid, background status will be used as
+     *        a client's status. Otherwise, client's app corresponding to the given session id will
+     *        be used as a client. {@see TvInputService#onCreateSession(String, String)}.
+     *
+     * @return the client priority..
+     */
+    int getClientPriority(int useCase, int pid);
+
+    /**
+     * Returns a config priority for the given use case type and the foreground or background
+     * status.
+     *
+     * @param useCase the use case type of the client. When the given use case type is invalid,
+     *        the default use case type will be used. {@see TvInputService#PriorityHintUseCaseType}.
+     * @param isForeground {@code true} if foreground, {@code false} otherwise.
+     *
+     * @return the config priority.
+     */
+    int getConfigPriority(int useCase, boolean isForeground);
 }

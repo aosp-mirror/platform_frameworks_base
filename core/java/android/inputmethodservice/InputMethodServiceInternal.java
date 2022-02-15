@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.inputmethod.InputConnection;
@@ -31,8 +32,11 @@ import java.io.PrintWriter;
  * framework classes for internal use.
  *
  * <p>CAVEATS: {@link AbstractInputMethodService} does not support all the methods here.</p>
+ *
+ * @hide
  */
-interface InputMethodServiceInternal {
+// TODO(b/215636776): move InputMethodServiceInternal to proper package
+public interface InputMethodServiceInternal {
     /**
      * @return {@link Context} associated with the service.
      */
@@ -70,7 +74,8 @@ interface InputMethodServiceInternal {
      * closed for you after you return.
      * @param args additional arguments to the dump request.
      */
-    default void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    default void dump(@SuppressLint("UseParcelFileDescriptor") @NonNull FileDescriptor fd,
+            @NonNull PrintWriter fout, @NonNull String[] args) {
     }
 
     /**
@@ -81,6 +86,6 @@ interface InputMethodServiceInternal {
      * @param where {@code where} parameter to be passed.
      * @param icProto {@code icProto} parameter to be passed.
      */
-    default void triggerServiceDump(String where, @Nullable byte[] icProto) {
+    default void triggerServiceDump(@NonNull String where, @Nullable byte[] icProto) {
     }
 }

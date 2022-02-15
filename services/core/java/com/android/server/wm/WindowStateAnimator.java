@@ -150,8 +150,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    private final Rect mTmpSize = new Rect();
-
     /**
      * Handles surface changes synchronized to after the client has drawn the surface. This
      * transaction is currently used to reparent the old surface children to the new surface once
@@ -291,7 +289,7 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked(int windowType) {
+    WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
 
         if (mSurfaceController != null) {
@@ -319,16 +317,9 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
-        w.calculateSurfaceBounds(attrs, mTmpSize);
-
-        final int width = mTmpSize.width();
-        final int height = mTmpSize.height();
-
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG, "Creating surface in session "
                     + mSession.mSurfaceSession + " window " + this
-                    + " w=" + width + " h=" + height
-                    + " x=" + mTmpSize.left + " y=" + mTmpSize.top
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -339,8 +330,8 @@ class WindowStateAnimator {
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
 
-            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
-                    height, format, flags, this, windowType);
+            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
+                    flags, this, attrs.type);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
@@ -372,8 +363,7 @@ class WindowStateAnimator {
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.getFrame().left + "," + w.getFrame().top + ") ("
-                    + width + "x" + height + ")" + " HIDE", false);
+                    + w.getFrame().left + "," + w.getFrame().top + ") HIDE", false);
         }
 
         mLastHidden = true;

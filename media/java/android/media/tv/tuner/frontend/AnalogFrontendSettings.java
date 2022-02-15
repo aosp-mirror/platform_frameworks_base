@@ -36,8 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class AnalogFrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SIGNAL_TYPE_",
+    @IntDef(prefix = "SIGNAL_TYPE_",
             value = {SIGNAL_TYPE_UNDEFINED, SIGNAL_TYPE_AUTO, SIGNAL_TYPE_PAL, SIGNAL_TYPE_PAL_M,
               SIGNAL_TYPE_PAL_N, SIGNAL_TYPE_PAL_60, SIGNAL_TYPE_NTSC, SIGNAL_TYPE_NTSC_443,
               SIGNAL_TYPE_SECAM})
@@ -82,8 +81,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
     public static final int SIGNAL_TYPE_SECAM = FrontendAnalogType.SECAM;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SIF_",
+    @IntDef(prefix = "SIF_",
             value = {SIF_UNDEFINED, SIF_AUTO, SIF_BG, SIF_BG_A2, SIF_BG_NICAM, SIF_I, SIF_DK,
             SIF_DK1_A2, SIF_DK2_A2, SIF_DK3_A2, SIF_DK_NICAM, SIF_L, SIF_M, SIF_M_BTSC, SIF_M_A2,
             SIF_M_EIAJ, SIF_I_NICAM, SIF_L_NICAM, SIF_L_PRIME})

@@ -177,7 +177,7 @@ class Vr2dDisplay {
                         }
                     }
                 }
-            }, intentFilter);
+            }, intentFilter, Context.RECEIVER_NOT_EXPORTED);
         }
     }
 

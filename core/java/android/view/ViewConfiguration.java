@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.Activity;
@@ -405,7 +406,7 @@ public class ViewConfiguration {
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
-    private ViewConfiguration(@UiContext Context context) {
+    private ViewConfiguration(@NonNull @UiContext Context context) {
         mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
@@ -517,7 +518,7 @@ public class ViewConfiguration {
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
     // TODO(b/182007470): Use @ConfigurationContext instead
-    public static ViewConfiguration get(@UiContext Context context) {
+    public static ViewConfiguration get(@NonNull @UiContext Context context) {
         StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();

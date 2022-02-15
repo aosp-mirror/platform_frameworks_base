@@ -47,9 +47,12 @@ public class DownloadSettings extends Settings {
     /**
      * Gets whether download ID is used.
      *
+     * If it's set to false, HAL will begin to send data before it knows downloadId and document
+     * structures.
+     *
      * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
-     * return {@code false}.
-     * Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
+     * return {@code false}. Use {@link TunerVersionChecker#getTunerVersion()} to get the version
+     * information.
      */
     public boolean useDownloadId() { return mUseDownloadId; }
 
@@ -77,6 +80,9 @@ public class DownloadSettings extends Settings {
 
         /**
          * Sets whether download ID is used or not.
+         *
+         * If it's set to false, HAL will begin to send data before it knows downloadId and document
+         * structures.
          *
          * <p>This configuration is only supported in Tuner 2.0 or higher version. Unsupported
          * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the

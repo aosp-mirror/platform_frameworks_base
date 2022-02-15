@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
+import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.biometrics.SensorProperties
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManagerGlobal
@@ -52,6 +53,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,6 +76,12 @@ import org.mockito.junit.MockitoJUnit
 
 private const val DISPLAY_ID = 2
 private const val SENSOR_ID = 1
+
+private const val DISPLAY_SIZE_X = 800
+private const val DISPLAY_SIZE_Y = 900
+
+private val X_LOCATION = SensorLocationInternal("", 540, 0, 20)
+private val Y_LOCATION = SensorLocationInternal("", 0, 1500, 22)
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -101,6 +109,8 @@ class SidefpsControllerTest : SysuiTestCase() {
     lateinit var handler: Handler
     @Captor
     lateinit var overlayCaptor: ArgumentCaptor<View>
+    @Captor
+    lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
@@ -125,6 +135,17 @@ class SidefpsControllerTest : SysuiTestCase() {
                 this
             }
         }
+        `when`(windowManager.maximumWindowMetrics).thenReturn(
+            WindowMetrics(Rect(0, 0, DISPLAY_SIZE_X, DISPLAY_SIZE_Y), WindowInsets.CONSUMED)
+        )
+    }
+
+    private fun testWithDisplay(
+        initInfo: DisplayInfo.() -> Unit = {},
+        locations: List<SensorLocationInternal> = listOf(X_LOCATION),
+        windowInsets: WindowInsets = insetsForSmallNavbar(),
+        block: () -> Unit
+    ) {
         `when`(fingerprintManager.sensorPropertiesInternal).thenReturn(
             listOf(
                 FingerprintSensorPropertiesInternal(
@@ -133,22 +154,21 @@ class SidefpsControllerTest : SysuiTestCase() {
                     5 /* maxEnrollmentsPerUser */,
                     listOf() /* componentInfo */,
                     FingerprintSensorProperties.TYPE_POWER_BUTTON,
-                    true /* resetLockoutRequiresHardwareAuthToken */
+                    true /* resetLockoutRequiresHardwareAuthToken */,
+                    locations
                 )
             )
         )
-        `when`(windowManager.maximumWindowMetrics).thenReturn(
-            WindowMetrics(Rect(0, 0, 800, 800), WindowInsets.CONSUMED)
-        )
-    }
 
-    private fun testWithDisplay(initInfo: DisplayInfo.() -> Unit = {}, block: () -> Unit) {
         val displayInfo = DisplayInfo()
         displayInfo.initInfo()
         val dmGlobal = mock(DisplayManagerGlobal::class.java)
         val display = Display(dmGlobal, DISPLAY_ID, displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS)
         `when`(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
         `when`(windowManager.defaultDisplay).thenReturn(display)
+        `when`(windowManager.currentWindowMetrics).thenReturn(
+            WindowMetrics(Rect(0, 0, DISPLAY_SIZE_X, DISPLAY_SIZE_Y), windowInsets)
+        )
 
         sideFpsController = SidefpsController(
             context.createDisplayContext(display), layoutInflater, fingerprintManager,
@@ -245,7 +265,23 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun showsWithTaskbarOnY() = testWithDisplay(
+        { rotation = Surface.ROTATION_0 },
+        locations = listOf(Y_LOCATION)
+    ) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
     fun showsWithTaskbar90() = testWithDisplay({ rotation = Surface.ROTATION_90 }) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun showsWithTaskbar90OnY() = testWithDisplay(
+        { rotation = Surface.ROTATION_90 },
+        locations = listOf(Y_LOCATION)
+    ) {
         hidesWithTaskbar(visible = true)
     }
 
@@ -255,18 +291,45 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showsWithTaskbarCollapsedDown() = testWithDisplay({ rotation = Surface.ROTATION_270 }) {
-        `when`(windowManager.currentWindowMetrics).thenReturn(
-            WindowMetrics(Rect(0, 0, 800, 800), insetsForSmallNavbar())
-        )
+    fun showsWithTaskbar270OnY() = testWithDisplay(
+        { rotation = Surface.ROTATION_270 },
+        locations = listOf(Y_LOCATION)
+    ) {
         hidesWithTaskbar(visible = true)
     }
 
     @Test
-    fun hidesWithTaskbarDown() = testWithDisplay({ rotation = Surface.ROTATION_270 }) {
-        `when`(windowManager.currentWindowMetrics).thenReturn(
-            WindowMetrics(Rect(0, 0, 800, 800), insetsForLargeNavbar())
-        )
+    fun showsWithTaskbarCollapsedDown() = testWithDisplay(
+        { rotation = Surface.ROTATION_270 },
+        windowInsets = insetsForSmallNavbar()
+    ) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun showsWithTaskbarCollapsedDownOnY() = testWithDisplay(
+        { rotation = Surface.ROTATION_180 },
+        locations = listOf(Y_LOCATION),
+        windowInsets = insetsForSmallNavbar()
+    ) {
+        hidesWithTaskbar(visible = true)
+    }
+
+    @Test
+    fun hidesWithTaskbarDown() = testWithDisplay(
+        { rotation = Surface.ROTATION_180 },
+        locations = listOf(X_LOCATION),
+        windowInsets = insetsForLargeNavbar()
+    ) {
+        hidesWithTaskbar(visible = false)
+    }
+
+    @Test
+    fun hidesWithTaskbarDownOnY() = testWithDisplay(
+        { rotation = Surface.ROTATION_270 },
+        locations = listOf(Y_LOCATION),
+        windowInsets = insetsForLargeNavbar()
+    ) {
         hidesWithTaskbar(visible = false)
     }
 
@@ -280,6 +343,28 @@ class SidefpsControllerTest : SysuiTestCase() {
         verify(windowManager).addView(any(), any())
         verify(windowManager, never()).removeView(any())
         verify(sidefpsView).visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    @Test
+    fun setsXAlign() = testWithDisplay {
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).addView(any(), overlayViewParamsCaptor.capture())
+
+        assertThat(overlayViewParamsCaptor.value.x).isEqualTo(X_LOCATION.sensorLocationX)
+        assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
+    }
+
+    @Test
+    fun setYAlign() = testWithDisplay(locations = listOf(Y_LOCATION)) {
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).addView(any(), overlayViewParamsCaptor.capture())
+
+        assertThat(overlayViewParamsCaptor.value.x).isEqualTo(DISPLAY_SIZE_X)
+        assertThat(overlayViewParamsCaptor.value.y).isEqualTo(Y_LOCATION.sensorLocationY)
     }
 }
 

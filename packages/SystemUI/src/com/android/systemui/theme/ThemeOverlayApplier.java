@@ -66,6 +66,8 @@ public class ThemeOverlayApplier implements Dumpable {
             "android.theme.customization.accent_color";
     static final String OVERLAY_CATEGORY_SYSTEM_PALETTE =
             "android.theme.customization.system_palette";
+    static final String OVERLAY_CATEGORY_THEME_STYLE =
+            "android.theme.customization.theme_style";
 
     static final String OVERLAY_COLOR_SOURCE = "android.theme.customization.color_source";
 

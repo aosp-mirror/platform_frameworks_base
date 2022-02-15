@@ -74,17 +74,9 @@ public class AccessibilityRecord {
     private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
-        AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
-        | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
-        | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
-
-    // Housekeeping
-    private static final int MAX_POOL_SIZE = 10;
-    private static final Object sPoolLock = new Object();
-    private static AccessibilityRecord sPool;
-    private static int sPoolSize;
-    private AccessibilityRecord mNext;
-    private boolean mIsInPool;
+            AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS
+                    | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
+                    | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID;
 
     @UnsupportedAppUsage
     boolean mSealed;
@@ -140,7 +132,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setSource(View source) {
+    public void setSource(@Nullable View source) {
         setSource(source, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
@@ -191,17 +183,31 @@ public class AccessibilityRecord {
      * </p>
      * @return The info of the source.
      */
-    public AccessibilityNodeInfo getSource() {
+    public @Nullable AccessibilityNodeInfo getSource() {
+        return getSource(GET_SOURCE_PREFETCH_FLAGS);
+    }
+
+    /**
+     * Gets the {@link AccessibilityNodeInfo} of the event source.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The info of the source.
+     *
+     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
+     */
+    @Nullable
+    public AccessibilityNodeInfo getSource(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         enforceSealed();
         if ((mConnectionId == UNDEFINED)
                 || (mSourceWindowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 || (AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId)
-                        == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
+                == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
-                mSourceNodeId, false, GET_SOURCE_PREFETCH_FLAGS, null);
+                mSourceNodeId, false, prefetchingStrategy, null);
     }
 
     /**
@@ -636,7 +642,7 @@ public class AccessibilityRecord {
      *
      * @return The class name.
      */
-    public CharSequence getClassName() {
+    public @Nullable CharSequence getClassName() {
         return mClassName;
     }
 
@@ -647,7 +653,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setClassName(CharSequence className) {
+    public void setClassName(@Nullable CharSequence className) {
         enforceNotSealed();
         mClassName = className;
     }
@@ -658,7 +664,7 @@ public class AccessibilityRecord {
      *
      * @return The text.
      */
-    public List<CharSequence> getText() {
+    public @NonNull List<CharSequence> getText() {
         return mText;
     }
 
@@ -667,7 +673,7 @@ public class AccessibilityRecord {
      *
      * @return The text before the change.
      */
-    public CharSequence getBeforeText() {
+    public @Nullable CharSequence getBeforeText() {
         return mBeforeText;
     }
 
@@ -678,7 +684,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setBeforeText(CharSequence beforeText) {
+    public void setBeforeText(@Nullable CharSequence beforeText) {
         enforceNotSealed();
         mBeforeText = (beforeText == null) ? null
                 : beforeText.subSequence(0, beforeText.length());
@@ -689,7 +695,7 @@ public class AccessibilityRecord {
      *
      * @return The description.
      */
-    public CharSequence getContentDescription() {
+    public @Nullable CharSequence getContentDescription() {
         return mContentDescription;
     }
 
@@ -700,7 +706,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setContentDescription(CharSequence contentDescription) {
+    public void setContentDescription(@Nullable CharSequence contentDescription) {
         enforceNotSealed();
         mContentDescription = (contentDescription == null) ? null
                 : contentDescription.subSequence(0, contentDescription.length());
@@ -711,7 +717,7 @@ public class AccessibilityRecord {
      *
      * @return The parcelable data.
      */
-    public Parcelable getParcelableData() {
+    public @Nullable Parcelable getParcelableData() {
         return mParcelableData;
     }
 
@@ -722,7 +728,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setParcelableData(Parcelable parcelableData) {
+    public void setParcelableData(@Nullable Parcelable parcelableData) {
         enforceNotSealed();
         mParcelableData = parcelableData;
     }
@@ -821,74 +827,47 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated. The instance is initialized with data from the
+     * Instantiates a new record initialized with data from the
      * given record.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
-     * constructor {@link #AccessibilityRecord(AccessibilityRecord)} instead.
-     *
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
+     * constructor {@link #AccessibilityRecord()} instead.
      * @return An instance.
      */
-    public static AccessibilityRecord obtain(AccessibilityRecord record) {
+    @Deprecated
+    public static @NonNull AccessibilityRecord obtain(@NonNull AccessibilityRecord record) {
        AccessibilityRecord clone = AccessibilityRecord.obtain();
        clone.init(record);
        return clone;
     }
 
     /**
-     * Returns a cached instance if such is available or a new one is
-     * instantiated.
+     * Instantiates a new record.
      *
-     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * @deprecated Object pooling has been discontinued. Create a new instance using the
      * constructor {@link #AccessibilityRecord()} instead.
-     *
      * @return An instance.
      */
-    public static AccessibilityRecord obtain() {
-        synchronized (sPoolLock) {
-            if (sPool != null) {
-                AccessibilityRecord record = sPool;
-                sPool = sPool.mNext;
-                sPoolSize--;
-                record.mNext = null;
-                record.mIsInPool = false;
-                return record;
-            }
-            return new AccessibilityRecord();
-        }
+    @Deprecated
+    public static @NonNull AccessibilityRecord obtain() {
+        return new AccessibilityRecord();
     }
 
     /**
-     * Return an instance back to be reused.
-     * <p>
-     * <strong>Note:</strong> You must not touch the object after calling this function.
+     * Would previously return an instance back to be reused.
      *
-     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
-     *
-     * @throws IllegalStateException If the record is already recycled.
+     * @deprecated Object pooling has been discontinued. Calling this function now will have
+     * no effect.
      */
-    public void recycle() {
-        if (mIsInPool) {
-            throw new IllegalStateException("Record already recycled!");
-        }
-        clear();
-        synchronized (sPoolLock) {
-            if (sPoolSize <= MAX_POOL_SIZE) {
-                mNext = sPool;
-                sPool = this;
-                mIsInPool = true;
-                sPoolSize++;
-            }
-        }
-    }
+    @Deprecated
+    public void recycle() { }
 
     /**
      * Initialize this record from another one.
      *
      * @param record The to initialize from.
      */
-    void init(AccessibilityRecord record) {
+    void init(@NonNull AccessibilityRecord record) {
         mSealed = record.mSealed;
         mBooleanProperties = record.mBooleanProperties;
         mCurrentItemIndex = record.mCurrentItemIndex;

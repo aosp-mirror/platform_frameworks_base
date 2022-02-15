@@ -77,6 +77,7 @@ public class UserDetailView extends PseudoGridView {
 
         private final Context mContext;
         protected UserSwitcherController mController;
+        @Nullable
         private View mCurrentUserView;
         private final UiEventLogger mUiEventLogger;
         private final FalsingManager mFalsingManager;

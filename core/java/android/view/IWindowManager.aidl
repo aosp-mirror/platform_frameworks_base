@@ -25,7 +25,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -66,6 +65,7 @@ import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.window.IOnFpsCallbackListener;
 
 /**
  * System private interface to the window manager.
@@ -484,16 +484,6 @@ interface IWindowManager
     void getStableInsets(int displayId, out Rect outInsets);
 
     /**
-     * Set the forwarded insets on the display.
-     * <p>
-     * This is only used in case a virtual display is displayed on another display that has insets,
-     * and the bounds of the virtual display is overlapping with the insets from the host display.
-     * In that case, the contents on the virtual display won't be placed over the forwarded insets.
-     * Only the owner of the display is permitted to set the forwarded insets on it.
-     */
-    void setForwardedInsets(int displayId, in Insets insets);
-
-    /**
      * Register shortcut key. Shortcut code is packed as:
      * (MetaState << Integer.SIZE) | KeyCode
      * @hide
@@ -549,6 +539,11 @@ interface IWindowManager
      * Stops a window trace.
      */
     void stopWindowTrace();
+
+    /**
+    * If window tracing is active, saves the window trace to file, otherwise does nothing
+    */
+    void saveWindowTraceToFile();
 
     /**
      * Returns true if window trace is enabled.
@@ -922,4 +917,38 @@ interface IWindowManager
      * reverts to using the default task transition with no spec changes.
      */
     void clearTaskTransitionSpec();
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
+     * registered, the registered callback will not be unregistered until
+     * {@link unregisterTaskFpsCallback()} is called
+     * @param taskId task id of the task.
+     * @param listener listener to be registered.
+     *
+     * @hide
+     */
+    void registerTaskFpsCallback(in int taskId, in IOnFpsCallbackListener listener);
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
+     *
+     * @param listener listener to be unregistered.
+     *
+     * @hide
+     */
+    void unregisterTaskFpsCallback(in IOnFpsCallbackListener listener);
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * Returns a bitmap of the screenshot or {@code null} if it was unable to screenshot.
+     * @hide
+     */
+    Bitmap snapshotTaskForRecents(int taskId);
 }

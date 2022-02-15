@@ -19,13 +19,13 @@ package com.android.server.net;
 import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
+import static android.app.usage.NetworkStatsManager.PREFIX_DEV;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
-import static android.net.NetworkStack.checkNetworkStackPermission;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.IFACE_VT;
@@ -43,28 +43,14 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
-import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.TrafficStats.UNSUPPORTED;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID_TAG;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_XT;
 import static android.os.Trace.TRACE_TAG_NETWORK;
-import static android.provider.Settings.Global.NETSTATS_AUGMENT_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_DEV_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_DEV_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_DEV_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_DEV_ROTATE_AGE;
-import static android.provider.Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES;
-import static android.provider.Settings.Global.NETSTATS_POLL_INTERVAL;
-import static android.provider.Settings.Global.NETSTATS_SAMPLE_ENABLED;
-import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_UID_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_UID_ROTATE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
-import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
@@ -72,12 +58,11 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.net.module.util.NetworkCapabilitiesUtils.getDisplayTransport;
-import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
-import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
-import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
+import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.usage.NetworkStatsManager;
@@ -90,13 +75,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.DataUsageRequest;
-import android.net.INetworkManagementEventObserver;
+import android.net.INetd;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
 import android.net.NetworkIdentitySet;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
@@ -107,26 +93,27 @@ import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.TetherStatsParcel;
+import android.net.TetheringManager;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
-import android.os.BestClock;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -134,6 +121,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionPlan;
 import android.text.TextUtils;
@@ -141,28 +130,34 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.MathUtils;
-import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FileRotator;
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
+import com.android.net.module.util.BestClock;
 import com.android.net.module.util.BinderUtils;
-import com.android.server.EventLogTags;
-import com.android.server.LocalServices;
+import com.android.net.module.util.BpfMap;
+import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.IBpfMap;
+import com.android.net.module.util.LocationPermissionChecker;
+import com.android.net.module.util.NetworkStatsUtils;
+import com.android.net.module.util.PermissionUtils;
+import com.android.net.module.util.Struct.U32;
+import com.android.net.module.util.Struct.U8;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -176,7 +171,12 @@ import java.util.concurrent.TimeUnit;
  * Collect and persist detailed network statistics, and provide this data to
  * other system services.
  */
+@TargetApi(Build.VERSION_CODES.TIRAMISU)
 public class NetworkStatsService extends INetworkStatsService.Stub {
+    static {
+        System.loadLibrary("service-connectivity");
+    }
+
     static final String TAG = "NetworkStats";
     static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
@@ -206,8 +206,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private static final String TAG_NETSTATS_ERROR = "netstats_error";
 
+    /**
+     * EventLog tags used when logging into the event log. Note the values must be sync with
+     * frameworks/base/services/core/java/com/android/server/EventLogTags.logtags to get correct
+     * name translation.
+      */
+    private static final int LOG_TAG_NETSTATS_MOBILE_SAMPLE = 51100;
+    private static final int LOG_TAG_NETSTATS_WIFI_SAMPLE = 51101;
+
+    // TODO: Replace the hardcoded string and move it into ConnectivitySettingsManager.
+    private static final String NETSTATS_COMBINE_SUBTYPE_ENABLED =
+            "netstats_combine_subtype_enabled";
+
+    // This is current path but may be changed soon.
+    private static final String UID_COUNTERSET_MAP_PATH =
+            "/sys/fs/bpf/map_netd_uid_counterset_map";
+
     private final Context mContext;
-    private final INetworkManagementService mNetworkManager;
     private final NetworkStatsFactory mStatsFactory;
     private final AlarmManager mAlarmManager;
     private final Clock mClock;
@@ -222,6 +237,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final ContentObserver mContentObserver;
     private final ContentResolver mContentResolver;
 
+    protected INetd mNetd;
+    private final AlertObserver mAlertObserver = new AlertObserver();
+
     @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
@@ -229,11 +247,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             "com.android.server.action.NETWORK_STATS_UPDATED";
 
     private PendingIntent mPollIntent;
-
-    private static final String PREFIX_DEV = "dev";
-    private static final String PREFIX_XT = "xt";
-    private static final String PREFIX_UID = "uid";
-    private static final String PREFIX_UID_TAG = "uid_tag";
 
     /**
      * Settings that can be changed externally.
@@ -244,9 +257,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         boolean getSampleEnabled();
         boolean getAugmentEnabled();
         /**
-         * When enabled, all mobile data is reported under {@link NetworkIdentity#SUBTYPE_COMBINED}.
-         * When disabled, mobile data is broken down by a granular subtype representative of the
-         * actual subtype. {@see NetworkTemplate#getCollapsedRatType}.
+         * When enabled, all mobile data is reported under {@link NetworkTemplate#NETWORK_TYPE_ALL}.
+         * When disabled, mobile data is broken down by a granular ratType representative of the
+         * actual ratType. {@see android.app.usage.NetworkStatsManager#getCollapsedRatType}.
          * Enabling this decreases the level of detail but saves performance, disk space and
          * amount of data logged.
          */
@@ -293,6 +306,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of any ifaces associated with mobile networks since boot. */
     private volatile String[] mMobileIfaces = new String[0];
 
+    /** Set of any ifaces associated with wifi networks since boot. */
+    private volatile String[] mWifiIfaces = new String[0];
+
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
     private Network[] mDefaultNetworks = new Network[0];
@@ -324,8 +340,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @GuardedBy("mStatsLock")
     private NetworkStatsCollection mXtStatsCached;
 
-    /** Current counter sets for each UID. */
+    /**
+     * Current counter sets for each UID.
+     * TODO: maybe remove mActiveUidCounterSet and read UidCouneterSet value from mUidCounterSetMap
+     * directly ? But if mActiveUidCounterSet would be accessed very frequently, maybe keep
+     * mActiveUidCounterSet to avoid accessing kernel too frequently.
+     */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
+    private final IBpfMap<U32, U8> mUidCounterSetMap;
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
@@ -352,6 +374,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @NonNull
     private final NetworkStatsSubscriptionsMonitor mNetworkStatsSubscriptionsMonitor;
+
+    @NonNull
+    private final LocationPermissionChecker mLocationPermissionChecker;
+
+    @NonNull
+    private final BpfInterfaceMapUpdater mInterfaceMapUpdater;
 
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
@@ -404,19 +432,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    public static NetworkStatsService create(Context context,
-                INetworkManagementService networkManager) {
+    /** Creates a new NetworkStatsService */
+    public static NetworkStatsService create(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
-        final NetworkStatsService service = new NetworkStatsService(context, networkManager,
+        final INetd netd = INetd.Stub.asInterface(
+                (IBinder) context.getSystemService(Context.NETD_SERVICE));
+        final NetworkStatsService service = new NetworkStatsService(context,
+                INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE)),
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
+                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(context),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
-        service.registerLocalService();
 
         return service;
     }
@@ -424,14 +453,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // This must not be called outside of tests, even within the same package, as this constructor
     // does not register the local service. Use the create() helper above.
     @VisibleForTesting
-    NetworkStatsService(Context context, INetworkManagementService networkManager,
-            AlarmManager alarmManager, PowerManager.WakeLock wakeLock, Clock clock,
-            NetworkStatsSettings settings, NetworkStatsFactory factory,
-            NetworkStatsObservers statsObservers, File systemDir, File baseDir,
-            @NonNull Dependencies deps) {
+    NetworkStatsService(Context context, INetd netd, AlarmManager alarmManager,
+            PowerManager.WakeLock wakeLock, Clock clock, NetworkStatsSettings settings,
+            NetworkStatsFactory factory, NetworkStatsObservers statsObservers, File systemDir,
+            File baseDir, @NonNull Dependencies deps) {
         mContext = Objects.requireNonNull(context, "missing Context");
-        mNetworkManager = Objects.requireNonNull(networkManager,
-                "missing INetworkManagementService");
+        mNetd = Objects.requireNonNull(netd, "missing Netd");
         mAlarmManager = Objects.requireNonNull(alarmManager, "missing AlarmManager");
         mClock = Objects.requireNonNull(clock, "missing Clock");
         mSettings = Objects.requireNonNull(settings, "missing NetworkStatsSettings");
@@ -446,10 +473,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                mHandler.getLooper(), new HandlerExecutor(mHandler), this);
+                (command) -> mHandler.post(command) , this);
         mContentResolver = mContext.getContentResolver();
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
+        mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+        mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
+        mInterfaceMapUpdater.start();
+        mUidCounterSetMap = mDeps.getUidCounterSetMap();
     }
 
     /**
@@ -472,11 +503,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         @NonNull
         public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(@NonNull Context context,
-                @NonNull Looper looper, @NonNull Executor executor,
-                @NonNull NetworkStatsService service) {
+                @NonNull Executor executor, @NonNull NetworkStatsService service) {
             // TODO: Update RatType passively in NSS, instead of querying into the monitor
             //  when notifyNetworkStatus.
-            return new NetworkStatsSubscriptionsMonitor(context, looper, executor,
+            return new NetworkStatsSubscriptionsMonitor(context, executor,
                     (subscriberId, type) -> service.handleOnCollapsedRatTypeChanged());
         }
 
@@ -498,11 +528,55 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
             };
         }
+
+        /**
+         * @see LocationPermissionChecker
+         */
+        public LocationPermissionChecker makeLocationPermissionChecker(final Context context) {
+            return new LocationPermissionChecker(context);
+        }
+
+        /** Create BpfInterfaceMapUpdater to update bpf interface map. */
+        @NonNull
+        public BpfInterfaceMapUpdater makeBpfInterfaceMapUpdater(
+                @NonNull Context ctx, @NonNull Handler handler) {
+            return new BpfInterfaceMapUpdater(ctx, handler);
+        }
+
+        /** Get counter sets map for each UID. */
+        public IBpfMap<U32, U8> getUidCounterSetMap() {
+            try {
+                return new BpfMap<U32, U8>(UID_COUNTERSET_MAP_PATH, BpfMap.BPF_F_RDWR,
+                        U32.class, U8.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create uid counter set map: " + e);
+                return null;
+            }
+        }
+
+        public TagStatsDeleter getTagStatsDeleter() {
+            return NetworkStatsService::nativeDeleteTagData;
+        }
     }
 
-    private void registerLocalService() {
-        LocalServices.addService(NetworkStatsManagerInternal.class,
-                new NetworkStatsManagerInternalImpl());
+    /**
+     * Observer that watches for {@link INetdUnsolicitedEventListener} alerts.
+     */
+    @VisibleForTesting
+    public class AlertObserver extends BaseNetdUnsolicitedEventListener {
+        @Override
+        public void onQuotaLimitReached(@NonNull String alertName, @NonNull String ifName) {
+            PermissionUtils.enforceNetworkStackPermission(mContext);
+
+            if (LIMIT_GLOBAL_ALERT.equals(alertName)) {
+                // kick off background poll to collect network stats unless there is already
+                // such a call pending; UID stats are handled during normal polling interval.
+                if (!mHandler.hasMessages(MSG_PERFORM_POLL_REGISTER_ALERT)) {
+                    mHandler.sendEmptyMessageDelayed(MSG_PERFORM_POLL_REGISTER_ALERT,
+                            mSettings.getPollDelay());
+                }
+            }
+        }
     }
 
     public void systemReady() {
@@ -529,8 +603,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // watch for tethering changes
-        final IntentFilter tetherFilter = new IntentFilter(ACTION_TETHER_STATE_CHANGED);
-        mContext.registerReceiver(mTetherReceiver, tetherFilter, null, mHandler);
+        final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
+        tetheringManager.registerTetheringEventCallback(
+                (command) -> mHandler.post(command), mTetherListener);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
@@ -549,9 +624,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.registerReceiver(mShutdownReceiver, shutdownFilter);
 
         try {
-            mNetworkManager.registerObserver(mAlertObserver);
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
+            mNetd.registerUnsolicitedEventListener(mAlertObserver);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Log.wtf(TAG, "Error registering event listener :", e);
         }
 
         //  schedule periodic pall alarm based on {@link NetworkStatsSettings#getPollInterval()}.
@@ -564,13 +639,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mSettings.getPollInterval(), pollIntent);
 
         mContentResolver.registerContentObserver(Settings.Global
-                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED),
+                .getUriFor(NETSTATS_COMBINE_SUBTYPE_ENABLED),
                         false /* notifyForDescendants */, mContentObserver);
 
         // Post a runnable on handler thread to call onChange(). It's for getting current value of
         // NETSTATS_COMBINE_SUBTYPE_ENABLED to decide start or stop monitoring RAT type changes.
         mHandler.post(() -> mContentObserver.onChange(false, Settings.Global
-                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED)));
+                .getUriFor(NETSTATS_COMBINE_SUBTYPE_ENABLED)));
 
         registerGlobalAlert();
     }
@@ -586,7 +661,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @GuardedBy("mStatsLock")
     private void shutdownLocked() {
-        mContext.unregisterReceiver(mTetherReceiver);
+        final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
+        tetheringManager.unregisterTetheringEventCallback(mTetherListener);
         mContext.unregisterReceiver(mPollReceiver);
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mUserReceiver);
@@ -638,15 +714,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Register for a global alert that is delivered through {@link INetworkManagementEventObserver}
+     * Register for a global alert that is delivered through {@link AlertObserver}
      * or {@link NetworkStatsProviderCallback#onAlertReached()} once a threshold amount of data has
      * been transferred.
      */
     private void registerGlobalAlert() {
         try {
-            mNetworkManager.setGlobalAlert(mGlobalAlertBytes);
+            mNetd.bandwidthSetGlobalAlert(mGlobalAlertBytes);
         } catch (IllegalStateException e) {
-            Slog.w(TAG, "problem registering for global alert: " + e);
+            Log.w(TAG, "problem registering for global alert: " + e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
@@ -655,8 +731,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public INetworkStatsSession openSession() {
-        // NOTE: if callers want to get non-augmented data, they should go
-        // through the public API
         return openSessionInternal(NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN, null);
     }
 
@@ -682,12 +756,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return now - lastCallTime < POLL_RATE_LIMIT_MS;
     }
 
-    private INetworkStatsSession openSessionInternal(final int flags, final String callingPackage) {
+    private int restrictFlagsForCaller(int flags) {
+        // All non-privileged callers are not allowed to turn off POLL_ON_OPEN.
+        final boolean isPrivileged = PermissionUtils.checkAnyPermissionOf(mContext,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                android.Manifest.permission.NETWORK_STACK);
+        if (!isPrivileged) {
+            flags |= NetworkStatsManager.FLAG_POLL_ON_OPEN;
+        }
+        // Non-system uids are rate limited for POLL_ON_OPEN.
         final int callingUid = Binder.getCallingUid();
-        final int usedFlags = isRateLimitedForPoll(callingUid)
+        flags = isRateLimitedForPoll(callingUid)
                 ? flags & (~NetworkStatsManager.FLAG_POLL_ON_OPEN)
                 : flags;
-        if ((usedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
+        return flags;
+    }
+
+    private INetworkStatsSession openSessionInternal(final int flags, final String callingPackage) {
+        final int restrictedFlags = restrictFlagsForCaller(flags);
+        if ((restrictedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
                 | NetworkStatsManager.FLAG_POLL_FORCE)) != 0) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -701,7 +788,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // for its lifetime; when caller closes only weak references remain.
 
         return new INetworkStatsSession.Stub() {
-            private final int mCallingUid = callingUid;
+            private final int mCallingUid = Binder.getCallingUid();
             private final String mCallingPackage = callingPackage;
             private final @NetworkStatsAccess.Level int mAccessLevel = checkAccessLevel(
                     callingPackage);
@@ -735,26 +822,41 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getDeviceSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
-                        mCallingUid);
+                enforceTemplatePermissions(template, callingPackage);
+                return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
+                        mAccessLevel, mCallingUid);
             }
 
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
-                        mCallingUid);
+                enforceTemplatePermissions(template, callingPackage);
+                return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
+                        mAccessLevel, mCallingUid);
+            }
+
+            // TODO: Remove this after all callers are removed.
+            @Override
+            public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
+                enforceTemplatePermissions(template, callingPackage);
+                return internalGetHistoryForNetwork(template, restrictedFlags, fields,
+                        mAccessLevel, mCallingUid, Long.MIN_VALUE, Long.MAX_VALUE);
             }
 
             @Override
-            public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-                return internalGetHistoryForNetwork(template, usedFlags, fields, mAccessLevel,
-                        mCallingUid);
+            public NetworkStatsHistory getHistoryIntervalForNetwork(NetworkTemplate template,
+                    int fields, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
+                // TODO(b/200768422): Redact returned history if the template is location
+                //  sensitive but the caller is not privileged.
+                return internalGetHistoryForNetwork(template, restrictedFlags, fields,
+                        mAccessLevel, mCallingUid, start, end);
             }
 
             @Override
             public NetworkStats getSummaryForAllUid(
                     NetworkTemplate template, long start, long end, boolean includeTags) {
+                enforceTemplatePermissions(template, callingPackage);
                 try {
                     final NetworkStats stats = getUidComplete()
                             .getSummary(template, start, end, mAccessLevel, mCallingUid);
@@ -765,8 +867,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     }
                     return stats;
                 } catch (NullPointerException e) {
-                    // TODO: Track down and fix the cause of this crash and remove this catch block.
-                    Slog.wtf(TAG, "NullPointerException in getSummaryForAllUid", e);
+                    throw e;
+                }
+            }
+
+            @Override
+            public NetworkStats getTaggedSummaryForAllUid(
+                    NetworkTemplate template, long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
+                try {
+                    final NetworkStats tagStats = getUidTagComplete()
+                            .getSummary(template, start, end, mAccessLevel, mCallingUid);
+                    return tagStats;
+                } catch (NullPointerException e) {
                     throw e;
                 }
             }
@@ -774,6 +887,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStatsHistory getHistoryForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields) {
+                enforceTemplatePermissions(template, callingPackage);
                 // NOTE: We don't augment UID-level statistics
                 if (tag == TAG_NONE) {
                     return getUidComplete().getHistory(template, null, uid, set, tag, fields,
@@ -788,6 +902,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             public NetworkStatsHistory getHistoryIntervalForUid(
                     NetworkTemplate template, int uid, int set, int tag, int fields,
                     long start, long end) {
+                enforceTemplatePermissions(template, callingPackage);
+                // TODO(b/200768422): Redact returned history if the template is location
+                //  sensitive but the caller is not privileged.
                 // NOTE: We don't augment UID-level statistics
                 if (tag == TAG_NONE) {
                     return getUidComplete().getHistory(template, null, uid, set, tag, fields,
@@ -809,9 +926,29 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         };
     }
 
+    private void enforceTemplatePermissions(@NonNull NetworkTemplate template,
+            @NonNull String callingPackage) {
+        // For a template with wifi network keys, it is possible for a malicious
+        // client to track the user locations via querying data usage. Thus, enforce
+        // fine location permission check.
+        if (!template.getWifiNetworkKeys().isEmpty()) {
+            final boolean canAccessFineLocation = mLocationPermissionChecker
+                    .checkCallersLocationPermission(callingPackage,
+                    null /* featureId */,
+                            Binder.getCallingUid(),
+                            false /* coarseForTargetSdkLessThanQ */,
+                            null /* message */);
+            if (!canAccessFineLocation) {
+                throw new SecurityException("Access fine location is required when querying"
+                        + " with wifi network keys, make sure the app has the necessary"
+                        + "permissions and the location toggle is on.");
+            }
+        }
+    }
+
     private @NetworkStatsAccess.Level int checkAccessLevel(String callingPackage) {
         return NetworkStatsAccess.checkAccessLevel(
-                mContext, Binder.getCallingUid(), callingPackage);
+                mContext, Binder.getCallingPid(), Binder.getCallingUid(), callingPackage);
     }
 
     /**
@@ -823,15 +960,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         SubscriptionPlan plan = null;
         if ((flags & NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN) != 0
                 && mSettings.getAugmentEnabled()) {
-            if (LOGD) Slog.d(TAG, "Resolving plan for " + template);
+            if (LOGD) Log.d(TAG, "Resolving plan for " + template);
             final long token = Binder.clearCallingIdentity();
             try {
-                plan = LocalServices.getService(NetworkPolicyManagerInternal.class)
+                plan = mContext.getSystemService(NetworkPolicyManager.class)
                         .getSubscriptionPlan(template);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            if (LOGD) Slog.d(TAG, "Resolved to plan " + plan);
+            if (LOGD) Log.d(TAG, "Resolved to plan " + plan);
         }
         return plan;
     }
@@ -845,7 +982,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
         final NetworkStatsHistory history = internalGetHistoryForNetwork(template, flags, FIELD_ALL,
-                accessLevel, callingUid);
+                accessLevel, callingUid, start, end);
 
         final long now = System.currentTimeMillis();
         final NetworkStatsHistory.Entry entry = history.getValues(start, end, now, null);
@@ -862,22 +999,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * appropriate.
      */
     private NetworkStatsHistory internalGetHistoryForNetwork(NetworkTemplate template,
-            int flags, int fields, @NetworkStatsAccess.Level int accessLevel, int callingUid) {
+            int flags, int fields, @NetworkStatsAccess.Level int accessLevel, int callingUid,
+            long start, long end) {
         // We've been using pure XT stats long enough that we no longer need to
         // splice DEV and XT together.
         final SubscriptionPlan augmentPlan = resolveSubscriptionPlan(template, flags);
         synchronized (mStatsLock) {
             return mXtStatsCached.getHistory(template, augmentPlan,
-                    UID_ALL, SET_ALL, TAG_NONE, fields, Long.MIN_VALUE, Long.MAX_VALUE,
-                    accessLevel, callingUid);
+                    UID_ALL, SET_ALL, TAG_NONE, fields, start, end, accessLevel, callingUid);
         }
     }
 
     private long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
         assertSystemReady();
 
-        // NOTE: if callers want to get non-augmented data, they should go
-        // through the public API
         return internalGetSummaryForNetwork(template,
                 NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN, start, end,
                 NetworkStatsAccess.Level.DEVICE, Binder.getCallingUid()).getTotalBytes();
@@ -902,8 +1037,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // TODO: switch to data layer stats once kernel exports
-        // for now, read network layer stats and flatten across all ifaces
-        final NetworkStats networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        // for now, read network layer stats and flatten across all ifaces.
+        // This function is used to query NeworkStats for calle's uid. The only caller method
+        // TrafficStats#getDataLayerSnapshotForUid alrady claim no special permission to query
+        // its own NetworkStats.
+        final long ident = Binder.clearCallingIdentity();
+        final NetworkStats networkLayer;
+        try {
+            networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         // splice in operation counts
         networkLayer.spliceOperationsFrom(mUidOperations);
@@ -922,10 +1066,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
+    public NetworkStats getUidStatsForTransport(int transport) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
+            final String[] relevantIfaces =
+                    transport == TRANSPORT_WIFI ? mWifiIfaces : mMobileIfaces;
+            // TODO(b/215633405) : mMobileIfaces and mWifiIfaces already contain the stacked
+            // interfaces, so this is not useful, remove it.
             final String[] ifacesToQuery =
-                    mStatsFactory.augmentWithStackedInterfaces(requiredIfaces);
+                    mStatsFactory.augmentWithStackedInterfaces(relevantIfaces);
             return getNetworkStatsUidDetail(ifacesToQuery);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error compiling UID stats", e);
@@ -936,7 +1085,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public String[] getMobileIfaces() {
         // TODO (b/192758557): Remove debug log.
-        if (ArrayUtils.contains(mMobileIfaces, null)) {
+        if (CollectionUtils.contains(mMobileIfaces, null)) {
             throw new NullPointerException(
                     "null element in mMobileIfaces: " + Arrays.toString(mMobileIfaces));
         }
@@ -965,8 +1114,32 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    private void setKernelCounterSet(int uid, int set) {
+        if (mUidCounterSetMap == null) {
+            Log.wtf(TAG, "Fail to set UidCounterSet: Null bpf map");
+            return;
+        }
+
+        if (set == SET_DEFAULT) {
+            try {
+                mUidCounterSetMap.deleteEntry(new U32(uid));
+            } catch (ErrnoException e) {
+                Log.w(TAG, "UidCounterSetMap.deleteEntry(" + uid + ") failed with errno: " + e);
+            }
+            return;
+        }
+
+        try {
+            mUidCounterSetMap.updateEntry(new U32(uid), new U8((short) set));
+        } catch (ErrnoException e) {
+            Log.w(TAG, "UidCounterSetMap.updateEntry(" + uid + ", " + set
+                    + ") failed with errno: " + e);
+        }
+    }
+
     @VisibleForTesting
-    void setUidForeground(int uid, boolean uidForeground) {
+    public void setUidForeground(int uid, boolean uidForeground) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         synchronized (mStatsLock) {
             final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
             final int oldSet = mActiveUidCounterSet.get(uid, SET_DEFAULT);
@@ -985,7 +1158,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @NonNull NetworkStateSnapshot[] networkStates,
             @Nullable String activeIface,
             @NonNull UnderlyingNetworkInfo[] underlyingNetworkInfos) {
-        checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1002,7 +1175,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public void forceUpdate() {
-        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1012,11 +1185,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    private void advisePersistThreshold(long thresholdBytes) {
+    /** Advise persistence threshold; may be overridden internally. */
+    public void advisePersistThreshold(long thresholdBytes) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         // clamp threshold into safe range
-        mPersistThreshold = MathUtils.constrain(thresholdBytes, 128 * KB_IN_BYTES, 2 * MB_IN_BYTES);
+        mPersistThreshold = NetworkStatsUtils.constrain(thresholdBytes,
+                128 * KB_IN_BYTES, 2 * MB_IN_BYTES);
         if (LOGV) {
-            Slog.v(TAG, "advisePersistThreshold() given " + thresholdBytes + ", clamped to "
+            Log.v(TAG, "advisePersistThreshold() given " + thresholdBytes + ", clamped to "
                     + mPersistThreshold);
         }
 
@@ -1041,21 +1217,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public DataUsageRequest registerUsageCallback(String callingPackage,
-                DataUsageRequest request, Messenger messenger, IBinder binder) {
+    public DataUsageRequest registerUsageCallback(@NonNull String callingPackage,
+                @NonNull DataUsageRequest request, @NonNull IUsageCallback callback) {
         Objects.requireNonNull(callingPackage, "calling package is null");
         Objects.requireNonNull(request, "DataUsageRequest is null");
         Objects.requireNonNull(request.template, "NetworkTemplate is null");
-        Objects.requireNonNull(messenger, "messenger is null");
-        Objects.requireNonNull(binder, "binder is null");
+        Objects.requireNonNull(callback, "callback is null");
 
         int callingUid = Binder.getCallingUid();
         @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(request, messenger, binder,
-                    callingUid, accessLevel);
+            normalizedRequest = mStatsObservers.register(mContext,
+                    request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1153,14 +1328,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Receiver that watches for {@link Tethering} to claim interface pairs.
+     * Listener that watches for {@link TetheringManager} to claim interface pairs.
      */
-    private BroadcastReceiver mTetherReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            performPoll(FLAG_PERSIST_NETWORK);
-        }
-    };
+    private final TetheringManager.TetheringEventCallback mTetherListener =
+            new TetheringManager.TetheringEventCallback() {
+                @Override
+                public void onUpstreamChanged(@Nullable Network network) {
+                    performPoll(FLAG_PERSIST_NETWORK);
+                }
+            };
 
     private BroadcastReceiver mPollReceiver = new BroadcastReceiver() {
         @Override
@@ -1200,13 +1376,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // On background handler thread, and USER_REMOVED is protected
             // broadcast.
 
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-            if (userId == -1) return;
+            final UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER);
+            if (userHandle == null) return;
 
             synchronized (mStatsLock) {
                 mWakeLock.acquire();
                 try {
-                    removeUserLocked(userId);
+                    removeUserLocked(userHandle);
                 } finally {
                     mWakeLock.release();
                 }
@@ -1220,26 +1396,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // SHUTDOWN is protected broadcast.
             synchronized (mStatsLock) {
                 shutdownLocked();
-            }
-        }
-    };
-
-    /**
-     * Observer that watches for {@link INetworkManagementService} alerts.
-     */
-    private final INetworkManagementEventObserver mAlertObserver = new BaseNetworkObserver() {
-        @Override
-        public void limitReached(String limitName, String iface) {
-            // only someone like NMS should be calling us
-            NetworkStack.checkNetworkStackPermission(mContext);
-
-            if (LIMIT_GLOBAL_ALERT.equals(limitName)) {
-                // kick off background poll to collect network stats unless there is already
-                // such a call pending; UID stats are handled during normal polling interval.
-                if (!mHandler.hasMessages(MSG_PERFORM_POLL_REGISTER_ALERT)) {
-                    mHandler.sendEmptyMessageDelayed(MSG_PERFORM_POLL_REGISTER_ALERT,
-                            mSettings.getPollDelay());
-                }
             }
         }
     };
@@ -1279,7 +1435,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void handleNotifyNetworkStatusLocked(@NonNull Network[] defaultNetworks,
             @NonNull NetworkStateSnapshot[] snapshots) {
         if (!mSystemReady) return;
-        if (LOGV) Slog.v(TAG, "handleNotifyNetworkStatusLocked()");
+        if (LOGV) Log.v(TAG, "handleNotifyNetworkStatusLocked()");
 
         // take one last stats snapshot before updating iface mapping. this
         // isn't perfect, since the kernel may already be counting traffic from
@@ -1299,15 +1455,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         final boolean combineSubtypeEnabled = mSettings.getCombineSubtypeEnabled();
         final ArraySet<String> mobileIfaces = new ArraySet<>();
+        final ArraySet<String> wifiIfaces = new ArraySet<>();
         for (NetworkStateSnapshot snapshot : snapshots) {
             final int displayTransport =
                     getDisplayTransport(snapshot.getNetworkCapabilities().getTransportTypes());
             final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
-            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, snapshot.getNetwork());
-            final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
-                    : getSubTypeForStateSnapshot(snapshot);
+            final boolean isWifi = (NetworkCapabilities.TRANSPORT_WIFI == displayTransport);
+            final boolean isDefault = CollectionUtils.contains(
+                    mDefaultNetworks, snapshot.getNetwork());
+            final int ratType = combineSubtypeEnabled ? NetworkTemplate.NETWORK_TYPE_ALL
+                    : getRatTypeForStateSnapshot(snapshot);
             final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
-                    isDefault, subType);
+                    isDefault, ratType);
 
             // Traffic occurring on the base interface is always counted for
             // both total usage and UID details.
@@ -1322,13 +1481,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // VT is considered always metered in framework's layer. If VT is not metered
                 // per carrier's policy, modem will report 0 usage for VT calls.
                 if (snapshot.getNetworkCapabilities().hasCapability(
-                        NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
+                        NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.isMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
-                    NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
-                            ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
-                            ident.getRoaming(), true /* metered */,
-                            true /* onDefaultNetwork */, ident.getOemManaged());
+                    NetworkIdentity vtIdent = new NetworkIdentity.Builder()
+                            .setType(ident.getType())
+                            .setRatType(ident.getRatType())
+                            .setSubscriberId(ident.getSubscriberId())
+                            .setWifiNetworkKey(ident.getWifiNetworkKey())
+                            .setRoaming(ident.isRoaming()).setMetered(true)
+                            .setDefaultNetwork(true)
+                            .setOemManaged(ident.getOemManaged())
+                            .setSubId(ident.getSubId()).build();
                     final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
                     findOrCreateNetworkIdentitySet(mActiveIfaces, ifaceVt).add(vtIdent);
                     findOrCreateNetworkIdentitySet(mActiveUidIfaces, ifaceVt).add(vtIdent);
@@ -1336,6 +1500,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
                 if (isMobile) {
                     mobileIfaces.add(baseIface);
+                }
+                if (isWifi) {
+                    wifiIfaces.add(baseIface);
                 }
             }
 
@@ -1378,6 +1545,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     if (isMobile) {
                         mobileIfaces.add(iface);
                     }
+                    if (isWifi) {
+                        wifiIfaces.add(iface);
+                    }
 
                     mStatsFactory.noteStackedIface(iface, baseIface);
                 }
@@ -1385,10 +1555,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mMobileIfaces = mobileIfaces.toArray(new String[0]);
+        mWifiIfaces = wifiIfaces.toArray(new String[0]);
         // TODO (b/192758557): Remove debug log.
-        if (ArrayUtils.contains(mMobileIfaces, null)) {
+        if (CollectionUtils.contains(mMobileIfaces, null)) {
             throw new NullPointerException(
                     "null element in mMobileIfaces: " + Arrays.toString(mMobileIfaces));
+        }
+        if (CollectionUtils.contains(mWifiIfaces, null)) {
+            throw new NullPointerException(
+                    "null element in mWifiIfaces: " + Arrays.toString(mWifiIfaces));
         }
     }
 
@@ -1401,17 +1576,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (spec instanceof TelephonyNetworkSpecifier) {
              return ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
         } else {
-            Slog.wtf(TAG, "getSubIdForState invalid NetworkSpecifier");
+            Log.wtf(TAG, "getSubIdForState invalid NetworkSpecifier");
             return INVALID_SUBSCRIPTION_ID;
         }
     }
 
     /**
-     * For networks with {@code TRANSPORT_CELLULAR}, get subType that was obtained through
+     * For networks with {@code TRANSPORT_CELLULAR}, get ratType that was obtained through
      * {@link PhoneStateListener}. Otherwise, return 0 given that other networks with different
      * transport types do not actually fill this value.
      */
-    private int getSubTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
+    private int getRatTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
         if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return 0;
         }
@@ -1485,7 +1660,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         try {
             recordSnapshotLocked(currentTime);
         } catch (IllegalStateException e) {
-            Slog.w(TAG, "problem reading network stats: " + e);
+            Log.w(TAG, "problem reading network stats: " + e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
@@ -1510,7 +1685,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @GuardedBy("mStatsLock")
     private void performPollLocked(int flags) {
         if (!mSystemReady) return;
-        if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
+        if (LOGV) Log.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
         Trace.traceBegin(TRACE_TAG_NETWORK, "performPollLocked");
 
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
@@ -1608,7 +1783,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
-        EventLogTags.writeNetstatsMobileSample(
+        EventLog.writeEvent(LOG_TAG_NETSTATS_MOBILE_SAMPLE,
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,
@@ -1620,7 +1795,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         xtTotal = mXtRecorder.getTotalSinceBootLocked(template);
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
 
-        EventLogTags.writeNetstatsWifiSample(
+        EventLog.writeEvent(LOG_TAG_NETSTATS_WIFI_SAMPLE,
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,
@@ -1632,7 +1807,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     @GuardedBy("mStatsLock")
     private void removeUidsLocked(int... uids) {
-        if (LOGV) Slog.v(TAG, "removeUidsLocked() for UIDs " + Arrays.toString(uids));
+        if (LOGV) Log.v(TAG, "removeUidsLocked() for UIDs " + Arrays.toString(uids));
 
         // Perform one last poll before removing
         performPollLocked(FLAG_PERSIST_ALL);
@@ -1642,7 +1817,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // Clear kernel stats associated with UID
         for (int uid : uids) {
-            resetKernelUidStats(uid);
+            final int ret = mDeps.getTagStatsDeleter().deleteTagData(uid);
+            if (ret < 0) {
+                Log.w(TAG, "problem clearing counters for uid " + uid + ": " + Os.strerror(-ret));
+            }
         }
     }
 
@@ -1650,73 +1828,40 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Clean up {@link #mUidRecorder} after user is removed.
      */
     @GuardedBy("mStatsLock")
-    private void removeUserLocked(int userId) {
-        if (LOGV) Slog.v(TAG, "removeUserLocked() for userId=" + userId);
+    private void removeUserLocked(@NonNull UserHandle userHandle) {
+        if (LOGV) Log.v(TAG, "removeUserLocked() for UserHandle=" + userHandle);
 
         // Build list of UIDs that we should clean up
-        int[] uids = new int[0];
+        final ArrayList<Integer> uids = new ArrayList<>();
         final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
                 PackageManager.MATCH_ANY_USER
                 | PackageManager.MATCH_DISABLED_COMPONENTS);
         for (ApplicationInfo app : apps) {
-            final int uid = UserHandle.getUid(userId, app.uid);
-            uids = ArrayUtils.appendInt(uids, uid);
+            final int uid = userHandle.getUid(app.uid);
+            uids.add(uid);
         }
 
-        removeUidsLocked(uids);
+        removeUidsLocked(CollectionUtils.toIntArray(uids));
     }
 
-    private class NetworkStatsManagerInternalImpl extends NetworkStatsManagerInternal {
-        @Override
-        public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
-            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkTotalBytes");
-            try {
-                return NetworkStatsService.this.getNetworkTotalBytes(template, start, end);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_NETWORK);
-            }
+    /**
+     * Set the warning and limit to all registered custom network stats providers.
+     * Note that invocation of any interface will be sent to all providers.
+     */
+    public void setStatsProviderWarningAndLimitAsync(
+            @NonNull String iface, long warning, long limit) {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (LOGV) {
+            Log.v(TAG, "setStatsProviderWarningAndLimitAsync("
+                    + iface + "," + warning + "," + limit + ")");
         }
-
-        @Override
-        public NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end) {
-            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkUidBytes");
-            try {
-                return NetworkStatsService.this.getNetworkUidBytes(template, start, end);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_NETWORK);
-            }
-        }
-
-        @Override
-        public void setUidForeground(int uid, boolean uidForeground) {
-            NetworkStatsService.this.setUidForeground(uid, uidForeground);
-        }
-
-        @Override
-        public void advisePersistThreshold(long thresholdBytes) {
-            NetworkStatsService.this.advisePersistThreshold(thresholdBytes);
-        }
-
-        @Override
-        public void forceUpdate() {
-            NetworkStatsService.this.forceUpdate();
-        }
-
-        @Override
-        public void setStatsProviderWarningAndLimitAsync(
-                @NonNull String iface, long warning, long limit) {
-            if (LOGV) {
-                Slog.v(TAG, "setStatsProviderWarningAndLimitAsync("
-                        + iface + "," + warning + "," + limit + ")");
-            }
-            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetWarningAndLimit(iface,
-                    warning, limit));
-        }
+        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetWarningAndLimit(iface,
+                warning, limit));
     }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter rawWriter, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, rawWriter)) return;
+        if (!PermissionUtils.checkDumpPermission(mContext, TAG, rawWriter)) return;
 
         long duration = DateUtils.DAY_IN_MILLIS;
         final HashSet<String> argSet = new HashSet<String>();
@@ -1777,15 +1922,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             pw.println("Configs:");
             pw.increaseIndent();
-            pw.printPair(NETSTATS_COMBINE_SUBTYPE_ENABLED, mSettings.getCombineSubtypeEnabled());
+            pw.print(NETSTATS_COMBINE_SUBTYPE_ENABLED, mSettings.getCombineSubtypeEnabled());
             pw.println();
             pw.decreaseIndent();
 
             pw.println("Active interfaces:");
             pw.increaseIndent();
             for (int i = 0; i < mActiveIfaces.size(); i++) {
-                pw.printPair("iface", mActiveIfaces.keyAt(i));
-                pw.printPair("ident", mActiveIfaces.valueAt(i));
+                pw.print("iface", mActiveIfaces.keyAt(i));
+                pw.print("ident", mActiveIfaces.valueAt(i));
                 pw.println();
             }
             pw.decreaseIndent();
@@ -1793,8 +1938,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             pw.println("Active UID interfaces:");
             pw.increaseIndent();
             for (int i = 0; i < mActiveUidIfaces.size(); i++) {
-                pw.printPair("iface", mActiveUidIfaces.keyAt(i));
-                pw.printPair("ident", mActiveUidIfaces.valueAt(i));
+                pw.print("iface", mActiveUidIfaces.keyAt(i));
+                pw.print("ident", mActiveUidIfaces.valueAt(i));
                 pw.println();
             }
             pw.decreaseIndent();
@@ -1867,16 +2012,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @GuardedBy("mStatsLock")
     private void dumpProtoLocked(FileDescriptor fd) {
-        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final ProtoOutputStream proto = new ProtoOutputStream(new FileOutputStream(fd));
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
 
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES, mActiveIfaces);
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES, mActiveUidIfaces);
-        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
-        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
-        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
-        mUidTagRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES_FIELD_NUMBER,
+                mActiveIfaces);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES_FIELD_NUMBER,
+                mActiveUidIfaces);
+        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS_FIELD_NUMBER);
+        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS_FIELD_NUMBER);
+        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS_FIELD_NUMBER);
+        mUidTagRecorder.dumpDebugLocked(proto,
+                NetworkStatsServiceDumpProto.UID_TAG_STATS_FIELD_NUMBER);
 
         proto.flush();
     }
@@ -1886,8 +2034,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         for (int i = 0; i < ifaces.size(); i++) {
             final long start = proto.start(tag);
 
-            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
-            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES);
+            proto.write(NetworkInterfaceProto.INTERFACE_FIELD_NUMBER, ifaces.keyAt(i));
+            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES_FIELD_NUMBER);
 
             proto.end(start);
         }
@@ -1954,13 +2102,29 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     // TODO: Remove this by implementing {@link NetworkStatsProvider} for non-offloaded
     //  tethering stats.
-    private NetworkStats getNetworkStatsTethering(int how) throws RemoteException {
+    private @NonNull NetworkStats getNetworkStatsTethering(int how) throws RemoteException {
+         // We only need to return per-UID stats. Per-device stats are already counted by
+        // interface counters.
+        if (how != STATS_PER_UID) {
+            return new NetworkStats(SystemClock.elapsedRealtime(), 0);
+        }
+
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
         try {
-            return mNetworkManager.getNetworkStatsTethering(how);
+            final TetherStatsParcel[] tetherStatsParcels = mNetd.tetherGetStats();
+            for (TetherStatsParcel tetherStats : tetherStatsParcels) {
+                try {
+                    stats.combineValues(new NetworkStats.Entry(tetherStats.iface, UID_TETHERING,
+                            SET_DEFAULT, TAG_NONE, tetherStats.rxBytes, tetherStats.rxPackets,
+                            tetherStats.txBytes, tetherStats.txPackets, 0L));
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new IllegalStateException("invalid tethering stats " + e);
+                }
+            }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
-            return new NetworkStats(0L, 10);
         }
+        return stats;
     }
 
     // TODO: It is copied from ConnectivityService, consider refactor these check permission
@@ -1999,10 +2163,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         Objects.requireNonNull(provider, "provider is null");
         Objects.requireNonNull(tag, "tag is null");
+        final NetworkPolicyManager netPolicyManager = mContext
+                .getSystemService(NetworkPolicyManager.class);
         try {
             NetworkStatsProviderCallbackImpl callback = new NetworkStatsProviderCallbackImpl(
                     tag, provider, mStatsProviderSem, mAlertObserver,
-                    mStatsProviderCbList);
+                    mStatsProviderCbList, netPolicyManager);
             mStatsProviderCbList.add(callback);
             Log.d(TAG, "registerNetworkStatsProvider from " + callback.mTag + " uid/pid="
                     + getCallingUid() + "/" + getCallingPid());
@@ -2042,8 +2208,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         @NonNull final INetworkStatsProvider mProvider;
         @NonNull private final Semaphore mSemaphore;
-        @NonNull final INetworkManagementEventObserver mAlertObserver;
+        @NonNull final AlertObserver mAlertObserver;
         @NonNull final CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList;
+        @NonNull final NetworkPolicyManager mNetworkPolicyManager;
 
         @NonNull private final Object mProviderStatsLock = new Object();
 
@@ -2056,8 +2223,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         NetworkStatsProviderCallbackImpl(
                 @NonNull String tag, @NonNull INetworkStatsProvider provider,
                 @NonNull Semaphore semaphore,
-                @NonNull INetworkManagementEventObserver alertObserver,
-                @NonNull CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> cbList)
+                @NonNull AlertObserver alertObserver,
+                @NonNull CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> cbList,
+                @NonNull NetworkPolicyManager networkPolicyManager)
                 throws RemoteException {
             mTag = tag;
             mProvider = provider;
@@ -2065,6 +2233,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mSemaphore = semaphore;
             mAlertObserver = alertObserver;
             mStatsProviderCbList = cbList;
+            mNetworkPolicyManager = networkPolicyManager;
         }
 
         @NonNull
@@ -2104,15 +2273,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // This binder object can only have been obtained by a process that holds
             // NETWORK_STATS_PROVIDER. Thus, no additional permission check is required.
             BinderUtils.withCleanCallingIdentity(() ->
-                    mAlertObserver.limitReached(LIMIT_GLOBAL_ALERT, null /* unused */));
+                    mAlertObserver.onQuotaLimitReached(LIMIT_GLOBAL_ALERT, null /* unused */));
         }
 
         @Override
         public void notifyWarningOrLimitReached() {
             Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    LocalServices.getService(NetworkPolicyManagerInternal.class)
-                            .onStatsProviderWarningOrLimitReached(mTag));
+                    mNetworkPolicyManager.notifyStatsProviderWarningOrLimitReached());
         }
 
         @Override
@@ -2171,24 +2339,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link android.provider.Settings.Global}.
      */
     private static class DefaultNetworkStatsSettings implements NetworkStatsSettings {
-        private final ContentResolver mResolver;
-
-        public DefaultNetworkStatsSettings(Context context) {
-            mResolver = Objects.requireNonNull(context.getContentResolver());
-            // TODO: adjust these timings for production builds
-        }
-
-        private long getGlobalLong(String name, long def) {
-            return Settings.Global.getLong(mResolver, name, def);
-        }
-        private boolean getGlobalBoolean(String name, boolean def) {
-            final int defInt = def ? 1 : 0;
-            return Settings.Global.getInt(mResolver, name, defInt) != 0;
-        }
+        DefaultNetworkStatsSettings() {}
 
         @Override
         public long getPollInterval() {
-            return getGlobalLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
+            return 30 * MINUTE_IN_MILLIS;
         }
         @Override
         public long getPollDelay() {
@@ -2196,25 +2351,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public long getGlobalAlertBytes(long def) {
-            return getGlobalLong(NETSTATS_GLOBAL_ALERT_BYTES, def);
+            return def;
         }
         @Override
         public boolean getSampleEnabled() {
-            return getGlobalBoolean(NETSTATS_SAMPLE_ENABLED, true);
+            return true;
         }
         @Override
         public boolean getAugmentEnabled() {
-            return getGlobalBoolean(NETSTATS_AUGMENT_ENABLED, true);
+            return true;
         }
         @Override
         public boolean getCombineSubtypeEnabled() {
-            return getGlobalBoolean(NETSTATS_COMBINE_SUBTYPE_ENABLED, false);
+            return false;
         }
         @Override
         public Config getDevConfig() {
-            return new Config(getGlobalLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_DEV_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(HOUR_IN_MILLIS, 15 * DAY_IN_MILLIS, 90 * DAY_IN_MILLIS);
         }
         @Override
         public Config getXtConfig() {
@@ -2222,35 +2375,39 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         @Override
         public Config getUidConfig() {
-            return new Config(getGlobalLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_ROTATE_AGE, 15 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
+            return new Config(2 * HOUR_IN_MILLIS, 15 * DAY_IN_MILLIS, 90 * DAY_IN_MILLIS);
         }
         @Override
         public Config getUidTagConfig() {
-            return new Config(getGlobalLong(NETSTATS_UID_TAG_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_TAG_ROTATE_AGE, 5 * DAY_IN_MILLIS),
-                    getGlobalLong(NETSTATS_UID_TAG_DELETE_AGE, 15 * DAY_IN_MILLIS));
+            return new Config(2 * HOUR_IN_MILLIS, 5 * DAY_IN_MILLIS, 15 * DAY_IN_MILLIS);
         }
         @Override
         public long getDevPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_DEV_PERSIST_BYTES, def);
+            return def;
         }
         @Override
         public long getXtPersistBytes(long def) {
-            return getDevPersistBytes(def);
+            return def;
         }
         @Override
         public long getUidPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_UID_PERSIST_BYTES, def);
+            return def;
         }
         @Override
         public long getUidTagPersistBytes(long def) {
-            return getGlobalLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
+            return def;
         }
     }
 
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);
     private static native long nativeGetUidStat(int uid, int type);
+
+    // TODO: use BpfNetMaps to delete tag data and remove this.
+    @VisibleForTesting
+    interface TagStatsDeleter {
+        int deleteTagData(int uid);
+    }
+
+    private static native int nativeDeleteTagData(int uid);
 }

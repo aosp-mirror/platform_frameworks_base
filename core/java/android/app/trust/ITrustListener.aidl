@@ -16,13 +16,16 @@
 */
 package android.app.trust;
 
+import java.util.List;
+
 /**
  * Private API to be notified about trust changes.
  *
  * {@hide}
  */
 oneway interface ITrustListener {
-    void onTrustChanged(boolean enabled, int userId, int flags);
+    void onTrustChanged(boolean enabled, int userId, int flags,
+        in List<String> trustGrantedMessages);
     void onTrustManagedChanged(boolean managed, int userId);
     void onTrustError(in CharSequence message);
 }

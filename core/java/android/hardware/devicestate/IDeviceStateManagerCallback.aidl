@@ -41,16 +41,6 @@ interface IDeviceStateManagerCallback {
     oneway void onRequestActive(IBinder token);
 
     /**
-     * Called to notify the callback that a request has become suspended. Guaranteed to be called
-     * before a subsequent call to {@link #onDeviceStateInfoChanged(DeviceStateInfo)} if the request
-     * becoming suspended resulted in a change of device state info.
-     *
-     * @param token the request token previously registered with
-     *        {@link IDeviceStateManager#requestState(IBinder, int, int)}
-     */
-    oneway void onRequestSuspended(IBinder token);
-
-    /**
      * Called to notify the callback that a request has become canceled. No further callbacks will
      * be triggered for this request. Guaranteed to be called before a subsequent call to
      * {@link #onDeviceStateInfoChanged(DeviceStateInfo)} if the request becoming canceled resulted

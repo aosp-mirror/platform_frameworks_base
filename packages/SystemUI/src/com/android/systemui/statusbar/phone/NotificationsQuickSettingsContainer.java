@@ -45,7 +45,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mStackScroller;
     private View mKeyguardStatusBar;
 
-    private int mStackScrollerMargin;
     private ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
     private ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
     private final Comparator<View> mIndexComparator = Comparator.comparingInt(this::indexOfChild);
@@ -53,6 +52,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
     private View mQSScrollView;
+    private View mQSContainer;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,7 +63,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         super.onFinishInflate();
         mQsFrame = findViewById(R.id.qs_frame);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
-        mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
     }
 
@@ -72,6 +71,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mQs = (QS) fragment;
         mQSFragmentAttachedListener.accept(mQs);
         mQSScrollView = mQs.getView().findViewById(R.id.expanded_qs_scroll_view);
+        mQSContainer = mQs.getView().findViewById(R.id.quick_settings_container);
     }
 
     @Override
@@ -91,13 +91,23 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
                     mQSScrollView.getPaddingLeft(),
                     mQSScrollView.getPaddingTop(),
                     mQSScrollView.getPaddingRight(),
+                    paddingBottom);
+        }
+    }
+
+    public void setQSContainerPaddingBottom(int paddingBottom) {
+        if (mQSContainer != null) {
+            mQSContainer.setPadding(
+                    mQSContainer.getPaddingLeft(),
+                    mQSContainer.getPaddingTop(),
+                    mQSContainer.getPaddingRight(),
                     paddingBottom
             );
         }
     }
 
     public int getDefaultNotificationsMarginBottom() {
-        return mStackScrollerMargin;
+        return ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
     }
 
     public void setInsetsChangedListener(Consumer<WindowInsets> onInsetsChangedListener) {

@@ -43,14 +43,14 @@ import java.util.Objects;
  */
 public final class DeviceState {
     /**
-     * Flag that indicates sticky requests should be cancelled when this device state becomes the
+     * Flag that indicates override requests should be cancelled when this device state becomes the
      * base device state.
      */
-    public static final int FLAG_CANCEL_STICKY_REQUESTS = 1 << 0;
+    public static final int FLAG_CANCEL_OVERRIDE_REQUESTS = 1 << 0;
 
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
-            FLAG_CANCEL_STICKY_REQUESTS,
+            FLAG_CANCEL_OVERRIDE_REQUESTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}
@@ -113,5 +113,11 @@ public final class DeviceState {
     @Override
     public int hashCode() {
         return Objects.hash(mIdentifier, mName, mFlags);
+    }
+
+    /** Checks if a specific flag is set
+     */
+    public boolean hasFlag(int flagToCheckFor) {
+        return (mFlags & flagToCheckFor) == flagToCheckFor;
     }
 }

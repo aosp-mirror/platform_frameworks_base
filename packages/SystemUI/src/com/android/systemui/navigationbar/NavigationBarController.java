@@ -31,6 +31,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
@@ -109,7 +111,8 @@ public class NavigationBarController implements
             DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
-            Optional<Pip> pipOptional) {
+            Optional<Pip> pipOptional,
+            Optional<BackAnimation> backAnimation) {
         mContext = context;
         mHandler = mainHandler;
         mNavigationBarFactory = navigationBarFactory;
@@ -121,7 +124,8 @@ public class NavigationBarController implements
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
-                dumpManager, autoHideController, lightBarController, pipOptional);
+                dumpManager, autoHideController, lightBarController, pipOptional,
+                backAnimation.orElse(null));
         mIsTablet = isTablet(mContext);
         dumpManager.registerDumpable(this);
     }
@@ -212,9 +216,11 @@ public class NavigationBarController implements
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         if (mIsTablet) {
+            Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
             // Remove navigation bar when taskbar is showing
             removeNavigationBar(mContext.getDisplayId());
             mTaskbarDelegate.init(mContext.getDisplayId());
+            Trace.endSection();
         } else {
             mTaskbarDelegate.destroy();
         }

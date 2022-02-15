@@ -35,6 +35,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.graph.SignalDrawable;
@@ -60,6 +61,72 @@ import java.util.List;
 public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
+    public void testDeviceProvisioned_userNotSetUp() {
+        // GIVEN - user is not setup
+        when(mMockProvisionController.isCurrentUserSetup()).thenReturn(false);
+
+        // WHEN - a NetworkController is created
+        mNetworkController = new NetworkControllerImpl(mContext,
+                mMockCm,
+                mMockTm,
+                mTelephonyListenerManager,
+                mMockWm,
+                mMockNsm,
+                mMockSm,
+                mConfig,
+                TestableLooper.get(this).getLooper(),
+                mFakeExecutor,
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mMockProvisionController,
+                mMockBd,
+                mDemoModeController,
+                mCarrierConfigTracker,
+                mFeatureFlags,
+                mock(DumpManager.class)
+        );
+        TestableLooper.get(this).processAllMessages();
+
+        // THEN - NetworkController claims the user is not setup
+        assertFalse("User has not been set up", mNetworkController.isUserSetup());
+    }
+
+    @Test
+    public void testDeviceProvisioned_userSetUp() {
+        // GIVEN - user is not setup
+        when(mMockProvisionController.isCurrentUserSetup()).thenReturn(true);
+
+        // WHEN - a NetworkController is created
+        mNetworkController = new NetworkControllerImpl(mContext,
+                mMockCm,
+                mMockTm,
+                mTelephonyListenerManager,
+                mMockWm,
+                mMockNsm,
+                mMockSm,
+                mConfig,
+                TestableLooper.get(this).getLooper(),
+                mFakeExecutor,
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mMockProvisionController,
+                mMockBd,
+                mDemoModeController,
+                mCarrierConfigTracker,
+                mFeatureFlags,
+                mock(DumpManager.class)
+        );
+        TestableLooper.get(this).processAllMessages();
+
+        // THEN - NetworkController claims the user is not setup
+        assertTrue("User has been set up", mNetworkController.isUserSetup());
+    }
+
+    @Test
     public void testNoIconWithoutMobile() {
         // Turn off mobile network support.
         when(mMockTm.isDataCapable()).thenReturn(false);
@@ -70,7 +137,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -91,7 +158,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -160,7 +227,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
                 mDemoModeController, mock(CarrierConfigTracker.class), mFeatureFlags,
-                mStatusBarFlags, mock(DumpManager.class));
+                mock(DumpManager.class));
         setupNetworkController();
 
         // No Subscriptions.

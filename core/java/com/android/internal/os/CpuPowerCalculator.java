@@ -20,17 +20,15 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
     private final int mNumCpuClusters;
 
@@ -90,6 +88,11 @@ public class CpuPowerCalculator extends PowerCalculator {
                 mPerCpuFreqPowerEstimators[index++] = estimator;
             }
         }
+    }
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_CPU;
     }
 
     @Override
@@ -156,11 +159,11 @@ public class CpuPowerCalculator extends PowerCalculator {
     private void calculateMeasuredPowerPerProcessState(UidBatteryConsumer.Builder app,
             BatteryStats.Uid u, BatteryConsumer.Key[] keys) {
         for (BatteryConsumer.Key key : keys) {
-            // The key for "PROCESS_STATE_ANY" has already been populated with the
-            // full energy across all states.  We don't want to override it with
+            // The key for PROCESS_STATE_UNSPECIFIED aka PROCESS_STATE_ANY has already been
+            // populated with the full energy across all states.  We don't want to override it with
             // the energy for "other" states, which excludes the tracked states like
             // foreground, background etc.
-            if (key.processState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (key.processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
@@ -184,7 +187,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                 uidProcState++) {
             @BatteryConsumer.ProcessState int procState =
                     BatteryStats.mapUidProcessStateToBatteryConsumerProcessState(uidProcState);
-            if (procState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (procState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
@@ -199,7 +202,7 @@ public class CpuPowerCalculator extends PowerCalculator {
         }
 
         for (BatteryConsumer.Key key : keys) {
-            if (key.processState == BatteryConsumer.PROCESS_STATE_ANY) {
+            if (key.processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
                 continue;
             }
 
@@ -210,29 +213,6 @@ public class CpuPowerCalculator extends PowerCalculator {
             app.setConsumedPower(key, powerMah, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
                     .setUsageDurationMillis(key, cpuActiveTime);
         }
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        Result result = new Result();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(app, app.uidObj, statsType, result);
-            }
-        }
-    }
-
-    private void calculateApp(BatterySipper app, BatteryStats.Uid u, int statsType, Result result) {
-        final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculatePowerAndDuration(u, powerModel, consumptionUC, statsType, result);
-
-        app.cpuPowerMah = result.powerMah;
-        app.cpuTimeMs = result.durationMs;
-        app.cpuFgTimeMs = result.durationFgMs;
-        app.packageWithHighestDrain = result.packageWithHighestDrain;
     }
 
     private void calculatePowerAndDuration(BatteryStats.Uid u,
@@ -253,7 +233,7 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         if (DEBUG && (durationMs != 0 || powerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + durationMs + " ms power="
-                    + formatCharge(powerMah));
+                    + BatteryStats.formatCharge(powerMah));
         }
 
         // Keep track of the package with highest drain.
@@ -320,7 +300,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                     if (DEBUG) {
                         Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster
                                 + " clusterTimeMs=" + cpuClusterTimes[cluster]
-                                + " power=" + formatCharge(power));
+                                + " power=" + BatteryStats.formatCharge(power));
                     }
                 }
             } else {

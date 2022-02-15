@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"Oʻchiq"</item>
     <item msgid="2075645297847971154">"Yoniq"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Ishlamaydi"</item>
+    <item msgid="1909756493418256167">"Yoqilmagan"</item>
+    <item msgid="4531508423703413340">"Yoniq"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Ishlamaydi"</item>
     <item msgid="9103697205127645916">"Oʻchiq"</item>

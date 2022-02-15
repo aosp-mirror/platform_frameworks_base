@@ -33,7 +33,7 @@ import android.content.om.CriticalOverlayInfo;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.os.FabricatedOverlayInfo;
 import android.os.FabricatedOverlayInternal;
 import android.text.TextUtils;
@@ -492,7 +492,7 @@ final class OverlayManagerServiceImpl {
     Set<PackageAndUser> registerFabricatedOverlay(
             @NonNull final FabricatedOverlayInternal overlay)
             throws OperationFailedException {
-        if (ParsingPackageUtils.validateName(overlay.overlayName,
+        if (FrameworkParsingPackageUtils.validateName(overlay.overlayName,
                 false /* requireSeparator */, true /* requireFilename */) != null) {
             throw new OperationFailedException(
                     "overlay name can only consist of alphanumeric characters, '_', and '.'");

@@ -156,11 +156,9 @@ public final class UiccCardInfo implements Parcelable {
     @Nullable
     @Deprecated
     public String getIccId() {
-        // Temporarily bypassing exception
-        // TODO: add exception once refactoring completed.
-        //if (mIccIdAccessRestricted) {
-        //    throw new UnsupportedOperationException("getIccId from UiccPortInfo");
-        //}
+        if (mIccIdAccessRestricted) {
+            throw new UnsupportedOperationException("getIccId from UiccPortInfo");
+        }
         //always return ICCID from first port.
         return getPorts().stream().findFirst().get().getIccId();
     }
@@ -259,8 +257,6 @@ public final class UiccCardInfo implements Parcelable {
                 + mCardId
                 + ", mEid="
                 + mEid
-                + ", mIccId="
-                + SubscriptionInfo.givePrintableIccid(getIccId())
                 + ", mPhysicalSlotIndex="
                 + mPhysicalSlotIndex
                 + ", mIsRemovable="

@@ -20,6 +20,8 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGRO
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
+import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
+import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
@@ -123,6 +125,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
             "kill_bg_restricted_cached_idle_settle_time";
+    static final String KEY_ENABLE_COMPONENT_ALIAS = "enable_experimental_component_alias";
     static final String KEY_COMPONENT_ALIAS_OVERRIDES = "component_alias_overrides";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -199,7 +202,12 @@ final class ActivityManagerConstants extends ContentObserver {
      * Whether or not to enable the extra delays to service restarts on memory pressure.
      */
     private static final boolean DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE = true;
+    private static final boolean DEFAULT_ENABLE_COMPONENT_ALIAS = false;
     private static final String DEFAULT_COMPONENT_ALIAS_OVERRIDES = "";
+
+    private static final int DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST =
+            DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY
+            | DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -289,6 +297,9 @@ final class ActivityManagerConstants extends ContentObserver {
      * Time in milliseconds; the allowed duration from a process is killed until it's really gone.
      */
     private static final String KEY_PROCESS_KILL_TIMEOUT = "process_kill_timeout";
+
+    private static final String KEY_DEFER_BOOT_COMPLETED_BROADCAST =
+            "defer_boot_completed_broadcast";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -595,6 +606,21 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
 
     /**
+     * Whether to enable "component alias" experimental feature. This can only be enabled
+     * on userdebug or eng builds.
+     */
+    volatile boolean mEnableComponentAlias = DEFAULT_ENABLE_COMPONENT_ALIAS;
+
+    /**
+     * Where or not to defer LOCKED_BOOT_COMPLETED and BOOT_COMPLETED broadcasts until the first
+     * time the process of the UID is started.
+     * Defined in {@link BroadcastConstants#DeferBootCompletedBroadcastType}
+     */
+    @GuardedBy("mService")
+    volatile @BroadcastConstants.DeferBootCompletedBroadcastType int mDeferBootCompletedBroadcast =
+            DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST;
+
+    /**
      * Defines component aliases. Format
      * ComponentName ":" ComponentName ( "," ComponentName ":" ComponentName )*
      */
@@ -831,11 +857,15 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
                                 updateEnableExtraServiceRestartDelayOnMemPressure();
                                 break;
+                            case KEY_ENABLE_COMPONENT_ALIAS:
                             case KEY_COMPONENT_ALIAS_OVERRIDES:
                                 updateComponentAliases();
                                 break;
                             case KEY_PROCESS_KILL_TIMEOUT:
                                 updateProcessKillTimeout();
+                                break;
+                            case KEY_DEFER_BOOT_COMPLETED_BROADCAST:
+                                updateDeferBootCompletedBroadcast();
                                 break;
                             default:
                                 break;
@@ -1249,6 +1279,13 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    private void updateDeferBootCompletedBroadcast() {
+        mDeferBootCompletedBroadcast = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFER_BOOT_COMPLETED_BROADCAST,
+                DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST);
+    }
+
     private long[] parseLongArray(@NonNull String key, @NonNull long[] def) {
         final String val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 key, null);
@@ -1269,11 +1306,15 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateComponentAliases() {
+        mEnableComponentAlias = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENABLE_COMPONENT_ALIAS,
+                DEFAULT_ENABLE_COMPONENT_ALIAS);
         mComponentAliasOverrides = DeviceConfig.getString(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_COMPONENT_ALIAS_OVERRIDES,
                 DEFAULT_COMPONENT_ALIAS_OVERRIDES);
-        mService.mComponentAliasResolver.update(mComponentAliasOverrides);
+        mService.mComponentAliasResolver.update(mEnableComponentAlias, mComponentAliasOverrides);
     }
 
     private void updateProcessKillTimeout() {
@@ -1512,8 +1553,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
         pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
         pw.print("="); pw.println(mFgsAllowOptOut);
+        pw.print("  "); pw.print(KEY_ENABLE_COMPONENT_ALIAS);
+        pw.print("="); pw.println(mEnableComponentAlias);
         pw.print("  "); pw.print(KEY_COMPONENT_ALIAS_OVERRIDES);
         pw.print("="); pw.println(mComponentAliasOverrides);
+        pw.print("  "); pw.print(KEY_DEFER_BOOT_COMPLETED_BROADCAST);
+        pw.print("="); pw.println(mDeferBootCompletedBroadcast);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

@@ -19,10 +19,8 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,13 +39,11 @@ import java.io.PrintWriter;
  */
 public class QSContainerImpl extends FrameLayout implements Dumpable {
 
-    private final Point mSizePoint = new Point();
     private int mFancyClippingTop;
     private int mFancyClippingBottom;
     private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
     private  final Path mFancyClippingPath = new Path();
     private int mHeightOverride = -1;
-    private View mQSDetail;
     private QuickStatusBarHeader mHeader;
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
@@ -66,7 +62,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQSPanelContainer = findViewById(R.id.expanded_qs_scroll_view);
-        mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -75,12 +70,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
 
     @Override
@@ -152,10 +141,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     void updateResources(QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         mQSPanelContainer.setPaddingRelative(
-                getPaddingStart(),
+                mQSPanelContainer.getPaddingStart(),
                 Utils.getQsHeaderSystemIconsAreaHeight(mContext),
-                getPaddingEnd(),
-                getPaddingBottom()
+                mQSPanelContainer.getPaddingEnd(),
+                mQSPanelContainer.getPaddingBottom()
         );
 
         int sideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
@@ -184,9 +173,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         int height = calculateContainerHeight();
         int scrollBottom = calculateContainerBottom();
         setBottom(getTop() + height);
-        mQSDetail.setBottom(getTop() + scrollBottom);
-        int qsDetailBottomMargin = ((MarginLayoutParams) mQSDetail.getLayoutParams()).bottomMargin;
-        mQSDetail.setBottom(getTop() + scrollBottom - qsDetailBottomMargin);
     }
 
     protected int calculateContainerHeight() {
@@ -220,9 +206,13 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 // Some views are always full width or have dependent padding
                 continue;
             }
-            LayoutParams lp = (LayoutParams) view.getLayoutParams();
-            lp.rightMargin = mSideMargins;
-            lp.leftMargin = mSideMargins;
+            if (!(view instanceof FooterActionsView)) {
+                // Only padding for FooterActionsView, no margin. That way, the background goes
+                // all the way to the edge.
+                LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                lp.rightMargin = mSideMargins;
+                lp.leftMargin = mSideMargins;
+            }
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
                 qsPanelController.setContentMargins(mContentPadding, mContentPadding);
@@ -239,13 +229,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                         view.getPaddingBottom());
             }
         }
-    }
-
-    private int getDisplayHeight() {
-        if (mSizePoint.y == 0) {
-            getDisplay().getRealSize(mSizePoint);
-        }
-        return mSizePoint.y;
     }
 
     /**

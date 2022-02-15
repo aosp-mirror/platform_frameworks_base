@@ -106,7 +106,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
-import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Point;
@@ -119,6 +118,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -447,25 +447,6 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     /**
-     * This tests override configuration updates for display content.
-     */
-    @Test
-    public void testDisplayOverrideConfigUpdate() {
-        final Configuration currentOverrideConfig =
-                mDisplayContent.getRequestedOverrideConfiguration();
-
-        // Create new, slightly changed override configuration and apply it to the display.
-        final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
-        newOverrideConfig.densityDpi += 120;
-        newOverrideConfig.fontScale += 0.3;
-
-        mWm.setNewDisplayOverrideConfiguration(newOverrideConfig, mDisplayContent);
-
-        // Check that override config is applied.
-        assertEquals(newOverrideConfig, mDisplayContent.getRequestedOverrideConfiguration());
-    }
-
-    /**
      * This tests global configuration updates when default display config is updated.
      */
     @Test
@@ -478,7 +459,8 @@ public class DisplayContentTests extends WindowTestsBase {
         newOverrideConfig.densityDpi += 120;
         newOverrideConfig.fontScale += 0.3;
 
-        mWm.setNewDisplayOverrideConfiguration(newOverrideConfig, defaultDisplay);
+        defaultDisplay.updateDisplayOverrideConfigurationLocked(newOverrideConfig,
+                null /* starting */, false /* deferResume */, null /* result */);
 
         // Check that global configuration is updated, as we've updated default display's config.
         Configuration globalConfig = mWm.mRoot.getConfiguration();
@@ -486,7 +468,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(newOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
 
         // Return back to original values.
-        mWm.setNewDisplayOverrideConfiguration(currentConfig, defaultDisplay);
+        defaultDisplay.updateDisplayOverrideConfigurationLocked(currentConfig,
+                null /* starting */, false /* deferResume */, null /* result */);
         globalConfig = mWm.mRoot.getConfiguration();
         assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
@@ -1101,7 +1084,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "app"));
         dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
-                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 
@@ -1152,7 +1135,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeInputTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
         dc.getImeTarget(IME_TARGET_INPUT).getWindow().setWindowingMode(
-                WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         dc.setImeLayeringTarget(dc.getImeTarget(IME_TARGET_INPUT).getWindow());
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertNotEquals(dc.getImeTarget(IME_TARGET_INPUT).getWindow(),
@@ -1339,7 +1322,7 @@ public class DisplayContentTests extends WindowTestsBase {
         displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
-        assertNotNull(displayContent.getFadeRotationAnimationController());
+        assertNotNull(displayContent.getAsyncRotationController());
         assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
 
         for (WindowState w : windows) {
@@ -1353,7 +1336,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // the animation controller should be cleared.
         statusBar.setOrientationChanging(false);
         navBar.setOrientationChanging(false);
-        assertNull(displayContent.getFadeRotationAnimationController());
+        assertNull(displayContent.getAsyncRotationController());
     }
 
     @UseTestDisplay(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR,
@@ -1391,7 +1374,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
 
-        assertNotNull(mDisplayContent.getFadeRotationAnimationController());
+        assertNotNull(mDisplayContent.getAsyncRotationController());
         assertTrue(mStatusBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
         assertTrue(mNavBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
         // Notification shade may have its own view animation in real case so do not fade out it.
@@ -1422,18 +1405,16 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(config90.orientation, app.getConfiguration().orientation);
         assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
-        // Make wallaper laid out with the fixed rotation transform.
+        // Associate wallpaper with the fixed rotation transform.
         final WindowToken wallpaperToken = mWallpaperWindow.mToken;
         wallpaperToken.linkFixedRotationTransform(app);
-        mWallpaperWindow.mLayoutNeeded = true;
-        performLayout(mDisplayContent);
 
         // Force the negative offset to verify it can be updated.
         mWallpaperWindow.mXOffset = mWallpaperWindow.mYOffset = -1;
         assertTrue(mDisplayContent.mWallpaperController.updateWallpaperOffset(mWallpaperWindow,
                 false /* sync */));
-        assertThat(mWallpaperWindow.mXOffset).isGreaterThan(-1);
-        assertThat(mWallpaperWindow.mYOffset).isGreaterThan(-1);
+        assertThat(mWallpaperWindow.mXOffset).isNotEqualTo(-1);
+        assertThat(mWallpaperWindow.mYOffset).isNotEqualTo(-1);
 
         // The wallpaper need to animate with transformed position, so its surface position should
         // not be reset.
@@ -1483,7 +1464,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(app.hasFixedRotationTransform());
         assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
-        assertNull(mDisplayContent.getFadeRotationAnimationController());
+        assertNull(mDisplayContent.getAsyncRotationController());
     }
 
     @Test
@@ -1599,6 +1580,30 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
+    /**
+     * Creates different types of displays, verifies that minimal task size doesn't change
+     * with density of display.
+     */
+    @Test
+    public void testCalculatesDisplaySpecificMinTaskSizes() {
+        DisplayContent defaultTestDisplay =
+                new TestDisplayContent.Builder(mAtm, 1000, 2000).build();
+        final int defaultMinTaskSize = defaultTestDisplay.mMinSizeOfResizeableTaskDp;
+        DisplayContent firstDisplay = new TestDisplayContent.Builder(mAtm, 1000, 2000)
+                .setDensityDpi(300)
+                .updateDisplayMetrics()
+                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 10)
+                .build();
+        assertEquals(defaultMinTaskSize + 10, firstDisplay.mMinSizeOfResizeableTaskDp);
+
+        DisplayContent secondDisplay = new TestDisplayContent.Builder(mAtm, 200, 200)
+                .setDensityDpi(320)
+                .updateDisplayMetrics()
+                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 20)
+                .build();
+        assertEquals(defaultMinTaskSize + 20, secondDisplay.mMinSizeOfResizeableTaskDp);
+    }
+
     @Test
     public void testRecentsNotRotatingWithFixedRotation() {
         unblockDisplayRotation(mDisplayContent);
@@ -1640,34 +1645,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 eq(recentsActivity));
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
         assertFalse(recentsActivity.hasFixedRotationTransform());
-    }
-
-    @Test
-    public void testClearIntermediateFixedRotationAdjustments() throws RemoteException {
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        mDisplayContent.setFixedRotationLaunchingApp(activity,
-                (mDisplayContent.getRotation() + 1) % 4);
-        // Create a window so FixedRotationAdjustmentsItem can be sent.
-        createWindow(null, TYPE_APPLICATION_STARTING, activity, "AppWin");
-        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        activity2.setVisible(false);
-        clearInvocations(mAtm.getLifecycleManager());
-        // The first activity has applied fixed rotation but the second activity becomes the top
-        // before the transition is done and it has the same rotation as display, so the dispatched
-        // rotation adjustment of first activity must be cleared.
-        mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(activity2,
-                false /* checkOpening */);
-
-        final ArgumentCaptor<FixedRotationAdjustmentsItem> adjustmentsCaptor =
-                ArgumentCaptor.forClass(FixedRotationAdjustmentsItem.class);
-        verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
-                eq(activity.app.getThread()), adjustmentsCaptor.capture());
-        // The transformation is kept for animation in real case.
-        assertTrue(activity.hasFixedRotationTransform());
-        final FixedRotationAdjustmentsItem clearAdjustments = FixedRotationAdjustmentsItem.obtain(
-                activity.token, null /* fixedRotationAdjustments */);
-        // The captor may match other items. The first one must be the item to clear adjustments.
-        assertEquals(clearAdjustments, adjustmentsCaptor.getAllValues().get(0));
     }
 
     @Test
@@ -1720,6 +1697,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testShellTransitRotation() {
         DisplayContent dc = createNewDisplay();
+        dc.setLastHasContent();
 
         final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final DisplayRotation dr = dc.getDisplayRotation();
@@ -1983,6 +1961,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Test step 1: appWin1 is the current IME target and soft-keyboard is visible.
         mDisplayContent.computeImeTarget(true);
         assertEquals(appWin1, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        mDisplayContent.setImeInputTarget(appWin1);
         spyOn(mDisplayContent.mInputMethodWindow);
         doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
         mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
@@ -1999,7 +1978,6 @@ public class DisplayContentTests extends WindowTestsBase {
         // be shown at this time.
         final Transaction t = mDisplayContent.getPendingTransaction();
         spyOn(t);
-        mDisplayContent.setImeInputTarget(appWin2);
         mDisplayContent.computeImeTarget(true);
         assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
@@ -2435,6 +2413,31 @@ public class DisplayContentTests extends WindowTestsBase {
 
         display.release();
         mockSession.finishMocking();
+    }
+
+    @Test
+    public void testKeepClearAreasMultipleWindows() {
+        final WindowState w1 = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent, "w1");
+        final Rect rect1 = new Rect(0, 0, 10, 10);
+        w1.setKeepClearAreas(Arrays.asList(rect1));
+        final WindowState w2 = createWindow(null, TYPE_NOTIFICATION_SHADE, mDisplayContent, "w2");
+        final Rect rect2 = new Rect(10, 10, 20, 20);
+        w2.setKeepClearAreas(Arrays.asList(rect2));
+
+        // No keep clear areas on display, because the windows are not visible
+        assertEquals(Arrays.asList(), mDisplayContent.getKeepClearAreas());
+
+        makeWindowVisible(w1);
+
+        // The returned keep-clear areas contain the areas just from the visible window
+        assertEquals(new ArraySet(Arrays.asList(rect1)),
+                     new ArraySet(mDisplayContent.getKeepClearAreas()));
+
+        makeWindowVisible(w1, w2);
+
+        // The returned keep-clear areas contain the areas from all visible windows
+        assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
+                     new ArraySet(mDisplayContent.getKeepClearAreas()));
     }
 
     private class TestToken extends Binder {

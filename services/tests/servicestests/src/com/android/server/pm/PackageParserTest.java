@@ -15,7 +15,7 @@
  */
 package com.android.server.pm;
 
-import static android.content.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
+import static com.android.server.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -43,27 +43,6 @@ import android.content.pm.PackageManager.Property;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedActivityImpl;
-import android.content.pm.parsing.component.ParsedApexSystemService;
-import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.parsing.component.ParsedInstrumentationImpl;
-import android.content.pm.parsing.component.ParsedIntentInfo;
-import android.content.pm.parsing.component.ParsedIntentInfoImpl;
-import android.content.pm.parsing.component.ParsedPermission;
-import android.content.pm.parsing.component.ParsedPermissionGroup;
-import android.content.pm.parsing.component.ParsedPermissionGroupImpl;
-import android.content.pm.parsing.component.ParsedPermissionImpl;
-import android.content.pm.parsing.component.ParsedPermissionUtils;
-import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedProviderImpl;
-import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.parsing.component.ParsedServiceImpl;
-import android.content.pm.parsing.component.ParsedUsesPermission;
-import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
-import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -85,7 +64,28 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.permission.CompatibilityPermissionInfo;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedActivityImpl;
+import com.android.server.pm.pkg.component.ParsedApexSystemService;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermissionGroup;
+import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl;
+import com.android.server.pm.pkg.component.ParsedPermissionImpl;
+import com.android.server.pm.pkg.component.ParsedPermissionUtils;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedProviderImpl;
+import com.android.server.pm.pkg.component.ParsedService;
+import com.android.server.pm.pkg.component.ParsedServiceImpl;
+import com.android.server.pm.pkg.component.ParsedUsesPermission;
+import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -673,9 +673,9 @@ public class PackageParserTest {
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
 
         PackageInfo aInfo = PackageInfoUtils.generate(a, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), PackageUserState.DEFAULT, 0, mockPkgSetting(a));
+                Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(a));
         PackageInfo bInfo = PackageInfoUtils.generate(b, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), PackageUserState.DEFAULT, 0, mockPkgSetting(b));
+                Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(b));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
 
         assertEquals(ArrayUtils.size(a.getPermissions()), ArrayUtils.size(b.getPermissions()));
@@ -831,9 +831,9 @@ public class PackageParserTest {
 
         // Validity check for ServiceInfo.
         ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
-                PackageUserState.DEFAULT, 0, mockPkgSetting(aPkg));
+                PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(aPkg));
         ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
-                PackageUserState.DEFAULT, 0, mockPkgSetting(bPkg));
+                PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -858,9 +858,9 @@ public class PackageParserTest {
 
         // Validity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
-                PackageUserState.DEFAULT, 0, mockPkgSetting(aPkg));
+                PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
-                PackageUserState.DEFAULT, 0, mockPkgSetting(bPkg));
+                PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -895,6 +895,7 @@ public class PackageParserTest {
         assertEquals(a.networkSecurityConfigRes, that.networkSecurityConfigRes);
         assertEquals(a.taskAffinity, that.taskAffinity);
         assertEquals(a.permission, that.permission);
+        assertEquals(a.getKnownActivityEmbeddingCerts(), that.getKnownActivityEmbeddingCerts());
         assertEquals(a.processName, that.processName);
         assertEquals(a.className, that.className);
         assertEquals(a.manageSpaceActivityName, that.manageSpaceActivityName);

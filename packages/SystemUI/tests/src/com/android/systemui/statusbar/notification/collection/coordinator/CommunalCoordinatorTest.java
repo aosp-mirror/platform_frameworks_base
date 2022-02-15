@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -82,12 +85,13 @@ public class CommunalCoordinatorTest extends SysuiTestCase {
         final NotifFilter filter = filterCaptor.getValue();
 
         // Verify that notifications are not filtered out by default.
-        assert (!filter.shouldFilterOut(mNotificationEntry, 0));
+        assertThat(filter.shouldFilterOut(mNotificationEntry, 0)).isFalse();
 
         filter.setInvalidationListener(mFilterListener);
 
         // Verify that notifications are filtered out when communal is showing and that the filter
         // pipeline is notified.
+        when(mCommunalStateController.getCommunalViewShowing()).thenReturn(true);
         stateCallback.onCommunalViewShowingChanged();
         // Make sure callback depends on executor to run.
         verify(mFilterListener, never()).onPluggableInvalidated(any());
@@ -97,7 +101,6 @@ public class CommunalCoordinatorTest extends SysuiTestCase {
 
         verify(mFilterListener).onPluggableInvalidated(any());
         verify(mNotificationEntryManager).updateNotifications(any());
-        assert (filter.shouldFilterOut(mNotificationEntry, 0));
-
+        assertThat(filter.shouldFilterOut(mNotificationEntry, 0)).isTrue();
     }
 }

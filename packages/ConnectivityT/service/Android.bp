@@ -26,10 +26,41 @@ filegroup {
     srcs: [
         "src/com/android/server/net/NetworkIdentity*.java",
         "src/com/android/server/net/NetworkStats*.java",
+        "src/com/android/server/net/BpfInterfaceMapUpdater.java",
+        "src/com/android/server/net/InterfaceMapValue.java",
+        "src/com/android/server/net/CookieTagMapKey.java",
+        "src/com/android/server/net/CookieTagMapValue.java",
+        "src/com/android/server/net/StatsMapKey.java",
+        "src/com/android/server/net/StatsMapValue.java",
+        "src/com/android/server/net/UidStatsMapKey.java",
     ],
     path: "src",
     visibility: [
         "//visibility:private",
+    ],
+}
+
+// For test code only.
+filegroup {
+    name: "lib_networkStatsFactory_native",
+    srcs: [
+        "jni/com_android_server_net_NetworkStatsFactory.cpp",
+    ],
+    path: "jni",
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+filegroup {
+    name: "services.connectivity-netstats-jni-sources",
+    srcs: [
+        "jni/com_android_server_net_NetworkStatsFactory.cpp",
+        "jni/com_android_server_net_NetworkStatsService.cpp",
+    ],
+    path: "jni",
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
     ],
 }
 
@@ -61,15 +92,65 @@ filegroup {
     ],
 }
 
+// Ethernet related libraries.
+
+filegroup {
+    name: "services.connectivity-ethernet-sources",
+    srcs: [
+        "src/com/android/server/net/DelayedDiskWrite.java",
+        "src/com/android/server/net/IpConfigStore.java",
+    ],
+    path: "src",
+    visibility: [
+        "//frameworks/opt/net/ethernet",
+    ],
+}
+
 // Connectivity-T common libraries.
 
 filegroup {
     name: "services.connectivity-tiramisu-sources",
+    srcs: [
+        ":services.connectivity-ethernet-sources",
+    ],
+    path: "src",
+    visibility: ["//frameworks/base/services/core"],
+}
+
+filegroup {
+    name: "services.connectivity-tiramisu-updatable-sources",
     srcs: [
         ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
         ":services.connectivity-nsd-sources",
     ],
     path: "src",
-    visibility: ["//frameworks/base/services/core"],
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+cc_library_shared {
+    name: "libcom_android_net_module_util_jni",
+    min_sdk_version: "30",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    stl: "libc++_static",
+    static_libs: [
+        "libnet_utils_device_common_bpfjni",
+    ],
+    shared_libs: [
+        "liblog",
+        "libnativehelper",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+    ],
 }

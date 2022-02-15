@@ -113,14 +113,16 @@ class ScreenOffAnimationController @Inject constructor(
      * the animation ends
      */
     fun shouldDelayKeyguardShow(): Boolean =
-        animations.any { it.shouldPlayAnimation() }
+        animations.any { it.shouldDelayKeyguardShow() }
 
     /**
      * Return true while we want to ignore requests to show keyguard, we need to handle pending
      * keyguard lock requests manually
+     *
+     * @see [com.android.systemui.keyguard.KeyguardViewMediator.maybeHandlePendingLock]
      */
     fun isKeyguardShowDelayed(): Boolean =
-        animations.any { it.isAnimationPlaying() }
+        animations.any { it.isKeyguardShowDelayed() }
 
     /**
      * Return true to ignore requests to hide keyguard
@@ -180,6 +182,14 @@ class ScreenOffAnimationController @Inject constructor(
         animations.all { it.shouldAnimateDozingChange() }
 
     /**
+     * Returns true when moving display state to power save mode should be
+     * delayed for a few seconds. This might be useful to play animations in full quality,
+     * without reducing FPS.
+     */
+    fun shouldDelayDisplayDozeTransition(): Boolean =
+        animations.any { it.shouldDelayDisplayDozeTransition() }
+
+    /**
      * Return true to animate large <-> small clock transition
      */
     fun shouldAnimateClockChange(): Boolean =
@@ -203,10 +213,13 @@ interface ScreenOffAnimation {
     fun shouldAnimateInKeyguard(): Boolean = false
     fun animateInKeyguard(keyguardView: View, after: Runnable) = after.run()
 
+    fun shouldDelayKeyguardShow(): Boolean = false
+    fun isKeyguardShowDelayed(): Boolean = false
     fun isKeyguardHideDelayed(): Boolean = false
     fun shouldHideScrimOnWakeUp(): Boolean = false
     fun overrideNotificationsDozeAmount(): Boolean = false
     fun shouldShowAodIconsWhenShade(): Boolean = false
+    fun shouldDelayDisplayDozeTransition(): Boolean = false
     fun shouldAnimateAodIcons(): Boolean = true
     fun shouldAnimateDozingChange(): Boolean = true
     fun shouldAnimateClockChange(): Boolean = true

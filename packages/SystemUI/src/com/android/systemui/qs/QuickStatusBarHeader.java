@@ -33,18 +33,17 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
-import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateView;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 
 import java.util.List;
 
@@ -57,8 +56,11 @@ public class QuickStatusBarHeader extends FrameLayout {
     private boolean mExpanded;
     private boolean mQsDisabled;
 
+    @Nullable
     private TouchAnimator mAlphaAnimator;
+    @Nullable
     private TouchAnimator mTranslationAnimator;
+    @Nullable
     private TouchAnimator mIconsAlphaAnimator;
     private TouchAnimator mIconsAlphaAnimatorFixed;
 
@@ -85,7 +87,9 @@ public class QuickStatusBarHeader extends FrameLayout {
     private StatusIconContainer mIconContainer;
     private View mPrivacyChip;
 
+    @Nullable
     private TintedIconManager mTintedIconManager;
+    @Nullable
     private QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private StatusBarContentInsetsProvider mInsetsProvider;
 
@@ -242,10 +246,9 @@ public class QuickStatusBarHeader extends FrameLayout {
         boolean shouldUseSplitShade =
                 resources.getBoolean(R.bool.config_use_split_notification_shade);
 
-        mStatusIconsView.setVisibility(
-                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
-        mDatePrivacyView.setVisibility(
-                shouldUseSplitShade || mUseCombinedQSHeader ? View.GONE : View.VISIBLE);
+        boolean gone = shouldUseSplitShade || mUseCombinedQSHeader || mQsDisabled;
+        mStatusIconsView.setVisibility(gone ? View.GONE : View.VISIBLE);
+        mDatePrivacyView.setVisibility(gone ? View.GONE : View.VISIBLE);
 
         mConfigShowBatteryEstimate = resources.getBoolean(R.bool.config_showBatteryEstimateQSBH);
 
@@ -542,10 +545,6 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     public void updateEverything() {
         post(() -> setClickable(!mExpanded));
-    }
-
-    public void setCallback(Callback qsPanelCallback) {
-        mHeaderQsPanel.setCallback(qsPanelCallback);
     }
 
     private void setContentMargins(View view, int marginStart, int marginEnd) {

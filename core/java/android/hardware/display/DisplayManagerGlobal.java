@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
@@ -55,6 +56,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -128,7 +131,7 @@ public final class DisplayManagerGlobal {
                 8, // size of display cache
                 CACHE_KEY_DISPLAY_INFO_PROPERTY) {
                 @Override
-                protected DisplayInfo recompute(Integer id) {
+                public DisplayInfo recompute(Integer id) {
                     try {
                         return mDm.getDisplayInfo(id);
                     } catch (RemoteException ex) {
@@ -584,8 +587,9 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
             IVirtualDevice virtualDevice, @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            VirtualDisplay.Callback callback, Handler handler, @Nullable Context windowContext) {
-        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
+            VirtualDisplay.Callback callback, @Nullable Executor executor,
+            @Nullable Context windowContext) {
+        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, executor);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
@@ -812,6 +816,21 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Report whether/how the display supports DISPLAY_DECORATION.
+     *
+     * @param displayId The display whose support is being queried.
+     *
+     * @hide
+     */
+    public DisplayDecorationSupport getDisplayDecorationSupport(int displayId) {
+        try {
+            return mDm.getDisplayDecorationSupport(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the brightness of the display.
      *
      * @param displayId The display from which to get the brightness
@@ -881,9 +900,9 @@ public final class DisplayManagerGlobal {
      * Sets the default display mode, according to the refresh rate and the resolution chosen by the
      * user.
      */
-    public void setUserPreferredDisplayMode(Display.Mode mode) {
+    public void setUserPreferredDisplayMode(int displayId, Display.Mode mode) {
         try {
-            mDm.setUserPreferredDisplayMode(mode);
+            mDm.setUserPreferredDisplayMode(displayId, mode);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -892,9 +911,20 @@ public final class DisplayManagerGlobal {
     /**
      * Returns the user preferred display mode.
      */
-    public Display.Mode getUserPreferredDisplayMode() {
+    public Display.Mode getUserPreferredDisplayMode(int displayId) {
         try {
-            return mDm.getUserPreferredDisplayMode();
+            return mDm.getUserPreferredDisplayMode(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the system preferred display mode.
+     */
+    public Display.Mode getSystemPreferredDisplayMode(int displayId) {
+        try {
+            return mDm.getSystemPreferredDisplayMode(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -965,7 +995,7 @@ public final class DisplayManagerGlobal {
 
     private static final class DisplayListenerDelegate extends Handler {
         public final DisplayListener mListener;
-        public long mEventsMask;
+        public volatile long mEventsMask;
 
         private final DisplayInfo mDisplayInfo = new DisplayInfo();
 
@@ -985,12 +1015,12 @@ public final class DisplayManagerGlobal {
             removeCallbacksAndMessages(null);
         }
 
-        public synchronized void setEventsMask(@EventsMask long newEventsMask) {
+        public void setEventsMask(@EventsMask long newEventsMask) {
             mEventsMask = newEventsMask;
         }
 
         @Override
-        public synchronized void handleMessage(Message msg) {
+        public void handleMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_DISPLAY_ADDED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
@@ -1021,61 +1051,36 @@ public final class DisplayManagerGlobal {
     }
 
     private final static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
-        private VirtualDisplayCallbackDelegate mDelegate;
+        @Nullable private final VirtualDisplay.Callback mCallback;
+        @Nullable private final Executor mExecutor;
 
-        public VirtualDisplayCallback(VirtualDisplay.Callback callback, Handler handler) {
-            if (callback != null) {
-                mDelegate = new VirtualDisplayCallbackDelegate(callback, handler);
-            }
+        VirtualDisplayCallback(VirtualDisplay.Callback callback, Executor executor) {
+            mCallback = callback;
+            mExecutor = mCallback != null ? Objects.requireNonNull(executor) : null;
         }
+
+        // These methods are called from the binder thread, but the AIDL is oneway, so it should be
+        // safe to call the callback on arbitrary executors directly without risking blocking
+        // the system.
 
         @Override // Binder call
         public void onPaused() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_PAUSED);
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onPaused);
             }
         }
 
         @Override // Binder call
         public void onResumed() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_RESUMED);
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onResumed);
             }
         }
 
         @Override // Binder call
         public void onStopped() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_STOPPED);
-            }
-        }
-    }
-
-    private final static class VirtualDisplayCallbackDelegate extends Handler {
-        public static final int MSG_DISPLAY_PAUSED = 0;
-        public static final int MSG_DISPLAY_RESUMED = 1;
-        public static final int MSG_DISPLAY_STOPPED = 2;
-
-        private final VirtualDisplay.Callback mCallback;
-
-        public VirtualDisplayCallbackDelegate(VirtualDisplay.Callback callback,
-                Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
-            mCallback = callback;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DISPLAY_PAUSED:
-                    mCallback.onPaused();
-                    break;
-                case MSG_DISPLAY_RESUMED:
-                    mCallback.onResumed();
-                    break;
-                case MSG_DISPLAY_STOPPED:
-                    mCallback.onStopped();
-                    break;
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onStopped);
             }
         }
     }

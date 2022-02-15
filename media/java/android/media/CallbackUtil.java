@@ -18,10 +18,13 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.SafeCloseable;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -220,5 +223,88 @@ import java.util.concurrent.Executor;
             }
         }
 
+    }
+
+    /**
+     * Interface to be implemented by stub implementation for the events received from a server
+     * to the class managing the listener API.
+     * For an example see {@link AudioManager#ModeDispatcherStub} which registers with AudioService.
+     */
+    interface DispatcherStub {
+        /**
+         * Register/unregister the stub as a listener of the events to be forwarded to the listeners
+         * managed by LazyListenerManager.
+         * @param register true for registering, false to unregister
+         */
+        void register(boolean register);
+    }
+
+    /**
+     * Class to manage a list of listeners and their callback, and the associated stub which
+     * receives the events to be forwarded to the listeners.
+     * The list of listeners and the stub and its registration are lazily initialized and registered
+     * @param <T> the listener class
+     */
+    static class LazyListenerManager<T> {
+        private final Object mListenerLock = new Object();
+
+        @GuardedBy("mListenerLock")
+        private @Nullable ArrayList<ListenerInfo<T>> mListeners;
+
+        @GuardedBy("mListenerLock")
+        private @Nullable DispatcherStub mDispatcherStub;
+
+        LazyListenerManager() {
+            // nothing to initialize as instances of dispatcher and list of listeners
+            // are lazily initialized
+        }
+
+        /**
+         * Add a new listener / executor pair for the configured listener
+         * @param executor Executor for the callback
+         * @param listener the listener to register
+         * @param methodName the name of the method calling this utility method for easier to read
+         *          exception messages
+         * @param newStub how to build a new instance of the stub receiving the events when the
+         *          number of listeners goes from 0 to 1, not called until then.
+         */
+        void addListener(@NonNull Executor executor, @NonNull T listener, String methodName,
+                @NonNull java.util.function.Supplier<DispatcherStub> newStub) {
+            synchronized (mListenerLock) {
+                final Pair<ArrayList<ListenerInfo<T>>, DispatcherStub> res =
+                        CallbackUtil.addListener(methodName,
+                                executor, listener, mListeners, mDispatcherStub,
+                                newStub,
+                                stub -> stub.register(true));
+                mListeners = res.first;
+                mDispatcherStub = res.second;
+            }
+        }
+
+        /**
+         * Remove a previously registered listener
+         * @param listener the listener to unregister
+         * @param methodName the name of the method calling this utility method for easier to read
+         *          exception messages
+         */
+        void removeListener(@NonNull T listener, String methodName) {
+            synchronized (mListenerLock) {
+                final Pair<ArrayList<ListenerInfo<T>>, DispatcherStub> res =
+                        CallbackUtil.removeListener(methodName,
+                                listener, mListeners, mDispatcherStub,
+                                stub -> stub.register(false));
+                mListeners = res.first;
+                mDispatcherStub = res.second;
+            }
+        }
+
+        /**
+         * Call the registered listeners with the given callback method
+         * @param callback the listener method to invoke
+         */
+        @SuppressLint("GuardedBy") // lock applied inside callListeners method
+        void callListeners(CallbackMethod<T> callback) {
+            CallbackUtil.callListeners(mListeners, mListenerLock, callback);
+        }
     }
 }

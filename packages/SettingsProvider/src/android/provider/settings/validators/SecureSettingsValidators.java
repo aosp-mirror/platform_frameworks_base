@@ -229,6 +229,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.SKIP_DIRECTION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SILENCE_GESTURE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES, JSON_OBJECT_VALIDATOR);
+        VALIDATORS.put(Secure.NAV_BAR_KIDS_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.NAVIGATION_MODE, new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Secure.BACK_GESTURE_INSET_SCALE_LEFT,
@@ -266,6 +267,7 @@ public class SecureSettingsValidators {
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL));
+        VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
@@ -276,8 +278,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.EMERGENCY_GESTURE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.EMERGENCY_GESTURE_SOUND_ENABLED, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
-                NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.ADAPTIVE_CONNECTIVITY_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS, NONE_NEGATIVE_LONG_VALIDATOR);
@@ -296,6 +296,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.LOCATION_SHOW_SYSTEM_OPS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DEVICE_STATE_ROTATION_LOCK, value -> {
             if (TextUtils.isEmpty(value)) {
                 return true;
@@ -323,5 +324,8 @@ public class SecureSettingsValidators {
             }
             return true;
         });
+        VALIDATORS.put(Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.FAST_PAIR_SCAN_ENABLED, BOOLEAN_VALIDATOR);
+
     }
 }

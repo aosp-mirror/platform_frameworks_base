@@ -83,6 +83,7 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
@@ -121,6 +122,7 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
@@ -159,6 +161,7 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                     HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                    HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
                     HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
@@ -317,8 +320,10 @@ public final class HdmiCecConfigTest {
     @Test
     public void getDefaultStringValue_MultipleDefaults() {
         setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
-        assertThrows(RuntimeException.class,
-                () -> new HdmiCecConfig(mContext, mStorageAdapter));
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
+        assertThat(hdmiCecConfig.getDefaultStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 
     @Test

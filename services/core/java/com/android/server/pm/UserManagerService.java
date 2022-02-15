@@ -1517,7 +1517,6 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails.getBadgeNoBackground();
     }
 
-    @Override
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
         synchronized (mUsersLock) {
@@ -1526,21 +1525,19 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * Returns the user type (if it is a profile), empty string (if it isn't a profile),
+     * or null (if the user doesn't exist).
+     */
     @Override
-    public boolean isManagedProfile(@UserIdInt int userId) {
-        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isManagedProfile");
+    public @Nullable String getProfileType(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getProfileType");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
-            return userInfo != null && userInfo.isManagedProfile();
-        }
-    }
-
-    @Override
-    public boolean isCloneProfile(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isCloneProfile");
-        synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userId);
-            return userInfo != null && userInfo.isCloneProfile();
+            if (userInfo != null) {
+                return userInfo.isProfile() ? userInfo.userType : "";
+            }
+            return null;
         }
     }
 
@@ -1552,6 +1549,17 @@ public class UserManagerService extends IUserManager.Stub {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null ? userTypeDetails.isProfile()
                     && userTypeDetails.isMediaSharedWithParent() : false;
+        }
+    }
+
+    @Override
+    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "isCredentialSharedWithParent");
+        synchronized (mUsersLock) {
+            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+            return userTypeDetails != null && userTypeDetails.isProfile()
+                    && userTypeDetails.isCredentialSharedWithParent();
         }
     }
 
@@ -2418,6 +2426,51 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Returns the remaining number of users of the given type that can be created. (taking into
+     * account the total number of users on the device as well as how many exist of that type)
+     */
+    @Override
+    public int getRemainingCreatableUserCount(String userType) {
+        checkQueryOrCreateUsersPermission("get the remaining number of users that can be added.");
+        final UserTypeDetails type = mUserTypes.get(userType);
+        if (type == null || !type.isEnabled()) {
+            return 0;
+        }
+        synchronized (mUsersLock) {
+            final int userCount = getAliveUsersExcludingGuestsCountLU();
+
+            // Limit total number of users that can be created (except for guest and demo)
+            int result =
+                    UserManager.isUserTypeGuest(userType) || UserManager.isUserTypeDemo(userType)
+                        ? Integer.MAX_VALUE
+                        : (UserManager.getMaxSupportedUsers() - userCount);
+
+            // Managed profiles have their own specific rules.
+            if (type.isManagedProfile()) {
+                if (!mContext.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_MANAGED_USERS)) {
+                    return 0;
+                }
+                // Special case: Allow creating a managed profile anyway if there's only 1 user
+                if (result <= 0 & userCount == 1) {
+                    result = 1;
+                }
+            }
+            if (result <= 0) {
+                return 0;
+            }
+
+            // Limit against max allowed for type
+            result = Math.min(result,
+                    type.getMaxAllowed() == UserTypeDetails.UNLIMITED_NUMBER_OF_USERS
+                        ? Integer.MAX_VALUE
+                        : (type.getMaxAllowed() - getNumberOfUsersOfType(userType)));
+
+            return Math.max(0, result);
+        }
+    }
+
+    /**
      * Gets the number of users of the given user type.
      * Does not include users that are about to die.
      */
@@ -2467,44 +2520,72 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean canAddMoreProfilesToUser(String userType, @UserIdInt int userId,
             boolean allowedToRemoveOne) {
-        checkQueryUsersPermission("check if more profiles can be added.");
+        return 0 < getRemainingCreatableProfileCount(userType, userId, allowedToRemoveOne);
+    }
+
+    @Override
+    public int getRemainingCreatableProfileCount(@NonNull String userType, @UserIdInt int userId) {
+        return getRemainingCreatableProfileCount(userType, userId, false);
+    }
+
+    /**
+     * Returns the remaining number of profiles of the given type that can be added to the given
+     * user. (taking into account the total number of users on the device as well as how many
+     * profiles exist of that type both in general and for the given user)
+     */
+    private int getRemainingCreatableProfileCount(@NonNull String userType, @UserIdInt int userId,
+            boolean allowedToRemoveOne) {
+        checkQueryOrCreateUsersPermission(
+                "get the remaining number of profiles that can be added to the given user.");
         final UserTypeDetails type = mUserTypes.get(userType);
         if (type == null || !type.isEnabled()) {
-            return false;
+            return 0;
         }
         // Managed profiles have their own specific rules.
         final boolean isManagedProfile = type.isManagedProfile();
         if (isManagedProfile) {
             if (!mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_MANAGED_USERS)) {
-                return false;
+                return 0;
             }
         }
         synchronized (mUsersLock) {
             // Check if the parent exists and its type is even allowed to have a profile.
             UserInfo userInfo = getUserInfoLU(userId);
             if (userInfo == null || !userInfo.canHaveProfile()) {
-                return false;
+                return 0;
             }
 
-            // Limit the number of profiles that can be created
+            final int userTypeCount = getProfileIds(userId, userType, false).length;
+            final int profilesRemovedCount = userTypeCount > 0 && allowedToRemoveOne ? 1 : 0;
+            final int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
+                    - profilesRemovedCount;
+
+            // Limit total number of users that can be created
+            int result = UserManager.getMaxSupportedUsers() - usersCountAfterRemoving;
+
+            // Special case: Allow creating a managed profile anyway if there's only 1 user
+            if (result <= 0 && isManagedProfile && usersCountAfterRemoving == 1) {
+                result = 1;
+            }
+
+            // Limit the number of profiles of this type that can be created.
             final int maxUsersOfType = getMaxUsersOfTypePerParent(type);
             if (maxUsersOfType != UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
-                final int userTypeCount = getProfileIds(userId, userType, false).length;
-                final int profilesRemovedCount = userTypeCount > 0 && allowedToRemoveOne ? 1 : 0;
-                if (userTypeCount - profilesRemovedCount >= maxUsersOfType) {
-                    return false;
-                }
-                // Allow creating a managed profile in the special case where there is only one user
-                if (isManagedProfile) {
-                    int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
-                            - profilesRemovedCount;
-                    return usersCountAfterRemoving == 1
-                            || usersCountAfterRemoving < UserManager.getMaxSupportedUsers();
-                }
+                result = Math.min(result, maxUsersOfType - (userTypeCount - profilesRemovedCount));
             }
+            if (result <= 0) {
+                return 0;
+            }
+
+            // Limit against max allowed for type (beyond max allowed per parent)
+            if (type.getMaxAllowed() != UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
+                result = Math.min(result, type.getMaxAllowed()
+                        - (getNumberOfUsersOfType(userType) - profilesRemovedCount));
+            }
+
+            return Math.max(0, result);
         }
-        return true;
     }
 
     @GuardedBy("mUsersLock")
@@ -3537,8 +3618,11 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.wtf(LOG_TAG, "Seeing both legacy and current local restrictions in xml");
                 }
             } else if (legacyLocalRestrictions != null) {
-                mDevicePolicyLocalUserRestrictions.put(id,
-                        new RestrictionsSet(id, legacyLocalRestrictions));
+                RestrictionsSet legacyLocalRestrictionsSet =
+                        legacyLocalRestrictions.isEmpty()
+                                ? new RestrictionsSet()
+                                : new RestrictionsSet(id, legacyLocalRestrictions);
+                mDevicePolicyLocalUserRestrictions.put(id, legacyLocalRestrictionsSet);
             }
             if (globalRestrictions != null) {
                 mDevicePolicyGlobalUserRestrictions.updateRestrictions(id,
@@ -3667,9 +3751,18 @@ public class UserManagerService extends IUserManager.Stub {
             @UserInfoFlag int flags, @UserIdInt int parentId,
             @Nullable String[] disallowedPackages)
             throws UserManager.CheckedUserOperationException {
-        String restriction = (UserManager.isUserTypeManagedProfile(userType))
-                ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
-                : UserManager.DISALLOW_ADD_USER;
+
+        // Checking user restriction before creating new user,
+        // default check is for DISALLOW_ADD_USER
+        // If new user is of type CLONE, check if creation of clone profile is allowed
+        // If new user is of type MANAGED, check if creation of managed profile is allowed
+        String restriction = UserManager.DISALLOW_ADD_USER;
+        if (UserManager.isUserTypeCloneProfile(userType)) {
+            restriction = UserManager.DISALLOW_ADD_CLONE_PROFILE;
+        } else if (UserManager.isUserTypeManagedProfile(userType)) {
+            restriction = UserManager.DISALLOW_ADD_MANAGED_PROFILE;
+        }
+
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
                 "Cannot add user");
         return createUserInternalUnchecked(name, userType, flags, parentId,
@@ -3750,6 +3843,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isGuest = UserManager.isUserTypeGuest(userType);
         final boolean isRestricted = UserManager.isUserTypeRestricted(userType);
         final boolean isDemo = UserManager.isUserTypeDemo(userType);
+        final boolean isManagedProfile = UserManager.isUserTypeManagedProfile(userType);
 
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
@@ -3773,18 +3867,20 @@ public class UserManagerService extends IUserManager.Stub {
                                     + ". Maximum number of that type already exists.",
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
+                // Keep logic in sync with getRemainingCreatableUserCount()
+                if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
+                    // If the user limit has been reached, we cannot add a user (except guest/demo).
+                    // Note that managed profiles can bypass it in certain circumstances (taken
+                    // into account in the profile check below).
+                    throwCheckedUserOperationException(
+                            "Cannot add user. Maximum user limit is reached.",
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
+                }
                 // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
                 if (isProfile && !canAddMoreProfilesToUser(userType, parentId, false)) {
                     throwCheckedUserOperationException(
                             "Cannot add more profiles of type " + userType
                                     + " for user " + parentId,
-                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
-                }
-                if (!isGuest && !isProfile && !isDemo && isUserLimitReached()) {
-                    // If we're not adding a guest/demo user or a profile and the 'user limit' has
-                    // been reached, cannot add a user.
-                    throwCheckedUserOperationException(
-                            "Cannot add user. Maximum user limit is reached.",
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
                 // In legacy mode, restricted profile's parent can only be the owner user
@@ -4427,11 +4523,11 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
-            boolean evenWhenDisallowed) {
+    public @UserManager.RemoveResult int removeUserWhenPossible(@UserIdInt int userId,
+            boolean overrideDevicePolicy) {
         checkCreateUsersPermission("Only the system can remove users");
 
-        if (!evenWhenDisallowed) {
+        if (!overrideDevicePolicy) {
             final String restriction = getUserRemovalRestriction(userId);
             if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
                 Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
@@ -4478,7 +4574,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
                 writeUserLP(userData);
 
-                return UserManager.REMOVE_RESULT_SET_EPHEMERAL;
+                return UserManager.REMOVE_RESULT_DEFERRED;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -5064,6 +5160,8 @@ public class UserManagerService extends IUserManager.Stub {
                 nextId = scanNextAvailableIdLocked();
             }
         }
+        // If we got here, we probably recycled user ids, so invalidate any caches.
+        UserManager.invalidateStaticUserProperties();
         if (nextId < 0) {
             throw new IllegalStateException("No user id available!");
         }

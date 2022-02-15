@@ -16,22 +16,30 @@
 
 package com.android.systemui.dreams;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
@@ -43,7 +51,9 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     DreamOverlayStateController.Callback mCallback;
 
     @Mock
-    OverlayProvider mProvider;
+    Complication mComplication;
+
+    final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
@@ -51,36 +61,103 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStateChange() {
+        final DreamOverlayStateController stateController = new DreamOverlayStateController(
+                mExecutor);
+        stateController.addCallback(mCallback);
+        stateController.setOverlayActive(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback).onStateChanged();
+        assertThat(stateController.isOverlayActive()).isTrue();
+
+        Mockito.clearInvocations(mCallback);
+        stateController.setOverlayActive(true);
+        mExecutor.runAllReady();
+        verify(mCallback, never()).onStateChanged();
+
+        stateController.setOverlayActive(false);
+        mExecutor.runAllReady();
+        verify(mCallback).onStateChanged();
+        assertThat(stateController.isOverlayActive()).isFalse();
+    }
+
+    @Test
     public void testCallback() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController();
+        final DreamOverlayStateController stateController = new DreamOverlayStateController(
+                mExecutor);
         stateController.addCallback(mCallback);
 
-        // Add overlay and verify callback is notified.
-        final DreamOverlayStateController.OverlayToken token =
-                stateController.addOverlay(mProvider);
+        // Add complication and verify callback is notified.
+        stateController.addComplication(mComplication);
 
-        verify(mCallback, times(1)).onOverlayChanged();
+        mExecutor.runAllReady();
 
-        final Collection<OverlayProvider> providers = stateController.getOverlays();
-        assertEquals(providers.size(), 1);
-        assertTrue(providers.contains(mProvider));
+        verify(mCallback, times(1)).onComplicationsChanged();
+
+        final Collection<Complication> complications = stateController.getComplications();
+        assertEquals(complications.size(), 1);
+        assertTrue(complications.contains(mComplication));
 
         clearInvocations(mCallback);
 
-        // Remove overlay and verify callback is notified.
-        stateController.removeOverlay(token);
-        verify(mCallback, times(1)).onOverlayChanged();
-        assertTrue(providers.isEmpty());
+        // Remove complication and verify callback is notified.
+        stateController.removeComplication(mComplication);
+        mExecutor.runAllReady();
+        verify(mCallback, times(1)).onComplicationsChanged();
+        assertTrue(stateController.getComplications().isEmpty());
     }
 
     @Test
     public void testNotifyOnCallbackAdd() {
-        final DreamOverlayStateController stateController = new DreamOverlayStateController();
-        final DreamOverlayStateController.OverlayToken token =
-                stateController.addOverlay(mProvider);
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+
+        stateController.addComplication(mComplication);
+        mExecutor.runAllReady();
 
         // Verify callback occurs on add when an overlay is already present.
         stateController.addCallback(mCallback);
-        verify(mCallback, times(1)).onOverlayChanged();
+        mExecutor.runAllReady();
+        verify(mCallback, times(1)).onComplicationsChanged();
+    }
+
+    @Test
+    public void testComplicationFiltering() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+
+        final Complication alwaysAvailableComplication = Mockito.mock(Complication.class);
+        final Complication weatherComplication = Mockito.mock(Complication.class);
+        when(alwaysAvailableComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_NONE);
+        when(weatherComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_WEATHER);
+
+        stateController.addComplication(alwaysAvailableComplication);
+        stateController.addComplication(weatherComplication);
+
+        final DreamOverlayStateController.Callback callback =
+                Mockito.mock(DreamOverlayStateController.Callback.class);
+
+        stateController.addCallback(callback);
+        mExecutor.runAllReady();
+
+        {
+            final Collection<Complication> complications = stateController.getComplications();
+            assertThat(complications.contains(alwaysAvailableComplication)).isTrue();
+            assertThat(complications.contains(weatherComplication)).isFalse();
+        }
+
+        stateController.setAvailableComplicationTypes(Complication.COMPLICATION_TYPE_WEATHER);
+        mExecutor.runAllReady();
+        verify(callback).onAvailableComplicationTypesChanged();
+
+        {
+            final Collection<Complication> complications = stateController.getComplications();
+            assertThat(complications.contains(alwaysAvailableComplication)).isTrue();
+            assertThat(complications.contains(weatherComplication)).isTrue();
+        }
+
     }
 }

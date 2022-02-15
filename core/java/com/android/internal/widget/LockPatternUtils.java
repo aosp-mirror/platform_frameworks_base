@@ -26,6 +26,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
@@ -34,6 +35,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -65,6 +67,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -194,6 +197,8 @@ public class LockPatternUtils {
     private final SparseLongArray mLockoutDeadlines = new SparseLongArray();
     private Boolean mHasSecureLockScreen;
 
+    private HashMap<UserHandle, UserManager> mUserManagerCache = new HashMap<>();
+
     /**
      * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
      *
@@ -263,6 +268,22 @@ public class LockPatternUtils {
             mUserManager = UserManager.get(mContext);
         }
         return mUserManager;
+    }
+
+    private UserManager getUserManager(int userId) {
+        UserHandle userHandle = UserHandle.of(userId);
+        if (mUserManagerCache.containsKey(userHandle)) {
+            return mUserManagerCache.get(userHandle);
+        }
+
+        try {
+            Context userContext = mContext.createPackageContextAsUser("system", 0, userHandle);
+            UserManager userManager = userContext.getSystemService(UserManager.class);
+            mUserManagerCache.put(userHandle, userManager);
+            return userManager;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("Failed to create context for user " + userHandle, e);
+        }
     }
 
     private TrustManager getTrustManager() {
@@ -812,16 +833,17 @@ public class LockPatternUtils {
 
     /**
      * Enables/disables the Separate Profile Challenge for this {@code userHandle}. This is a no-op
-     * for user handles that do not belong to a managed profile.
+     * for user handles that do not belong to a profile that shares credential with parent.
+     * (managed profile and clone profile share lock credential with parent).
      *
      * @param userHandle Managed profile user id
      * @param enabled True if separate challenge is enabled
-     * @param profilePassword Managed profile previous password. Null when {@code enabled} is
+     * @param profilePassword Managed/Clone profile previous password. Null when {@code enabled} is
      *            true
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             LockscreenCredential profilePassword) {
-        if (!isManagedProfile(userHandle)) {
+        if (!isCredentialSharedWithParent(userHandle)) {
             return;
         }
         try {
@@ -837,7 +859,7 @@ public class LockPatternUtils {
      * Returns true if {@code userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        return isManagedProfile(userHandle) && hasSeparateChallenge(userHandle);
+        return isCredentialSharedWithParent(userHandle) && hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -860,6 +882,10 @@ public class LockPatternUtils {
     private boolean isManagedProfile(int userHandle) {
         final UserInfo info = getUserManager().getUserInfo(userHandle);
         return info != null && info.isManagedProfile();
+    }
+
+    private boolean isCredentialSharedWithParent(int userHandle) {
+        return getUserManager(userHandle).isCredentialSharedWithParent();
     }
 
     /**
@@ -916,17 +942,53 @@ public class LockPatternUtils {
     }
 
     /**
+     * Retrieve the credential type of a user.
+     */
+    private final PropertyInvalidatedCache.QueryHandler<Integer, Integer> mCredentialTypeQuery =
+            new PropertyInvalidatedCache.QueryHandler<>() {
+                @Override
+                public Integer apply(Integer userHandle) {
+                    try {
+                        return getLockSettings().getCredentialType(userHandle);
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "failed to get credential type", re);
+                        return CREDENTIAL_TYPE_NONE;
+                    }
+                }
+                @Override
+                public boolean shouldBypassCache(Integer userHandle) {
+                    return userHandle == USER_FRP;
+                }
+            };
+
+    /**
+     * The API that is cached.
+     */
+    private final static String CREDENTIAL_TYPE_API = "getCredentialType";
+
+    /**
+     * Cache the credential type of a user.
+     */
+    private final PropertyInvalidatedCache<Integer, Integer> mCredentialTypeCache =
+            new PropertyInvalidatedCache<>(4, PropertyInvalidatedCache.MODULE_SYSTEM,
+                    CREDENTIAL_TYPE_API, CREDENTIAL_TYPE_API, mCredentialTypeQuery);
+
+    /**
+     * Invalidate the credential cache
+     * @hide
+     */
+    public final static void invalidateCredentialTypeCache() {
+        PropertyInvalidatedCache.invalidateCache(PropertyInvalidatedCache.MODULE_SYSTEM,
+                CREDENTIAL_TYPE_API);
+    }
+
+    /**
      * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
     public @CredentialType int getCredentialTypeForUser(int userHandle) {
-        try {
-            return getLockSettings().getCredentialType(userHandle);
-        } catch (RemoteException re) {
-            Log.e(TAG, "failed to get credential type", re);
-            return CREDENTIAL_TYPE_NONE;
-        }
+        return mCredentialTypeCache.query(userHandle);
     }
 
     /**
@@ -1025,15 +1087,6 @@ public class LockPatternUtils {
         } catch (RemoteException e) {
             Log.e(TAG, "Error changing password visible state", e);
         }
-    }
-
-    /**
-     * @return Whether tactile feedback for the pattern is enabled.
-     */
-    @UnsupportedAppUsage
-    public boolean isTactileFeedbackEnabled() {
-        return Settings.System.getIntForUser(mContentResolver,
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
     }
 
     /**
@@ -1236,6 +1289,28 @@ public class LockPatternUtils {
         }
     }
 
+    /** Register the given WeakEscrowTokenRemovedListener. */
+    public boolean registerWeakEscrowTokenRemovedListener(
+            @NonNull final IWeakEscrowTokenRemovedListener listener) {
+        try {
+            return getLockSettings().registerWeakEscrowTokenRemovedListener(listener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not register WeakEscrowTokenRemovedListener.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Unregister the given WeakEscrowTokenRemovedListener. */
+    public boolean unregisterWeakEscrowTokenRemovedListener(
+            @NonNull final IWeakEscrowTokenRemovedListener listener) {
+        try {
+            return getLockSettings().unregisterWeakEscrowTokenRemovedListener(listener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not register WeakEscrowTokenRemovedListener.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     public void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
         try {
             getLockSettings().reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
@@ -1355,15 +1430,38 @@ public class LockPatternUtils {
     }
 
     /**
+     * Create a weak escrow token for the current user, which can later be used to unlock FBE
+     * or change user password.
+     *
+     * After adding, if the user currently has lockscreen password, they will need to perform a
+     * confirm credential operation in order to activate the token for future use. If the user
+     * has no secure lockscreen, then the token is activated immediately.
+     *
+     * If the user changes or removes lockscreen password, activated weak escrow tokens will be
+     * removed.
+     *
+     * @return a unique 64-bit token handle which is needed to refer to this token later.
+     */
+    public long addWeakEscrowToken(byte[] token, int userId,
+            @NonNull IWeakEscrowTokenActivatedListener callback) {
+        try {
+            return getLockSettings().addWeakEscrowToken(token, userId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not add weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Callback interface to notify when an added escrow token has been activated.
      */
     public interface EscrowTokenStateChangeCallback {
         /**
          * The method to be called when the token is activated.
          * @param handle 64 bit handle corresponding to the escrow token
-         * @param userid user for whom the escrow token has been added
+         * @param userId user for whom the escrow token has been added
          */
-        void onEscrowTokenActivated(long handle, int userid);
+        void onEscrowTokenActivated(long handle, int userId);
     }
 
     /**
@@ -1379,6 +1477,21 @@ public class LockPatternUtils {
     }
 
     /**
+     * Remove a weak escrow token.
+     *
+     * @return true if the given handle refers to a valid weak token previously returned from
+     * {@link #addWeakEscrowToken}, whether it's active or not. return false otherwise.
+     */
+    public boolean removeWeakEscrowToken(long handle, int userId) {
+        try {
+            return getLockSettings().removeWeakEscrowToken(handle, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not remove the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if the given escrow token is active or not. Only active token can be used to call
      * {@link #setLockCredentialWithToken} and {@link #unlockUserWithToken}
      *
@@ -1386,6 +1499,29 @@ public class LockPatternUtils {
      */
     public boolean isEscrowTokenActive(long handle, int userId) {
         return getLockSettingsInternal().isEscrowTokenActive(handle, userId);
+    }
+
+    /**
+     * Check if the given weak escrow token is active or not. Only active token can be used to call
+     * {@link #setLockCredentialWithToken} and {@link #unlockUserWithToken}
+     */
+    public boolean isWeakEscrowTokenActive(long handle, int userId) {
+        try {
+            return getLockSettings().isWeakEscrowTokenActive(handle, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not check the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Check if the given weak escrow token is valid. */
+    public boolean isWeakEscrowTokenValid(long handle, byte[] token, int userId) {
+        try {
+            return getLockSettings().isWeakEscrowTokenValid(handle, token, userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not validate the weak token.");
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

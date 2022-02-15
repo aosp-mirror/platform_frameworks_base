@@ -32,9 +32,12 @@ import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvid
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.ShellTransitions;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+
+import javax.inject.Provider;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -122,7 +125,8 @@ public class SystemUIFactory {
                     .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
                     .setCompatUI(Optional.of(mWMComponent.getCompatUI()))
-                    .setDragAndDrop(Optional.of(mWMComponent.getDragAndDrop()));
+                    .setDragAndDrop(Optional.of(mWMComponent.getDragAndDrop()))
+                    .setBackAnimation(mWMComponent.getBackAnimation());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
@@ -142,7 +146,8 @@ public class SystemUIFactory {
                     .setTaskSurfaceHelper(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
                     .setCompatUI(Optional.ofNullable(null))
-                    .setDragAndDrop(Optional.ofNullable(null));
+                    .setDragAndDrop(Optional.ofNullable(null))
+                    .setBackAnimation(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (mInitializeComponents) {
@@ -188,24 +193,24 @@ public class SystemUIFactory {
     }
 
     /**
-     * Returns the list of system UI components that should be started.
+     * Returns the list of {@link CoreStartable} components that should be started at startup.
      */
-    public String[] getSystemUIServiceComponents(Resources resources) {
-        return resources.getStringArray(R.array.config_systemUIServiceComponents);
+    public Map<Class<?>, Provider<CoreStartable>> getStartableComponents() {
+        return mSysUIComponent.getStartables();
     }
 
     /**
      * Returns the list of additional system UI components that should be started.
      */
-    public String[] getAdditionalSystemUIServiceComponents(Resources resources) {
-        return resources.getStringArray(R.array.config_additionalSystemUIServiceComponents);
+    public String getVendorComponent(Resources resources) {
+        return resources.getString(R.string.config_systemUIVendorServiceComponent);
     }
 
     /**
-     * Returns the list of system UI components that should be started per user.
+     * Returns the list of {@link CoreStartable} components that should be started per user.
      */
-    public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
-        return resources.getStringArray(R.array.config_systemUIServiceComponentsPerUser);
+    public Map<Class<?>, Provider<CoreStartable>> getStartableComponentsPerUser() {
+        return mSysUIComponent.getPerUserStartables();
     }
 
     /**

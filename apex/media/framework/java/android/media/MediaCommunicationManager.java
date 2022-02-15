@@ -36,6 +36,8 @@ import android.view.KeyEvent;
 
 import androidx.annotation.RequiresApi;
 
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.modules.annotation.MinSdk;
 import com.android.modules.utils.build.SdkLevel;

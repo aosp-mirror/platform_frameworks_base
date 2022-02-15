@@ -21,26 +21,23 @@ import static java.lang.Integer.bitCount;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
  * An in-memory event log to support historical event information. The log is of a constant size,
  * and new events will overwrite old events as the log fills up.
- *
- * @param <T> log event type
  */
 public class LocalEventLog<T> {
 
-    /**
-     * Consumer of log events for iterating over the log.
-     *
-     * @param <T> log event type
-     */
+    /** Consumer of log events for iterating over the log. */
     public interface LogConsumer<T> {
         /** Invoked with a time and a logEvent. */
         void acceptLog(long time, T logEvent);
@@ -48,12 +45,13 @@ public class LocalEventLog<T> {
 
     // masks for the entries field. 1 bit is used to indicate whether this is a filler event or not,
     // and 31 bits to store the time delta.
-    private static final int IS_FILLER_MASK = 0b10000000000000000000000000000000;
+    private static final int IS_FILLER_MASK  = 0b10000000000000000000000000000000;
     private static final int TIME_DELTA_MASK = 0b01111111111111111111111111111111;
 
     private static final int IS_FILLER_OFFSET = countTrailingZeros(IS_FILLER_MASK);
     private static final int TIME_DELTA_OFFSET = countTrailingZeros(TIME_DELTA_MASK);
 
+    @VisibleForTesting
     static final int MAX_TIME_DELTA = (1 << bitCount(TIME_DELTA_MASK)) - 1;
 
     private static int countTrailingZeros(int i) {
@@ -79,7 +77,7 @@ public class LocalEventLog<T> {
         return (entry & IS_FILLER_MASK) != 0;
     }
 
-    // circular buffer of log entries and events. each entry corrosponds to the log event at the
+    // circular buffer of log entries and events. each entry corresponds to the log event at the
     // same index. the log entry holds the filler status and time delta according to the bit masks
     // above, and the log event is the log event.
 
@@ -102,6 +100,9 @@ public class LocalEventLog<T> {
 
     @GuardedBy("this")
     long mLastLogTime;
+
+    @GuardedBy("this")
+    long mModificationCount;
 
     @SuppressWarnings("unchecked")
     public LocalEventLog(int size, Class<T> clazz) {
@@ -143,6 +144,7 @@ public class LocalEventLog<T> {
         if (isEmpty()) {
             mStartTime = time;
             mLastLogTime = mStartTime;
+            mModificationCount++;
         }
 
         addLogEventInternal(false, (int) delta, logEvent);
@@ -156,6 +158,7 @@ public class LocalEventLog<T> {
         if (mLogSize == mEntries.length) {
             // if log is full, size will remain the same, but update the start time
             mStartTime += getTimeDelta(mEntries[startIndex()]);
+            mModificationCount++;
         } else {
             // otherwise add an item
             mLogSize++;
@@ -170,11 +173,12 @@ public class LocalEventLog<T> {
 
     /** Clears the log of all entries. */
     public synchronized void clear() {
-        // clear entries to allow gc
+        // clear entries to aid gc
         Arrays.fill(mLogEvents, null);
 
         mLogEndIndex = 0;
         mLogSize = 0;
+        mModificationCount++;
 
         mStartTime = -1;
         mLastLogTime = -1;
@@ -186,7 +190,10 @@ public class LocalEventLog<T> {
         return mLogSize == 0;
     }
 
-    /** Iterates over the event log, passing each log string to the given consumer. */
+    /**
+     * Iterates over the event log, passing each log event to the given consumer. Locks the log
+     * while executing so that {@link ConcurrentModificationException}s cannot occur.
+     */
     public synchronized void iterate(LogConsumer<? super T> consumer) {
         LogIterator it = new LogIterator();
         while (it.hasNext()) {
@@ -195,15 +202,53 @@ public class LocalEventLog<T> {
         }
     }
 
+    /**
+     * Iterates over all the given event logs in time order, passing each log event to the given
+     * consumer. It is the caller's responsibility to ensure that {@link
+     * ConcurrentModificationException}s cannot occur, whether through locking or other means.
+     */
+    @SafeVarargs
+    public static <T> void iterate(LogConsumer<? super T> consumer, LocalEventLog<T>... logs) {
+        ArrayList<LocalEventLog<T>.LogIterator> its = new ArrayList<>(logs.length);
+        for (LocalEventLog<T> log : logs) {
+            LocalEventLog<T>.LogIterator it = log.new LogIterator();
+            if (it.hasNext()) {
+                its.add(it);
+                it.next();
+            }
+        }
+
+        while (true) {
+            LocalEventLog<T>.LogIterator next = null;
+            for (LocalEventLog<T>.LogIterator it : its) {
+                if (it != null && (next == null || it.getTime() < next.getTime())) {
+                    next = it;
+                }
+            }
+
+            if (next == null) {
+                return;
+            }
+
+            consumer.acceptLog(next.getTime(), next.getLog());
+
+            if (next.hasNext()) {
+                next.next();
+            } else {
+                its.remove(next);
+            }
+        }
+    }
+
     // returns the index of the first element
     @GuardedBy("this")
-    private int startIndex() {
+    int startIndex() {
         return wrapIndex(mLogEndIndex - mLogSize);
     }
 
     // returns the index after this one
     @GuardedBy("this")
-    private int incrementIndex(int index) {
+    int incrementIndex(int index) {
         if (index == -1) {
             return startIndex();
         } else if (index >= 0) {
@@ -215,12 +260,15 @@ public class LocalEventLog<T> {
 
     // rolls over the given index if necessary
     @GuardedBy("this")
-    private int wrapIndex(int index) {
+    int wrapIndex(int index) {
         // java modulo will keep negative sign, we need to rollover
         return (index % mEntries.length + mEntries.length) % mEntries.length;
     }
 
-    private class LogIterator {
+    /** Iterator over log times and events. */
+    protected final class LogIterator {
+
+        private final long mModificationCount;
 
         private long mLogTime;
         private int mIndex;
@@ -229,8 +277,10 @@ public class LocalEventLog<T> {
         private long mCurrentTime;
         private T mCurrentLogEvent;
 
-        LogIterator() {
+        public LogIterator() {
             synchronized (LocalEventLog.this) {
+                mModificationCount = LocalEventLog.this.mModificationCount;
+
                 mLogTime = mStartTime;
                 mIndex = -1;
                 mCount = -1;
@@ -241,6 +291,7 @@ public class LocalEventLog<T> {
 
         public boolean hasNext() {
             synchronized (LocalEventLog.this) {
+                checkModifications();
                 return mCount < mLogSize;
             }
         }
@@ -276,6 +327,13 @@ public class LocalEventLog<T> {
                     nextDeltaMs = getTimeDelta(mEntries[mIndex]);
                 }
             } while (mCount < mLogSize && isFiller(mEntries[mIndex]));
+        }
+
+        @GuardedBy("LocalEventLog.this")
+        private void checkModifications() {
+            if (mModificationCount != LocalEventLog.this.mModificationCount) {
+                throw new ConcurrentModificationException();
+            }
         }
     }
 }

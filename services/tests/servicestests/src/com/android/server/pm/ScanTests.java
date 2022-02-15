@@ -17,7 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.SharedLibraryInfo.TYPE_DYNAMIC;
-import static android.content.pm.SharedLibraryInfo.TYPE_SDK;
+import static android.content.pm.SharedLibraryInfo.TYPE_SDK_PACKAGE;
 import static android.content.pm.SharedLibraryInfo.TYPE_STATIC;
 import static android.content.pm.SharedLibraryInfo.VERSION_UNDEFINED;
 
@@ -43,8 +43,8 @@ import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -258,7 +258,7 @@ public class ScanTests {
         assertThat(scanResult.mSdkSharedLibraryInfo.getPackageName(), is("ogl.sdk_123"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getName(), is("ogl.sdk"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getLongVersion(), is(123L));
-        assertThat(scanResult.mSdkSharedLibraryInfo.getType(), is(TYPE_SDK));
+        assertThat(scanResult.mSdkSharedLibraryInfo.getType(), is(TYPE_SDK_PACKAGE));
         assertThat(scanResult.mSdkSharedLibraryInfo.getDeclaringPackage().getPackageName(),
                 is("ogl.sdk_123"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getDeclaringPackage().getLongVersionCode(),
@@ -470,9 +470,7 @@ public class ScanTests {
                 .addUsesPermission(
                         new ParsedUsesPermissionImpl(Manifest.permission.FACTORY_TEST, 0));
 
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(
-                mMockPackageManager, mMockInjector);
-        final ScanResult scanResult = scanPackageHelper.scanPackageOnlyLI(
+        final ScanResult scanResult = ScanPackageUtils.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
                 true /*isUnderFactoryTest*/,
@@ -520,9 +518,7 @@ public class ScanTests {
 
     private ScanResult executeScan(
             ScanRequest scanRequest) throws PackageManagerException {
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(
-                mMockPackageManager, mMockInjector);
-        ScanResult result = scanPackageHelper.scanPackageOnlyLI(
+        ScanResult result = ScanPackageUtils.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,
                 false /*isUnderFactoryTest*/,
@@ -578,7 +574,7 @@ public class ScanTests {
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertBasicApplicationInfo(scanResult, applicationInfo);
     }
 
@@ -616,7 +612,7 @@ public class ScanTests {
     private static void assertAbiAndPathssDerived(ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
         assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
 
@@ -630,7 +626,7 @@ public class ScanTests {
     private static void assertPathsNotDerived(ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
         assertThat(pkgSetting.getLegacyNativeLibraryPath(), is("getRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));

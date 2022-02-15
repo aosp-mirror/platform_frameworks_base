@@ -135,6 +135,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ProcessChangeItem;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
@@ -1722,6 +1723,12 @@ public final class ProcessList {
             return Zygote.MEMORY_TAG_LEVEL_TBI;
         }
 
+        String defaultLevel = SystemProperties.get("persist.arm64.memtag.app_default");
+        if ("sync".equals(defaultLevel)) {
+            return Zygote.MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(defaultLevel)) {
+            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
+        }
         return Zygote.MEMORY_TAG_LEVEL_NONE;
     }
 
@@ -1917,7 +1924,7 @@ public final class ProcessList {
             if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0) {
                 runtimeFlags |= Zygote.PROFILE_FROM_SHELL;
             }
-            if ((app.info.privateFlagsExt & ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE) != 0) {
+            if (app.info.isProfileable()) {
                 runtimeFlags |= Zygote.PROFILEABLE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -2379,6 +2386,8 @@ public final class ProcessList {
             final String[] targetPackagesList = sharedPackages.length == 0
                     ? new String[]{app.info.packageName} : sharedPackages;
 
+            final boolean hasAppStorage = hasAppStorage(pmInt, app.info.packageName);
+
             pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, targetPackagesList, uid);
             if (pkgDataInfoMap == null) {
                 // TODO(b/152760674): Handle inode == 0 case properly, now we just give it a
@@ -2399,6 +2408,12 @@ public final class ProcessList {
                 // TODO(b/152760674): Handle inode == 0 case properly, now we just give it a
                 // tmp free pass.
                 bindMountAppsData = false;
+            }
+
+            if (!hasAppStorage) {
+                bindMountAppsData = false;
+                pkgDataInfoMap = null;
+                allowlistedAppDataInfoMap = null;
             }
 
             int userId = UserHandle.getUserId(uid);
@@ -2488,6 +2503,17 @@ public final class ProcessList {
         }
     }
 
+    private boolean hasAppStorage(PackageManagerInternal pmInt, String packageName) {
+        final AndroidPackage pkg = pmInt.getPackage(packageName);
+        if (pkg == null) {
+            Slog.w(TAG, "Unknown package " + packageName);
+            return false;
+        }
+        final PackageManager.Property noAppStorageProp =
+                    pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return noAppStorageProp == null || !noAppStorageProp.getBoolean();
+    }
+
     @GuardedBy("mService")
     void startProcessLocked(ProcessRecord app, HostingRecord hostingRecord, int zygotePolicyFlags) {
         startProcessLocked(app, hostingRecord, zygotePolicyFlags, null /* abiOverride */);
@@ -2505,6 +2531,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
+            boolean supplemental, int supplementalUid,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2598,7 +2625,8 @@ public final class ProcessList {
 
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
-            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, hostingRecord);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, supplemental,
+                    supplementalUid, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -3093,10 +3121,14 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated, int isolatedUid, HostingRecord hostingRecord) {
+            boolean isolated, int isolatedUid, boolean supplemental, int supplementalUid,
+            HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
+        if (supplemental) {
+            uid = supplementalUid;
+        }
         if (isolated) {
             if (isolatedUid == 0) {
                 IsolatedUidRange uidRange = getOrCreateIsolatedUidRangeLocked(info, hostingRecord);

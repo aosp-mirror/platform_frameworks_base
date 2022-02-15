@@ -18,28 +18,37 @@ package com.android.systemui.dreams.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import android.view.ViewGroup;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ViewModelStore;
 
-import com.android.systemui.dreams.DreamOverlayContainerView;
-import com.android.systemui.dreams.DreamOverlayStatusBarViewController;
+import com.android.systemui.dreams.DreamOverlayContainerViewController;
+import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.dagger.ComplicationModule;
+import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
  * Dagger subcomponent for {@link DreamOverlayModule}.
  */
-@Subcomponent(modules = {DreamOverlayModule.class})
+@Subcomponent(modules = {
+        DreamOverlayModule.class,
+        ComplicationModule.class,
+})
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
     /** Simple factory for {@link DreamOverlayComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        DreamOverlayComponent create();
+        DreamOverlayComponent create(@BindsInstance ViewModelStore store,
+                @BindsInstance Complication.Host host);
     }
 
     /** Scope annotation for singleton items within the {@link DreamOverlayComponent}. */
@@ -48,15 +57,15 @@ public interface DreamOverlayComponent {
     @Scope
     @interface DreamOverlayScope {}
 
-    /** Builds a {@link DreamOverlayContainerView} */
-    @DreamOverlayScope
-    DreamOverlayContainerView getDreamOverlayContainerView();
+    /** Builds a {@link DreamOverlayContainerViewController}. */
+    DreamOverlayContainerViewController getDreamOverlayContainerViewController();
 
-    /** Builds a content view for dream overlays */
-    @DreamOverlayScope
-    ViewGroup getDreamOverlayContentView();
+    /** Builds a {@link androidx.lifecycle.LifecycleRegistry} */
+    LifecycleRegistry getLifecycleRegistry();
 
-    /** Builds a {@link DreamOverlayStatusBarViewController}. */
-    @DreamOverlayScope
-    DreamOverlayStatusBarViewController getDreamOverlayStatusBarViewController();
+    /** Builds a {@link androidx.lifecycle.LifecycleOwner} */
+    LifecycleOwner getLifecycleOwner();
+
+    /** Builds a {@link DreamOverlayTouchMonitor} */
+    DreamOverlayTouchMonitor getDreamOverlayTouchMonitor();
 }

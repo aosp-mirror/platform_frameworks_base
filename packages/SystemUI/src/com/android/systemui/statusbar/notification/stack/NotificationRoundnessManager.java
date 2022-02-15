@@ -21,8 +21,6 @@ import android.util.MathUtils;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -41,14 +39,13 @@ public class NotificationRoundnessManager {
     private final ExpandableView[] mLastInSectionViews;
     private final ExpandableView[] mTmpFirstInSectionViews;
     private final ExpandableView[] mTmpLastInSectionViews;
-    private final FeatureFlags mFeatureFlags;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
     private boolean mRoundForPulsingViews;
-    private boolean mIsDismissAllInProgress;
+    private boolean mIsClearAllInProgress;
 
     private ExpandableView mSwipedView = null;
     private ExpandableView mViewBeforeSwipedView = null;
@@ -56,9 +53,7 @@ public class NotificationRoundnessManager {
 
     @Inject
     NotificationRoundnessManager(
-            NotificationSectionsFeatureManager sectionsFeatureManager,
-            FeatureFlags featureFlags) {
-        mFeatureFlags = featureFlags;
+            NotificationSectionsFeatureManager sectionsFeatureManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
@@ -125,9 +120,6 @@ public class NotificationRoundnessManager {
             ExpandableView viewBefore,
             ExpandableView viewSwiped,
             ExpandableView viewAfter) {
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_UPDATES)) {
-            return;
-        }
         final boolean animate = true;
 
         ExpandableView oldViewBefore = mViewBeforeSwipedView;
@@ -164,8 +156,8 @@ public class NotificationRoundnessManager {
         }
     }
 
-    void setDismissAllInProgress(boolean isClearingAll) {
-        mIsDismissAllInProgress = isClearingAll;
+    void setClearAllInProgress(boolean isClearingAll) {
+        mIsClearAllInProgress = isClearingAll;
     }
 
     private float getRoundnessFraction(ExpandableView view, boolean top) {
@@ -178,8 +170,8 @@ public class NotificationRoundnessManager {
             return 1f;
         }
         if (view instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) view).canViewBeDismissed()
-                && mIsDismissAllInProgress) {
+                && ((ExpandableNotificationRow) view).canViewBeCleared()
+                && mIsClearAllInProgress) {
             return 1.0f;
         }
         if ((view.isPinned()

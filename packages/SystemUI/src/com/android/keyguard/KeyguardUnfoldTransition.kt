@@ -17,11 +17,13 @@
 package com.android.keyguard
 
 import android.content.Context
-import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.R
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.LEFT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.RIGHT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.SysUIUnfoldScope
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import javax.inject.Inject
 
@@ -30,84 +32,37 @@ import javax.inject.Inject
  * the set of ids, which also dictact which direction to move and when, via a filter function.
  */
 @SysUIUnfoldScope
-class KeyguardUnfoldTransition @Inject constructor(
-    val context: Context,
-    val unfoldProgressProvider: NaturalRotationUnfoldProgressProvider
+class KeyguardUnfoldTransition
+@Inject
+constructor(
+    private val context: Context,
+    unfoldProgressProvider: NaturalRotationUnfoldProgressProvider
 ) {
 
-    companion object {
-        final val LEFT = -1
-        final val RIGHT = 1
-    }
+    /** Certain views only need to move if they are not currently centered */
+    var statusViewCentered = false
 
     private val filterSplitShadeOnly = { !statusViewCentered }
     private val filterNever = { true }
 
-    private val ids = setOf(
-        Triple(R.id.keyguard_status_area, LEFT, filterNever),
-        Triple(R.id.controls_button, LEFT, filterNever),
-        Triple(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
-        Triple(R.id.lockscreen_clock_view, LEFT, filterNever),
-        Triple(R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
-        Triple(R.id.wallet_button, RIGHT, filterNever)
-    )
-    private var parent: ViewGroup? = null
-    private var views = listOf<Triple<View, Int, () -> Boolean>>()
-    private var xTranslationMax = 0f
-
-    /**
-     * Certain views only need to move if they are not currently centered
-     */
-    var statusViewCentered = false
-
-    init {
-        unfoldProgressProvider.addCallback(
-            object : TransitionProgressListener {
-                override fun onTransitionStarted() {
-                    findViews()
-                }
-
-                override fun onTransitionProgress(progress: Float) {
-                    translateViews(progress)
-                }
-
-                override fun onTransitionFinished() {
-                    translateViews(1f)
-                }
-            }
-        )
+    private val translateAnimator by lazy {
+        UnfoldConstantTranslateAnimator(
+            viewsIdToTranslate =
+                setOf(
+                    ViewIdToTranslate(R.id.keyguard_status_area, LEFT, filterNever),
+                    ViewIdToTranslate(R.id.controls_button, LEFT, filterNever),
+                    ViewIdToTranslate(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
+                    ViewIdToTranslate(R.id.lockscreen_clock_view, LEFT, filterNever),
+                    ViewIdToTranslate(
+                        R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
+                    ViewIdToTranslate(R.id.wallet_button, RIGHT, filterNever)),
+            progressProvider = unfoldProgressProvider)
     }
 
-    /**
-     * Relies on the [parent] to locate views to translate
-     */
+    /** Relies on the [parent] to locate views to translate. */
     fun setup(parent: ViewGroup) {
-        this.parent = parent
-        xTranslationMax = context.resources.getDimensionPixelSize(
-            R.dimen.keyguard_unfold_translation_x).toFloat()
-    }
-
-    /**
-     * Manually translate views based on set direction. At the moment
-     * [UnfoldMoveFromCenterAnimator] exists but moves all views a dynamic distance
-     * from their mid-point. This code instead will only ever translate by a fixed amount.
-     */
-    private fun translateViews(progress: Float) {
-        val xTrans = progress * xTranslationMax - xTranslationMax
-        views.forEach {
-            (view, direction, pred) -> if (pred()) {
-                view.setTranslationX(xTrans * direction)
-            }
-        }
-    }
-
-    private fun findViews() {
-        parent?.let { p ->
-            views = ids.mapNotNull {
-                (id, direction, pred) -> p.findViewById<View>(id)?.let {
-                    Triple(it, direction, pred)
-                }
-            }
-        }
+        val translationMax =
+            context.resources.getDimensionPixelSize(R.dimen.keyguard_unfold_translation_x).toFloat()
+        translateAnimator.init(parent, translationMax)
     }
 }

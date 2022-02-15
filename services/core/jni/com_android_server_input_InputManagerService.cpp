@@ -265,7 +265,6 @@ public:
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(JNIEnv* env,
                                                                    const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(JNIEnv* env, int32_t displayId,
-                                                                   bool isGestureMonitor,
                                                                    const std::string& name,
                                                                    int32_t pid);
     status_t removeInputChannel(JNIEnv* env, const sp<IBinder>& connectionToken);
@@ -277,6 +276,7 @@ public:
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiLightsOut(bool lightsOut);
     void setPointerSpeed(int32_t speed);
+    void setPointerAcceleration(float acceleration);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
@@ -286,6 +286,7 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
+    void notifyPointerDisplayIdChanged();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -362,6 +363,9 @@ private:
         // Pointer speed.
         int32_t pointerSpeed;
 
+        // Pointer acceleration.
+        float pointerAcceleration;
+
         // True if pointer gestures are enabled.
         bool pointerGesturesEnabled;
 
@@ -411,6 +415,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         AutoMutex _l(mLock);
         mLocked.systemUiLightsOut = false;
         mLocked.pointerSpeed = 0;
+        mLocked.pointerAcceleration = android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
         mLocked.pointerDisplayId = ADISPLAY_ID_DEFAULT;
@@ -438,6 +443,7 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
+        dump += StringPrintf(INDENT "Pointer Acceleration: %0.3f\n", mLocked.pointerAcceleration);
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                 toString(mLocked.pointerGesturesEnabled));
         dump += StringPrintf(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
@@ -448,6 +454,9 @@ void NativeInputManager::dump(std::string& dump) {
     dump += "\n";
 
     mInputManager->getReader().dump(dump);
+    dump += "\n";
+
+    mInputManager->getUnwantedInteractionBlocker().dump(dump);
     dump += "\n";
 
     mInputManager->getClassifier().dump(dump);
@@ -512,11 +521,9 @@ base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChann
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
-        JNIEnv* /* env */, int32_t displayId, bool isGestureMonitor, const std::string& name,
-        int32_t pid) {
+        JNIEnv* /* env */, int32_t displayId, const std::string& name, int32_t pid) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher().createInputMonitor(displayId, isGestureMonitor, name,
-                                                             pid);
+    return mInputManager->getDispatcher().createInputMonitor(displayId, name, pid);
 }
 
 status_t NativeInputManager::removeInputChannel(JNIEnv* /* env */,
@@ -627,6 +634,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
+        outConfig->pointerVelocityControlParameters.acceleration = mLocked.pointerAcceleration;
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
 
         outConfig->showTouches = mLocked.showTouches;
@@ -696,6 +704,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
+    mInputManager->getUnwantedInteractionBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
@@ -1059,6 +1068,22 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
 
         ALOGI("Setting pointer speed to %d.", speed);
         mLocked.pointerSpeed = speed;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_POINTER_SPEED);
+}
+
+void NativeInputManager::setPointerAcceleration(float acceleration) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.pointerAcceleration == acceleration) {
+            return;
+        }
+
+        ALOGI("Setting pointer acceleration to %0.3f", acceleration);
+        mLocked.pointerAcceleration = acceleration;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -1494,6 +1519,18 @@ void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
 }
 
+void NativeInputManager::notifyPointerDisplayIdChanged() {
+    int32_t pointerDisplayId = getPointerDisplayId();
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+        mLocked.pointerDisplayId = pointerDisplayId;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+}
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeInit(JNIEnv* env, jclass /* clazz */,
@@ -1573,6 +1610,13 @@ static jboolean nativeHasKeys(JNIEnv* env, jclass /* clazz */,
     return result;
 }
 
+static jint nativeGetKeyCodeForKeyLocation(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                           jint deviceId, jint locationKeyCode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    return (jint)im->getInputManager()->getReader().getKeyCodeForKeyLocation(deviceId,
+                                                                             locationKeyCode);
+}
+
 static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj */,
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
@@ -1595,7 +1639,7 @@ static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong p
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
+        message += StringPrintf(" Status=%d", static_cast<int>(inputChannel.error().code()));
         jniThrowRuntimeException(env, message.c_str());
         return nullptr;
     }
@@ -1612,7 +1656,7 @@ static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong p
 }
 
 static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId,
-                                        jboolean isGestureMonitor, jstring nameObj, jint pid) {
+                                        jstring nameObj, jint pid) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     if (displayId == ADISPLAY_ID_NONE) {
@@ -1625,11 +1669,11 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong p
     std::string name = nameChars.c_str();
 
     base::Result<std::unique_ptr<InputChannel>> inputChannel =
-            im->createInputMonitor(env, displayId, isGestureMonitor, name, pid);
+            im->createInputMonitor(env, displayId, name, pid);
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
-        message += StringPrintf(" Status=%d", inputChannel.error().code());
+        message += StringPrintf(" Status=%d", static_cast<int>(inputChannel.error().code()));
         jniThrowRuntimeException(env, message.c_str());
         return nullptr;
     }
@@ -1660,7 +1704,6 @@ static void nativePilferPointers(JNIEnv* env, jclass /* clazz */, jlong ptr, job
     im->pilferPointers(token);
 }
 
-
 static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1668,11 +1711,13 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
     im->getInputManager()->getDispatcher().setInputFilterEnabled(enabled);
 }
 
-static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
-        jlong ptr, jboolean inTouchMode) {
+static jboolean nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
+                                     jboolean inTouchMode, jint pid, jint uid,
+                                     jboolean hasPermission) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode);
+    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid, uid,
+                                                                 hasPermission);
 }
 
 static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* /* env */, jclass /* clazz */,
@@ -1860,6 +1905,13 @@ static void nativeSetPointerSpeed(JNIEnv* /* env */, jclass /* clazz */, jlong p
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     im->setPointerSpeed(speed);
+}
+
+static void nativeSetPointerAcceleration(JNIEnv* /* env */, jclass /* clazz */, jlong ptr,
+                                         jfloat acceleration) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setPointerAcceleration(acceleration);
 }
 
 static void nativeSetShowTouches(JNIEnv* /* env */,
@@ -2186,6 +2238,18 @@ static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */,
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
+static void nativeNotifyPointerDisplayIdChanged(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->notifyPointerDisplayIdChanged();
+}
+
+static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                                         jint displayId, jboolean isEligible) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getDispatcher().setDisplayEligibilityForPointerCapture(displayId,
+                                                                                  isEligible);
+}
+
 static void nativeChangeUniqueIdAssociation(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     im->getInputManager()->getReader().requestRefreshConfiguration(
@@ -2292,6 +2356,11 @@ static jboolean nativeFlushSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, ji
                                                                       sensorType));
 }
 
+static void nativeCancelCurrentTouch(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getDispatcher().cancelCurrentTouch();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2307,14 +2376,15 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeGetKeyCodeState", "(JIII)I", (void*)nativeGetKeyCodeState},
         {"nativeGetSwitchState", "(JIII)I", (void*)nativeGetSwitchState},
         {"nativeHasKeys", "(JII[I[Z)Z", (void*)nativeHasKeys},
+        {"nativeGetKeyCodeForKeyLocation", "(JII)I", (void*)nativeGetKeyCodeForKeyLocation},
         {"nativeCreateInputChannel", "(JLjava/lang/String;)Landroid/view/InputChannel;",
          (void*)nativeCreateInputChannel},
-        {"nativeCreateInputMonitor", "(JIZLjava/lang/String;I)Landroid/view/InputChannel;",
+        {"nativeCreateInputMonitor", "(JILjava/lang/String;I)Landroid/view/InputChannel;",
          (void*)nativeCreateInputMonitor},
         {"nativeRemoveInputChannel", "(JLandroid/os/IBinder;)V", (void*)nativeRemoveInputChannel},
         {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
         {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
-        {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},
+        {"nativeSetInTouchMode", "(JZIIZ)Z", (void*)nativeSetInTouchMode},
         {"nativeSetMaximumObscuringOpacityForTouch", "(JF)V",
          (void*)nativeSetMaximumObscuringOpacityForTouch},
         {"nativeSetBlockUntrustedTouchesMode", "(JI)V", (void*)nativeSetBlockUntrustedTouchesMode},
@@ -2335,6 +2405,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeTransferTouchFocus},
         {"nativeTransferTouch", "(JLandroid/os/IBinder;)Z", (void*)nativeTransferTouch},
         {"nativeSetPointerSpeed", "(JI)V", (void*)nativeSetPointerSpeed},
+        {"nativeSetPointerAcceleration", "(JF)V", (void*)nativeSetPointerAcceleration},
         {"nativeSetShowTouches", "(JZ)V", (void*)nativeSetShowTouches},
         {"nativeSetInteractive", "(JZ)V", (void*)nativeSetInteractive},
         {"nativeReloadCalibration", "(J)V", (void*)nativeReloadCalibration},
@@ -2365,12 +2436,16 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
         {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
         {"nativeChangeUniqueIdAssociation", "(J)V", (void*)nativeChangeUniqueIdAssociation},
+        {"nativeNotifyPointerDisplayIdChanged", "(J)V", (void*)nativeNotifyPointerDisplayIdChanged},
+        {"nativeSetDisplayEligibilityForPointerCapture", "(JIZ)V",
+         (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"nativeSetMotionClassifierEnabled", "(JZ)V", (void*)nativeSetMotionClassifierEnabled},
         {"nativeGetSensorList", "(JI)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
         {"nativeEnableSensor", "(JIIII)Z", (void*)nativeEnableSensor},
         {"nativeDisableSensor", "(JII)V", (void*)nativeDisableSensor},
         {"nativeFlushSensor", "(JII)Z", (void*)nativeFlushSensor},
+        {"nativeCancelCurrentTouch", "(J)V", (void*)nativeCancelCurrentTouch},
 };
 
 #define FIND_CLASS(var, className) \

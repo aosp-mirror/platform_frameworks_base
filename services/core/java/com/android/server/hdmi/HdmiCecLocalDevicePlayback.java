@@ -17,10 +17,15 @@
 package com.android.server.hdmi;
 
 import android.annotation.CallSuper;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -44,9 +49,6 @@ import java.util.Locale;
  */
 public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
-
-    private static final boolean SET_MENU_LANGUAGE =
-            HdmiProperties.set_menu_language_enabled().orElse(false);
 
     // How long to wait after hotplug out before possibly going to Standby.
     @VisibleForTesting
@@ -74,6 +76,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
         mDelayedStandbyHandler = new Handler(service.getServiceLooper());
+        mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
     @Override
@@ -383,7 +386,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Constants.HandleMessageResult
     protected int handleSetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (!SET_MENU_LANGUAGE) {
+        if (mService.getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE)
+                    == HdmiControlManager.SET_MENU_LANGUAGE_DISABLED) {
             return Constants.ABORT_UNRECOGNIZED_OPCODE;
         }
 
@@ -408,7 +413,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     // locale from being chosen. 'eng' in the CEC command, for instance,
                     // will always be mapped to en-AU among other variants like en-US, en-GB,
                     // an en-IN, which may not be the expected one.
-                    LocalePicker.updateLocale(localeInfo.getLocale());
+                    startSetMenuLanguageActivity(localeInfo.getLocale());
                     return Constants.HANDLED;
                 }
             }
@@ -417,6 +422,24 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         } catch (UnsupportedEncodingException e) {
             Slog.w(TAG, "Can't handle <Set Menu Language>", e);
             return Constants.ABORT_INVALID_OPERAND;
+        }
+    }
+
+    private void startSetMenuLanguageActivity(Locale locale) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Context context = mService.getContext();
+            Intent intent = new Intent();
+            intent.putExtra(HdmiControlManager.EXTRA_LOCALE, locale.toLanguageTag());
+            intent.setComponent(
+                    ComponentName.unflattenFromString(context.getResources().getString(
+                            com.android.internal.R.string.config_hdmiCecSetMenuLanguageActivity)));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivityAsUser(intent, context.getUser());
+        } catch (ActivityNotFoundException e) {
+            Slog.e(TAG, "unable to start HdmiCecSetMenuLanguageActivity");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

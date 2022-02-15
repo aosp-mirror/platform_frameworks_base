@@ -23,7 +23,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -126,7 +126,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected FeatureFlags mFeatureFlags;
-    protected StatusBarFlags mStatusBarFlags;
 
     protected int mSubId;
 
@@ -157,10 +156,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mFeatureFlags = mock(FeatureFlags.class);
-        mStatusBarFlags = mock(StatusBarFlags.class);
         when(mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false);
-        when(mStatusBarFlags.isProviderModelSettingEnabled()).thenReturn(true);
-
 
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
@@ -213,8 +209,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockProvisionController.isCurrentUserSetup()).thenReturn(true);
         doAnswer(invocation -> {
             mUserCallback = (DeviceProvisionedListener) invocation.getArguments()[0];
-            mUserCallback.onUserSetupChanged();
-            mUserCallback.onDeviceProvisionedChanged();
             TestableLooper.get(this).processAllMessages();
             return null;
         }).when(mMockProvisionController).addCallback(any());
@@ -238,7 +232,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mFeatureFlags,
-                mStatusBarFlags,
                 mock(DumpManager.class)
         );
         setupNetworkController();
@@ -308,7 +301,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults,
                         mock(DeviceProvisionedController.class), mMockBd, mDemoModeController,
-                        mCarrierConfigTracker, mFeatureFlags, mStatusBarFlags,
+                        mCarrierConfigTracker, mFeatureFlags,
                         mock(DumpManager.class));
 
         setupNetworkController();

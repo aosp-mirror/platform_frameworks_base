@@ -176,7 +176,6 @@ public class InteractionJankMonitorTest {
     private InteractionJankMonitor createMockedInteractionJankMonitor() {
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
         doReturn(true).when(monitor).shouldMonitor(anyInt());
-        doNothing().when(monitor).notifyEvents(any(), any(), any());
         return monitor;
     }
 

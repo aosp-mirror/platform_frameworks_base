@@ -218,7 +218,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
         // Mark the pool as being open for business.
         mIsOpen = true;
-        mCloseGuard.open("close");
+        mCloseGuard.open("SQLiteConnectionPool.close");
     }
 
     /**

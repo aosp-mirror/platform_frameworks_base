@@ -18,6 +18,7 @@ package com.android.systemui.navigationbar;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
@@ -73,6 +74,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -95,6 +97,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -105,7 +108,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -119,6 +121,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private NavigationBar mExternalDisplayNavigationBar;
 
     private SysuiTestableContext mSysuiTestableContextExternal;
+    @Mock
+    private SystemActions mSystemActions;
     @Mock
     private OverviewProxyService mOverviewProxyService;
     @Mock
@@ -182,8 +186,9 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
             mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
-                    mock(AccessibilityManagerWrapper.class),
-                    mock(AccessibilityButtonModeObserver.class), mOverviewProxyService,
+                    mock(AccessibilityButtonModeObserver.class),
+                    mock(AccessibilityButtonTargetsObserver.class),
+                    mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mStatusBar),
                     mock(NavigationModeController.class), mock(UserTracker.class),
                     mock(DumpManager.class)));
@@ -285,20 +290,26 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true);
 
         // Verify IME window state will be updated in default NavBar & external NavBar state reset.
-        assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN,
+        assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
+                        | NAVIGATION_HINT_IME_SWITCHER_SHOWN,
                 defaultNavBar.getNavigationIconHints());
         assertFalse((externalNavBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertFalse((externalNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+        assertFalse((externalNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
+                != 0);
 
         externalNavBar.setImeWindowStatus(EXTERNAL_DISPLAY_ID, null, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         defaultNavBar.setImeWindowStatus(
                 DEFAULT_DISPLAY, null, IME_INVISIBLE, BACK_DISPOSITION_DEFAULT, false);
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
-        assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN,
+        assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
+                        | NAVIGATION_HINT_IME_SWITCHER_SHOWN,
                 externalNavBar.getNavigationIconHints());
         assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+        assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
+                != 0);
     }
 
     @Test
@@ -316,6 +327,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
+                != 0);
 
         // Verify navbar didn't alter and showing back icon when the keyguard is showing without
         // requesting IME insets visible.
@@ -324,6 +337,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+        assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
+                != 0);
 
         // Verify navbar altered and showing back icon when the keyguard is showing and
         // requesting IME insets visible.
@@ -333,6 +348,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
         assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
+        assertTrue((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SWITCHER_SHOWN)
+                != 0);
     }
 
     @Test
@@ -346,7 +363,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 NavBarHelper.NavbarTaskbarStateUpdater.class));
 
         // Should be safe even though the internal view is now null.
-        mNavigationBar.updateAcessibilityStateFlags();
+        mNavigationBar.updateAccessibilityStateFlags();
     }
 
     private NavigationBar createNavBar(Context context) {
@@ -372,18 +389,17 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
-                mock(SystemActions.class),
                 mHandler,
                 mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
                 mNavBarHelper,
-                mock(UserTracker.class),
                 mLightBarController,
                 mLightBarcontrollerFactory,
                 mAutoHideController,
                 mAutoHideControllerFactory,
                 Optional.of(mTelecomManager),
-                mInputMethodManager);
+                mInputMethodManager,
+                Optional.of(mock(BackAnimation.class)));
         return spy(factory.create(context));
     }
 

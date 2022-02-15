@@ -42,8 +42,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class DvbsFrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SCAN_TYPE_",
+    @IntDef(prefix = "SCAN_TYPE_",
             value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_DIRECT, SCAN_TYPE_DISEQC,
                     SCAN_TYPE_UNICABLE, SCAN_TYPE_JESS})
     @Retention(RetentionPolicy.SOURCE)
@@ -75,8 +74,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
     public static final int SCAN_TYPE_JESS = FrontendDvbsScanType.JESS;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_QPSK,
                     MODULATION_MOD_8PSK, MODULATION_MOD_16QAM, MODULATION_MOD_16PSK,
                     MODULATION_MOD_32PSK, MODULATION_MOD_ACM, MODULATION_MOD_8APSK,
@@ -207,8 +205,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "STANDARD_",
+    @IntDef(prefix = "STANDARD_",
             value = {STANDARD_AUTO, STANDARD_S, STANDARD_S2, STANDARD_S2X})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Standard {}

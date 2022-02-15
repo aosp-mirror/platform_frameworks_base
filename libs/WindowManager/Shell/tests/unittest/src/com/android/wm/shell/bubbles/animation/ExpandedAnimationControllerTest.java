@@ -59,19 +59,21 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mStackOffset;
     private PointF mExpansionPoint;
     private BubblePositioner mPositioner;
-    private BubbleStackView.StackViewState mStackViewState;
+    private BubbleStackView.StackViewState mStackViewState = new BubbleStackView.StackViewState();
 
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
-        BubbleStackView stackView = mock(BubbleStackView.class);
-        when(stackView.getState()).thenReturn(getStackViewState());
         mPositioner = new BubblePositioner(getContext(), mock(WindowManager.class));
         mPositioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));
+
+        BubbleStackView stackView = mock(BubbleStackView.class);
+        when(stackView.getState()).thenReturn(getStackViewState());
+
         mExpandedController = new ExpandedAnimationController(mPositioner,
                 mOnBubbleAnimatedOutAction,
                 stackView);
@@ -133,6 +135,12 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         mLayout.removeView(mViews.get(3));
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
         testBubblesInCorrectExpandedPositions();
+    }
+
+    @Test
+    public void testDragBubbleOutDoesntNPE() throws InterruptedException {
+        mExpandedController.onGestureFinished();
+        mExpandedController.dragBubbleOut(mViews.get(0), 1, 1);
     }
 
     /** Expand the stack and wait for animations to finish. */

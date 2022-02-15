@@ -16,6 +16,10 @@
 
 package com.android.settingslib.drawable;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_USER_ICON;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -38,9 +42,12 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.UserHandle;
 
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.os.BuildCompat;
 
 import com.android.settingslib.R;
 
@@ -82,8 +89,23 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @return drawable containing just the badge
      */
     public static Drawable getManagedUserDrawable(Context context) {
-        return getDrawableForDisplayDensity
-                (context, com.android.internal.R.drawable.ic_corp_user_badge);
+        if (BuildCompat.isAtLeastT()) {
+            return getUpdatableManagedUserDrawable(context);
+        } else {
+            return getDrawableForDisplayDensity(
+                    context, com.android.internal.R.drawable.ic_corp_user_badge);
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static Drawable getUpdatableManagedUserDrawable(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getDrawableForDensity(
+                WORK_PROFILE_USER_ICON,
+                SOLID_COLORED,
+                context.getResources().getDisplayMetrics().densityDpi,
+                /* default= */ () -> getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_user_badge));
     }
 
     private static Drawable getDrawableForDisplayDensity(
@@ -181,8 +203,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
                     && dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(UserHandle.of(userId))
                             == null; // and has no supervisor
             if (isCorp) {
-                badge = getDrawableForDisplayDensity(
-                        context, com.android.internal.R.drawable.ic_corp_badge_case);
+                badge = getManagementBadge(context);
             }
         }
         return setBadge(badge);
@@ -192,14 +213,33 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * Sets the managed badge to this user icon if the device has a device owner.
      */
     public UserIconDrawable setBadgeIfManagedDevice(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         Drawable badge = null;
-        boolean deviceOwnerExists = context.getSystemService(DevicePolicyManager.class)
-                .getDeviceOwnerComponentOnAnyUser() != null;
+        boolean deviceOwnerExists = dpm.getDeviceOwnerComponentOnAnyUser() != null;
         if (deviceOwnerExists) {
-            badge = getDrawableForDisplayDensity(
-                    context, com.android.internal.R.drawable.ic_corp_badge_case);
+            badge = getManagementBadge(context);
         }
         return setBadge(badge);
+    }
+
+    private static Drawable getManagementBadge(Context context) {
+        if (BuildCompat.isAtLeastT()) {
+            return getUpdatableManagementBadge(context);
+        } else {
+            return getDrawableForDisplayDensity(
+                    context, com.android.internal.R.drawable.ic_corp_user_badge);
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static Drawable getUpdatableManagementBadge(Context context) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return dpm.getDrawableForDensity(
+                WORK_PROFILE_ICON,
+                SOLID_COLORED,
+                context.getResources().getDisplayMetrics().densityDpi,
+                /* default= */ () -> getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_badge_case));
     }
 
     public void setBadgeRadius(float radius) {

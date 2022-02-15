@@ -24,13 +24,15 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.os.RemoteException;
-import android.util.IntArray;
 import android.util.Log;
+
+import com.android.net.module.util.CollectionUtils;
 
 import dalvik.system.CloseGuard;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
 /**
  * Class providing enumeration over buckets of network usage statistics. {@link NetworkStats} objects
@@ -543,9 +545,18 @@ public final class NetworkStats implements AutoCloseable {
     }
 
     /**
+     * Collects tagged summary results and sets summary enumeration mode.
+     * @throws RemoteException
+     */
+    void startTaggedSummaryEnumeration() throws RemoteException {
+        mSummary = mSession.getTaggedSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp);
+        mEnumerationIndex = 0;
+    }
+
+    /**
      * Collects history results for uid and resets history enumeration index.
      */
-    void startHistoryEnumeration(int uid, int tag, int state) {
+    void startHistoryUidEnumeration(int uid, int tag, int state) {
         mHistory = null;
         try {
             mHistory = mSession.getHistoryIntervalForUid(mTemplate, uid,
@@ -560,6 +571,20 @@ public final class NetworkStats implements AutoCloseable {
     }
 
     /**
+     * Collects history results for network and resets history enumeration index.
+     */
+    void startHistoryDeviceEnumeration() {
+        try {
+            mHistory = mSession.getHistoryIntervalForNetwork(
+                    mTemplate, NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
+        } catch (RemoteException e) {
+            Log.w(TAG, e);
+            mHistory = null;
+        }
+        mEnumerationIndex = 0;
+    }
+
+    /**
      * Starts uid enumeration for current user.
      * @throws RemoteException
      */
@@ -568,7 +593,7 @@ public final class NetworkStats implements AutoCloseable {
         //       the filtering logic below can be removed.
         int[] uids = mSession.getRelevantUids();
         // Filtering of uids with empty history.
-        IntArray filteredUids = new IntArray(uids.length);
+        final ArrayList<Integer> filteredUids = new ArrayList<>();
         for (int uid : uids) {
             try {
                 NetworkStatsHistory history = mSession.getHistoryIntervalForUid(mTemplate, uid,
@@ -581,7 +606,7 @@ public final class NetworkStats implements AutoCloseable {
                 Log.w(TAG, "Error while getting history of uid " + uid, e);
             }
         }
-        mUids = filteredUids.toArray();
+        mUids = CollectionUtils.toIntArray(filteredUids);
         mUidOrUidIndex = -1;
         stepHistory();
     }

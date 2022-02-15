@@ -33,7 +33,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.VcnGatewayConnectionConfig;
-import android.net.vcn.VcnUnderlyingNetworkPriority;
+import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
@@ -498,10 +498,10 @@ public class UnderlyingNetworkController {
         pw.println(
                 "Currently selected: " + (mCurrentRecord == null ? null : mCurrentRecord.network));
 
-        pw.println("VcnUnderlyingNetworkPriority list:");
+        pw.println("VcnUnderlyingNetworkTemplate list:");
         pw.increaseIndent();
         int index = 0;
-        for (VcnUnderlyingNetworkPriority priority :
+        for (VcnUnderlyingNetworkTemplate priority :
                 mConnectionConfig.getVcnUnderlyingNetworkPriorities()) {
             pw.println("Priority index: " + index);
             priority.dump(pw);

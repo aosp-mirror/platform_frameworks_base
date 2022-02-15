@@ -21,12 +21,12 @@ import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
-import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -144,20 +144,20 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     * @hide
     */
     public boolean connect(BluetoothDevice device) {
-       if (mService == null) {
-           return false;
-       }
-       return mService.connect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
     }
 
     /*
     * @hide
     */
     public boolean disconnect(BluetoothDevice device) {
-       if (mService == null) {
-           return false;
-       }
-       return mService.disconnect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
@@ -177,10 +177,10 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     }
 
     public List<BluetoothDevice> getActiveDevices() {
-        if (mService == null) {
+        if (mBluetoothAdapter == null) {
             return new ArrayList<>();
         }
-        return mService.getActiveDevices();
+        return mBluetoothAdapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
     }
 
     @Override

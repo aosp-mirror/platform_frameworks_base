@@ -130,7 +130,7 @@ public final class MovePackageHelper {
                         "Device admin cannot be moved");
             }
 
-            if (mPm.mFrozenPackages.contains(packageName)) {
+            if (mPm.mFrozenPackages.containsKey(packageName)) {
                 throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
                         "Failed to move already frozen package");
             }
@@ -188,6 +188,7 @@ public final class MovePackageHelper {
             for (int userId : installedUserIds) {
                 if (StorageManager.isFileEncryptedNativeOrEmulated()
                         && !StorageManager.isUserKeyUnlocked(userId)) {
+                    freezer.close();
                     throw new PackageManagerException(MOVE_FAILED_LOCKED_USER,
                             "User " + userId + " must be unlocked");
                 }
@@ -230,6 +231,7 @@ public final class MovePackageHelper {
         final IPackageInstallObserver2 installObserver = new IPackageInstallObserver2.Stub() {
             @Override
             public void onUserActionRequired(Intent intent) throws RemoteException {
+                freezer.close();
                 throw new IllegalStateException();
             }
 
@@ -296,7 +298,8 @@ public final class MovePackageHelper {
                 new File(origin.mResolvedPath), /* flags */ 0);
         final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user, packageAbiOverride, lite, mPm);
+                installSource, volumeUuid, user, packageAbiOverride,
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, lite, mPm);
         params.movePackage();
     }
 

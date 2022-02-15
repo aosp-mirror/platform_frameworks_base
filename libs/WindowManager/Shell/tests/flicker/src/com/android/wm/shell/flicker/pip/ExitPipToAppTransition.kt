@@ -18,9 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import org.junit.Assume.assumeFalse
 import org.junit.Test
 
 /**
@@ -29,15 +27,6 @@ import org.junit.Test
 abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     protected val testApp = FixedAppHelper(instrumentation)
 
-    /** {@inheritDoc}  */
-    @Presubmit
-    @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
-
     /**
      * Checks that the pip app window remains inside the display bounds throughout the whole
      * animation
@@ -45,8 +34,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppWindowRemainInsideVisibleBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -57,8 +46,8 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
     @Presubmit
     @Test
     open fun pipAppLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 

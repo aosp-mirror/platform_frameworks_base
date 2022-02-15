@@ -16,10 +16,10 @@
 package android.telephony.euicc;
 
 import android.Manifest;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -37,13 +36,11 @@ import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager.ResetOption;
 
 import com.android.internal.telephony.euicc.IEuiccController;
-import com.android.internal.telephony.euicc.IResultCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +55,7 @@ import java.util.stream.Collectors;
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
 public class EuiccManager {
 
     /**
@@ -217,20 +215,6 @@ public class EuiccManager {
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_EUICC_ACTIVATION =
             "android.telephony.euicc.action.START_EUICC_ACTIVATION";
-
-    /**
-     * Result codes passed to the ResultListener by
-     * {@link #switchToSubscription(int, int, Executor, ResultListener)}
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"EMBEDDED_SUBSCRIPTION_RESULT_"}, value = {
-            EMBEDDED_SUBSCRIPTION_RESULT_OK,
-            EMBEDDED_SUBSCRIPTION_RESULT_ERROR,
-            EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR
-    })
-    public @interface ResultCode{}
 
     /**
      * Result code for an operation indicating that the operation succeeded.
@@ -821,6 +805,13 @@ public class EuiccManager {
      */
     public static final int ERROR_OPERATION_BUSY = 10016;
 
+    /**
+     * Failure due to target port is not supported.
+     * @see #switchToSubscription(int, int, PendingIntent)
+     */
+    public static final int ERROR_INVALID_PORT = 10017;
+
+
     private final Context mContext;
     private int mCardId;
 
@@ -1136,6 +1127,15 @@ public class EuiccManager {
      * intent to prompt the user to accept the download. The caller should also be authorized to
      * manage the subscription to be enabled.
      *
+     * <p> From Android T, devices might support MEP(Multiple Enabled Profile), the subscription
+     * can be installed on different port from the eUICC. Calling apps with carrier privilege
+     * (see {@link TelephonyManager#hasCarrierPrivileges}) over the currently active subscriptions
+     * can use {@link #switchToSubscription(int, int, PendingIntent)} to specify which port to
+     * enable the subscription. Otherwise, use this API to enable the subscription on the eUICC
+     * and the platform will internally resolve a port. If there is no available port,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned in the callback
+     * intent to prompt the user to disable an already-active subscription.
+     *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
      *     current profile without activating another profile to replace it. If it's a disable
@@ -1143,12 +1143,7 @@ public class EuiccManager {
      *     permission, or the calling app must be authorized to manage the active subscription on
      *     the target eUICC.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
-     *
-     * @deprecated From T, callers should use
-     * {@link #switchToSubscription(int, int, Executor, ResultListener)} instead to specify a port
-     * index on the card to switch to.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -1166,20 +1161,19 @@ public class EuiccManager {
     /**
      * Switch to (enable) the given subscription.
      *
-     * <p>Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
-     * or the calling app must be authorized to manage both the currently-active subscription and
-     * the subscription to be enabled according to the subscription metadata. Without the former,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download.
+     * <p> Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
+     * or the caller must be having both the carrier privileges
+     * (see {@link TelephonyManager#hasCarrierPrivileges}) over any currently active subscriptions
+     * and the subscription to be enabled according to the subscription metadata.
+     * Without the former permissions, an SecurityException is thrown.
      *
-     * <p>On a multi-active SIM device, requires the
-     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or a calling app
-     * only if the targeted eUICC does not currently have an active subscription or the calling app
-     * is authorized to manage the active subscription on the target eUICC, and the calling app is
-     * authorized to manage any active subscription on any SIM. Without it, an
-     * {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} will be returned in the callback
-     * intent to prompt the user to accept the download. The caller should also be authorized to
-     * manage the subscription to be enabled.
+     * <p> If the caller is passing invalid port index,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_ERROR} with detailed error code
+     * {@link #ERROR_INVALID_PORT} will be returned.
+     *
+     * <p> Depending on the target port and permission check,
+     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned to the callback
+     * intent to prompt the user to authorize before the switch.
      *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
@@ -1188,44 +1182,21 @@ public class EuiccManager {
      *     permission, or the calling app must be authorized to manage the active subscription on
      *     the target eUICC.
      * @param portIndex the index of the port to target for the enabled subscription
-     * @param executor an Executor on which to run the callback
-     * @param callback a {@link ResultListener} which will run when the operation completes
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, int portIndex,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull ResultListener callback) {
+            @NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
-            sendUnavailableErrorToCallback(executor, callback);
+            sendUnavailableError(callbackIntent);
             return;
         }
         try {
-            IResultCallback internalCallback = new IResultCallback.Stub() {
-                @Override
-                public void onComplete(int result, Intent resultIntent) {
-                    executor.execute(() -> Binder.withCleanCallingIdentity(
-                            () -> callback.onComplete(result, resultIntent)));
-                }
-            };
-            getIEuiccController().switchToSubscriptionWithPort(mCardId, portIndex,
-                    subscriptionId, mContext.getOpPackageName(), internalCallback);
+            getIEuiccController().switchToSubscriptionWithPort(mCardId,
+                    subscriptionId, portIndex, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Callback to receive the result of an EuiccManager API.
-     */
-    public interface ResultListener {
-        /**
-         * Called on completion of some operation.
-         * @param resultCode representing success or specific failure of the operation
-         *                   (See {@link ResultCode})
-         * @param resultIntent an intent used to start a resolution activity when an error
-         *                     occurs that can be resolved by the user
-         */
-        void onComplete(@ResultCode int resultCode, @Nullable Intent resultIntent);
     }
 
     /**
@@ -1497,13 +1468,6 @@ public class EuiccManager {
         } catch (PendingIntent.CanceledException e) {
             // Caller canceled the callback; do nothing.
         }
-    }
-
-    private static void sendUnavailableErrorToCallback(@NonNull Executor executor,
-            ResultListener callback) {
-        Integer result = EMBEDDED_SUBSCRIPTION_RESULT_ERROR;
-        executor.execute(() ->
-                Binder.withCleanCallingIdentity(() -> callback.onComplete(result, null)));
     }
 
     private static IEuiccController getIEuiccController() {

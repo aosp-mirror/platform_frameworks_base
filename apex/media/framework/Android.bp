@@ -61,10 +61,13 @@ java_library {
         "test_com.android.media",
     ],
     min_sdk_version: "29",
+    lint: {
+        strict_updatability_linting: true,
+    },
     visibility: [
         "//frameworks/av/apex:__subpackages__",
-        "//frameworks/base", // For framework-all
         "//frameworks/base/apex/media/service",
+        "//frameworks/base/api", // For framework-all
     ],
 }
 

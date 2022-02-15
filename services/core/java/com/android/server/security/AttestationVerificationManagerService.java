@@ -16,6 +16,8 @@
 
 package com.android.server.security;
 
+import static android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED;
+import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN;
 
 import android.content.Context;
@@ -76,10 +78,24 @@ public class AttestationVerificationManagerService extends SystemService {
     private void verifyAttestationForAllVerifiers(
             AttestationProfile profile, int localBindingType, Bundle requirements,
             byte[] attestation, AndroidFuture<IVerificationResult> resultCallback) {
-        // TODO(b/201696614): Implement
         IVerificationResult result = new IVerificationResult();
-        result.resultCode = RESULT_UNKNOWN;
+        // TODO(b/201696614): Implement
         result.token = null;
+        switch (profile.getAttestationProfileId()) {
+            case PROFILE_SELF_TRUSTED:
+                Slog.d(TAG, "Verifying Self trusted profile.");
+                try {
+                    result.resultCode =
+                            AttestationVerificationSelfTrustedVerifierForTesting.getInstance()
+                                    .verifyAttestation(localBindingType, requirements, attestation);
+                } catch (Throwable t) {
+                    result.resultCode = RESULT_FAILURE;
+                }
+                break;
+            default:
+                Slog.d(TAG, "No profile found, defaulting.");
+                result.resultCode = RESULT_UNKNOWN;
+        }
         resultCallback.complete(result);
     }
 

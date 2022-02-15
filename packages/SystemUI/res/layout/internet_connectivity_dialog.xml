@@ -53,21 +53,22 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/internet_dialog_progress_bar_width"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
         android:orientation="vertical">
 
         <View
             android:id="@+id/divider"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="4dp"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:background="?androidprv:attr/colorSurfaceVariant"/>
 
         <ProgressBar
             android:id="@+id/wifi_searching_progress"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
@@ -377,7 +378,8 @@
                         android:clickable="true"/>
                 </LinearLayout>
             </LinearLayout>
-            <FrameLayout
+
+            <LinearLayout
                 android:id="@+id/button_layout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -389,39 +391,42 @@
                 android:clickable="false"
                 android:focusable="false">
 
-                <FrameLayout
-                    android:id="@+id/apm_layout"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
+                    android:layout_weight="1"
                     android:layout_gravity="start|center_vertical"
                     android:orientation="vertical">
                     <Button
+                        android:id="@+id/apm_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/turn_off_airplane_mode"
                         android:ellipsize="end"
+                        android:maxLines="1"
                         style="@style/Widget.Dialog.Button.BorderButton"
-                        android:clickable="false"/>
-                </FrameLayout>
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
 
-                <FrameLayout
-                    android:id="@+id/done_layout"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:layout_gravity="end|center_vertical">
                     <Button
+                        android:id="@+id/done_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/inline_done_button"
                         style="@style/Widget.Dialog.Button"
-                        android:clickable="false"/>
-                </FrameLayout>
-            </FrameLayout>
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

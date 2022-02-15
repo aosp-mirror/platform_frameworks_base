@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -26,14 +28,11 @@ import android.app.usage.NetworkStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.DataUnit;
-
-import com.android.server.NetworkManagementSocketTagger;
-
-import dalvik.system.SocketTagger;
+import android.os.StrictMode;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -54,24 +53,29 @@ import java.net.SocketException;
  * use {@link NetworkStatsManager} instead.
  */
 public class TrafficStats {
+    static {
+        System.loadLibrary("framework-connectivity-tiramisu-jni");
+    }
+
+    private static final String TAG = TrafficStats.class.getSimpleName();
     /**
      * The return value to indicate that the device does not support the statistic.
      */
     public final static int UNSUPPORTED = -1;
 
-    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    /** @hide @deprecated use {@code DataUnit} instead to clarify SI-vs-IEC */
     @Deprecated
     public static final long KB_IN_BYTES = 1024;
-    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    /** @hide @deprecated use {@code DataUnit} instead to clarify SI-vs-IEC */
     @Deprecated
     public static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
-    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    /** @hide @deprecated use {@code DataUnit} instead to clarify SI-vs-IEC */
     @Deprecated
     public static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
-    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    /** @hide @deprecated use {@code DataUnit} instead to clarify SI-vs-IEC */
     @Deprecated
     public static final long TB_IN_BYTES = GB_IN_BYTES * 1024;
-    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    /** @hide @deprecated use {@code DataUnit} instead to clarify SI-vs-IEC */
     @Deprecated
     public static final long PB_IN_BYTES = TB_IN_BYTES * 1024;
 
@@ -174,8 +178,8 @@ public class TrafficStats {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
-            sStatsService = INetworkStatsService.Stub.asInterface(
-                    ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+            throw new IllegalStateException("TrafficStats not initialized, uid="
+                    + Binder.getCallingUid());
         }
         return sStatsService;
     }
@@ -194,6 +198,104 @@ public class TrafficStats {
     private static final String LOOPBACK_IFACE = "lo";
 
     /**
+     * Initialization {@link TrafficStats} with the context, to
+     * allow {@link TrafficStats} to fetch the needed binder.
+     *
+     * @param context a long-lived context, such as the application context or system
+     *                server context.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("VisiblySynchronized")
+    public static synchronized void init(@NonNull final Context context) {
+        if (sStatsService != null) {
+            throw new IllegalStateException("TrafficStats is already initialized, uid="
+                    + Binder.getCallingUid());
+        }
+        final NetworkStatsManager statsManager =
+                context.getSystemService(NetworkStatsManager.class);
+        if (statsManager == null) {
+            // TODO: Currently Process.isSupplemental is not working yet, because it depends on
+            //  process to run in a certain UID range, which is not true for now. Change this
+            //  to Log.wtf once Process.isSupplemental is ready.
+            Log.e(TAG, "TrafficStats not initialized, uid=" + Binder.getCallingUid());
+            return;
+        }
+        sStatsService = statsManager.getBinder();
+    }
+
+    /**
+     * Attach the socket tagger implementation to the current process, to
+     * get notified when a socket's {@link FileDescriptor} is assigned to
+     * a thread. See {@link SocketTagger#set(SocketTagger)}.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void attachSocketTagger() {
+        dalvik.system.SocketTagger.set(new SocketTagger());
+    }
+
+    private static class SocketTagger extends dalvik.system.SocketTagger {
+
+        // TODO: set to false
+        private static final boolean LOGD = true;
+
+        SocketTagger() {
+        }
+
+        @Override
+        public void tag(FileDescriptor fd) throws SocketException {
+            final UidTag tagInfo = sThreadUidTag.get();
+            if (LOGD) {
+                Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=0x"
+                        + Integer.toHexString(tagInfo.tag) + ", statsUid=" + tagInfo.uid);
+            }
+            if (tagInfo.tag == -1) {
+                StrictMode.noteUntaggedSocket();
+            }
+
+            if (tagInfo.tag == -1 && tagInfo.uid == -1) return;
+            final int errno = native_tagSocketFd(fd, tagInfo.tag, tagInfo.uid);
+            if (errno < 0) {
+                Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
+                        + tagInfo.tag + ", "
+                        + tagInfo.uid + ") failed with errno" + errno);
+            }
+        }
+
+        @Override
+        public void untag(FileDescriptor fd) throws SocketException {
+            if (LOGD) {
+                Log.i(TAG, "untagSocket(" + fd.getInt$() + ")");
+            }
+
+            final UidTag tagInfo = sThreadUidTag.get();
+            if (tagInfo.tag == -1 && tagInfo.uid == -1) return;
+
+            final int errno = native_untagSocketFd(fd);
+            if (errno < 0) {
+                Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
+            }
+        }
+    }
+
+    private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
+    private static native int native_untagSocketFd(FileDescriptor fd);
+
+    private static class UidTag {
+        public int tag = -1;
+        public int uid = -1;
+    }
+
+    private static ThreadLocal<UidTag> sThreadUidTag = new ThreadLocal<UidTag>() {
+        @Override
+        protected UidTag initialValue() {
+            return new UidTag();
+        }
+    };
+
+    /**
      * Set active tag to use when accounting {@link Socket} traffic originating
      * from the current thread. Only one active tag per thread is supported.
      * <p>
@@ -207,7 +309,7 @@ public class TrafficStats {
      * @see #clearThreadStatsTag()
      */
     public static void setThreadStatsTag(int tag) {
-        NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
+        getAndSetThreadStatsTag(tag);
     }
 
     /**
@@ -225,7 +327,9 @@ public class TrafficStats {
      *         restore any existing values after a nested operation is finished
      */
     public static int getAndSetThreadStatsTag(int tag) {
-        return NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
+        final int old = sThreadUidTag.get().tag;
+        sThreadUidTag.get().tag = tag;
+        return old;
     }
 
     /**
@@ -266,6 +370,18 @@ public class TrafficStats {
     }
 
     /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all download provider traffic.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagDownload() {
+        setThreadStatsTag(TAG_SYSTEM_DOWNLOAD);
+    }
+
+    /**
      * Get the active tag used when accounting {@link Socket} traffic originating
      * from the current thread. Only one active tag per thread is supported.
      * {@link #tagSocket(Socket)}.
@@ -273,7 +389,7 @@ public class TrafficStats {
      * @see #setThreadStatsTag(int)
      */
     public static int getThreadStatsTag() {
-        return NetworkManagementSocketTagger.getThreadSocketStatsTag();
+        return sThreadUidTag.get().tag;
     }
 
     /**
@@ -283,7 +399,7 @@ public class TrafficStats {
      * @see #setThreadStatsTag(int)
      */
     public static void clearThreadStatsTag() {
-        NetworkManagementSocketTagger.setThreadSocketStatsTag(-1);
+        sThreadUidTag.get().tag = -1;
     }
 
     /**
@@ -303,7 +419,7 @@ public class TrafficStats {
      */
     @SuppressLint("RequiresPermission")
     public static void setThreadStatsUid(int uid) {
-        NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
+        sThreadUidTag.get().uid = uid;
     }
 
     /**
@@ -314,7 +430,7 @@ public class TrafficStats {
      * @see #setThreadStatsUid(int)
      */
     public static int getThreadStatsUid() {
-        return NetworkManagementSocketTagger.getThreadSocketStatsUid();
+        return sThreadUidTag.get().uid;
     }
 
     /**
@@ -341,7 +457,7 @@ public class TrafficStats {
      */
     @SuppressLint("RequiresPermission")
     public static void clearThreadStatsUid() {
-        NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
+        setThreadStatsUid(-1);
     }
 
     /**

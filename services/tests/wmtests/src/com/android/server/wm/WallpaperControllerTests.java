@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -116,6 +117,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         WindowManager.LayoutParams attrs = wallpaperWindow.getAttrs();
         Rect bounds = dc.getBounds();
+        int displayWidth = dc.getBounds().width();
         int displayHeight = dc.getBounds().height();
 
         // Use a wallpaper with a different ratio than the display
@@ -123,20 +125,18 @@ public class WallpaperControllerTests extends WindowTestsBase {
         int wallpaperHeight = (int) (bounds.height() * 1.10);
 
         // Simulate what would be done on the client's side
-        attrs.width = wallpaperWidth;
-        attrs.height = wallpaperHeight;
-        attrs.flags |= FLAG_LAYOUT_NO_LIMITS;
+        final float layoutScale = Math.max(
+                displayWidth / (float) wallpaperWidth, displayHeight / (float) wallpaperHeight);
+        attrs.width = (int) (wallpaperWidth * layoutScale + .5f);
+        attrs.height = (int) (wallpaperHeight * layoutScale + .5f);
+        attrs.flags |= FLAG_LAYOUT_NO_LIMITS | FLAG_SCALED;
         attrs.gravity = Gravity.TOP | Gravity.LEFT;
         wallpaperWindow.getWindowFrames().mParentFrame.set(dc.getBounds());
 
-        // Calling layoutWindowLw a first time, so adjustWindowParams gets the correct data
-        dc.getDisplayPolicy().layoutWindowLw(wallpaperWindow, null, dc.mDisplayFrames);
-
-        wallpaperWindowToken.adjustWindowParams(wallpaperWindow, attrs);
         dc.getDisplayPolicy().layoutWindowLw(wallpaperWindow, null, dc.mDisplayFrames);
 
         assertEquals(Configuration.ORIENTATION_PORTRAIT, dc.getConfiguration().orientation);
-        int expectedWidth = (int) (wallpaperWidth * (displayHeight / (double) wallpaperHeight));
+        int expectedWidth = (int) (wallpaperWidth * layoutScale + .5f);
 
         // Check that the wallpaper is correctly scaled
         assertEquals(expectedWidth, wallpaperWindow.getFrame().width());

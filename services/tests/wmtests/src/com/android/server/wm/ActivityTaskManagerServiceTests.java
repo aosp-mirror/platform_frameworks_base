@@ -53,7 +53,6 @@ import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -78,6 +77,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -189,6 +189,10 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
             @Override
             public void onFixedRotationFinished(int displayId) {}
+
+            @Override
+            public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                    List<Rect> unrestricted) {}
         };
         int[] displayIds = mAtm.mWindowManager.registerDisplayWindowListener(listener);
         for (int i = 0; i < displayIds.length; i++) {
@@ -951,7 +955,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -963,7 +967,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -975,7 +979,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -983,7 +987,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -997,7 +1001,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });

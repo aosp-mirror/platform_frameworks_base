@@ -56,12 +56,15 @@ import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
 
+import com.google.android.collect.Sets;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -195,8 +198,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             return;
         }
 
-        registerTask();
-
         for (String pkg : whichPackages) {
             try {
                 PackageManager pm = backupManagerService.getPackageManager();
@@ -262,11 +263,15 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         }
 
         mPackages = backupManagerService.filterUserFacingPackages(mPackages);
-    }
 
-    private void registerTask() {
+        Set<String> packageNames = Sets.newHashSet();
+        for (PackageInfo pkgInfo : mPackages) {
+            packageNames.add(pkgInfo.packageName);
+        }
+
         Slog.d(TAG, "backupmanager pftbt token=" + Integer.toHexString(mCurrentOpToken));
-        mOperationStorage.registerOperation(mCurrentOpToken, OpState.PENDING, this, OpType.BACKUP);
+        mOperationStorage.registerOperationForPackages(mCurrentOpToken, OpState.PENDING,
+                packageNames, this, OpType.BACKUP);
     }
 
     // public, because called from KeyValueBackupTask.finishTask.
@@ -834,12 +839,13 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             mBackupResult = BackupTransport.AGENT_ERROR;
             mQuota = quota;
             mTransportFlags = transportFlags;
-            registerTask();
+            registerTask(target.packageName);
         }
 
-        void registerTask() {
-            mOperationStorage.registerOperation(mCurrentOpToken,
-                    OpState.PENDING, this, OpType.BACKUP_WAIT);
+        void registerTask(String packageName) {
+            Set<String> packages = Sets.newHashSet(packageName);
+            mOperationStorage.registerOperationForPackages(mCurrentOpToken, OpState.PENDING,
+                    packages, this, OpType.BACKUP_WAIT);
         }
 
         void unregisterTask() {

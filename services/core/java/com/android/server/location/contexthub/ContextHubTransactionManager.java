@@ -152,6 +152,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
                 /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                ContextHubStatsLog.write(
+                        ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED,
+                        nanoAppBinary.getNanoAppId(),
+                        nanoAppBinary.getNanoAppVersion(),
+                        ContextHubStatsLog
+                            .CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_TYPE__TYPE_LOAD,
+                        toStatsTransactionResult(result));
+
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     // NOTE: The legacy JNI code used to do a query right after a load success
                     // to synchronize the service cache. Instead store the binary that was
@@ -200,6 +208,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
                 /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                ContextHubStatsLog.write(
+                        ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED, nanoAppId,
+                        0 /* nanoappVersion */,
+                        ContextHubStatsLog
+                            .CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_TYPE__TYPE_UNLOAD,
+                        toStatsTransactionResult(result));
+
                 if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);
                 }
@@ -463,13 +478,41 @@ import java.util.concurrent.atomic.AtomicInteger;
                 };
 
                 long timeoutSeconds = transaction.getTimeout(TimeUnit.SECONDS);
-                mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
+                try {
+                    mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
                         TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error when schedule a timer", e);
+                }
             } else {
                 transaction.onTransactionComplete(
                         ContextHubServiceUtil.toTransactionResult(result));
                 mTransactionQueue.remove();
             }
+        }
+    }
+
+    private int toStatsTransactionResult(@ContextHubTransaction.Result int result) {
+        switch (result) {
+            case ContextHubTransaction.RESULT_SUCCESS:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_SUCCESS;
+            case ContextHubTransaction.RESULT_FAILED_BAD_PARAMS:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_BAD_PARAMS;
+            case ContextHubTransaction.RESULT_FAILED_UNINITIALIZED:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_UNINITIALIZED;
+            case ContextHubTransaction.RESULT_FAILED_BUSY:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_BUSY;
+            case ContextHubTransaction.RESULT_FAILED_AT_HUB:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_AT_HUB;
+            case ContextHubTransaction.RESULT_FAILED_TIMEOUT:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_TIMEOUT;
+            case ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_SERVICE_INTERNAL_FAILURE;
+            case ContextHubTransaction.RESULT_FAILED_HAL_UNAVAILABLE:
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_HAL_UNAVAILABLE;
+            case ContextHubTransaction.RESULT_FAILED_UNKNOWN:
+            default: /* fall through */
+                return ContextHubStatsLog.CHRE_CODE_DOWNLOAD_TRANSACTED__TRANSACTION_RESULT__TRANSACTION_RESULT_FAILED_UNKNOWN;
         }
     }
 

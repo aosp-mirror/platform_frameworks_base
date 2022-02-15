@@ -24,10 +24,12 @@ import android.annotation.SystemApi;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.ambientcontext.AmbientContextManager;
+import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
-import android.app.communal.CommunalManager;
-import android.app.communal.ICommunalManager;
+import android.app.cloudsearch.CloudSearchManager;
+import android.app.cloudsearch.ICloudSearchManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -46,12 +48,13 @@ import android.app.timezonedetector.TimeZoneDetectorImpl;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
-import android.app.usage.NetworkStatsManager;
 import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.app.wallpapereffectsgeneration.IWallpaperEffectsGenerationManager;
+import android.app.wallpapereffectsgeneration.WallpaperEffectsGenerationManager;
 import android.apphibernation.AppHibernationManager;
 import android.appwidget.AppWidgetManager;
-import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothFrameworkInitializer;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
 import android.companion.virtual.IVirtualDeviceManager;
@@ -126,19 +129,18 @@ import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
-import android.media.tv.interactive.ITvIAppManager;
-import android.media.tv.interactive.TvIAppManager;
+import android.media.tv.interactive.ITvInteractiveAppManager;
+import android.media.tv.interactive.TvInteractiveAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
 import android.net.IEthernetManager;
-import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
-import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
@@ -211,6 +213,7 @@ import android.telecom.TelecomManager;
 import android.telephony.MmsManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyRegistryManager;
+import android.transparency.BinaryTransparencyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -227,6 +230,8 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 import android.view.displayhash.DisplayHashManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.selectiontoolbar.ISelectionToolbarManager;
+import android.view.selectiontoolbar.SelectionToolbarManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
@@ -239,6 +244,7 @@ import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.graphics.fonts.IFontManager;
 import com.android.internal.net.INetworkWatchlistManager;
+import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 import com.android.internal.util.Preconditions;
@@ -344,13 +350,6 @@ public final class SystemServiceRegistry {
                 return new MediaRouter(ctx);
             }});
 
-        registerService(Context.BLUETOOTH_SERVICE, BluetoothManager.class,
-                new CachedServiceFetcher<BluetoothManager>() {
-            @Override
-            public BluetoothManager createService(ContextImpl ctx) {
-                return new BluetoothManager(ctx);
-            }});
-
         registerService(Context.HDMI_CONTROL_SERVICE, HdmiControlManager.class,
                 new StaticServiceFetcher<HdmiControlManager>() {
             @Override
@@ -365,6 +364,15 @@ public final class SystemServiceRegistry {
             public TextClassificationManager createService(ContextImpl ctx) {
                 return new TextClassificationManager(ctx);
             }});
+
+        registerService(Context.SELECTION_TOOLBAR_SERVICE, SelectionToolbarManager.class,
+                new CachedServiceFetcher<SelectionToolbarManager>() {
+                    @Override
+                    public SelectionToolbarManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(Context.SELECTION_TOOLBAR_SERVICE);
+                        return new SelectionToolbarManager(ctx.getOuterContext(),
+                                ISelectionToolbarManager.Stub.asInterface(b));
+                    }});
 
         registerService(Context.FONT_SERVICE, FontManager.class,
                 new CachedServiceFetcher<FontManager>() {
@@ -429,15 +437,6 @@ public final class SystemServiceRegistry {
                 return new VcnManager(ctx, service);
             }});
 
-        registerService(Context.IPSEC_SERVICE, IpSecManager.class,
-                new CachedServiceFetcher<IpSecManager>() {
-            @Override
-            public IpSecManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
-                IIpSecService service = IIpSecService.Stub.asInterface(b);
-                return new IpSecManager(ctx, service);
-            }});
-
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
                 new StaticServiceFetcher<CountryDetector>() {
             @Override
@@ -486,6 +485,17 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.DROPBOX_SERVICE);
                 IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
                 return new DropBoxManager(ctx, service);
+            }});
+
+        registerService(Context.BINARY_TRANSPARENCY_SERVICE, BinaryTransparencyManager.class,
+                new CachedServiceFetcher<BinaryTransparencyManager>() {
+            @Override
+            public BinaryTransparencyManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(
+                        Context.BINARY_TRANSPARENCY_SERVICE);
+                IBinaryTransparencyService service = IBinaryTransparencyService.Stub.asInterface(b);
+                return new BinaryTransparencyManager(ctx, service);
             }});
 
         registerService(Context.INPUT_SERVICE, InputManager.class,
@@ -953,13 +963,16 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.TV_IAPP_SERVICE, TvIAppManager.class,
-                new CachedServiceFetcher<TvIAppManager>() {
+        registerService(Context.TV_INTERACTIVE_APP_SERVICE, TvInteractiveAppManager.class,
+                new CachedServiceFetcher<TvInteractiveAppManager>() {
             @Override
-            public TvIAppManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_IAPP_SERVICE);
-                ITvIAppManager service = ITvIAppManager.Stub.asInterface(iBinder);
-                return new TvIAppManager(service, ctx.getUserId());
+            public TvInteractiveAppManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder iBinder =
+                        ServiceManager.getServiceOrThrow(Context.TV_INTERACTIVE_APP_SERVICE);
+                ITvInteractiveAppManager service =
+                        ITvInteractiveAppManager.Stub.asInterface(iBinder);
+                return new TvInteractiveAppManager(service, ctx.getUserId());
             }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
@@ -998,13 +1011,6 @@ public final class SystemServiceRegistry {
                 return new UsageStatsManager(ctx.getOuterContext(), service);
             }});
 
-        registerService(Context.NETWORK_STATS_SERVICE, NetworkStatsManager.class,
-                new CachedServiceFetcher<NetworkStatsManager>() {
-            @Override
-            public NetworkStatsManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new NetworkStatsManager(ctx.getOuterContext());
-            }});
-
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,
                 new StaticServiceFetcher<PersistentDataBlockManager>() {
             @Override
@@ -1018,7 +1024,8 @@ public final class SystemServiceRegistry {
                     // not supported
                     return null;
                 }
-            }});
+            }
+         });
 
         registerService(Context.OEM_LOCK_SERVICE, OemLockManager.class,
                 new StaticServiceFetcher<OemLockManager>() {
@@ -1233,6 +1240,17 @@ public final class SystemServiceRegistry {
                 }
             });
 
+        registerService(Context.CLOUDSEARCH_SERVICE, CloudSearchManager.class,
+            new CachedServiceFetcher<CloudSearchManager>() {
+                @Override
+                public CloudSearchManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.CLOUDSEARCH_SERVICE);
+                    return b == null ? null :
+                        new CloudSearchManager(ICloudSearchManager.Stub.asInterface(b));
+                }
+            });
+
         registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
                 new CachedServiceFetcher<AppPredictionManager>() {
             @Override
@@ -1254,6 +1272,20 @@ public final class SystemServiceRegistry {
                         IContentSuggestionsManager service =
                                 IContentSuggestionsManager.Stub.asInterface(b);
                         return new ContentSuggestionsManager(ctx.getUserId(), service);
+                    }
+                });
+
+        registerService(Context.WALLPAPER_EFFECTS_GENERATION_SERVICE,
+                WallpaperEffectsGenerationManager.class,
+                new CachedServiceFetcher<WallpaperEffectsGenerationManager>() {
+                    @Override
+                    public WallpaperEffectsGenerationManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getService(
+                                Context.WALLPAPER_EFFECTS_GENERATION_SERVICE);
+                        return b == null ? null :
+                                new WallpaperEffectsGenerationManager(
+                                        IWallpaperEffectsGenerationManager.Stub.asInterface(b));
                     }
                 });
 
@@ -1503,20 +1535,17 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.COMMUNAL_SERVICE, CommunalManager.class,
-                new CachedServiceFetcher<CommunalManager>() {
+        registerService(Context.AMBIENT_CONTEXT_SERVICE, AmbientContextManager.class,
+                new CachedServiceFetcher<AmbientContextManager>() {
                     @Override
-                    public CommunalManager createService(ContextImpl ctx) {
-                        if (!ctx.getPackageManager().hasSystemFeature(
-                                PackageManager.FEATURE_COMMUNAL_MODE)) {
-                            return null;
-                        }
-                        IBinder iBinder =
-                                ServiceManager.getService(Context.COMMUNAL_SERVICE);
-                        return iBinder != null ? new CommunalManager(
-                                ICommunalManager.Stub.asInterface(iBinder)) : null;
-                    }
-                });
+                    public AmbientContextManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.AMBIENT_CONTEXT_SERVICE);
+                        IAmbientContextManager manager =
+                                IAmbientContextManager.Stub.asInterface(iBinder);
+                        return new AmbientContextManager(ctx.getOuterContext(), manager);
+                    }});
 
         sInitializing = true;
         try {
@@ -1525,6 +1554,7 @@ public final class SystemServiceRegistry {
             ConnectivityFrameworkInitializer.registerServiceWrappers();
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
+            BluetoothFrameworkInitializer.registerServiceWrappers();
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
@@ -1538,6 +1568,7 @@ public final class SystemServiceRegistry {
             UwbFrameworkInitializer.registerServiceWrappers();
             SafetyCenterFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
+            NearbyFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

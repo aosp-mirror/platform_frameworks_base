@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -65,9 +67,12 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
     @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private NotifPanelEventSource mNotifPanelEventSource;
+    @Mock private VisualStabilityProvider mVisualStabilityProvider;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
+    @Captor private ArgumentCaptor<NotifPanelEventSource.Callbacks> mNotifPanelEventsCallbackCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -75,6 +80,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
     private StatusBarStateController.StateListener mStatusBarStateListener;
+    private NotifPanelEventSource.Callbacks mNotifPanelEventsCallback;
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
 
@@ -83,11 +89,13 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mCoordinator = new VisualStabilityCoordinator(
+                mFakeExecutor,
                 mDumpManager,
                 mHeadsUpManager,
-                mWakefulnessLifecycle,
+                mNotifPanelEventSource,
                 mStatusBarStateController,
-                mFakeExecutor);
+                mVisualStabilityProvider,
+                mWakefulnessLifecycle);
 
         mCoordinator.attach(mNotifPipeline);
 
@@ -97,6 +105,9 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         verify(mStatusBarStateController).addCallback(mSBStateListenerCaptor.capture());
         mStatusBarStateListener = mSBStateListenerCaptor.getValue();
+
+        verify(mNotifPanelEventSource).registerCallbacks(mNotifPanelEventsCallbackCaptor.capture());
+        mNotifPanelEventsCallback = mNotifPanelEventsCallbackCaptor.getValue();
 
         verify(mNotifPipeline).setVisualStabilityManager(mNotifStabilityManagerCaptor.capture());
         mNotifStabilityManager = mNotifStabilityManagerCaptor.getValue();
@@ -319,6 +330,58 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNotLaunchingActivityAnymore_invalidationCalled() {
+        // GIVEN visual stability is being maintained b/c animation is playing
+        setActivityLaunching(true);
+
+        assertFalse(mNotifStabilityManager.isPipelineRunAllowed());
+
+        // WHEN the animation has stopped playing
+        setActivityLaunching(false);
+
+        // invalidate is called, b/c we were previously suppressing the pipeline from running
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
+    public void testNotCollapsingPanelAnymore_invalidationCalled() {
+        // GIVEN visual stability is being maintained b/c animation is playing
+        setPanelCollapsing(true);
+
+        assertFalse(mNotifStabilityManager.isPipelineRunAllowed());
+
+        // WHEN the animation has stopped playing
+        setPanelCollapsing(false);
+
+        // invalidate is called, b/c we were previously suppressing the pipeline from running
+        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
+    public void testNeverSuppressPipelineRunFromPanelCollapse_noInvalidationCalled() {
+        // GIVEN animation is playing
+        setPanelCollapsing(true);
+
+        // WHEN the animation has stopped playing
+        setPanelCollapsing(false);
+
+        // THEN invalidate is not called, b/c nothing has been suppressed
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
+    public void testNeverSuppressPipelineRunFromLaunchActivity_noInvalidationCalled() {
+        // GIVEN animation is playing
+        setActivityLaunching(true);
+
+        // WHEN the animation has stopped playing
+        setActivityLaunching(false);
+
+        // THEN invalidate is not called, b/c nothing has been suppressed
+        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+    }
+
+    @Test
     public void testNotSuppressingEntryReorderingAnymoreWillInvalidate() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
@@ -368,6 +431,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         assertTrue(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
+    }
+
+    private void setActivityLaunching(boolean activityLaunching) {
+        mNotifPanelEventsCallback.onLaunchingActivityChanged(activityLaunching);
+    }
+
+    private void setPanelCollapsing(boolean collapsing) {
+        mNotifPanelEventsCallback.onPanelCollapsingChanged(collapsing);
     }
 
     private void setPulsing(boolean pulsing) {

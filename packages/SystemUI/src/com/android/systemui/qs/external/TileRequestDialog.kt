@@ -59,6 +59,7 @@ class TileRequestDialog(
                                     R.dimen.qs_tile_service_request_tile_width),
                             context.resources.getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                     )
+                    isSelected = true
         }
         val spacing = 0
         setView(ll, spacing, spacing, spacing, spacing / 2)
@@ -68,12 +69,17 @@ class TileRequestDialog(
         val tile = QSTileViewImpl(context, QSIconViewImpl(context), true)
         val state = QSTile.BooleanState().apply {
             label = tileData.label
+            handlesLongClick = false
             icon = tileData.icon?.loadDrawable(context)?.let {
                 QSTileImpl.DrawableIcon(it)
             } ?: ResourceIcon.get(R.drawable.android)
         }
         tile.onStateChanged(state)
-        tile.isSelected = true
+        tile.post {
+            tile.stateDescription = ""
+            tile.isClickable = false
+            tile.isSelected = true
+        }
         return tile
     }
 

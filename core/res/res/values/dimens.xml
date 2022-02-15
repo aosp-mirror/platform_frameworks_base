@@ -131,6 +131,19 @@
         corners. -->
     <dimen name="rounded_corner_radius_bottom_adjustment">0px</dimen>
 
+    <!-- Default paddings for content around the corners. -->
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+
+    <!-- Copied from SysUI's @dimen/navigation_key_width for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_width">70dp</dimen>
+    <!-- Copied from SysUI's @dimen/navigation_key_padding for the embedded nav bar in the IME. -->
+    <dimen name="input_method_navigation_key_padding">0dp</dimen>
+    <!-- Copied from SysUI's @dimen/nav_content_padding for the embedded nav bar in the IME. -->
+    <dimen name="input_method_nav_content_padding">0px</dimen>
+    <!-- Copied from SysUI's @dimen/key_button_ripple_max_width for the embedded nav bar in the
+         IME. -->
+    <dimen name="input_method_nav_key_button_ripple_max_width">95dp</dimen>
+
     <!-- Width of the window of the divider bar used to resize docked stacks. -->
     <dimen name="docked_stack_divider_thickness">48dp</dimen>
 
@@ -742,6 +755,8 @@
     <dimen name="item_touch_helper_swipe_escape_velocity">120dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
 
+    <!-- The maximum size of the small notification icon. -->
+    <dimen name="notification_small_icon_size">48dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined by the maximum notification height -->
     <dimen name="notification_custom_view_max_image_height">284dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined a maximum notification width -->
@@ -766,6 +781,8 @@
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
+    <!-- The maximum size of the small notification icon on low memory devices. -->
+    <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
     <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
@@ -859,6 +876,9 @@
 
     <!-- Maximum number of datasets that are visible in the UX picker without scrolling -->
     <integer name="autofill_max_visible_datasets">3</integer>
+
+    <!-- Size of an icon in the Autolfill fill dialog -->
+    <dimen name="autofill_dialog_icon_size">56dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>

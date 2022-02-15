@@ -21,13 +21,12 @@ import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
-import kotlin.concurrent.thread
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +39,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
+import kotlin.concurrent.thread
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -48,6 +48,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
     private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
+    @Mock lateinit var listener: ActivityLaunchAnimator.Listener
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
     @Mock lateinit var failHandler: Log.TerribleFailureHandler
@@ -59,6 +60,12 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     fun setup() {
         activityLaunchAnimator = ActivityLaunchAnimator(launchAnimator)
         activityLaunchAnimator.callback = callback
+        activityLaunchAnimator.addListener(listener)
+    }
+
+    @After
+    fun tearDown() {
+        activityLaunchAnimator.removeListener(listener)
     }
 
     private fun startIntentWithAnimation(
@@ -177,7 +184,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
         waitForIdleSync()
-        verify(callback).setBlursDisabledForAppLaunch(eq(true))
+        verify(listener).onLaunchAnimationStart()
         verify(controller).onLaunchAnimationStart(anyBoolean())
     }
 

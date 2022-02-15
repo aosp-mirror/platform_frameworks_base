@@ -17,6 +17,7 @@
 package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
@@ -260,14 +261,12 @@ public final class JobStatus {
      *
      * Doesn't exempt jobs with a deadline constraint, as they can be started without any content or
      * network changes, in which case this exemption does not make sense.
-     *
-     * TODO(b/149519887): Use a more explicit signal, maybe an API flag, that the scheduling package
-     * needs to provide at the time of scheduling a job.
      */
-    private final boolean mHasMediaBackupExemption;
+    private boolean mHasMediaBackupExemption;
+    private final boolean mHasExemptedMediaUrisOnly;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
-    public boolean dozeWhitelisted;
+    boolean appHasDozeExemption;
 
     // Set to true when the app is "active" per AppStateTracker
     public boolean uidActive;
@@ -507,11 +506,9 @@ public final class JobStatus {
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
-        boolean requiresNetwork = false;
         int requiredConstraints = job.getConstraintFlags();
         if (job.getRequiredNetwork() != null) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
-            requiresNetwork = true;
         }
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
@@ -530,6 +527,7 @@ public final class JobStatus {
                 }
             }
         }
+        mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
         addDynamicConstraints(dynamicConstraints);
@@ -562,9 +560,7 @@ public final class JobStatus {
             job = builder.build(false);
         }
 
-        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
-        mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
-                && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
+        updateMediaBackupExemptionStatus();
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -844,12 +840,15 @@ public final class JobStatus {
      * exemptions.
      */
     public int getEffectiveStandbyBucket() {
+        final int actualBucket = getStandbyBucket();
+        if (actualBucket == EXEMPTED_INDEX) {
+            return actualBucket;
+        }
         if (uidActive || getJob().isExemptedFromAppStandby()) {
             // Treat these cases as if they're in the ACTIVE bucket so that they get throttled
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
-        final int actualBucket = getStandbyBucket();
         if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
                 && mHasMediaBackupExemption) {
             // Cap it at WORKING_INDEX as media back up jobs are important to the user, and the
@@ -908,6 +907,25 @@ public final class JobStatus {
 
     public void setFirstForceBatchedTimeElapsed(long now) {
         mFirstForceBatchedTimeElapsed = now;
+    }
+
+    /**
+     * Re-evaluates the media backup exemption status.
+     *
+     * @return true if the exemption status changed
+     */
+    public boolean updateMediaBackupExemptionStatus() {
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        boolean hasMediaExemption = mHasExemptedMediaUrisOnly
+                && !job.hasLateConstraint()
+                && job.getRequiredNetwork() != null
+                && getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT
+                && sourcePackageName.equals(jsi.getCloudMediaProviderPackage(sourceUserId));
+        if (mHasMediaBackupExemption == hasMediaExemption) {
+            return false;
+        }
+        mHasMediaBackupExemption = hasMediaExemption;
+        return true;
     }
 
     public String getSourceTag() {
@@ -1135,11 +1153,12 @@ public final class JobStatus {
      */
     public float getFractionRunTime() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-        if (earliestRunTimeElapsedMillis == 0 && latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME
+                && latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return 1;
-        } else if (earliestRunTimeElapsedMillis == 0) {
+        } else if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
             return now >= latestRunTimeElapsedMillis ? 1 : 0;
-        } else if (latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+        } else if (latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
             return now >= earliestRunTimeElapsedMillis ? 1 : 0;
         } else {
             if (now <= earliestRunTimeElapsedMillis) {
@@ -1179,7 +1198,8 @@ public final class JobStatus {
      * in Doze.
      */
     public boolean canRunInDoze() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
+        return appHasDozeExemption
+                || (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
@@ -1243,7 +1263,7 @@ public final class JobStatus {
     /** @return true if the constraint was changed, false otherwise. */
     boolean setDeviceNotDozingConstraintSatisfied(final long nowElapsed,
             boolean state, boolean whitelisted) {
-        dozeWhitelisted = whitelisted;
+        appHasDozeExemption = whitelisted;
         if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyNotDozing = state || canRunInDoze();
@@ -2021,6 +2041,7 @@ public final class JobStatus {
                     TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
                     pw.println();
                 }
+                pw.print("Has media backup exemption", mHasMediaBackupExemption).println();
             }
             if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 pw.print("Extras: ");
@@ -2110,7 +2131,7 @@ public final class JobStatus {
             }
             pw.decreaseIndent();
 
-            if (dozeWhitelisted) {
+            if (appHasDozeExemption) {
                 pw.println("Doze whitelisted: true");
             }
             if (uidActive) {
@@ -2323,7 +2344,7 @@ public final class JobStatus {
             dumpConstraints(proto, JobStatusDumpProto.SATISFIED_CONSTRAINTS, satisfiedConstraints);
             dumpConstraints(proto, JobStatusDumpProto.UNSATISFIED_CONSTRAINTS,
                     ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA) & ~satisfiedConstraints));
-            proto.write(JobStatusDumpProto.IS_DOZE_WHITELISTED, dozeWhitelisted);
+            proto.write(JobStatusDumpProto.IS_DOZE_WHITELISTED, appHasDozeExemption);
             proto.write(JobStatusDumpProto.IS_UID_ACTIVE, uidActive);
             proto.write(JobStatusDumpProto.IS_EXEMPTED_FROM_APP_STANDBY,
                     job.isExemptedFromAppStandby());

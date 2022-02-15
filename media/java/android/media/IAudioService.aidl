@@ -25,7 +25,7 @@ import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -215,8 +215,7 @@ interface IAudioService {
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
 
-    void setWiredDeviceConnectionState(int type, int state, String address, String name,
-            String caller);
+    void setWiredDeviceConnectionState(in AudioDeviceAttributes aa, int state, String caller);
 
     @UnsupportedAppUsage
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
@@ -276,7 +275,7 @@ interface IAudioService {
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     void handleBluetoothActiveDeviceChanged(in BluetoothDevice newDevice,
-            in BluetoothDevice previousDevice, in BtProfileConnectionInfo info);
+            in BluetoothDevice previousDevice, in BluetoothProfileConnectionInfo info);
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);
@@ -307,6 +306,8 @@ interface IAudioService {
     List<AudioDeviceAttributes> getPreferredDevicesForStrategy(in int strategy);
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
+
+    List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
 
     int setAllowedCapturePolicy(in int capturePolicy);
 
@@ -401,6 +402,14 @@ interface IAudioService {
 
     boolean isSpatializerAvailable();
 
+    boolean isSpatializerAvailableForDevice(in AudioDeviceAttributes device);
+
+    boolean hasHeadTracker(in AudioDeviceAttributes device);
+
+    void setHeadTrackerEnabled(boolean enabled, in AudioDeviceAttributes device);
+
+    boolean isHeadTrackerEnabled(in AudioDeviceAttributes device);
+
     void setSpatializerEnabled(boolean enabled);
 
     boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
@@ -464,4 +473,19 @@ interface IAudioService {
     List<AudioFocusInfo> getFocusStack();
 
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void addAssistantServicesUids(in int[] assistantUID);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void removeAssistantServicesUids(in int[] assistantUID);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void setActiveAssistantServiceUids(in int[] activeUids);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    int[] getAssistantServicesUids();
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    int[] getActiveAssistantServiceUids();
 }

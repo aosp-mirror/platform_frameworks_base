@@ -43,6 +43,7 @@ FilterClient::FilterClient(DemuxFilterType type, shared_ptr<ITunerFilter> tunerF
 }
 
 FilterClient::~FilterClient() {
+    Mutex::Autolock _l(mLock);
     mTunerFilter = nullptr;
     mAvSharedHandle = nullptr;
     mAvSharedMemSize = 0;
@@ -74,6 +75,7 @@ Result FilterClient::configure(DemuxFilterSettings configure) {
     Result res;
     checkIsPassthroughFilter(configure);
 
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->configure(configure);
         res = ClientHelper::getServiceSpecificErrorCode(s);
@@ -87,6 +89,7 @@ Result FilterClient::configure(DemuxFilterSettings configure) {
 }
 
 Result FilterClient::configureMonitorEvent(int32_t monitorEventType) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->configureMonitorEvent(monitorEventType);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -96,6 +99,7 @@ Result FilterClient::configureMonitorEvent(int32_t monitorEventType) {
 }
 
 Result FilterClient::configureIpFilterContextId(int32_t cid) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->configureIpFilterContextId(cid);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -105,6 +109,7 @@ Result FilterClient::configureIpFilterContextId(int32_t cid) {
 }
 
 Result FilterClient::configureAvStreamType(AvStreamType avStreamType) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->configureAvStreamType(avStreamType);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -114,6 +119,7 @@ Result FilterClient::configureAvStreamType(AvStreamType avStreamType) {
 }
 
 Result FilterClient::start() {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->start();
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -123,6 +129,7 @@ Result FilterClient::start() {
 }
 
 Result FilterClient::stop() {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->stop();
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -132,6 +139,7 @@ Result FilterClient::stop() {
 }
 
 Result FilterClient::flush() {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->flush();
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -141,6 +149,7 @@ Result FilterClient::flush() {
 }
 
 Result FilterClient::getId(int32_t& id) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->getId(&id);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -150,6 +159,7 @@ Result FilterClient::getId(int32_t& id) {
 }
 
 Result FilterClient::getId64Bit(int64_t& id) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->getId64Bit(&id);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -159,6 +169,7 @@ Result FilterClient::getId64Bit(int64_t& id) {
 }
 
 Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->releaseAvHandle(dupToAidl(handle), avDataId);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -168,6 +179,7 @@ Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId)
 }
 
 Result FilterClient::setDataSource(sp<FilterClient> filterClient){
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->setDataSource(filterClient->getAidlFilter());
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -177,6 +189,7 @@ Result FilterClient::setDataSource(sp<FilterClient> filterClient){
 }
 
 Result FilterClient::close() {
+    Mutex::Autolock _l(mLock);
     if (mFilterMQEventFlag != nullptr) {
         EventFlag::deleteEventFlag(&mFilterMQEventFlag);
         mFilterMQEventFlag = nullptr;
@@ -197,6 +210,7 @@ Result FilterClient::close() {
 }
 
 string FilterClient::acquireSharedFilterToken() {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         string filterToken;
         if (mTunerFilter->acquireSharedFilterToken(&filterToken).isOk()) {
@@ -208,6 +222,7 @@ string FilterClient::acquireSharedFilterToken() {
 }
 
 Result FilterClient::freeSharedFilterToken(const string& filterToken) {
+    Mutex::Autolock _l(mLock);
     if (mTunerFilter != nullptr) {
         Status s = mTunerFilter->freeSharedFilterToken(filterToken);
         return ClientHelper::getServiceSpecificErrorCode(s);
@@ -237,6 +252,7 @@ Status TunerFilterCallback::onFilterEvent(const vector<DemuxFilterEvent>& filter
 }
 
 Result FilterClient::getFilterMq() {
+    Mutex::Autolock _l(mLock);
     if (mFilterMQ != nullptr) {
         return Result::SUCCESS;
     }

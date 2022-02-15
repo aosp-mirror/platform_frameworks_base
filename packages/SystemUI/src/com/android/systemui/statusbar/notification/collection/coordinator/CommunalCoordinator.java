@@ -74,7 +74,9 @@ public class CommunalCoordinator implements Coordinator {
     public void attach(@NonNull NotifPipeline pipeline) {
         pipeline.addPreGroupFilter(mFilter);
         mCommunalStateController.addCallback(mStateCallback);
-        mNotificationLockscreenUserManager.addKeyguardNotificationSuppressor(
-                entry -> mCommunalStateController.getCommunalViewShowing());
+        if (!pipeline.isNewPipelineEnabled()) {
+            mNotificationLockscreenUserManager.addKeyguardNotificationSuppressor(
+                    entry -> mCommunalStateController.getCommunalViewShowing());
+        }
     }
 }

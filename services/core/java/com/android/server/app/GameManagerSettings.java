@@ -93,6 +93,14 @@ public class GameManagerSettings {
     }
 
     /**
+     * Remove the game mode of a given package.
+     * This operation must be synced with an external lock.
+     */
+    void removeGame(String packageName) {
+        mGameModes.remove(packageName);
+    }
+
+    /**
      * Write all current game service settings into disk.
      * This operation must be synced with an external lock.
      */

@@ -17,9 +17,9 @@
 package com.android.systemui.navigationbar;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -31,6 +31,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IMMERSIVE_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -69,6 +70,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
@@ -86,6 +88,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private static final String TAG = TaskbarDelegate.class.getSimpleName();
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
+    private final NavigationBarOverlayController mNavBarOverlayController;
     private boolean mInitialized;
     private CommandQueue mCommandQueue;
     private OverviewProxyService mOverviewProxyService;
@@ -140,13 +143,26 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
         @Override
         public void hide() {
+            clearTransient();
         }
     };
+
+    private final Consumer<Boolean> mNavbarOverlayVisibilityChangeCallback = (visible) -> {
+        if (visible) {
+            mAutoHideController.touchAutoHide();
+        }
+    };
+    private BackAnimation mBackAnimation;
 
     @Inject
     public TaskbarDelegate(Context context) {
         mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
                 .create(context);
+        mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
+                    mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
+        }
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
@@ -159,7 +175,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             SysUiState sysUiState, DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
-            Optional<Pip> pipOptional) {
+            Optional<Pip> pipOptional,
+            BackAnimation backAnimation) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -171,6 +188,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarController = lightBarController;
         mLightBarTransitionsController = createLightBarTransitionsController();
         mPipOptional = pipOptional;
+        mBackAnimation = backAnimation;
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -206,6 +224,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.init();
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.registerListeners();
+        }
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
@@ -217,6 +238,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
         mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
+        mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
         mInitialized = true;
     }
 
@@ -229,6 +251,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNavBarHelper.destroy();
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.unregisterListeners();
+        }
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         if (mWindowContext != null) {
@@ -268,7 +293,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .setFlag(SYSUI_STATE_IME_SHOWING,
                         (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_SHOWING,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SHOWN) != 0)
+                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_SHOWN) != 0)
                 .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
                 .setFlag(SYSUI_STATE_HOME_DISABLED,
@@ -280,6 +305,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                         allowSystemGestureIgnoringBarVisibility())
                 .setFlag(SYSUI_STATE_SCREEN_PINNING,
                         ActivityManagerWrapper.getInstance().isScreenPinningActive())
+                .setFlag(SYSUI_STATE_IMMERSIVE_MODE, isImmersiveMode())
                 .commitUpdate(mDisplayId);
     }
 
@@ -350,14 +376,17 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showTransient(int displayId, int[] types) {
+    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+        if (!containsType(types, ITYPE_EXTRA_NAVIGATION_BAR)) {
             return;
         }
-        mTaskbarTransientShowing = true;
+        if (!mTaskbarTransientShowing) {
+            mTaskbarTransientShowing = true;
+            onTransientStateChanged();
+        }
     }
 
     @Override
@@ -365,19 +394,42 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+        if (!containsType(types, ITYPE_EXTRA_NAVIGATION_BAR)) {
             return;
         }
-        mTaskbarTransientShowing = false;
+        clearTransient();
     }
 
     @Override
     public void onTaskbarAutohideSuspend(boolean suspend) {
-        mTaskbarTransientShowing = suspend;
         if (suspend) {
             mAutoHideController.suspendAutoHide();
         } else {
             mAutoHideController.resumeSuspendedAutoHide();
+        }
+    }
+
+    private void clearTransient() {
+        if (mTaskbarTransientShowing) {
+            mTaskbarTransientShowing = false;
+            onTransientStateChanged();
+        }
+    }
+
+    private void onTransientStateChanged() {
+        mEdgeBackGestureHandler.onNavBarTransientStateChanged(mTaskbarTransientShowing);
+
+        // The visibility of the navigation bar buttons is dependent on the transient state of
+        // the navigation bar.
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.setButtonState(mTaskbarTransientShowing, /* force */ false);
+        }
+    }
+
+    @Override
+    public void onRecentsAnimationStateChanged(boolean running) {
+        if (running) {
+            mNavBarOverlayController.setButtonState(/* visible */false, /* force */true);
         }
     }
 
@@ -393,6 +445,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private boolean allowSystemGestureIgnoringBarVisibility() {
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+    }
+
+    private boolean isImmersiveMode() {
+        return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
     @Override

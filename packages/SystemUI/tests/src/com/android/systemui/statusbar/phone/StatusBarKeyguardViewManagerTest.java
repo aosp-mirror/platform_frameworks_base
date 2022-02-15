@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
@@ -43,6 +44,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -97,6 +99,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private ShadeController mShadeController;
+    @Mock
+    private DreamOverlayStateController mDreamOverlayStateController;
+    @Mock
+    private LatencyTracker mLatencyTracker;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -116,6 +122,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mock(ConfigurationController.class),
                 mKeyguardUpdateMonitor,
+                mDreamOverlayStateController,
                 mock(NavigationModeController.class),
                 mock(DockManager.class),
                 mock(NotificationShadeWindowController.class),
@@ -123,7 +130,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
                 mKeyguardMessageAreaFactory,
-                () -> mShadeController);
+                () -> mShadeController,
+                mLatencyTracker);
         mStatusBarKeyguardViewManager.registerStatusBar(
                 mStatusBar,
                 mNotificationPanelView,
@@ -164,17 +172,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void showBouncer_showsTheBouncer() {
         mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         verify(mBouncer).show(anyBoolean(), eq(true));
-    }
-
-    @Test
-    public void onPanelExpansionChanged_neverHidesFullscreenBouncer() {
-        // TODO: StatusBar should not be here, mBouncer.isFullscreenBouncer() should do the same.
-        when(mStatusBar.isFullScreenUserSwitcherState()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
-                /* fraction= */ 0.5f,
-                /* expanded= */ false,
-                /* tracking= */ true);
-        verify(mBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
     }
 
     @Test

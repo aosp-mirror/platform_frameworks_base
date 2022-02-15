@@ -300,13 +300,6 @@ public abstract class AbstractInputMethodService extends WindowProviderService
         return false;
     }
 
-    // TODO(b/149463653): remove it in T. We missed the API deadline in S.
-    /** @hide */
-    @Override
-    public final boolean isUiContext() {
-        return true;
-    }
-
     /** @hide */
     @Override
     public final int getWindowType() {

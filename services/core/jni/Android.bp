@@ -44,7 +44,6 @@ cc_library_static {
         "com_android_server_lights_LightsService.cpp",
         "com_android_server_location_GnssLocationProvider.cpp",
         "com_android_server_locksettings_SyntheticPasswordManager.cpp",
-        "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_powerstats_PowerStatsService.cpp",
         "com_android_server_hint_HintManagerService.cpp",
@@ -68,21 +67,23 @@ cc_library_static {
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "com_android_server_sensor_SensorService.cpp",
+        "com_android_server_wm_TaskFpsCallbackController.cpp",
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
-        ":lib_networkStatsFactory_native",
+        ":lib_gameManagerService_native",
     ],
 
     include_dirs: [
         "frameworks/base/libs",
         "frameworks/native/services",
+        "frameworks/native/libs/math/include",
+        "frameworks/native/libs/ui/include",
         "system/gatekeeper/include",
         "system/memory/libmeminfo/include",
     ],
 
     header_libs: [
         "bionic_libc_platform_headers",
-        "bpf_connectivity_headers",
     ],
 }
 
@@ -99,10 +100,12 @@ cc_defaults {
         "libappfuse",
         "libbinder_ndk",
         "libbinder",
+        "libchrome",
         "libcutils",
         "libcrypto",
         "liblog",
         "libgraphicsenv",
+        "libgralloctypes",
         "libhardware",
         "libhardware_legacy",
         "libhidlbase",
@@ -139,9 +142,6 @@ cc_defaults {
         "libhidlbase",
         "libutils",
         "libhwui",
-        "libbpf_android",
-        "libnetdbpf",
-        "libnetdutils",
         "libpsi",
         "libdataloader",
         "libincfs",
@@ -155,15 +155,18 @@ cc_defaults {
         "android.hardware.gnss@2.0",
         "android.hardware.gnss@2.1",
         "android.hardware.gnss.measurement_corrections@1.0",
-        "android.hardware.gnss.visibility_control@1.0",
         "android.hardware.graphics.bufferqueue@1.0",
-        "android.hardware.input.classifier@1.0",
+        "android.hardware.graphics.bufferqueue@2.0",
+        "android.hardware.graphics.common@1.2",
+        "android.hardware.graphics.common-V3-ndk",
+        "android.hardware.graphics.mapper@4.0",
+        "android.hardware.input.processor-V1-ndk",
         "android.hardware.ir@1.0",
         "android.hardware.light@2.0",
         "android.hardware.memtrack-V1-ndk",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
-        "android.hardware.power-V2-cpp",
+        "android.hardware.power-V3-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
@@ -204,15 +207,15 @@ cc_defaults {
 }
 
 filegroup {
-    name: "lib_networkStatsFactory_native",
+    name: "lib_cachedAppOptimizer_native",
     srcs: [
-        "com_android_server_net_NetworkStatsFactory.cpp",
+        "com_android_server_am_CachedAppOptimizer.cpp",
     ],
 }
 
 filegroup {
-    name: "lib_cachedAppOptimizer_native",
+    name: "lib_gameManagerService_native",
     srcs: [
-        "com_android_server_am_CachedAppOptimizer.cpp",
+        "com_android_server_app_GameManagerService.cpp",
     ],
 }

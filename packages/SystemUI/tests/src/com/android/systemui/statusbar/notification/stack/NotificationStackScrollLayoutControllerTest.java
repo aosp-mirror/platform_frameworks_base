@@ -38,6 +38,7 @@ import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -135,6 +136,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private ShadeController mShadeController;
+    @Mock private InteractionJankMonitor mJankMonitor;
+    @Mock private StackStateLogger mStackLogger;
+    @Mock private NotificationStackScrollLogger mLogger;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -188,7 +192,10 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
-                mShadeController
+                mShadeController,
+                mJankMonitor,
+                mStackLogger,
+                mLogger
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -376,18 +383,18 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Test
     public void testDismissListener() {
-        ArgumentCaptor<NotificationStackScrollLayout.DismissListener>
+        ArgumentCaptor<NotificationStackScrollLayout.ClearAllListener>
                 dismissListenerArgumentCaptor = ArgumentCaptor.forClass(
-                NotificationStackScrollLayout.DismissListener.class);
+                NotificationStackScrollLayout.ClearAllListener.class);
 
         mController.attach(mNotificationStackScrollLayout);
 
-        verify(mNotificationStackScrollLayout).setDismissListener(
+        verify(mNotificationStackScrollLayout).setClearAllListener(
                 dismissListenerArgumentCaptor.capture());
-        NotificationStackScrollLayout.DismissListener dismissListener =
+        NotificationStackScrollLayout.ClearAllListener dismissListener =
                 dismissListenerArgumentCaptor.getValue();
 
-        dismissListener.onDismiss(ROWS_ALL);
+        dismissListener.onClearAll(ROWS_ALL);
         verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
     }
 

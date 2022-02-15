@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -66,9 +67,10 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     NotificationSwipeHelper(
             Resources resources, ViewConfiguration viewConfiguration,
-            FalsingManager falsingManager, int swipeDirection, NotificationCallback callback,
+            FalsingManager falsingManager, FeatureFlags featureFlags,
+            int swipeDirection, NotificationCallback callback,
             NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
-        super(swipeDirection, callback, resources, viewConfiguration, falsingManager);
+        super(swipeDirection, callback, resources, viewConfiguration, falsingManager, featureFlags);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -508,16 +510,18 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private final Resources mResources;
         private final ViewConfiguration mViewConfiguration;
         private final FalsingManager mFalsingManager;
+        private final FeatureFlags mFeatureFlags;
         private int mSwipeDirection;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
 
         @Inject
         Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
-                FalsingManager falsingManager) {
+                FalsingManager falsingManager, FeatureFlags featureFlags) {
             mResources = resources;
             mViewConfiguration = viewConfiguration;
             mFalsingManager = falsingManager;
+            mFeatureFlags = featureFlags;
         }
 
         Builder setSwipeDirection(int swipeDirection) {
@@ -538,7 +542,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
         NotificationSwipeHelper build() {
             return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
-                    mSwipeDirection, mNotificationCallback, mOnMenuEventListener);
+                    mFeatureFlags, mSwipeDirection, mNotificationCallback, mOnMenuEventListener);
         }
     }
 }

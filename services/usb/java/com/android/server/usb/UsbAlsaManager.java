@@ -237,6 +237,7 @@ public final class UsbAlsaManager {
         if (hasInput || hasOutput) {
             boolean isInputHeadset = parser.isInputHeadset();
             boolean isOutputHeadset = parser.isOutputHeadset();
+            boolean isDock = parser.isDock();
 
             if (mAudioService == null) {
                 Slog.e(TAG, "no AudioService");
@@ -246,7 +247,7 @@ public final class UsbAlsaManager {
             UsbAlsaDevice alsaDevice =
                     new UsbAlsaDevice(mAudioService, cardRec.getCardNum(), 0 /*device*/,
                                       deviceAddress, hasOutput, hasInput,
-                                      isInputHeadset, isOutputHeadset);
+                                      isInputHeadset, isOutputHeadset, isDock);
             if (alsaDevice != null) {
                 alsaDevice.setDeviceNameAndDescription(
                           cardRec.getCardName(), cardRec.getCardDescription());
@@ -257,10 +258,11 @@ public final class UsbAlsaManager {
 
         // look for MIDI devices
         boolean hasMidi = parser.hasMIDIInterface();
-        int midiNumInputs = parser.calculateNumMidiInputs();
-        int midiNumOutputs = parser.calculateNumMidiOutputs();
+        int midiNumInputs = parser.calculateNumLegacyMidiInputs();
+        int midiNumOutputs = parser.calculateNumLegacyMidiOutputs();
         if (DEBUG) {
             Slog.d(TAG, "hasMidi: " + hasMidi + " mHasMidiFeature:" + mHasMidiFeature);
+            Slog.d(TAG, "midiNumInputs: " + midiNumInputs + " midiNumOutputs:" + midiNumOutputs);
         }
         if (hasMidi && mHasMidiFeature) {
             int device = 0;

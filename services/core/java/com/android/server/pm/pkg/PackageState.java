@@ -54,7 +54,6 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface PackageState {
 
@@ -98,12 +97,6 @@ public interface PackageState {
      */
     @Nullable
     String getCpuAbiOverride();
-
-    /**
-     * In epoch milliseconds. The timestamp of the first install of the particular app on the
-     * device, surviving past app updates. This does not survive full uninstalls + reinstalls.
-     */
-    long getFirstInstallTime();
 
     /**
      * In epoch milliseconds. The last modified time of the file directory which houses the app
@@ -166,13 +159,18 @@ public interface PackageState {
     String getSecondaryCpuAbi();
 
     /**
-     * Retrieves the shared user ID. Note that the actual shared user data is not available here and
-     * must be queried separately.
-     *
-     * @return the shared user this package is a part of, or null if it's not part of a shared user.
+     * Whether the package shares the same user ID as other packages
      */
-    @Nullable
-    Integer getSharedUserId();
+    boolean hasSharedUser();
+
+    /**
+     * Retrieves the shared user app ID. Note that the actual shared user data is not available here
+     * and must be queried separately.
+     *
+     * @return the app ID of the shared user that this package is a part of, or -1 if it's not part
+     * of a shared user.
+     */
+    int getSharedUserAppId();
 
     @NonNull
     SigningInfo getSigningInfo();

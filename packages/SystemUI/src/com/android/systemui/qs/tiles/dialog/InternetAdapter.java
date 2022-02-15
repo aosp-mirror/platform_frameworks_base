@@ -52,8 +52,12 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     private static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
 
     private final InternetDialogController mInternetDialogController;
+    @Nullable
     private List<WifiEntry> mWifiEntries;
-    private int mWifiEntriesCount;
+    @VisibleForTesting
+    protected int mWifiEntriesCount;
+    @VisibleForTesting
+    protected int mMaxEntriesCount = InternetDialogController.MAX_WIFI_ENTRY_COUNT;
 
     protected View mHolderView;
     protected Context mContext;
@@ -87,7 +91,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
      */
     public void setWifiEntries(@Nullable List<WifiEntry> wifiEntries, int wifiEntriesCount) {
         mWifiEntries = wifiEntries;
-        mWifiEntriesCount = wifiEntriesCount;
+        mWifiEntriesCount =
+                (wifiEntriesCount < mMaxEntriesCount) ? wifiEntriesCount : mMaxEntriesCount;
     }
 
     /**
@@ -98,6 +103,20 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
     @Override
     public int getItemCount() {
         return mWifiEntriesCount;
+    }
+
+    /**
+     * Sets the maximum number of Wi-Fi networks.
+     */
+    public void setMaxEntriesCount(int count) {
+        if (count < 0 || mMaxEntriesCount == count) {
+            return;
+        }
+        mMaxEntriesCount = count;
+        if (mWifiEntriesCount > count) {
+            mWifiEntriesCount = count;
+            notifyDataSetChanged();
+        }
     }
 
     /**
@@ -133,7 +152,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         void onBind(@NonNull WifiEntry wifiEntry) {
-            mWifiIcon.setImageDrawable(getWifiDrawable(wifiEntry));
+            mWifiIcon.setImageDrawable(
+                    getWifiDrawable(wifiEntry.getLevel(), wifiEntry.shouldShowXLevelIcon()));
             setWifiNetworkLayout(wifiEntry.getTitle(),
                     Html.fromHtml(wifiEntry.getSummary(false), Html.FROM_HTML_MODE_LEGACY));
 
@@ -170,12 +190,14 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiSummaryText.setText(summary);
         }
 
-        Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
-            if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
+        @Nullable
+        Drawable getWifiDrawable(int level, boolean hasNoInternet) {
+            // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
+            // will be returned.
+            if (level == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
                 return null;
             }
-            final Drawable drawable = mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(),
-                    wifiEntry.getLevel());
+            final Drawable drawable = mWifiIconInjector.getIcon(hasNoInternet, level);
             if (drawable == null) {
                 return null;
             }

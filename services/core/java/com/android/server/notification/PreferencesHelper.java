@@ -45,6 +45,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
+import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -101,6 +102,8 @@ public class PreferencesHelper implements RankingConfig {
 
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 50000;
+    @VisibleForTesting
+    static final int NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT = 50000;
 
     private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
     private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
@@ -188,8 +191,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private Map<String, List<String>> mOemLockedApps = new HashMap();
 
-    private int mCurrentUserId = UserHandle.USER_NULL;
-
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper,
             NotificationChannelLogger notificationChannelLogger,
@@ -213,7 +214,6 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
-        mCurrentUserId = ActivityManager.getCurrentUser();
         syncChannelsBypassingDnd();
     }
 
@@ -254,6 +254,7 @@ public class PreferencesHelper implements RankingConfig {
                                 }
                             }
                             boolean skipWarningLogged = false;
+                            boolean skipGroupWarningLogged = false;
                             boolean hasSAWPermission = false;
                             if (upgradeForBubbles && uid != UNKNOWN_UID) {
                                 hasSAWPermission = mAppOps.noteOpNoThrow(
@@ -303,6 +304,14 @@ public class PreferencesHelper implements RankingConfig {
                                 String tagName = parser.getName();
                                 // Channel groups
                                 if (TAG_GROUP.equals(tagName)) {
+                                    if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                                        if (!skipGroupWarningLogged) {
+                                            Slog.w(TAG, "Skipping further groups for " + r.pkg
+                                                    + "; app has too many");
+                                            skipGroupWarningLogged = true;
+                                        }
+                                        continue;
+                                    }
                                     String id = parser.getAttributeValue(null, ATT_ID);
                                     CharSequence groupName = parser.getAttributeValue(null,
                                             ATT_NAME);
@@ -382,6 +391,7 @@ public class PreferencesHelper implements RankingConfig {
 
                             if (migrateToPermission) {
                                 r.importance = appImportance;
+                                r.migrateToPm = true;
                                 if (r.uid != UNKNOWN_UID) {
                                     // Don't call into permission system until we have a valid uid
                                     PackagePermission pkgPerm = new PackagePermission(
@@ -808,6 +818,23 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    /** Sets whether this package has sent a notification with valid bubble metadata. */
+    public boolean setValidBubbleSent(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
+            boolean valueChanged = !r.hasSentValidBubble;
+            r.hasSentValidBubble = true;
+            return valueChanged;
+        }
+    }
+
+    boolean hasSentValidBubble(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
+            return r.hasSentValidBubble;
+        }
+    }
+
     @Override
     public boolean isGroupBlocked(String packageName, int uid, String groupId) {
         if (groupId == null) {
@@ -847,6 +874,12 @@ public class PreferencesHelper implements RankingConfig {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
+            }
+            if (fromTargetApp) {
+                group.setBlocked(false);
+                if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                    throw new IllegalStateException("Limit exceed; cannot create more groups");
+                }
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {
@@ -1728,12 +1761,13 @@ public class PreferencesHelper implements RankingConfig {
     private void updateChannelsBypassingDnd() {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
+        final int currentUserId = getCurrentUser();
         synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 // Package isn't associated with the current userId
-                if (mCurrentUserId != UserHandle.getUserId(r.uid)) {
+                if (currentUserId != UserHandle.getUserId(r.uid)) {
                     continue;
                 }
 
@@ -1768,6 +1802,13 @@ public class PreferencesHelper implements RankingConfig {
             mAreChannelsBypassingDnd = haveBypassingApps;
             updateZenPolicy(mAreChannelsBypassingDnd);
         }
+    }
+
+    private int getCurrentUser() {
+        final long identity = Binder.clearCallingIdentity();
+        int currentUserId = ActivityManager.getCurrentUser();
+        Binder.restoreCallingIdentity(identity);
+        return currentUserId;
     }
 
     private boolean channelIsLiveLocked(PackagePreferences pkgPref, NotificationChannel channel) {
@@ -2151,6 +2192,10 @@ public class PreferencesHelper implements RankingConfig {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 event.writeInt(r.uid);
                 event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
+
+                // collect whether this package's importance info was user-set for later, if needed
+                // before the migration is enabled, this will simply default to false in all cases.
+                boolean importanceIsUserSet = false;
                 if (mPermissionHelper.isMigrationEnabled()) {
                     // Even if this package's data is not present, we need to write something;
                     // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
@@ -2158,8 +2203,12 @@ public class PreferencesHelper implements RankingConfig {
                     int importance = IMPORTANCE_NONE;
                     Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                     if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        importance = pkgPermissions.get(key).first
+                        Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);
+                        importance = permissionPair.first
                                 ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
+                        // cache the second value for writing later
+                        importanceIsUserSet = permissionPair.second;
+
                         pkgsWithPermissionsToHandle.remove(key);
                     }
                     event.writeInt(importance);
@@ -2168,6 +2217,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 event.writeInt(r.visibility);
                 event.writeInt(r.lockedAppFields);
+                event.writeBoolean(importanceIsUserSet);  // optional bool user_set_importance = 5;
                 events.add(event.build());
             }
         }
@@ -2189,6 +2239,7 @@ public class PreferencesHelper implements RankingConfig {
                 // builder
                 event.writeInt(DEFAULT_VISIBILITY);
                 event.writeInt(DEFAULT_LOCKED_APP_FIELDS);
+                event.writeBoolean(pkgPermissions.get(p).second); // user_set_importance field
                 events.add(event.build());
             }
         }
@@ -2465,22 +2516,6 @@ public class PreferencesHelper implements RankingConfig {
         return packageChannels;
     }
 
-    /**
-     * Called when user switches
-     */
-    public void onUserSwitched(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
-    }
-
-    /**
-     * Called when user is unlocked
-     */
-    public void onUserUnlocked(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
-    }
-
     public void onUserRemoved(int userId) {
         synchronized (mPackagePreferences) {
             int N = mPackagePreferences.size();
@@ -2541,7 +2576,7 @@ public class PreferencesHelper implements RankingConfig {
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
                         }
-                        if (mPermissionHelper.isMigrationEnabled()) {
+                        if (mPermissionHelper.isMigrationEnabled() && r.migrateToPm) {
                             try {
                                 PackagePermission p = new PackagePermission(
                                         r.pkg, UserHandle.getUserId(r.uid),
@@ -2803,8 +2838,11 @@ public class PreferencesHelper implements RankingConfig {
 
         boolean hasSentInvalidMessage = false;
         boolean hasSentValidMessage = false;
-        // notE: only valid while hasSentMessage is false and hasSentInvalidMessage is true
+        // note: only valid while hasSentMessage is false and hasSentInvalidMessage is true
         boolean userDemotedMsgApp = false;
+        boolean hasSentValidBubble = false;
+
+        boolean migrateToPm = false;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

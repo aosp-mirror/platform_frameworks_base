@@ -16,10 +16,10 @@
 
 package com.android.systemui.unfold
 
+import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
-import com.android.systemui.keyguard.KeyguardViewMediator
-import com.android.systemui.keyguard.ScreenLifecycle
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -27,23 +27,20 @@ import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus
 import com.android.systemui.util.settings.GlobalSettings
-import dagger.Lazy
 import javax.inject.Inject
 
 /**
- * Controls folding to AOD animation: when AOD is enabled and foldable device is folded
- * we play a special AOD animation on the outer screen
+ * Controls folding to AOD animation: when AOD is enabled and foldable device is folded we play a
+ * special AOD animation on the outer screen
  */
 @SysUIUnfoldScope
-class FoldAodAnimationController @Inject constructor(
-    private val screenLifecycle: ScreenLifecycle,
-    private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
+class FoldAodAnimationController
+@Inject
+constructor(
+    @Main private val handler: Handler,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val globalSettings: GlobalSettings
-) : ScreenLifecycle.Observer,
-    CallbackController<FoldAodAnimationStatus>,
-    ScreenOffAnimation,
-    WakefulnessLifecycle.Observer {
+) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
     private var alwaysOnEnabled: Boolean = false
     private var isScrimOpaque: Boolean = false
@@ -53,26 +50,28 @@ class FoldAodAnimationController @Inject constructor(
     private var shouldPlayAnimation = false
     private val statusListeners = arrayListOf<FoldAodAnimationStatus>()
 
+    private val startAnimationRunnable = Runnable {
+        statusBar.notificationPanelViewController.startFoldToAodAnimation {
+            // End action
+            isAnimationPlaying = false
+        }
+    }
+
     private var isAnimationPlaying = false
 
     override fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
         this.statusBar = statusBar
 
-        screenLifecycle.addObserver(this)
         wakefulnessLifecycle.addObserver(this)
     }
 
-    /**
-     * Returns true if we should run fold to AOD animation
-     */
-    override fun shouldPlayAnimation(): Boolean =
-        shouldPlayAnimation
+    /** Returns true if we should run fold to AOD animation */
+    override fun shouldPlayAnimation(): Boolean = shouldPlayAnimation
 
     override fun startAnimation(): Boolean =
         if (alwaysOnEnabled &&
             wakefulnessLifecycle.lastSleepReason == PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD &&
-            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0"
-        ) {
+            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0") {
             shouldPlayAnimation = true
 
             isAnimationPlaying = true
@@ -87,6 +86,11 @@ class FoldAodAnimationController @Inject constructor(
         }
 
     override fun onStartedWakingUp() {
+        if (isAnimationPlaying) {
+            handler.removeCallbacks(startAnimationRunnable)
+            statusBar.notificationPanelViewController.cancelFoldToAodAnimation();
+        }
+
         shouldPlayAnimation = false
         isAnimationPlaying = false
     }
@@ -111,9 +115,7 @@ class FoldAodAnimationController @Inject constructor(
         }
     }
 
-    /**
-     * Called when keyguard scrim opaque changed
-     */
+    /** Called when keyguard scrim opaque changed */
     override fun onScrimOpaqueChanged(isOpaque: Boolean) {
         isScrimOpaque = isOpaque
 
@@ -123,38 +125,31 @@ class FoldAodAnimationController @Inject constructor(
         }
     }
 
-    override fun onScreenTurnedOn() {
+    fun onScreenTurnedOn() {
         if (shouldPlayAnimation) {
-            statusBar.notificationPanelViewController.startFoldToAodAnimation {
-                // End action
-                isAnimationPlaying = false
-                keyguardViewMediatorLazy.get().maybeHandlePendingLock()
-            }
+            handler.removeCallbacks(startAnimationRunnable)
+
+            // Post starting the animation to the next frame to avoid junk due to inset changes
+            handler.post(startAnimationRunnable)
             shouldPlayAnimation = false
         }
     }
 
-    override fun isAnimationPlaying(): Boolean =
-        isAnimationPlaying
+    override fun isAnimationPlaying(): Boolean = isAnimationPlaying
 
-    override fun isKeyguardHideDelayed(): Boolean =
-        isAnimationPlaying()
+    override fun isKeyguardHideDelayed(): Boolean = isAnimationPlaying()
 
-    override fun shouldShowAodIconsWhenShade(): Boolean =
-        shouldPlayAnimation()
+    override fun shouldShowAodIconsWhenShade(): Boolean = shouldPlayAnimation()
 
-    override fun shouldAnimateAodIcons(): Boolean =
-        !shouldPlayAnimation()
+    override fun shouldAnimateAodIcons(): Boolean = !shouldPlayAnimation()
 
-    override fun shouldAnimateDozingChange(): Boolean =
-        !shouldPlayAnimation()
+    override fun shouldAnimateDozingChange(): Boolean = !shouldPlayAnimation()
 
-    override fun shouldAnimateClockChange(): Boolean =
-        !isAnimationPlaying()
+    override fun shouldAnimateClockChange(): Boolean = !isAnimationPlaying()
 
-    /**
-     * Called when AOD status is changed
-     */
+    override fun shouldDelayDisplayDozeTransition(): Boolean = shouldPlayAnimation()
+
+    /** Called when AOD status is changed */
     override fun onAlwaysOnChanged(alwaysOn: Boolean) {
         alwaysOnEnabled = alwaysOn
     }

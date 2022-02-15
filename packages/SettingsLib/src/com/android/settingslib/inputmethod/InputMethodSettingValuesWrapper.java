@@ -27,6 +27,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.DirectBootAwareness;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +89,8 @@ public class InputMethodSettingValuesWrapper {
 
     public void refreshAllInputMethodAndSubtypes() {
         mMethodList.clear();
-        mMethodList.addAll(mImm.getInputMethodListAsUser(mContentResolver.getUserId()));
+        mMethodList.addAll(mImm.getInputMethodListAsUser(
+                mContentResolver.getUserId(), DirectBootAwareness.ANY));
     }
 
     public List<InputMethodInfo> getInputMethodList() {

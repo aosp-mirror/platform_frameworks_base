@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
@@ -80,7 +81,7 @@ public class NotificationChildrenContainer extends ViewGroup
     private int mNotificationHeaderMargin;
 
     private int mNotificationTopPadding;
-    private float mCollapsedBottompadding;
+    private float mCollapsedBottomPadding;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mContainingNotification;
     private TextView mOverflowNumber;
@@ -139,17 +140,17 @@ public class NotificationChildrenContainer extends ViewGroup
 
     private void initDimens() {
         Resources res = getResources();
-        mChildPadding = res.getDimensionPixelSize(R.dimen.notification_children_padding);
-        mDividerHeight = res.getDimensionPixelSize(
+        mChildPadding = res.getDimensionPixelOffset(R.dimen.notification_children_padding);
+        mDividerHeight = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_divider_height);
         mDividerAlpha = res.getFloat(R.dimen.notification_divider_alpha);
-        mNotificationHeaderMargin = res.getDimensionPixelSize(
+        mNotificationHeaderMargin = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_margin_top);
-        mNotificationTopPadding = res.getDimensionPixelSize(
+        mNotificationTopPadding = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_top_padding);
         mHeaderHeight = mNotificationHeaderMargin + mNotificationTopPadding;
-        mCollapsedBottompadding = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin);
+        mCollapsedBottomPadding = res.getDimensionPixelOffset(
+                R.dimen.notification_children_collapsed_bottom_padding);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
         mShowGroupCountInExpander =
@@ -158,7 +159,7 @@ public class NotificationChildrenContainer extends ViewGroup
                 res.getBoolean(R.bool.config_showDividersWhenGroupNotificationExpanded);
         mHideDividersDuringExpand =
                 res.getBoolean(R.bool.config_hideDividersDuringExpand);
-        mTranslationForHeader = res.getDimensionPixelSize(
+        mTranslationForHeader = res.getDimensionPixelOffset(
                 com.android.internal.R.dimen.notification_content_margin)
                 - mNotificationHeaderMargin;
         mHybridGroupManager.initDimens();
@@ -272,6 +273,7 @@ public class NotificationChildrenContainer extends ViewGroup
      * @param childIndex the index to add it at, if -1 it will be added at the end
      */
     public void addNotification(ExpandableNotificationRow row, int childIndex) {
+        ensureRemovedFromTransientContainer(row);
         int newIndex = childIndex < 0 ? mAttachedChildren.size() : childIndex;
         mAttachedChildren.add(newIndex, row);
         addView(row);
@@ -288,6 +290,16 @@ public class NotificationChildrenContainer extends ViewGroup
         if (viewState != null) {
             viewState.cancelAnimations(row);
             row.cancelAppearDrawing();
+        }
+    }
+
+    private void ensureRemovedFromTransientContainer(View v) {
+        if (v.getParent() != null && v instanceof ExpandableView) {
+            // If the child is animating away, it will still have a parent, so detach it first
+            // TODO: We should really cancel the active animations here. This will
+            //  happen automatically when the view's intro animation starts, but
+            //  it's a fragile link.
+            ((ExpandableView) v).removeFromTransientContainerForAdditionTo(this);
         }
     }
 
@@ -548,10 +560,10 @@ public class NotificationChildrenContainer extends ViewGroup
             visibleChildren++;
         }
         if (mUserLocked) {
-            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottompadding, 0.0f,
+            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottomPadding, 0.0f,
                     expandFactor);
         } else if (!childrenExpanded) {
-            intrinsicHeight += mCollapsedBottompadding;
+            intrinsicHeight += mCollapsedBottomPadding;
         }
         return intrinsicHeight;
     }
@@ -1151,7 +1163,7 @@ public class NotificationChildrenContainer extends ViewGroup
             minExpandHeight += child.getSingleLineView().getHeight();
             visibleChildren++;
         }
-        minExpandHeight += mCollapsedBottompadding;
+        minExpandHeight += mCollapsedBottomPadding;
         return minExpandHeight;
     }
 

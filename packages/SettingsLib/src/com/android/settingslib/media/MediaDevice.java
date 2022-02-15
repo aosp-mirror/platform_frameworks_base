@@ -320,6 +320,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         }
 
         if (mType == another.mType) {
+            // Check device is muting expected device
+            if (isMutingExpectedDevice()) {
+                return -1;
+            } else if (another.isMutingExpectedDevice()) {
+                return 1;
+            }
+
             // Check fast pair device
             if (isFastPairDevice()) {
                 return -1;
@@ -389,6 +396,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return {@code true} if it is FastPair device, otherwise return {@code false}
      */
     protected boolean isFastPairDevice() {
+        return false;
+    }
+
+    /**
+     * Check if it is muting expected device
+     * @return {@code true} if it is muting expected device, otherwise return {@code false}
+     */
+    protected boolean isMutingExpectedDevice() {
         return false;
     }
 

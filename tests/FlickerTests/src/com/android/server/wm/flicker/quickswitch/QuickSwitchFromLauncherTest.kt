@@ -261,7 +261,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -333,7 +333,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(
-                            repetitions = 5,
+                            repetitions = 3,
                             supportedNavigationModes = listOf(
                                     WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
                             ),

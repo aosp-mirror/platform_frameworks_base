@@ -131,6 +131,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
         return mQRCodeScannerController.isCameraAvailable();
     }
 
+    @Nullable
     @Override
     public Intent getLongClickIntent() {
         return null;

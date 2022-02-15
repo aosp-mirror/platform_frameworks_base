@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
@@ -425,6 +426,18 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // THEN ranking for the entry has been updated with new ranking
         assertEquals(newRank, mEntry.getRanking().getRank());
+    }
+
+    @Test
+    public void testNotifyChannelModified_notifiesListeners() {
+        NotificationChannel channel = mock(NotificationChannel.class);
+        String pkg = "PKG";
+        mEntryManager.notifyChannelModified(pkg, UserHandle.CURRENT, channel,
+                NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+        verify(mNotifCollectionListener).onNotificationChannelModified(eq(pkg),
+                eq(UserHandle.CURRENT), eq(channel), eq(NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+        verify(mEntryListener).onNotificationChannelModified(eq(pkg),
+                eq(UserHandle.CURRENT), eq(channel), eq(NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
 
     @Test

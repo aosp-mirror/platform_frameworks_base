@@ -76,12 +76,6 @@ public interface SplitScreen {
     }
 
     /**
-     * Called when the keyguard occluded state changes.
-     * @param occluded Indicates if the keyguard is now occluded.
-     */
-    void onKeyguardOccludedChanged(boolean occluded);
-
-    /**
      * Called when the visibility of the keyguard changes.
      * @param showing Indicates if the keyguard is now visible.
      */
@@ -89,9 +83,6 @@ public interface SplitScreen {
 
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
-
-    /** Called when device going to sleep finished. */
-    void onFinishedGoingToSleep();
 
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {

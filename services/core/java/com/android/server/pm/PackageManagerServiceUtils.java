@@ -18,9 +18,11 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
+import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -34,13 +36,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
@@ -49,7 +52,6 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
-import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;
@@ -60,6 +62,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalStorage;
 import android.os.incremental.V4Signature;
 import android.os.incremental.V4Signature.HashingInfo;
 import android.os.storage.DiskInfo;
@@ -77,17 +80,19 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -141,7 +146,7 @@ public class PackageManagerServiceUtils {
      * allow 3P apps to trigger internal-only functionality.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -224,11 +229,9 @@ public class PackageManagerServiceUtils {
         }
         final File baseFile = new File(pkg.getBaseApkPath());
         long maxModifiedTime = baseFile.lastModified();
-        if (pkg.getSplitCodePaths() != null) {
-            for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
-                final File splitFile = new File(pkg.getSplitCodePaths()[i]);
-                maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
-            }
+        for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
+            final File splitFile = new File(pkg.getSplitCodePaths()[i]);
+            maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
         }
         return maxModifiedTime;
     }
@@ -461,30 +464,24 @@ public class PackageManagerServiceUtils {
      * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
      * and is not tamperproof.
      */
-    private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
-            PackageSetting disabledPkgSetting) {
-        if (pkgSetting.getSigningDetails().checkCapability(
+    private static boolean matchSignatureInSystem(@NonNull String packageName,
+            @NonNull SigningDetails signingDetails, PackageSetting disabledPkgSetting) {
+        if (signingDetails.checkCapability(
                 disabledPkgSetting.getSigningDetails(),
                 SigningDetails.CertCapabilities.INSTALLED_DATA)
                 || disabledPkgSetting.getSigningDetails().checkCapability(
-                pkgSetting.getSigningDetails(),
+                signingDetails,
                 SigningDetails.CertCapabilities.ROLLBACK)) {
             return true;
         } else {
             logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
-                    pkgSetting.getPackageName());
+                    packageName);
             return false;
         }
     }
 
     /** Default is to not use fs-verity since it depends on kernel support. */
     private static final int FSVERITY_DISABLED = 0;
-
-    /**
-     * Experimental implementation targeting priv apps, with Android specific kernel patches to
-     * extend fs-verity.
-     */
-    private static final int FSVERITY_LEGACY = 1;
 
     /** Standard fs-verity. */
     private static final int FSVERITY_ENABLED = 2;
@@ -494,10 +491,6 @@ public class PackageManagerServiceUtils {
         return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;
-    }
-
-    static boolean isLegacyApkVerityEnabled() {
-        return SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED) == FSVERITY_LEGACY;
     }
 
     /** Returns true to force apk verification if the package is considered privileged. */
@@ -512,6 +505,7 @@ public class PackageManagerServiceUtils {
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
+            @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
             boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
@@ -544,7 +538,8 @@ public class PackageManagerServiceUtils {
             }
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
-                match = matchSignatureInSystem(pkgSetting, disabledPkgSetting);
+                match = matchSignatureInSystem(packageName, pkgSetting.getSigningDetails(),
+                        disabledPkgSetting);
             }
 
             if (!match && isRollback) {
@@ -556,15 +551,13 @@ public class PackageManagerServiceUtils {
 
             if (!match) {
                 throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                        "Package " + packageName +
-                        " signatures do not match previously installed version; ignoring!");
+                        "Existing package " + packageName
+                                + " signatures do not match newer version; ignoring!");
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.getSharedUser() != null
-                && pkgSetting.getSharedUser().signatures.mSigningDetails
-                        != SigningDetails.UNKNOWN) {
-
+        if (sharedUserSetting != null
+                && sharedUserSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
             // Already existing package. Make sure signatures match.  In case of signing certificate
             // rotation, the packages with newer certs need to be ok with being sharedUserId with
             // the older ones.  We check to see if either the new package is signed by an older cert
@@ -572,32 +565,33 @@ public class PackageManagerServiceUtils {
             // with being sharedUser with the existing signing cert.
             boolean match =
                     parsedSignatures.checkCapability(
-                            pkgSetting.getSharedUser().signatures.mSigningDetails,
+                            sharedUserSetting.getSigningDetails(),
                             SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
+                    || sharedUserSetting.getSigningDetails().checkCapability(
                             parsedSignatures,
                             SigningDetails.CertCapabilities.SHARED_USER_ID);
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
-            if (!match && pkgSetting.getSharedUser().packages.size() == 1
-                    && pkgSetting.getSharedUser().packages
-                            .valueAt(0).getPackageName().equals(packageName)) {
+            final ArraySet<PackageStateInternal> susPackageStates =
+                    (ArraySet<PackageStateInternal>) sharedUserSetting.getPackageStates();
+            if (!match && susPackageStates.size() == 1
+                    && susPackageStates.valueAt(0).getPackageName().equals(packageName)) {
                 match = true;
             }
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
-                        packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
+                        packageName, sharedUserSetting.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match =
                         matchSignaturesRecover(packageName,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 parsedSignatures,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
@@ -605,14 +599,15 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
-                        + pkgSetting.getSharedUser().name + "; ignoring!");
+                        + sharedUserSetting.name + "; ignoring!");
             }
             // It is possible that this package contains a lineage that blocks sharedUserId access
             // to an already installed package in the sharedUserId signed with a previous key.
             // Iterate over all of the packages in the sharedUserId and ensure any that are signed
             // with a key in this package's lineage have the SHARED_USER_ID capability granted.
             if (parsedSignatures.hasPastSigningCertificates()) {
-                for (PackageSetting shUidPkgSetting : pkgSetting.getSharedUser().packages) {
+                for (int i = 0; i < susPackageStates.size(); i++) {
+                    PackageStateInternal shUidPkgSetting = susPackageStates.valueAt(i);
                     // if the current package in the sharedUserId is the package being updated then
                     // skip this check as the update may revoke the sharedUserId capability from
                     // the key with which this app was previously signed.
@@ -639,13 +634,65 @@ public class PackageManagerServiceUtils {
             // If the lineage of this package diverges from the lineage of the sharedUserId then
             // do not allow the installation to proceed.
             if (!parsedSignatures.hasCommonAncestor(
-                    pkgSetting.getSharedUser().signatures.mSigningDetails)) {
+                    sharedUserSetting.signatures.mSigningDetails)) {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName + " has a signing lineage "
                                 + "that diverges from the lineage of the sharedUserId");
             }
         }
         return compatMatch;
+    }
+
+    /**
+     * Extract native libraries to a target path
+     */
+    public static int extractNativeBinaries(File dstCodePath, String packageName) {
+        final File libraryRoot = new File(dstCodePath, LIB_DIR_NAME);
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(dstCodePath);
+            return NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
+                    null /*abiOverride*/, false /*isIncremental*/);
+        } catch (IOException e) {
+            logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
+                    + "; pkg: " + packageName);
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        } finally {
+            IoUtils.closeQuietly(handle);
+        }
+    }
+
+    /**
+     * Remove native libraries of a given package
+     */
+    public static void removeNativeBinariesLI(PackageSetting ps) {
+        if (ps != null) {
+            NativeLibraryHelper.removeNativeBinariesLI(ps.getLegacyNativeLibraryPath());
+        }
+    }
+
+    /**
+     * Wait for native library extraction to be done in IncrementalService
+     */
+    public static void waitForNativeBinariesExtractionForIncremental(
+            ArraySet<IncrementalStorage> incrementalStorages) {
+        if (incrementalStorages.isEmpty()) {
+            return;
+        }
+        try {
+            // Native library extraction may take very long time: each page could potentially
+            // wait for either 10s or 100ms (adb vs non-adb data loader), and that easily adds
+            // up to a full watchdog timeout of 1 min, killing the system after that. It doesn't
+            // make much sense as blocking here doesn't lock up the framework, but only blocks
+            // the installation session and the following ones.
+            Watchdog.getInstance().pauseWatchingCurrentThread("native_lib_extract");
+            for (int i = 0; i < incrementalStorages.size(); ++i) {
+                IncrementalStorage storage = incrementalStorages.valueAtUnchecked(i);
+                storage.waitForNativeBinariesExtraction();
+            }
+        } finally {
+            Watchdog.getInstance().resumeWatchingCurrentThread("native_lib_extract");
+        }
     }
 
     /**
@@ -760,27 +807,37 @@ public class PackageManagerServiceUtils {
         final PackageInfoLite ret = new PackageInfoLite();
         if (packagePath == null || pkg == null) {
             Slog.i(TAG, "Invalid package file " + packagePath);
-            ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
             return ret;
         }
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
         try {
-            sizeBytes = PackageHelper.calculateInstalledSize(pkg, abiOverride);
+            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
         } catch (IOException e) {
             if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
             } else {
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
             }
 
             return ret;
         }
 
-        final int recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                pkg.getPackageName(), pkg.getInstallLocation(), sizeBytes, flags);
-
+        final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_INVALID);
+        sessionParams.appPackageName = pkg.getPackageName();
+        sessionParams.installLocation = pkg.getInstallLocation();
+        sessionParams.sizeBytes = sizeBytes;
+        sessionParams.installFlags = flags;
+        final int recommendedInstallLocation;
+        try {
+            recommendedInstallLocation = InstallLocationUtils.resolveInstallLocation(context,
+                    sessionParams);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
         ret.packageName = pkg.getPackageName();
         ret.splitNames = pkg.getSplitNames();
         ret.versionCode = pkg.getVersionCode();
@@ -792,7 +849,6 @@ public class PackageManagerServiceUtils {
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.isMultiArch();
         ret.debuggable = pkg.isDebuggable();
-
         return ret;
     }
 
@@ -812,7 +868,7 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(result.getErrorCode(),
                         result.getErrorMessage(), result.getException());
             }
-            return PackageHelper.calculateInstalledSize(result.getResult(), abiOverride);
+            return InstallLocationUtils.calculateInstalledSize(result.getResult(), abiOverride);
         } catch (PackageManagerException | IOException e) {
             Slog.w(TAG, "Failed to calculate installed size: " + e);
             return -1;
@@ -1279,5 +1335,40 @@ public class PackageManagerServiceUtils {
         }
 
         return cacheDir;
+    }
+
+    /**
+     * Check and throw if the given before/after packages would be considered a
+     * downgrade.
+     */
+    public static void checkDowngrade(AndroidPackage before, PackageInfoLite after)
+            throws PackageManagerException {
+        if (after.getLongVersionCode() < before.getLongVersionCode()) {
+            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                    "Update version code " + after.versionCode + " is older than current "
+                            + before.getLongVersionCode());
+        } else if (after.getLongVersionCode() == before.getLongVersionCode()) {
+            if (after.baseRevisionCode < before.getBaseRevisionCode()) {
+                throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                        "Update base revision code " + after.baseRevisionCode
+                                + " is older than current " + before.getBaseRevisionCode());
+            }
+
+            if (!ArrayUtils.isEmpty(after.splitNames)) {
+                for (int i = 0; i < after.splitNames.length; i++) {
+                    final String splitName = after.splitNames[i];
+                    final int j = ArrayUtils.indexOf(before.getSplitNames(), splitName);
+                    if (j != -1) {
+                        if (after.splitRevisionCodes[i] < before.getSplitRevisionCodes()[j]) {
+                            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                                    "Update split " + splitName + " revision code "
+                                            + after.splitRevisionCodes[i]
+                                            + " is older than current "
+                                            + before.getSplitRevisionCodes()[j]);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

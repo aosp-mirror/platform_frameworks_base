@@ -56,4 +56,8 @@ public class ActivityOptions {
     public static final ComponentName LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".LaunchNewTaskActivity");
+    public static final String DIALOG_THEMED_ACTIVITY = "DialogThemedActivity";
+    public static final ComponentName DIALOG_THEMED_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".DialogThemedActivity");
 }

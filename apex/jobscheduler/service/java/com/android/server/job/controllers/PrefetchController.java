@@ -40,7 +40,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
-import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -81,9 +80,6 @@ public class PrefetchController extends StateController {
      */
     @GuardedBy("mLock")
     private final SparseArrayMap<String, Long> mEstimatedLaunchTimes = new SparseArrayMap<>();
-    /** Cached list of UIDs in the TOP state. */
-    @GuardedBy("mLock")
-    private final SparseBooleanArray mTopUids = new SparseBooleanArray();
     private final ThresholdAlarmListener mThresholdAlarmListener;
 
     /**
@@ -186,15 +182,9 @@ public class PrefetchController extends StateController {
 
     @GuardedBy("mLock")
     @Override
-    public void onUidBiasChangedLocked(int uid, int newBias) {
+    public void onUidBiasChangedLocked(int uid, int prevBias, int newBias) {
         final boolean isNowTop = newBias == JobInfo.BIAS_TOP_APP;
-        final boolean wasTop = mTopUids.get(uid);
-        if (isNowTop) {
-            mTopUids.put(uid, true);
-        } else {
-            // Delete entries of non-top apps so the set doesn't get too large.
-            mTopUids.delete(uid);
-        }
+        final boolean wasTop = prevBias == JobInfo.BIAS_TOP_APP;
         if (isNowTop != wasTop) {
             mHandler.obtainMessage(MSG_PROCESS_TOP_STATE_CHANGE, uid, 0).sendToTarget();
         }
@@ -314,7 +304,8 @@ public class PrefetchController extends StateController {
         //   3. The app is not open but has an active widget (we can't tell if a widget displays
         //      status/data, so this assumes the prefetch job is to update the data displayed on
         //      the widget).
-        final boolean appIsOpen = mTopUids.get(jobStatus.getSourceUid());
+        final boolean appIsOpen =
+                mService.getUidBias(jobStatus.getSourceUid()) == JobInfo.BIAS_TOP_APP;
         final boolean satisfied;
         if (!appIsOpen) {
             final int userId = jobStatus.getSourceUserId();

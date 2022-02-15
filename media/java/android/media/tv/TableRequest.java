@@ -16,17 +16,28 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
-public class TableRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final int requestType = BroadcastInfoType.TABLE;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    // todo: change const declaration to intdef
-    public static final int PAT = 1;
-    public static final int PMT = 2;
+/**
+ * A request for Table from broadcast signal.
+ */
+public final class TableRequest extends BroadcastInfoRequest implements Parcelable {
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
+            TvInputManager.BROADCAST_INFO_TYPE_TABLE;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TABLE_NAME_PAT, TABLE_NAME_PMT})
+    public @interface TableName {}
+
+    public static final int TABLE_NAME_PAT = 0;
+    public static final int TABLE_NAME_PMT = 1;
 
     public static final @NonNull Parcelable.Creator<TableRequest> CREATOR =
             new Parcelable.Creator<TableRequest>() {
@@ -43,37 +54,52 @@ public class TableRequest extends BroadcastInfoRequest implements Parcelable {
             };
 
     private final int mTableId;
-    private final int mTableName;
+    private final @TableName int mTableName;
     private final int mVersion;
 
-    public static TableRequest createFromParcelBody(Parcel in) {
+    static TableRequest createFromParcelBody(Parcel in) {
         return new TableRequest(in);
     }
 
-    public TableRequest(int requestId, int option, int tableId, int tableName, int version) {
-        super(requestType, requestId, option);
+    public TableRequest(int requestId, @RequestOption int option, int tableId,
+            @TableName int tableName, int version) {
+        super(REQUEST_TYPE, requestId, option);
         mTableId = tableId;
         mTableName = tableName;
         mVersion = version;
     }
 
-    protected TableRequest(Parcel source) {
-        super(requestType, source);
+    TableRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         mTableId = source.readInt();
         mTableName = source.readInt();
         mVersion = source.readInt();
     }
 
+    /**
+     * Gets the ID of requested table.
+     */
     public int getTableId() {
         return mTableId;
     }
 
-    public int getTableName() {
+    /**
+     * Gets the name of requested table.
+     */
+    public @TableName int getTableName() {
         return mTableName;
     }
 
+    /**
+     * Gets the version number of requested table.
+     */
     public int getVersion() {
         return mVersion;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

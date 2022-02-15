@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"Aus"</item>
     <item msgid="2075645297847971154">"An"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Nicht verfügbar"</item>
+    <item msgid="1909756493418256167">"Aus"</item>
+    <item msgid="4531508423703413340">"An"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Nicht verfügbar"</item>
     <item msgid="9103697205127645916">"Aus"</item>

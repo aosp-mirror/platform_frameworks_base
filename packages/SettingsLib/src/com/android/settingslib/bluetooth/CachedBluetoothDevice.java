@@ -21,7 +21,6 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
-import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -502,6 +501,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public String getAddress() {
         return mDevice.getAddress();
+    }
+
+    /**
+     * Get identity address from remote device
+     * @return {@link BluetoothDevice#getIdentityAddress()} if
+     * {@link BluetoothDevice#getIdentityAddress()} is not null otherwise return
+     * {@link BluetoothDevice#getAddress()}
+     */
+    public String getIdentityAddress() {
+        final String identityAddress = mDevice.getIdentityAddress();
+        return TextUtils.isEmpty(identityAddress) ? getAddress() : identityAddress;
     }
 
     /**
@@ -1131,9 +1141,18 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return resource for android auto string that describes the connection state of this device.
+     * See {@link #getCarConnectionSummary(boolean)}
      */
     public String getCarConnectionSummary() {
+        return getCarConnectionSummary(false);
+    }
+
+    /**
+     * Returns android auto string that describes the connection state of this device.
+     *
+     * @param shortSummary {@code true} if need to return short version summary
+     */
+    public String getCarConnectionSummary(boolean shortSummary) {
         boolean profileConnected = false;       // at least one profile is connected
         boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
         boolean hfpNotConnected = false;        // HFP is preferred but not connected
@@ -1151,6 +1170,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                                 BluetoothUtils.getConnectionStateSummary(connectionStatus));
 
                     case BluetoothProfile.STATE_CONNECTED:
+                        if (shortSummary) {
+                            return mContext.getString(BluetoothUtils.getConnectionStateSummary(
+                                    connectionStatus), /* formatArgs= */ "");
+                        }
                         profileConnected = true;
                         break;
 
@@ -1248,7 +1271,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         return getBondState() == BluetoothDevice.BOND_BONDING ?
-                mContext.getString(R.string.bluetooth_pairing) : null;
+                mContext.getString(R.string.bluetooth_pairing) :
+                mContext.getString(R.string.bluetooth_disconnected);
     }
 
     /**

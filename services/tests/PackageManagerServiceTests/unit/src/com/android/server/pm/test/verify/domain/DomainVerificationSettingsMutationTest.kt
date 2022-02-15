@@ -19,8 +19,8 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
@@ -196,7 +196,8 @@ class DomainVerificationSettingsMutationTest {
                 listOf(
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     autoVerify = true
                                     addAction(Intent.ACTION_VIEW)

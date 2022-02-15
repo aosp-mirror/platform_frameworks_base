@@ -17,8 +17,7 @@ package android.net;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -27,8 +26,8 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.annotations.PolicyDirection;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -43,9 +42,12 @@ import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Objects;
 
 /**
  * This class contains methods for managing IPsec sessions. Once configured, the kernel will apply
@@ -59,7 +61,7 @@ import java.net.Socket;
  *     Internet Protocol</a>
  */
 @SystemService(Context.IPSEC_SERVICE)
-public final class IpSecManager {
+public class IpSecManager {
     private static final String TAG = "IpSecManager";
 
     /**
@@ -86,7 +88,13 @@ public final class IpSecManager {
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final int DIRECTION_FWD = 2;
+
+    /** @hide */
+    @IntDef(value = {DIRECTION_IN, DIRECTION_OUT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PolicyDirection {}
 
     /**
      * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
@@ -99,9 +107,9 @@ public final class IpSecManager {
 
     /** @hide */
     public interface Status {
-        public static final int OK = 0;
-        public static final int RESOURCE_UNAVAILABLE = 1;
-        public static final int SPI_UNAVAILABLE = 2;
+        int OK = 0;
+        int RESOURCE_UNAVAILABLE = 1;
+        int SPI_UNAVAILABLE = 2;
     }
 
     /** @hide */
@@ -276,7 +284,7 @@ public final class IpSecManager {
      * @param destinationAddress the destination address for traffic bearing the requested SPI.
      *     For inbound traffic, the destination should be an address currently assigned on-device.
      * @return the reserved SecurityParameterIndex
-     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     * @throws ResourceUnavailableException indicating that too many SPIs are
      *     currently allocated for this user
      */
     @NonNull
@@ -307,9 +315,9 @@ public final class IpSecManager {
      * @param requestedSpi the requested SPI. The range 1-255 is reserved and may not be used. See
      *     RFC 4303 Section 2.1.
      * @return the reserved SecurityParameterIndex
-     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     * @throws ResourceUnavailableException indicating that too many SPIs are
      *     currently allocated for this user
-     * @throws {@link #SpiUnavailableException} indicating that the requested SPI could not be
+     * @throws SpiUnavailableException indicating that the requested SPI could not be
      *     reserved
      */
     @NonNull
@@ -981,6 +989,29 @@ public final class IpSecManager {
     }
 
     /**
+     * @hide
+     */
+    public IpSecTransformResponse createTransform(IpSecConfig config, IBinder binder,
+            String callingPackage) {
+        try {
+            return mService.createTransform(config, binder, callingPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void deleteTransform(int resourceId) {
+        try {
+            mService.deleteTransform(resourceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Construct an instance of IpSecManager within an application context.
      *
      * @param context the application context for this manager
@@ -988,7 +1019,7 @@ public final class IpSecManager {
      */
     public IpSecManager(Context ctx, IIpSecService service) {
         mContext = ctx;
-        mService = checkNotNull(service, "missing service");
+        mService = Objects.requireNonNull(service, "missing service");
     }
 
     private static void maybeHandleServiceSpecificException(ServiceSpecificException sse) {

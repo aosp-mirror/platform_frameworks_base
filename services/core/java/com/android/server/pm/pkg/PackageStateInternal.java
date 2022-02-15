@@ -23,7 +23,7 @@ import android.content.pm.SigningDetails;
 import android.util.SparseArray;
 
 import com.android.server.pm.InstallSource;
-import com.android.server.pm.SharedUserSetting;
+import com.android.server.pm.PackageKeySetData;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionState;
 
@@ -49,9 +49,6 @@ public interface PackageStateInternal extends PackageState {
 
     @NonNull
     InstallSource getInstallSource();
-
-    @Nullable
-    SharedUserSetting getSharedUser();
 
     // TODO: Remove this in favor of boolean APIs
     int getFlags();
@@ -82,4 +79,7 @@ public interface PackageStateInternal extends PackageState {
     String getPathString();
 
     float getLoadingProgress();
+
+    @NonNull
+    PackageKeySetData getKeySetData();
 }

@@ -311,6 +311,7 @@ public class Binder implements IBinder {
     private final long mObject;
 
     private IInterface mOwner;
+    @Nullable
     private String mDescriptor;
     private volatile String[] mTransactionTraceNames = null;
     private volatile String mSimpleDescriptor = null;
@@ -930,8 +931,8 @@ public class Binder implements IBinder {
                 transactionNames[i] = buf.toString();
                 buf.setLength(0);
             }
-            mTransactionTraceNames = transactionNames;
             mSimpleDescriptor = descriptor;
+            mTransactionTraceNames = transactionNames;
         }
         final int index = transactionCode - FIRST_CALL_TRANSACTION;
         if (index < 0 || index >= mTransactionTraceNames.length) {
@@ -940,13 +941,19 @@ public class Binder implements IBinder {
         return mTransactionTraceNames[index];
     }
 
-    private String getSimpleDescriptor() {
-        final int dot = mDescriptor.lastIndexOf(".");
+    private @NonNull String getSimpleDescriptor() {
+        String descriptor = mDescriptor;
+        if (descriptor == null) {
+            // Just "Binder" to avoid null checks in transaction name tracing.
+            return "Binder";
+        }
+
+        final int dot = descriptor.lastIndexOf(".");
         if (dot > 0) {
             // Strip the package name
-            return mDescriptor.substring(dot + 1);
+            return descriptor.substring(dot + 1);
         }
-        return mDescriptor;
+        return descriptor;
     }
 
     /**
@@ -1308,10 +1315,11 @@ public class Binder implements IBinder {
                         data.readCallingWorkSourceUid());
                 observer.callEnded(callSession, data.dataSize(), reply.dataSize(), workSourceUid);
             }
+
+            checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
+            reply.recycle();
+            data.recycle();
         }
-        checkParcel(this, code, reply, "Unreasonably large binder reply buffer");
-        reply.recycle();
-        data.recycle();
 
         // Just in case -- we are done with the IPC, so there should be no more strict
         // mode violations that have gathered for this thread. Either they have been

@@ -137,14 +137,16 @@ public class SplitDecorManager extends WindowlessWindowManager {
             return;
         }
 
-        if (mIcon == null) {
-            // TODO: add fade-in animation.
+        if (mBackgroundLeash == null) {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
                     .setLayer(mBackgroundLeash, SPLIT_DIVIDER_LAYER - 1)
                     .show(mBackgroundLeash);
+        }
 
+        if (mIcon == null && resizingTask.topActivityInfo != null) {
+            // TODO: add fade-in animation.
             mIcon = mIconProvider.getIcon(resizingTask.topActivityInfo);
             mResizingIconView.setImageDrawable(mIcon);
             mResizingIconView.setVisibility(View.VISIBLE);
@@ -168,12 +170,16 @@ public class SplitDecorManager extends WindowlessWindowManager {
             return;
         }
 
+        if (mBackgroundLeash != null) {
+            t.remove(mBackgroundLeash);
+            mBackgroundLeash = null;
+        }
+
         if (mIcon != null) {
             mResizingIconView.setVisibility(View.GONE);
             mResizingIconView.setImageDrawable(null);
-            t.remove(mBackgroundLeash).hide(mIconLeash);
+            t.hide(mIconLeash);
             mIcon = null;
-            mBackgroundLeash = null;
         }
     }
 

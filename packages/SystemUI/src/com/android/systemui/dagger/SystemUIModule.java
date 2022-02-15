@@ -42,13 +42,13 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
@@ -86,6 +87,7 @@ import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.dagger.DynamicOverride;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -187,12 +189,6 @@ public abstract class SystemUIModule {
         return SystemUIFactory.getInstance();
     }
 
-    @SysUISingleton
-    @Provides
-    static SmartspaceTransitionController provideSmartspaceTransitionController() {
-        return new SmartspaceTransitionController();
-    }
-
     // TODO: This should provided by the WM component
     /** Provides Optional of BubbleManager */
     @SysUISingleton
@@ -208,6 +204,7 @@ public abstract class SystemUIModule {
             NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
+            CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline, SysUiState sysUiState,
             NotifPipelineFlags notifPipelineFlags, DumpManager dumpManager,
             @Main Executor sysuiMainExecutor) {
@@ -216,7 +213,22 @@ public abstract class SystemUIModule {
                 configurationController, statusBarService, notificationManager,
                 visibilityProvider,
                 interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifPipeline, sysUiState, notifPipelineFlags,
-                dumpManager, sysuiMainExecutor));
+                groupManager, entryManager, notifCollection, notifPipeline, sysUiState,
+                notifPipelineFlags, dumpManager, sysuiMainExecutor));
+    }
+
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract LowLightClockController optionalLowLightClockController();
+
+    @SysUISingleton
+    @Provides
+    static Optional<LowLightClockController> provideLowLightClockController(
+            @DynamicOverride Optional<LowLightClockController> optionalController) {
+        if (optionalController.isPresent() && optionalController.get().isLowLightClockEnabled()) {
+            return optionalController;
+        } else {
+            return Optional.empty();
+        }
     }
 }

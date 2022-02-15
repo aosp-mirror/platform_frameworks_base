@@ -200,8 +200,10 @@ public class PrefetchControllerTest {
     }
 
     private void setUidBias(int uid, int bias) {
+        int prevBias = mJobSchedulerService.getUidBias(uid);
+        doReturn(bias).when(mJobSchedulerService).getUidBias(uid);
         synchronized (mPrefetchController.mLock) {
-            mPrefetchController.onUidBiasChangedLocked(uid, bias);
+            mPrefetchController.onUidBiasChangedLocked(uid, prevBias, bias);
         }
     }
 
@@ -381,6 +383,10 @@ public class PrefetchControllerTest {
 
         inOrder.verify(mUsageStatsManagerInternal, timeout(DEFAULT_WAIT_MS).times(0))
                 .getEstimatedPackageLaunchTime(SOURCE_PACKAGE, SOURCE_USER_ID);
+        verify(mAlarmManager, timeout(DEFAULT_WAIT_MS).times(1))
+                .setWindow(
+                        anyInt(), eq(sElapsedRealtimeClock.millis() + 3 * HOUR_IN_MILLIS),
+                        anyLong(), eq(TAG_PREFETCH), any(), any());
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
     }
 

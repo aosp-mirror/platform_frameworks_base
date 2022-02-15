@@ -27,8 +27,6 @@ import android.content.pm.ServiceInfo
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
 import android.content.pm.UserInfo
-import android.content.pm.parsing.ParsingPackage
-import android.content.pm.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseTypeImpl
 import android.content.res.Resources
 import android.hardware.display.DisplayManager
@@ -68,12 +66,16 @@ import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.pm.pkg.parsing.ParsingPackage
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
+import com.android.server.supplementalprocess.SupplementalProcessManagerLocal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedArrayMap
+import libcore.util.HexEncoding
 import org.junit.Assert
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -121,6 +123,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     /** The active map simulating the in memory storage of Settings  */
     private val mSettingsMap = WatchedArrayMap<String, PackageSetting>()
 
+    /** The shared libraries on the device */
+    private lateinit var mSharedLibraries: SharedLibrariesImpl
+
     init {
         PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
@@ -137,6 +142,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)
                 .mockStatic(DeviceConfig::class.java)
+                .mockStatic(HexEncoding::class.java)
                 .apply(withSession)
         session = apply.startMocking()
         whenever(mocks.settings.insertPackageSettingLPw(
@@ -164,24 +170,6 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             mSettingsMap.putAll(mPreExistingSettings)
             !mPreExistingSettings.isEmpty()
         }
-        whenever(mocks.settings.setPackageStoppedStateLPw(any(), any(), anyBoolean(), anyInt())) {
-            val pm: PackageManagerService = getArgument(0)
-            val pkgSetting = mSettingsMap[getArgument(1)]!!
-            val stopped: Boolean = getArgument(2)
-            val userId: Int = getArgument(3)
-            return@whenever if (pkgSetting.getStopped(userId) != stopped) {
-                pkgSetting.setStopped(stopped, userId)
-                if (pkgSetting.getNotLaunched(userId)) {
-                    pkgSetting.installSource.installerPackageName?.let {
-                        pm.notifyFirstLaunch(pkgSetting.packageName, it, userId)
-                    }
-                    pkgSetting.setNotLaunched(false, userId)
-                }
-                true
-            } else {
-                false
-            }
-        }
     }
 
     /** Collection of mocks used for PackageManagerService tests. */
@@ -205,12 +193,15 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val packageParser: PackageParser2 = mock()
         val keySetManagerService: KeySetManagerService = mock()
         val packageAbiHelper: PackageAbiHelper = mock()
-        val appsFilter: AppsFilter = mock()
+        val appsFilter: AppsFilter = mock {
+            whenever(snapshot()) { this@mock }
+        }
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()
         val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
         val handler = TestHandler(null)
+        val defaultAppProvider: DefaultAppProvider = mock()
     }
 
     companion object {
@@ -289,6 +280,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.domainVerificationManagerInternal)
             .thenReturn(mocks.domainVerificationManagerInternal)
         whenever(mocks.injector.handler) { mocks.handler }
+        whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
@@ -324,6 +316,11 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 any(AndroidPackage::class.java), anyBoolean(), any(File::class.java))) {
             PackageAbiHelper.NativeLibraryPaths("", false, "", "")
         }
+        whenever(mocks.injector.bootstrap(any(PackageManagerService::class.java))) {
+            mSharedLibraries = SharedLibrariesImpl(
+                getArgument<Any>(0) as PackageManagerService, mocks.injector)
+        }
+        whenever(mocks.injector.sharedLibrariesImpl) { mSharedLibraries }
         // everything visible by default
         whenever(mocks.appsFilter.shouldFilterApplication(
                 anyInt(), nullable(), nullable(), anyInt())) { false }
@@ -339,6 +336,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         stageServicesExtensionScan()
         stageSystemSharedLibraryScan()
         stagePermissionsControllerScan()
+        stageSupplementalProcessScan()
         stageInstantAppResolverScan()
     }
 
@@ -509,6 +507,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val parsedPackage = parseResult.hideAsParsed() as ParsedPackage
         whenever(mocks.packageParser.parsePackage(
                 or(eq(path), eq(basePath)), anyInt(), anyBoolean())) { parsedPackage }
+        whenever(mocks.packageParser.parsePackage(
+                or(eq(path), eq(basePath)), anyInt(), anyBoolean(), any())) { parsedPackage }
         return parsedPackage
     }
 
@@ -563,6 +563,22 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                     mockQueryActivities(Intent.ACTION_MANAGE_PERMISSIONS,
                             createBasicActivityInfo(
                                     pkg, applicationInfo, "test.PermissionActivity"))
+                    pkg
+                },
+                withSetting = { setting: PackageSettingBuilder ->
+                    setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM)
+                })
+    }
+
+    @Throws(Exception::class)
+    private fun stageSupplementalProcessScan() {
+        stageScanNewPackage("com.android.supplemental.process",
+                1L, systemPartitions[0].privAppFolder,
+                withPackage = { pkg: PackageImpl ->
+                    val applicationInfo: ApplicationInfo = createBasicApplicationInfo(pkg)
+                    mockQueryServices(SupplementalProcessManagerLocal.SERVICE_INTERFACE,
+                            createBasicServiceInfo(
+                                    pkg, applicationInfo, "SupplementalProcessService"))
                     pkg
                 },
                 withSetting = { setting: PackageSettingBuilder ->

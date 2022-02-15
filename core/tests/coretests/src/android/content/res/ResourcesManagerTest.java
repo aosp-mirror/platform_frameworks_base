@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.platform.test.annotations.Postsubmit;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
@@ -32,6 +33,7 @@ import junit.framework.TestCase;
 import java.util.HashMap;
 import java.util.Map;
 
+@Postsubmit
 public class ResourcesManagerTest extends TestCase {
     private static final int SECONDARY_DISPLAY_ID = 1;
     private static final String APP_ONE_RES_DIR = "app_one.apk";
@@ -276,37 +278,6 @@ public class ResourcesManagerTest extends TestCase {
 
         expectedConfig2.orientation = Configuration.ORIENTATION_LANDSCAPE;
         assertEquals(expectedConfig2, resources2.getConfiguration());
-    }
-
-    @SmallTest
-    public void testOverrideDisplayAdjustments() {
-        final int originalOverrideDensity = 200;
-        final int overrideDisplayDensity = 400;
-        final Binder token = new Binder();
-        final Configuration overrideConfig = new Configuration();
-        overrideConfig.densityDpi = originalOverrideDensity;
-        final Resources resources = mResourcesManager.createBaseTokenResources(
-                token, APP_ONE_RES_DIR, null /* splitResDirs */, null /* legacyOverlayDirs */,
-                null /* overlayDirs */,null /* libDirs */, Display.DEFAULT_DISPLAY, overrideConfig,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* classLoader */,
-                null /* loaders */);
-
-        // Update the override.
-        boolean handled = mResourcesManager.overrideTokenDisplayAdjustments(token,
-                adjustments -> adjustments.getConfiguration().densityDpi = overrideDisplayDensity);
-
-        assertTrue(handled);
-        assertTrue(resources.hasOverrideDisplayAdjustments());
-        assertEquals(overrideDisplayDensity,
-                resources.getDisplayAdjustments().getConfiguration().densityDpi);
-
-        // Clear the override.
-        handled = mResourcesManager.overrideTokenDisplayAdjustments(token, null /* override */);
-
-        assertTrue(handled);
-        assertFalse(resources.hasOverrideDisplayAdjustments());
-        assertEquals(originalOverrideDensity,
-                resources.getDisplayAdjustments().getConfiguration().densityDpi);
     }
 
     @SmallTest

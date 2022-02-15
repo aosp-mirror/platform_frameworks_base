@@ -117,9 +117,9 @@ void RenderThread::extendedFrameCallback(const AChoreographerFrameCallbackData* 
     RenderThread* rt = reinterpret_cast<RenderThread*>(data);
     size_t preferredFrameTimelineIndex =
             AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex(cbData);
-    int64_t vsyncId = AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
+    AVsyncId vsyncId = AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
             cbData, preferredFrameTimelineIndex);
-    int64_t frameDeadline = AChoreographerFrameCallbackData_getFrameTimelineDeadline(
+    int64_t frameDeadline = AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos(
             cbData, preferredFrameTimelineIndex);
     int64_t frameTimeNanos = AChoreographerFrameCallbackData_getFrameTimeNanos(cbData);
     // TODO(b/193273294): Remove when shared memory in use w/ expected present time always current.

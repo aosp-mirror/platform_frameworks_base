@@ -123,6 +123,18 @@
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
+    <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=80] -->
+    <string name="hdmi_cec_set_menu_language_title">Do you want to change the system language to <xliff:g id="language" example="German">%1$s</xliff:g>?</string>
+
+    <!-- Description for the <Set Menu Language> confirmation dialog [CHAR LIMIT=NONE] -->
+    <string name="hdmi_cec_set_menu_language_description">System language change requested by another device</string>
+
+    <!-- Button label for accepting language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_accept">Change language</string>
+
+    <!-- Button label for declining language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_decline">Keep current language</string>
+
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
     <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
 
@@ -425,64 +437,24 @@
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_close">Close</string>
 
-    <!-- Announcement made when the wifi is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_wifi_changed_off">Wifi turned off.</string>
-    <!-- Announcement made when the wifi is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_wifi_changed_on">Wifi turned on.</string>
-    <!-- Announcement made when the airplane mode changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_changed_off">Airplane mode turned off.</string>
-    <!-- Announcement made when the airplane mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_airplane_changed_on">Airplane mode turned on.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in none (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_none_on">total silence</string>
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_alarms_on">alarms only</string>
-     <!-- Content description of the do not disturb tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd">Do Not Disturb.</string>
-    <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_off">Do Not Disturb turned off.</string>
-    <!-- Announcement made when do not disturb changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_on">Do Not Disturb turned on.</string>
+     <!-- Content description of the priority mode tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_dnd" translatable="false">Priority mode.</string>
     <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth">Bluetooth.</string>
     <!-- Content description of the bluetooth tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth_on">Bluetooth on.</string>
-    <!-- Announcement made when the bluetooth is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_changed_off">Bluetooth turned off.</string>
-    <!-- Announcement made when the bluetooth is turned on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_bluetooth_changed_on">Bluetooth turned on.</string>
-    <!-- Announcement made when the location tile changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_changed_off">Location reporting turned off.</string>
-    <!-- Announcement made when the location tile changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_location_changed_on">Location reporting turned on.</string>
     <!-- Content description of the alarm tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_alarm">Alarm set for <xliff:g id="time" example="Wed 3:30 PM">%s</xliff:g>.</string>
     <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_more_time">More time.</string>
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_less_time">Less time.</string>
-    <!-- Announcement made when the flashlight state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_changed_off">Flashlight turned off.</string>
-    <!-- Announcement made when the flashlight state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_flashlight_changed_on">Flashlight turned on.</string>
-    <!-- Announcement made when the color inversion state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_color_inversion_changed_off">Color inversion turned off.</string>
-    <!-- Announcement made when the color inversion state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_color_inversion_changed_on">Color inversion turned on.</string>
-    <!-- Announcement made when the hotspot state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_hotspot_changed_off">Mobile hotspot turned off.</string>
-    <!-- Announcement made when the hotspot state changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_hotspot_changed_on">Mobile hotspot turned on.</string>
     <!-- Announcement made when the screen stopped casting (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_casting_turned_off">Screen casting stopped.</string>
-    <!-- Announcement made when the work mode changes to off (not shown on the screen). Paused is used as a verb. [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the work mode changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the Data Saver changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_data_saver_changed_off">Data Saver turned off.</string>
-    <!-- Announcement made when the Data Saver changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_data_saver_changed_on">Data Saver turned on.</string>
-    <!-- Announcement made when the Sensor Privacy changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <!-- Announcement made when the Sensor Privacy changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
 
     <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_brightness">Display brightness</string>
@@ -548,8 +520,8 @@
     <string name="ethernet_label">Ethernet</string>
 
     <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
-    <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_label">Do Not Disturb</string>
+    <!-- QuickSettings: Priority mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_dnd_label" translatable="false">Priority mode</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
@@ -636,8 +608,7 @@
     <!-- QuickSettings: Label for the toggle that controls whether display inversion is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_inversion_label">Color inversion</string>
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
-    <!-- QuickSettings: Control panel: Label for button that navigates to settings. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_more_settings">More settings</string>
+    <string name="quick_settings_color_correction_label">Color correction</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to user settings. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_more_user_settings">User settings</string>
     <!-- QuickSettings: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
@@ -709,6 +680,10 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
     <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
+    <!-- QuickSettings: Secondary text for when the Dark theme will be enabled at bedtime. [CHAR LIMIT=40] -->
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime">On at bedtime</string>
+    <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until bedtime ends. [CHAR LIMIT=40] -->
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends">Until bedtime ends</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -831,6 +806,9 @@
     <!-- Indication on the keyguard that is shown when the device is charging slowly. Should match keyguard_plugged_in_charging_slowly [CHAR LIMIT=50]-->
     <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
+    <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
+    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging Dock • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
@@ -931,8 +909,8 @@
     <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
     <string name="accessibility_notification_section_header_gentle_clear_all">Clear all silent notifications</string>
 
-    <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
-    <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>
+    <!-- The text to show in the notifications shade when Priority mode is suppressing notifications. [CHAR LIMIT=100] -->
+    <string name="dnd_suppressing_shade_text" translatable="false">Notifications paused by Priority mode</string>
 
     <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
     <string name="media_projection_action_text">Start now</string>
@@ -1204,10 +1182,10 @@
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
-    <string name="qr_code_scanner_title">Scan QR</string>
+    <string name="qr_code_scanner_title">QR code</string>
 
     <!-- QR Code Scanner description [CHAR LIMIT=NONE] -->
-    <string name="qr_code_scanner_description">Click to scan a QR code</string>
+    <string name="qr_code_scanner_description">Tap to scan</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
@@ -1232,9 +1210,6 @@
 
     <!-- Alarm template for far alarms [CHAR LIMIT=25] -->
     <string name="alarm_template_far">on <xliff:g id="when" example="Fri 7:00 AM">%1$s</xliff:g></string>
-
-    <!-- Accessibility label for Quick Settings detail screens [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_detail">Quick Settings, <xliff:g id="title" example="Wi-Fi">%s</xliff:g>.</string>
 
     <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_hotspot">Hotspot</string>
@@ -1277,6 +1252,10 @@
 
     <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
     <string name="tuner_full_importance_settings">Power notification controls</string>
+
+    <!-- [CHAR LIMIT=NONE] Notification camera based rotation enabled description -->
+    <string name="rotation_lock_camera_rotation_on">On - Face-based</string>
+
     <string name="power_notification_controls_description">With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications.
         \n\n<b>Level 5</b>
         \n- Show at the top of the notification list
@@ -1350,8 +1329,8 @@
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
     <string name="notification_channel_summary_priority_baseline">Shows at the top of conversation notifications and as a profile picture on lock screen</string>
     <string name="notification_channel_summary_priority_bubble">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble</string>
-    <string name="notification_channel_summary_priority_dnd">Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Do Not Disturb</string>
-    <string name="notification_channel_summary_priority_all">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb</string>
+    <string name="notification_channel_summary_priority_dnd" translatable="false">Shows at the top of conversation notifications and as a profile picture on lock screen, interrupts Priority mode</string>
+    <string name="notification_channel_summary_priority_all" translatable="false">Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Priority mode</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
     <string name="notification_priority_title">Priority</string>
@@ -1542,8 +1521,8 @@
     <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. -->
     <string name="keyboard_shortcut_group_applications_calendar">Calendar</string>
 
-    <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
-    <string name="volume_and_do_not_disturb">Do Not Disturb</string>
+    <!-- SysUI Tuner: Label for screen about priority mode settings [CHAR LIMIT=60] -->
+    <string name="volume_and_do_not_disturb" translatable="false">Priority mode</string>
 
     <!-- SysUI Tuner: Switch to control whether volume buttons enter/exit do
          not disturb [CHAR LIMIT=60] -->
@@ -1747,11 +1726,6 @@
     <string name="data_connection_no_internet">No internet</string>
 
     <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_open_details">Open details.</string>
-
-    <!-- accessibility label for quick settings items that are currently disabled. Must have a reason [CHAR LIMIT=NONE] -->
-
-    <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
 
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
@@ -1904,17 +1878,17 @@
     <!-- Label for when bluetooth is off in QS detail panel [CHAR LIMIT=NONE] -->
     <string name="bt_is_off">Bluetooth is off</string>
 
-    <!-- Label for when Do not disturb is off in QS detail panel [CHAR LIMIT=NONE] -->
-    <string name="dnd_is_off">Do Not Disturb is off</string>
+    <!-- Label for when Priority mode is off in QS detail panel [CHAR LIMIT=NONE] -->
+    <string name="dnd_is_off" translatable="false">Priority mode is off</string>
 
-    <!-- Prompt for when Do not disturb is on from automatic rule in QS [CHAR LIMIT=NONE] -->
-    <string name="qs_dnd_prompt_auto_rule">Do Not Disturb was turned on by an automatic rule (<xliff:g name="rule">%s</xliff:g>).</string>
+    <!-- Prompt for when Priority mode is on from automatic rule in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_auto_rule" translatable="false">Priority mode was turned on by an automatic rule (<xliff:g name="rule">%s</xliff:g>).</string>
 
-    <!-- Prompt for when Do not disturb is on from app in QS [CHAR LIMIT=NONE] -->
-    <string name="qs_dnd_prompt_app">Do Not Disturb was turned on by an app (<xliff:g name="app">%s</xliff:g>).</string>
+    <!-- Prompt for when Priority mode is on from app in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_app" translatable="false">Priority mode was turned on by an app (<xliff:g name="app">%s</xliff:g>).</string>
 
-    <!-- Prompt for when Do not disturb is on from automatic rule or app in QS [CHAR LIMIT=NONE] -->
-    <string name="qs_dnd_prompt_auto_rule_app">Do Not Disturb was turned on by an automatic rule or app.</string>
+    <!-- Prompt for when Priority mode is on from automatic rule or app in QS [CHAR LIMIT=NONE] -->
+    <string name="qs_dnd_prompt_auto_rule_app" translatable="false">Priority mode was turned on by an automatic rule or app.</string>
 
     <!-- Title of the "running foreground services" dialog. [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_title">Apps running in background</string>
@@ -2187,10 +2161,16 @@
     <!--- ****** Media tap-to-transfer ****** -->
     <!-- Text for a button to undo the media transfer. [CHAR LIMIT=20] -->
     <string name="media_transfer_undo">Undo</string>
-    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to play music on the different device. [CHAR LIMIT=75] -->
-    <string name="media_move_closer_to_transfer">Move closer to play on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to play media on the different device. [CHAR LIMIT=75] -->
+    <string name="media_move_closer_to_start_cast">Move closer to play on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to transfer media from the different device and back onto the current device. [CHAR LIMIT=75] -->
+    <string name="media_move_closer_to_end_cast">Move closer to <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g> to play here</string>
     <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
-    <string name="media_transfer_playing">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_this_device">Playing on this phone</string>
+    <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIMIT=50] -->
+    <string name="media_transfer_failed">Something went wrong</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
@@ -2293,8 +2273,8 @@
     <string name="people_tile_description">See recent messages, missed calls, and status updates</string>
     <!-- Title text displayed for the Conversation widget [CHAR LIMIT=50] -->
     <string name="people_tile_title">Conversation</string>
-    <!-- Text when the Conversation widget when Do Not Disturb is suppressing the notification. [CHAR LIMIT=50] -->
-    <string name="paused_by_dnd">Paused by Do Not Disturb</string>
+    <!-- Text when the Conversation widget when Priority mode is suppressing the notification. [CHAR LIMIT=50] -->
+    <string name="paused_by_dnd" translatable="false">Paused by Priority mode</string>
     <!-- Content description text on the Conversation widget when a person has sent a new text message [CHAR LIMIT=150] -->
     <string name="new_notification_text_content_description"><xliff:g id="name" example="Anna">%1$s</xliff:g> sent a message: <xliff:g id="notification" example="Hey! How is your day going">%2$s</xliff:g></string>
     <!-- Content description text on the Conversation widget when a person has sent a new image message [CHAR LIMIT=150] -->
@@ -2380,8 +2360,40 @@
     <!-- Title for User Switch dialog. [CHAR LIMIT=20] -->
     <string name="qs_user_switch_dialog_title">Select user</string>
 
-    <!-- Title for dialog listing applications currently running in the backing [CHAR LIMIT=NONE]-->
-    <string name="fgs_manager_dialog_title">Apps running in the background</string>
-    <!-- Label of the button to stop the app from running in the background [CHAR LIMIT=12]-->
+    <!-- Label for the entry point to open the dialog which shows currently running applications [CHAR LIMIT=NONE]-->
+    <plurals name="fgs_manager_footer_label">
+        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> active app</item>
+        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> active apps</item>
+    </plurals>
+    <!-- Content description for a dot indicator in the running application indicating that there
+    is new information [CHAR LIMIT=NONE] -->
+    <string name="fgs_dot_content_description">New information</string>
+    <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_title">Active apps</string>
+    <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
+    <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
+    <string name="fgs_manager_app_item_stop_button_stopped_label">Stopped</string>
+
+    <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->
+    <string name="clipboard_edit_text_copy">Copy</string>
+    <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_overlay_text_copied">Copied</string>
+    <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
+    <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
+    <string name="clipboard_dismiss_description">Dismiss copy UI</string>
+    <!-- Label for button to edit text that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_text_description">Edit copied text</string>
+    <!-- Label for button to edit an image that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_image_description">Edit copied image</string>
+    <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
+    <string name="clipboard_send_nearby_description">Send to nearby device</string>
+
+    <!-- Generic "add" string [CHAR LIMIT=NONE] -->
+    <string name="add">Add</string>
+    <!-- Add supervised user -->
+    <string name="add_user_supervised" translatable="false">@*android:string/supervised_user_creation_label</string>
+    <!-- Manage users - For system user management [CHAR LIMIT=40]  -->
+    <string name="manage_users">Manage users</string>
 </resources>

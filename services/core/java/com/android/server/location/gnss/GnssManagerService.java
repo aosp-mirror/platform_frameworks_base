@@ -113,16 +113,16 @@ public class GnssManagerService {
      * Set whether the GnssLocationProvider is suspended on the device. This method was added to
      * help support power management use cases on automotive devices.
      */
-    public void setAutoGnssSuspended(boolean suspended) {
-        mGnssLocationProvider.setAutoGnssSuspended(suspended);
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        mGnssLocationProvider.setAutomotiveGnssSuspended(suspended);
     }
 
     /**
      * Return whether the GnssLocationProvider is suspended or not. This method was added to
      * help support power management use cases on automotive devices.
      */
-    public boolean isAutoGnssSuspended() {
-        return mGnssLocationProvider.isAutoGnssSuspended();
+    public boolean isAutomotiveGnssSuspended() {
+        return mGnssLocationProvider.isAutomotiveGnssSuspended();
     }
 
     /** Retrieve the IGpsGeofenceHardware. */

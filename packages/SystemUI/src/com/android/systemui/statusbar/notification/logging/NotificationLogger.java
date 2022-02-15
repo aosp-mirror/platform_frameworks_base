@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.util.Compile;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +66,7 @@ import javax.inject.Inject;
  */
 public class NotificationLogger implements StateListener {
     private static final String TAG = "NotificationLogger";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     /** The minimum delay in ms between reports of notification visibility. */
     private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;

@@ -149,7 +149,6 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
-            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
             mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();
         }

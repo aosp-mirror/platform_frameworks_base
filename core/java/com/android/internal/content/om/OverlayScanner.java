@@ -16,15 +16,13 @@
 
 package com.android.internal.content.om;
 
-import static android.content.pm.parsing.ParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY;
-import static android.content.pm.parsing.ParsingPackageUtils.checkRequiredSystemProperties;
-
 import static com.android.internal.content.om.OverlayConfig.TAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.text.TextUtils;
@@ -183,7 +181,8 @@ public class OverlayScanner {
             List<Pair<String, File>> outExcludedOverlayPackages) {
         final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
         final ParseResult<ApkLite> ret = ApkLiteParseUtils.parseApkLite(input.reset(),
-                overlayApk, PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY);
+                overlayApk,
+                FrameworkParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY);
         if (ret.isError()) {
             Log.w(TAG, "Got exception loading overlay.", ret.getException());
             return null;
@@ -196,7 +195,8 @@ public class OverlayScanner {
         final String propName = apkLite.getRequiredSystemPropertyName();
         final String propValue = apkLite.getRequiredSystemPropertyValue();
         if ((!TextUtils.isEmpty(propName) || !TextUtils.isEmpty(propValue))
-                && !checkRequiredSystemProperties(propName, propValue)) {
+                && !FrameworkParsingPackageUtils.checkRequiredSystemProperties(propName,
+                propValue)) {
             // The overlay package should be excluded. Adds it into the outExcludedOverlayPackages
             // for overlay configuration parser to ignore it.
             outExcludedOverlayPackages.add(Pair.create(apkLite.getPackageName(), overlayApk));

@@ -100,9 +100,11 @@ class LaunchAnimator(
          * needed for the animation. [isExpandingFullyAbove] will be true if the window is expanding
          * fully above the [launchContainer].
          */
+        @JvmDefault
         fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {}
 
         /** The animation made progress and the expandable view [state] should be updated. */
+        @JvmDefault
         fun onLaunchAnimationProgress(state: State, progress: Float, linearProgress: Float) {}
 
         /**
@@ -110,6 +112,7 @@ class LaunchAnimator(
          * called previously. This is typically used to clean up the resources initialized when the
          * animation was started.
          */
+        @JvmDefault
         fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {}
     }
 

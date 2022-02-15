@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
@@ -149,12 +148,13 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void onConfigurationChanged_updateModeSwitches() {
-        final Configuration config = new Configuration();
-        config.densityDpi = Configuration.DENSITY_DPI_ANY;
-        mWindowMagnification.onConfigurationChanged(config);
+    public void onDrag_enabled_notifyCallback() throws RemoteException {
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
 
-        verify(mModeSwitchesController).onConfigurationChanged(anyInt());
+        mWindowMagnification.onDrag(TEST_DISPLAY);
+
+        verify(mConnectionCallback).onDrag(TEST_DISPLAY);
     }
 
     @Test

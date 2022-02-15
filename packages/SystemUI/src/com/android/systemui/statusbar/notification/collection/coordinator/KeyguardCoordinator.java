@@ -36,6 +36,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -48,7 +50,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import javax.inject.Inject;
 
 /**
- * Filters low priority and privacy-sensitive notifications from the lockscreen.
+ * Filters low priority and privacy-sensitive notifications from the lockscreen, and hides section
+ * headers on the lockscreen.
  */
 @CoordinatorScope
 public class KeyguardCoordinator implements Coordinator {
@@ -62,6 +65,7 @@ public class KeyguardCoordinator implements Coordinator {
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final HighPriorityProvider mHighPriorityProvider;
+    private final SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
 
     private boolean mHideSilentNotificationsOnLockscreen;
 
@@ -74,7 +78,8 @@ public class KeyguardCoordinator implements Coordinator {
             BroadcastDispatcher broadcastDispatcher,
             StatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            HighPriorityProvider highPriorityProvider) {
+            HighPriorityProvider highPriorityProvider,
+            SectionHeaderVisibilityProvider sectionHeaderVisibilityProvider) {
         mContext = context;
         mMainHandler = mainThreadHandler;
         mKeyguardStateController = keyguardStateController;
@@ -83,6 +88,7 @@ public class KeyguardCoordinator implements Coordinator {
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mHighPriorityProvider = highPriorityProvider;
+        mSectionHeaderVisibilityProvider = sectionHeaderVisibilityProvider;
     }
 
     @Override
@@ -90,7 +96,10 @@ public class KeyguardCoordinator implements Coordinator {
         readShowSilentNotificationSetting();
 
         setupInvalidateNotifListCallbacks();
+        // Filter at the "finalize" stage so that views remain bound by PreparationCoordinator
         pipeline.addFinalizeFilter(mNotifFilter);
+
+        updateSectionHeadersVisibility();
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
@@ -157,6 +166,8 @@ public class KeyguardCoordinator implements Coordinator {
         }
     }
 
+    // TODO(b/206118999): merge this class with SensitiveContentCoordinator which also depends on
+    // these same updates
     private void setupInvalidateNotifListCallbacks() {
         // register onKeyguardShowing callback
         mKeyguardStateController.addCallback(mKeyguardCallback);
@@ -213,6 +224,7 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
+        updateSectionHeadersVisibility();
         mNotifFilter.invalidateList();
     }
 
@@ -222,6 +234,13 @@ public class KeyguardCoordinator implements Coordinator {
                         mContext.getContentResolver(),
                         Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
                         1) == 0;
+    }
+
+    private void updateSectionHeadersVisibility() {
+        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean neverShowSections = mSectionHeaderVisibilityProvider.getNeverShowSectionHeaders();
+        boolean showSections = !onKeyguard && !neverShowSections;
+        mSectionHeaderVisibilityProvider.setSectionHeadersVisible(showSections);
     }
 
     private final KeyguardStateController.Callback mKeyguardCallback =

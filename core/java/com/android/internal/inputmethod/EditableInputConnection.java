@@ -211,7 +211,10 @@ public final class EditableInputConnection extends BaseInputConnection
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
         final int knownFlagMask = InputConnection.CURSOR_UPDATE_IMMEDIATE
-                | InputConnection.CURSOR_UPDATE_MONITOR;
+                | InputConnection.CURSOR_UPDATE_MONITOR
+                | InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
+                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS;
         final int unknownFlags = cursorUpdateMode & ~knownFlagMask;
         if (unknownFlags != 0) {
             if (DEBUG) {

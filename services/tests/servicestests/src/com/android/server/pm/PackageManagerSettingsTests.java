@@ -22,7 +22,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
-import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
+import static android.content.pm.parsing.FrameworkParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -48,6 +48,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -69,6 +70,7 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableTester;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.Watcher;
 
 import com.google.common.truth.Truth;
@@ -85,7 +87,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -108,6 +109,8 @@ public class PackageManagerSettingsTests {
     LegacyPermissionDataProvider mPermissionDataProvider;
     @Mock
     DomainVerificationManagerInternal mDomainVerificationManager;
+
+    final ArrayMap<String, Long> mOrigFirstInstallTimes = new ArrayMap<>();
 
     @Before
     public void initializeMocks() {
@@ -208,14 +211,14 @@ public class PackageManagerSettingsTests {
                 new WatchableTester(settingsUnderTest, "noSuspendingPackage");
         watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("put package 1");
         // Collect a snapshot at the midway point (package 2 has not been added)
         final Settings snapshot = settingsUnderTest.snapshot();
         watcher.verifyNoChangeReported("snapshot");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
         watcher.verifyChangeReported("put package 2");
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
 
         PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
         PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
@@ -251,7 +254,7 @@ public class PackageManagerSettingsTests {
         watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
         watcher.verifyChangeReported("put package 1");
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("readPackageRestrictions");
 
         final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
@@ -264,17 +267,17 @@ public class PackageManagerSettingsTests {
         final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
-        assertThat(params.appExtras.size(), is(1));
-        assertThat(params.appExtras.getString("app_extra_string"), is("value"));
-        assertThat(params.launcherExtras.size(), is(1));
-        assertThat(params.launcherExtras.getLong("launcher_extra_long"), is(4L));
-        assertThat(params.dialogInfo, is(notNullValue()));
-        assertThat(params.dialogInfo.getDialogMessage(), is("Dialog Message"));
-        assertThat(params.dialogInfo.getTitleResId(), is(ID_NULL));
-        assertThat(params.dialogInfo.getIconResId(), is(TEST_RESOURCE_ID));
-        assertThat(params.dialogInfo.getNeutralButtonTextResId(), is(ID_NULL));
-        assertThat(params.dialogInfo.getNeutralButtonAction(), is(BUTTON_ACTION_MORE_DETAILS));
-        assertThat(params.dialogInfo.getDialogMessageResId(), is(ID_NULL));
+        assertThat(params.getAppExtras().size(), is(1));
+        assertThat(params.getAppExtras().getString("app_extra_string"), is("value"));
+        assertThat(params.getLauncherExtras().size(), is(1));
+        assertThat(params.getLauncherExtras().getLong("launcher_extra_long"), is(4L));
+        assertThat(params.getDialogInfo(), is(notNullValue()));
+        assertThat(params.getDialogInfo().getDialogMessage(), is("Dialog Message"));
+        assertThat(params.getDialogInfo().getTitleResId(), is(ID_NULL));
+        assertThat(params.getDialogInfo().getIconResId(), is(TEST_RESOURCE_ID));
+        assertThat(params.getDialogInfo().getNeutralButtonTextResId(), is(ID_NULL));
+        assertThat(params.getDialogInfo().getNeutralButtonAction(), is(BUTTON_ACTION_MORE_DETAILS));
+        assertThat(params.getDialogInfo().getDialogMessageResId(), is(ID_NULL));
     }
 
     @Test
@@ -311,18 +314,19 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.addOrUpdateSuspension("suspendingPackage1", dialogInfo1, appExtras1, launcherExtras1,
-                0);
-        ps1.addOrUpdateSuspension("suspendingPackage2", dialogInfo2, appExtras2, launcherExtras2,
-                0);
+        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage1",
+                SuspendParams.getInstanceOrNull(dialogInfo1, appExtras1, launcherExtras1));
+        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage2",
+                SuspendParams.getInstanceOrNull(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.addOrUpdateSuspension("suspendingPackage3", null, appExtras1, null, 0);
+        ps2.modifyUserState(0).putSuspendParams( "suspendingPackage3",
+                SuspendParams.getInstanceOrNull(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
-        ps3.removeSuspension("irrelevant", 0);
+        ps3.modifyUserState(0).removeSuspension("irrelevant");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 
@@ -338,7 +342,7 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         watcher.verifyChangeReported("put package 3");
         // now read and verify
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         watcher.verifyChangeReported("readPackageRestrictions");
         final PackageUserStateInternal readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
@@ -351,18 +355,18 @@ public class PackageManagerSettingsTests {
         final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
-        assertThat(params11.dialogInfo, is(dialogInfo1));
-        assertThat(BaseBundle.kindofEquals(params11.appExtras, appExtras1), is(true));
-        assertThat(BaseBundle.kindofEquals(params11.launcherExtras, launcherExtras1),
+        assertThat(params11.getDialogInfo(), is(dialogInfo1));
+        assertThat(BaseBundle.kindofEquals(params11.getAppExtras(), appExtras1), is(true));
+        assertThat(BaseBundle.kindofEquals(params11.getLauncherExtras(), launcherExtras1),
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
         final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
-        assertThat(params12.dialogInfo, is(dialogInfo2));
-        assertThat(BaseBundle.kindofEquals(params12.appExtras, appExtras2), is(true));
-        assertThat(BaseBundle.kindofEquals(params12.launcherExtras, launcherExtras2),
+        assertThat(params12.getDialogInfo(), is(dialogInfo2));
+        assertThat(BaseBundle.kindofEquals(params12.getAppExtras(), appExtras2), is(true));
+        assertThat(BaseBundle.kindofEquals(params12.getLauncherExtras(), launcherExtras2),
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
@@ -373,9 +377,9 @@ public class PackageManagerSettingsTests {
         assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
         final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
-        assertThat(params21.dialogInfo, is(nullValue()));
-        assertThat(BaseBundle.kindofEquals(params21.appExtras, appExtras1), is(true));
-        assertThat(params21.launcherExtras, is(nullValue()));
+        assertThat(params21.getDialogInfo(), is(nullValue()));
+        assertThat(BaseBundle.kindofEquals(params21.getAppExtras(), appExtras1), is(true));
+        assertThat(params21.getLauncherExtras(), is(nullValue()));
         watcher.verifyNoChangeReported("read package param");
 
         final PackageUserStateInternal readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
@@ -388,7 +392,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testPackageRestrictionsSuspendedDefault() {
         final PackageSetting defaultSetting = createPackageSetting(PACKAGE_NAME_1);
-        assertThat(defaultSetting.getSuspended(0), is(false));
+        assertThat(defaultSetting.getUserStateOrDefault(0).isSuspended(), is(false));
     }
 
     @Test
@@ -418,7 +422,7 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
         // now read and verify
-        settingsUnderTest.readPackageRestrictionsLPr(0);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
         final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
         assertThat(readPus1.getDistractionFlags(), is(distractionFlags1));
@@ -592,13 +596,13 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("getEnabled");
 
         // Enable/Disable a component
-        ArraySet<String> components = new ArraySet<String>();
+        WatchedArraySet<String> components = new WatchedArraySet<String>();
         String component1 = PACKAGE_NAME_1 + "/.Component1";
         components.add(component1);
         ps.setDisabledComponents(components, 0);
-        ArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
+        WatchedArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
         assertThat(componentsDisabled.size(), is(1));
-        assertThat(componentsDisabled.toArray()[0], is(component1));
+        assertThat(componentsDisabled.untrackedStorage().toArray()[0], is(component1));
         boolean hasEnabled =
                 ps.getEnabledComponents(0) != null && ps.getEnabledComponents(1).size() > 0;
         assertThat(hasEnabled, is(false));
@@ -666,6 +670,23 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
+        origPkgSetting01.setUserState(0, 100, 1, true, false, false, false, 0, null, false,
+                false, "lastDisabledCaller", new ArraySet<>(new String[]{"enabledComponent1"}),
+                new ArraySet<>(new String[]{"disabledComponent1"}), 0, 0, "harmfulAppWarning",
+                "splashScreenTheme", 1000L);
+        final PersistableBundle appExtras1 = createPersistableBundle(
+                PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
+        final PersistableBundle launcherExtras1 = createPersistableBundle(
+                PACKAGE_NAME_1, 10L, 0.1, false, "launcherString1");
+        final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
+                .setIcon(0x11220001)
+                .setTitle("String Title")
+                .setMessage("1st message")
+                .setNeutralButtonText(0x11220003)
+                .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
+                .build();
+        origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
+                SuspendParams.getInstanceOrNull(dialogInfo1, appExtras1, launcherExtras1));
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -684,8 +705,10 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
-        testPkgSetting01.copyPackageSetting(origPkgSetting01);
+        testPkgSetting01.copyPackageSetting(origPkgSetting01, true);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
+        verifyUserStatesCopy(origPkgSetting01.readUserState(0),
+                testPkgSetting01.readUserState(0));
     }
 
     /** Update package */
@@ -700,6 +723,7 @@ public class PackageManagerSettingsTests {
         Settings.updatePackageSetting(
                 testPkgSetting01,
                 null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
                 null /*legacyNativeLibraryPath*/,
@@ -719,8 +743,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        final PackageUserState oldUserState = oldPkgSetting01.readUserState(0);
-        verifyUserState(userState, oldUserState, false /*userStateChanged*/, false /*notLaunched*/,
+        verifyUserState(userState, false /*notLaunched*/,
                 false /*stopped*/, false /*installed*/);
     }
 
@@ -736,6 +759,7 @@ public class PackageManagerSettingsTests {
         Settings.updatePackageSetting(
                 testPkgSetting01,
                 null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
                 null /*legacyNativeLibraryPath*/,
@@ -755,11 +779,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
         assertThat(testPkgSetting01.getPrivateFlags(), is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        final PackageUserState oldUserState = oldPkgSetting01.readUserState(0);
-        // WARNING: When creating a shallow copy of the PackageSetting we do NOT create
-        // new contained objects. For example, this means that changes to the user state
-        // in testPkgSetting01 will also change the user state in its copy.
-        verifyUserState(userState, oldUserState, false /*userStateChanged*/, false /*notLaunched*/,
+        verifyUserState(userState,  false /*notLaunched*/,
                 false /*stopped*/, true /*installed*/);
     }
 
@@ -775,6 +795,7 @@ public class PackageManagerSettingsTests {
             Settings.updatePackageSetting(
                     testPkgSetting01,
                     null /*disabledPkg*/,
+                    null /*existingSharedUserSetting*/,
                     testUserSetting01 /*sharedUser*/,
                     UPDATED_CODE_PATH /*codePath*/,
                     null /*legacyNativeLibraryPath*/,
@@ -834,8 +855,7 @@ public class PackageManagerSettingsTests {
         assertNotSame(testPkgSetting01.getSignatures(), originalSignatures);
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
-                false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+        verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
     }
 
     /** Create a new non-system PackageSetting */
@@ -875,8 +895,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         // by default, the package is considered stopped
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
-                true /*notLaunched*/, true /*stopped*/, true /*installed*/);
+        verifyUserState(userState, true /*notLaunched*/, true /*stopped*/, true /*installed*/);
     }
 
     /** Create PackageSetting for a shared user */
@@ -918,8 +937,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
         assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
-                false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+        verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
     }
 
     /** Create a new PackageSetting based on a disabled package setting */
@@ -963,8 +981,7 @@ public class PackageManagerSettingsTests {
         assertNotSame(testPkgSetting01.getSignatures(), disabledSignatures);
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
-        verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
-                false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+        verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
     }
 
     @Test
@@ -1075,29 +1092,8 @@ public class PackageManagerSettingsTests {
         assertThat(countDownLatch.getCount(), is(0L));
     }
 
-    private <T> void assertArrayEquals(T[] a, T[] b) {
-        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
-                Arrays.equals(a, b));
-    }
-
-    private void assertArrayEquals(int[] a, int[] b) {
-        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
-                Arrays.equals(a, b));
-    }
-
-    private void assertArrayEquals(long[] a, long[] b) {
-        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
-                Arrays.equals(a, b));
-    }
-
-    private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
-            boolean userStateChanged) {
-        verifyUserState(userState, oldUserState, userStateChanged, false /*notLaunched*/,
-                false /*stopped*/, true /*installed*/);
-    }
-
-    private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
-            boolean userStateChanged, boolean notLaunched, boolean stopped, boolean installed) {
+    private void verifyUserState(PackageUserState userState,
+            boolean notLaunched, boolean stopped, boolean installed) {
         assertThat(userState.getEnabledState(), is(0));
         assertThat(userState.isHidden(), is(false));
         assertThat(userState.isInstalled(), is(installed));
@@ -1105,9 +1101,6 @@ public class PackageManagerSettingsTests {
         assertThat(userState.isStopped(), is(stopped));
         assertThat(userState.isSuspended(), is(false));
         assertThat(userState.getDistractionFlags(), is(0));
-        if (oldUserState != null) {
-            assertThat(userState.equals(oldUserState), is(not(userStateChanged)));
-        }
     }
 
     private void verifyKeySetData(PackageKeySetData originalData, PackageKeySetData testData) {
@@ -1127,7 +1120,6 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.getCpuAbiOverride(), testPkgSetting.getCpuAbiOverride());
         assertThat(origPkgSetting.getCpuAbiOverride(), is(testPkgSetting.getCpuAbiOverride()));
         assertThat(origPkgSetting.getDomainSetId(), is(testPkgSetting.getDomainSetId()));
-        assertThat(origPkgSetting.getFirstInstallTime(), is(testPkgSetting.getFirstInstallTime()));
         assertSame(origPkgSetting.getInstallSource(), testPkgSetting.getInstallSource());
         assertThat(origPkgSetting.isInstallPermissionsFixed(),
                 is(testPkgSetting.isInstallPermissionsFixed()));
@@ -1160,8 +1152,6 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.getRealName(), is(testPkgSetting.getRealName()));
         assertSame(origPkgSetting.getSecondaryCpuAbi(), testPkgSetting.getSecondaryCpuAbi());
         assertThat(origPkgSetting.getSecondaryCpuAbi(), is(testPkgSetting.getSecondaryCpuAbi()));
-        assertSame(origPkgSetting.getSharedUser(), testPkgSetting.getSharedUser());
-        assertThat(origPkgSetting.getSharedUser(), is(testPkgSetting.getSharedUser()));
         assertSame(origPkgSetting.getSignatures(), testPkgSetting.getSignatures());
         assertThat(origPkgSetting.getSignatures(), is(testPkgSetting.getSignatures()));
         assertThat(origPkgSetting.getLastModifiedTime(), is(testPkgSetting.getLastModifiedTime()));
@@ -1171,6 +1161,57 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.getVersionCode(), is(testPkgSetting.getVersionCode()));
         assertSame(origPkgSetting.getVolumeUuid(), testPkgSetting.getVolumeUuid());
         assertThat(origPkgSetting.getVolumeUuid(), is(testPkgSetting.getVolumeUuid()));
+    }
+
+    private void verifyUserStatesCopy(PackageUserStateInternal origPus,
+            PackageUserStateInternal testPus) {
+        assertThat(userStateEquals(origPus, testPus), is(true));
+        // Verify suspendParams are copied over
+        assertThat(origPus.getSuspendParams(), is(notNullValue()));
+        assertThat(testPus.getSuspendParams(), is(notNullValue()));
+        SuspendParams origSuspendParams = origPus.getSuspendParams().valueAt(0);
+        SuspendParams testSuspendParams = testPus.getSuspendParams().valueAt(0);
+        assertThat(origSuspendParams.getDialogInfo().equals(testSuspendParams.getDialogInfo()),
+                is(true));
+        assertThat(BaseBundle.kindofEquals(
+                origSuspendParams.getAppExtras(), testSuspendParams.getAppExtras()), is(true));
+        assertThat(BaseBundle.kindofEquals(origSuspendParams.getLauncherExtras(),
+                testSuspendParams.getLauncherExtras()), is(true));
+        // Verify that disabledComponents and enabledComponents are copied
+        assertThat(origPus.getDisabledComponents(), is(notNullValue()));
+        assertThat(origPus.getDisabledComponents().equals(testPus.getDisabledComponents()),
+                is(true));
+        assertThat(origPus.getEnabledComponents(), is(notNullValue()));
+        assertThat(origPus.getEnabledComponents().equals(testPus.getEnabledComponents()),
+                is(true));
+    }
+
+    private boolean userStateEquals(PackageUserState userState, PackageUserState oldUserState) {
+        return userState.isHidden() == oldUserState.isHidden()
+                && userState.isStopped() == oldUserState.isStopped()
+                && userState.isInstalled() == oldUserState.isInstalled()
+                && userState.isSuspended() == oldUserState.isSuspended()
+                && userState.isNotLaunched() == oldUserState.isNotLaunched()
+                && userState.isInstantApp() == oldUserState.isInstantApp()
+                && userState.isVirtualPreload() == oldUserState.isVirtualPreload()
+                && (userState.getAllOverlayPaths() != null
+                ? userState.getAllOverlayPaths().equals(oldUserState.getAllOverlayPaths())
+                : oldUserState.getOverlayPaths() == null)
+                && userState.getCeDataInode() == oldUserState.getCeDataInode()
+                && userState.getDistractionFlags() == oldUserState.getDistractionFlags()
+                && userState.getFirstInstallTime() == oldUserState.getFirstInstallTime()
+                && userState.getEnabledState() == oldUserState.getEnabledState()
+                 && userState.getHarmfulAppWarning().equals(oldUserState.getHarmfulAppWarning())
+                && userState.getInstallReason() == oldUserState.getInstallReason()
+                && userState.getLastDisableAppCaller().equals(
+                        oldUserState.getLastDisableAppCaller())
+                && (userState.getSharedLibraryOverlayPaths() != null
+                ? userState.getSharedLibraryOverlayPaths().equals(
+                        oldUserState.getSharedLibraryOverlayPaths())
+                : oldUserState.getSharedLibraryOverlayPaths() == null)
+                && userState.getSplashScreenTheme().equals(
+                        oldUserState.getSplashScreenTheme())
+                && userState.getUninstallReason() == oldUserState.getUninstallReason();
     }
 
     private SharedUserSetting createSharedUserSetting(Settings settings, String userName,

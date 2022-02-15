@@ -6,9 +6,8 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.core.util.Consumer
 
-internal class HingeSensorAngleProvider(
-    private val sensorManager: SensorManager
-) : HingeAngleProvider {
+internal class HingeSensorAngleProvider(private val sensorManager: SensorManager) :
+    HingeAngleProvider {
 
     private val sensorListener = HingeAngleSensorListener()
     private val listeners: MutableList<Consumer<Float>> = arrayListOf()
@@ -32,8 +31,7 @@ internal class HingeSensorAngleProvider(
 
     private inner class HingeAngleSensorListener : SensorEventListener {
 
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        }
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
         override fun onSensorChanged(event: SensorEvent) {
             listeners.forEach { it.accept(event.values[0]) }

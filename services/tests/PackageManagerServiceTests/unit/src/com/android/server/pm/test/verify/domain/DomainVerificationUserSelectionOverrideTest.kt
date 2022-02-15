@@ -18,8 +18,8 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -112,7 +112,8 @@ class DomainVerificationUserStateOverrideTest {
                 val activityList = listOf(
                     ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     autoVerify = true
                                     addAction(Intent.ACTION_VIEW)
@@ -126,7 +127,8 @@ class DomainVerificationUserStateOverrideTest {
                             }
                         )
                         addIntent(
-                            ParsedIntentInfoImpl().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
                                 intentFilter.apply {
                                     autoVerify = true
                                     addAction(Intent.ACTION_VIEW)
@@ -147,7 +149,6 @@ class DomainVerificationUserStateOverrideTest {
             whenever(this.pkg) { pkg }
             whenever(packageName) { pkgName }
             whenever(this.domainSetId) { domainSetId }
-            whenever(firstInstallTime) { 0L }
             whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
             whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
             whenever(userStates) {

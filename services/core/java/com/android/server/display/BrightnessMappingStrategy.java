@@ -32,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
+import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -68,8 +69,10 @@ public abstract class BrightnessMappingStrategy {
      */
     @Nullable
     public static BrightnessMappingStrategy create(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig) {
-        return create(resources, displayDeviceConfig, /* isForIdleMode= */ false);
+            DisplayDeviceConfig displayDeviceConfig,
+            DisplayWhiteBalanceController displayWhiteBalanceController) {
+        return create(resources, displayDeviceConfig, /* isForIdleMode= */ false,
+                displayWhiteBalanceController);
     }
 
     /**
@@ -80,8 +83,10 @@ public abstract class BrightnessMappingStrategy {
      */
     @Nullable
     public static BrightnessMappingStrategy createForIdleMode(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig) {
-        return create(resources, displayDeviceConfig, /* isForIdleMode= */ true);
+            DisplayDeviceConfig displayDeviceConfig, DisplayWhiteBalanceController
+            displayWhiteBalanceController) {
+        return create(resources, displayDeviceConfig, /* isForIdleMode= */ true,
+                displayWhiteBalanceController);
     }
 
     /**
@@ -96,7 +101,8 @@ public abstract class BrightnessMappingStrategy {
      */
     @Nullable
     private static BrightnessMappingStrategy create(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig, boolean isForIdleMode) {
+            DisplayDeviceConfig displayDeviceConfig, boolean isForIdleMode,
+            DisplayWhiteBalanceController displayWhiteBalanceController) {
 
         // Display independent, mode dependent values
         float[] brightnessLevelsNits;
@@ -135,7 +141,7 @@ public abstract class BrightnessMappingStrategy {
             builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
-                    autoBrightnessAdjustmentMaxGamma, isForIdleMode);
+                    autoBrightnessAdjustmentMaxGamma, isForIdleMode, displayWhiteBalanceController);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight) && !isForIdleMode) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight,
                     autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
@@ -770,9 +776,11 @@ public abstract class BrightnessMappingStrategy {
         private float mUserLux;
         private float mUserBrightness;
         private final boolean mIsForIdleMode;
+        private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
 
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
-                float[] brightness, float maxGamma, boolean isForIdleMode) {
+                float[] brightness, float maxGamma, boolean isForIdleMode,
+                DisplayWhiteBalanceController displayWhiteBalanceController) {
 
             Preconditions.checkArgument(nits.length != 0 && brightness.length != 0,
                     "Nits and brightness arrays must not be empty!");
@@ -789,6 +797,7 @@ public abstract class BrightnessMappingStrategy {
             mAutoBrightnessAdjustment = 0;
             mUserLux = -1;
             mUserBrightness = -1;
+            mDisplayWhiteBalanceController = displayWhiteBalanceController;
 
             mNits = nits;
             mBrightness = brightness;
@@ -836,6 +845,12 @@ public abstract class BrightnessMappingStrategy {
         public float getBrightness(float lux, String packageName,
                 @ApplicationInfo.Category int category) {
             float nits = mBrightnessSpline.interpolate(lux);
+
+            // Adjust nits to compensate for display white balance colour strength.
+            if (mDisplayWhiteBalanceController != null) {
+                nits = mDisplayWhiteBalanceController.calculateAdjustedBrightnessNits(nits);
+            }
+
             float brightness = mNitsToBrightnessSpline.interpolate(nits);
             // Correct the brightness according to the current application and its category, but
             // only if no user data point is set (as this will override the user setting).

@@ -189,11 +189,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertEquals(0,
                 displayPolicy.updateLightNavigationBarLw(APPEARANCE_LIGHT_NAVIGATION_BARS, null));
 
-        // Dimming window clears APPEARANCE_LIGHT_NAVIGATION_BARS.
-        assertEquals(0, displayPolicy.updateLightNavigationBarLw(0, dimming));
-        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
-                APPEARANCE_LIGHT_NAVIGATION_BARS, dimming));
-
         // Control window overrides APPEARANCE_LIGHT_NAVIGATION_BARS flag.
         assertEquals(0, displayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar));
         assertEquals(0, displayPolicy.updateLightNavigationBarLw(
@@ -326,5 +321,27 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(imeSource.getFrame().isEmpty());
         assertFalse(navBarSource.getFrame().isEmpty());
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
+    }
+
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @Test
+    public void testInsetsGivenContentFrame() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 1000;
+        displayInfo.logicalHeight = 2000;
+        displayInfo.rotation = ROTATION_0;
+
+        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
+        displayPolicy.addWindowLw(mNavBarWindow, attrs);
+        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
+        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
+
+        mNavBarWindow.mGivenContentInsets.set(0, 10, 0, 0);
+
+        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
+        assertEquals(attrs.height - 10, navBarSource.getFrame().height());
     }
 }

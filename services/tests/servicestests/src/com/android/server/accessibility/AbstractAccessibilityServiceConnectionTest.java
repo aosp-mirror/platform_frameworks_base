@@ -66,6 +66,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
@@ -594,6 +595,20 @@ public class AbstractAccessibilityServiceConnectionTest {
     }
 
     @Test
+    public void getCurrentMagnificationRegion_returnRegion() {
+        final int displayId = 1;
+        final Region region = new Region(10, 20, 100, 200);
+        doAnswer((invocation) -> {
+            ((Region) invocation.getArguments()[1]).set(region);
+            return null;
+        }).when(mMockMagnificationProcessor).getCurrentMagnificationRegion(eq(displayId), any(),
+                anyBoolean());
+
+        final Region result = mServiceConnection.getCurrentMagnificationRegion(displayId);
+        assertEquals(result, region);
+    }
+
+    @Test
     public void getMagnificationCenterX_serviceNotBelongCurrentUser_returnZero() {
         final int displayId = 1;
         final float centerX = 480.0f;
@@ -839,6 +854,11 @@ public class AbstractAccessibilityServiceConnectionTest {
         @Override
         public boolean switchToInputMethod(String imeId) {
             return false;
+        }
+
+        @Override
+        public int setInputMethodEnabled(String imeId, boolean enabled) throws RemoteException {
+            return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
         }
 
         @Override

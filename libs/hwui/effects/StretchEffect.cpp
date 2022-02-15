@@ -227,7 +227,7 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
     mBuilder->uniform("viewportWidth").set(&width, 1);
     mBuilder->uniform("viewportHeight").set(&height, 1);
 
-    auto result = mBuilder->makeShader(nullptr, false);
+    auto result = mBuilder->makeShader();
     mBuilder->child(CONTENT_TEXTURE) = nullptr;
     return result;
 }

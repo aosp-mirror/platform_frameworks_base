@@ -37,32 +37,42 @@ class TaskFragmentAnimationController {
 
     private final TaskFragmentOrganizer mOrganizer;
     private final TaskFragmentAnimationRunner mRemoteRunner = new TaskFragmentAnimationRunner();
+    private final RemoteAnimationDefinition mDefinition;
+    private boolean mIsRegister;
 
     TaskFragmentAnimationController(TaskFragmentOrganizer organizer) {
         mOrganizer = organizer;
+        mDefinition = new RemoteAnimationDefinition();
+        final RemoteAnimationAdapter animationAdapter =
+                new RemoteAnimationAdapter(mRemoteRunner, 0, 0, true /* changeNeedsSnapshot */);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_OPEN, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_CLOSE, animationAdapter);
+        mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
     }
 
     void registerRemoteAnimations() {
         if (DEBUG) {
             Log.v(TAG, "registerRemoteAnimations");
         }
-        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
-        final RemoteAnimationAdapter animationAdapter =
-                new RemoteAnimationAdapter(mRemoteRunner, 0, 0, true /* changeNeedsSnapshot */);
-        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_OPEN, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_CLOSE, animationAdapter);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
-        mOrganizer.registerRemoteAnimations(definition);
+        if (mIsRegister) {
+            return;
+        }
+        mOrganizer.registerRemoteAnimations(mDefinition);
+        mIsRegister = true;
     }
 
     void unregisterRemoteAnimations() {
         if (DEBUG) {
             Log.v(TAG, "unregisterRemoteAnimations");
         }
+        if (!mIsRegister) {
+            return;
+        }
         mOrganizer.unregisterRemoteAnimations();
+        mIsRegister = false;
     }
 }

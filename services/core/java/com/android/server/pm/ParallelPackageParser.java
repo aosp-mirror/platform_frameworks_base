@@ -27,6 +27,7 @@ import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -54,9 +55,17 @@ class ParallelPackageParser {
 
     private final ExecutorService mExecutorService;
 
+    private final List<File> mFrameworkSplits;
+
     ParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService) {
+        this(packageParser, executorService, /* frameworkSplits= */ null);
+    }
+
+    ParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService,
+            List<File> frameworkSplits) {
         mPackageParser = packageParser;
         mExecutorService = executorService;
+        mFrameworkSplits = frameworkSplits;
     }
 
     static class ParseResult {
@@ -125,6 +134,6 @@ class ParallelPackageParser {
     @VisibleForTesting
     protected ParsedPackage parsePackage(File scanFile, int parseFlags)
             throws PackageManagerException {
-        return mPackageParser.parsePackage(scanFile, parseFlags, true);
+        return mPackageParser.parsePackage(scanFile, parseFlags, true, mFrameworkSplits);
     }
 }

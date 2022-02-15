@@ -24,7 +24,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
-import android.content.pm.SELinuxUtil;
 import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
 import android.os.Environment;
@@ -35,6 +34,9 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
+import android.security.AndroidKeyStoreMaintenance;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -46,6 +48,8 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SELinuxUtil;
 
 import dalvik.system.VMRuntime;
 
@@ -74,13 +78,6 @@ final class AppDataHelper {
         mArtManagerService = mInjector.getArtManagerService();
     }
 
-    AppDataHelper(PackageManagerService pm, PackageManagerServiceInjector injector) {
-        mPm = pm;
-        mInjector = injector;
-        mInstaller = injector.getInstaller();
-        mArtManagerService = injector.getArtManagerService();
-    }
-
     /**
      * Prepare app data for the given app just after it was installed or
      * upgraded. This method carefully only touches users that it's installed
@@ -106,6 +103,12 @@ final class AppDataHelper {
         synchronized (mPm.mLock) {
             ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
             mPm.mSettings.writeKernelMappingLPr(ps);
+        }
+
+        // TODO(b/211761016): should we still create the profile dirs?
+        if (!shouldHaveAppStorage(pkg)) {
+            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+            return;
         }
 
         Installer.Batch batch = new Installer.Batch();
@@ -157,8 +160,7 @@ final class AppDataHelper {
      * <ul>
      * <li>If previousAppId < 0, app data will be migrated to the new app ID
      * <li>If previousAppId == 0, no migration will happen and data will be wiped and recreated
-     * <li>If previousAppId > 0, it will migrate all data owned by previousAppId
-     *     to the new app ID
+     * <li>If previousAppId > 0, app data owned by previousAppId will be migrated to the new app ID
      * </ul>
      */
     private @NonNull CompletableFuture<?> prepareAppData(@NonNull Installer.Batch batch,
@@ -166,6 +168,10 @@ final class AppDataHelper {
             @StorageManager.StorageFlags int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
+            return CompletableFuture.completedFuture(null);
+        }
+        if (!shouldHaveAppStorage(pkg)) {
+            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
             return CompletableFuture.completedFuture(null);
         }
         return prepareAppDataLeaf(batch, pkg, previousAppId, userId, flags);
@@ -272,8 +278,8 @@ final class AppDataHelper {
         });
     }
 
-    public void prepareAppDataContentsLIF(AndroidPackage pkg, @Nullable PackageSetting pkgSetting,
-            int userId, int flags) {
+    public void prepareAppDataContentsLIF(AndroidPackage pkg,
+            @Nullable PackageStateInternal pkgSetting, int userId, int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
@@ -282,7 +288,7 @@ final class AppDataHelper {
     }
 
     private void prepareAppDataContentsLeafLIF(AndroidPackage pkg,
-            @Nullable PackageSetting pkgSetting, int userId, int flags) {
+            @Nullable PackageStateInternal pkgSetting, int userId, int flags) {
         final String volumeUuid = pkg.getVolumeUuid();
         final String packageName = pkg.getPackageName();
 
@@ -388,7 +394,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -405,7 +411,7 @@ final class AppDataHelper {
             for (File file : files) {
                 final String packageName = file.getName();
                 try {
-                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                    assertPackageStorageValid(volumeUuid, packageName, userId);
                 } catch (PackageManagerException e) {
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     try {
@@ -453,7 +459,11 @@ final class AppDataHelper {
         return result;
     }
 
-    private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
+    /**
+     * Asserts that storage path is valid by checking that {@code packageName} is present,
+     * installed for the given {@code userId} and can have app data.
+     */
+    private void assertPackageStorageValid(String volumeUuid, String packageName, int userId)
             throws PackageManagerException {
         synchronized (mPm.mLock) {
             // Normalize package name to handle renamed packages
@@ -469,6 +479,9 @@ final class AppDataHelper {
             } else if (!ps.getInstalled(userId)) {
                 throw new PackageManagerException(
                         "Package " + packageName + " not installed for user " + userId);
+            } else if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
+                throw new PackageManagerException(
+                        "Package " + packageName + " shouldn't have storage");
             }
         }
     }
@@ -533,6 +546,26 @@ final class AppDataHelper {
             Slog.i(TAG, "Deferred reconcileAppsData finished " + count + " packages");
         }, "prepareAppData");
         return prepareAppDataFuture;
+    }
+
+    public void migrateKeyStoreData(int previousAppId, int appId) {
+        // If previous UID is system UID, declaring inheritKeyStoreKeys is not supported.
+        // Silently ignore the request to migrate keys.
+        if (previousAppId == Process.SYSTEM_UID) return;
+
+        for (int userId : mPm.resolveUserIds(UserHandle.USER_ALL)) {
+            int srcUid = UserHandle.getUid(userId, previousAppId);
+            int destUid = UserHandle.getUid(userId, appId);
+            final KeyDescriptor[] keys = AndroidKeyStoreMaintenance.listEntries(Domain.APP, srcUid);
+            if (keys == null) continue;
+            for (final KeyDescriptor key : keys) {
+                KeyDescriptor dest = new KeyDescriptor();
+                dest.domain = Domain.APP;
+                dest.nspace = destUid;
+                dest.alias = key.alias;
+                AndroidKeyStoreMaintenance.migrateKeyNamespace(key, dest);
+            }
+        }
     }
 
     void clearAppDataLIF(AndroidPackage pkg, int userId, int flags) {
@@ -608,6 +641,29 @@ final class AppDataHelper {
             mInstaller.destroyAppProfiles(pkg.getPackageName());
         } catch (Installer.InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
+        }
+    }
+
+    /**
+     * Returns {@code true} if app's internal storage should be created for this {@code pkg}.
+     */
+    private boolean shouldHaveAppStorage(AndroidPackage pkg) {
+        PackageManager.Property noAppDataProp =
+                pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return noAppDataProp == null || !noAppDataProp.getBoolean();
+    }
+
+    /**
+     * Remove entries from the keystore daemon. Will only remove if the {@code appId} is valid.
+     */
+    public void clearKeystoreData(int userId, int appId) {
+        if (appId < 0) {
+            return;
+        }
+
+        for (int realUserId : mPm.resolveUserIds(userId)) {
+            AndroidKeyStoreMaintenance.clearNamespace(
+                    Domain.APP, UserHandle.getUid(realUserId, appId));
         }
     }
 }

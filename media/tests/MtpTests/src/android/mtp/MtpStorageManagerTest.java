@@ -160,10 +160,11 @@ public class MtpStorageManagerTest {
                 Log.d(TAG, "sendObjectInfoChanged: " + id);
                 objectsInfoChanged.add(id);
             }
-        }, null);
+        }, /* subdirectories= */ null);
 
-        mainMtpStorage = manager.addMtpStorage(mainStorage);
-        secondaryMtpStorage = manager.addMtpStorage(secondaryStorage);
+        mainMtpStorage = manager.addMtpStorage(mainStorage, /* isHostWindows= */ () -> false);
+        secondaryMtpStorage = manager.addMtpStorage(secondaryStorage,
+                                                    /* isHostWindows= */ () -> false);
     }
 
     @After

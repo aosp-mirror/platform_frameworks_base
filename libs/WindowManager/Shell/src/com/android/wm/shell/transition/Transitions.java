@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -74,20 +75,25 @@ public class Transitions implements RemoteCallable<Transitions> {
     public static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
-    /** Transition type for dismissing split-screen via dragging the divider off the screen. */
-    public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 1;
-
-    /** Transition type for launching 2 tasks simultaneously. */
-    public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 2;
-
     /** Transition type for exiting PIP via the Shell, via pressing the expand button. */
-    public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 3;
+    public static final int TRANSIT_EXIT_PIP = TRANSIT_FIRST_CUSTOM + 1;
+
+    public static final int TRANSIT_EXIT_PIP_TO_SPLIT =  TRANSIT_FIRST_CUSTOM + 2;
 
     /** Transition type for removing PIP via the Shell, either via Dismiss bubble or Close. */
-    public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 4;
+    public static final int TRANSIT_REMOVE_PIP = TRANSIT_FIRST_CUSTOM + 3;
+
+    /** Transition type for launching 2 tasks simultaneously. */
+    public static final int TRANSIT_SPLIT_SCREEN_PAIR_OPEN = TRANSIT_FIRST_CUSTOM + 4;
 
     /** Transition type for entering split by opening an app into side-stage. */
     public static final int TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE = TRANSIT_FIRST_CUSTOM + 5;
+
+    /** Transition type for dismissing split-screen via dragging the divider off the screen. */
+    public static final int TRANSIT_SPLIT_DISMISS_SNAP = TRANSIT_FIRST_CUSTOM + 6;
+
+    /** Transition type for dismissing split-screen. */
+    public static final int TRANSIT_SPLIT_DISMISS = TRANSIT_FIRST_CUSTOM + 7;
 
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
@@ -95,6 +101,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
+    private final DisplayController mDisplayController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
@@ -117,15 +124,17 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull DisplayController displayController, @NonNull Context context,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
+            @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
+        mDisplayController = displayController;
         mPlayerImpl = new TransitionPlayerImpl();
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(new DefaultTransitionHandler(displayController, pool, context, mainExecutor,
-                animExecutor));
+                mainHandler, animExecutor));
         // Next lowest priority is remote transitions.
         mRemoteTransitionHandler = new RemoteTransitionHandler(mainExecutor);
         mHandlers.add(mRemoteTransitionHandler);
@@ -147,6 +156,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         mContext = null;
         mMainExecutor = null;
         mAnimExecutor = null;
+        mDisplayController = null;
         mPlayerImpl = null;
         mRemoteTransitionHandler = null;
     }
@@ -351,6 +361,28 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
+        // apply transfer starting window directly if there is no other task change.
+        final int changeSize = info.getChanges().size();
+        if (changeSize == 2) {
+            boolean nonTaskChange = true;
+            boolean transferStartingWindow = false;
+            for (int i = changeSize - 1; i >= 0; --i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (change.getTaskInfo() != null) {
+                    nonTaskChange = false;
+                    break;
+                }
+                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+                    transferStartingWindow = true;
+                }
+            }
+            if (nonTaskChange && transferStartingWindow) {
+                t.apply();
+                onFinish(transitionToken, null /* wct */, null /* wctCB */);
+                return;
+            }
+        }
+
         final ActiveTransition active = mActiveTransitions.get(activeIdx);
         active.mInfo = info;
         active.mStartT = t;
@@ -545,6 +577,17 @@ public class Transitions implements RemoteCallable<Transitions> {
             if (wct != null) {
                 active.mHandler = mHandlers.get(i);
                 break;
+            }
+        }
+        if (request.getDisplayChange() != null) {
+            TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
+            if (change.getEndRotation() != change.getStartRotation()) {
+                // Is a rotation, so dispatch to all displayChange listeners
+                if (wct == null) {
+                    wct = new WindowContainerTransaction();
+                }
+                mDisplayController.getChangeController().dispatchOnRotateDisplay(wct,
+                        change.getDisplayId(), change.getStartRotation(), change.getEndRotation());
             }
         }
         active.mToken = mOrganizer.startTransition(

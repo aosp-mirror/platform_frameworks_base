@@ -35,14 +35,17 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -240,6 +243,22 @@ public abstract class IContextHubWrapper {
     public abstract void onMicrophoneSettingChanged(boolean enabled);
 
     /**
+     * @return True if this version of the Contexthub HAL supports BT availability setting
+     * notifications.
+     */
+    public abstract boolean supportsBtSettingNotifications();
+
+    /**
+     * Notifies the Contexthub implementation of a BT main setting change.
+     */
+    public abstract void onBtMainSettingChanged(boolean enabled);
+
+    /**
+     * Notifies the Contexthub implementation of a BT scanning setting change.
+     */
+    public abstract void onBtScanningSettingChanged(boolean enabled);
+
+    /**
      * Invoked whenever a host client connects with the framework.
      *
      * @param info The host endpoint info.
@@ -320,9 +339,8 @@ public abstract class IContextHubWrapper {
     private static class ContextHubWrapperAidl extends IContextHubWrapper {
         private android.hardware.contexthub.IContextHub mHub;
 
-        private ICallback mCallback = null;
-
-        private ContextHubAidlCallback mAidlCallback = new ContextHubAidlCallback();
+        private final Map<Integer, ContextHubAidlCallback> mAidlCallbackMap =
+                    new HashMap<>();
 
         // Use this thread in case where the execution requires to be on a service thread.
         // For instance, AppOpsManager.noteOp requires the UPDATE_APP_OPS_STATS permission.
@@ -332,6 +350,14 @@ public abstract class IContextHubWrapper {
 
         private class ContextHubAidlCallback extends
                 android.hardware.contexthub.IContextHubCallback.Stub {
+            private final int mContextHubId;
+            private final ICallback mCallback;
+
+            ContextHubAidlCallback(int contextHubId, ICallback callback) {
+                mContextHubId = contextHubId;
+                mCallback = callback;
+            }
+
             public void handleNanoappInfo(android.hardware.contexthub.NanoappInfo[] appInfo) {
                 List<NanoAppState> nanoAppStateList =
                         ContextHubServiceUtil.createNanoAppStateList(appInfo);
@@ -399,6 +425,10 @@ public abstract class IContextHubWrapper {
             return true;
         }
 
+        public boolean supportsBtSettingNotifications() {
+            return true;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             onSettingChanged(android.hardware.contexthub.Setting.LOCATION, enabled);
         }
@@ -422,12 +452,20 @@ public abstract class IContextHubWrapper {
             onSettingChanged(android.hardware.contexthub.Setting.WIFI_SCANNING, enabled);
         }
 
+        public void onBtMainSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.BT_MAIN, enabled);
+        }
+
+        public void onBtScanningSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.BT_SCANNING, enabled);
+        }
+
         @Override
         public void onHostEndpointConnected(HostEndpointInfo info) {
             try {
                 mHub.onHostEndpointConnected(info);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in onHostEndpointConnected");
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception in onHostEndpointConnected" + e.getMessage());
             }
         }
 
@@ -435,8 +473,8 @@ public abstract class IContextHubWrapper {
         public void onHostEndpointDisconnected(short hostEndpointId) {
             try {
                 mHub.onHostEndpointDisconnected((char) hostEndpointId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in onHostEndpointDisconnected");
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception in onHostEndpointDisconnected" + e.getMessage());
             }
         }
 
@@ -444,8 +482,15 @@ public abstract class IContextHubWrapper {
         public int sendMessageToContextHub(
                 short hostEndpointId, int contextHubId, NanoAppMessage message)
                 throws RemoteException {
-            return toTransactionResult(mHub.sendMessageToHub(contextHubId,
-                    ContextHubServiceUtil.createAidlContextHubMessage(hostEndpointId, message)));
+            try {
+                mHub.sendMessageToHub(contextHubId,
+                        ContextHubServiceUtil.createAidlContextHubMessage(hostEndpointId, message));
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         @ContextHubTransaction.Result
@@ -453,49 +498,81 @@ public abstract class IContextHubWrapper {
                 int transactionId) throws RemoteException {
             android.hardware.contexthub.NanoappBinary aidlNanoAppBinary =
                     ContextHubServiceUtil.createAidlNanoAppBinary(binary);
-            return toTransactionResult(
-                    mHub.loadNanoapp(contextHubId, aidlNanoAppBinary, transactionId));
+            try {
+                mHub.loadNanoapp(contextHubId, aidlNanoAppBinary, transactionId);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         @ContextHubTransaction.Result
         public int unloadNanoapp(int contextHubId, long nanoappId, int transactionId)
                 throws RemoteException {
-            return toTransactionResult(mHub.unloadNanoapp(contextHubId, nanoappId, transactionId));
+            try {
+                mHub.unloadNanoapp(contextHubId, nanoappId, transactionId);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         @ContextHubTransaction.Result
         public int enableNanoapp(int contextHubId, long nanoappId, int transactionId)
                 throws RemoteException {
-            return toTransactionResult(mHub.enableNanoapp(contextHubId, nanoappId, transactionId));
+            try {
+                mHub.enableNanoapp(contextHubId, nanoappId, transactionId);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         @ContextHubTransaction.Result
         public int disableNanoapp(int contextHubId, long nanoappId, int transactionId)
                 throws RemoteException {
-            return toTransactionResult(mHub.disableNanoapp(contextHubId, nanoappId, transactionId));
+            try {
+                mHub.disableNanoapp(contextHubId, nanoappId, transactionId);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         @ContextHubTransaction.Result
         public int queryNanoapps(int contextHubId) throws RemoteException {
-            return toTransactionResult(mHub.queryNanoapps(contextHubId));
+            try {
+                mHub.queryNanoapps(contextHubId);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback(contextHubId, mAidlCallback);
-        }
-
-        @ContextHubTransaction.Result
-        private int toTransactionResult(boolean success) {
-            return success ? ContextHubTransaction.RESULT_SUCCESS
-                    : ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            mAidlCallbackMap.put(contextHubId, new ContextHubAidlCallback(contextHubId, callback));
+            try {
+                mHub.registerCallback(contextHubId, mAidlCallbackMap.get(contextHubId));
+            } catch (RemoteException | ServiceSpecificException | IllegalArgumentException e) {
+                Log.e(TAG, "Exception while registering callback: " + e.getMessage());
+            }
         }
 
         private void onSettingChanged(byte setting, boolean enabled) {
             try {
                 mHub.onSettingChanged(setting, enabled);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while sending setting update");
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception while sending setting update: " + e.getMessage());
             }
         }
     }
@@ -508,10 +585,18 @@ public abstract class IContextHubWrapper {
 
         protected ICallback mCallback = null;
 
-        protected final ContextHubWrapperHidlCallback mHidlCallback =
-                new ContextHubWrapperHidlCallback();
+        protected final Map<Integer, ContextHubWrapperHidlCallback> mHidlCallbackMap =
+                    new HashMap<>();
 
         protected class ContextHubWrapperHidlCallback extends IContexthubCallback.Stub {
+            private final int mContextHubId;
+            private final ICallback mCallback;
+
+            ContextHubWrapperHidlCallback(int contextHubId, ICallback callback) {
+                mContextHubId = contextHubId;
+                mCallback = callback;
+            }
+
             @Override
             public void handleClientMsg(ContextHubMsg message) {
                 mCallback.handleNanoappMessage(
@@ -612,12 +697,19 @@ public abstract class IContextHubWrapper {
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback(contextHubId, mHidlCallback);
+            mHidlCallbackMap.put(contextHubId,
+                        new ContextHubWrapperHidlCallback(contextHubId, callback));
+            mHub.registerCallback(contextHubId, mHidlCallbackMap.get(contextHubId));
+        }
+
+        public boolean supportsBtSettingNotifications() {
+            return false;
         }
 
         public void onWifiMainSettingChanged(boolean enabled) {}
         public void onWifiScanningSettingChanged(boolean enabled) {}
+        public void onBtMainSettingChanged(boolean enabled) {}
+        public void onBtScanningSettingChanged(boolean enabled) {}
     }
 
     private static class ContextHubWrapperV1_0 extends ContextHubWrapperHidl {
@@ -779,8 +871,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void registerCallback(int contextHubId, ICallback callback) throws RemoteException {
-            mCallback = callback;
-            mHub.registerCallback_1_2(contextHubId, mHidlCallback);
+            mHidlCallbackMap.put(contextHubId,
+                        new ContextHubWrapperHidlCallback(contextHubId, callback));
+            mHub.registerCallback_1_2(contextHubId, mHidlCallbackMap.get(contextHubId));
         }
 
         private void sendSettingChanged(byte setting, byte newValue) {

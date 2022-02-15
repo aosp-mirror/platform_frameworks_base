@@ -17,15 +17,16 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PathPermission
-import android.content.pm.parsing.component.ParsedProvider
-import android.content.pm.parsing.component.ParsedProviderImpl
+import com.android.server.pm.pkg.component.ParsedProvider
+import com.android.server.pm.pkg.component.ParsedProviderImpl
 import android.os.PatternMatcher
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
 class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, ParsedProviderImpl::class) {
 
-    override val defaultImpl = ParsedProviderImpl()
+    override val defaultImpl =
+        ParsedProviderImpl()
     override val creator = ParsedProviderImpl.CREATOR
 
     override val mainComponentSubclassBaseParams = listOf(
@@ -42,10 +43,9 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, Parsed
     override fun mainComponentSubclassExtraParams() = listOf(
         getSetByValue(
             ParsedProvider::getUriPermissionPatterns,
-            ParsedProviderImpl::setUriPermissionPatterns,
+            ParsedProviderImpl::addUriPermissionPattern,
             PatternMatcher("testPattern", PatternMatcher.PATTERN_LITERAL),
-            transformGet = { it?.singleOrNull() },
-            transformSet = { arrayOf(it) },
+            transformGet = { it.singleOrNull() },
             compare = { first, second ->
                 equalBy(
                     first, second,
@@ -56,15 +56,14 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, Parsed
         ),
         getSetByValue(
             ParsedProvider::getPathPermissions,
-            ParsedProviderImpl::setPathPermissions,
+            ParsedProviderImpl::addPathPermission,
             PathPermission(
                 "testPermissionPattern",
                 PatternMatcher.PATTERN_LITERAL,
                 "test.READ_PERMISSION",
                 "test.WRITE_PERMISSION"
             ),
-            transformGet = { it?.singleOrNull() },
-            transformSet = { arrayOf(it) },
+            transformGet = { it.singleOrNull() },
             compare = { first, second ->
                 equalBy(
                     first, second,

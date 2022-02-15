@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,7 +54,7 @@ public class FragmentHostManager {
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
+                    | ActivityInfo.CONFIG_LAYOUT_DIRECTION | ActivityInfo.CONFIG_ASSETS_PATHS);
     private final FragmentService mManager;
     private final ExtensionFragmentManager mPlugins = new ExtensionFragmentManager();
 
@@ -224,10 +225,12 @@ public class FragmentHostManager {
     }
 
     public void reloadFragments() {
+        Trace.beginSection("FrargmentHostManager#reloadFragments");
         // Save the old state.
         Parcelable p = destroyFragmentHost();
         // Generate a new fragment host and restore its state.
         createFragmentHost(p);
+        Trace.endSection();
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {

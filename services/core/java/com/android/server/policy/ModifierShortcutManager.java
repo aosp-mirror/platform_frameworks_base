@@ -112,10 +112,15 @@ class ModifierShortcutManager {
      * @return The intent that matches the shortcut, or null if not found.
      */
     private Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
+        // If a modifier key other than shift is also pressed, skip it.
+        final boolean isShiftOn = KeyEvent.metaStateHasModifiers(metaState, KeyEvent.META_SHIFT_ON);
+        if (!isShiftOn && !KeyEvent.metaStateHasNoModifiers(metaState)) {
+            return null;
+        }
+
         ShortcutInfo shortcut = null;
 
         // If the Shift key is pressed, then search for the shift shortcuts.
-        boolean isShiftOn = (metaState & KeyEvent.META_SHIFT_ON) == KeyEvent.META_SHIFT_ON;
         SparseArray<ShortcutInfo> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
 
         // First try the exact keycode (with modifiers).

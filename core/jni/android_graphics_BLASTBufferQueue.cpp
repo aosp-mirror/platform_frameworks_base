@@ -30,19 +30,14 @@
 
 namespace android {
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gTransactionClassInfo;
+
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName) {
     ScopedUtfChars name(env, jName);
     sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str());
-    queue->incStrong((void*)nativeCreate);
-    return reinterpret_cast<jlong>(queue.get());
-}
-
-static jlong nativeCreateAndUpdate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
-                                   jlong width, jlong height, jint format) {
-    ScopedUtfChars name(env, jName);
-    sp<BLASTBufferQueue> queue =
-            new BLASTBufferQueue(name.c_str(), reinterpret_cast<SurfaceControl*>(surfaceControl),
-                                 width, height, format);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -91,11 +86,23 @@ static void nativeApplyPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr,
     queue->applyPendingTransactions(frameNum);
 }
 
+static bool nativeIsSameSurfaceControl(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    return queue->isSameSurfaceControl(reinterpret_cast<SurfaceControl*>(surfaceControl));
+}
+
+static jobject nativeGatherPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr,
+                                               jlong frameNum) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    SurfaceComposerClient::Transaction* transaction = queue->gatherPendingTransactions(frameNum);
+    return env->NewObject(gTransactionClassInfo.clazz, gTransactionClassInfo.ctor,
+                          reinterpret_cast<jlong>(transaction));
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
         {"nativeCreate", "(Ljava/lang/String;)J", (void*)nativeCreate},
-        {"nativeCreateAndUpdate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreateAndUpdate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetSyncTransaction", "(JJZ)V", (void*)nativeSetSyncTransaction},
@@ -103,6 +110,8 @@ static const JNINativeMethod gMethods[] = {
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},
+        {"nativeIsSameSurfaceControl", "(JJ)Z", (void*)nativeIsSameSurfaceControl},
+        {"nativeGatherPendingTransactions", "(JJ)Landroid/view/SurfaceControl$Transaction;", (void*)nativeGatherPendingTransactions}
         // clang-format on
 };
 
@@ -110,6 +119,11 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/graphics/BLASTBufferQueue",
             gMethods, NELEM(gMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+
+    jclass transactionClazz = FindClassOrDie(env, "android/view/SurfaceControl$Transaction");
+    gTransactionClassInfo.clazz = MakeGlobalRefOrDie(env, transactionClazz);
+    gTransactionClassInfo.ctor =
+            GetMethodIDOrDie(env, gTransactionClassInfo.clazz, "<init>", "(J)V");
     return 0;
 }
 

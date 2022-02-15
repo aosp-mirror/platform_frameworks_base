@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -111,11 +112,11 @@ interface IActivityClientController {
      * calls, so this method should be the same as them to keep the invocation order.
      */
     void overridePendingTransition(in IBinder token, in String packageName,
-            int enterAnim, int exitAnim);
+            int enterAnim, int exitAnim, int backgroundColor);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
 
-    /** See {@link android.app.Activity#setDisablePreviewScreenshots}. */
-    oneway void setDisablePreviewScreenshots(in IBinder token, boolean disable);
+    /** See {@link android.app.Activity#setRecentsScreenshotEnabled}. */
+    oneway void setRecentsScreenshotEnabled(in IBinder token, boolean enabled);
 
     /**
      * It should only be called from home activity to remove its outdated snapshot. The home
@@ -143,4 +144,15 @@ interface IActivityClientController {
 
     /** Reports that the splash screen view has attached to activity.  */
     oneway void splashScreenAttached(in IBinder token);
+
+    /**
+     * Shows or hides a Camera app compat toggle for stretched issues with the requested state.
+     *
+     * @param token The token for the window that needs a control.
+     * @param showControl Whether the control should be shown or hidden.
+     * @param transformationApplied Whether the treatment is already applied.
+     * @param callback The callback executed when the user clicks on a control.
+     */
+    oneway void requestCompatCameraControl(in IBinder token, boolean showControl,
+            boolean transformationApplied, in ICompatCameraControlCallback callback);
 }

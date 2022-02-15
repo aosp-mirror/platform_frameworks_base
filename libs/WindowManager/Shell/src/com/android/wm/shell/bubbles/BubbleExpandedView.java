@@ -60,6 +60,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
@@ -386,13 +387,14 @@ public class BubbleExpandedView extends LinearLayout {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
                 android.R.attr.dialogCornerRadius,
                 android.R.attr.colorBackgroundFloating});
-        mCornerRadius = ta.getDimensionPixelSize(0, 0);
+        boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
+                mContext.getResources());
+        mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;
         mBackgroundColorFloating = ta.getColor(1, Color.WHITE);
         mExpandedViewContainer.setBackgroundColor(mBackgroundColorFloating);
         ta.recycle();
 
-        if (mTaskView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
-                mContext.getResources())) {
+        if (mTaskView != null) {
             mTaskView.setCornerRadius(mCornerRadius);
         }
         updatePointerView();
@@ -417,8 +419,9 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerView.setBackground(mCurrentPointer);
     }
 
-    private String getBubbleKey() {
-        return mBubble != null ? mBubble.getKey() : "null";
+    @VisibleForTesting
+    public String getBubbleKey() {
+        return mBubble != null ? mBubble.getKey() : mIsOverflow ? BubbleOverflow.KEY : null;
     }
 
     /**

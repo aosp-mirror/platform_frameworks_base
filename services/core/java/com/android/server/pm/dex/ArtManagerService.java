@@ -31,7 +31,7 @@ import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;

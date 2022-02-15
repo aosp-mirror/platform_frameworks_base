@@ -17,7 +17,9 @@
 package android.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import android.annotation.NonNull;
 import android.service.NetworkIdentitySetProto;
 import android.util.proto.ProtoOutputStream;
 
@@ -25,6 +27,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Identity of a {@code iface}, defined by the set of {@link NetworkIdentity}
@@ -32,18 +36,28 @@ import java.util.HashSet;
  *
  * @hide
  */
-public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
-        Comparable<NetworkIdentitySet> {
+public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADD_ROAMING = 2;
     private static final int VERSION_ADD_NETWORK_ID = 3;
     private static final int VERSION_ADD_METERED = 4;
     private static final int VERSION_ADD_DEFAULT_NETWORK = 5;
     private static final int VERSION_ADD_OEM_MANAGED_NETWORK = 6;
+    private static final int VERSION_ADD_SUB_ID = 7;
 
+    /**
+     * Construct a {@link NetworkIdentitySet} object.
+     */
     public NetworkIdentitySet() {
+        super();
     }
 
+    /** @hide */
+    public NetworkIdentitySet(@NonNull Set<NetworkIdentity> ident) {
+        super(ident);
+    }
+
+    /** @hide */
     public NetworkIdentitySet(DataInput in) throws IOException {
         final int version = in.readInt();
         final int size = in.readInt();
@@ -52,7 +66,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 final int ignored = in.readInt();
             }
             final int type = in.readInt();
-            final int subType = in.readInt();
+            final int ratType = in.readInt();
             final String subscriberId = readOptionalString(in);
             final String networkId;
             if (version >= VERSION_ADD_NETWORK_ID) {
@@ -91,63 +105,81 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 oemNetCapabilities = NetworkIdentity.OEM_NONE;
             }
 
-            add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered,
-                    defaultNetwork, oemNetCapabilities));
+            final int subId;
+            if (version >= VERSION_ADD_SUB_ID) {
+                subId = in.readInt();
+            } else {
+                subId = INVALID_SUBSCRIPTION_ID;
+            }
+
+            add(new NetworkIdentity(type, ratType, subscriberId, networkId, roaming, metered,
+                    defaultNetwork, oemNetCapabilities, subId));
         }
     }
 
     /**
      * Method to serialize this object into a {@code DataOutput}.
+     * @hide
      */
     public void writeToStream(DataOutput out) throws IOException {
-        out.writeInt(VERSION_ADD_OEM_MANAGED_NETWORK);
+        out.writeInt(VERSION_ADD_SUB_ID);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
             out.writeInt(ident.getType());
-            out.writeInt(ident.getSubType());
+            out.writeInt(ident.getRatType());
             writeOptionalString(out, ident.getSubscriberId());
-            writeOptionalString(out, ident.getNetworkId());
-            out.writeBoolean(ident.getRoaming());
-            out.writeBoolean(ident.getMetered());
-            out.writeBoolean(ident.getDefaultNetwork());
+            writeOptionalString(out, ident.getWifiNetworkKey());
+            out.writeBoolean(ident.isRoaming());
+            out.writeBoolean(ident.isMetered());
+            out.writeBoolean(ident.isDefaultNetwork());
             out.writeInt(ident.getOemManaged());
+            out.writeInt(ident.getSubId());
         }
     }
 
-    /** @return whether any {@link NetworkIdentity} in this set is considered metered. */
+    /**
+     * @return whether any {@link NetworkIdentity} in this set is considered metered.
+     * @hide
+     */
     public boolean isAnyMemberMetered() {
         if (isEmpty()) {
             return false;
         }
         for (NetworkIdentity ident : this) {
-            if (ident.getMetered()) {
+            if (ident.isMetered()) {
                 return true;
             }
         }
         return false;
     }
 
-    /** @return whether any {@link NetworkIdentity} in this set is considered roaming. */
+    /**
+     * @return whether any {@link NetworkIdentity} in this set is considered roaming.
+     * @hide
+     */
     public boolean isAnyMemberRoaming() {
         if (isEmpty()) {
             return false;
         }
         for (NetworkIdentity ident : this) {
-            if (ident.getRoaming()) {
+            if (ident.isRoaming()) {
                 return true;
             }
         }
         return false;
     }
 
-    /** @return whether any {@link NetworkIdentity} in this set is considered on the default
-            network. */
+    /**
+     * @return whether any {@link NetworkIdentity} in this set is considered on the default
+     *         network.
+     * @hide
+     */
     public boolean areAllMembersOnDefaultNetwork() {
         if (isEmpty()) {
             return true;
         }
         for (NetworkIdentity ident : this) {
-            if (!ident.getDefaultNetwork()) {
+            if (!ident.isDefaultNetwork()) {
                 return false;
             }
         }
@@ -171,24 +203,26 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         }
     }
 
-    @Override
-    public int compareTo(NetworkIdentitySet another) {
-        if (isEmpty()) return -1;
-        if (another.isEmpty()) return 1;
+    public static int compare(@NonNull NetworkIdentitySet left, @NonNull NetworkIdentitySet right) {
+        Objects.requireNonNull(left);
+        Objects.requireNonNull(right);
+        if (left.isEmpty()) return -1;
+        if (right.isEmpty()) return 1;
 
-        final NetworkIdentity ident = iterator().next();
-        final NetworkIdentity anotherIdent = another.iterator().next();
-        return ident.compareTo(anotherIdent);
+        final NetworkIdentity leftIdent = left.iterator().next();
+        final NetworkIdentity rightIdent = right.iterator().next();
+        return NetworkIdentity.compare(leftIdent, rightIdent);
     }
 
     /**
      * Method to dump this object into proto debug file.
+     * @hide
      */
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         for (NetworkIdentity ident : this) {
-            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES);
+            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES_FIELD_NUMBER);
         }
 
         proto.end(start);

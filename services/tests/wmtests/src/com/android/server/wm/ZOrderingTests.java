@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -363,7 +362,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
         final WindowState dockedStackWindow = createWindow(null,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "dockedStackWindow");
         final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
@@ -426,6 +425,25 @@ public class ZOrderingTests extends WindowTestsBase {
         // attached on app.
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
         assertWindowHigher(mImeWindow, imeAppTarget);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeOnPopupImeLayeringTarget() {
+        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
+                mAppWindow.mActivityRecord, "imeAppTarget");
+        mDisplayContent.setImeInputTarget(imeAppTarget);
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
+
+        // Set a popup IME layering target and keeps the original IME control target behinds it.
+        final WindowState popupImeTargetWin = createWindow(imeAppTarget,
+                TYPE_APPLICATION_SUB_PANEL, mAppWindow.mActivityRecord, "popupImeTargetWin");
+        mDisplayContent.setImeLayeringTarget(popupImeTargetWin);
+        mDisplayContent.updateImeParent();
+
+        // Ime should on top of the popup IME layering target window.
+        mDisplayContent.assignChildLayers(mTransaction);
+        assertWindowHigher(mImeWindow, popupImeTargetWin);
     }
 
 

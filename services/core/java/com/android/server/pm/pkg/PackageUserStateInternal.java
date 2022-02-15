@@ -19,27 +19,30 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.util.ArrayMap;
-import android.util.ArraySet;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.util.Pair;
+
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedArraySet;
 
 /**
  * Internal variant of {@link PackageUserState} that includes data not exposed as API. This is
  * still read-only and should be used inside system server code when possible over the
  * implementation.
  */
-public interface PackageUserStateInternal extends PackageUserState {
+public interface PackageUserStateInternal extends PackageUserState, FrameworkPackageUserState {
 
     PackageUserStateInternal DEFAULT = new PackageUserStateDefault();
 
+    // TODO: Make non-null with emptyMap()
     @Nullable
-    ArrayMap<String, SuspendParams> getSuspendParams();
+    WatchedArrayMap<String, SuspendParams> getSuspendParams();
 
     @Nullable
-    ArraySet<String> getDisabledComponentsNoCopy();
+    WatchedArraySet<String> getDisabledComponentsNoCopy();
 
     @Nullable
-    ArraySet<String> getEnabledComponentsNoCopy();
+    WatchedArraySet<String> getEnabledComponentsNoCopy();
 
     @Nullable
     Pair<String, Integer> getOverrideLabelIconForComponent(@NonNull ComponentName componentName);

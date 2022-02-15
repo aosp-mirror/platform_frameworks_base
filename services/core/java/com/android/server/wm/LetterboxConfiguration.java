@@ -126,6 +126,9 @@ final class LetterboxConfiguration {
     @LetterboxReachabilityPosition
     private volatile int mLetterboxPositionForReachability;
 
+    // Whether education is allowed for letterboxed fullscreen apps.
+    private boolean mIsEducationEnabled;
+
     LetterboxConfiguration(Context systemUiContext) {
         mContext = systemUiContext;
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
@@ -143,6 +146,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsReachabilityEnabled);
         mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
         mLetterboxPositionForReachability = mDefaultPositionForReachability;
+        mIsEducationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEducationEnabled);
     }
 
     /**
@@ -175,7 +180,7 @@ final class LetterboxConfiguration {
      * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
      * both it and a value of {@link
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
-     * and corners of the activity won't be rounded.
+     * corners of the activity won't be rounded.
      */
     void setLetterboxActivityCornersRadius(int cornersRadius) {
         mLetterboxActivityCornersRadius = cornersRadius;
@@ -499,6 +504,29 @@ final class LetterboxConfiguration {
      */
     void movePositionForReachabilityToNextLeftStop() {
         mLetterboxPositionForReachability = Math.max(mLetterboxPositionForReachability - 1, 0);
+    }
+
+    /**
+     * Whether education is allowed for letterboxed fullscreen apps.
+     */
+    boolean getIsEducationEnabled() {
+        return mIsEducationEnabled;
+    }
+
+    /**
+     * Overrides whether education is allowed for letterboxed fullscreen apps.
+     */
+    void setIsEducationEnabled(boolean enabled) {
+        mIsEducationEnabled = enabled;
+    }
+
+    /**
+     * Resets whether education is allowed for letterboxed fullscreen apps to
+     * {@link R.bool.config_letterboxIsEducationEnabled}.
+     */
+    void resetIsEducationEnabled() {
+        mIsEducationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEducationEnabled);
     }
 
 }

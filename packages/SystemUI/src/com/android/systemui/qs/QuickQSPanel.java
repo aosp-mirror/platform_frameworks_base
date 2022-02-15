@@ -46,11 +46,9 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    void initialize() {
-        super.initialize();
-        if (mHorizontalContentContainer != null) {
-            mHorizontalContentContainer.setClipChildren(false);
-        }
+    protected void setHorizontalContentContainerClipping() {
+        mHorizontalContentContainer.setClipToPadding(false);
+        mHorizontalContentContainer.setClipChildren(false);
     }
 
     @Override

@@ -24,7 +24,6 @@ import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
-import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -47,23 +46,23 @@ import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRI
 import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
 import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.BLOCKED_REASON_RESTRICTED_MODE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
-import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
-import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -72,11 +71,13 @@ import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_MASK;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_USER_EXEMPTED;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_TOP;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
@@ -90,6 +91,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileInLowPowerStandby;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.net.NetworkPolicyManager.resolveNetworkId;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
@@ -100,9 +102,6 @@ import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkTemplate.MATCH_CARRIER;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
-import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
-import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
@@ -124,14 +123,11 @@ import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
-import static com.android.internal.util.XmlUtils.readThisIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
-import static com.android.internal.util.XmlUtils.writeIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
+import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -151,6 +147,8 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -170,7 +168,6 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
-import android.net.INetworkStatsService;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -178,13 +175,9 @@ import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkPolicyManager.UidState;
 import android.net.NetworkRequest;
-import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
-import android.net.NetworkStats;
 import android.net.NetworkTemplate;
-import android.net.TelephonyNetworkSpecifier;
-import android.net.TrafficStats;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
@@ -253,8 +246,8 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
-import com.android.internal.util.XmlUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
+import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -265,8 +258,6 @@ import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import libcore.io.IoUtils;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -290,6 +281,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntConsumer;
 
@@ -342,7 +334,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_CYCLE = 11;
     private static final int VERSION_ADDED_NETWORK_TYPES = 12;
     private static final int VERSION_SUPPORTED_CARRIER_USAGE = 13;
-    private static final int VERSION_LATEST = VERSION_SUPPORTED_CARRIER_USAGE;
+    private static final int VERSION_REMOVED_SUBSCRIPTION_PLANS = 14;
+    private static final int VERSION_LATEST = VERSION_REMOVED_SUBSCRIPTION_PLANS;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
@@ -355,7 +348,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
-    private static final String TAG_SUBSCRIPTION_PLAN = "subscription-plan";
     private static final String TAG_UID_POLICY = "uid-policy";
     private static final String TAG_APP_POLICY = "app-policy";
     private static final String TAG_WHITELIST = "whitelist";
@@ -432,6 +424,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * obj = oldBlockedReasons
      */
     private static final int MSG_BLOCKED_REASON_CHANGED = 21;
+    /**
+     * Message to indicate that subscription plans expired and should be cleared.
+     * arg1 = subId
+     * arg2 = setSubscriptionPlans call ID
+     * obj = callingPackage
+     */
+    private static final int MSG_CLEAR_SUBSCRIPTION_PLANS = 22;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
@@ -440,7 +439,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
-    private NetworkStatsManagerInternal mNetworkStats;
+    private NetworkStatsManager mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
     private AppStandbyInternal mAppStandby;
@@ -452,6 +451,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private ConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
     private PowerWhitelistManager mPowerWhitelistManager;
+    @NonNull
+    private final Dependencies mDeps;
 
     /** Current cached value of the current Battery Saver mode's setting for restrict background. */
     @GuardedBy("mUidRulesFirstLock")
@@ -479,6 +480,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     volatile boolean mRestrictBackgroundChangedInBsm;
     @GuardedBy("mUidRulesFirstLock")
     volatile boolean mRestrictedNetworkingMode;
+    @GuardedBy("mUidRulesFirstLock")
+    volatile boolean mLowPowerStandbyActive;
 
     private final boolean mSuppressDefaultPolicy;
 
@@ -496,6 +499,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from subId to package name that owns subscription plans. */
     @GuardedBy("mNetworkPoliciesSecondLock")
     final SparseArray<String> mSubscriptionPlansOwner = new SparseArray<>();
+    /** Map from subId to the ID of the clear plans request. */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    final SparseIntArray mSetSubscriptionPlansIds = new SparseIntArray();
+    /** Atomic integer to generate a new ID for each clear plans request. */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    int mSetSubscriptionPlansIdCounter = 0;
 
     /** Map from subId to daily opportunistic quota. */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -512,6 +521,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidFirewallRestrictedModeRules = new SparseIntArray();
+    @GuardedBy("mUidRulesFirstLock")
+    final SparseIntArray mUidFirewallLowPowerStandbyModeRules = new SparseIntArray();
 
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mUidRulesFirstLock")
@@ -539,6 +550,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
+
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseBooleanArray mLowPowerStandbyAllowlistUids = new SparseBooleanArray();
 
     /**
      * UIDs that have been allowlisted temporarily to be able to have network access despite being
@@ -703,7 +717,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement) {
         this(context, activityManager, networkManagement, AppGlobals.getPackageManager(),
-                getDefaultClock(), getDefaultSystemDir(), false);
+                getDefaultClock(), getDefaultSystemDir(), false, new Dependencies(context));
     }
 
     private static @NonNull File getDefaultSystemDir() {
@@ -715,9 +729,59 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Clock.systemUTC());
     }
 
+    static class Dependencies {
+        final Context mContext;
+        final NetworkStatsManager mNetworkStatsManager;
+        Dependencies(Context context) {
+            mContext = context;
+            mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+            // Query stats from NetworkStatsService will trigger a poll by default.
+            // But since NPMS listens stats updated event, and will query stats
+            // after the event. A polling -> updated -> query -> polling loop will be introduced
+            // if polls on open. Hence, while NPMS manages it's poll requests explicitly, set
+            // flag to false to prevent a polling loop.
+            mNetworkStatsManager.setPollOnOpen(false);
+        }
+
+        long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkTotalBytes");
+            try {
+                final NetworkStats.Bucket ret = mNetworkStatsManager
+                        .querySummaryForDevice(template, start, end);
+                return ret.getRxBytes() + ret.getTxBytes();
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to read network stats: " + e);
+                return 0;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
+        }
+
+        @NonNull
+        List<NetworkStats.Bucket> getNetworkUidBytes(
+                @NonNull NetworkTemplate template, long start, long end) {
+            Trace.traceBegin(TRACE_TAG_NETWORK, "getNetworkUidBytes");
+            final List<NetworkStats.Bucket> buckets = new ArrayList<>();
+            try {
+                final NetworkStats stats = mNetworkStatsManager.querySummary(template, start, end);
+                while (stats.hasNextBucket()) {
+                    final NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+                    stats.getNextBucket(bucket);
+                    buckets.add(bucket);
+                }
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failed to read network stats: " + e);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_NETWORK);
+            }
+            return buckets;
+        }
+    }
+
+    @VisibleForTesting
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement, IPackageManager pm, Clock clock,
-            File systemDir, boolean suppressDefaultPolicy) {
+            File systemDir, boolean suppressDefaultPolicy, Dependencies deps) {
         mContext = Objects.requireNonNull(context, "missing context");
         mActivityManager = Objects.requireNonNull(activityManager, "missing activityManager");
         mNetworkManager = Objects.requireNonNull(networkManagement, "missing networkManagement");
@@ -738,10 +802,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidEventHandler = new Handler(mUidEventThread.getLooper(), mUidEventHandlerCallback);
 
         mSuppressDefaultPolicy = suppressDefaultPolicy;
+        mDeps = Objects.requireNonNull(deps, "missing Dependencies");
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"), "net-policy");
 
         mAppOps = context.getSystemService(AppOpsManager.class);
+        mNetworkStats = context.getSystemService(NetworkStatsManager.class);
         mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
         // Expose private service for system components to use.
         LocalServices.addService(NetworkPolicyManagerInternal.class,
@@ -841,7 +907,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
             mAppStandby = LocalServices.getService(AppStandbyInternal.class);
-            mNetworkStats = LocalServices.getService(NetworkStatsManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
@@ -956,10 +1021,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             userFilter.addAction(ACTION_USER_REMOVED);
             mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
-            // listen for stats update events
-            final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
-            mContext.registerReceiver(
-                    mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
+            // listen for stats updated callbacks for interested network types.
+            final Executor executor = new HandlerExecutor(mHandler);
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_MOBILE).build(),
+                    0 /* thresholdBytes */, executor, mStatsCallback);
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_WIFI).build(),
+                    0 /* thresholdBytes */, executor, mStatsCallback);
 
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,
@@ -1160,20 +1227,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Receiver that watches for {@link INetworkStatsService} updates, which we
-     * use to check against {@link NetworkPolicy#warningBytes}.
+     * Listener that watches for {@link NetworkStatsManager} updates, which
+     * NetworkPolicyManagerService uses to check against {@link NetworkPolicy#warningBytes}.
      */
-    final private BroadcastReceiver mStatsReceiver = new BroadcastReceiver() {
+    private final StatsCallback mStatsCallback = new StatsCallback();
+    private class StatsCallback extends NetworkStatsManager.UsageCallback {
+        private boolean mIsAnyCallbackReceived = false;
+
         @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified
-            // READ_NETWORK_USAGE_HISTORY permission above.
+        public void onThresholdReached(int networkType, String subscriberId) {
+            mIsAnyCallbackReceived = true;
 
             synchronized (mNetworkPoliciesSecondLock) {
                 updateNetworkRulesNL();
                 updateNetworkEnabledNL();
                 updateNotificationsNL();
             }
+        }
+
+        /**
+         * Return whether any callback is received.
+         * Used to determine if NetworkStatsService is ready.
+         */
+        public boolean isAnyCallbackReceived() {
+            // Warning : threading for this member is broken. It should only be read
+            // and written on the handler thread ; furthermore, the constructor
+            // is called on a different thread, so this stops working if the default
+            // value is not false or if this member ever goes back to false after
+            // being set to true.
+            // TODO : fix threading for this member.
+            return mIsAnyCallbackReceived;
         }
     };
 
@@ -1263,7 +1346,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Check {@link NetworkPolicy} against current {@link INetworkStatsService}
+     * Check {@link NetworkPolicy} against current {@link NetworkStatsManager}
      * to show visible notifications as needed.
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -1384,15 +1467,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         long maxBytes = 0;
         int maxUid = 0;
 
-        final NetworkStats stats = getNetworkUidBytes(template, start, end);
-        NetworkStats.Entry entry = null;
-        for (int i = 0; i < stats.size(); i++) {
-            entry = stats.getValues(i, entry);
-            final long bytes = entry.rxBytes + entry.txBytes;
+        // Skip if not ready. NetworkStatsService will block public API calls until it is
+        // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
+        if (!mStatsCallback.isAnyCallbackReceived()) return null;
+
+        final List<NetworkStats.Bucket> stats = mDeps.getNetworkUidBytes(template, start, end);
+        for (final NetworkStats.Bucket entry : stats) {
+            final long bytes = entry.getRxBytes() + entry.getTxBytes();
             totalBytes += bytes;
             if (bytes > maxBytes) {
                 maxBytes = bytes;
-                maxUid = entry.uid;
+                maxUid = entry.getUid();
             }
         }
 
@@ -1428,13 +1513,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
             final int subId = mSubIdToSubscriberId.keyAt(i);
             final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-            final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                    true, OEM_NONE);
-            /* While OEM_NONE indicates "any non OEM managed network", OEM_NONE is meant to be a
-             * placeholder value here. The probeIdent is matched against a NetworkTemplate which
-             * should have its OEM managed value set to OEM_MANAGED_ALL, which will cause the
-             * template to match probeIdent without regard to OEM managed status. */
+            final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                    .setType(TYPE_MOBILE)
+                    .setSubscriberId(subscriberId)
+                    .setMetered(true)
+                    .setDefaultNetwork(true)
+                    .setSubId(subId).build();
             if (template.matches(probeIdent)) {
                 return subId;
             }
@@ -1667,9 +1751,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // find and update the carrier NetworkPolicy for this subscriber id
         boolean policyUpdated = false;
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1897,10 +1984,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
                     final int subId = mSubIdToSubscriberId.keyAt(i);
                     final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-
-                    final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                            TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                            true, OEM_NONE);
+                    final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                            .setType(TYPE_MOBILE)
+                            .setSubscriberId(subscriberId)
+                            .setMetered(true)
+                            .setDefaultNetwork(true)
+                            .setSubId(subId).build();
                     // Template is matched when subscriber id matches.
                     if (template.matches(probeIdent)) {
                         matchingSubIds.add(subId);
@@ -2002,13 +2091,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetIdToSubId.clear();
         final ArrayMap<NetworkStateSnapshot, NetworkIdentity> identified = new ArrayMap<>();
         for (final NetworkStateSnapshot snapshot : snapshots) {
-            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
+            final int subId = snapshot.getSubId();
+            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), subId);
 
-            // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
-            // in the object created here is never used and its value doesn't matter, so use
-            // NETWORK_TYPE_UNKNOWN.
-            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
-                    true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
+            // Policies matched by NPMS only match by subscriber ID or by network ID.
+            final NetworkIdentity ident = new NetworkIdentity.Builder()
+                    .setNetworkStateSnapshot(snapshot).setDefaultNetwork(true).build();
             identified.put(snapshot, ident);
         }
 
@@ -2205,9 +2293,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mNetworkPoliciesSecondLock")
     private boolean ensureActiveCarrierPolicyAL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -2233,7 +2324,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (dataWarningConfig == WARNING_DISABLED) {
             return WARNING_DISABLED;
         } else {
-            return dataWarningConfig * MB_IN_BYTES;
+            return DataUnit.MEBIBYTES.toBytes(dataWarningConfig);
         }
     }
 
@@ -2255,6 +2346,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
         return policy;
+    }
+
+    /**
+     * Template to match all metered carrier networks with the given IMSI.
+     *
+     * @hide
+     */
+    public static NetworkTemplate buildTemplateCarrierMetered(@NonNull String subscriberId) {
+        Objects.requireNonNull(subscriberId);
+        return new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(subscriberId))
+                .setMeteredness(METERED_YES).build();
     }
 
     /**
@@ -2368,7 +2471,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             templateMeteredness = readIntAttribute(in, ATTR_TEMPLATE_METERED);
 
                         } else {
-                            subscriberIdMatchRule = NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
+                            subscriberIdMatchRule =
+                                    NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT;
                             if (templateType == MATCH_MOBILE) {
                                 Log.d(TAG, "Update template match rule from mobile to carrier and"
                                         + " force to metered");
@@ -2431,66 +2535,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             inferred = false;
                         }
-                        final NetworkTemplate template = new NetworkTemplate(templateType,
-                                subscriberId, new String[] { subscriberId },
-                                networkId, templateMeteredness, NetworkStats.ROAMING_ALL,
-                                NetworkStats.DEFAULT_NETWORK_ALL, NetworkTemplate.NETWORK_TYPE_ALL,
-                                NetworkTemplate.OEM_MANAGED_ALL, subscriberIdMatchRule);
-                        if (template.isPersistable()) {
+                        final NetworkTemplate.Builder builder =
+                                new NetworkTemplate.Builder(templateType)
+                                        .setMeteredness(templateMeteredness);
+                        if (subscriberIdMatchRule
+                                == NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT) {
+                            final ArraySet<String> ids = new ArraySet<>();
+                            ids.add(subscriberId);
+                            builder.setSubscriberIds(ids);
+                        }
+                        if (networkId != null) {
+                            builder.setWifiNetworkKeys(Set.of(networkId));
+                        }
+                        final NetworkTemplate template = builder.build();
+                        if (NetworkPolicy.isTemplatePersistable(template)) {
                             mNetworkPolicy.put(template, new NetworkPolicy(template, cycleRule,
                                     warningBytes, limitBytes, lastWarningSnooze,
                                     lastLimitSnooze, metered, inferred));
                         }
-
-                    } else if (TAG_SUBSCRIPTION_PLAN.equals(tag)) {
-                        final String start = readStringAttribute(in, ATTR_CYCLE_START);
-                        final String end = readStringAttribute(in, ATTR_CYCLE_END);
-                        final String period = readStringAttribute(in, ATTR_CYCLE_PERIOD);
-                        final SubscriptionPlan.Builder builder = new SubscriptionPlan.Builder(
-                                RecurrenceRule.convertZonedDateTime(start),
-                                RecurrenceRule.convertZonedDateTime(end),
-                                RecurrenceRule.convertPeriod(period));
-                        builder.setTitle(readStringAttribute(in, ATTR_TITLE));
-                        builder.setSummary(readStringAttribute(in, ATTR_SUMMARY));
-
-                        final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES,
-                                SubscriptionPlan.BYTES_UNKNOWN);
-                        final int limitBehavior = readIntAttribute(in, ATTR_LIMIT_BEHAVIOR,
-                                SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN);
-                        if (limitBytes != SubscriptionPlan.BYTES_UNKNOWN
-                                && limitBehavior != SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN) {
-                            builder.setDataLimit(limitBytes, limitBehavior);
-                        }
-
-                        final long usageBytes = readLongAttribute(in, ATTR_USAGE_BYTES,
-                                SubscriptionPlan.BYTES_UNKNOWN);
-                        final long usageTime = readLongAttribute(in, ATTR_USAGE_TIME,
-                                SubscriptionPlan.TIME_UNKNOWN);
-                        if (usageBytes != SubscriptionPlan.BYTES_UNKNOWN
-                                && usageTime != SubscriptionPlan.TIME_UNKNOWN) {
-                            builder.setDataUsage(usageBytes, usageTime);
-                        }
-
-                        final int subId = readIntAttribute(in, ATTR_SUB_ID);
-                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
-
-                        if (version >= VERSION_ADDED_NETWORK_TYPES) {
-                            final int depth = in.getDepth();
-                            while (XmlUtils.nextElementWithin(in, depth)) {
-                                if (TAG_XML_UTILS_INT_ARRAY.equals(in.getName())
-                                        && ATTR_NETWORK_TYPES.equals(
-                                                readStringAttribute(in, ATTR_XML_UTILS_NAME))) {
-                                    final int[] networkTypes =
-                                            readThisIntArrayXml(in, TAG_XML_UTILS_INT_ARRAY, null);
-                                    builder.setNetworkTypes(networkTypes);
-                                }
-                            }
-                        }
-
-                        final SubscriptionPlan plan = builder.build();
-                        mSubscriptionPlans.put(subId, ArrayUtils.appendElement(
-                                SubscriptionPlan.class, mSubscriptionPlans.get(subId), plan));
-                        mSubscriptionPlansOwner.put(subId, ownerPackage);
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
@@ -2585,35 +2647,39 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * into {@link WifiConfiguration}.
      */
     private void upgradeWifiMeteredOverride() {
-        final ArrayMap<String, Boolean> wifiNetworkIds = new ArrayMap<>();
+        final ArrayMap<String, Boolean> wifiNetworkKeys = new ArrayMap<>();
         synchronized (mNetworkPoliciesSecondLock) {
             for (int i = 0; i < mNetworkPolicy.size();) {
                 final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
                 if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
                         && !policy.inferred) {
                     mNetworkPolicy.removeAt(i);
-                    wifiNetworkIds.put(policy.template.getNetworkId(), policy.metered);
+                    final Set<String> keys = policy.template.getWifiNetworkKeys();
+                    wifiNetworkKeys.put(keys.isEmpty() ? null : keys.iterator().next(),
+                            policy.metered);
                 } else {
                     i++;
                 }
             }
         }
 
-        if (wifiNetworkIds.isEmpty()) {
+        if (wifiNetworkKeys.isEmpty()) {
             return;
         }
         final WifiManager wm = mContext.getSystemService(WifiManager.class);
         final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
         for (int i = 0; i < configs.size(); ++i) {
             final WifiConfiguration config = configs.get(i);
-            final String networkId = resolveNetworkId(config);
-            final Boolean metered = wifiNetworkIds.get(networkId);
-            if (metered != null) {
-                Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
-                config.meteredOverride = metered
-                        ? WifiConfiguration.METERED_OVERRIDE_METERED
-                        : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
-                wm.updateNetwork(config);
+            for (String key : config.getAllNetworkKeys()) {
+                final Boolean metered = wifiNetworkKeys.get(key);
+                if (metered != null) {
+                    Slog.d(TAG, "Found network " + key + "; upgrading metered hint");
+                    config.meteredOverride = metered
+                            ? WifiConfiguration.METERED_OVERRIDE_METERED
+                            : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+                    wm.updateNetwork(config);
+                    break;
+                }
             }
         }
 
@@ -2643,19 +2709,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int i = 0; i < mNetworkPolicy.size(); i++) {
                 final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
                 final NetworkTemplate template = policy.template;
-                if (!template.isPersistable()) continue;
+                if (!NetworkPolicy.isTemplatePersistable(template)) continue;
 
                 out.startTag(null, TAG_NETWORK_POLICY);
                 writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, template.getMatchRule());
-                final String subscriberId = template.getSubscriberId();
+                final String subscriberId = template.getSubscriberIds().isEmpty() ? null
+                        : template.getSubscriberIds().iterator().next();
                 if (subscriberId != null) {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
-                writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE,
-                        template.getSubscriberIdMatchRule());
-                final String networkId = template.getNetworkId();
-                if (networkId != null) {
-                    out.attribute(null, ATTR_NETWORK_ID, networkId);
+                final int subscriberIdMatchRule = template.getSubscriberIds().isEmpty()
+                        ? NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_ALL
+                        : NetworkStatsUtils.SUBSCRIBER_ID_MATCH_RULE_EXACT;
+                writeIntAttribute(out, ATTR_SUBSCRIBER_ID_MATCH_RULE, subscriberIdMatchRule);
+                if (!template.getWifiNetworkKeys().isEmpty()) {
+                    out.attribute(null, ATTR_NETWORK_ID,
+                            template.getWifiNetworkKeys().iterator().next());
                 }
                 writeIntAttribute(out, ATTR_TEMPLATE_METERED,
                         template.getMeteredness());
@@ -2672,38 +2741,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writeBooleanAttribute(out, ATTR_METERED, policy.metered);
                 writeBooleanAttribute(out, ATTR_INFERRED, policy.inferred);
                 out.endTag(null, TAG_NETWORK_POLICY);
-            }
-
-            // write all known subscription plans
-            for (int i = 0; i < mSubscriptionPlans.size(); i++) {
-                final int subId = mSubscriptionPlans.keyAt(i);
-                if (subId == INVALID_SUBSCRIPTION_ID) continue;
-                final String ownerPackage = mSubscriptionPlansOwner.get(subId);
-                final SubscriptionPlan[] plans = mSubscriptionPlans.valueAt(i);
-                if (ArrayUtils.isEmpty(plans)) continue;
-
-                for (SubscriptionPlan plan : plans) {
-                    out.startTag(null, TAG_SUBSCRIPTION_PLAN);
-                    writeIntAttribute(out, ATTR_SUB_ID, subId);
-                    writeStringAttribute(out, ATTR_OWNER_PACKAGE, ownerPackage);
-                    final RecurrenceRule cycleRule = plan.getCycleRule();
-                    writeStringAttribute(out, ATTR_CYCLE_START,
-                            RecurrenceRule.convertZonedDateTime(cycleRule.start));
-                    writeStringAttribute(out, ATTR_CYCLE_END,
-                            RecurrenceRule.convertZonedDateTime(cycleRule.end));
-                    writeStringAttribute(out, ATTR_CYCLE_PERIOD,
-                            RecurrenceRule.convertPeriod(cycleRule.period));
-                    writeStringAttribute(out, ATTR_TITLE, plan.getTitle());
-                    writeStringAttribute(out, ATTR_SUMMARY, plan.getSummary());
-                    writeLongAttribute(out, ATTR_LIMIT_BYTES, plan.getDataLimitBytes());
-                    writeIntAttribute(out, ATTR_LIMIT_BEHAVIOR, plan.getDataLimitBehavior());
-                    writeLongAttribute(out, ATTR_USAGE_BYTES, plan.getDataUsageBytes());
-                    writeLongAttribute(out, ATTR_USAGE_TIME, plan.getDataUsageTime());
-                    try {
-                        writeIntArrayXml(plan.getNetworkTypes(), ATTR_NETWORK_TYPES, out);
-                    } catch (XmlPullParserException ignored) { }
-                    out.endTag(null, TAG_SUBSCRIPTION_PLAN);
-                }
             }
 
             // write all known uid policies
@@ -3022,7 +3059,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             // When two normalized templates conflict, prefer the most
             // restrictive policy
-            policy.template = NetworkTemplate.normalize(policy.template, mMergedSubscriberIds);
+            policy.template = normalizeTemplate(policy.template, mMergedSubscriberIds);
             final NetworkPolicy existing = mNetworkPolicy.get(policy.template);
             if (existing == null || existing.compareTo(policy) > 0) {
                 if (existing != null) {
@@ -3031,6 +3068,46 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetworkPolicy.put(policy.template, policy);
             }
         }
+    }
+
+    /**
+     * Examine the given template and normalize it.
+     * We pick the "lowest" merged subscriber as the primary
+     * for key purposes, and expand the template to match all other merged
+     * subscribers.
+     *
+     * There can be multiple merged subscriberIds for multi-SIM devices.
+     *
+     * <p>
+     * For example, given an incoming template matching B, and the currently
+     * active merge set [A,B], we'd return a new template that primarily matches
+     * A, but also matches B.
+     */
+    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+            @NonNull List<String[]> mergedList) {
+        // Now there are several types of network which uses Subscriber Id to store network
+        // information. For instance:
+        // 1. A merged carrier wifi network which has TYPE_WIFI with a Subscriber Id.
+        // 2. A typical cellular network could have TYPE_MOBILE with a Subscriber Id.
+
+        if (template.getSubscriberIds().isEmpty()) return template;
+
+        for (final String[] merged : mergedList) {
+            // TODO: Handle incompatible subscriberIds if that happens in practice.
+            for (final String subscriberId : template.getSubscriberIds()) {
+                if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
+                    // Requested template subscriber is part of the merged group; return
+                    // a template that matches all merged subscribers.
+                    return new NetworkTemplate.Builder(template.getMatchRule())
+                            .setWifiNetworkKeys(template.getWifiNetworkKeys())
+                            .setSubscriberIds(Set.of(merged))
+                            .setMeteredness(template.getMeteredness())
+                            .build();
+                }
+            }
+        }
+
+        return template;
     }
 
     @Override
@@ -3347,6 +3424,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return result;
     }
 
+    /**
+     * Get subscription plan for the given networkTemplate.
+     *
+     * @param template the networkTemplate to get the subscription plan for.
+     */
+    @Override
+    public SubscriptionPlan getSubscriptionPlan(@NonNull NetworkTemplate template) {
+        enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+        synchronized (mNetworkPoliciesSecondLock) {
+            final int subId = findRelevantSubIdNL(template);
+            return getPrimarySubscriptionPlanLocked(subId);
+        }
+    }
+
+    /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
+     * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
+     * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     */
+    @Override
+    public void notifyStatsProviderWarningOrLimitReached() {
+        enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+        // This API may be called before the system is ready.
+        synchronized (mNetworkPoliciesSecondLock) {
+            if (!mSystemReady) return;
+        }
+        mHandler.obtainMessage(MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED).sendToTarget();
+    }
+
     @Override
     public SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
@@ -3358,9 +3464,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3368,15 +3474,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Happy")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Charged after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
             } else if ("month_soft".equals(fake)) {
@@ -3385,25 +3491,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
                         .setSummary("Crazy unlimited bandwidth plan with incredibly long title "
                                 + "that should be cut off to prevent UI from looking terrible")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3411,25 +3517,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(6 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(6),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3443,9 +3549,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             } else if ("prepaid_crazy".equals(fake)) {
@@ -3453,9 +3559,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile Anytime")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3463,9 +3569,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Nickel Nights")
                         .setSummary("5¢/GB between 1-5AM")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(15 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(15),
                                 ZonedDateTime.now().minusHours(30).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3473,9 +3579,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Bonus 3G")
                         .setSummary("Unlimited 3G data")
-                        .setDataLimit(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(1),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(300 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(300),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
             } else if ("unlimited".equals(fake)) {
@@ -3485,7 +3591,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Awesome")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(50 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(50),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             }
@@ -3510,7 +3616,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage) {
+    public void setSubscriptionPlans(int subId, SubscriptionPlan[] plans,
+            long expirationDurationMillis, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
         enforceSubscriptionPlanValidity(plans);
 
@@ -3520,31 +3627,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mNetworkPoliciesSecondLock) {
-                    mSubscriptionPlans.put(subId, plans);
-                    mSubscriptionPlansOwner.put(subId, callingPackage);
-
-                    final String subscriberId = mSubIdToSubscriberId.get(subId, null);
-                    if (subscriberId != null) {
-                        ensureActiveCarrierPolicyAL(subId, subscriberId);
-                        maybeUpdateCarrierPolicyCycleAL(subId, subscriberId);
-                    } else {
-                        Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
-                    }
-
-                    handleNetworkPoliciesUpdateAL(true);
-                }
-            }
-
-            final Intent intent = new Intent(SubscriptionManager.ACTION_SUBSCRIPTION_PLANS_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
-            mContext.sendBroadcast(intent, android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS);
-            mHandler.sendMessage(
-                    mHandler.obtainMessage(MSG_SUBSCRIPTION_PLANS_CHANGED, subId, 0, plans));
+            setSubscriptionPlansInternal(subId, plans, expirationDurationMillis, callingPackage);
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void setSubscriptionPlansInternal(int subId, SubscriptionPlan[] plans,
+            long expirationDurationMillis, String callingPackage) {
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                mSubscriptionPlans.put(subId, plans);
+                mSubscriptionPlansOwner.put(subId, callingPackage);
+
+                final String subscriberId = mSubIdToSubscriberId.get(subId, null);
+                if (subscriberId != null) {
+                    ensureActiveCarrierPolicyAL(subId, subscriberId);
+                    maybeUpdateCarrierPolicyCycleAL(subId, subscriberId);
+                } else {
+                    Slog.wtf(TAG, "Missing subscriberId for subId " + subId);
+                }
+
+                handleNetworkPoliciesUpdateAL(true);
+
+                final Intent intent = new Intent(
+                        SubscriptionManager.ACTION_SUBSCRIPTION_PLANS_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
+                mContext.sendBroadcast(intent,
+                        android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MSG_SUBSCRIPTION_PLANS_CHANGED, subId, 0, plans));
+                final int setPlansId = mSetSubscriptionPlansIdCounter++;
+                mSetSubscriptionPlansIds.put(subId, setPlansId);
+                if (expirationDurationMillis > 0) {
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_SUBSCRIPTION_PLANS,
+                            subId, setPlansId, callingPackage), expirationDurationMillis);
+                }
+            }
         }
     }
 
@@ -3570,7 +3690,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void setSubscriptionOverride(int subId, int overrideMask, int overrideValue,
-            int[] networkTypes, long timeoutMillis, String callingPackage) {
+            int[] networkTypes, long expirationDurationMillis, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
 
         final ArraySet<Integer> allNetworksSet = new ArraySet<>();
@@ -3608,10 +3728,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             args.arg3 = overrideValue;
             args.arg4 = applicableNetworks.toArray();
             mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args));
-            if (timeoutMillis > 0) {
+            if (expirationDurationMillis > 0) {
                 args.arg3 = 0;
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args),
-                        timeoutMillis);
+                        expirationDurationMillis);
             }
         }
     }
@@ -3657,6 +3777,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
                 fout.print("Restricted networking mode: "); fout.println(mRestrictedNetworkingMode);
+                fout.print("Low Power Standby mode: "); fout.println(mLowPowerStandbyActive);
                 synchronized (mMeteredIfacesLock) {
                     fout.print("Metered ifaces: ");
                     fout.println(mMeteredIfaces);
@@ -3792,6 +3913,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
+                size = mLowPowerStandbyAllowlistUids.size();
+                if (size > 0) {
+                    fout.println("Low Power Standby allowlist uids:");
+                    fout.increaseIndent();
+                    for (int i = 0; i < size; i++) {
+                        fout.print("UID=");
+                        fout.print(mLowPowerStandbyAllowlistUids.keyAt(i));
+                        fout.println();
+                    }
+                    fout.decreaseIndent();
+                }
+
                 final SparseBooleanArray knownUids = new SparseBooleanArray();
                 collectKeys(mUidState, knownUids);
                 collectKeys(mUidBlockedState, knownUids);
@@ -3873,6 +4006,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return isProcStateAllowedWhileIdleOrPowerSaveMode(uidState);
     }
 
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidTop(int uid) {
+        final UidState uidState = mUidState.get(uid);
+        return isProcStateAllowedWhileInLowPowerStandby(uidState);
+    }
+
     /**
      * Process state of UID changed; if needed, will trigger
      * {@link #updateRulesForDataUsageRestrictionsUL(int)} and
@@ -3889,8 +4028,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // state changed, push updated rules
                 mUidState.put(uid, newUidState);
                 updateRestrictBackgroundRulesOnUidStatusChangedUL(uid, oldUidState, newUidState);
-                if (isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
-                        != isProcStateAllowedWhileIdleOrPowerSaveMode(newUidState)) {
+                boolean allowedWhileIdleOrPowerSaveModeChanged =
+                        isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
+                                != isProcStateAllowedWhileIdleOrPowerSaveMode(newUidState);
+                if (allowedWhileIdleOrPowerSaveModeChanged) {
                     updateRuleForAppIdleUL(uid);
                     if (mDeviceIdleMode) {
                         updateRuleForDeviceIdleUL(uid);
@@ -3899,6 +4040,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         updateRuleForRestrictPowerUL(uid);
                     }
                     updateRulesForPowerRestrictionsUL(uid);
+                }
+                if (mLowPowerStandbyActive) {
+                    boolean allowedInLpsChanged =
+                            isProcStateAllowedWhileInLowPowerStandby(oldUidState)
+                                    != isProcStateAllowedWhileInLowPowerStandby(newUidState);
+                    if (allowedInLpsChanged) {
+                        if (!allowedWhileIdleOrPowerSaveModeChanged) {
+                            updateRulesForPowerRestrictionsUL(uid);
+                        }
+                        updateRuleForLowPowerStandbyUL(uid);
+                    }
                 }
                 return true;
             }
@@ -3923,6 +4075,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     updateRuleForRestrictPowerUL(uid);
                 }
                 updateRulesForPowerRestrictionsUL(uid);
+                if (mLowPowerStandbyActive) {
+                    updateRuleForLowPowerStandbyUL(uid);
+                }
                 return true;
             }
         }
@@ -4126,6 +4281,50 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRulesForLowPowerStandbyUL() {
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForLowPowerStandbyUL");
+        try {
+            if (mLowPowerStandbyActive) {
+                mUidFirewallLowPowerStandbyModeRules.clear();
+                for (int i = mUidState.size() - 1; i >= 0; i--) {
+                    final int uid = mUidState.keyAt(i);
+                    UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
+                    if (hasInternetPermissionUL(uid) && uidBlockedState != null
+                            && (uidBlockedState.effectiveBlockedReasons
+                                    & BLOCKED_REASON_LOW_POWER_STANDBY) == 0) {
+                        mUidFirewallLowPowerStandbyModeRules.put(mUidBlockedState.keyAt(i),
+                                FIREWALL_RULE_ALLOW);
+                    }
+                }
+                setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                        mUidFirewallLowPowerStandbyModeRules, CHAIN_TOGGLE_ENABLE);
+            } else {
+                setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY, null, CHAIN_TOGGLE_DISABLE);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRuleForLowPowerStandbyUL(int uid) {
+        if (!hasInternetPermissionUL(uid)) {
+            return;
+        }
+
+        final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
+        if (mUidState.contains(uid) && uidBlockedState != null
+                && (uidBlockedState.effectiveBlockedReasons & BLOCKED_REASON_LOW_POWER_STANDBY)
+                == 0) {
+            mUidFirewallLowPowerStandbyModeRules.put(uid, FIREWALL_RULE_ALLOW);
+            setUidFirewallRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_ALLOW);
+        } else {
+            mUidFirewallLowPowerStandbyModeRules.delete(uid);
+            setUidFirewallRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+        }
+    }
+
     /**
      * Returns whether a uid is allowlisted from power saving restrictions (eg: Battery Saver, Doze
      * mode, and app idle).
@@ -4153,6 +4352,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean isWhitelistedFromPowerSaveExceptIdleUL(int uid) {
         final int appId = UserHandle.getAppId(uid);
         return mPowerSaveWhitelistExceptIdleAppIds.get(appId);
+    }
+
+    /**
+     * Returns whether a uid is allowlisted from low power standby restrictions.
+     */
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isAllowlistedFromLowPowerStandbyUL(int uid) {
+        return mLowPowerStandbyAllowlistUids.get(uid);
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
@@ -4492,6 +4699,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerSaveTempWhitelistAppIds.delete(uid);
         mAppIdleTempWhitelistAppIds.delete(uid);
         mUidFirewallRestrictedModeRules.delete(uid);
+        mUidFirewallLowPowerStandbyModeRules.delete(uid);
         synchronized (mUidStateCallbackInfos) {
             mUidStateCallbackInfos.remove(uid);
         }
@@ -4717,6 +4925,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
+        final boolean isTop = isUidTop(uid);
 
         final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
 
@@ -4730,17 +4939,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         int newAllowedReasons = ALLOWED_REASON_NONE;
         newBlockedReasons |= (mRestrictPower ? BLOCKED_REASON_BATTERY_SAVER : 0);
         newBlockedReasons |= (mDeviceIdleMode ? BLOCKED_REASON_DOZE : 0);
+        newBlockedReasons |= (mLowPowerStandbyActive ? BLOCKED_REASON_LOW_POWER_STANDBY : 0);
         newBlockedReasons |= (isUidIdle ? BLOCKED_REASON_APP_STANDBY : 0);
         newBlockedReasons |= (uidBlockedState.blockedReasons & BLOCKED_REASON_RESTRICTED_MODE);
 
         newAllowedReasons |= (isSystem(uid) ? ALLOWED_REASON_SYSTEM : 0);
         newAllowedReasons |= (isForeground ? ALLOWED_REASON_FOREGROUND : 0);
+        newAllowedReasons |= (isTop ? ALLOWED_REASON_TOP : 0);
         newAllowedReasons |= (isWhitelistedFromPowerSaveUL(uid, true)
                 ? ALLOWED_REASON_POWER_SAVE_ALLOWLIST : 0);
         newAllowedReasons |= (isWhitelistedFromPowerSaveExceptIdleUL(uid)
                 ? ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST : 0);
         newAllowedReasons |= (uidBlockedState.allowedReasons
                 & ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS);
+        newAllowedReasons |= (isAllowlistedFromLowPowerStandbyUL(uid))
+                ? ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST : 0;
 
         uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
                 & BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
@@ -4762,6 +4975,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", mRestrictPower: " + mRestrictPower
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
                     + ", isForeground=" + isForeground
+                    + ", isTop=" + isTop
                     + ", isWhitelisted=" + isWhitelisted
                     + ", oldUidBlockedState=" + previousUidBlockedState.toString()
                     + ", newUidBlockedState=" + uidBlockedState.toString());
@@ -4964,7 +5178,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // make sure stats are recorded frequently enough; we aim
                     // for 2MB threshold for 2GB/month rules.
                     final long persistThreshold = lowestRule / 1000;
-                    mNetworkStats.advisePersistThreshold(persistThreshold);
+                    // TODO: Sync internal naming with the API surface.
+                    mNetworkStats.setDefaultGlobalAlert(persistThreshold);
                     return true;
                 }
                 case MSG_UPDATE_INTERFACE_QUOTAS: {
@@ -5023,6 +5238,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         dispatchSubscriptionPlansChanged(listener, subId, plans);
                     }
                     mListeners.finishBroadcast();
+                    return true;
+                }
+                case MSG_CLEAR_SUBSCRIPTION_PLANS: {
+                    synchronized (mUidRulesFirstLock) {
+                        synchronized (mNetworkPoliciesSecondLock) {
+                            int subId = msg.arg1;
+                            if (msg.arg2 == mSetSubscriptionPlansIds.get(subId)) {
+                                if (LOGD) Slog.d(TAG, "Clearing expired subscription plans.");
+                                setSubscriptionPlansInternal(subId, new SubscriptionPlan[]{},
+                                        0 /* expirationDurationMillis */,
+                                        (String) msg.obj /* callingPackage */);
+                            } else {
+                                if (LOGD) Slog.d(TAG, "Ignoring stale CLEAR_SUBSCRIPTION_PLANS.");
+                            }
+                        }
+                    }
                     return true;
                 }
                 case MSG_BLOCKED_REASON_CHANGED: {
@@ -5275,6 +5506,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mUidFirewallPowerSaveRules.put(uid, rule);
             } else if (chain == FIREWALL_CHAIN_RESTRICTED) {
                 mUidFirewallRestrictedModeRules.put(uid, rule);
+            } else if (chain == FIREWALL_CHAIN_LOW_POWER_STANDBY) {
+                mUidFirewallLowPowerStandbyModeRules.put(uid, rule);
             }
 
             try {
@@ -5322,6 +5555,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
             mNetworkManager
                     .setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager
+                    .setFirewallUidRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid,
+                            FIREWALL_RULE_DEFAULT);
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
         } catch (IllegalStateException e) {
@@ -5333,25 +5569,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Deprecated
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
-        return getNetworkTotalBytes(template, start, end);
-    }
-
-    private long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
-        try {
-            return mNetworkStats.getNetworkTotalBytes(template, start, end);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failed to read network stats: " + e);
-            return 0;
-        }
-    }
-
-    private NetworkStats getNetworkUidBytes(NetworkTemplate template, long start, long end) {
-        try {
-            return mNetworkStats.getNetworkUidBytes(template, start, end);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failed to read network stats: " + e);
-            return new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        }
+        // Skip if not ready. NetworkStatsService will block public API calls until it is
+        // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
+        if (!mStatsCallback.isAnyCallbackReceived()) return 0;
+        return mDeps.getNetworkTotalBytes(template, start, end);
     }
 
     private boolean isBandwidthControlEnabled() {
@@ -5465,7 +5686,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
         NetworkTemplate templateCarrier = subscriber != null
                 ? buildTemplateCarrierMetered(subscriber) : null;
-        NetworkTemplate templateMobile = buildTemplateMobileAll(subscriber);
+        NetworkTemplate templateMobile = subscriber != null
+                ? new NetworkTemplate.Builder(MATCH_MOBILE)
+                .setSubscriberIds(Set.of(subscriber))
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .build() : null;
         for (NetworkPolicy policy : policies) {
             //  All policies loaded from disk will be carrier templates, and setting will also only
             //  set carrier templates, but we clear mobile templates just in case one is set by
@@ -5567,14 +5792,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public SubscriptionPlan getSubscriptionPlan(NetworkTemplate template) {
-            synchronized (mNetworkPoliciesSecondLock) {
-                final int subId = findRelevantSubIdNL(template);
-                return getPrimarySubscriptionPlanLocked(subId);
-            }
-        }
-
-        @Override
         public long getSubscriptionOpportunisticQuota(Network network, int quotaType) {
             final long quotaBytes;
             synchronized (mNetworkPoliciesSecondLock) {
@@ -5618,9 +5835,64 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onStatsProviderWarningOrLimitReached(@NonNull String tag) {
-            Log.v(TAG, "onStatsProviderWarningOrLimitReached: " + tag);
-            mHandler.obtainMessage(MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED).sendToTarget();
+        public void setLowPowerStandbyActive(boolean active) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setLowPowerStandbyActive");
+            try {
+                synchronized (mUidRulesFirstLock) {
+                    if (mLowPowerStandbyActive == active) {
+                        return;
+                    }
+                    mLowPowerStandbyActive = active;
+                    synchronized (mNetworkPoliciesSecondLock) {
+                        if (!mSystemReady) return;
+                    }
+
+                    forEachUid("updateRulesForRestrictPower",
+                            uid -> updateRulesForPowerRestrictionsUL(uid));
+                    updateRulesForLowPowerStandbyUL();
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+            }
+        }
+
+        @Override
+        public void setLowPowerStandbyAllowlist(int[] uids) {
+            synchronized (mUidRulesFirstLock) {
+                final SparseBooleanArray changedUids = new SparseBooleanArray();
+                for (int i = 0; i < mLowPowerStandbyAllowlistUids.size(); i++) {
+                    final int oldUid = mLowPowerStandbyAllowlistUids.keyAt(i);
+                    if (!ArrayUtils.contains(uids, oldUid)) {
+                        changedUids.put(oldUid, true);
+                    }
+                }
+
+                for (int i = 0; i < changedUids.size(); i++) {
+                    final int deletedUid = changedUids.keyAt(i);
+                    mLowPowerStandbyAllowlistUids.delete(deletedUid);
+                }
+
+                for (int newUid : uids) {
+                    if (mLowPowerStandbyAllowlistUids.indexOfKey(newUid) < 0) {
+                        changedUids.append(newUid, true);
+                        mLowPowerStandbyAllowlistUids.append(newUid, true);
+                    }
+                }
+
+                if (!mLowPowerStandbyActive) {
+                    return;
+                }
+
+                synchronized (mNetworkPoliciesSecondLock) {
+                    if (!mSystemReady) return;
+                }
+
+                for (int i = 0; i < changedUids.size(); i++) {
+                    final int changedUid = changedUids.keyAt(i);
+                    updateRulesForPowerRestrictionsUL(changedUid);
+                    updateRuleForLowPowerStandbyUL(changedUid);
+                }
+            }
         }
     }
 
@@ -5647,17 +5919,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (NameNotFoundException e) {
             return -1;
         }
-    }
-
-    private int parseSubId(@NonNull NetworkStateSnapshot snapshot) {
-        int subId = INVALID_SUBSCRIPTION_ID;
-        if (snapshot.getNetworkCapabilities().hasTransport(TRANSPORT_CELLULAR)) {
-            NetworkSpecifier spec = snapshot.getNetworkCapabilities().getNetworkSpecifier();
-            if (spec instanceof TelephonyNetworkSpecifier) {
-                subId = ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
-            }
-        }
-        return subId;
     }
 
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -5790,6 +6051,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_USER_RESTRICTED;
             }
+            if ((allowedReasons & ALLOWED_REASON_TOP) != 0) {
+                effectiveBlockedReasons &= ~BLOCKED_REASON_LOW_POWER_STANDBY;
+            }
             if ((allowedReasons & ALLOWED_REASON_POWER_SAVE_ALLOWLIST) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_REASON_BATTERY_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_DOZE;
@@ -5805,6 +6069,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if ((allowedReasons & ALLOWED_METERED_REASON_USER_EXEMPTED) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
             }
+            if ((allowedReasons & ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST) != 0) {
+                effectiveBlockedReasons &= ~BLOCKED_REASON_LOW_POWER_STANDBY;
+            }
+
             return effectiveBlockedReasons;
         }
 
@@ -5829,6 +6097,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 BLOCKED_REASON_DOZE,
                 BLOCKED_REASON_APP_STANDBY,
                 BLOCKED_REASON_RESTRICTED_MODE,
+                BLOCKED_REASON_LOW_POWER_STANDBY,
                 BLOCKED_METERED_REASON_DATA_SAVER,
                 BLOCKED_METERED_REASON_USER_RESTRICTED,
                 BLOCKED_METERED_REASON_ADMIN_DISABLED,
@@ -5837,9 +6106,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         private static final int[] ALLOWED_REASONS = {
                 ALLOWED_REASON_SYSTEM,
                 ALLOWED_REASON_FOREGROUND,
+                ALLOWED_REASON_TOP,
                 ALLOWED_REASON_POWER_SAVE_ALLOWLIST,
                 ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST,
                 ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS,
+                ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST,
                 ALLOWED_METERED_REASON_USER_EXEMPTED,
                 ALLOWED_METERED_REASON_SYSTEM,
                 ALLOWED_METERED_REASON_FOREGROUND,
@@ -5857,6 +6128,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return "APP_STANDBY";
                 case BLOCKED_REASON_RESTRICTED_MODE:
                     return "RESTRICTED_MODE";
+                case BLOCKED_REASON_LOW_POWER_STANDBY:
+                    return "LOW_POWER_STANDBY";
                 case BLOCKED_METERED_REASON_DATA_SAVER:
                     return "DATA_SAVER";
                 case BLOCKED_METERED_REASON_USER_RESTRICTED:
@@ -5877,12 +6150,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return "SYSTEM";
                 case ALLOWED_REASON_FOREGROUND:
                     return "FOREGROUND";
+                case ALLOWED_REASON_TOP:
+                    return "TOP";
                 case ALLOWED_REASON_POWER_SAVE_ALLOWLIST:
                     return "POWER_SAVE_ALLOWLIST";
                 case ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST:
                     return "POWER_SAVE_EXCEPT_IDLE_ALLOWLIST";
                 case ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS:
                     return "RESTRICTED_MODE_PERMISSIONS";
+                case ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST:
+                    return "LOW_POWER_STANDBY_ALLOWLIST";
                 case ALLOWED_METERED_REASON_USER_EXEMPTED:
                     return "METERED_USER_EXEMPTED";
                 case ALLOWED_METERED_REASON_SYSTEM:
@@ -5949,7 +6226,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             int powerBlockedReasons = BLOCKED_REASON_APP_STANDBY
                     | BLOCKED_REASON_DOZE
-                    | BLOCKED_REASON_BATTERY_SAVER;
+                    | BLOCKED_REASON_BATTERY_SAVER
+                    | BLOCKED_REASON_LOW_POWER_STANDBY;
             if ((effectiveBlockedReasons & powerBlockedReasons) != 0) {
                 uidRule |= RULE_REJECT_ALL;
             } else if ((blockedReasons & powerBlockedReasons) != 0) {

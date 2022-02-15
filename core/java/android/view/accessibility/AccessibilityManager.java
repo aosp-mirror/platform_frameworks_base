@@ -1766,6 +1766,72 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Sets the system audio caption enabled state.
+     *
+     * @param isEnabled The system audio captioning enabled state.
+     * @param userId The user Id.
+     * @hide
+     */
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setSystemAudioCaptioningEnabled(isEnabled, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the system audio caption UI enabled state.
+     *
+     * @param userId The user Id.
+     * @return the system audio caption UI enabled state.
+     * @hide
+     */
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.isSystemAudioCaptioningUiEnabled(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the system audio caption UI enabled state.
+     *
+     * @param isEnabled The system audio captioning UI enabled state.
+     * @param userId The user Id.
+     * @hide
+     */
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);

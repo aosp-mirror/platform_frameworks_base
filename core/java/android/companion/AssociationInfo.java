@@ -36,6 +36,10 @@ import java.util.Objects;
  */
 public final class AssociationInfo implements Parcelable {
     /**
+     * A String indicates the selfManaged device is not connected.
+     */
+    private static final String LAST_TIME_CONNECTED_NONE = "None";
+    /**
      * A unique ID of this Association record.
      * Disclosed to the clients (ie. companion applications) for referring to this record (eg. in
      * {@code disassociate()} API call).
@@ -50,8 +54,13 @@ public final class AssociationInfo implements Parcelable {
     private final @Nullable String mDeviceProfile;
 
     private final boolean mSelfManaged;
-    private boolean mNotifyOnDeviceNearby;
+    private final boolean mNotifyOnDeviceNearby;
     private final long mTimeApprovedMs;
+    /**
+     * A long value indicates the last time connected reported by selfManaged devices
+     * Default value is Long.MAX_VALUE.
+     */
+    private final long mLastTimeConnectedMs;
 
     /**
      * Creates a new Association.
@@ -62,7 +71,7 @@ public final class AssociationInfo implements Parcelable {
     public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, boolean selfManaged, boolean notifyOnDeviceNearby,
-            long timeApprovedMs) {
+            long timeApprovedMs, long lastTimeConnectedMs) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -83,6 +92,7 @@ public final class AssociationInfo implements Parcelable {
         mSelfManaged = selfManaged;
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
         mTimeApprovedMs = timeApprovedMs;
+        mLastTimeConnectedMs = lastTimeConnectedMs;
     }
 
     /**
@@ -150,14 +160,6 @@ public final class AssociationInfo implements Parcelable {
         return mSelfManaged;
     }
 
-    /**
-     * Should only be used by the CdmService.
-     * @hide
-     */
-    public void setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
-        mNotifyOnDeviceNearby = notifyOnDeviceNearby;
-    }
-
     /** @hide */
     public boolean isNotifyOnDeviceNearby() {
         return mNotifyOnDeviceNearby;
@@ -171,6 +173,14 @@ public final class AssociationInfo implements Parcelable {
     /** @hide */
     public boolean belongsToPackage(@UserIdInt int userId, String packageName) {
         return mUserId == userId && Objects.equals(mPackageName, packageName);
+    }
+
+    /**
+     * @return the last time self reported disconnected for selfManaged only.
+     * @hide
+     */
+    public Long getLastTimeConnectedMs() {
+        return mLastTimeConnectedMs;
     }
 
     /**
@@ -197,6 +207,32 @@ public final class AssociationInfo implements Parcelable {
         return macAddress.equals(mDeviceMacAddress);
     }
 
+    /**
+     * Utility method to be used by CdmService only.
+     *
+     * @return whether CdmService should bind the companion application that "owns" this association
+     *         when the device is present.
+     *
+     * @hide
+     */
+    public boolean shouldBindWhenPresent() {
+        return mNotifyOnDeviceNearby || mSelfManaged;
+    }
+
+    /** @hide */
+    public @NonNull String toShortString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("id=").append(mId);
+        if (mDeviceMacAddress != null) {
+            sb.append(", addr=").append(getDeviceMacAddressAsString());
+        }
+        if (mSelfManaged) {
+            sb.append(", self-managed");
+        }
+        sb.append(", pkg=u").append(mUserId).append('/').append(mPackageName);
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return "Association{"
@@ -209,6 +245,9 @@ public final class AssociationInfo implements Parcelable {
                 + ", mSelfManaged=" + mSelfManaged
                 + ", mNotifyOnDeviceNearby=" + mNotifyOnDeviceNearby
                 + ", mTimeApprovedMs=" + new Date(mTimeApprovedMs)
+                + ", mLastTimeConnectedMs=" + (
+                    mLastTimeConnectedMs == Long.MAX_VALUE
+                        ? LAST_TIME_CONNECTED_NONE : new Date(mLastTimeConnectedMs))
                 + '}';
     }
 
@@ -222,6 +261,7 @@ public final class AssociationInfo implements Parcelable {
                 && mSelfManaged == that.mSelfManaged
                 && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby
                 && mTimeApprovedMs == that.mTimeApprovedMs
+                && mLastTimeConnectedMs == that.mLastTimeConnectedMs
                 && Objects.equals(mPackageName, that.mPackageName)
                 && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
                 && Objects.equals(mDisplayName, that.mDisplayName)
@@ -231,7 +271,8 @@ public final class AssociationInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
-                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs);
+                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs,
+                mLastTimeConnectedMs);
     }
 
     @Override
@@ -253,6 +294,7 @@ public final class AssociationInfo implements Parcelable {
         dest.writeBoolean(mSelfManaged);
         dest.writeBoolean(mNotifyOnDeviceNearby);
         dest.writeLong(mTimeApprovedMs);
+        dest.writeLong(mLastTimeConnectedMs);
     }
 
     private AssociationInfo(@NonNull Parcel in) {
@@ -268,6 +310,7 @@ public final class AssociationInfo implements Parcelable {
         mSelfManaged = in.readBoolean();
         mNotifyOnDeviceNearby = in.readBoolean();
         mTimeApprovedMs = in.readLong();
+        mLastTimeConnectedMs = in.readLong();
     }
 
     @NonNull
@@ -283,4 +326,112 @@ public final class AssociationInfo implements Parcelable {
             return new AssociationInfo(in);
         }
     };
+
+    /**
+     * Use this method to obtain a builder that you can use to create a copy of the
+     * given {@link AssociationInfo} with modified values of {@code mLastTimeConnected}
+     * or {@code mNotifyOnDeviceNearby}.
+     * <p>
+     *     Note that you <b>must</b> call either {@link Builder#setLastTimeConnected(long)
+     *     setLastTimeConnected} or {@link Builder#setNotifyOnDeviceNearby(boolean)
+     *     setNotifyOnDeviceNearby} before you will be able to call {@link Builder#build() build}.
+     *
+     *     This is ensured statically at compile time.
+     *
+     * @hide
+     */
+    @NonNull
+    public static NonActionableBuilder builder(@NonNull AssociationInfo info) {
+        return new Builder(info);
+    }
+
+    /**
+     * @hide
+     */
+    public static final class Builder implements NonActionableBuilder {
+        @NonNull
+        private final AssociationInfo mOriginalInfo;
+        private boolean mNotifyOnDeviceNearby;
+        private long mLastTimeConnectedMs;
+
+        private Builder(@NonNull AssociationInfo info) {
+            mOriginalInfo = info;
+            mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
+            mLastTimeConnectedMs = info.mLastTimeConnectedMs;
+        }
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @Override
+        @NonNull
+        public Builder setLastTimeConnected(long lastTimeConnectedMs) {
+            if (lastTimeConnectedMs < 0) {
+                throw new IllegalArgumentException(
+                        "lastTimeConnectedMs must not be negative! (Given " + lastTimeConnectedMs
+                                + " )");
+            }
+            mLastTimeConnectedMs = lastTimeConnectedMs;
+            return this;
+        }
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @Override
+        @NonNull
+        public Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
+            mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public AssociationInfo build() {
+            return new AssociationInfo(
+                    mOriginalInfo.mId,
+                    mOriginalInfo.mUserId,
+                    mOriginalInfo.mPackageName,
+                    mOriginalInfo.mDeviceMacAddress,
+                    mOriginalInfo.mDisplayName,
+                    mOriginalInfo.mDeviceProfile,
+                    mOriginalInfo.mSelfManaged,
+                    mNotifyOnDeviceNearby,
+                    mOriginalInfo.mTimeApprovedMs,
+                    mLastTimeConnectedMs
+            );
+        }
+    }
+
+    /**
+     * This interface is returned from the
+     * {@link AssociationInfo#builder(android.companion.AssociationInfo) builder} entry point
+     * to indicate that this builder is not yet in a state that can produce a meaningful
+     * {@link AssociationInfo} object that is different from the one originally passed in.
+     *
+     * <p>
+     * Only by calling one of the setter methods is this builder turned into one where calling
+     * {@link Builder#build() build()} makes sense.
+     *
+     * @hide
+     */
+    public interface NonActionableBuilder {
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @NonNull
+        Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby);
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @NonNull
+        Builder setLastTimeConnected(long lastTimeConnectedMs);
+    }
 }

@@ -29,6 +29,9 @@ import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
+// NOT Singleton. Started per-user.
 public class NotificationChannels extends CoreStartable {
     public static String ALERTS      = "ALR";
     public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
@@ -38,6 +41,7 @@ public class NotificationChannels extends CoreStartable {
     public static String TVPIP       = TvPipNotificationController.NOTIFICATION_CHANNEL; // "TVPIP"
     public static String HINTS       = "HNT";
 
+    @Inject
     public NotificationChannels(Context context) {
         super(context);
     }

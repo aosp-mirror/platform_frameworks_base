@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.window.WindowProviderService.isWindowProviderService;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -31,12 +32,14 @@ import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.window.TaskFpsCallback;
 import android.window.WindowContext;
 import android.window.WindowProvider;
 
@@ -418,5 +421,33 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    @Override
+    public void registerTaskFpsCallback(@IntRange(from = 0) int taskId, TaskFpsCallback callback) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerTaskFpsCallback(
+                    taskId, callback.getListener());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void unregisterTaskFpsCallback(TaskFpsCallback callback) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().unregisterTaskFpsCallback(
+                    callback.getListener());
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public Bitmap snapshotTaskForRecents(int taskId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().snapshotTaskForRecents(taskId);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return null;
     }
 }

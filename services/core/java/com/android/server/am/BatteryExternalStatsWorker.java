@@ -16,6 +16,7 @@
 package com.android.server.am;
 
 import android.annotation.Nullable;
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -129,6 +130,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     @GuardedBy("this")
     private Future<?> mBatteryLevelSync;
+
+    @GuardedBy("this")
+    private Future<?> mProcessStateSync;
 
     // If both mStats and mWorkerLock need to be synchronized, mWorkerLock must be acquired first.
     private final Object mWorkerLock = new Object();
@@ -316,6 +320,25 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
+    public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
+        synchronized (BatteryExternalStatsWorker.this) {
+            mProcessStateSync = scheduleDelayedSyncLocked(mProcessStateSync,
+                    () -> scheduleSync("procstate-change", UPDATE_ON_PROC_STATE_CHANGE),
+                    delayMillis);
+            return mProcessStateSync;
+        }
+    }
+
+    public void cancelSyncDueToProcessStateChange() {
+        synchronized (BatteryExternalStatsWorker.this) {
+            if (mProcessStateSync != null) {
+                mProcessStateSync.cancel(false);
+                mProcessStateSync = null;
+            }
+        }
+    }
+
+    @Override
     public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
         synchronized (BatteryExternalStatsWorker.this) {
             return mExecutorService.schedule(() -> {
@@ -428,11 +451,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
-                if (updateFlags == UPDATE_ALL) {
+                if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                     cancelSyncDueToBatteryLevelChangeLocked();
                 }
                 if ((updateFlags & UPDATE_CPU) != 0) {
                     cancelCpuSyncDueToWakelockChange();
+                }
+                if ((updateFlags & UPDATE_ON_PROC_STATE_CHANGE) == UPDATE_ON_PROC_STATE_CHANGE) {
+                    cancelSyncDueToProcessStateChange();
                 }
             }
 
@@ -470,7 +496,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 Slog.wtf(TAG, "Error updating external stats: ", e);
             }
 
-            if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
+            if ((updateFlags & RESET) != 0) {
+                synchronized (BatteryExternalStatsWorker.this) {
+                    mLastCollectionTimeStamp = 0;
+                }
+            } else if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                 synchronized (BatteryExternalStatsWorker.this) {
                     mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
                 }
@@ -632,7 +662,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff, cpuClusterChargeUC);
             }
 
-            if (updateFlags == UPDATE_ALL) {
+            if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                 mStats.updateKernelWakelocksLocked(elapsedRealtimeUs);
                 mStats.updateKernelMemoryBandwidthLocked(elapsedRealtimeUs);
             }
@@ -687,8 +717,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (wifiInfo.isValid()) {
                 final long wifiChargeUC = measuredEnergyDeltas != null ?
                         measuredEnergyDeltas.wifiChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
-                mStats.updateWifiState(
-                        extractDeltaLocked(wifiInfo), wifiChargeUC, elapsedRealtime, uptime);
+                final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
+                        NetworkStatsManager.class);
+                mStats.updateWifiState(extractDeltaLocked(wifiInfo),
+                        wifiChargeUC, elapsedRealtime, uptime, networkStatsManager);
             } else {
                 Slog.w(TAG, "wifi info is invalid: " + wifiInfo);
             }
@@ -697,11 +729,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         if (modemInfo != null) {
             final long mobileRadioChargeUC = measuredEnergyDeltas != null
                     ? measuredEnergyDeltas.mobileRadioChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
+            final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
+                    NetworkStatsManager.class);
             mStats.noteModemControllerActivity(modemInfo, mobileRadioChargeUC, elapsedRealtime,
-                    uptime);
+                    uptime, networkStatsManager);
         }
 
-        if (updateFlags == UPDATE_ALL) {
+        if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
             // This helps mStats deal with ignoring data from prior to resets.
             mStats.informThatAllExternalStatsAreFlushed();
         }

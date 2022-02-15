@@ -42,4 +42,6 @@ oneway interface IInputMethodPrivilegedOperations {
     void shouldOfferSwitchingToNextInputMethod(in AndroidFuture future /* T=Boolean */);
     void notifyUserActionAsync();
     void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible);
+    void onStylusHandwritingReady(int requestId);
+    void finishStylusHandwriting(int requestId);
 }

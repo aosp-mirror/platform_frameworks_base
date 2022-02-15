@@ -910,6 +910,7 @@ public class CallLog {
          * <li>{@link #PRESENTATION_RESTRICTED}</li>
          * <li>{@link #PRESENTATION_UNKNOWN}</li>
          * <li>{@link #PRESENTATION_PAYPHONE}</li>
+         * <li>{@link #PRESENTATION_UNAVAILABLE}</li>
          * </ul>
          * </p>
          *
@@ -925,6 +926,8 @@ public class CallLog {
         public static final int PRESENTATION_UNKNOWN = 3;
         /** Number is a pay phone. */
         public static final int PRESENTATION_PAYPHONE = 4;
+        /** Number is unavailable. */
+        public static final int PRESENTATION_UNAVAILABLE = 5;
 
         /**
          * The ISO 3166-1 two letters country code of the country where the
@@ -2026,6 +2029,10 @@ public class CallLog {
 
             if (presentation == TelecomManager.PRESENTATION_PAYPHONE) {
                 return presentation;
+            }
+
+            if (presentation == TelecomManager.PRESENTATION_UNAVAILABLE) {
+                return PRESENTATION_UNAVAILABLE;
             }
 
             if (TextUtils.isEmpty(number)

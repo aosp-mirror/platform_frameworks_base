@@ -63,6 +63,7 @@ interface INotificationManager
     boolean isInInvalidMsgState(String pkg, int uid);
     boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
     void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
+    boolean hasSentValidBubble(String pkg, int uid);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     /**
      * Updates the notification's enabled state. Additionally locks importance for all of the

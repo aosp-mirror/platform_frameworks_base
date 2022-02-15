@@ -43,4 +43,5 @@ enum AudioInputFlags {
   VOIP_TX = 5,
   HW_AV_SYNC = 6,
   DIRECT = 7,
+  ULTRASOUND = 8,
 }

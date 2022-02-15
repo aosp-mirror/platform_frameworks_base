@@ -29,6 +29,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
+import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -41,6 +42,7 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Dumpable;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
@@ -215,6 +217,10 @@ public final class ContentCaptureManager {
     /** @hide */
     public static final boolean DEBUG = false;
 
+    /** @hide */
+    @TestApi
+    public static final String DUMPABLE_NAME = "ContentCaptureManager";
+
     /** Error happened during the data sharing session. */
     public static final int DATA_SHARE_ERROR_UNKNOWN = 1;
 
@@ -385,6 +391,9 @@ public final class ContentCaptureManager {
 
     @GuardedBy("mLock")
     private MainContentCaptureSession mMainSession;
+
+    @Nullable // set on-demand by addDumpable()
+    private Dumper mDumpable;
 
     /** @hide */
     public interface ContentCaptureClient {
@@ -741,26 +750,43 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
-    public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.println("ContentCaptureManager");
-        final String prefix2 = prefix + "  ";
-        synchronized (mLock) {
-            pw.print(prefix2); pw.print("isContentCaptureEnabled(): ");
-            pw.println(isContentCaptureEnabled());
-            pw.print(prefix2); pw.print("Debug: "); pw.print(sDebug);
-            pw.print(" Verbose: "); pw.println(sVerbose);
-            pw.print(prefix2); pw.print("Context: "); pw.println(mContext);
-            pw.print(prefix2); pw.print("User: "); pw.println(mContext.getUserId());
-            pw.print(prefix2); pw.print("Service: "); pw.println(mService);
-            pw.print(prefix2); pw.print("Flags: "); pw.println(mFlags);
-            pw.print(prefix2); pw.print("Options: "); mOptions.dumpShort(pw); pw.println();
-            if (mMainSession != null) {
-                final String prefix3 = prefix2 + "  ";
-                pw.print(prefix2); pw.println("Main session:");
-                mMainSession.dump(prefix3, pw);
-            } else {
-                pw.print(prefix2); pw.println("No sessions");
+    public void addDumpable(Activity activity) {
+        if (mDumpable == null) {
+            mDumpable = new Dumper();
+        }
+        activity.addDumpable(mDumpable);
+    }
+
+    // NOTE: ContentCaptureManager cannot implement it directly as it would be exposed as public API
+    private final class Dumper implements Dumpable {
+        @Override
+        public void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
+            String prefix = "";
+            pw.print(prefix); pw.println("ContentCaptureManager");
+            final String prefix2 = prefix + "  ";
+            synchronized (mLock) {
+                pw.print(prefix2); pw.print("isContentCaptureEnabled(): ");
+                pw.println(isContentCaptureEnabled());
+                pw.print(prefix2); pw.print("Debug: "); pw.print(sDebug);
+                pw.print(" Verbose: "); pw.println(sVerbose);
+                pw.print(prefix2); pw.print("Context: "); pw.println(mContext);
+                pw.print(prefix2); pw.print("User: "); pw.println(mContext.getUserId());
+                pw.print(prefix2); pw.print("Service: "); pw.println(mService);
+                pw.print(prefix2); pw.print("Flags: "); pw.println(mFlags);
+                pw.print(prefix2); pw.print("Options: "); mOptions.dumpShort(pw); pw.println();
+                if (mMainSession != null) {
+                    final String prefix3 = prefix2 + "  ";
+                    pw.print(prefix2); pw.println("Main session:");
+                    mMainSession.dump(prefix3, pw);
+                } else {
+                    pw.print(prefix2); pw.println("No sessions");
+                }
             }
+        }
+
+        @Override
+        public String getDumpableName() {
+            return DUMPABLE_NAME;
         }
     }
 

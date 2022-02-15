@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
-import android.app.IActivityTaskManager
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
@@ -49,13 +48,15 @@ import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
+import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -84,8 +85,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var activityTaskManager: IActivityTaskManager
-    @Mock private lateinit var userDetailAdapter: UserSwitcherController.UserDetailAdapter
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
@@ -96,8 +95,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var shadeController: ShadeController
     private lateinit var testableLooper: TestableLooper
-    private lateinit var uiBgExecutor: FakeExecutor
+    private lateinit var bgExecutor: FakeExecutor
+    private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var userSwitcherController: UserSwitcherController
     private lateinit var picture: Bitmap
@@ -116,10 +117,11 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        uiBgExecutor = FakeExecutor(FakeSystemClock())
+        bgExecutor = FakeExecutor(FakeSystemClock())
+        uiExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
 
-        context.orCreateTestableResources.addOverride(
+        mContext.orCreateTestableResources.addOverride(
                 com.android.internal.R.bool.config_guestUserAutoCreated, false)
 
         mContext.addMockSystemService(Context.FACE_SERVICE, mock(FaceManager::class.java))
@@ -130,8 +132,27 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 .thenReturn(true)
         `when`(notificationShadeWindowView.context).thenReturn(context)
 
+        // Since userSwitcherController involves InteractionJankMonitor.
+        // Let's fulfill the dependencies.
+        val mockedContext = mock(Context::class.java)
+        doReturn(mockedContext).`when`(notificationShadeWindowView).context
+        doReturn(true).`when`(notificationShadeWindowView).isAttachedToWindow
+        doNothing().`when`(threadedRenderer).addObserver(any())
+        doNothing().`when`(threadedRenderer).removeObserver(any())
+        doReturn(threadedRenderer).`when`(notificationShadeWindowView).threadedRenderer
+
+        picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
+
+        // Create defaults for the current user
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
+        setupController()
+    }
+
+    private fun setupController() {
         userSwitcherController = UserSwitcherController(
-                context,
+                mContext,
                 activityManager,
                 userManager,
                 userTracker,
@@ -144,27 +165,14 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 falsingManager,
                 telephonyListenerManager,
-                activityTaskManager,
-                userDetailAdapter,
                 secureSettings,
-                uiBgExecutor,
+                bgExecutor,
+                uiExecutor,
                 interactionJankMonitor,
                 latencyTracker,
                 dumpManager,
+                { shadeController },
                 dialogLaunchAnimator)
-        userSwitcherController.mPauseRefreshUsers = true
-
-        // Since userSwitcherController involves InteractionJankMonitor.
-        // Let's fulfill the dependencies.
-        val mockedContext = mock(Context::class.java)
-        doReturn(mockedContext).`when`(notificationShadeWindowView).context
-        doReturn(true).`when`(notificationShadeWindowView).isAttachedToWindow
-        doNothing().`when`(threadedRenderer).addObserver(any())
-        doNothing().`when`(threadedRenderer).removeObserver(any())
-        doReturn(threadedRenderer).`when`(notificationShadeWindowView).threadedRenderer
-        userSwitcherController.init(notificationShadeWindowView)
-
-        picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
         userSwitcherController.init(notificationShadeWindowView)
     }
 
@@ -177,7 +185,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -196,7 +205,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -220,7 +230,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
@@ -240,7 +251,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -262,7 +274,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -283,7 +296,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestInfo.id)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -302,7 +316,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 true /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -323,7 +338,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -357,7 +373,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 false /* current */,
                 false /* isAddUser */,
                 false /* isRestricted */,
-                true /* isSwitchToEnabled */)
+                true /* isSwitchToEnabled */,
+                false /* isAddSupervisedUser */)
         `when`(userTracker.userId).thenReturn(guestId)
         `when`(userTracker.userInfo).thenReturn(guestInfo)
 
@@ -389,7 +406,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
             userSwitcherController.users.add(UserSwitcherController.UserRecord(
                     UserInfo(id, name, 0),
                     null, false, isCurrent, false,
-                    false, false
+                    false, false, false
             ))
         }
         val bgUserName = "background_user"
@@ -399,5 +416,55 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         addUser(2, fgUserName, true)
 
         assertEquals(fgUserName, userSwitcherController.currentUserName)
+    }
+
+    @Test
+    fun isSystemUser_currentUserIsSystemUser_shouldReturnTrue() {
+        `when`(userTracker.userId).thenReturn(UserHandle.USER_SYSTEM)
+        assertEquals(true, userSwitcherController.isSystemUser)
+    }
+
+    @Test
+    fun isSystemUser_currentUserIsNotSystemUser_shouldReturnFalse() {
+        `when`(userTracker.userId).thenReturn(1)
+        assertEquals(false, userSwitcherController.isSystemUser)
+    }
+
+    @Test
+    fun testCanCreateSupervisedUserWithConfiguredPackage() {
+        // GIVEN the supervised user creation package is configured
+        `when`(context.getString(
+            com.android.internal.R.string.config_supervisedUserCreationPackage))
+            .thenReturn("some_pkg")
+
+        // AND the current user is allowed to create new users
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
+        // WHEN the controller is started with the above config
+        setupController()
+        testableLooper.processAllMessages()
+
+        // THEN a supervised user can be constructed
+        assertTrue(userSwitcherController.canCreateSupervisedUser())
+    }
+
+    @Test
+    fun testCannotCreateSupervisedUserWithConfiguredPackage() {
+        // GIVEN the supervised user creation package is NOT configured
+        `when`(context.getString(
+            com.android.internal.R.string.config_supervisedUserCreationPackage))
+            .thenReturn(null)
+
+        // AND the current user is allowed to create new users
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
+        // WHEN the controller is started with the above config
+        setupController()
+        testableLooper.processAllMessages()
+
+        // THEN a supervised user can NOT be constructed
+        assertFalse(userSwitcherController.canCreateSupervisedUser())
     }
 }

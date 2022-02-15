@@ -165,7 +165,7 @@ public class GraphicsEnvironment {
     private boolean isAngleEnabledByGameMode(Context context, String packageName) {
         try {
             final boolean gameModeEnabledAngle =
-                    (mGameManager != null) && mGameManager.getAngleEnabled(packageName);
+                    (mGameManager != null) && mGameManager.isAngleEnabled(packageName);
             Log.v(TAG, "ANGLE GameManagerService for " + packageName + ": " + gameModeEnabledAngle);
             return gameModeEnabledAngle;
         } catch (SecurityException e) {

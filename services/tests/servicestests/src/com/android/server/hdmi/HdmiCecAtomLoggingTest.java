@@ -98,8 +98,6 @@ public class HdmiCecAtomLoggingTest {
         doReturn(hdmiCecConfig).when(mHdmiControlServiceSpy).getHdmiCecConfig();
 
         mHdmiControlServiceSpy.setIoLooper(mLooper);
-        mHdmiControlServiceSpy.setMessageValidator(
-                new HdmiCecMessageValidator(mHdmiControlServiceSpy));
         mHdmiControlServiceSpy.setCecMessageBuffer(
                 new CecMessageBuffer(mHdmiControlServiceSpy));
 
@@ -226,7 +224,7 @@ public class HdmiCecAtomLoggingTest {
 
     @Test
     public void testMessageReported_writesAtom_userControlPressed_noParams() {
-        HdmiCecMessage message = new HdmiCecMessage(
+        HdmiCecMessage message = HdmiCecMessage.build(
                 Constants.ADDR_TV,
                 Constants.ADDR_PLAYBACK_1,
                 Constants.MESSAGE_USER_CONTROL_PRESSED,
@@ -279,7 +277,7 @@ public class HdmiCecAtomLoggingTest {
 
     @Test
     public void testMessageReported_writesAtom_featureAbort_noParams() {
-        HdmiCecMessage message = new HdmiCecMessage(
+        HdmiCecMessage message = HdmiCecMessage.build(
                 Constants.ADDR_TV,
                 Constants.ADDR_PLAYBACK_1,
                 Constants.MESSAGE_FEATURE_ABORT,

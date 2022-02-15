@@ -117,6 +117,7 @@ public class AccessPointControllerImpl implements AccessPointController,
     }
 
     public boolean canConfigWifi() {
+        if (!mWifiPickerTrackerFactory.isSupported()) return false;
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
                 new UserHandle(mCurrentUser));
     }
@@ -310,6 +311,10 @@ public class AccessPointControllerImpl implements AccessPointController,
             mConnectivityManager = connectivityManager;
             mMainHandler = mainHandler;
             mWorkerHandler = workerHandler;
+        }
+
+        private boolean isSupported() {
+            return mWifiManager != null;
         }
 
         /**

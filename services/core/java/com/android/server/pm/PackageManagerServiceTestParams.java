@@ -57,6 +57,7 @@ public final class PackageManagerServiceTestParams {
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
     public InstantAppRegistry instantAppRegistry;
+    public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;
@@ -88,9 +89,11 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String defaultTextClassifierPackage;
     public @Nullable String systemTextClassifierPackage;
     public @Nullable String overlayConfigSignaturePackage;
+    public @NonNull String requiredSupplementalProcessPackage;
     public ViewCompiler viewCompiler;
     public @Nullable String retailDemoPackage;
     public @Nullable String recentsPackage;
+    public @Nullable String ambientContextDetectionPackage;
     public ComponentName resolveComponentName;
     public ArrayMap<String, AndroidPackage> packages;
     public boolean enableFreeCacheV2;
@@ -104,10 +107,12 @@ public final class PackageManagerServiceTestParams {
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     public BroadcastHelper broadcastHelper;
     public AppDataHelper appDataHelper;
+    public InstallPackageHelper installPackageHelper;
     public RemovePackageHelper removePackageHelper;
     public InitAndSystemPackageHelper initAndSystemPackageHelper;
     public DeletePackageHelper deletePackageHelper;
     public PreferredActivityHelper preferredActivityHelper;
     public ResolveIntentHelper resolveIntentHelper;
     public DexOptHelper dexOptHelper;
+    public SuspendPackageHelper suspendPackageHelper;
 }

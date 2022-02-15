@@ -79,6 +79,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,6 +91,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -180,6 +182,22 @@ public class AudioManager {
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when the volume for a particular stream type changes.
+     * Includes the stream, the new volume and previous volumes.
+     * Notes:
+     *  - for internal platform use only, do not make public,
+     *  - never used for "remote" volume changes
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_VOLUME_STREAM_VALUE
+     * @see #EXTRA_PREV_VOLUME_STREAM_VALUE
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SuppressLint("ActionValue")
+    public static final String ACTION_VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION";
+
+    /**
      * @hide Broadcast intent when the devices for a particular stream type changes.
      * Includes the stream, the new devices and previous devices.
      * Notes:
@@ -243,7 +261,8 @@ public class AudioManager {
     /**
      * @hide The stream type for the volume changed intent.
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
 
     /**
@@ -260,7 +279,8 @@ public class AudioManager {
     /**
      * @hide The volume associated with the stream for the volume changed intent.
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_VOLUME_STREAM_VALUE";
 
@@ -367,7 +387,7 @@ public class AudioManager {
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide Used to identify the volume of audio streams for phone calls when connected
      *        to bluetooth */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
     /** @hide Used to identify the volume of audio streams for enforced system sounds
      *        in certain countries (e.g camera in Japan) */
@@ -543,6 +563,7 @@ public class AudioManager {
      * Indicates the volume set/adjust call is for Bluetooth absolute volume
      * @hide
      */
+    @SystemApi
     public static final int FLAG_BLUETOOTH_ABS_VOLUME = 1 << 6;
 
     /**
@@ -1204,7 +1225,8 @@ public class AudioManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
     public int getLastAudibleStreamVolume(int streamType) {
         final IAudioService service = getService();
         try {
@@ -2399,6 +2421,77 @@ public class AudioManager {
     }
 
     //====================================================================
+    // Direct playback query
+
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct playback not supported. */
+    public static final int DIRECT_PLAYBACK_NOT_SUPPORTED = AudioSystem.DIRECT_NOT_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct offload playback supported. Compressed offload is a variant of direct playback.
+        It is the feature that allows audio processing tasks to be done on the Android device but
+        not on the application processor, instead, it is handled by dedicated hardware such as audio
+        DSPs. That will allow the application processor to be idle as much as possible, which is
+        good for power saving. Compressed offload playback supports
+        {@link AudioTrack.StreamEventCallback} for event notifications. */
+    public static final int DIRECT_PLAYBACK_OFFLOAD_SUPPORTED =
+            AudioSystem.DIRECT_OFFLOAD_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct offload playback supported with gapless transitions. Compressed offload is a variant
+        of direct playback. It is the feature that allows audio processing tasks to be done on the
+        Android device but not on the application processor, instead, it is handled by dedicated
+        hardware such as audio DSPs. That will allow the application processor to be idle as much as
+        possible, which is good for power saving. Compressed offload playback supports
+        {@link AudioTrack.StreamEventCallback} for event notifications. Gapless transitions
+        indicates the ability to play consecutive audio tracks without an audio silence in
+        between. */
+    public static final int DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED =
+            AudioSystem.DIRECT_OFFLOAD_GAPLESS_SUPPORTED;
+    /** Return value for {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)}:
+        direct playback supported. This value covers direct playback that is bitstream pass-through
+        such as compressed pass-through. */
+    public static final int DIRECT_PLAYBACK_BITSTREAM_SUPPORTED =
+            AudioSystem.DIRECT_BITSTREAM_SUPPORTED;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "DIRECT_PLAYBACK_", value = {
+            DIRECT_PLAYBACK_NOT_SUPPORTED,
+            DIRECT_PLAYBACK_OFFLOAD_SUPPORTED,
+            DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED,
+            DIRECT_PLAYBACK_BITSTREAM_SUPPORTED}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDirectPlaybackMode {}
+
+    /**
+     * Returns a bitfield representing the different forms of direct playback currently available
+     * for a given audio format.
+     * <p>Direct playback means that the audio stream is not altered by the framework. The audio
+     * stream will not be resampled, volume scaled, downmixed or mixed with other content by
+     * the framework. But it may be wrapped in a higher level protocol such as IEC61937 for
+     * passthrough.
+     * <p>Checking for direct support can help the app select the representation of audio content
+     * that most closely matches the capabilities of the device and peripherals (e.g. A/V receiver)
+     * connected to it. Note that the provided stream can still be re-encoded or mixed with other
+     * streams, if needed.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return the direct playback mode available with given format and attributes. The returned
+     *         value will be {@link #DIRECT_PLAYBACK_NOT_SUPPORTED} or a combination of
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_SUPPORTED},
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} and
+     *         {@link #DIRECT_PLAYBACK_BITSTREAM_SUPPORTED}. Note that if
+     *         {@link #DIRECT_PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} is present in the returned value,
+     *         then {@link #DIRECT_PLAYBACK_OFFLOAD_SUPPORTED} will be too.
+     */
+    @AudioDirectPlaybackMode
+    public static int getDirectPlaybackSupport(@NonNull AudioFormat format,
+                                               @NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(format);
+        Objects.requireNonNull(attributes);
+        return AudioSystem.getDirectPlaybackSupport(format, attributes);
+    }
+
+    //====================================================================
     // Offload query
     /**
      * Returns whether offloaded playback of an audio format is supported on the device.
@@ -2458,7 +2551,9 @@ public class AudioManager {
      *         {@link #PLAYBACK_OFFLOAD_SUPPORTED} if offload playback is supported or
      *         {@link #PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} if gapless transitions are
      *         also supported.
+     * @deprecated Use {@link #getDirectPlaybackSupport(AudioFormat, AudioAttributes)} instead
      */
+    @Deprecated
     @AudioOffloadMode
     public static int getPlaybackOffloadSupport(@NonNull AudioFormat format,
             @NonNull AudioAttributes attributes) {
@@ -2921,19 +3016,17 @@ public class AudioManager {
         void onModeChanged(@AudioMode int mode);
     }
 
-    private final Object mModeListenerLock = new Object();
     /**
-     * List of listeners for audio mode and their associated Executor.
-     * List is lazy-initialized on first registration
+     * manages the OnModeChangedListener listeners and the ModeDispatcherStub
      */
-    @GuardedBy("mModeListenerLock")
-    private @Nullable ArrayList<ListenerInfo<OnModeChangedListener>> mModeListeners;
+    private final CallbackUtil.LazyListenerManager<OnModeChangedListener> mModeChangedListenerMgr =
+            new CallbackUtil.LazyListenerManager();
 
-    @GuardedBy("mModeListenerLock")
-    private ModeDispatcherStub mModeDispatcherStub;
 
-    private final class ModeDispatcherStub extends IAudioModeDispatcher.Stub {
+    final class ModeDispatcherStub extends IAudioModeDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
 
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -2947,10 +3040,8 @@ public class AudioManager {
         }
 
         @Override
-        @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchAudioModeChanged(int mode) {
-            CallbackUtil.callListeners(mModeListeners, mModeListenerLock,
-                    (listener) -> listener.onModeChanged(mode));
+            mModeChangedListenerMgr.callListeners((listener) -> listener.onModeChanged(mode));
         }
     }
 
@@ -2963,15 +3054,8 @@ public class AudioManager {
     public void addOnModeChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnModeChangedListener listener) {
-        synchronized (mModeListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnModeChangedListener>>, ModeDispatcherStub> res =
-                    CallbackUtil.addListener("addOnModeChangedListener",
-                            executor, listener, mModeListeners, mModeDispatcherStub,
-                            () -> new ModeDispatcherStub(),
-                            stub -> stub.register(true));
-            mModeListeners = res.first;
-            mModeDispatcherStub = res.second;
-        }
+        mModeChangedListenerMgr.addListener(executor, listener, "addOnModeChangedListener",
+                () -> new ModeDispatcherStub());
     }
 
     /**
@@ -2980,14 +3064,7 @@ public class AudioManager {
      * @param listener
      */
     public void removeOnModeChangedListener(@NonNull OnModeChangedListener listener) {
-        synchronized (mModeListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnModeChangedListener>>, ModeDispatcherStub> res =
-                    CallbackUtil.removeListener("removeOnModeChangedListener",
-                            listener, mModeListeners, mModeDispatcherStub,
-                            stub -> stub.register(false));
-            mModeListeners = res.first;
-            mModeDispatcherStub = res.second;
-        }
+        mModeChangedListenerMgr.removeListener(listener, "removeOnModeChangedListener");
     }
 
     /**
@@ -5383,6 +5460,10 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_BLE_SPEAKER = AudioSystem.DEVICE_OUT_BLE_SPEAKER;
     /** @hide
+     * The audio output device code for a BLE audio brodcast group.
+     */
+    public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
@@ -5592,6 +5673,43 @@ public class AudioManager {
     }
 
     /**
+     * Get the audio devices that would be used for the routing of the given audio attributes.
+     * These are the devices anticipated to play sound from an {@link AudioTrack} created with
+     * the specified {@link AudioAttributes}.
+     * The audio routing can change if audio devices are physically connected or disconnected or
+     * concurrently through {@link AudioRouting} or {@link MediaRouter}.
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @return an empty list if there was an issue with the request, a list of
+     * {@link AudioDeviceInfo} otherwise (typically one device, except for duplicated paths).
+     */
+    public @NonNull List<AudioDeviceInfo> getAudioDevicesForAttributes(
+            @NonNull AudioAttributes attributes) {
+        final List<AudioDeviceAttributes> devicesForAttributes;
+        try {
+            Objects.requireNonNull(attributes);
+            final IAudioService service = getService();
+            devicesForAttributes = service.getDevicesForAttributesUnprotected(attributes);
+        } catch (Exception e) {
+            Log.i(TAG, "No audio devices available for specified attributes.");
+            return Collections.emptyList();
+        }
+
+        // Map from AudioDeviceAttributes to AudioDeviceInfo
+        AudioDeviceInfo[] outputDeviceInfos = getDevicesStatic(GET_DEVICES_OUTPUTS);
+        List<AudioDeviceInfo> deviceInfosForAttributes = new ArrayList<>();
+        for (AudioDeviceAttributes deviceForAttributes : devicesForAttributes) {
+            for (AudioDeviceInfo deviceInfo : outputDeviceInfos) {
+                if (deviceForAttributes.getType() == deviceInfo.getType()
+                        && TextUtils.equals(deviceForAttributes.getAddress(),
+                                deviceInfo.getAddress())) {
+                    deviceInfosForAttributes.add(deviceInfo);
+                }
+            }
+        }
+        return Collections.unmodifiableList(deviceInfosForAttributes);
+    }
+
+    /**
      * @hide
      * Volume behavior for an audio device that has no particular volume behavior set. Invalid as
      * an argument to {@link #setDeviceVolumeBehavior(AudioDeviceAttributes, int)} and should not
@@ -5757,7 +5875,7 @@ public class AudioManager {
         return false;
     }
 
-     /**
+    /**
      * Indicate wired accessory connection state change.
      * @param device type of device connected/disconnected (AudioManager.DEVICE_OUT_xxx)
      * @param state  new connection state: 1 connected, 0 disconnected
@@ -5766,10 +5884,29 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(int type, int state, String address, String name) {
+    public void setWiredDeviceConnectionState(int device, int state, String address,
+            String name) {
+        final IAudioService service = getService();
+        int role = isOutputDevice(device)
+                ? AudioDeviceAttributes.ROLE_OUTPUT : AudioDeviceAttributes.ROLE_INPUT;
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                role, AudioDeviceInfo.convertInternalDeviceToDeviceType(device), address,
+                name, new ArrayList<>()/*mAudioProfiles*/, new ArrayList<>()/*mAudioDescriptors*/);
+        setWiredDeviceConnectionState(attributes, state);
+    }
+
+    /**
+     * Indicate wired accessory connection state change and attributes.
+     * @param state      new connection state: 1 connected, 0 disconnected
+     * @param attributes attributes of the connected device
+     * {@hide}
+     */
+    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes, int state) {
         final IAudioService service = getService();
         try {
-            service.setWiredDeviceConnectionState(type, state, address, name,
+            service.setWiredDeviceConnectionState(attributes, state,
                     mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -5802,13 +5939,14 @@ public class AudioManager {
      * @param newDevice Bluetooth device connected or null if there is no new devices
      * @param previousDevice Bluetooth device disconnected or null if there is no disconnected
      * devices
-     * @param info contain all info related to the device. {@link BtProfileConnectionInfo}
+     * @param info contain all info related to the device. {@link BluetoothProfileConnectionInfo}
      * {@hide}
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
     public void handleBluetoothActiveDeviceChanged(@Nullable BluetoothDevice newDevice,
-            @Nullable BluetoothDevice previousDevice, @NonNull BtProfileConnectionInfo info) {
+            @Nullable BluetoothDevice previousDevice,
+            @NonNull BluetoothProfileConnectionInfo info) {
         final IAudioService service = getService();
         try {
             service.handleBluetoothActiveDeviceChanged(newDevice, previousDevice, info);
@@ -6788,56 +6926,63 @@ public class AudioManager {
 
     /**
      * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for A2DP and LE audio playback.
+     * supported on offload path for A2DP playback.
      *
-     * @param deviceType Indicates the target device type {@link AudioSystem.DeviceType}
      * @return a list of {@link BluetoothCodecConfig} objects containing encoding formats
-     * supported for offload A2DP playback or a list of {@link BluetoothLeAudioCodecConfig}
-     * objects containing encoding formats supported for offload LE Audio playback
+     * supported for offload A2DP playback
      * @hide
      */
-    public List<?> getHwOffloadFormatsSupportedForBluetoothMedia(
-            @AudioSystem.DeviceType int deviceType) {
-        ArrayList<Integer> formatsList = new ArrayList<Integer>();
-        ArrayList<BluetoothCodecConfig> a2dpCodecConfigList = new ArrayList<BluetoothCodecConfig>();
-        ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList =
-                new ArrayList<BluetoothLeAudioCodecConfig>();
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @NonNull List<BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp() {
+        ArrayList<Integer> formatsList = new ArrayList<>();
+        ArrayList<BluetoothCodecConfig> codecConfigList = new ArrayList<>();
 
-        if (deviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
-                && deviceType != AudioSystem.DEVICE_OUT_BLE_HEADSET) {
-            throw new IllegalArgumentException(
-                    "Illegal devicetype for the getHwOffloadFormatsSupportedForBluetoothMedia");
-        }
-
-        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(deviceType,
-                                                                                formatsList);
+        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, formatsList);
         if (status != AudioManager.SUCCESS) {
-            Log.e(TAG, "getHwOffloadFormatsSupportedForBluetoothMedia for deviceType "
-                    + deviceType + " failed:" + status);
-            return a2dpCodecConfigList;
+            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForA2DP failed:" + status);
+            return codecConfigList;
         }
 
-        if (deviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-            for (Integer format : formatsList) {
-                int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
-                if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                    a2dpCodecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
-                }
+        for (Integer format : formatsList) {
+            int btSourceCodec = AudioSystem.audioFormatToBluetoothSourceCodec(format);
+            if (btSourceCodec != BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                codecConfigList.add(new BluetoothCodecConfig(btSourceCodec));
             }
-            return a2dpCodecConfigList;
-        } else if (deviceType == AudioSystem.DEVICE_OUT_BLE_HEADSET) {
-            for (Integer format : formatsList) {
-                int btLeAudioCodec = AudioSystem.audioFormatToBluetoothLeAudioSourceCodec(format);
-                if (btLeAudioCodec != BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
-                    leAudioCodecConfigList.add(new BluetoothLeAudioCodecConfig.Builder()
-                                                .setCodecType(btLeAudioCodec)
-                                                .build());
-                }
-            }
+        }
+        return codecConfigList;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le audio playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Audio playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+        ArrayList<Integer> formatsList = new ArrayList<>();
+        ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList = new ArrayList<>();
+
+        int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
+                AudioSystem.DEVICE_OUT_BLE_HEADSET, formatsList);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForLeAudio failed:" + status);
             return leAudioCodecConfigList;
         }
-        Log.e(TAG, "Input deviceType " + deviceType + " doesn't support.");
-        return a2dpCodecConfigList;
+
+        for (Integer format : formatsList) {
+            int btLeAudioCodec = AudioSystem.audioFormatToBluetoothLeAudioSourceCodec(format);
+            if (btLeAudioCodec != BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_INVALID) {
+                leAudioCodecConfigList.add(new BluetoothLeAudioCodecConfig.Builder()
+                                            .setCodecType(btLeAudioCodec)
+                                            .build());
+            }
+        }
+        return leAudioCodecConfigList;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
@@ -7133,6 +7278,24 @@ public class AudioManager {
      */
     public static boolean isHapticPlaybackSupported() {
         return AudioSystem.isHapticPlaybackSupported();
+    }
+
+    /**
+     * @hide
+     * Indicates whether a platform supports the Ultrasound feature which covers the playback
+     * and recording of 20kHz~ sounds. If platform supports Ultrasound, then the
+     * usage will be
+     * To start the Ultrasound playback:
+     *     - Create an AudioTrack with {@link AudioAttributes.CONTENT_TYPE_ULTRASOUND}.
+     * To start the Ultrasound capture:
+     *     - Create an AudioRecord with {@link MediaRecorder.AudioSource.ULTRASOUND}.
+     *
+     * @return whether the ultrasound feature is supported, true when platform supports both
+     * Ultrasound playback and capture, false otherwise.
+     */
+    @SystemApi
+    public static boolean isUltrasoundSupported() {
+        return AudioSystem.isUltrasoundSupported();
     }
 
     /**
@@ -7570,6 +7733,33 @@ public class AudioManager {
     }
 
     /**
+     * Returns a list of direct {@link AudioProfile} that are supported for the specified
+     * {@link AudioAttributes}. This can be empty in case of an error or if no direct playback
+     * is possible.
+     *
+     * <p>Direct playback means that the audio stream is not resampled or downmixed
+     * by the framework. Checking for direct support can help the app select the representation
+     * of audio content that most closely matches the capabilities of the device and peripherals
+     * (e.g. A/V receiver) connected to it. Note that the provided stream can still be re-encoded
+     * or mixed with other streams, if needed.
+     * <p>When using this information to inform your application which audio format to play,
+     * query again whenever audio output devices change (see {@link AudioDeviceCallback}).
+     * @param attributes a non-null {@link AudioAttributes} instance.
+     * @return a list of {@link AudioProfile}
+     */
+    @NonNull
+    public List<AudioProfile> getDirectProfilesForAttributes(@NonNull AudioAttributes attributes) {
+        Objects.requireNonNull(attributes);
+        ArrayList<AudioProfile> audioProfilesList = new ArrayList<>();
+        int status = AudioSystem.getDirectProfilesForAttributes(attributes, audioProfilesList);
+        if (status != SUCCESS) {
+            Log.w(TAG, "getDirectProfilesForAttributes failed.");
+            return new ArrayList<>();
+        }
+        return audioProfilesList;
+    }
+
+    /**
      * @hide
      * Returns an {@link AudioDeviceInfo} corresponding to a connected device of the type provided.
      * The type must be a valid output type defined in <code>AudioDeviceInfo</code> class,
@@ -7637,6 +7827,12 @@ public class AudioManager {
     }
 
     /**
+     * manages the OnCommunicationDeviceChangedListener listeners and the
+     * CommunicationDeviceDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<OnCommunicationDeviceChangedListener>
+            mCommDeviceChangedListenerMgr = new CallbackUtil.LazyListenerManager();
+    /**
      * Adds a listener for being notified of changes to the communication audio device.
      * See {@link #setCommunicationDevice(AudioDeviceInfo)}.
      * @param executor
@@ -7645,16 +7841,9 @@ public class AudioManager {
     public void addOnCommunicationDeviceChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnCommunicationDeviceChangedListener listener) {
-        synchronized (mCommDevListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>>,
-                    CommunicationDeviceDispatcherStub> res =
-                    CallbackUtil.addListener("addOnCommunicationDeviceChangedListener",
-                            executor, listener, mCommDevListeners, mCommDevDispatcherStub,
-                            () -> new CommunicationDeviceDispatcherStub(),
-                            stub -> stub.register(true));
-            mCommDevListeners = res.first;
-            mCommDevDispatcherStub = res.second;
-        }
+        mCommDeviceChangedListenerMgr.addListener(
+                            executor, listener, "addOnCommunicationDeviceChangedListener",
+                            () -> new CommunicationDeviceDispatcherStub());
     }
 
     /**
@@ -7664,32 +7853,14 @@ public class AudioManager {
      */
     public void removeOnCommunicationDeviceChangedListener(
             @NonNull OnCommunicationDeviceChangedListener listener) {
-        synchronized (mCommDevListenerLock) {
-            final Pair<ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>>,
-                    CommunicationDeviceDispatcherStub> res =
-                    CallbackUtil.removeListener("removeOnCommunicationDeviceChangedListener",
-                            listener, mCommDevListeners, mCommDevDispatcherStub,
-                            stub -> stub.register(false));
-            mCommDevListeners = res.first;
-            mCommDevDispatcherStub = res.second;
-        }
+        mCommDeviceChangedListenerMgr.removeListener(listener,
+                "removeOnCommunicationDeviceChangedListener");
     }
 
-    private final Object mCommDevListenerLock = new Object();
-    /**
-     * List of listeners for preferred device for strategy and their associated Executor.
-     * List is lazy-initialized on first registration
-     */
-    @GuardedBy("mCommDevListenerLock")
-    private @Nullable
-            ArrayList<ListenerInfo<OnCommunicationDeviceChangedListener>> mCommDevListeners;
-
-    @GuardedBy("mCommDevListenerLock")
-    private CommunicationDeviceDispatcherStub mCommDevDispatcherStub;
-
     private final class CommunicationDeviceDispatcherStub
-            extends ICommunicationDeviceDispatcher.Stub {
+            extends ICommunicationDeviceDispatcher.Stub implements CallbackUtil.DispatcherStub {
 
+        @Override
         public void register(boolean register) {
             try {
                 if (register) {
@@ -7703,10 +7874,9 @@ public class AudioManager {
         }
 
         @Override
-        @SuppressLint("GuardedBy") // lock applied inside callListeners method
         public void dispatchCommunicationDeviceChanged(int portId) {
             AudioDeviceInfo device = getDeviceForPortId(portId, GET_DEVICES_OUTPUTS);
-            CallbackUtil.callListeners(mCommDevListeners, mCommDevListenerLock,
+            mCommDeviceChangedListenerMgr.callListeners(
                     (listener) -> listener.onCommunicationDeviceChanged(device));
         }
     }
@@ -8170,6 +8340,106 @@ public class AudioManager {
                             stub -> stub.register(false));
             mMuteAwaitConnectionListeners = res.first;
             mMuteAwaitConnDispatcherStub = res.second;
+        }
+    }
+
+    /**
+     * Add UID's that can be considered as assistant.
+     *
+     * @param assistantUids UID's of the services that can be considered as assistant.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void addAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+        try {
+            getService().addAssistantServicesUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove UID's that can be considered as assistant.
+     *
+     * @param assistantUids UID'S of the services that should be remove.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void removeAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+        try {
+            getService().removeAssistantServicesUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the list of assistants UIDs that been added with the
+     * {@link #addAssistantServicesUids(List)} (List)} and not yet removed with
+     * {@link #removeAssistantServicesUids(List)}
+     *
+     * @return list of assistants UID's
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<Integer> getAssistantServicesUids() {
+        try {
+            int[] uids = getService().getAssistantServicesUids();
+            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets UID's that can be considered as active assistant. Calling the API with a new list will
+     * overwrite previous list. If the list of UIDs is empty then no UID will be considered active.
+     * In this manner calling the API with an empty list will remove all UID's previously set.
+     *
+     * @param assistantUids UID'S of the services that can be considered active assistant. Can be
+     * an empty list, for this no UID will be considered active.
+     *
+     * <p> Note that during audio service crash reset and after boot up the list of active assistant
+     * UID's will be reset to an empty list (i.e. no UID will be considered as an active assistant).
+     * Just after user switch the list of active assistant will also reset to empty.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setActiveAssistantServiceUids(@NonNull List<Integer>  assistantUids) {
+        try {
+            getService().setActiveAssistantServiceUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the list of active assistant UIDs last set with the
+     * {@link #setActiveAssistantServiceUids(List)}
+     *
+     * @return list of active assistants UID's
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<Integer> getActiveAssistantServicesUids() {
+        try {
+            int[] uids = getService().getActiveAssistantServiceUids();
+            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

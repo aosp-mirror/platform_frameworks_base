@@ -36,5 +36,16 @@ interface InputTarget {
 
     /* Owning pid of the target. */
     int getPid();
+
+    /**
+     * Indicates whether a target should receive focus from server side
+     * tap outside focus detection. For example, this is false in the case of
+     * EmbeddedWindows in a client view hierarchy, where the client will do internal
+     * tap detection and invoke grantEmbeddedWindowFocus itself
+     */
+    boolean receiveFocusFromTapOutside();
+
+    void handleTapOutsideFocusInsideSelf();
+    void handleTapOutsideFocusOutsideSelf();
 }
 

@@ -186,13 +186,15 @@ static std::map<int, int> KEY_CODE_MAPPING = {
 };
 
 /** Creates a new uinput device and assigns a file descriptor. */
-static int openUinput(const char* readableName, jint vendorId, jint productId,
+static int openUinput(const char* readableName, jint vendorId, jint productId, const char* phys,
                       DeviceType deviceType, jint screenHeight, jint screenWidth) {
     android::base::unique_fd fd(TEMP_FAILURE_RETRY(::open("/dev/uinput", O_WRONLY | O_NONBLOCK)));
     if (fd < 0) {
         ALOGE("Error creating uinput device: %s", strerror(errno));
         return -errno;
     }
+
+    ioctl(fd, UI_SET_PHYS, phys);
 
     ioctl(fd, UI_SET_EVBIT, EV_KEY);
     ioctl(fd, UI_SET_EVBIT, EV_SYN);
@@ -241,22 +243,34 @@ static int openUinput(const char* readableName, jint vendorId, jint productId,
             xAbsSetup.code = ABS_MT_POSITION_X;
             xAbsSetup.absinfo.maximum = screenWidth - 1;
             xAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, xAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &xAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput x axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup yAbsSetup;
             yAbsSetup.code = ABS_MT_POSITION_Y;
             yAbsSetup.absinfo.maximum = screenHeight - 1;
             yAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, yAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &yAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput y axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup majorAbsSetup;
             majorAbsSetup.code = ABS_MT_TOUCH_MAJOR;
             majorAbsSetup.absinfo.maximum = screenWidth - 1;
             majorAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, majorAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &majorAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput major axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup pressureAbsSetup;
             pressureAbsSetup.code = ABS_MT_PRESSURE;
             pressureAbsSetup.absinfo.maximum = 255;
             pressureAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, pressureAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &pressureAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput pressure axis: %s", strerror(errno));
+                return -errno;
+            }
         }
         if (ioctl(fd, UI_DEV_SETUP, &setup) != 0) {
             ALOGE("Error creating uinput device: %s", strerror(errno));
@@ -264,6 +278,7 @@ static int openUinput(const char* readableName, jint vendorId, jint productId,
         }
     } else {
         // UI_DEV_SETUP was not introduced until version 5. Try setting up manually.
+        ALOGI("Falling back to version %d manual setup", version);
         uinput_user_dev fallback;
         memset(&fallback, 0, sizeof(fallback));
         strlcpy(fallback.name, readableName, UINPUT_MAX_NAME_SIZE);
@@ -295,28 +310,30 @@ static int openUinput(const char* readableName, jint vendorId, jint productId,
     return fd.release();
 }
 
-static int openUinputJni(JNIEnv* env, jstring name, jint vendorId, jint productId,
+static int openUinputJni(JNIEnv* env, jstring name, jint vendorId, jint productId, jstring phys,
                          DeviceType deviceType, int screenHeight, int screenWidth) {
     ScopedUtfChars readableName(env, name);
-    return openUinput(readableName.c_str(), vendorId, productId, deviceType, screenHeight,
-                      screenWidth);
+    ScopedUtfChars readablePhys(env, phys);
+    return openUinput(readableName.c_str(), vendorId, productId, readablePhys.c_str(), deviceType,
+                      screenHeight, screenWidth);
 }
 
 static int nativeOpenUinputKeyboard(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
-                                    jint productId) {
-    return openUinputJni(env, name, vendorId, productId, DeviceType::KEYBOARD, /* screenHeight */ 0,
-                         /* screenWidth */ 0);
+                                    jint productId, jstring phys) {
+    return openUinputJni(env, name, vendorId, productId, phys, DeviceType::KEYBOARD,
+                         /* screenHeight */ 0, /* screenWidth */ 0);
 }
 
 static int nativeOpenUinputMouse(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
-                                 jint productId) {
-    return openUinputJni(env, name, vendorId, productId, DeviceType::MOUSE, /* screenHeight */ 0,
-                         /* screenWidth */ 0);
+                                 jint productId, jstring phys) {
+    return openUinputJni(env, name, vendorId, productId, phys, DeviceType::MOUSE,
+                         /* screenHeight */ 0, /* screenWidth */ 0);
 }
 
 static int nativeOpenUinputTouchscreen(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
-                                       jint productId, jint height, jint width) {
-    return openUinputJni(env, name, vendorId, productId, DeviceType::TOUCHSCREEN, height, width);
+                                       jint productId, jstring phys, jint height, jint width) {
+    return openUinputJni(env, name, vendorId, productId, phys, DeviceType::TOUCHSCREEN, height,
+                         width);
 }
 
 static bool nativeCloseUinput(JNIEnv* env, jobject thiz, jint fd) {
@@ -435,9 +452,11 @@ static bool nativeWriteScrollEvent(JNIEnv* env, jobject thiz, jint fd, jfloat xA
 }
 
 static JNINativeMethod methods[] = {
-        {"nativeOpenUinputKeyboard", "(Ljava/lang/String;II)I", (void*)nativeOpenUinputKeyboard},
-        {"nativeOpenUinputMouse", "(Ljava/lang/String;II)I", (void*)nativeOpenUinputMouse},
-        {"nativeOpenUinputTouchscreen", "(Ljava/lang/String;IIII)I",
+        {"nativeOpenUinputKeyboard", "(Ljava/lang/String;IILjava/lang/String;)I",
+         (void*)nativeOpenUinputKeyboard},
+        {"nativeOpenUinputMouse", "(Ljava/lang/String;IILjava/lang/String;)I",
+         (void*)nativeOpenUinputMouse},
+        {"nativeOpenUinputTouchscreen", "(Ljava/lang/String;IILjava/lang/String;II)I",
          (void*)nativeOpenUinputTouchscreen},
         {"nativeCloseUinput", "(I)Z", (void*)nativeCloseUinput},
         {"nativeWriteKeyEvent", "(III)Z", (void*)nativeWriteKeyEvent},

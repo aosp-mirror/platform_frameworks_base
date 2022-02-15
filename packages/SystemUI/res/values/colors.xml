@@ -23,7 +23,6 @@
     <color name="system_bar_background_transparent">#00000000</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
-    <color name="qs_detail_transition">#66FFFFFF</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
 
@@ -88,6 +87,8 @@
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
+    <color name="user_switcher_fullscreen_bg">@android:color/system_neutral1_900</color>
+    <color name="user_switcher_fullscreen_popup_item_tint">@*android:color/text_color_primary_device_default_dark</color>
 
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>
@@ -139,9 +140,9 @@
     <color name="udfps_enroll_progress">#7DA7F1</color>
     <color name="udfps_enroll_progress_help">#ffEE675C</color>
 
-    <!-- Global screenshot actions -->
-    <color name="screenshot_button_ripple">#1f000000</color>
-    <color name="screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
+    <!-- Floating overlay actions -->
+    <color name="overlay_button_ripple">#1f000000</color>
+    <color name="overlay_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- GM2 colors -->
     <color name="GM2_grey_100">#F1F3F4</color>
@@ -195,6 +196,7 @@
     <color name="control_enabled_cool_foreground">@color/GM2_blue_300</color>
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
+    <color name="controls_task_view_bg">#CC191C1D</color>
 
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>

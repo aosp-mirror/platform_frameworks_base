@@ -43,8 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class DtmbFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_AUTO, BANDWIDTH_6MHZ, BANDWIDTH_8MHZ})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Bandwidth {}
@@ -68,8 +67,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_TIMER_INT_240, TIME_INTERLEAVE_MODE_TIMER_INT_720})
     @Retention(RetentionPolicy.SOURCE)
@@ -97,8 +95,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "GUARD_INTERVAL_",
+    @IntDef(prefix = "GUARD_INTERVAL_",
             value = {GUARD_INTERVAL_UNDEFINED, GUARD_INTERVAL_AUTO,
             GUARD_INTERVAL_PN_420_VARIOUS, GUARD_INTERVAL_PN_595_CONST,
             GUARD_INTERVAL_PN_945_VARIOUS, GUARD_INTERVAL_PN_420_CONST,
@@ -143,8 +140,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_CONSTELLATION_UNDEFINED, MODULATION_CONSTELLATION_AUTO,
                     MODULATION_CONSTELLATION_4QAM, MODULATION_CONSTELLATION_4QAM_NR,
                     MODULATION_CONSTELLATION_16QAM, MODULATION_CONSTELLATION_32QAM,
@@ -187,8 +183,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
             FrontendDtmbModulation.CONSTELLATION_64QAM;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_2_5, CODERATE_3_5, CODERATE_4_5})
     @Retention(RetentionPolicy.SOURCE)
     public @interface CodeRate {}
@@ -215,8 +210,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     public static final int CODERATE_4_5 = FrontendDtmbCodeRate.CODERATE_4_5;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TRANSMISSION_MODE_",
+    @IntDef(prefix = "TRANSMISSION_MODE_",
             value = {TRANSMISSION_MODE_UNDEFINED, TRANSMISSION_MODE_AUTO,
                     TRANSMISSION_MODE_C1, TRANSMISSION_MODE_C3780})
     @Retention(RetentionPolicy.SOURCE)

@@ -16,135 +16,212 @@
 
 package com.android.systemui.dreams;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 /**
- * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations.
- * Clients can register as listeners for changes to the overlay composition and can query for the
- * overlays on-demand.
+ * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations and
+ * state. Clients can register as listeners for changes to the overlay composition and can query for
+ * the complications on-demand.
  */
 @SysUISingleton
 public class DreamOverlayStateController implements
         CallbackController<DreamOverlayStateController.Callback> {
-    // A counter for guaranteeing unique overlay tokens within the scope of this state controller.
-    private int mNextOverlayTokenId = 0;
+    private static final String TAG = "DreamOverlayStateCtlr";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    /**
-     * {@link OverlayToken} provides a unique key for identifying {@link OverlayProvider}
-     * instances registered with {@link DreamOverlayStateController}.
-     */
-    public static class OverlayToken {
-        private final int mId;
+    public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
 
-        private OverlayToken(int id) {
-            mId = id;
-        }
+    private static final int OP_CLEAR_STATE = 1;
+    private static final int OP_SET_STATE = 2;
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof OverlayToken)) return false;
-            OverlayToken that = (OverlayToken) o;
-            return mId == that.mId;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mId);
-        }
-    }
+    private int mState;
 
     /**
      * Callback for dream overlay events.
      */
     public interface Callback {
         /**
-         * Called when the visibility of the communal view changes.
+         * Called when the composition of complications changes.
          */
-        default void onOverlayChanged() {
+        default void onComplicationsChanged() {
+        }
+
+        /**
+         * Called when the dream overlay state changes.
+         */
+        default void onStateChanged() {
+        }
+
+        /**
+         * Called when the available complication types changes.
+         */
+        default void onAvailableComplicationTypesChanged() {
         }
     }
 
+    private final Executor mExecutor;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-    private final HashMap<OverlayToken, OverlayProvider> mOverlays = new HashMap<>();
+
+    @Complication.ComplicationType
+    private int mAvailableComplicationTypes = Complication.COMPLICATION_TYPE_NONE;
+
+    private final Collection<Complication> mComplications = new HashSet();
 
     @VisibleForTesting
     @Inject
-    public DreamOverlayStateController() {
+    public DreamOverlayStateController(@Main Executor executor) {
+        mExecutor = executor;
     }
 
     /**
-     * Adds an overlay to be presented on top of dreams.
-     * @param provider The {@link OverlayProvider} providing the dream.
-     * @return The {@link OverlayToken} tied to the supplied {@link OverlayProvider}.
+     * Adds a complication to be included on the dream overlay.
      */
-    public OverlayToken addOverlay(OverlayProvider provider) {
-        final OverlayToken token = new OverlayToken(mNextOverlayTokenId++);
-        mOverlays.put(token, provider);
-        notifyCallbacks();
-        return token;
+    public void addComplication(Complication complication) {
+        mExecutor.execute(() -> {
+            if (mComplications.add(complication)) {
+                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+            }
+        });
     }
 
     /**
-     * Removes an overlay from being shown on dreams.
-     * @param token The {@link OverlayToken} associated with the {@link OverlayProvider} to be
-     *              removed.
-     * @return The removed {@link OverlayProvider}, {@code null} if not found.
+     * Removes a complication from inclusion on the dream overlay.
      */
-    public OverlayProvider removeOverlay(OverlayToken token) {
-        final OverlayProvider removedOverlay = mOverlays.remove(token);
-
-        if (removedOverlay != null) {
-            notifyCallbacks();
-        }
-
-        return removedOverlay;
+    public void removeComplication(Complication complication) {
+        mExecutor.execute(() -> {
+            if (mComplications.remove(complication)) {
+                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+            }
+        });
     }
 
-    private void notifyCallbacks() {
-        for (Callback callback : mCallbacks) {
-            callback.onOverlayChanged();
-        }
+    /**
+     * Returns collection of present {@link Complication}.
+     */
+    public Collection<Complication> getComplications() {
+        return getComplications(true);
+    }
+
+    /**
+     * Returns collection of present {@link Complication}.
+     */
+    public Collection<Complication> getComplications(boolean filterByAvailability) {
+        return Collections.unmodifiableCollection(filterByAvailability
+                ? mComplications
+                .stream()
+                .filter(complication -> {
+                    @Complication.ComplicationType
+                    final int requiredTypes = complication.getRequiredTypeAvailability();
+                    return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
+                })
+                .collect(Collectors.toCollection(HashSet::new))
+                : mComplications);
+    }
+
+    private void notifyCallbacks(Consumer<Callback> callbackConsumer) {
+        mExecutor.execute(() -> {
+            for (Callback callback : mCallbacks) {
+                callbackConsumer.accept(callback);
+            }
+        });
     }
 
     @Override
     public void addCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        if (mCallbacks.contains(callback)) {
-            return;
-        }
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            if (mCallbacks.contains(callback)) {
+                return;
+            }
 
-        mCallbacks.add(callback);
+            mCallbacks.add(callback);
 
-        if (mOverlays.isEmpty()) {
-            return;
-        }
+            if (mComplications.isEmpty()) {
+                return;
+            }
 
-        callback.onOverlayChanged();
+            callback.onComplicationsChanged();
+        });
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
-        Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-        mCallbacks.remove(callback);
+        mExecutor.execute(() -> {
+            Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
+            mCallbacks.remove(callback);
+        });
     }
 
     /**
-     * Returns all registered {@link OverlayProvider} instances.
-     * @return A collection of {@link OverlayProvider}.
+     * Returns whether the overlay is active.
+     * @return {@code true} if overlay is active, {@code false} otherwise.
      */
-    public Collection<OverlayProvider> getOverlays() {
-        return mOverlays.values();
+    public boolean isOverlayActive() {
+        return containsState(STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    private boolean containsState(int state) {
+        return (mState & state) != 0;
+    }
+
+    private void modifyState(int op, int state) {
+        final int existingState = mState;
+        switch (op) {
+            case OP_CLEAR_STATE:
+                mState &= ~state;
+                break;
+            case OP_SET_STATE:
+                mState |= state;
+                break;
+        }
+
+        if (existingState != mState) {
+            notifyCallbacks(callback -> callback.onStateChanged());
+        }
+    }
+
+    /**
+     * Sets whether the overlay is active.
+     * @param active {@code true} if overlay is active, {@code false} otherwise.
+     */
+    public void setOverlayActive(boolean active) {
+        modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    /**
+     * Returns the available complication types.
+     */
+    @Complication.ComplicationType
+    public int getAvailableComplicationTypes() {
+        return mAvailableComplicationTypes;
+    }
+
+    /**
+     * Sets the available complication types for the dream overlay.
+     */
+    public void setAvailableComplicationTypes(@Complication.ComplicationType int types) {
+        mExecutor.execute(() -> {
+            mAvailableComplicationTypes = types;
+            mCallbacks.forEach(callback -> callback.onAvailableComplicationTypesChanged());
+        });
     }
 }

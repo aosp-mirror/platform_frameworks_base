@@ -31,7 +31,7 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume.assumeFalse
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
@@ -96,24 +96,6 @@ class ChangeAppRotationTest(
             }
         }
 
-    @FlakyTest
-    @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
-    }
-
     /**
      * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
      * focus returns to [testApp]
@@ -133,6 +115,7 @@ class ChangeAppRotationTest(
     @Presubmit
     @Test
     fun rotationLayerAppearsAndVanishes() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(testApp.component)
                 .then()
@@ -141,6 +124,13 @@ class ChangeAppRotationTest(
                 .isVisible(testApp.component)
                 .isInvisible(FlickerComponentName.ROTATION)
         }
+    }
+
+    @FlakyTest(bugId = 218484127)
+    @Test
+    fun rotationLayerAppearsAndVanishes_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        rotationLayerAppearsAndVanishes()
     }
 
     /**
@@ -165,13 +155,9 @@ class ChangeAppRotationTest(
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -197,7 +183,7 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(repetitions = 5)
+                .getConfigRotationTests(repetitions = 3)
         }
     }
 }

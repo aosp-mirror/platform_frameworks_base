@@ -29,11 +29,11 @@ import com.android.systemui.qs.tiles.BluetoothTile
 import com.android.systemui.qs.tiles.CameraToggleTile
 import com.android.systemui.qs.tiles.CastTile
 import com.android.systemui.qs.tiles.CellularTile
+import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.DataSaverTile
 import com.android.systemui.qs.tiles.DeviceControlsTile
 import com.android.systemui.qs.tiles.DndTile
-import com.android.systemui.qs.tiles.FgsManagerTile
 import com.android.systemui.qs.tiles.FlashlightTile
 import com.android.systemui.qs.tiles.HotspotTile
 import com.android.systemui.qs.tiles.InternetTile
@@ -48,7 +48,6 @@ import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import com.android.systemui.qs.tiles.RotationLockTile
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.UiModeNightTile
-import com.android.systemui.qs.tiles.UserTile
 import com.android.systemui.qs.tiles.WifiTile
 import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.util.leak.GarbageMonitor
@@ -76,7 +75,6 @@ private val specMap = mapOf(
         "location" to LocationTile::class.java,
         "cast" to CastTile::class.java,
         "hotspot" to HotspotTile::class.java,
-        "user" to UserTile::class.java,
         "battery" to BatterySaverTile::class.java,
         "saver" to DataSaverTile::class.java,
         "night" to NightDisplayTile::class.java,
@@ -91,7 +89,7 @@ private val specMap = mapOf(
         "wallet" to QuickAccessWalletTile::class.java,
         "qr_code_scanner" to QRCodeScannerTile::class.java,
         "onehanded" to OneHandedModeTile::class.java,
-        "fgsmanager" to FgsManagerTile::class.java
+        "color_correction" to ColorCorrectionTile::class.java
 )
 
 @RunWith(AndroidTestingRunner::class)
@@ -115,7 +113,6 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var locationTile: LocationTile
     @Mock private lateinit var castTile: CastTile
     @Mock private lateinit var hotspotTile: HotspotTile
-    @Mock private lateinit var userTile: UserTile
     @Mock private lateinit var batterySaverTile: BatterySaverTile
     @Mock private lateinit var dataSaverTile: DataSaverTile
     @Mock private lateinit var nightDisplayTile: NightDisplayTile
@@ -131,7 +128,7 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var quickAccessWalletTile: QuickAccessWalletTile
     @Mock private lateinit var qrCodeScannerTile: QRCodeScannerTile
     @Mock private lateinit var oneHandedModeTile: OneHandedModeTile
-    @Mock private lateinit var fgsManagerTile: FgsManagerTile
+    @Mock private lateinit var colorCorrectionTile: ColorCorrectionTile
 
     private lateinit var factory: QSFactoryImpl
 
@@ -159,7 +156,6 @@ class QSFactoryImplTest : SysuiTestCase() {
                 { locationTile },
                 { castTile },
                 { hotspotTile },
-                { userTile },
                 { batterySaverTile },
                 { dataSaverTile },
                 { nightDisplayTile },
@@ -175,7 +171,7 @@ class QSFactoryImplTest : SysuiTestCase() {
                 { quickAccessWalletTile },
                 { qrCodeScannerTile },
                 { oneHandedModeTile },
-                { fgsManagerTile }
+                { colorCorrectionTile }
         )
         // When adding/removing tiles, fix also [specMap]
     }

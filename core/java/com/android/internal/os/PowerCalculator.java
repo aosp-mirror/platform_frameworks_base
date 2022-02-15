@@ -21,46 +21,24 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Calculates power use of a device subsystem for an app.
  */
 public abstract class PowerCalculator {
+    protected static final boolean DEBUG = false;
 
     protected static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 
     /**
-     * Attributes the total amount of power used by this subsystem to various consumers such
-     * as apps.
-     *
-     * @param sippers       A list of battery sippers that contains battery attribution data.
-     *                      The calculator may modify the list.
-     * @param batteryStats  The recorded battery stats.
-     * @param rawRealtimeUs The raw system realtime in microseconds.
-     * @param rawUptimeUs   The raw system uptime in microseconds.
-     * @param statsType     The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this
-     *                      can only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                      {@link BatteryStats#STATS_CURRENT} and
-     *                      {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
-     * @param asUsers       An array of users for which the attribution is requested.  It may
-     *                      contain {@link UserHandle#USER_ALL} to indicate that the attribution
-     *                      should be performed for all users.
+     * Returns true if this power calculator computes power/duration for the specified
+     * power component.
      */
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(app, app.uidObj, rawRealtimeUs, rawUptimeUs, statsType);
-            }
-        }
-    }
+    public abstract boolean isPowerComponentSupported(
+            @BatteryConsumer.PowerComponent int powerComponent);
 
     /**
      * Attributes the total amount of power used by this subsystem to various consumers such
@@ -82,21 +60,6 @@ public abstract class PowerCalculator {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs, rawUptimeUs, query);
         }
-    }
-
-    /**
-     * Calculate the amount of power an app used for this subsystem.
-     * @param app The BatterySipper that represents the power use of an app.
-     * @param u The recorded stats for the app.
-     * @param rawRealtimeUs The raw system realtime in microseconds.
-     * @param rawUptimeUs The raw system uptime in microseconds.
-     * @param statsType The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this can
-     *                  only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                  {@link BatteryStats#STATS_CURRENT} and
-     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
-     */
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                                      long rawUptimeUs, int statsType) {
     }
 
     /**
@@ -136,38 +99,7 @@ public abstract class PowerCalculator {
      * Prints formatted amount of power in milli-amp-hours.
      */
     public static void printPowerMah(PrintWriter pw, double powerMah) {
-        pw.print(formatCharge(powerMah));
-    }
-
-    /**
-     * Converts charge in mAh to string.
-     */
-    public static String formatCharge(double power) {
-        if (power == 0) return "0";
-
-        final String format;
-        if (power < .00001) {
-            format = "%.8f";
-        } else if (power < .0001) {
-            format = "%.7f";
-        } else if (power < .001) {
-            format = "%.6f";
-        } else if (power < .01) {
-            format = "%.5f";
-        } else if (power < .1) {
-            format = "%.4f";
-        } else if (power < 1) {
-            format = "%.3f";
-        } else if (power < 10) {
-            format = "%.2f";
-        } else if (power < 100) {
-            format = "%.1f";
-        } else {
-            format = "%.0f";
-        }
-
-        // Use English locale because this is never used in UI (only in checkin and dump).
-        return String.format(Locale.ENGLISH, format, power);
+        pw.print(BatteryStats.formatCharge(powerMah));
     }
 
     static double uCtoMah(long chargeUC) {

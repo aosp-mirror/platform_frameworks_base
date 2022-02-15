@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.charging
 
-import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.RuntimeShader
 import android.util.MathUtils
@@ -34,13 +33,13 @@ import android.util.MathUtils
  *
  * Modeled after frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java.
  */
-class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
+class DwellRippleShader internal constructor() : RuntimeShader(SHADER) {
     companion object {
         private const val SHADER_UNIFORMS = """uniform vec2 in_origin;
                 uniform float in_time;
                 uniform float in_radius;
                 uniform float in_blur;
-                uniform vec4 in_color;
+                layout(color) uniform vec4 in_color;
                 uniform float in_phase1;
                 uniform float in_phase2;
                 uniform float in_distortion_strength;"""
@@ -59,8 +58,8 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 }
 
                 vec2 distort(vec2 p, float time, float distort_amount_xy, float frequency) {
-                    return p + vec2(sin(p.x * frequency + in_phase1),
-                                    cos(p.y * frequency * 1.23 + in_phase2)) * distort_amount_xy;
+                    return p + vec2(sin(p.y * frequency + in_phase1),
+                                    cos(p.x * frequency * -1.23 + in_phase2)) * distort_amount_xy;
                 }
 
                 vec4 ripple(vec2 p, float distort_xy, float frequency) {
@@ -73,11 +72,11 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
                 """
         private const val SHADER_MAIN = """vec4 main(vec2 p) {
                     vec4 color1 = ripple(p,
-                        12 * in_distortion_strength, // distort_xy
+                        34 * in_distortion_strength, // distort_xy
                         0.012 // frequency
                     );
                     vec4 color2 = ripple(p,
-                        17.5 * in_distortion_strength, // distort_xy
+                        49 * in_distortion_strength, // distort_xy
                         0.018 // frequency
                     );
                     // Alpha blend between two layers.
@@ -98,7 +97,7 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var origin: PointF = PointF()
         set(value) {
             field = value
-            setUniform("in_origin", floatArrayOf(value.x, value.y))
+            setFloatUniform("in_origin", value.x, value.y)
         }
 
     /**
@@ -107,9 +106,9 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var progress: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_radius",
+            setFloatUniform("in_radius",
                     (1 - (1 - value) * (1 - value) * (1 - value))* maxRadius)
-            setUniform("in_blur", MathUtils.lerp(1f, 0.7f, value))
+            setFloatUniform("in_blur", MathUtils.lerp(1f, 0.7f, value))
         }
 
     /**
@@ -118,7 +117,7 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var distortionStrength: Float = 0.0f
         set(value) {
             field = value
-            setUniform("in_distortion_strength", value)
+            setFloatUniform("in_distortion_strength", value)
         }
 
     /**
@@ -127,9 +126,9 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var time: Float = 0.0f
         set(value) {
             field = value * 0.001f
-            setUniform("in_time", field)
-            setUniform("in_phase1", field * 2f + 0.367f)
-            setUniform("in_phase2", field * 5.2f * 1.531f)
+            setFloatUniform("in_time", field)
+            setFloatUniform("in_phase1", field * 3f + 0.367f)
+            setFloatUniform("in_phase2", field * 7.2f * 1.531f)
         }
 
     /**
@@ -138,8 +137,6 @@ class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
     var color: Int = 0xffffff.toInt()
         set(value) {
             field = value
-            val color = Color.valueOf(value)
-            setUniform("in_color", floatArrayOf(color.red(),
-                    color.green(), color.blue(), color.alpha()))
+            setColorUniform("in_color", value)
         }
 }

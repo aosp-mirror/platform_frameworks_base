@@ -94,6 +94,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
     final long createRealTime;  // when this service was created
+    final boolean supplemental; // whether this is a supplemental service
+    final int supplementedAppUid; // the app uid for which this supplemental service is running
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
@@ -102,7 +104,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
-    ProcessRecord isolatedProc; // keep track of isolated process, if requested
+    ProcessRecord isolationHostProc; // process which we've started for this service (used for
+                                     // isolated and supplemental processes)
     ServiceState tracker; // tracking service execution, may be null
     ServiceState restartTracker; // tracking service restart
     boolean allowlistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
@@ -174,6 +177,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean mFgsNotificationWasDeferred;
     // FGS notification was shown before the FGS finishes, or it wasn't deferred in the first place.
     boolean mFgsNotificationShown;
+    // Whether FGS package has permissions to show notifications.
+    boolean mFgsHasNotificationPermission;
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
@@ -350,8 +355,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app != null) {
             app.dumpDebug(proto, ServiceRecordProto.APP);
         }
-        if (isolatedProc != null) {
-            isolatedProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
+        if (isolationHostProc != null) {
+            isolationHostProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
         }
         proto.write(ServiceRecordProto.WHITELIST_MANAGER, allowlistManager);
         proto.write(ServiceRecordProto.DELAYED, delayed);
@@ -453,8 +458,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
         }
         pw.print(prefix); pw.print("app="); pw.println(app);
-        if (isolatedProc != null) {
-            pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
+        if (isolationHostProc != null) {
+            pw.print(prefix); pw.print("isolationHostProc="); pw.println(isolationHostProc);
         }
         if (allowlistManager) {
             pw.print(prefix); pw.print("allowlistManager="); pw.println(allowlistManager);
@@ -567,6 +572,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
+        this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
+                restarter, null, 0);
+    }
+
+    ServiceRecord(ActivityManagerService ams, ComponentName name,
+            ComponentName instanceName, String definingPackageName, int definingUid,
+            Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
+            Runnable restarter, String supplementalProcessName, int supplementedAppUid) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -577,8 +590,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
+        supplemental = supplementalProcessName != null;
+        this.supplementedAppUid = supplementedAppUid;
         if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
             processName = sInfo.processName + ":" + instanceName.getClassName();
+        } else if (supplementalProcessName != null) {
+            processName = supplementalProcessName;
         } else {
             processName = sInfo.processName;
         }
@@ -590,6 +607,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         userId = UserHandle.getUserId(appInfo.uid);
         createdFromFg = callerIsFg;
         updateKeepWarmLocked();
+        // initialize notification permission state; this'll be updated whenever there's an attempt
+        // to post or update a notification, but that doesn't cover the time before the first
+        // notification
+        updateFgsHasNotificationPermission();
     }
 
     public ServiceState getTracker() {
@@ -947,6 +968,25 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         return lastStartId;
     }
 
+    private void updateFgsHasNotificationPermission() {
+        // Do asynchronous communication with notification manager to avoid deadlocks.
+        final String localPackageName = packageName;
+        final int appUid = appInfo.uid;
+
+        ams.mHandler.post(new Runnable() {
+            public void run() {
+                NotificationManagerInternal nm = LocalServices.getService(
+                        NotificationManagerInternal.class);
+                if (nm == null) {
+                    return;
+                }
+                // Record whether the package has permission to notify the user
+                mFgsHasNotificationPermission = nm.areNotificationsEnabledForPackage(
+                        localPackageName, appUid);
+            }
+        });
+    }
+
     public void postNotification() {
         if (isForeground && foregroundNoti != null && app != null) {
             final int appUid = appInfo.uid;
@@ -968,6 +1008,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     if (nm == null) {
                         return;
                     }
+                    // Record whether the package has permission to notify the user
+                    mFgsHasNotificationPermission = nm.areNotificationsEnabledForPackage(
+                            localPackageName, appUid);
                     Notification localForegroundNoti = _foregroundNoti;
                     try {
                         if (localForegroundNoti.getSmallIcon() == null) {
@@ -1055,6 +1098,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                                 userId);
 
                         foregroundNoti = localForegroundNoti; // save it for amending next time
+
+                        signalForegroundServiceNotification(packageName, appInfo.uid,
+                                localForegroundId);
+
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
@@ -1088,8 +1135,19 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error canceling notification for service", e);
                 }
+                signalForegroundServiceNotification(packageName, appInfo.uid, -localForegroundId);
             }
         });
+    }
+
+    private void signalForegroundServiceNotification(String packageName, int uid,
+            int foregroundId) {
+        synchronized (ams) {
+            for (int i = ams.mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
+                ams.mForegroundServiceStateListeners.get(i).onForegroundServiceNotificationUpdated(
+                        packageName, appInfo.uid, foregroundId);
+            }
+        }
     }
 
     public void stripForegroundServiceFlagFromNotification() {

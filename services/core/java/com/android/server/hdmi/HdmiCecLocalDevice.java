@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import android.annotation.CallSuper;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -73,6 +74,8 @@ abstract class HdmiCecLocalDevice {
     protected HdmiDeviceInfo mDeviceInfo;
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
+
+    HdmiCecStandbyModeHandler mStandbyHandler;
 
     // Stores recent changes to the active source in the CEC network.
     private final ArrayBlockingQueue<HdmiCecController.Dumpable> mActiveSourceHistory =
@@ -261,6 +264,11 @@ abstract class HdmiCecLocalDevice {
         int dest = message.getDestination();
         if (dest != mDeviceInfo.getLogicalAddress() && dest != Constants.ADDR_BROADCAST) {
             return Constants.NOT_HANDLED;
+        }
+        if (mService.isPowerStandby()
+                && !mService.isWakeUpMessageReceived()
+                && mStandbyHandler.handleCommand(message)) {
+            return Constants.HANDLED;
         }
         // Cache incoming message if it is included in the list of cacheable opcodes.
         mCecMessageCache.cacheMessage(message);
@@ -634,7 +642,34 @@ abstract class HdmiCecLocalDevice {
 
     protected abstract List<Integer> getRcFeatures();
 
-    protected abstract List<Integer> getDeviceFeatures();
+    /**
+     * Computes the set of supported device features. To update local state with changes in
+     * the set of supported device features, use {@link #getDeviceFeatures} instead.
+     */
+    protected DeviceFeatures computeDeviceFeatures() {
+        return DeviceFeatures.NO_FEATURES_SUPPORTED;
+    }
+
+    /**
+     * Computes the set of supported device features, and updates local state to match.
+     */
+    private void updateDeviceFeatures() {
+        synchronized (mLock) {
+            setDeviceInfo(getDeviceInfo().toBuilder()
+                    .setDeviceFeatures(computeDeviceFeatures())
+                    .build());
+        }
+    }
+
+    /**
+     * Computes and returns the set of supported device features. Updates local state to match.
+     */
+    protected final DeviceFeatures getDeviceFeatures() {
+        updateDeviceFeatures();
+        synchronized (mLock) {
+            return getDeviceInfo().getDeviceFeatures();
+        }
+    }
 
     @Constants.HandleMessageResult
     protected int handleGiveFeatures(HdmiCecMessage message) {
@@ -655,11 +690,17 @@ abstract class HdmiCecLocalDevice {
 
         int rcProfile = getRcProfile();
         List<Integer> rcFeatures = getRcFeatures();
-        List<Integer> deviceFeatures = getDeviceFeatures();
+        DeviceFeatures deviceFeatures = getDeviceFeatures();
+
+
+        int logicalAddress;
+        synchronized (mLock) {
+            logicalAddress = mDeviceInfo.getLogicalAddress();
+        }
 
         mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildReportFeatures(
-                        mDeviceInfo.getLogicalAddress(),
+                ReportFeaturesMessage.build(
+                        logicalAddress,
                         mService.getCecVersion(),
                         localDeviceTypes,
                         rcProfile,
@@ -867,17 +908,12 @@ abstract class HdmiCecLocalDevice {
     protected int handleVendorCommandWithId(HdmiCecMessage message) {
         byte[] params = message.getParams();
         int vendorId = HdmiUtils.threeBytesToInt(params);
-        if (vendorId == mService.getVendorId()) {
-            if (!mService.invokeVendorCommandListenersOnReceived(
-                    mDeviceType, message.getSource(), message.getDestination(), params, true)) {
-                return Constants.ABORT_REFUSED;
-            }
-        } else if (message.getDestination() != Constants.ADDR_BROADCAST
-                && message.getSource() != Constants.ADDR_UNREGISTERED) {
-            Slog.v(TAG, "Wrong direct vendor command. Replying with <Feature Abort>");
-            return Constants.ABORT_UNRECOGNIZED_OPCODE;
-        } else {
+        if (message.getDestination() == Constants.ADDR_BROADCAST
+                || message.getSource() == Constants.ADDR_UNREGISTERED) {
             Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
+        } else if (!mService.invokeVendorCommandListenersOnReceived(
+                mDeviceType, message.getSource(), message.getDestination(), params, true)) {
+            return Constants.ABORT_REFUSED;
         }
         return Constants.HANDLED;
     }
@@ -922,6 +958,7 @@ abstract class HdmiCecLocalDevice {
     final void handleAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mPreferredAddress = logicalAddress;
+        updateDeviceFeatures();
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
             reportFeatures();
         }

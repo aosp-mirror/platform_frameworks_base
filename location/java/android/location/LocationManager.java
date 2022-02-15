@@ -18,6 +18,7 @@ package android.location;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.location.LocationRequest.createFromDeprecatedCriteria;
@@ -678,8 +679,9 @@ public class LocationManager {
      *
      * @hide
      */
+    // TODO: remove WRITE_SECURE_SETTINGS.
     @SystemApi
-    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
     public void setAdasGnssLocationEnabled(boolean enabled) {
         try {
             mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());
@@ -758,45 +760,41 @@ public class LocationManager {
     }
 
     /**
-     * Set whether GNSS requests are suspended on the device.
+     * Set whether GNSS requests are suspended on the automotive device.
      *
-     * This method was added to help support power management use cases on automotive devices. More
-     * specifically, it is being added to fix a suspend to RAM issue where the SoC can't go into
-     * a lower power state when applications are actively requesting GNSS updates.
+     * For devices where GNSS prevents the system from going into a low power state, GNSS should
+     * be suspended right before going into the lower power state and resumed right after the device
+     * wakes up.
      *
-     * Ideally, the issue should be fixed at a lower layer in the stack, but this API introduces a
-     * workaround in the platform layer. This API allows car specific services to halt GNSS requests
-     * based on changes to the car power policy, which will in turn enable the device to go into
-     * suspend.
+     * This method disables GNSS and should only be used for power management use cases such as
+     * suspend-to-RAM or suspend-to-disk.
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public void setAutoGnssSuspended(boolean suspended) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public void setAutomotiveGnssSuspended(boolean suspended) {
         try {
-            mService.setAutoGnssSuspended(suspended);
+            mService.setAutomotiveGnssSuspended(suspended);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Return whether GNSS requests are suspended or not.
-     *
-     * This method was added to help support power management use cases on automotive devices. More
-     * specifically, it is being added as part of the fix for a suspend to RAM issue where the SoC
-     * can't go into a lower power state when applications are actively requesting GNSS updates.
+     * Return whether GNSS requests are suspended on the automotive device.
      *
      * @return true if GNSS requests are suspended and false if they aren't.
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public boolean isAutoGnssSuspended() {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public boolean isAutomotiveGnssSuspended() {
         try {
-            return mService.isAutoGnssSuspended();
+            return mService.isAutomotiveGnssSuspended();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3640,7 +3638,7 @@ public class LocationManager {
         }
 
         @Override
-        protected Boolean recompute(Integer userId) {
+        public Boolean recompute(Integer userId) {
             Preconditions.checkArgument(userId >= 0);
 
             if (mManager == null) {

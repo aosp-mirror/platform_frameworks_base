@@ -126,6 +126,12 @@ public class ActivityOptions extends ComponentOptions {
     public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:activity.animInPlaceRes";
 
     /**
+     * Custom background color for animation.
+     * @hide
+     */
+    public static final String KEY_ANIM_BACKGROUND_COLOR = "android:activity.backgroundColor";
+
+    /**
      * Bitmap for thumbnail animation.
      * @hide
      */
@@ -337,7 +343,7 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCHED_FROM_BUBBLE =
             "android.activity.launchTypeBubble";
 
-    /** See {@link #setSplashscreenStyle(int)}. */
+    /** See {@link #setSplashScreenStyle(int)}. */
     private static final String KEY_SPLASH_SCREEN_STYLE =
             "android.activity.splashScreenStyle";
 
@@ -380,6 +386,8 @@ public class ActivityOptions extends ComponentOptions {
     public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
     /** @hide */
     public static final int ANIM_REMOTE_ANIMATION = 13;
+    /** @hide */
+    public static final int ANIM_FROM_STYLE = 14;
 
     private String mPackageName;
     private Rect mLaunchBounds;
@@ -387,6 +395,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mCustomEnterResId;
     private int mCustomExitResId;
     private int mCustomInPlaceResId;
+    private int mCustomBackgroundColor;
     private Bitmap mThumbnail;
     private int mStartX;
     private int mStartY;
@@ -451,7 +460,27 @@ public class ActivityOptions extends ComponentOptions {
      */
     public static ActivityOptions makeCustomAnimation(Context context,
             int enterResId, int exitResId) {
-        return makeCustomAnimation(context, enterResId, exitResId, null, null, null);
+        return makeCustomAnimation(context, enterResId, exitResId, 0, null, null);
+    }
+
+    /**
+     * Create an ActivityOptions specifying a custom animation to run when
+     * the activity is displayed.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param enterResId A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitResId A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param backgroundColor The background color to use for the background during the animation if
+     * the animation requires a background. Set to 0 to not override the default color.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
+            int enterResId, int exitResId, int backgroundColor) {
+        return makeCustomAnimation(context, enterResId, exitResId, backgroundColor, null, null);
     }
 
     /**
@@ -475,12 +504,14 @@ public class ActivityOptions extends ComponentOptions {
      */
     @UnsupportedAppUsage
     public static ActivityOptions makeCustomAnimation(Context context,
-            int enterResId, int exitResId, Handler handler, OnAnimationStartedListener listener) {
+            int enterResId, int exitResId, int backgroundColor, Handler handler,
+            OnAnimationStartedListener listener) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = context.getPackageName();
         opts.mAnimationType = ANIM_CUSTOM;
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
+        opts.mCustomBackgroundColor = backgroundColor;
         opts.setOnAnimationStartedListener(handler, listener);
         return opts;
     }
@@ -508,11 +539,11 @@ public class ActivityOptions extends ComponentOptions {
      */
     @TestApi
     public static @NonNull ActivityOptions makeCustomAnimation(@NonNull Context context,
-            int enterResId, int exitResId, @Nullable Handler handler,
+            int enterResId, int exitResId, int backgroundColor, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
             @Nullable OnAnimationFinishedListener finishedListener) {
-        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
-                startedListener);
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, backgroundColor,
+                handler, startedListener);
         opts.setOnAnimationFinishedListener(handler, finishedListener);
         return opts;
     }
@@ -545,8 +576,8 @@ public class ActivityOptions extends ComponentOptions {
             int enterResId, int exitResId, @Nullable Handler handler,
             @Nullable OnAnimationStartedListener startedListener,
             @Nullable OnAnimationFinishedListener finishedListener) {
-        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
-                startedListener, finishedListener);
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, 0,
+                handler, startedListener, finishedListener);
         opts.mOverrideTaskTransition = true;
         return opts;
     }
@@ -1090,7 +1121,7 @@ public class ActivityOptions extends ComponentOptions {
 
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
-            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);
+            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT, PendingIntent.class);
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
@@ -1239,6 +1270,11 @@ public class ActivityOptions extends ComponentOptions {
     /** @hide */
     public int getCustomInPlaceResId() {
         return mCustomInPlaceResId;
+    }
+
+    /** @hide */
+    public int getCustomBackgroundColor() {
+        return mCustomBackgroundColor;
     }
 
     /**
@@ -1391,20 +1427,26 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Sets the preferred splash screen style.
-     * @hide
+     * Gets the style can be used for cold-launching an activity.
+     * @see #setSplashScreenStyle(int)
      */
-    public void setSplashscreenStyle(@SplashScreen.SplashScreenStyle int style) {
-        mSplashScreenStyle = style;
+    public @SplashScreen.SplashScreenStyle int getSplashScreenStyle() {
+        return mSplashScreenStyle;
     }
 
     /**
-     * Gets the preferred splash screen style from caller
-     * @hide
+     * Sets the preferred splash screen style of the opening activities. This only applies if the
+     * Activity or Process is not yet created.
+     * @param style Can be either {@link SplashScreen#SPLASH_SCREEN_STYLE_ICON} or
+     *              {@link SplashScreen#SPLASH_SCREEN_STYLE_EMPTY}
      */
-    @SplashScreen.SplashScreenStyle
-    public int getSplashScreenStyle() {
-        return mSplashScreenStyle;
+    @NonNull
+    public ActivityOptions setSplashScreenStyle(@SplashScreen.SplashScreenStyle int style) {
+        if (style == SplashScreen.SPLASH_SCREEN_STYLE_ICON
+                || style == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+            mSplashScreenStyle = style;
+        }
+        return this;
     }
 
     /**
@@ -1766,6 +1808,7 @@ public class ActivityOptions extends ComponentOptions {
             case ANIM_CUSTOM:
                 mCustomEnterResId = otherOptions.mCustomEnterResId;
                 mCustomExitResId = otherOptions.mCustomExitResId;
+                mCustomBackgroundColor = otherOptions.mCustomBackgroundColor;
                 mThumbnail = null;
                 if (mAnimationStartedListener != null) {
                     try {
@@ -1853,6 +1896,7 @@ public class ActivityOptions extends ComponentOptions {
             case ANIM_CUSTOM:
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
+                b.putInt(KEY_ANIM_BACKGROUND_COLOR, mCustomBackgroundColor);
                 b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;

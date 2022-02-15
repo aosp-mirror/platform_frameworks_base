@@ -17,6 +17,8 @@
 package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
@@ -77,8 +79,10 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -107,6 +111,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.onehanded.OneHandedController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -118,6 +123,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Tests the NotifPipeline setup with BubbleController.
@@ -130,6 +136,8 @@ import java.util.List;
 public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
+    @Mock
+    private CommonNotifCollection mCommonNotifCollection;
     @Mock
     private NotificationGroupManagerLegacy mNotificationGroupManager;
     @Mock
@@ -222,6 +230,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private TaskViewTransitions mTaskViewTransitions;
+    @Mock
+    private Optional<OneHandedController> mOneHandedOptional;
 
     private TestableBubblePositioner mPositioner;
 
@@ -291,6 +301,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         mock(StatusBarStateController.class),
                         mock(BatteryController.class),
                         mock(HeadsUpManager.class),
+                        mock(NotificationInterruptLogger.class),
                         mock(Handler.class)
                 );
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
@@ -309,6 +320,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mShellTaskOrganizer,
                 mPositioner,
                 mock(DisplayController.class),
+                mOneHandedOptional,
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
@@ -331,6 +343,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mNotificationGroupManager,
                 mNotificationEntryManager,
+                mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
                 mNotifPipelineFlags,
@@ -399,8 +412,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     public void testRemoveBubble_withDismissedNotif_notInOverflow() {
         mEntryListener.onEntryAdded(mRow);
         mBubbleController.updateBubble(mBubbleEntry);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
 
         assertTrue(mBubbleController.hasBubbles());
         assertBubbleNotificationNotSuppressedFromShade(mBubbleEntry);
@@ -882,7 +894,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -906,7 +918,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
@@ -930,7 +942,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(2);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
+        when(mCommonNotifCollection.getEntry(groupedBubble.getEntry().getKey()))
                 .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
 
@@ -1006,10 +1018,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
      */
     @Test
     public void testOverflowLoadedOnce() {
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
-                .thenReturn(mRow);
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
-                .thenReturn(mRow2);
+        // XXX
+        when(mCommonNotifCollection.getEntry(mRow.getKey())).thenReturn(mRow);
+        when(mCommonNotifCollection.getEntry(mRow2.getKey())).thenReturn(mRow2);
 
         mEntryListener.onEntryAdded(mRow);
         mEntryListener.onEntryAdded(mRow2);
@@ -1095,6 +1106,74 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(false);
 
         assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
+    }
+
+    @Test
+    public void testNotificationChannelModified_channelUpdated_removesOverflowBubble()
+            throws Exception {
+        // Setup
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        NotificationEntry entry = row.getEntry();
+        entry.getChannel().setConversationId(
+                row.getEntry().getChannel().getParentChannelId(),
+                "shortcutId");
+        mBubbleController.updateBubble(BubblesManager.notifToBubbleEntry(row.getEntry()));
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(entry.getKey(),
+                Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isTrue();
+
+        // Test
+        entry.getChannel().setDeleted(true);
+        mBubbleController.onNotificationChannelModified(entry.getSbn().getPackageName(),
+                entry.getSbn().getUser(),
+                entry.getChannel(),
+                NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isFalse();
+    }
+
+    @Test
+    public void testNotificationChannelModified_channelDeleted_removesOverflowBubble()
+            throws Exception {
+        // Setup
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        NotificationEntry entry = row.getEntry();
+        entry.getChannel().setConversationId(
+                row.getEntry().getChannel().getParentChannelId(),
+                "shortcutId");
+        mBubbleController.updateBubble(BubblesManager.notifToBubbleEntry(row.getEntry()));
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(entry.getKey(),
+                Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isTrue();
+
+        // Test
+        entry.getChannel().setDeleted(true);
+        mBubbleController.onNotificationChannelModified(entry.getSbn().getPackageName(),
+                entry.getSbn().getUser(),
+                entry.getChannel(),
+                NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isFalse();
+    }
+
+    @Test
+    public void testStackViewOnBackPressed_updatesBubbleDataExpandState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand the stack
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+
+        // Hit back
+        BubbleStackView stackView = mBubbleController.getStackView();
+        stackView.onBackPressed();
+
+        // Make sure we're collapsed
+        assertStackCollapsed();
     }
 
     /**

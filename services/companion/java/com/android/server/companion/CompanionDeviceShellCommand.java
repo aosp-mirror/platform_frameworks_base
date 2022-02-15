@@ -16,32 +16,41 @@
 
 package com.android.server.companion;
 
-import static com.android.internal.util.CollectionUtils.forEach;
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
-
 import android.companion.AssociationInfo;
+import android.os.ShellCommand;
 import android.util.Log;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.List;
 
-class CompanionDeviceShellCommand extends android.os.ShellCommand {
+class CompanionDeviceShellCommand extends ShellCommand {
+    private static final String TAG = "CompanionDevice_ShellCommand";
+
     private final CompanionDeviceManagerService mService;
+    private final AssociationStore mAssociationStore;
 
-    CompanionDeviceShellCommand(CompanionDeviceManagerService service) {
+    CompanionDeviceShellCommand(CompanionDeviceManagerService service,
+            AssociationStore associationStore) {
         mService = service;
+        mAssociationStore = associationStore;
     }
 
     @Override
     public int onCommand(String cmd) {
+        final PrintWriter out = getOutPrintWriter();
         try {
             switch (cmd) {
                 case "list": {
-                    forEach(
-                            mService.getAllAssociationsForUser(getNextArgInt()),
-                            a -> getOutPrintWriter()
-                                    .println(a.getPackageName() + " "
-                                            + a.getDeviceMacAddress()));
+                    final int userId = getNextArgInt();
+                    final List<AssociationInfo> associationsForUser =
+                            mAssociationStore.getAssociationsForUser(userId);
+                    for (AssociationInfo association : associationsForUser) {
+                        // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
+                        //  longer referenced in tests.
+                        out.println(association.getPackageName() + " "
+                                + association.getDeviceMacAddress());
+                    }
                 }
                 break;
 
@@ -60,18 +69,14 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                     final AssociationInfo association =
                             mService.getAssociationWithCallerChecks(userId, packageName, address);
                     if (association != null) {
-                        mService.disassociateInternal(userId, association.getId());
+                        mService.disassociateInternal(association.getId());
                     }
                 }
                 break;
 
-                case "simulate_connect": {
-                    mService.onDeviceConnected(getNextArgRequired());
-                }
-                break;
-
-                case "simulate_disconnect": {
-                    mService.onDeviceDisconnected(getNextArgRequired());
+                case "clear-association-memory-cache": {
+                    mService.persistState();
+                    mService.loadAssociationsFromDisk();
                 }
                 break;
 
@@ -80,7 +85,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
             }
             return 0;
         } catch (Throwable t) {
-            Slog.e(LOG_TAG, "Error running a command: $ " + cmd, t);
+            Slog.e(TAG, "Error running a command: $ " + cmd, t);
             getErrPrintWriter().println(Log.getStackTraceString(t));
             return 1;
         }
@@ -102,5 +107,8 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");
+        pw.println("  clear-association-memory-cache");
+        pw.println("      Clear the in-memory association cache and reload all association "
+                + "information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
     }
 }

@@ -28,9 +28,6 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.DisplayInfo;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -107,13 +104,21 @@ class WallpaperWindowToken extends WindowToken {
     /** Returns {@code true} if visibility is changed. */
     boolean updateWallpaperWindows(boolean visible) {
         boolean changed = false;
-        if (isVisible() != visible) {
+        if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
             changed = true;
         }
         if (mTransitionController.isShellTransitionsEnabled()) {
+            // Apply legacy fixed rotation to wallpaper if it is becoming visible
+            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
+                final WindowState wallpaperTarget =
+                        mDisplayContent.mWallpaperController.getWallpaperTarget();
+                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
+                    linkFixedRotationTransform(wallpaperTarget.mToken);
+                }
+            }
             return changed;
         }
 
@@ -188,23 +193,6 @@ class WallpaperWindowToken extends WindowToken {
 
         setVisibleRequested(visible);
         setVisible(visible);
-    }
-
-    @Override
-    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
-        if (attrs.height == ViewGroup.LayoutParams.MATCH_PARENT
-                || attrs.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-            return;
-        }
-
-        final DisplayInfo displayInfo = win.getDisplayInfo();
-
-        final float layoutScale = Math.max(
-                (float) displayInfo.logicalHeight / (float) attrs.height,
-                (float) displayInfo.logicalWidth / (float) attrs.width);
-        attrs.height = (int) (attrs.height * layoutScale);
-        attrs.width = (int) (attrs.width * layoutScale);
-        attrs.flags |= WindowManager.LayoutParams.FLAG_SCALED;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {

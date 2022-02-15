@@ -61,6 +61,7 @@ import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult;
 
 /**
  * A class that contains activity intercepting logic for {@link ActivityStarter#startActivityLocked}
@@ -194,11 +195,12 @@ class ActivityStartInterceptor {
 
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
-            final Intent newIntent = callback.intercept(interceptorInfo);
-            if (newIntent == null) {
+            final ActivityInterceptResult interceptResult = callback.intercept(interceptorInfo);
+            if (interceptResult == null) {
                 continue;
             }
-            mIntent = newIntent;
+            mIntent = interceptResult.intent;
+            mActivityOptions = interceptResult.activityOptions;
             mCallingPid = mRealCallingPid;
             mCallingUid = mRealCallingUid;
             mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);

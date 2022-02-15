@@ -106,9 +106,9 @@ public abstract class TvInputService extends Service {
      * @hide
      */
     @IntDef(prefix = "PRIORITY_HINT_USE_CASE_TYPE_",
-        value = {PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, PRIORITY_HINT_USE_CASE_TYPE_SCAN,
-            PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, PRIORITY_HINT_USE_CASE_TYPE_LIVE,
-            PRIORITY_HINT_USE_CASE_TYPE_RECORD})
+            value = {PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, PRIORITY_HINT_USE_CASE_TYPE_SCAN,
+                    PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, PRIORITY_HINT_USE_CASE_TYPE_LIVE,
+                    PRIORITY_HINT_USE_CASE_TYPE_RECORD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PriorityHintUseCaseType {}
 
@@ -202,6 +202,21 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
+            public List<String>  getAvailableExtensionInterfaceNames() {
+                return TvInputService.this.getAvailableExtensionInterfaceNames();
+            }
+
+            @Override
+            public IBinder getExtensionInterface(String name) {
+                return TvInputService.this.getExtensionInterface(name);
+            }
+
+            @Override
+            public String getExtensionInterfacePermission(String name) {
+                return TvInputService.this.getExtensionInterfacePermission(name);
+            }
+
+            @Override
             public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_INPUT,
                         hardwareInfo).sendToTarget();
@@ -250,6 +265,67 @@ public abstract class TvInputService extends Service {
     @Nullable
     @SystemApi
     public IBinder createExtension() {
+        return null;
+    }
+
+    /**
+     * Returns available extension interfaces. This can be used to provide domain-specific
+     * features that are only known between certain hardware TV inputs and their clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @return a non-null list of available extension interface names. An empty list
+     *         indicates the TV input doesn't support any extension interfaces.
+     * @see #getExtensionInterface
+     * @see #getExtensionInterfacePermission
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<String> getAvailableExtensionInterfaceNames() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns an extension interface. This can be used to provide domain-specific features
+     * that are only known between certain hardware TV inputs and their clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @param name The extension interface name.
+     * @return an {@link IBinder} for the given extension interface, {@code null} if the TV input
+     *         doesn't support the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @see #getExtensionInterfacePermission
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public IBinder getExtensionInterface(@NonNull String name) {
+        return null;
+    }
+
+    /**
+     * Returns a permission for the given extension interface. This can be used to provide
+     * domain-specific features that are only known between certain hardware TV inputs and their
+     * clients.
+     *
+     * <p>Note that this service-level extension interface mechanism is only for hardware
+     * TV inputs that are bound even when sessions are not created.
+     *
+     * @param name The extension interface name.
+     * @return a name of the permission being checked for the given extension interface,
+     *         {@code null} if there is no required permission, or if the TV input doesn't
+     *         support the given extension interface.
+     * @see #getAvailableExtensionInterfaceNames
+     * @see #getExtensionInterface
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public String getExtensionInterfacePermission(@NonNull String name) {
         return null;
     }
 
@@ -517,6 +593,28 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that this session has been tuned to the given channel.
+         *
+         * @param channelUri The URI of the tuned channel.
+         */
+        public void notifyTuned(@NonNull Uri channelUri) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTuned");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTuned(channelUri);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTuned", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends the list of all audio/video/subtitle tracks. The is used by the framework to
          * maintain the track information for a given session, which in turn is used by
          * {@link TvView#getTracks} for the application to retrieve metadata for a given track type.
@@ -773,8 +871,7 @@ public abstract class TvInputService extends Service {
         /**
          * Notifies response for broadcast info.
          *
-         * @param response
-         * @hide
+         * @param response broadcast info response.
          */
         public void notifyBroadcastInfoResponse(@NonNull final BroadcastInfoResponse response) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -788,6 +885,29 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyBroadcastInfoResponse", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies response for advertisement.
+         *
+         * @param response advertisement response.
+         * @see android.media.tv.interactive.TvInteractiveAppService.Session#requestAd(AdRequest)
+         */
+        public void notifyAdResponse(@NonNull final AdResponse response) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAdResponse");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdResponse(response);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdResponse", e);
                     }
                 }
             });
@@ -828,8 +948,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Notifies AIT info updated.
-         * @hide
+         * Informs the app that the AIT (Application Information Table) is updated.
+         *
+         * <p>This method should also be called when
+         * {@link #onSetInteractiveAppNotificationEnabled(boolean)} is called to send the first AIT
+         * info.
+         *
+         * @see #onSetInteractiveAppNotificationEnabled(boolean)
          */
         public void notifyAitInfoUpdated(@NonNull final AitInfo aitInfo) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -843,6 +968,26 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAitInfoUpdated", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies signal strength.
+         */
+        public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifySignalStrength");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSignalStrength(strength);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifySignalStrength", e);
                     }
                 }
             });
@@ -962,10 +1107,25 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
+         * called when broadcast info is requested.
+         *
          * @param request broadcast info request
-         * @hide
          */
         public void onRequestBroadcastInfo(@NonNull BroadcastInfoRequest request) {
+        }
+
+        /**
+         * called when broadcast info is removed.
+         */
+        public void onRemoveBroadcastInfo(int requestId) {
+        }
+
+        /**
+         * Called when advertisement request is received.
+         *
+         * @param request advertisement request received
+         */
+        public void onRequestAd(@NonNull AdRequest request) {
         }
 
         /**
@@ -1043,10 +1203,18 @@ public abstract class TvInputService extends Service {
 
         /**
          * Enables or disables interactive app notification.
+         *
+         * <p>This method enables or disables the event detection from the corresponding TV input.
+         * When it's enabled, the TV input service detects events related to interactive app, such
+         * as AIT (Application Information Table) and sends to TvView or the linked TV interactive
+         * app service.
+         *
          * @param enabled {@code true} to enable, {@code false} to disable.
-         * @hide
+         *
+         * @see TvView#setInteractiveAppNotificationEnabled(boolean)
+         * @see Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
          */
-        public void onSetIAppNotificationEnabled(boolean enabled) {
+        public void onSetInteractiveAppNotificationEnabled(boolean enabled) {
         }
 
         /**
@@ -1398,10 +1566,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onSetIAppNotificationEnabled}.
+         * Calls {@link #onSetInteractiveAppNotificationEnabled}.
          */
-        void setIAppNotificationEnabled(boolean enabled) {
-            onSetIAppNotificationEnabled(enabled);
+        void setInteractiveAppNotificationEnabled(boolean enabled) {
+            onSetInteractiveAppNotificationEnabled(enabled);
         }
 
         /**
@@ -1575,6 +1743,14 @@ public abstract class TvInputService extends Service {
 
         void requestBroadcastInfo(BroadcastInfoRequest request) {
             onRequestBroadcastInfo(request);
+        }
+
+        void removeBroadcastInfo(int requestId) {
+            onRemoveBroadcastInfo(requestId);
+        }
+
+        void requestAd(AdRequest request) {
+            onRequestAd(request);
         }
 
         /**
@@ -2113,43 +2289,43 @@ public abstract class TvInputService extends Service {
 
         private final TvInputManager.SessionCallback mHardwareSessionCallback =
                 new TvInputManager.SessionCallback() {
-            @Override
-            public void onSessionCreated(TvInputManager.Session session) {
-                mHardwareSession = session;
-                SomeArgs args = SomeArgs.obtain();
-                if (session != null) {
-                    args.arg1 = HardwareSession.this;
-                    args.arg2 = mProxySession;
-                    args.arg3 = mProxySessionCallback;
-                    args.arg4 = session.getToken();
-                    session.tune(TvContract.buildChannelUriForPassthroughInput(
-                            getHardwareInputId()));
-                } else {
-                    args.arg1 = null;
-                    args.arg2 = null;
-                    args.arg3 = mProxySessionCallback;
-                    args.arg4 = null;
-                    onRelease();
-                }
-                mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
-                        .sendToTarget();
-            }
+                    @Override
+                    public void onSessionCreated(TvInputManager.Session session) {
+                        mHardwareSession = session;
+                        SomeArgs args = SomeArgs.obtain();
+                        if (session != null) {
+                            args.arg1 = HardwareSession.this;
+                            args.arg2 = mProxySession;
+                            args.arg3 = mProxySessionCallback;
+                            args.arg4 = session.getToken();
+                            session.tune(TvContract.buildChannelUriForPassthroughInput(
+                                    getHardwareInputId()));
+                        } else {
+                            args.arg1 = null;
+                            args.arg2 = null;
+                            args.arg3 = mProxySessionCallback;
+                            args.arg4 = null;
+                            onRelease();
+                        }
+                        mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
+                                        args).sendToTarget();
+                    }
 
-            @Override
-            public void onVideoAvailable(final TvInputManager.Session session) {
-                if (mHardwareSession == session) {
-                    onHardwareVideoAvailable();
-                }
-            }
+                    @Override
+                    public void onVideoAvailable(final TvInputManager.Session session) {
+                        if (mHardwareSession == session) {
+                            onHardwareVideoAvailable();
+                        }
+                    }
 
-            @Override
-            public void onVideoUnavailable(final TvInputManager.Session session,
-                    final int reason) {
-                if (mHardwareSession == session) {
-                    onHardwareVideoUnavailable(reason);
-                }
-            }
-        };
+                    @Override
+                    public void onVideoUnavailable(final TvInputManager.Session session,
+                            final int reason) {
+                        if (mHardwareSession == session) {
+                            onHardwareVideoUnavailable(reason);
+                        }
+                    }
+                };
 
         /**
          * This method will not be called in {@link HardwareSession}. Framework will

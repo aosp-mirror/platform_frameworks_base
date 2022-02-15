@@ -18,8 +18,8 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -41,7 +41,9 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.ConditionList
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
@@ -63,6 +65,12 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
+    private val waitConditionSetup = ConditionList(listOf(
+        WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
+        WindowManagerConditionsFactory.isHomeActivityVisible()
+    ))
+
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -73,8 +81,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 eachRun {
                     device.pressRecentApps()
-                    wmHelper.waitImeGone()
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.waitFor(waitConditionSetup)
                     this.setRotation(testSpec.startRotation)
                 }
             }
@@ -101,8 +108,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        // This test doesn't work in shell transitions because of b/204570898
-        assumeFalse(isShellTransitionsEnabled)
         val component = FlickerComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
@@ -116,8 +121,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun launcherWindowBecomesInvisible() {
-        // This test doesn't work in shell transitions because of b/204574221
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertWm {
             this.isAppWindowVisible(LAUNCHER_COMPONENT)
                     .then()
@@ -127,11 +130,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeWindowIsAlwaysVisible() {
-        // This test doesn't work in shell transitions because of b/204570898
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
-    }
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
 
     @Presubmit
     @Test
@@ -202,8 +201,6 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun appLayerReplacesLauncher() {
-        // This test doesn't work in shell transitions because of b/204574221
-        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                 .then()
@@ -217,13 +214,9 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
-    fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        testSpec.statusBarLayerRotatesScales()
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
@@ -245,11 +238,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 1,
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    repetitions = 3,
+                    supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
     }

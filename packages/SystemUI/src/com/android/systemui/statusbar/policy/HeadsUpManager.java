@@ -184,6 +184,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
+        mLogger.logNotificationActuallyRemoved(entry.getKey());
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
@@ -349,11 +350,14 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * @return -1 if the first argument should be ranked higher than the second, 1 if the second
      * one should be ranked higher and 0 if they are equal.
      */
-    public int compare(@NonNull NotificationEntry a, @NonNull NotificationEntry b) {
+    public int compare(@Nullable NotificationEntry a, @Nullable NotificationEntry b) {
+        if (a == null || b == null) {
+            return Boolean.compare(a == null, b == null);
+        }
         AlertEntry aEntry = getHeadsUpEntry(a.getKey());
         AlertEntry bEntry = getHeadsUpEntry(b.getKey());
         if (aEntry == null || bEntry == null) {
-            return aEntry == null ? 1 : -1;
+            return Boolean.compare(aEntry == null, bEntry == null);
         }
         return aEntry.compareTo(bEntry);
     }
@@ -376,10 +380,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     public void onDensityOrFontScaleChanged() {
-    }
-
-    public boolean isEntryAutoHeadsUpped(String key) {
-        return false;
     }
 
     /**

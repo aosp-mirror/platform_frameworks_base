@@ -599,7 +599,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
         synchronized (mSurfacesLock) {
             mSurfaceSet.clear();
-            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader());
+            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader(),
+                    Surface.class);
             if (parcelableArray != null) {
                 for (Parcelable p : parcelableArray) {
                     Surface s = (Surface) p;

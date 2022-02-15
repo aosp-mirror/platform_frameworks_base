@@ -44,6 +44,8 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
+import android.media.tv.AdRequest;
+import android.media.tv.AdResponse;
 import android.media.tv.AitInfo;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
@@ -67,6 +69,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -92,6 +95,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1178,6 +1182,93 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public List<String> getAvailableExtensionInterfaceNames(String inputId, int userId) {
+            ensureTisExtensionInterfacePermission();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "getAvailableExtensionInterfaceNames");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ITvInputService service = null;
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvInputState inputState = userState.inputMap.get(inputId);
+                    if (inputState != null) {
+                        ServiceState serviceState =
+                                userState.serviceStateMap.get(inputState.info.getComponent());
+                        if (serviceState != null && serviceState.isHardware
+                                && serviceState.service != null) {
+                            service = serviceState.service;
+                        }
+                    }
+                }
+                try {
+                    if (service != null) {
+                        List<String> interfaces = new ArrayList<>();
+                        for (final String name : CollectionUtils.emptyIfNull(
+                                service.getAvailableExtensionInterfaceNames())) {
+                            String permission = service.getExtensionInterfacePermission(name);
+                            if (permission == null
+                                    || mContext.checkPermission(permission, callingPid, callingUid)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                                interfaces.add(name);
+                            }
+                        }
+                        return interfaces;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in getAvailableExtensionInterfaceNames "
+                            + "or getExtensionInterfacePermission", e);
+                }
+                return new ArrayList<>();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public IBinder getExtensionInterface(String inputId, String name, int userId) {
+            ensureTisExtensionInterfacePermission();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "getExtensionInterface");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ITvInputService service = null;
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvInputState inputState = userState.inputMap.get(inputId);
+                    if (inputState != null) {
+                        ServiceState serviceState =
+                                userState.serviceStateMap.get(inputState.info.getComponent());
+                        if (serviceState != null && serviceState.isHardware
+                                && serviceState.service != null) {
+                            service = serviceState.service;
+                        }
+                    }
+                }
+                try {
+                    if (service != null) {
+                        String permission = service.getExtensionInterfacePermission(name);
+                        if (permission == null
+                                || mContext.checkPermission(permission, callingPid, callingUid)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return service.getExtensionInterface(name);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in getExtensionInterfacePermission "
+                            + "or getExtensionInterface", e);
+                }
+                return null;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId) {
             if (mContext.checkCallingPermission(
                     android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS)
@@ -1762,18 +1853,19 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void setIAppNotificationEnabled(IBinder sessionToken, boolean enabled, int userId) {
+        public void setInteractiveAppNotificationEnabled(
+                IBinder sessionToken, boolean enabled, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "setIAppNotificationEnabled");
+                    userId, "setInteractiveAppNotificationEnabled");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .setIAppNotificationEnabled(enabled);
+                                .setInteractiveAppNotificationEnabled(enabled);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in setIAppNotificationEnabled", e);
+                        Slog.e(TAG, "error in setInteractiveAppNotificationEnabled", e);
                     }
                 }
             } finally {
@@ -2382,6 +2474,50 @@ public final class TvInputManagerService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removeBroadcastInfo(IBinder sessionToken, int requestId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "removeBroadcastInfo");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).removeBroadcastInfo(requestId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in removeBroadcastInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void requestAd(IBinder sessionToken, AdRequest request, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "requestAd");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).requestAd(request);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in requestAd", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             };
         }
 
@@ -2403,6 +2539,32 @@ public final class TvInputManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
             return clientPid;
+        }
+
+        @Override
+        public int getClientPriority(int useCase, String sessionId) {
+            ensureTunerResourceAccessPermission();
+            final int callingPid = Binder.getCallingPid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                int clientPid = TvInputManager.UNKNOWN_CLIENT_PID;
+                if (sessionId != null) {
+                    synchronized (mLock) {
+                        try {
+                            clientPid = getClientPidLocked(sessionId);
+                        } catch (ClientPidNotFoundException e) {
+                            Slog.e(TAG, "error in getClientPriority", e);
+                        }
+                    }
+                } else {
+                    clientPid = callingPid;
+                }
+                TunerResourceManager trm = (TunerResourceManager)
+                        mContext.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+                return trm.getClientPriority(useCase, clientPid);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
@@ -2453,9 +2615,9 @@ public final class TvInputManagerService extends SystemService {
 
         @GuardedBy("mLock")
         private int getClientPidLocked(String sessionId)
-                throws IllegalStateException {
+                throws ClientPidNotFoundException {
             if (mSessionIdToSessionStateMap.get(sessionId) == null) {
-                throw new IllegalStateException("Client Pid not found with sessionId "
+                throw new ClientPidNotFoundException("Client Pid not found with sessionId "
                         + sessionId);
             }
             return mSessionIdToSessionStateMap.get(sessionId).callingPid;
@@ -2466,6 +2628,14 @@ public final class TvInputManagerService extends SystemService {
                     android.Manifest.permission.TUNER_RESOURCE_ACCESS)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires TUNER_RESOURCE_ACCESS permission");
+            }
+        }
+
+        private void ensureTisExtensionInterfacePermission() {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.TIS_EXTENSION_INTERFACE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires TIS_EXTENSION_INTERFACE permission");
             }
         }
 
@@ -3380,6 +3550,23 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void onSignalStrength(int strength) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onSignalStrength(" + strength + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onSignalStrength(strength, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onSignalStrength", e);
+                }
+            }
+        }
+
+        @Override
         public void onTuned(Uri channelUri) {
             synchronized (mLock) {
                 if (DEBUG) {
@@ -3446,6 +3633,23 @@ public final class TvInputManagerService extends SystemService {
                     mSessionState.client.onBroadcastInfoResponse(response, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onBroadcastInfoResponse", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAdResponse (AdResponse response) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onAdResponse()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onAdResponse(response, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onAdResponse", e);
                 }
             }
         }

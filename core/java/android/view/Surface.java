@@ -755,7 +755,7 @@ public class Surface implements Parcelable {
     private void setNativeObjectLocked(long ptr) {
         if (mNativeObject != ptr) {
             if (mNativeObject == 0 && ptr != 0) {
-                mCloseGuard.open("release");
+                mCloseGuard.open("Surface.release");
             } else if (mNativeObject != 0 && ptr == 0) {
                 mCloseGuard.close();
             }

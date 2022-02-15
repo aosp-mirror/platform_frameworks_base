@@ -36,8 +36,13 @@ class LogBufferFactory @Inject constructor(
     }
 
     @JvmOverloads
-    fun create(name: String, maxPoolSize: Int, flexSize: Int = 10): LogBuffer {
-        val buffer = LogBuffer(name, poolLimit(maxPoolSize), flexSize, logcatEchoTracker)
+    fun create(
+        name: String,
+        maxPoolSize: Int,
+        flexSize: Int = 10,
+        systrace: Boolean = true
+    ): LogBuffer {
+        val buffer = LogBuffer(name, poolLimit(maxPoolSize), flexSize, logcatEchoTracker, systrace)
         dumpManager.registerBuffer(name, buffer)
         return buffer
     }

@@ -80,11 +80,6 @@ class AuthRippleController @Inject constructor(
     private var circleReveal: LightRevealEffect? = null
 
     private var udfpsController: UdfpsController? = null
-
-    private var dwellScale = 2f
-    private var expandedDwellScale = 2.5f
-    private var aodDwellScale = 1.9f
-    private var aodExpandedDwellScale = 2.3f
     private var udfpsRadius: Float = -1f
 
     override fun onInit() {
@@ -128,7 +123,7 @@ class AuthRippleController @Inject constructor(
         updateSensorLocation()
         if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
             fingerprintSensorLocation != null) {
-            mView.setSensorLocation(fingerprintSensorLocation!!)
+            mView.setFingerprintSensorLocation(fingerprintSensorLocation!!, udfpsRadius)
             showUnlockedRipple()
         } else if (biometricSourceType == BiometricSourceType.FACE &&
             faceSensorLocation != null) {
@@ -241,24 +236,12 @@ class AuthRippleController @Inject constructor(
     }
 
     private fun updateRippleColor() {
-        mView.setColor(
-            Utils.getColorAttr(sysuiContext, android.R.attr.colorAccent).defaultColor)
+        mView.setLockScreenColor(Utils.getColorAttrDefaultColor(sysuiContext,
+                R.attr.wallpaperTextColorAccent))
     }
 
     private fun showDwellRipple() {
-        if (statusBarStateController.isDozing) {
-            mView.startDwellRipple(
-                    /* startRadius */ udfpsRadius,
-                    /* endRadius */ udfpsRadius * aodDwellScale,
-                    /* expandedRadius */ udfpsRadius * aodExpandedDwellScale,
-                    /* isDozing */ true)
-        } else {
-            mView.startDwellRipple(
-                    /* startRadius */ udfpsRadius,
-                    /* endRadius */ udfpsRadius * dwellScale,
-                    /* expandedRadius */ udfpsRadius * expandedDwellScale,
-                    /* isDozing */ false)
-        }
+        mView.startDwellRipple(statusBarStateController.isDozing)
     }
 
     private val keyguardUpdateMonitorCallback =
@@ -295,7 +278,7 @@ class AuthRippleController @Inject constructor(
                     return
                 }
 
-                mView.setSensorLocation(fingerprintSensorLocation!!)
+                mView.setFingerprintSensorLocation(fingerprintSensorLocation!!, udfpsRadius)
                 showDwellRipple()
             }
 
@@ -307,8 +290,8 @@ class AuthRippleController @Inject constructor(
     private val authControllerCallback =
         object : AuthController.Callback {
             override fun onAllAuthenticatorsRegistered() {
-                updateSensorLocation()
                 updateUdfpsDependentParams()
+                updateSensorLocation()
             }
 
             override fun onEnrollmentsChanged() {
@@ -329,20 +312,6 @@ class AuthRippleController @Inject constructor(
     }
 
     inner class AuthRippleCommand : Command {
-        fun printLockScreenDwellInfo(pw: PrintWriter) {
-            pw.println("lock screen dwell ripple: " +
-                    "\n\tsensorLocation=$fingerprintSensorLocation" +
-                    "\n\tdwellScale=$dwellScale" +
-                    "\n\tdwellExpand=$expandedDwellScale")
-        }
-
-        fun printAodDwellInfo(pw: PrintWriter) {
-            pw.println("aod dwell ripple: " +
-                    "\n\tsensorLocation=$fingerprintSensorLocation" +
-                    "\n\tdwellScale=$aodDwellScale" +
-                    "\n\tdwellExpand=$aodExpandedDwellScale")
-        }
-
         override fun execute(pw: PrintWriter, args: List<String>) {
             if (args.isEmpty()) {
                 invalidCommand(pw)
@@ -350,11 +319,9 @@ class AuthRippleController @Inject constructor(
                 when (args[0]) {
                     "dwell" -> {
                         showDwellRipple()
-                        if (statusBarStateController.isDozing) {
-                            printAodDwellInfo(pw)
-                        } else {
-                            printLockScreenDwellInfo(pw)
-                        }
+                        pw.println("lock screen dwell ripple: " +
+                                "\n\tsensorLocation=$fingerprintSensorLocation" +
+                                "\n\tudfpsRadius=$udfpsRadius")
                     }
                     "fingerprint" -> {
                         updateSensorLocation()

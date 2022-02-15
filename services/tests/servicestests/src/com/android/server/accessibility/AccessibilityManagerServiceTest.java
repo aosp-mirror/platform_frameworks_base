@@ -343,6 +343,20 @@ public class AccessibilityManagerServiceTest {
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW), ArgumentMatchers.isNotNull());
     }
 
+    @Test
+    public void testFollowTypingEnabled_defaultEnabledAndThenDisable_propagateToController() {
+        final AccessibilityUserState userState = mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked());
+        Settings.Secure.putIntForUser(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
+                0, mA11yms.getCurrentUserIdLocked());
+
+        mA11yms.readMagnificationFollowTypingLocked(userState);
+
+        verify(mMockMagnificationController).setMagnificationFollowTypingEnabled(false);
+    }
+
     @SmallTest
     @Test
     public void testOnClientChange_magnificationEnabledAndCapabilityAll_requestConnection() {

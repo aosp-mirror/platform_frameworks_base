@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,6 +43,7 @@ import java.util.concurrent.Future;
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public boolean mForceOnBattery;
+    // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
     private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
 
@@ -116,10 +119,16 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
     }
 
+    @Override
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return mNetworkStats;
+    }
     public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
         return this;
@@ -231,6 +240,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
         @Override
         public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
             return null;
         }
     }

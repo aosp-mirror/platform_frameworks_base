@@ -31,9 +31,8 @@ public class InterestingConfigChanges {
     private int mLastDensity;
 
     public InterestingConfigChanges() {
-        this(ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_SCREEN_LAYOUT
-                | ActivityInfo.CONFIG_ASSETS_PATHS);
+        this(ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_LAYOUT_DIRECTION
+                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_ASSETS_PATHS);
     }
 
     public InterestingConfigChanges(int flags) {

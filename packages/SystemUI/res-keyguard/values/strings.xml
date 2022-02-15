@@ -37,6 +37,9 @@
     <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's wirelessly charging. [CHAR LIMIT=50]  -->
     <string name="keyguard_plugged_in_wireless"><xliff:g id="percentage" example="20%">%s</xliff:g> • Charging wirelessly</string>
 
+    <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's dock charging. [CHAR LIMIT=50]  -->
+    <string name="keyguard_plugged_in_dock"><xliff:g id="percentage" example="20%">%s</xliff:g> • Charging Dock</string>
+
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, say that it's charging.  -->
     <string name="keyguard_plugged_in"><xliff:g id="percentage">%s</xliff:g> • Charging</string>
@@ -117,10 +120,11 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <plurals name="kg_too_many_failed_attempts_countdown">
-        <item quantity="one">Try again in 1 second.</item>
-        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown">{count, plural,
+        =1 {Try again in # second.}
+        other {Try again in # seconds.}
+    }
+    </string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
@@ -212,9 +216,6 @@
     <!-- An explanation text that the credential needs to be entered because the user has clicked
      the force lock button. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_user_request">Device was locked manually</string>
-
-    <!-- Fingerprint hint message when finger was not recognized.-->
-    <string name="kg_fingerprint_not_recognized">Not recognized</string>
 
     <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
     <string name="kg_face_not_recognized">Not recognized</string>

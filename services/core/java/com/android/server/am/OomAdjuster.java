@@ -598,7 +598,7 @@ public class OomAdjuster {
             for (int i = psr.numberOfConnections() - 1; i >= 0; i--) {
                 ConnectionRecord cr = psr.getConnectionAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
-                        ? cr.binding.service.isolatedProc : cr.binding.service.app;
+                        ? cr.binding.service.isolationHostProc : cr.binding.service.app;
                 if (service == null || service == pr) {
                     continue;
                 }
@@ -2486,20 +2486,12 @@ public class OomAdjuster {
         // don't compact during bootup
         if (mCachedAppOptimizer.useCompaction() && mService.mBooted) {
             // Cached and prev/home compaction
+            // reminder: here, setAdj is previous state, curAdj is upcoming state
             if (state.getCurAdj() != state.getSetAdj()) {
-                // Perform a minor compaction when a perceptible app becomes the prev/home app
-                // Perform a major compaction when any app enters cached
-                // reminder: here, setAdj is previous state, curAdj is upcoming state
-                if (state.getSetAdj() <= ProcessList.PERCEPTIBLE_APP_ADJ
-                        && (state.getCurAdj() == ProcessList.PREVIOUS_APP_ADJ
-                            || state.getCurAdj() == ProcessList.HOME_APP_ADJ)) {
-                    mCachedAppOptimizer.compactAppSome(app);
-                } else if (state.getCurAdj() >= ProcessList.CACHED_APP_MIN_ADJ
-                        && state.getCurAdj() <= ProcessList.CACHED_APP_MAX_ADJ) {
-                    mCachedAppOptimizer.compactAppFull(app);
-                }
+                mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
             } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
                     && state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
+                    && !state.isRunningRemoteAnimation()
                     // Because these can fire independent of oom_adj/procstate changes, we need
                     // to throttle the actual dispatch of these requests in addition to the
                     // processing of the requests. As a result, there is throttling both here
@@ -2782,29 +2774,18 @@ public class OomAdjuster {
     void setAttachingSchedGroupLSP(ProcessRecord app) {
         int initialSchedGroup = ProcessList.SCHED_GROUP_DEFAULT;
         final ProcessStateRecord state = app.mState;
-        // If the process has been marked as foreground via Zygote.START_FLAG_USE_TOP_APP_PRIORITY,
-        // then verify that the top priority is actually is applied.
+        // If the process has been marked as foreground, it is starting as the top app (with
+        // Zygote#START_AS_TOP_APP_ARG), so boost the thread priority of its default UI thread.
         if (state.hasForegroundActivities()) {
-            String fallbackReason = null;
             try {
                 // The priority must be the same as how does {@link #applyOomAdjLSP} set for
                 // {@link ProcessList.SCHED_GROUP_TOP_APP}. We don't check render thread because it
                 // is not ready when attaching.
-                if (Process.getProcessGroup(app.getPid()) == THREAD_GROUP_TOP_APP) {
-                    app.getWindowProcessController().onTopProcChanged();
-                    setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
-                } else {
-                    fallbackReason = "not expected top priority";
-                }
-            } catch (Exception e) {
-                fallbackReason = e.toString();
-            }
-            if (fallbackReason == null) {
+                app.getWindowProcessController().onTopProcChanged();
+                setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                 initialSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
-            } else {
-                // The real scheduling group will depend on if there is any component of the process
-                // did something during attaching.
-                Slog.w(TAG, "Fallback pre-set sched group to default: " + fallbackReason);
+            } catch (Exception e) {
+                Slog.w(TAG, "Failed to pre-set top priority to " + app + " " + e);
             }
         }
 

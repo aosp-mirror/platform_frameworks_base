@@ -208,7 +208,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
             }
 
             @Override
-            public void onError() {
+            public void onError(Throwable t) {
                 synchronized (mLock) {
                     mFlushListeners.remove(callback);
                 }

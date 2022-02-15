@@ -119,7 +119,7 @@ public final class TextValueSanitizer extends InternalSanitizer implements
             new Parcelable.Creator<TextValueSanitizer>() {
         @Override
         public TextValueSanitizer createFromParcel(Parcel parcel) {
-            return new TextValueSanitizer((Pattern) parcel.readSerializable(), parcel.readString());
+            return new TextValueSanitizer((Pattern) parcel.readSerializable(java.util.regex.Pattern.class.getClassLoader(), java.util.regex.Pattern.class), parcel.readString());
         }
 
         @Override

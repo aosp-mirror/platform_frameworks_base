@@ -112,8 +112,6 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
             if (statusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
                 statusBarOptional.get().executeRunnableDismissingKeyguard(() -> {
-                        // Flush trustmanager before checking device locked per user
-                        mTrustManager.reportKeyguardShowingChanged();
                         mHandler.post(toggleRecents);
                     }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
                     true /* deferred */);

@@ -20,8 +20,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
-import android.content.pm.parsing.component.ParsedActivityImpl
-import android.content.pm.parsing.component.ParsedIntentInfoImpl
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
@@ -867,7 +867,8 @@ class DomainVerificationPackageTest {
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
 
-            fun baseIntent(domain: String) = ParsedIntentInfoImpl().apply {
+            fun baseIntent(domain: String) = ParsedIntentInfoImpl()
+                .apply {
                 intentFilter.apply {
                     addAction(Intent.ACTION_VIEW)
                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -896,7 +897,6 @@ class DomainVerificationPackageTest {
         whenever(this.pkg) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
-        whenever(firstInstallTime) { 0L }
         whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
         whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
         whenever(userStates) {

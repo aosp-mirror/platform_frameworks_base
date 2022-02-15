@@ -46,6 +46,7 @@ import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IS
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.UID_FIELD_NUMBER;
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
+import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT;
 import static com.android.server.notification.PreferencesHelper.UNKNOWN_UID;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -542,6 +543,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setInvalidMessageSent(PKG_P, UID_P);
         mHelper.setValidMessageSent(PKG_P, UID_P);
         mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+        mHelper.setValidBubbleSent(PKG_P, UID_P);
 
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
 
@@ -561,6 +563,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(mHelper.hasSentInvalidMsg(PKG_N_MR1, UID_N_MR1));
         assertTrue(mHelper.hasSentValidMsg(PKG_P, UID_P));
         assertTrue(mHelper.didUserEverDemoteInvalidMsgApp(PKG_P, UID_P));
+        assertTrue(mHelper.hasSentValidBubble(PKG_P, UID_P));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -781,6 +784,73 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(idn, mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, idn.getId(), false));
         compareChannels(ido, mHelper.getNotificationChannel(PKG_O, UID_O, ido.getId(), false));
         compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
+
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+    }
+
+    @Test
+    public void testReadXml_oldXml_migration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"2\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
+
+        verify(mPermissionHelper, times(1)).setNotificationPermission(any());
+    }
+
+    @Test
+    public void testReadXml_newXml_noMigration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"3\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
 
         verify(mPermissionHelper, never()).setNotificationPermission(any());
     }
@@ -1795,24 +1865,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(1, mHelper.getBlockedChannelCount(PKG_N_MR1, UID_N_MR1));
         assertEquals(0, mHelper.getBlockedChannelCount("pkg2", UID_O));
-    }
-
-    @Test
-    public void testUpdateChannelsBypassingDnd_onUserSwitch_onUserUnlocked() throws Exception {
-        int user = USER.getIdentifier();
-        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
-        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
-                NotificationManager.IMPORTANCE_MAX);
-        channel1.setBypassDnd(true);
-        channel1.setGroup(ncg.getId());
-
-        // channel is associated with a group, then group is deleted
-        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
-        mHelper.deleteNotificationChannelGroup(PKG_N_MR1, user, ncg.getId());
-
-        mHelper.onUserSwitched(user);
-        mHelper.onUserUnlocked(user);
     }
 
     @Test
@@ -3174,6 +3226,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsGroupBlocked_appCannotCreateAsBlocked() throws Exception {
+        NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
+        group.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
+        assertFalse(mHelper.isGroupBlocked(PKG_N_MR1, UID_N_MR1, group.getId()));
+
+        NotificationChannelGroup group3 = group.clone();
+        group3.setBlocked(false);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group3, true);
+        assertFalse(mHelper.isGroupBlocked(PKG_N_MR1, UID_N_MR1, group.getId()));
+    }
+
+    @Test
     public void testIsGroup_appCannotResetBlock() throws Exception {
         NotificationChannelGroup group = new NotificationChannelGroup("id", "name");
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
@@ -4235,6 +4300,52 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testTooManyGroups() {
+        for (int i = 0; i < NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT; i++) {
+            NotificationChannelGroup group = new NotificationChannelGroup(String.valueOf(i),
+                    String.valueOf(i));
+            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+        }
+        try {
+            NotificationChannelGroup group = new NotificationChannelGroup(
+                    String.valueOf(NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT),
+                    String.valueOf(NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT));
+            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+            fail("Allowed to create too many notification channel groups");
+        } catch (IllegalStateException e) {
+            // great
+        }
+    }
+
+    @Test
+    public void testTooManyGroups_xml() throws Exception {
+        String extraGroup = "EXTRA";
+        String extraGroup1 = "EXTRA1";
+
+        // create first... many... directly so we don't need a big xml blob in this test
+        for (int i = 0; i < NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT; i++) {
+            NotificationChannelGroup group = new NotificationChannelGroup(String.valueOf(i),
+                    String.valueOf(i));
+            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+        }
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channelGroup id=\"" + extraGroup + "\" name=\"hi\"/>"
+                + "<channelGroup id=\"" + extraGroup1 + "\" name=\"hi2\"/>"
+                + "</package>"
+                + "</ranking>";
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNull(mHelper.getNotificationChannelGroup(extraGroup, PKG_O, UID_O));
+        assertNull(mHelper.getNotificationChannelGroup(extraGroup1, PKG_O, UID_O));
+    }
+
+    @Test
     public void testRestoreMultiUser() throws Exception {
         String pkg = "restore_pkg";
         String channelId = "channelId";
@@ -4706,7 +4817,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testGetConversations_noDisabledGroups() {
         NotificationChannelGroup group = new NotificationChannelGroup("a", "a");
         group.setBlocked(true);
-        mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+        mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, false);
         NotificationChannel parent = new NotificationChannel("parent", "p", 1);
         mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
 
@@ -4927,6 +5038,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testValidBubbleSent() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+        // false by default
+        assertFalse(mHelper.hasSentValidBubble(PKG_P, UID_P));
+
+        // set something valid was sent
+        mHelper.setValidBubbleSent(PKG_P, UID_P);
+        assertTrue(mHelper.hasSentValidBubble(PKG_P, UID_P));
+    }
+
+    @Test
     public void testPullPackageChannelPreferencesStats() {
         String channelId = "parent";
         String name = "messages";
@@ -5112,6 +5235,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 assertTrue(expected.containsKey(uid));
                 assertThat(expected.get(uid)).isEqualTo(
                             builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
+
+                // pre-migration, the userSet field will always default to false
+                boolean userSet = builder.getBoolean(
+                        PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
+                assertFalse(userSet);
             }
         }
     }
@@ -5123,8 +5251,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // build a collection of app permissions that should be passed in but ignored
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
         appPermissions.put(new Pair(1, "first"), new Pair(true, false));    // not in local prefs
-        appPermissions.put(new Pair(3, "third"), new Pair(false, false));   // not in local prefs
-        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, false)); // in local prefs
+        appPermissions.put(new Pair(3, "third"), new Pair(false, true));   // not in local prefs
+        appPermissions.put(new Pair(UID_O, PKG_O), new Pair(false, true)); // in local prefs
 
         // package preferences: PKG_O not banned based on local importance, and PKG_P is
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_HIGH);
@@ -5132,11 +5260,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // expected output. format: uid -> importance, as only uid (and not package name)
         // is in PackageNotificationPreferences
-        ArrayMap<Integer, Integer> expected = new ArrayMap<>();
-        expected.put(1, IMPORTANCE_DEFAULT);
-        expected.put(3, IMPORTANCE_NONE);
-        expected.put(UID_O, IMPORTANCE_NONE);    // banned by permissions
-        expected.put(UID_P, IMPORTANCE_NONE);    // defaults to none
+        ArrayMap<Integer, Pair<Integer, Boolean>> expected = new ArrayMap<>();
+        expected.put(1, new Pair(IMPORTANCE_DEFAULT, false));
+        expected.put(3, new Pair(IMPORTANCE_NONE, true));
+        expected.put(UID_O, new Pair(IMPORTANCE_NONE, true));     // banned by permissions
+        expected.put(UID_P, new Pair(IMPORTANCE_NONE, false));    // defaults to none, false
 
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackagePreferencesStats(events, appPermissions);
@@ -5144,11 +5272,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
                 int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
+                boolean userSet = builder.getBoolean(
+                        PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
 
                 // if it's one of the expected ids, then make sure the importance matches
                 assertTrue(expected.containsKey(uid));
-                assertThat(expected.get(uid)).isEqualTo(
+                assertThat(expected.get(uid).first).isEqualTo(
                         builder.getInt(PackageNotificationPreferences.IMPORTANCE_FIELD_NUMBER));
+                assertThat(expected.get(uid).second).isEqualTo(userSet);
             }
         }
     }

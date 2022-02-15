@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
@@ -119,7 +120,15 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return null;
     }
 
+    public Region getCurrentMagnificationRegion(int displayId) {
+        return null;
+    }
+
     public boolean resetMagnification(int displayId, boolean animate) {
+        return false;
+    }
+
+    public boolean resetCurrentMagnification(int displayId, boolean animate) {
         return false;
     }
 
@@ -142,6 +151,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public boolean switchToInputMethod(String imeId) {
         return false;
+    }
+
+    public int setInputMethodEnabled(String imeId, boolean enabled) {
+        return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
     }
 
     public boolean isAccessibilityButtonAvailable() {
@@ -168,6 +181,8 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setFocusAppearance(int strokeWidth, int color) {}
 
+    public void setCacheEnabled(boolean enabled) {}
+
     public void logTrace(long timestamp, String where, String callingParams, int processId,
             long threadId, int callingUid, Bundle callingStack) {}
 
@@ -189,4 +204,6 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
             int processId, long threadId, int callingUid, Bundle serializedCallingStackInBundle) {}
+
+    public void setAnimationScale(float scale) {}
 }

@@ -592,6 +592,7 @@ public interface RILConstants {
     int RIL_UNSOL_UNTHROTTLE_APN = 1052;
     int RIL_UNSOL_RESPONSE_SIM_PHONEBOOK_CHANGED = 1053;
     int RIL_UNSOL_RESPONSE_SIM_PHONEBOOK_RECORDS_RECEIVED = 1054;
+    int RIL_UNSOL_SLICING_CONFIG_CHANGED = 1055;
 
     /* The following unsols are not defined in RIL.h */
     int RIL_UNSOL_HAL_NON_RIL_BASE = 1100;

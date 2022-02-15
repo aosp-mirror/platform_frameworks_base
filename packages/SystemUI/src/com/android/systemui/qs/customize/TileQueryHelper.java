@@ -31,6 +31,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -41,7 +43,6 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.connectivity.StatusBarFlags;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -63,7 +64,6 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final StatusBarFlags mStatusBarFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
@@ -73,17 +73,15 @@ public class TileQueryHelper {
             Context context,
             UserTracker userTracker,
             @Main Executor mainExecutor,
-            @Background Executor bgExecutor,
-            StatusBarFlags statusBarFlags
+            @Background Executor bgExecutor
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
-        mStatusBarFlags = statusBarFlags;
     }
 
-    public void setListener(TileStateListener listener) {
+    public void setListener(@Nullable TileStateListener listener) {
         mListener = listener;
     }
 
@@ -121,10 +119,8 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        if (mStatusBarFlags.isProviderModelSettingEnabled()) {
-            possibleTiles.remove("cell");
-            possibleTiles.remove("wifi");
-        }
+        possibleTiles.remove("cell");
+        possibleTiles.remove("wifi");
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
@@ -209,18 +205,6 @@ public class TileQueryHelper {
                 finished();
             }
         }
-
-        @Override
-        public void onShowDetail(boolean show) {}
-
-        @Override
-        public void onToggleStateChanged(boolean state) {}
-
-        @Override
-        public void onScanStateChanged(boolean state) {}
-
-        @Override
-        public void onAnnouncementRequested(CharSequence announcement) {}
     }
 
     private void addPackageTiles(final QSTileHost host) {
@@ -278,6 +262,7 @@ public class TileQueryHelper {
         });
     }
 
+    @Nullable
     private State getState(Collection<QSTile> tiles, String spec) {
         for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
@@ -287,7 +272,8 @@ public class TileQueryHelper {
         return null;
     }
 
-    private void addTile(String spec, CharSequence appLabel, State state, boolean isSystem) {
+    private void addTile(
+            String spec, @Nullable CharSequence appLabel, State state, boolean isSystem) {
         if (mSpecs.contains(spec)) {
             return;
         }

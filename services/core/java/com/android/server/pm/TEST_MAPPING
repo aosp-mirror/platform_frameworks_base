@@ -56,27 +56,6 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.PrivilegedUpdateTests"
-        }
-      ]
-    },
-    {
-      "name": "CtsAppSecurityHostTestCases",
-      "file_patterns": [
-        "core/java/.*Install.*",
-        "services/core/.*Install.*",
-        "services/core/java/com/android/server/pm/.*"
-      ],
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.SplitTests"
-        }
-      ]
-    },
-    {
       "name": "PackageManagerServiceHostTests",
       "options": [
         {

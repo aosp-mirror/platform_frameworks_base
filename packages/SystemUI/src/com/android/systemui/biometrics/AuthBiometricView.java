@@ -636,7 +636,9 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setText(message);
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
-        mIndicatorView.setSelected(true);
+        // select to enable marquee unless a screen reader is enabled
+        mIndicatorView.setSelected(!mAccessibilityManager.isEnabled()
+                || !mAccessibilityManager.isTouchExplorationEnabled());
         mHandler.postDelayed(resetMessageRunnable, mInjector.getDelayAfterError());
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);

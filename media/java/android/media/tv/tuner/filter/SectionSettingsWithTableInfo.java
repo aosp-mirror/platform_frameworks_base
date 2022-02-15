@@ -37,8 +37,8 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
     private final int mVersion;
 
     private SectionSettingsWithTableInfo(int mainType, boolean isCheckCrc, boolean isRepeat,
-            boolean isRaw, int tableId, int version) {
-        super(mainType, isCheckCrc, isRepeat, isRaw);
+            boolean isRaw, int bitWidthOfLengthField, int tableId, int version) {
+        super(mainType, isCheckCrc, isRepeat, isRaw, bitWidthOfLengthField);
         mTableId = tableId;
         mVersion = version;
     }
@@ -99,8 +99,8 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
          */
         @NonNull
         public SectionSettingsWithTableInfo build() {
-            return new SectionSettingsWithTableInfo(
-                    mMainType, mCrcEnabled, mIsRepeat, mIsRaw, mTableId, mVersion);
+            return new SectionSettingsWithTableInfo(mMainType, mCrcEnabled, mIsRepeat, mIsRaw,
+                    mBitWidthOfLengthField, mTableId, mVersion);
         }
 
         @Override

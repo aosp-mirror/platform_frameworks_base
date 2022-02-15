@@ -16,6 +16,11 @@
 
 package android.app;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
 import static android.content.pm.Checksum.TYPE_WHOLE_MD5;
@@ -31,6 +36,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
+import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -73,13 +79,6 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -127,7 +126,6 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -177,6 +175,8 @@ public class ApplicationPackageManager extends PackageManager {
     private PackageInstaller mInstaller;
     @GuardedBy("mLock")
     private ArtManager mArtManager;
+    @GuardedBy("mLock")
+    private DevicePolicyManager mDevicePolicyManager;
 
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
@@ -190,6 +190,15 @@ public class ApplicationPackageManager extends PackageManager {
                 mUserManager = UserManager.get(mContext);
             }
             return mUserManager;
+        }
+    }
+
+    DevicePolicyManager getDevicePolicyManager() {
+        synchronized (mLock) {
+            if (mDevicePolicyManager == null) {
+                mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
+            }
+            return mDevicePolicyManager;
         }
     }
 
@@ -802,7 +811,7 @@ public class ApplicationPackageManager extends PackageManager {
             new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
                 256, "cache_key.has_system_feature") {
                 @Override
-                protected Boolean recompute(HasSystemFeatureQuery query) {
+                public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
                         return ActivityThread.currentActivityThread().getPackageManager().
                             hasSystemFeature(query.name, query.version);
@@ -851,6 +860,18 @@ public class ApplicationPackageManager extends PackageManager {
                 }
             }
             return mPermissionsControllerPackageName;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public String getSupplementalProcessPackageName() {
+        try {
+            return mPM.getSupplementalProcessPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1098,7 +1119,7 @@ public class ApplicationPackageManager extends PackageManager {
             new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(
                 32, CACHE_KEY_PACKAGES_FOR_UID_PROPERTY) {
                 @Override
-                protected GetPackagesForUidResult recompute(Integer uid) {
+                public GetPackagesForUidResult recompute(Integer uid) {
                     try {
                         return new GetPackagesForUidResult(
                             ActivityThread.currentActivityThread().
@@ -1881,10 +1902,25 @@ public class ApplicationPackageManager extends PackageManager {
         if (!hasUserBadge(user.getIdentifier())) {
             return icon;
         }
+
+        final Drawable badgeForeground = getDevicePolicyManager().getDrawable(
+                getUpdatableUserIconBadgeId(user),
+                SOLID_COLORED,
+                () -> getDefaultUserIconBadge(user));
+
         Drawable badge = new LauncherIcons(mContext).getBadgeDrawable(
-                getUserManager().getUserIconBadgeResId(user.getIdentifier()),
+                badgeForeground,
                 getUserBadgeColor(user, false));
         return getBadgedDrawable(icon, badge, null, true);
+    }
+
+    private String getUpdatableUserIconBadgeId(UserHandle user) {
+        return getUserManager().isManagedProfile(user.getIdentifier())
+                ? WORK_PROFILE_ICON_BADGE : UNDEFINED;
+    }
+
+    private Drawable getDefaultUserIconBadge(UserHandle user) {
+        return mContext.getDrawable(getUserManager().getUserIconBadgeResId(user.getIdentifier()));
     }
 
     @Override
@@ -1918,11 +1954,26 @@ public class ApplicationPackageManager extends PackageManager {
         if (badgeColor == null) {
             return null;
         }
-        Drawable badgeForeground = getDrawableForDensity(
-                getUserManager().getUserBadgeResId(user.getIdentifier()), density);
+
+        final Drawable badgeForeground = getDevicePolicyManager().getDrawableForDensity(
+                getUpdatableUserBadgeId(user),
+                SOLID_COLORED,
+                density,
+                () -> getDefaultUserBadgeForDensity(user, density));
+
         badgeForeground.setTint(getUserBadgeColor(user, false));
         Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
         return badge;
+    }
+
+    private String getUpdatableUserBadgeId(UserHandle user) {
+        return getUserManager().isManagedProfile(user.getIdentifier())
+                ? WORK_PROFILE_ICON : UNDEFINED;
+    }
+
+    private Drawable getDefaultUserBadgeForDensity(UserHandle user, int density) {
+        return getDrawableForDensity(
+                getUserManager().getUserBadgeResId(user.getIdentifier()), density);
     }
 
     /**
@@ -1933,12 +1984,22 @@ public class ApplicationPackageManager extends PackageManager {
         if (!hasUserBadge(user.getIdentifier())) {
             return null;
         }
-        Drawable badge = getDrawableForDensity(
-                getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
+
+        final Drawable badge = getDevicePolicyManager().getDrawableForDensity(
+                getUpdatableUserBadgeId(user),
+                SOLID_NOT_COLORED,
+                density,
+                () -> getDefaultUserBadgeNoBackgroundForDensity(user, density));
+
         if (badge != null) {
             badge.setTint(getUserBadgeColor(user, true));
         }
         return badge;
+    }
+
+    private Drawable getDefaultUserBadgeNoBackgroundForDensity(UserHandle user, int density) {
+        return getDrawableForDensity(
+                getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
     }
 
     private Drawable getDrawableForDensity(int drawableId, int density) {
@@ -2333,37 +2394,6 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public CharSequence getApplicationLabel(ApplicationInfo info) {
         return info.loadLabel(this);
-    }
-
-    @Nullable
-    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
-        return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
-    }
-
-    @Nullable
-    public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
-            PackageInfoFlags flags) {
-        long flagsBits = flags.getValue();
-        if ((flagsBits & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
-            // Caller expressed no opinion about what encryption
-            // aware/unaware components they want to see, so match both
-            flagsBits |= PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-        }
-
-        boolean collectCertificates = (flagsBits & PackageManager.GET_SIGNATURES) != 0
-                || (flagsBits & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
-
-        ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
-                new File(archiveFilePath), 0, getPermissionManager().getSplitPermissions(),
-                collectCertificates);
-        if (result.isError()) {
-            return null;
-        }
-        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flagsBits, 0, 0,
-                null, FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     @Override

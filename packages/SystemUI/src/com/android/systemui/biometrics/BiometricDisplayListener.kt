@@ -37,7 +37,7 @@ class BiometricDisplayListener(
     private val onChanged: () -> Unit
 ) : DisplayManager.DisplayListener {
 
-    private var lastRotation = context.display?.rotation ?: Surface.ROTATION_0
+    private var lastRotation = Surface.ROTATION_0
 
     override fun onDisplayAdded(displayId: Int) {}
     override fun onDisplayRemoved(displayId: Int) {}
@@ -63,6 +63,7 @@ class BiometricDisplayListener(
 
     /** Listen for changes. */
     fun enable() {
+        lastRotation = context.display?.rotation ?: Surface.ROTATION_0
         displayManager.registerDisplayListener(this, handler)
     }
 

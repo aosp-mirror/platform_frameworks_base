@@ -32,9 +32,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class FooterView extends StackScrollerDecorView {
-    private FooterViewButton mDismissButton;
+    private FooterViewButton mClearAllButton;
     private FooterViewButton mManageButton;
     private boolean mShowHistory;
+    // String cache, for performance reasons.
+    // Reading them from a Resources object can be quite slow sometimes.
+    private String mManageNotificationText;
+    private String mManageNotificationHistoryText;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,25 +61,27 @@ public class FooterView extends StackScrollerDecorView {
             pw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
             pw.println("manageButton showHistory: " + mShowHistory);
             pw.println("manageButton visibility: "
-                    + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
+                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
             pw.println("dismissButton visibility: "
-                    + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
+                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
         });
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDismissButton = (FooterViewButton) findSecondaryView();
+        mClearAllButton = (FooterViewButton) findSecondaryView();
         mManageButton = findViewById(R.id.manage_text);
+        updateResources();
+        updateText();
     }
 
     public void setManageButtonClickListener(OnClickListener listener) {
         mManageButton.setOnClickListener(listener);
     }
 
-    public void setDismissButtonClickListener(OnClickListener listener) {
-        mDismissButton.setOnClickListener(listener);
+    public void setClearAllButtonClickListener(OnClickListener listener) {
+        mClearAllButton.setOnClickListener(listener);
     }
 
     public boolean isOnEmptySpace(float touchX, float touchY) {
@@ -86,15 +92,20 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     public void showHistory(boolean showHistory) {
+        if (mShowHistory == showHistory) {
+            return;
+        }
         mShowHistory = showHistory;
+        updateText();
+    }
+
+    private void updateText() {
         if (mShowHistory) {
-            mManageButton.setText(R.string.manage_notifications_history_text);
-            mManageButton.setContentDescription(
-                    mContext.getString(R.string.manage_notifications_history_text));
+            mManageButton.setText(mManageNotificationHistoryText);
+            mManageButton.setContentDescription(mManageNotificationHistoryText);
         } else {
-            mManageButton.setText(R.string.manage_notifications_text);
-            mManageButton.setContentDescription(
-                    mContext.getString(R.string.manage_notifications_text));
+            mManageButton.setText(mManageNotificationText);
+            mManageButton.setContentDescription(mManageNotificationText);
         }
     }
 
@@ -106,10 +117,11 @@ public class FooterView extends StackScrollerDecorView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateColors();
-        mDismissButton.setText(R.string.clear_all_notifications_text);
-        mDismissButton.setContentDescription(
+        mClearAllButton.setText(R.string.clear_all_notifications_text);
+        mClearAllButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
-        showHistory(mShowHistory);
+        updateResources();
+        updateText();
     }
 
     /**
@@ -118,10 +130,16 @@ public class FooterView extends StackScrollerDecorView {
     public void updateColors() {
         Resources.Theme theme = mContext.getTheme();
         int textColor = getResources().getColor(R.color.notif_pill_text, theme);
-        mDismissButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
-        mDismissButton.setTextColor(textColor);
+        mClearAllButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
+        mClearAllButton.setTextColor(textColor);
         mManageButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
         mManageButton.setTextColor(textColor);
+    }
+
+    private void updateResources() {
+        mManageNotificationText = getContext().getString(R.string.manage_notifications_text);
+        mManageNotificationHistoryText = getContext()
+                .getString(R.string.manage_notifications_history_text);
     }
 
     @Override

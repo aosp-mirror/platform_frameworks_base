@@ -37,6 +37,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
+import android.view.RoundedCorner;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -229,13 +230,29 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (insets.getDisplayCutout() != null) {
-            mHeaderPaddingTop = insets.getDisplayCutout().getSafeInsetTop();
-            mWaterfallInsets = insets.getDisplayCutout().getWaterfallInsets();
-        } else {
-            mHeaderPaddingTop = 0;
-            mWaterfallInsets = Insets.NONE;
+        int headerPaddingTop = 0;
+        Insets waterfallInsets = Insets.NONE;
+
+        final RoundedCorner topLeftRounded =
+                insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+        if (topLeftRounded != null) {
+            headerPaddingTop = topLeftRounded.getRadius();
         }
+
+        final RoundedCorner topRightRounded =
+                insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+        if (topRightRounded != null) {
+            headerPaddingTop = Math.max(headerPaddingTop, topRightRounded.getRadius());
+        }
+
+        if (insets.getDisplayCutout() != null) {
+            headerPaddingTop =
+                    Math.max(headerPaddingTop, insets.getDisplayCutout().getSafeInsetTop());
+            waterfallInsets = insets.getDisplayCutout().getWaterfallInsets();
+        }
+
+        mHeaderPaddingTop = headerPaddingTop;
+        mWaterfallInsets = waterfallInsets;
         return super.onApplyWindowInsets(insets);
     }
 

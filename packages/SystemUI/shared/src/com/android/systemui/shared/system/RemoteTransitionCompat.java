@@ -25,6 +25,8 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
+import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_RECENTS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -145,11 +147,16 @@ public class RemoteTransitionCompat implements Parcelable {
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
                             pipTask = taskInfo.token;
                         }
+                    } else if (change.getTaskInfo() != null
+                            && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_RECENTS) {
+                        // This task is for recents, keep it on top.
+                        t.setLayer(leashMap.get(change.getLeash()),
+                                info.getChanges().size() * 3 - i);
                     }
                 }
                 // Also make all the wallpapers opaque since we want the visible from the start
                 for (int i = wallpapers.length - 1; i >= 0; --i) {
-                    t.setAlpha(wallpapers[i].leash.mSurfaceControl, 1);
+                    t.setAlpha(wallpapers[i].leash, 1);
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
@@ -246,10 +253,6 @@ public class RemoteTransitionCompat implements Parcelable {
                 if (mPausingTasks.contains(openingTasks.get(i).getContainer())) {
                     ++pauseMatches;
                 }
-                if (openingTasks.get(i).getContainer().equals(mPausingTasks.get(i))) {
-                    // In this case, we are "returning" to an already running app, so just consume
-                    // the merge and do nothing.
-                }
             }
             if (pauseMatches > 0) {
                 if (pauseMatches != mPausingTasks.size()) {
@@ -271,13 +274,12 @@ public class RemoteTransitionCompat implements Parcelable {
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
                 final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
                         openingTasks.get(i), layer, info, t);
-                mLeashMap.put(mOpeningLeashes.get(i), target.leash.mSurfaceControl);
-                t.reparent(target.leash.mSurfaceControl, mInfo.getRootLeash());
-                t.setLayer(target.leash.mSurfaceControl, layer);
-                t.hide(target.leash.mSurfaceControl);
-                t.apply();
+                mLeashMap.put(mOpeningLeashes.get(i), target.leash);
+                t.reparent(target.leash, mInfo.getRootLeash());
+                t.setLayer(target.leash, layer);
                 targets[i] = target;
             }
+            t.apply();
             recents.onTasksAppeared(targets);
             return true;
         }
@@ -314,53 +316,41 @@ public class RemoteTransitionCompat implements Parcelable {
                 return;
             }
             if (mWrapped != null) mWrapped.finish(toHome, sendUserLeaveHint);
-            try {
-                if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
-                    // The gesture went back to opening the app rather than continuing with
-                    // recents, so end the transition by moving the app back to the top (and also
-                    // re-showing it's task).
-                    final WindowContainerTransaction wct = new WindowContainerTransaction();
-                    final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                    for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
-                        // reverse order so that index 0 ends up on top
-                        wct.reorder(mPausingTasks.get(i), true /* onTop */);
-                        t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
-                    }
-                    mFinishCB.onTransitionFinished(wct, t);
-                } else {
-                    if (mOpeningLeashes != null) {
-                        // TODO: the launcher animation should handle this
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        for (int i = 0; i < mOpeningLeashes.size(); ++i) {
-                            t.show(mOpeningLeashes.get(i));
-                            t.setAlpha(mOpeningLeashes.get(i), 1.f);
-                        }
-                        t.apply();
-                    }
-                    if (mPipTask != null && mPipTransaction != null) {
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        t.show(mInfo.getChange(mPipTask).getLeash());
-                        PictureInPictureSurfaceTransaction.apply(mPipTransaction,
-                                mInfo.getChange(mPipTask).getLeash(), t);
-                        mPipTask = null;
-                        mPipTransaction = null;
-                        mFinishCB.onTransitionFinished(null /* wct */, t);
-                    } else {
-                        mFinishCB.onTransitionFinished(null /* wct */, null /* sct */);
-                    }
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            final WindowContainerTransaction wct;
 
+            if (!toHome && mPausingTasks != null && mOpeningLeashes == null) {
+                // The gesture went back to opening the app rather than continuing with
+                // recents, so end the transition by moving the app back to the top (and also
+                // re-showing it's task).
+                wct = new WindowContainerTransaction();
+                for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
+                    // reverse order so that index 0 ends up on top
+                    wct.reorder(mPausingTasks.get(i), true /* onTop */);
+                    t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
                 }
-            } catch (RemoteException e) {
-                Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
+            } else {
+                wct = null;
+                if (mPipTask != null && mPipTransaction != null) {
+                    t.show(mInfo.getChange(mPipTask).getLeash());
+                    PictureInPictureSurfaceTransaction.apply(mPipTransaction,
+                            mInfo.getChange(mPipTask).getLeash(), t);
+                    mPipTask = null;
+                    mPipTransaction = null;
+                }
             }
             // Release surface references now. This is apparently to free GPU
             // memory while doing quick operations (eg. during CTS).
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             for (int i = 0; i < mLeashMap.size(); ++i) {
                 if (mLeashMap.keyAt(i) == mLeashMap.valueAt(i)) continue;
                 t.remove(mLeashMap.valueAt(i));
             }
-            t.apply();
+            try {
+                mFinishCB.onTransitionFinished(wct, t);
+            } catch (RemoteException e) {
+                Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
+                t.apply();
+            }
             for (int i = 0; i < mInfo.getChanges().size(); ++i) {
                 mInfo.getChanges().get(i).getLeash().release();
             }

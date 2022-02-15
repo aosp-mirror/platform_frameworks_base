@@ -39,7 +39,6 @@ import com.android.server.SystemService;
 import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
-import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,6 +99,8 @@ public class Installer extends SystemService {
     public static final int FLAG_FREE_CACHE_V2 = IInstalld.FLAG_FREE_CACHE_V2;
     public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = IInstalld.FLAG_FREE_CACHE_V2_DEFY_QUOTA;
     public static final int FLAG_FREE_CACHE_NOOP = IInstalld.FLAG_FREE_CACHE_NOOP;
+    public static final int FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES =
+            IInstalld.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES;
 
     public static final int FLAG_USE_QUOTA = IInstalld.FLAG_USE_QUOTA;
     public static final int FLAG_FORCE = IInstalld.FLAG_FORCE;
@@ -719,34 +720,6 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             return mInstalld.deleteOdex(packageName, apkPath, instructionSet, outputPath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Enables legacy apk-verity for an apk.
-     */
-    public void installApkVerity(String packageName, String filePath, FileDescriptor verityInput,
-            int contentSize) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(filePath);
-        try {
-            mInstalld.installApkVerity(packageName, filePath, verityInput, contentSize);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Checks if provided hash matches the file's fs-verity merkle tree root hash.
-     */
-    public void assertFsverityRootHashMatches(String packageName, String filePath,
-            @NonNull byte[] expectedHash) throws InstallerException {
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(filePath);
-        try {
-            mInstalld.assertFsverityRootHashMatches(packageName, filePath, expectedHash);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

@@ -35,18 +35,17 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageLite;
-import android.os.Environment;
 import android.os.Message;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.content.F2fsUtils;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -75,12 +74,13 @@ final class InstallParams extends HandlerParams {
     final boolean mForceQueryableOverride;
     final int mDataLoaderType;
     final long mRequiredInstalledVersionCode;
+    final int mPackageSource;
     final PackageLite mPackageLite;
 
     InstallParams(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String packageAbiOverride, PackageLite packageLite,
-            PackageManagerService pm) {
+            UserHandle user, String packageAbiOverride, int packageSource,
+            PackageLite packageLite, PackageManagerService pm) {
         super(user, pm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
@@ -99,6 +99,7 @@ final class InstallParams extends HandlerParams {
         mForceQueryableOverride = false;
         mDataLoaderType = DataLoaderType.NONE;
         mRequiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
+        mPackageSource = packageSource;
         mPackageLite = packageLite;
     }
 
@@ -125,6 +126,7 @@ final class InstallParams extends HandlerParams {
         mDataLoaderType = (sessionParams.dataLoaderParams != null)
                 ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
         mRequiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
+        mPackageSource = sessionParams.packageSource;
         mPackageLite = packageLite;
     }
 
@@ -142,12 +144,8 @@ final class InstallParams extends HandlerParams {
      * Only {@link PackageManager#INSTALL_INTERNAL} flag may mutate in
      * {@link #mInstallFlags}
      */
-    private int overrideInstallLocation(PackageInfoLite pkgLite) {
-        final boolean ephemeral = (mInstallFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
-        if (DEBUG_INSTANT && ephemeral) {
-            Slog.v(TAG, "pkgLite for install: " + pkgLite);
-        }
-
+    private int overrideInstallLocation(String packageName, int recommendedInstallLocation,
+            int installLocation) {
         if (mOriginInfo.mStaged) {
             // If we're already staged, we've firmly committed to an install location
             if (mOriginInfo.mFile != null) {
@@ -155,77 +153,35 @@ final class InstallParams extends HandlerParams {
             } else {
                 throw new IllegalStateException("Invalid stage location");
             }
-        } else if (pkgLite.recommendedInstallLocation
-                == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-            /*
-             * If we are not staged and have too little free space, try to free cache
-             * before giving up.
-             */
-            // TODO: focus freeing disk space on the target device
-            final StorageManager storage = StorageManager.from(mPm.mContext);
-            final long lowThreshold = storage.getStorageLowBytes(
-                    Environment.getDataDirectory());
-
-            final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(
-                    mOriginInfo.mResolvedPath, mPackageAbiOverride);
-            if (sizeBytes >= 0) {
-                synchronized (mPm.mInstallLock) {
-                    try {
-                        mPm.mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
-                        pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
-                                mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags,
-                                mPackageAbiOverride);
-                    } catch (Installer.InstallerException e) {
-                        Slog.w(TAG, "Failed to free cache", e);
-                    }
-                }
-            }
-
-            /*
-             * The cache free must have deleted the file we downloaded to install.
-             *
-             * TODO: fix the "freeCache" call to not delete the file we care about.
-             */
-            if (pkgLite.recommendedInstallLocation
-                    == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
-                pkgLite.recommendedInstallLocation =
-                        PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+        }
+        if (recommendedInstallLocation < 0) {
+            return InstallLocationUtils.getInstallationErrorCode(recommendedInstallLocation);
+        }
+        // Override with defaults if needed.
+        synchronized (mPm.mLock) {
+            // reader
+            AndroidPackage installedPkg = mPm.mPackages.get(packageName);
+            if (installedPkg != null) {
+                // Currently installed package which the new package is attempting to replace
+                recommendedInstallLocation = InstallLocationUtils.installLocationPolicy(
+                        installLocation, recommendedInstallLocation, mInstallFlags,
+                        installedPkg.isSystem(), installedPkg.isExternalStorage());
             }
         }
 
-        int ret = INSTALL_SUCCEEDED;
-        int loc = pkgLite.recommendedInstallLocation;
-        if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
-            ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-        } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS) {
-            ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
-        } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-            ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-        } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
-            ret = PackageManager.INSTALL_FAILED_INVALID_APK;
-        } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
-            ret = PackageManager.INSTALL_FAILED_INVALID_URI;
-        } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
-            ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
-        } else {
-            // Override with defaults if needed.
-            loc = mInstallPackageHelper.installLocationPolicy(pkgLite, mInstallFlags);
+        final boolean onInt = (mInstallFlags & PackageManager.INSTALL_INTERNAL) != 0;
 
-            final boolean onInt = (mInstallFlags & PackageManager.INSTALL_INTERNAL) != 0;
-
-            if (!onInt) {
-                // Override install location with flags
-                if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
-                    // Set the flag to install on external media.
-                    mInstallFlags &= ~PackageManager.INSTALL_INTERNAL;
-                } else {
-                    // Make sure the flag for installing on external
-                    // media is unset
-                    mInstallFlags |= PackageManager.INSTALL_INTERNAL;
-                }
+        if (!onInt) {
+            // Override install location with flags
+            if (recommendedInstallLocation == InstallLocationUtils.RECOMMEND_INSTALL_EXTERNAL) {
+                // Set the flag to install on external media.
+                mInstallFlags &= ~PackageManager.INSTALL_INTERNAL;
+            } else {
+                // Make sure the flag for installing on external media is unset
+                mInstallFlags |= PackageManager.INSTALL_INTERNAL;
             }
         }
-        return ret;
+        return INSTALL_SUCCEEDED;
     }
 
     /*
@@ -254,7 +210,21 @@ final class InstallParams extends HandlerParams {
             }
         }
 
-        mRet = overrideInstallLocation(pkgLite);
+        final boolean ephemeral = (mInstallFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+        if (DEBUG_INSTANT && ephemeral) {
+            Slog.v(TAG, "pkgLite for install: " + pkgLite);
+        }
+
+        if (!mOriginInfo.mStaged && pkgLite.recommendedInstallLocation
+                == InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+            // If we are not staged and have too little free space, try to free cache
+            // before giving up.
+            pkgLite.recommendedInstallLocation = mPm.freeCacheForInstallation(
+                    pkgLite.recommendedInstallLocation, mPackageLite,
+                    mOriginInfo.mResolvedPath, mPackageAbiOverride, mInstallFlags);
+        }
+        mRet = overrideInstallLocation(pkgLite.packageName, pkgLite.recommendedInstallLocation,
+                pkgLite.installLocation);
     }
 
     @Override

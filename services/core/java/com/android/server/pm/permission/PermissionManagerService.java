@@ -17,6 +17,7 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
@@ -50,6 +51,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -66,9 +68,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 
@@ -383,8 +387,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
-            long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
+            long timeoutMillis, long revokeAfterKilledDelayMillis, int importanceToResetTimer,
+            int importanceToKeepSessionAlive) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
                         + " to register permissions as one time.");
         Objects.requireNonNull(packageName);
@@ -392,7 +398,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
-                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -549,6 +556,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
+    public void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId) {
+        mPermissionManagerServiceImpl.revokePostNotificationPermissionWithoutKillForTest(
+                packageName, userId);
+    }
+
+    @Override
+    public void revokeOwnPermissionsOnKill(@NonNull String packageName,
+            @NonNull List<String> permissions) {
+        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
+    }
+
+    @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
             int userId) {
         return mPermissionManagerServiceImpl.shouldShowRequestPermissionRationale(packageName,
@@ -580,6 +599,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int checkUidPermission(int uid, @NonNull String permissionName) {
             return PermissionManagerService.this.checkUidPermission(uid, permissionName);
+        }
+
+        @Override
+        public int checkPostNotificationsPermissionGrantedOrLegacyAccess(int uid) {
+            int granted = PermissionManagerService.this.checkUidPermission(uid,
+                    POST_NOTIFICATIONS);
+            AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
+            if (pkg == null) {
+                Slog.e(LOG_TAG, "No package for uid " + uid);
+                return granted;
+            }
+            if (granted != PackageManager.PERMISSION_GRANTED
+                    && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
+                int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),
+                        POST_NOTIFICATIONS, UserHandle.getUserId(uid));
+                if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                    return PackageManager.PERMISSION_GRANTED;
+                }
+            }
+            return granted;
         }
 
         @Override
@@ -678,8 +717,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
-                @NonNull PackageInstalledParams params, @UserIdInt int userId) {
-            mPermissionManagerServiceImpl.onPackageInstalled(pkg, previousAppId, params, userId);
+                @NonNull PackageInstalledParams params, @UserIdInt int rawUserId) {
+            Objects.requireNonNull(pkg, "pkg");
+            Objects.requireNonNull(params, "params");
+            Preconditions.checkArgument(rawUserId >= UserHandle.USER_SYSTEM
+                    || rawUserId == UserHandle.USER_ALL, "userId");
+
+            mPermissionManagerServiceImpl.onPackageInstalled(pkg, previousAppId, params, rawUserId);
+            final int[] userIds = rawUserId == UserHandle.USER_ALL ? getAllUserIds()
+                    : new int[] { rawUserId };
+            for (final int userId : userIds) {
+                final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
+                if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
+                        || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+                    setAutoRevokeExemptedInternal(pkg,
+                            autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
+                }
+            }
         }
 
         @Override
@@ -777,6 +831,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         /* End of delegate methods to PermissionManagerServiceInterface */
+    }
+
+    /**
+     * Returns all relevant user ids.  This list include the current set of created user ids as well
+     * as pre-created user ids.
+     * @return user ids for created users and pre-created users
+     */
+    private int[] getAllUserIds() {
+        return UserManagerService.getInstance().getUserIdsIncludingPreCreated();
     }
 
     /**
@@ -1251,8 +1314,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 if (op < 0) {
                     // Bg location is one-off runtime modifier permission and has no app op
-                    if (sPlatformPermissions.contains(permission)
-                            && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)) {
+                    if (sPlatformPermissions.containsKey(permission)
+                            && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)
+                            && !Manifest.permission.BODY_SENSORS_BACKGROUND.equals(permission)) {
                         Slog.wtf(LOG_TAG, "Platform runtime permission " + permission
                                 + " with no app op defined!");
                     }

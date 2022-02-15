@@ -16,12 +16,13 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
 
@@ -51,11 +52,28 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     @Presubmit
     @Test
     open fun pipWindowBecomesInvisible() {
-        testSpec.assertWm {
-            this.invoke("hasPipWindow") {
-                it.isPinned(pipApp.component).isAppWindowVisible(pipApp.component)
-            }.then().invoke("!hasPipWindow") {
-                it.isNotPinned(pipApp.component).isAppWindowInvisible(pipApp.component)
+        if (isShellTransitionsEnabled) {
+            // When Shell transition is enabled, we change the windowing mode at start, but
+            // update the visibility after the transition is finished, so we can't check isNotPinned
+            // and isAppWindowInvisible in the same assertion block.
+            testSpec.assertWm {
+                this.invoke("hasPipWindow") {
+                    it.isPinned(pipApp.component)
+                            .isAppWindowVisible(pipApp.component)
+                            .isAppWindowOnTop(pipApp.component)
+                }.then().invoke("!hasPipWindow") {
+                    it.isNotPinned(pipApp.component)
+                            .isAppWindowNotOnTop(pipApp.component)
+                }
+            }
+            testSpec.assertWmEnd { isAppWindowInvisible(pipApp.component) }
+        } else {
+            testSpec.assertWm {
+                this.invoke("hasPipWindow") {
+                    it.isPinned(pipApp.component).isAppWindowVisible(pipApp.component)
+                }.then().invoke("!hasPipWindow") {
+                    it.isNotPinned(pipApp.component).isAppWindowInvisible(pipApp.component)
+                }
             }
         }
     }
@@ -78,14 +96,13 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     }
 
     /**
-     * Checks that the focus changes between the [pipApp] window and the launcher when
-     * closing the pip window
+     * Checks that the focus doesn't change between windows during the transition
      */
-    @FlakyTest(bugId = 151179149)
+    @Postsubmit
     @Test
-    open fun focusChanges() {
+    open fun focusDoesNotChange() {
         testSpec.assertEventLog {
-            this.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
+            this.focusDoesNotChange()
         }
     }
 }

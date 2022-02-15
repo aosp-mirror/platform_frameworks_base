@@ -86,8 +86,8 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                 // [Step1]: Swipe right from imeTestApp to testApp task
                 createTag(TAG_IME_VISIBLE)
                 val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-                device.swipe(0, displayBounds.bounds.height(),
-                        displayBounds.bounds.width(), displayBounds.bounds.height(), 50)
+                device.swipe(0, displayBounds.bounds.height,
+                        displayBounds.bounds.width, displayBounds.bounds.height, 50)
 
                 wmHelper.waitForFullScreenApp(testApp.component)
                 wmHelper.waitForAppTransitionIdle()
@@ -96,8 +96,8 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
             transitions {
                 // [Step2]: Swipe left to back to imeTestApp task
                 val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-                device.swipe(displayBounds.bounds.width(), displayBounds.bounds.height(),
-                        0, displayBounds.bounds.height(), 50)
+                device.swipe(displayBounds.bounds.width, displayBounds.bounds.height,
+                        0, displayBounds.bounds.height, 50)
                 wmHelper.waitForFullScreenApp(imeTestApp.component)
             }
         }

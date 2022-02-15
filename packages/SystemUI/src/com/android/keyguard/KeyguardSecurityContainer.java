@@ -20,6 +20,8 @@ import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
 import static java.lang.Integer.max;
 
@@ -32,9 +34,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -70,6 +77,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.UserIcons;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -610,9 +618,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
             final View view = getChildAt(i);
             if (view.getVisibility() != GONE) {
                 int updatedWidthMeasureSpec = mViewMode.getChildWidthMeasureSpec(widthMeasureSpec);
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+
+                // When using EXACTLY spec, measure will use the layout width if > 0. Set before
+                // measuring the child
+                lp.width = MeasureSpec.getSize(updatedWidthMeasureSpec);
                 measureChildWithMargins(view, updatedWidthMeasureSpec, 0, heightMeasureSpec, 0);
 
-                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
                 maxWidth = Math.max(maxWidth,
                         view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
                 maxHeight = Math.max(maxHeight,
@@ -760,11 +772,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
         private ViewGroup mView;
         private ViewGroup mUserSwitcherViewGroup;
         private KeyguardSecurityViewFlipper mViewFlipper;
-        private ImageView mUserIconView;
         private TextView mUserSwitcher;
         private FalsingManager mFalsingManager;
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
+        private Resources mResources;
 
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
@@ -775,6 +787,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
             mViewFlipper = viewFlipper;
             mFalsingManager = falsingManager;
             mUserSwitcherController = userSwitcherController;
+            mResources = v.getContext().getResources();
 
             if (mUserSwitcherViewGroup == null) {
                 LayoutInflater.from(v.getContext()).inflate(
@@ -784,9 +797,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mUserSwitcherViewGroup =  mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             }
 
-            mUserIconView = mView.findViewById(R.id.user_icon);
-            Drawable icon = UserIcons.getDefaultUserIcon(v.getContext().getResources(), 0, false);
-            mUserIconView.setImageDrawable(icon);
+            Drawable userIcon = findUserIcon(KeyguardUpdateMonitor.getCurrentUser());
+            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
 
             updateSecurityViewLocation();
 
@@ -800,6 +812,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.dismiss();
                 mPopup = null;
             }
+        }
+
+        private Drawable findUserIcon(int userId) {
+            Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
+            if (userIcon != null) {
+                return new BitmapDrawable(userIcon);
+            }
+            return UserIcons.getDefaultUserIcon(mResources, userId, false);
         }
 
         @Override
@@ -824,8 +844,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 return;
             }
 
-            int yTranslation = mView.getContext().getResources().getDimensionPixelSize(
-                    R.dimen.disappear_y_translation);
+            int yTranslation = mResources.getDimensionPixelSize(R.dimen.disappear_y_translation);
 
             AnimatorSet anims = new AnimatorSet();
             ObjectAnimator yAnim = ObjectAnimator.ofFloat(mView, View.TRANSLATION_Y, yTranslation);
@@ -837,23 +856,74 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         private void setupUserSwitcher() {
-            String currentUserName = mUserSwitcherController.getCurrentUserName();
-            mUserSwitcher.setText(currentUserName);
+            final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
+            mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
 
             ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
             BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
                     UserRecord item = getItem(position);
-                    TextView view = (TextView) convertView;
+                    FrameLayout view = (FrameLayout) convertView;
                     if (view == null) {
-                        view = (TextView) LayoutInflater.from(parent.getContext()).inflate(
+                        view = (FrameLayout) LayoutInflater.from(parent.getContext()).inflate(
                                 R.layout.keyguard_bouncer_user_switcher_item,
                                 parent,
                                 false);
                     }
-                    view.setText(getName(parent.getContext(), item));
+                    TextView textView = (TextView) view.getChildAt(0);
+                    textView.setText(getName(parent.getContext(), item));
+                    Drawable icon = null;
+                    if (item.picture != null) {
+                        icon = new BitmapDrawable(item.picture);
+                    } else {
+                        icon = getDrawable(item, view.getContext());
+                    }
+                    int iconSize = view.getResources().getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_item_icon_size);
+                    int iconPadding = view.getResources().getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_item_icon_padding);
+                    icon.setBounds(0, 0, iconSize, iconSize);
+                    textView.setCompoundDrawablePadding(iconPadding);
+                    textView.setCompoundDrawablesRelative(icon, null, null, null);
+
+                    if (item == currentUser) {
+                        textView.setBackground(view.getContext().getDrawable(
+                                R.drawable.bouncer_user_switcher_item_selected_bg));
+                    } else {
+                        textView.setBackground(null);
+                    }
+                    view.setEnabled(item.isSwitchToEnabled);
+                    view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
+                            USER_SWITCH_DISABLED_ALPHA);
                     return view;
+                }
+
+                private Drawable getDrawable(UserRecord item, Context context) {
+                    Drawable drawable;
+                    if (item.isCurrent && item.isGuest) {
+                        drawable = context.getDrawable(R.drawable.ic_avatar_guest_user);
+                    } else {
+                        drawable = getIconDrawable(context, item);
+                    }
+
+                    int iconColor;
+                    if (item.isSwitchToEnabled) {
+                        iconColor = Utils.getColorAttrDefaultColor(context,
+                                com.android.internal.R.attr.colorAccentPrimaryVariant);
+                    } else {
+                        iconColor = context.getResources().getColor(
+                                R.color.kg_user_switcher_restricted_avatar_icon_color,
+                                context.getTheme());
+                    }
+                    drawable.setTint(iconColor);
+
+                    Drawable bg = context.getDrawable(R.drawable.kg_bg_avatar);
+                    bg.setTintBlendMode(BlendMode.DST);
+                    bg.setTint(Utils.getColorAttrDefaultColor(context,
+                                com.android.internal.R.attr.colorSurfaceVariant));
+                    drawable = new LayerDrawable(new Drawable[]{bg, drawable});
+                    return drawable;
                 }
             };
 
@@ -875,8 +945,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         public void onItemClick(AdapterView parent, View view, int pos, long id) {
                             if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
+                            if (!view.isEnabled()) return;
 
-                            UserRecord user = adapter.getItem(pos);
+                            // Subtract one for the header
+                            UserRecord user = adapter.getItem(pos - 1);
                             if (!user.isCurrent) {
                                 adapter.onUserListItemClicked(user);
                             }
@@ -896,13 +968,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
         public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return MeasureSpec.makeMeasureSpec(
                     MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.getMode(parentWidthMeasureSpec));
+                    MeasureSpec.EXACTLY);
         }
 
         @Override
         public void updateSecurityViewLocation() {
-            if (mView.getContext().getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_PORTRAIT) {
+            if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 updateViewGravity(mViewFlipper, Gravity.CENTER_HORIZONTAL);
                 updateViewGravity(mUserSwitcherViewGroup, Gravity.CENTER_HORIZONTAL);
                 mUserSwitcherViewGroup.setTranslationY(0);
@@ -912,8 +983,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
                 // Attempt to reposition a bit higher to make up for this frame being a bit lower
                 // on the device
-                int yTrans = mView.getContext().getResources().getDimensionPixelSize(
-                        R.dimen.status_bar_height);
+                int yTrans = mResources.getDimensionPixelSize(R.dimen.status_bar_height);
                 mUserSwitcherViewGroup.setTranslationY(-yTrans);
             }
         }
@@ -955,7 +1025,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         public int getChildWidthMeasureSpec(int parentWidthMeasureSpec) {
             return MeasureSpec.makeMeasureSpec(
                     MeasureSpec.getSize(parentWidthMeasureSpec) / 2,
-                    MeasureSpec.getMode(parentWidthMeasureSpec));
+                    MeasureSpec.EXACTLY);
         }
 
         private void updateSecurityViewGravity() {

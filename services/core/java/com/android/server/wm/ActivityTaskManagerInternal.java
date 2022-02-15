@@ -243,21 +243,6 @@ public abstract class ActivityTaskManagerInternal {
             int startFlags, @Nullable Bundle options, int userId);
 
     /**
-     * Called when Keyguard flags might have changed.
-     *
-     * @param callback Callback to run after activity visibilities have been reevaluated. This can
-     *                 be used from window manager so that when the callback is called, it's
-     *                 guaranteed that all apps have their visibility updated accordingly.
-     * @param displayId The id of the display where the keyguard flags changed.
-     */
-    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId);
-
-    /**
-     * Called when the trusted state of Keyguard has changed.
-     */
-    public abstract void notifyKeyguardTrustedChanged();
-
-    /**
      * Called after virtual display Id is updated by
      * {@link com.android.server.vr.Vr2dDisplay} with a specific
      * {@param vr2dDisplayId}.
@@ -331,7 +316,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
-    public abstract boolean isDreaming();
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
     public abstract boolean shuttingDown(boolean booted, int timeout);
@@ -470,15 +454,6 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Writes current activity states to the proto stream. */
     public abstract void writeActivitiesToProto(ProtoOutputStream proto);
-
-    /**
-     * Saves the current activity manager state and includes the saved state in the next dump of
-     * activity manager.
-     */
-    public abstract void saveANRState(String reason);
-
-    /** Clears the previously saved activity manager ANR state. */
-    public abstract void clearSavedANRState();
 
     /** Dump the current state based on the command. */
     public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,
@@ -702,4 +677,7 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Get the most recent task excluding the first running task (the one on the front most). */
     public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
+
+    /** Get the app tasks for a package */
+    public abstract List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid);
 }

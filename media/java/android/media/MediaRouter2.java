@@ -34,28 +34,31 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-  <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * This API is not generally intended for third party application developers. Use the
+ * <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
  * Library</a> for consistent behavior across all devices.
  *
- * Media Router 2 allows applications to control the routing of media channels
- * and streams from the current device to remote speakers and devices.
+ * <p>MediaRouter2 allows applications to control the routing of media channels and streams from
+ * the current device to remote speakers and devices.
  */
 // TODO(b/157873330): Add method names at the beginning of log messages. (e.g. selectRoute)
 //       Not only MediaRouter2, but also to service / manager / provider.
@@ -302,8 +305,7 @@ public final class MediaRouter2 {
         mSystemController = new SystemRoutingController(
                 ensureClientPackageNameForSystemSession(
                         sManager.getSystemRoutingSession(clientPackageName)));
-        mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
-                sManager.getPreferredFeatures(clientPackageName), true).build();
+        mDiscoveryPreference = sManager.getDiscoveryPreference(clientPackageName);
         updateAllRoutesFromManager();
 
         // Only used by non-system MediaRouter2.
@@ -476,13 +478,8 @@ public final class MediaRouter2 {
             if (mShouldUpdateRoutes) {
                 mShouldUpdateRoutes = false;
 
-                List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
-                for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
-                        filteredRoutes.add(route);
-                    }
-                }
-                mFilteredRoutes = Collections.unmodifiableList(filteredRoutes);
+                mFilteredRoutes = Collections.unmodifiableList(
+                        filterRoutes(List.copyOf(mRoutes.values()), mDiscoveryPreference));
             }
         }
         return mFilteredRoutes;
@@ -1060,11 +1057,49 @@ public final class MediaRouter2 {
                 .build();
     }
 
+    private List<MediaRoute2Info> getSortedRoutes(List<MediaRoute2Info> routes,
+            RouteDiscoveryPreference preference) {
+        if (!preference.shouldRemoveDuplicates()) {
+            return routes;
+        }
+        Map<String, Integer> packagePriority = new ArrayMap<>();
+        int count = preference.getDeduplicationPackageOrder().size();
+        for (int i = 0; i < count; i++) {
+            // the last package will have 1 as the priority
+            packagePriority.put(preference.getDeduplicationPackageOrder().get(i), count - i);
+        }
+        ArrayList<MediaRoute2Info> sortedRoutes = new ArrayList<>(routes);
+        // take the negative for descending order
+        sortedRoutes.sort(Comparator.comparingInt(
+                r -> -packagePriority.getOrDefault(r.getPackageName(), 0)));
+        return sortedRoutes;
+    }
+
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
-            RouteDiscoveryPreference discoveryRequest) {
-        return routes.stream()
-                .filter(route -> route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
-                .collect(Collectors.toList());
+            RouteDiscoveryPreference discoveryPreference) {
+
+        Set<String> deduplicationIdSet = new ArraySet<>();
+
+        List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
+        for (MediaRoute2Info route : getSortedRoutes(routes, discoveryPreference)) {
+            if (!route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
+                continue;
+            }
+            if (!discoveryPreference.getAllowedPackages().isEmpty()
+                    && (route.getPackageName() == null
+                    || !discoveryPreference.getAllowedPackages()
+                            .contains(route.getPackageName()))) {
+                continue;
+            }
+            if (discoveryPreference.shouldRemoveDuplicates()) {
+                if (!Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
+                    continue;
+                }
+                deduplicationIdSet.addAll(route.getDeduplicationIds());
+            }
+            filteredRoutes.add(route);
+        }
+        return filteredRoutes;
     }
 
     private void updateAllRoutesFromManager() {
@@ -2048,19 +2083,17 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void onPreferredFeaturesChanged(@NonNull String packageName,
-                @NonNull List<String> preferredFeatures) {
+        public void onDiscoveryPreferenceChanged(@NonNull String packageName,
+                @NonNull RouteDiscoveryPreference preference) {
             if (!TextUtils.equals(mClientPackageName, packageName)) {
                 return;
             }
 
             synchronized (mLock) {
-                mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
-                        preferredFeatures, true).build();
+                mDiscoveryPreference = preference;
             }
-
             updateAllRoutesFromManager();
-            notifyPreferredFeaturesChanged(preferredFeatures);
+            notifyPreferredFeaturesChanged(preference.getPreferredFeatures());
         }
 
         @Override

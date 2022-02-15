@@ -12,19 +12,17 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.testing.FakeMetricsLogger
-import com.android.systemui.Dependency
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.qs.FooterActionsController.ExpansionState
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
-import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.settings.FakeSettings
-import com.android.systemui.utils.leaks.FakeTunerService
 import com.android.systemui.utils.leaks.LeakCheckedTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -54,7 +52,7 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var userInfoController: UserInfoController
     @Mock
-    private lateinit var qsPanelController: QSPanelController
+    private lateinit var multiUserSwitchControllerFactory: MultiUserSwitchController.Factory
     @Mock
     private lateinit var multiUserSwitchController: MultiUserSwitchController
     @Mock
@@ -62,6 +60,12 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
     @Mock
+    private lateinit var featureFlags: FeatureFlags
+    @Mock
+    private lateinit var securityFooterController: QSSecurityFooter
+    @Mock
+    private lateinit var fgsManagerController: QSFgsManagerFooter
+
     private lateinit var controller: FooterActionsController
 
     private val metricsLogger: MetricsLogger = FakeMetricsLogger()
@@ -75,18 +79,19 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         fakeSettings = FakeSettings()
-        injectLeakCheckedDependencies(*LeakCheckedTest.ALL_SUPPORTED_CLASSES)
-        val fakeTunerService = Dependency.get(TunerService::class.java) as FakeTunerService
+
+        whenever(multiUserSwitchControllerFactory.create(any()))
+                .thenReturn(multiUserSwitchController)
+        whenever(featureFlags.isEnabled(Flags.NEW_FOOTER)).thenReturn(false)
 
         view = LayoutInflater.from(context)
                 .inflate(R.layout.footer_actions, null) as FooterActionsView
 
-        controller = FooterActionsController(view, qsPanelController, activityStarter,
-                userManager, userTracker, userInfoController, multiUserSwitchController,
-                deviceProvisionedController, falsingManager, metricsLogger, fakeTunerService,
-                globalActionsDialog, uiEventLogger, showPMLiteButton = true,
-                buttonsVisibleState = ExpansionState.EXPANDED, fakeSettings,
-                Handler(testableLooper.looper))
+        controller = FooterActionsController(view, multiUserSwitchControllerFactory,
+                activityStarter, userManager, userTracker, userInfoController,
+                deviceProvisionedController, securityFooterController, fgsManagerController,
+                falsingManager, metricsLogger, globalActionsDialog, uiEventLogger,
+                showPMLiteButton = true, fakeSettings, Handler(testableLooper.looper), featureFlags)
         controller.init()
         ViewUtils.attachView(view)
         // View looper is the testable looper associated with the test
@@ -100,7 +105,7 @@ class FooterActionsControllerTest : LeakCheckedTest() {
 
     @Test
     fun testLogPowerMenuClick() {
-        controller.expanded = true
+        controller.visible = true
         falsingManager.setFalseTap(false)
 
         view.findViewById<View>(R.id.pm_lite).performClick()

@@ -56,9 +56,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.platform.test.annotations.Presubmit;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
-import android.view.DisplayCutout;
-import android.view.Surface;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
@@ -198,8 +195,6 @@ public class TransactionParcelTests {
         bundle.putParcelable("data", new ParcelableData(1));
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
-        FixedRotationAdjustments fixedRotationAdjustments = new FixedRotationAdjustments(
-                Surface.ROTATION_90, 1920, 1080, DisplayCutout.NO_CUTOUT);
 
         LaunchActivityItem item = new LaunchActivityItemBuilder()
                 .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
@@ -207,8 +202,7 @@ public class TransactionParcelTests {
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
                 .setPendingResults(resultInfoList()).setActivityOptions(ActivityOptions.makeBasic())
                 .setPendingNewIntents(referrerIntentList()).setIsForward(true)
-                .setAssistToken(new Binder()).setFixedRotationAdjustments(fixedRotationAdjustments)
-                .setShareableActivityToken(new Binder())
+                .setAssistToken(new Binder()).setShareableActivityToken(new Binder())
                 .build();
 
         writeAndPrepareForReading(item);
@@ -349,23 +343,6 @@ public class TransactionParcelTests {
 
         ClientTransaction transaction = ClientTransaction.obtain(appThread, activityToken);
         transaction.setLifecycleStateRequest(lifecycleRequest);
-
-        writeAndPrepareForReading(transaction);
-
-        // Read from parcel and assert
-        ClientTransaction result = ClientTransaction.CREATOR.createFromParcel(mParcel);
-
-        assertEquals(transaction.hashCode(), result.hashCode());
-        assertTrue(transaction.equals(result));
-    }
-
-    @Test
-    public void testFixedRotationAdjustments() {
-        ClientTransaction transaction = ClientTransaction.obtain(new StubAppThread(),
-                null /* activityToken */);
-        transaction.addCallback(FixedRotationAdjustmentsItem.obtain(new Binder(),
-                new FixedRotationAdjustments(Surface.ROTATION_270, 1920, 1080,
-                        DisplayCutout.NO_CUTOUT)));
 
         writeAndPrepareForReading(transaction);
 
@@ -666,6 +643,10 @@ public class TransactionParcelTests {
         @Override
         public void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, String path,
                 ParcelFileDescriptor fd, RemoteCallback finishCallback) {
+        }
+
+        @Override
+        public void dumpResources(ParcelFileDescriptor fd, RemoteCallback finishCallback) {
         }
 
         @Override

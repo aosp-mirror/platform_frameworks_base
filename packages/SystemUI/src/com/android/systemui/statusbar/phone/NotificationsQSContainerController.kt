@@ -1,6 +1,8 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.WindowInsets
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
@@ -14,7 +16,8 @@ import javax.inject.Inject
 class NotificationsQSContainerController @Inject constructor(
     view: NotificationsQuickSettingsContainer,
     private val navigationModeController: NavigationModeController,
-    private val overviewProxyService: OverviewProxyService
+    private val overviewProxyService: OverviewProxyService,
+    private val featureFlags: FeatureFlags
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
     var qsExpanded = false
@@ -63,7 +66,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     public override fun onViewAttached() {
-        notificationsBottomMargin = mView.defaultNotificationsMarginBottom
+        updateMargins()
         overviewProxyService.addCallback(taskbarVisibilityListener)
         mView.setInsetsChangedListener(windowInsetsListener)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
@@ -73,6 +76,10 @@ class NotificationsQSContainerController @Inject constructor(
         overviewProxyService.removeCallback(taskbarVisibilityListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
+    }
+
+    fun updateMargins() {
+        notificationsBottomMargin = mView.defaultNotificationsMarginBottom
     }
 
     override fun setCustomizerAnimating(animating: Boolean) {
@@ -95,16 +102,24 @@ class NotificationsQSContainerController @Inject constructor(
     private fun updateBottomSpacing() {
         val (containerPadding, notificationsMargin) = calculateBottomSpacing()
         var qsScrollPaddingBottom = 0
-        if (!(splitShadeEnabled || isQSCustomizing || isQSDetailShowing || isGestureNavigation ||
-                        taskbarVisible)) {
+        val newFooter = featureFlags.isEnabled(Flags.NEW_FOOTER)
+        if (!newFooter && !(splitShadeEnabled || isQSCustomizing || isQSDetailShowing ||
+                        isGestureNavigation || taskbarVisible)) {
             // no taskbar, portrait, navigation buttons enabled:
             // padding is needed so QS can scroll up over bottom insets - to reach the point when
             // the whole QS is above bottom insets
             qsScrollPaddingBottom = bottomStableInsets
+        } else if (newFooter && !(isQSCustomizing || isQSDetailShowing)) {
+            // With the new footer, we also want this padding in the bottom in these cases
+            qsScrollPaddingBottom = bottomStableInsets
         }
         mView.setPadding(0, 0, 0, containerPadding)
         mView.setNotificationsMarginBottom(notificationsMargin)
-        mView.setQSScrollPaddingBottom(qsScrollPaddingBottom)
+        if (newFooter) {
+            mView.setQSContainerPaddingBottom(qsScrollPaddingBottom)
+        } else {
+            mView.setQSScrollPaddingBottom(qsScrollPaddingBottom)
+        }
     }
 
     private fun calculateBottomSpacing(): Pair<Int, Int> {

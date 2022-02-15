@@ -31,8 +31,6 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -61,7 +59,10 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Settings;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.PackageUserStateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
@@ -820,10 +821,11 @@ public class DomainVerificationService extends SystemService
                 PackageStateInternal firstPkgSetting = pkgSettingFunction.apply(first);
                 PackageStateInternal secondPkgSetting = pkgSettingFunction.apply(second);
 
-                long firstInstallTime =
-                        firstPkgSetting == null ? -1L : firstPkgSetting.getFirstInstallTime();
-                long secondInstallTime =
-                        secondPkgSetting == null ? -1L : secondPkgSetting.getFirstInstallTime();
+                long firstInstallTime = firstPkgSetting == null
+                        ? -1L : firstPkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
+                long secondInstallTime = secondPkgSetting == null
+                        ? -1L
+                        : secondPkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
 
                 if (firstInstallTime != secondInstallTime) {
                     return (int) (firstInstallTime - secondInstallTime);
@@ -1197,6 +1199,7 @@ public class DomainVerificationService extends SystemService
             @Nullable @UserIdInt Integer userId,
             @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
             throws NameNotFoundException {
+        mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         synchronized (mLock) {
             mDebug.printState(writer, packageName, userId, pkgSettingFunction, mAttachedPkgStates);
         }
@@ -1649,7 +1652,8 @@ public class DomainVerificationService extends SystemService
                 continue;
             }
 
-            long installTime = pkgSetting.getFirstInstallTime();
+            long installTime = PackageStateUtils.getEarliestFirstInstallTime(
+                    pkgSetting.getUserStates());
             if (installTime > latestInstall) {
                 latestInstall = installTime;
                 targetPackageName = packageName;
@@ -1747,7 +1751,7 @@ public class DomainVerificationService extends SystemService
         int approvalLevel = approvalLevelForDomainInternal(pkgSetting, host, includeNegative,
                 userId, debugObject);
         if (includeNegative && approvalLevel == APPROVAL_LEVEL_NONE) {
-            PackageUserState pkgUserState = pkgSetting.getUserStateOrDefault(userId);
+            PackageUserStateInternal pkgUserState = pkgSetting.getUserStateOrDefault(userId);
             if (!pkgUserState.isInstalled()) {
                 return APPROVAL_LEVEL_NOT_INSTALLED;
             }
@@ -1779,7 +1783,7 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_UNDECLARED;
         }
 
-        final PackageUserState pkgUserState = pkgSetting.getUserStates().get(userId);
+        final PackageUserStateInternal pkgUserState = pkgSetting.getUserStates().get(userId);
         if (pkgUserState == null) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, debugObject, userId, false,
@@ -1976,7 +1980,7 @@ public class DomainVerificationService extends SystemService
             if (pkgSetting == null) {
                 continue;
             }
-            long installTime = pkgSetting.getFirstInstallTime();
+            long installTime = pkgSetting.getUserStateOrDefault(userId).getFirstInstallTime();
             if (installTime > latestInstall) {
                 latestInstall = installTime;
                 filteredPackages.clear();

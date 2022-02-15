@@ -37,6 +37,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
+import android.window.IOnBackInvokedCallback;
 
 import java.util.List;
 
@@ -73,7 +74,6 @@ interface IWindowSession {
      * @param viewVisibility Window root view's visibility.
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -96,17 +96,15 @@ interface IWindowSession {
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
-     * @param outSurfaceSize The width and height of the surface control
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out ClientWindowFrames outFrames,
+            int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Point outSurfaceSize);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -290,12 +288,17 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the keep-clear areas for this window have changed.
+     */
+    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> keepClearRects);
+
+    /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
     * an input channel where the client can receive input.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
             in IBinder hostInputToken, int flags, int privateFlags, int type,
-            out InputChannel outInputChannel);
+            in IBinder focusGrantToken, String inputHandleName, out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.
@@ -328,4 +331,19 @@ interface IWindowSession {
      */
     oneway void generateDisplayHash(IWindow window, in Rect boundsInWindow,
             in String hashAlgorithm, in RemoteCallback callback);
+
+    /**
+     * Sets the {@link IOnBackInvokedCallback} to be invoked for a window when back is triggered.
+     *
+     * @param window The token for the window to set the callback to.
+     * @param callback The {@link IOnBackInvokedCallback} to set.
+     * @param priority The priority of the callback.
+     */
+    oneway void setOnBackInvokedCallback(
+            IWindow window, IOnBackInvokedCallback callback, int priority);
+
+    /**
+     * Clears a touchable region set by {@link #setInsets}.
+     */
+    void clearTouchableRegion(IWindow window);
 }

@@ -169,7 +169,7 @@ interface IActivityManager {
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String callingPackage, int userId);
-    int bindIsolatedService(in IApplicationThread caller, in IBinder token, in Intent service,
+    int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
@@ -279,7 +279,7 @@ interface IActivityManager {
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
-    void makeServicesNonForeground(in String packageName, int userId);
+    void stopAppForUser(in String packageName, int userId);
     /** Returns {@code false} if the callback could not be registered, {@true} otherwise. */
     boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
@@ -679,6 +679,10 @@ interface IActivityManager {
      */
     boolean isAppFreezerSupported();
 
+    /**
+     * Return whether the app freezer is enabled (true) or not (false) by this system.
+     */
+    boolean isAppFreezerEnabled();
 
     /**
      * Kills uid with the reason of permission change.
@@ -743,4 +747,14 @@ interface IActivityManager {
 
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
+
+    /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     */
+    int getBackgroundRestrictionExemptionReason(int uid);
 }

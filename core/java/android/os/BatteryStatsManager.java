@@ -157,6 +157,7 @@ public final class BatteryStatsManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface WifiSupplState {}
 
+
     private final IBatteryStats mBatteryStats;
 
     /** @hide */
@@ -352,6 +353,36 @@ public final class BatteryStatsManager {
     }
 
     /**
+     * Retrieves accumulate wake lock stats.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public WakeLockStats getWakeLockStats() {
+        try {
+            return mBatteryStats.getWakeLockStats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves accumulated bluetooth stats.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BluetoothBatteryStats getBluetoothBatteryStats() {
+        try {
+            return mBatteryStats.getBluetoothBatteryStats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Indicates an app acquiring full wifi lock.
      *
      * @param ws worksource (to be used for battery blaming).
@@ -478,6 +509,38 @@ public final class BatteryStatsManager {
             @NonNull int[] transportTypes) throws RuntimeException {
         try {
             mBatteryStats.noteNetworkInterfaceForTransports(iface, transportTypes);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth was toggled on.
+     *
+     * @param uid calling package uid
+     * @param reason why Bluetooth has been turned on
+     * @param packageName package responsible for this change
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public void reportBluetoothOn(int uid, int reason, @NonNull String packageName) {
+        try {
+            mBatteryStats.noteBluetoothOn(uid, reason, packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth was toggled off.
+     *
+     * @param uid calling package uid
+     * @param reason why Bluetooth has been turned on
+     * @param packageName package responsible for this change
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public void reportBluetoothOff(int uid, int reason, @NonNull String packageName) {
+        try {
+            mBatteryStats.noteBluetoothOff(uid, reason, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

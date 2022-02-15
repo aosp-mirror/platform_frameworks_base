@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +73,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -138,10 +142,26 @@ public class ContextHubService extends IContextHubService.Stub {
     // The manager for the internal nanoapp state cache
     private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
 
+    // An executor and the future object for scheduling timeout timers
+    private final ScheduledThreadPoolExecutor mDailyMetricTimer =
+            new ScheduledThreadPoolExecutor(1);
+
+
+    // The period of the recurring time
+    private static final int PERIOD_METRIC_QUERY_DAYS = 1;
+
     // True if WiFi is available for the Context Hub
     private boolean mIsWifiAvailable = false;
     private boolean mIsWifiScanningEnabled = false;
     private boolean mIsWifiMainEnabled = false;
+
+    // True if BT is available for the Context Hub
+    private boolean mIsBtScanningEnabled = false;
+    private boolean mIsBtMainEnabled = false;
+
+    // A hashmap used to record if a contexthub is waiting for daily query
+    private Set<Integer> mMetricQueryPendingContextHubIds =
+            Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
 
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
@@ -317,6 +337,27 @@ public class ContextHubService extends IContextHubService.Stub {
                     });
 
         }
+
+        if (mContextHubWrapper.supportsBtSettingNotifications()) {
+            sendBtSettingUpdate(true /* forceUpdate */);
+
+            BroadcastReceiver btReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
+                            || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
+                                    intent.getAction())) {
+                        sendBtSettingUpdate(false /* forceUpdate */);
+                    }
+                }
+            };
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
+            mContext.registerReceiver(btReceiver, filter);
+        }
+
+        scheduleDailyMetricSnapshot();
     }
 
     /**
@@ -718,6 +759,7 @@ public class ContextHubService extends IContextHubService.Stub {
             sendWifiSettingUpdate(true /* forceUpdate */);
             sendAirplaneModeSettingUpdate();
             sendMicrophoneDisableSettingUpdateForCurrentUser();
+            sendBtSettingUpdate(true /* forceUpdate */);
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -747,6 +789,18 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param nanoappStateList the list of loaded nanoapps
      */
     private void handleQueryAppsCallback(int contextHubId, List<NanoAppState> nanoappStateList) {
+        if (mMetricQueryPendingContextHubIds.contains(contextHubId)) {
+            for (NanoAppState nanoappState : nanoappStateList) {
+                ContextHubStatsLog.write(
+                        ContextHubStatsLog.CONTEXT_HUB_LOADED_NANOAPP_SNAPSHOT_REPORTED,
+                        contextHubId, nanoappState.getNanoAppId(),
+                        (int) nanoappState.getNanoAppVersion());
+            }
+            mMetricQueryPendingContextHubIds.remove(contextHubId);
+            if (mMetricQueryPendingContextHubIds.isEmpty()) {
+                scheduleDailyMetricSnapshot();
+            }
+        }
         mNanoAppStateManager.updateCache(contextHubId, nanoappStateList);
         mTransactionManager.onQueryResponse(nanoappStateList);
     }
@@ -1104,6 +1158,39 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
+     * Obtains the latest BT availability setting value and notifies the Context Hub.
+     *
+     * @param forceUpdate True to force send update to the Context Hub, otherwise only send the
+     *                    update when the BT availability changes.
+     */
+    private void sendBtSettingUpdate(boolean forceUpdate) {
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        // Adapter may be null if BT is not supported.
+        if (adapter != null) {
+            boolean btEnabled = adapter.isEnabled();
+            boolean btScanEnabled = adapter.isBleScanAlwaysAvailable();
+            if (forceUpdate || mIsBtScanningEnabled != btScanEnabled) {
+                mIsBtScanningEnabled = btScanEnabled;
+                mContextHubWrapper.onBtScanningSettingChanged(btScanEnabled);
+            }
+            if (forceUpdate || mIsBtMainEnabled != btEnabled) {
+                mIsBtMainEnabled = btEnabled;
+                mContextHubWrapper.onBtMainSettingChanged(btEnabled);
+            }
+        } else {
+            Log.d(TAG, "BT adapter not available. Defaulting to disabled");
+            if (mIsBtMainEnabled) {
+                mIsBtMainEnabled = false;
+                mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
+            }
+            if (mIsBtScanningEnabled) {
+                mIsBtScanningEnabled = false;
+                mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
+            }
+        }
+    }
+
+    /**
      * Obtains the latest airplane mode setting value and notifies the Context Hub.
      */
     private void sendAirplaneModeSettingUpdate() {
@@ -1135,6 +1222,23 @@ public class ContextHubService extends IContextHubService.Stub {
         sendMicrophoneDisableSettingUpdate(isEnabled);
     }
 
+    /**
+     *  Invokes a daily timer to query all context hubs
+     */
+    private void scheduleDailyMetricSnapshot() {
+        Runnable queryAllContextHub = () -> {
+            for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+                mMetricQueryPendingContextHubIds.add(contextHubId);
+                queryNanoAppsInternal(contextHubId);
+            }
+        };
+        try {
+            mDailyMetricTimer.schedule(queryAllContextHub, PERIOD_METRIC_QUERY_DAYS,
+                    TimeUnit.DAYS);
+        } catch (Exception e) {
+            Log.e(TAG, "Error when schedule a timer", e);
+        }
+    }
 
     private String getCallingPackageName() {
         return mContext.getPackageManager().getNameForUid(Binder.getCallingUid());

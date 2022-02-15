@@ -19,6 +19,7 @@ package android.content.pm;
 import static android.os.Build.VERSION_CODES.DONUT;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -34,6 +35,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -48,9 +50,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -60,60 +65,62 @@ import java.util.UUID;
  */
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+    private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
     /**
-     * Default task affinity of all activities in this application. See 
-     * {@link ActivityInfo#taskAffinity} for more information.  This comes 
-     * from the "taskAffinity" attribute. 
+     * Default task affinity of all activities in this application. See
+     * {@link ActivityInfo#taskAffinity} for more information.  This comes
+     * from the "taskAffinity" attribute.
      */
     public String taskAffinity;
-    
+
     /**
      * Optional name of a permission required to be able to access this
      * application's components.  From the "permission" attribute.
      */
     public String permission;
-    
+
     /**
      * The name of the process this application should run in.  From the
      * "process" attribute or, if not set, the same as
      * <var>packageName</var>.
      */
     public String processName;
-    
+
     /**
      * Class implementing the Application object.  From the "class"
      * attribute.
      */
     public String className;
-    
+
     /**
      * A style resource identifier (in the package's resources) of the
      * description of an application.  From the "description" attribute
      * or, if not set, 0.
      */
-    public int descriptionRes;    
-    
+    public int descriptionRes;
+
     /**
      * A style resource identifier (in the package's resources) of the
      * default visual theme of the application.  From the "theme" attribute
      * or, if not set, 0.
      */
     public int theme;
-    
+
     /**
      * Class implementing the Application's manage space
      * functionality.  From the "manageSpaceActivity"
      * attribute. This is an optional attribute and will be null if
      * applications don't specify it in their manifest
      */
-    public String manageSpaceActivityName;    
-    
+    public String manageSpaceActivityName;
+
     /**
      * Class implementing the Application's backup functionality.  From
      * the "backupAgent" attribute.  This is an optional attribute and
      * will be null if the application does not specify it in its manifest.
-     * 
+     *
      * <p>If android:allowBackup is set to false, this attribute is ignored.
      */
     public String backupAgentName;
@@ -174,7 +181,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@code signatureOrSystem}.
      */
     public static final int FLAG_SYSTEM = 1<<0;
-    
+
     /**
      * Value for {@link #flags}: set to true if this application would like to
      * allow debugging of its
@@ -183,7 +190,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:debuggable} of the &lt;application&gt; tag.
      */
     public static final int FLAG_DEBUGGABLE = 1<<1;
-    
+
     /**
      * Value for {@link #flags}: set to true if this application has code
      * associated with it.  Comes
@@ -191,7 +198,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:hasCode} of the &lt;application&gt; tag.
      */
     public static final int FLAG_HAS_CODE = 1<<2;
-    
+
     /**
      * Value for {@link #flags}: set to true if this application is persistent.
      * Comes from {@link android.R.styleable#AndroidManifestApplication_persistent
@@ -212,20 +219,20 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:allowTaskReparenting} of the &lt;application&gt; tag.
      */
     public static final int FLAG_ALLOW_TASK_REPARENTING = 1<<5;
-    
+
     /**
      * Value for {@link #flags}: default value for the corresponding ActivityInfo flag.
      * Comes from {@link android.R.styleable#AndroidManifestApplication_allowClearUserData
      * android:allowClearUserData} of the &lt;application&gt; tag.
      */
     public static final int FLAG_ALLOW_CLEAR_USER_DATA = 1<<6;
-    
+
     /**
      * Value for {@link #flags}: this is set if this application has been
      * installed as an update to a built-in system application.
      */
     public static final int FLAG_UPDATED_SYSTEM_APP = 1<<7;
-    
+
     /**
      * Value for {@link #flags}: this is set if the application has specified
      * {@link android.R.styleable#AndroidManifestApplication_testOnly
@@ -240,15 +247,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:smallScreens}.
      */
     public static final int FLAG_SUPPORTS_SMALL_SCREENS = 1<<9;
-    
+
     /**
      * Value for {@link #flags}: true when the application's window can be
      * displayed on normal screens.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_normalScreens
      * android:normalScreens}.
      */
-    public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1<<10; 
-    
+    public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1<<10;
+
     /**
      * Value for {@link #flags}: true when the application's window can be
      * increased in size for larger screens.  Corresponds to
@@ -256,7 +263,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:largeScreens}.
      */
     public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<11;
-    
+
     /**
      * Value for {@link #flags}: true when the application knows how to adjust
      * its UI for different screen sizes.  Corresponds to
@@ -264,7 +271,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:resizeable}.
      */
     public static final int FLAG_RESIZEABLE_FOR_SCREENS = 1<<12;
-    
+
     /**
      * Value for {@link #flags}: true when the application knows how to
      * accommodate different screen densities.  Corresponds to
@@ -276,7 +283,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     @Deprecated
     public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 1<<13;
-    
+
     /**
      * Value for {@link #flags}: set to true if this application would like to
      * request the VM to operate under the safe mode. Comes from
@@ -288,7 +295,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Value for {@link #flags}: set to <code>false</code> if the application does not wish
      * to permit any OS-driven backups of its data; <code>true</code> otherwise.
-     * 
+     *
      * <p>Comes from the
      * {@link android.R.styleable#AndroidManifestApplication_allowBackup android:allowBackup}
      * attribute of the &lt;application&gt; tag.
@@ -351,7 +358,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * android:xlargeScreens}.
      */
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
-    
+
     /**
      * Value for {@link #flags}: true when the application has requested a
      * large heap for its processes.  Corresponds to
@@ -1114,7 +1121,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the same uid).
      */
     public int uid;
-    
+
     /**
      * The minimum SDK version this application can run on. It will not run
      * on earlier versions.
@@ -1543,6 +1550,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @Nullable
     private ArrayMap<String, String> mAppClassNamesByProcess;
 
+    /**
+     * Resource file providing the application's locales configuration.
+     */
+    private int localeConfigRes;
+
+    /**
+     * Optional set of a certificates identifying apps that are allowed to embed activities of this
+     * application. From the "knownActivityEmbeddingCerts" attribute.
+     */
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1660,8 +1679,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "requestRawExternalStorageAccess="
                         + requestRawExternalStorageAccess);
             }
+            if (localeConfigRes != 0) {
+                pw.println(prefix + "localeConfigRes=0x"
+                        + Integer.toHexString(localeConfigRes));
+            }
         }
         pw.println(prefix + "createTimestamp=" + createTimestamp);
+        if (mKnownActivityEmbeddingCerts != null) {
+            pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
+        }
         super.dumpBack(pw, prefix);
     }
 
@@ -1776,6 +1802,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
             proto.end(detailToken);
         }
+        if (!ArrayUtils.isEmpty(mKnownActivityEmbeddingCerts)) {
+            for (String knownCert : mKnownActivityEmbeddingCerts) {
+                proto.write(ApplicationInfoProto.KNOWN_ACTIVITY_EMBEDDING_CERTS, knownCert);
+            }
+        }
         proto.end(token);
     }
 
@@ -1808,7 +1839,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (sb == null) {
                 sb = ab.packageName;
             }
-            
+
             return sCollator.compare(sa.toString(), sb.toString());
         }
 
@@ -1821,11 +1852,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public ApplicationInfo() {
         createTimestamp = System.currentTimeMillis();
     }
-    
+
     public ApplicationInfo(ApplicationInfo orig) {
         super(orig);
         taskAffinity = orig.taskAffinity;
         permission = orig.permission;
+        mKnownActivityEmbeddingCerts = orig.mKnownActivityEmbeddingCerts;
         processName = orig.processName;
         className = orig.className;
         theme = orig.theme;
@@ -1891,6 +1923,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         memtagMode = orig.memtagMode;
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
+        localeConfigRes = orig.localeConfigRes;
         createTimestamp = System.currentTimeMillis();
     }
 
@@ -1993,6 +2026,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 dest.writeString(mAppClassNamesByProcess.valueAt(i));
             }
         }
+        dest.writeInt(localeConfigRes);
+        sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -2088,6 +2123,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 mAppClassNamesByProcess.put(source.readString(), source.readString());
             }
         }
+        localeConfigRes = source.readInt();
+        mKnownActivityEmbeddingCerts = sForStringSet.unparcel(source);
+        if (mKnownActivityEmbeddingCerts.isEmpty()) {
+            mKnownActivityEmbeddingCerts = null;
+        }
     }
 
     /**
@@ -2113,7 +2153,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Disable compatibility mode
-     * 
+     *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -2334,7 +2374,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
         return pm.getDefaultActivityIcon();
     }
-    
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
@@ -2630,5 +2670,59 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         return className;
+    }
+
+    /** @hide */ public void setLocaleConfigRes(int value) { localeConfigRes = value; }
+
+    /**
+     * Return the resource id pointing to the resource file that provides the application's locales
+     * configuration.
+     *
+     * @hide
+     */
+    public int getLocaleConfigRes() {
+        return localeConfigRes;
+    }
+
+    /**
+     *  List of all shared libraries this application is linked against. This
+     *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
+     *  PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving the structure.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public List<SharedLibraryInfo> getSharedLibraryInfos() {
+        if (sharedLibraryInfos == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return sharedLibraryInfos;
+    }
+
+    /**
+     * Gets the trusted host certificate digests of apps that are allowed to embed activities of
+     * this application. The digests are computed using the SHA-256 digest algorithm.
+     * @see android.R.attr#knownActivityEmbeddingCerts
+     */
+    @NonNull
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed activities of this
+     * application.
+     * @see #getKnownActivityEmbeddingCerts()
+     * @hide
+     */
+    public void setKnownActivityEmbeddingCerts(@NonNull Set<String> knownActivityEmbeddingCerts) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        mKnownActivityEmbeddingCerts = new ArraySet<>();
+        for (String knownCert : knownActivityEmbeddingCerts) {
+            mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
     }
 }

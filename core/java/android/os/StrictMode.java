@@ -15,10 +15,13 @@
  */
 package android.os;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -939,7 +942,7 @@ public final class StrictMode {
              * <p>Instead, apps should use {@code content://} Uris so the platform can extend
              * temporary permission for the receiving app to access the resource.
              *
-             * @see android.support.v4.content.FileProvider
+             * @see androidx.core.content.FileProvider
              * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
              */
             public @NonNull Builder detectFileUriExposure() {
@@ -2690,6 +2693,12 @@ public final class StrictMode {
         ((AndroidBlockGuardPolicy) policy).onCustomSlowCall(name);
     }
 
+    /** @hide */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void noteUntaggedSocket() {
+        if (vmUntaggedSocketEnabled()) onUntaggedSocket();
+    }
+
     /**
      * For code to note that a resource was obtained using a type other than its defined type. This
      * is a no-op unless the current thread's {@link android.os.StrictMode.ThreadPolicy} has {@link
@@ -2984,7 +2993,7 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mViolation = (Violation) in.readSerializable();
+            mViolation = (Violation) in.readSerializable(android.os.strictmode.Violation.class.getClassLoader(), android.os.strictmode.Violation.class);
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
                 StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];

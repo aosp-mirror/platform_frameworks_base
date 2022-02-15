@@ -16,16 +16,17 @@
 
 #define LOG_TAG "perf_hint"
 
-#include <utility>
-#include <vector>
-
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
+#include <android/performance_hint.h>
 #include <binder/Binder.h>
 #include <binder/IBinder.h>
 #include <binder/IServiceManager.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
+
+#include <utility>
+#include <vector>
 
 using namespace android;
 using namespace android::os;

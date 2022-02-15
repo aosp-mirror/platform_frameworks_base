@@ -22,6 +22,8 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_CACHED;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,7 +37,13 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.bluetooth.UidTraffic;
 import android.os.BatteryStats;
+import android.os.BluetoothBatteryStats;
+import android.os.Parcel;
+import android.os.WakeLockStats;
+import android.os.WorkSource;
 import android.util.SparseArray;
 import android.view.Display;
 
@@ -44,11 +52,15 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -61,6 +73,8 @@ public class BatteryStatsImplTest {
     private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
     private KernelSingleUidTimeReader mKernelSingleUidTimeReader;
+    @Mock
+    private PowerProfile mPowerProfile;
 
     private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStatsImpl;
@@ -74,6 +88,7 @@ public class BatteryStatsImplTest {
         when(mKernelUidCpuFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock)
+                .setPowerProfile(mPowerProfile)
                 .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
     }
@@ -506,5 +521,117 @@ public class BatteryStatsImplTest {
     private void addIsolatedUid(int parentUid, int childUid) {
         final BatteryStatsImpl.Uid u = mBatteryStatsImpl.getUidStatsLocked(parentUid);
         u.addIsolatedUid(childUid);
+    }
+
+    @Test
+    public void testGetWakeLockStats() {
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // First wakelock, acquired once, not currently held
+        mMockClock.realtime = 1000;
+        mBatteryStatsImpl.noteStartWakeLocked(10100, 100, null, "wakeLock1", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 3000;
+        mBatteryStatsImpl.noteStopWakeLocked(10100, 100, null, "wakeLock1", null,
+                BatteryStats.WAKE_TYPE_PARTIAL);
+
+        // Second wakelock, acquired twice, still held
+        mMockClock.realtime = 4000;
+        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 5000;
+        mBatteryStatsImpl.noteStopWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL);
+
+        mMockClock.realtime = 6000;
+        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
+                BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 9000;
+
+        List<WakeLockStats.WakeLock> wakeLockStats =
+                mBatteryStatsImpl.getWakeLockStats().getWakeLocks();
+        assertThat(wakeLockStats).hasSize(2);
+
+        WakeLockStats.WakeLock wakeLock1 = wakeLockStats.stream()
+                .filter(wl -> wl.uid == 10100 && wl.name.equals("wakeLock1")).findFirst().get();
+
+        assertThat(wakeLock1.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock1.timeHeldMs).isEqualTo(0);  // Not currently held
+        assertThat(wakeLock1.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+
+        WakeLockStats.WakeLock wakeLock2 = wakeLockStats.stream()
+                .filter(wl -> wl.uid == 10200 && wl.name.equals("wakeLock2")).findFirst().get();
+
+        assertThat(wakeLock2.timesAcquired).isEqualTo(2);
+        assertThat(wakeLock2.timeHeldMs).isEqualTo(3000);  // 9000-6000
+        assertThat(wakeLock2.totalTimeHeldMs).isEqualTo(4000); // (5000-4000) + (9000-6000)
+    }
+
+    @Test
+    public void testGetBluetoothBatteryStats() {
+        when(mPowerProfile.getAveragePower(
+                PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE)).thenReturn(3.0);
+        mBatteryStatsImpl.setOnBatteryInternal(true);
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        final WorkSource ws = new WorkSource(10042);
+        mBatteryStatsImpl.noteBluetoothScanStartedFromSourceLocked(ws, false, 1000, 1000);
+        mBatteryStatsImpl.noteBluetoothScanStoppedFromSourceLocked(ws, false, 5000, 5000);
+        mBatteryStatsImpl.noteBluetoothScanStartedFromSourceLocked(ws, true, 6000, 6000);
+        mBatteryStatsImpl.noteBluetoothScanStoppedFromSourceLocked(ws, true, 9000, 9000);
+        mBatteryStatsImpl.noteBluetoothScanResultsFromSourceLocked(ws, 42, 9000, 9000);
+
+
+
+        final Parcel uidTrafficParcel1 = Parcel.obtain();
+        final Parcel uidTrafficParcel2 = Parcel.obtain();
+
+        uidTrafficParcel1.writeInt(10042);
+        uidTrafficParcel1.writeLong(3000);
+        uidTrafficParcel1.writeLong(4000);
+        uidTrafficParcel1.setDataPosition(0);
+        uidTrafficParcel2.writeInt(10043);
+        uidTrafficParcel2.writeLong(5000);
+        uidTrafficParcel2.writeLong(8000);
+        uidTrafficParcel2.setDataPosition(0);
+
+        List<UidTraffic> uidTrafficList = ImmutableList.of(
+                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel1),
+                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel2));
+
+        final Parcel btActivityEnergyInfoParcel = Parcel.obtain();
+        btActivityEnergyInfoParcel.writeLong(1000);
+        btActivityEnergyInfoParcel.writeInt(
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE);
+        btActivityEnergyInfoParcel.writeLong(9000);
+        btActivityEnergyInfoParcel.writeLong(8000);
+        btActivityEnergyInfoParcel.writeLong(12000);
+        btActivityEnergyInfoParcel.writeLong(0);
+        btActivityEnergyInfoParcel.writeTypedList(uidTrafficList);
+        btActivityEnergyInfoParcel.setDataPosition(0);
+
+        BluetoothActivityEnergyInfo info = BluetoothActivityEnergyInfo.CREATOR
+                .createFromParcel(btActivityEnergyInfoParcel);
+
+        uidTrafficParcel1.recycle();
+        uidTrafficParcel2.recycle();
+        btActivityEnergyInfoParcel.recycle();
+
+        mBatteryStatsImpl.updateBluetoothStateLocked(info, -1, 1000, 1000);
+
+        BluetoothBatteryStats stats =
+                mBatteryStatsImpl.getBluetoothBatteryStats();
+        assertThat(stats.getUidStats()).hasSize(2);
+
+        final BluetoothBatteryStats.UidStats uidStats =
+                stats.getUidStats().stream().filter(u -> u.uid == 10042).findFirst().get();
+        assertThat(uidStats.scanTimeMs).isEqualTo(7000);  // 4000+3000
+        assertThat(uidStats.unoptimizedScanTimeMs).isEqualTo(3000);
+        assertThat(uidStats.scanResultCount).isEqualTo(42);
+        assertThat(uidStats.rxTimeMs).isEqualTo(7375);  // Some scan time is treated as RX
+        assertThat(uidStats.txTimeMs).isEqualTo(7666);  // Some scan time is treated as TX
     }
 }

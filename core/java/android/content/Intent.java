@@ -1458,6 +1458,18 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
+
+    /**
+     * Activity Action: Action to show the list of all work apps in the launcher. For example,
+     * shows the work apps folder or tab.
+     *
+     * <p>Input: Nothing.
+     * <p>Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_WORK_APPS =
+            "android.intent.action.SHOW_WORK_APPS";
+
     /**
      * Activity Action: Show settings for choosing wallpaper.
      * <p>Input: Nothing.
@@ -2385,6 +2397,10 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#START_VIEW_APP_FEATURES} permission to ensure that
      * only the system can launch this activity. The system will not launch activities
      * that are not properly protected.
+     *
+     * An optional <meta-data> tag in the activity's manifest with
+     * android:name=app_features_preference_summary and android:resource=@string/<string name> will
+     * be used to add a summary line for the "All Services" preference in settings.
      * </p>
      * @hide
      */
@@ -2973,6 +2989,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: A uid has been removed from the system.  The uid
      * number is stored in the extra data under {@link #EXTRA_UID}.
+     *
+     * In certain instances, {@link #EXTRA_REPLACING} is set to true if the UID is not being
+     * fully removed.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -3979,7 +3998,7 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @SystemApi
     public static final String ACTION_USER_SWITCHED =
             "android.intent.action.USER_SWITCHED";
 
@@ -4350,9 +4369,9 @@ public class Intent implements Parcelable, Cloneable {
      * restored from (corresponds to {@link android.os.Build.VERSION#SDK_INT}). The first three
      * values are represented as strings, the fourth one as int.
      *
-     * <p>This broadcast is sent only for settings provider entries known to require special handling
-     * around restore time.  These entries are found in the BROADCAST_ON_RESTORE table within
-     * the provider's backup agent implementation.
+     * <p>This broadcast is sent only for settings provider entries known to require special
+     * handling around restore time to specific receivers. These entries are found in the
+     * BROADCAST_ON_RESTORE table within the provider's backup agent implementation.
      *
      * @see #EXTRA_SETTING_NAME
      * @see #EXTRA_SETTING_PREVIOUS_VALUE
@@ -4360,15 +4379,46 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_SETTING_RESTORED_FROM_SDK_INT
      * {@hide}
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ActionValue")
     public static final String ACTION_SETTING_RESTORED = "android.os.action.SETTING_RESTORED";
 
-    /** {@hide} */
+    /**
+     * String intent extra to be used with {@link ACTION_SETTING_RESTORED}.
+     * Contain the name of the restored setting.
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ActionValue")
     public static final String EXTRA_SETTING_NAME = "setting_name";
-    /** {@hide} */
+
+    /**
+     * String intent extra to be used with {@link ACTION_SETTING_RESTORED}.
+     * Contain the value of the {@link EXTRA_SETTING_NAME} settings entry prior to the restore
+     * operation.
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ActionValue")
     public static final String EXTRA_SETTING_PREVIOUS_VALUE = "previous_value";
-    /** {@hide} */
+
+    /**
+     * String intent extra to be used with {@link ACTION_SETTING_RESTORED}.
+     * Contain the value of the {@link EXTRA_SETTING_NAME} settings entry being restored.
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ActionValue")
     public static final String EXTRA_SETTING_NEW_VALUE = "new_value";
-    /** {@hide} */
+
+    /**
+     * Int intent extra to be used with {@link ACTION_SETTING_RESTORED}.
+     * Contain the version of the SDK that the setting has been restored from (corresponds to
+     * {@link android.os.Build.VERSION#SDK_INT}).
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ActionValue")
     public static final String EXTRA_SETTING_RESTORED_FROM_SDK_INT = "restored_from_sdk_int";
 
     /**
@@ -4978,6 +5028,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
+    /**
+     * Broadcast Action: Start the foreground service manager.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
+            "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -5527,6 +5588,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A String[] holding attribution tags when used with
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      *
      * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
      */
@@ -5535,17 +5597,20 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A long representing the start timestamp (epoch time in millis) of the permission usage
      * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
      * A long representing the end timestamp (epoch time in millis) of the permission usage when
      * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
 
     /**
-     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD},
+     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and {@link #ACTION_MANAGE_PERMISSION_USAGE},
      * that specifies whether the permission usage system UI is showing attribution information
      * for the chosen entry.
      *
@@ -5598,7 +5663,9 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p>Targets provided in this way will be presented inline with all other targets provided
      * by services from other apps. They will be prioritized before other service targets, but
-     * after those targets provided by sources that the user has manually pinned to the front.</p>
+     * after those targets provided by sources that the user has manually pinned to the front.
+     * You can provide up to two targets on this extra (the limit of two targets
+     * starts in Android 10).</p>
      *
      * @see #ACTION_CHOOSER
      */
@@ -5709,9 +5776,11 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A Parcelable[] of {@link Intent} or
      * {@link android.content.pm.LabeledIntent} objects as set with
-     * {@link #putExtra(String, Parcelable[])} of additional activities to place
-     * a the front of the list of choices, when shown to the user with a
-     * {@link #ACTION_CHOOSER}.
+     * {@link #putExtra(String, Parcelable[])} to place
+     * at the front of the list of choices, when shown to the user with an
+     * {@link #ACTION_CHOOSER}. You can choose up to two additional activities
+     * to show before the app suggestions (the limit of two additional activities starts in
+     * Android 10).
      */
     public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
 
@@ -5915,6 +5984,22 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_UID = "android.intent.extra.UID";
 
     /**
+     * Used as an optional int extra field in {@link android.content.Intent#ACTION_PACKAGE_ADDED}
+     * intents to supply the previous uid the package had been assigned.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
+
+    /**
+     * Used as an optional int extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
+     * intents to supply the new uid the package will be assigned.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
+
+    /**
      * @hide String array of package names.
      */
     @SystemApi
@@ -5944,6 +6029,16 @@ public class Intent implements Parcelable, Cloneable {
      * different version of the same package.
      */
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
+
+    /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED},
+     * {@link android.content.Intent#ACTION_UID_REMOVED}, and
+     * {@link android.content.Intent#ACTION_PACKAGE_ADDED}
+     * intents to indicate that this package is changing its UID.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_UID_CHANGING = "android.intent.extra.UID_CHANGING";
 
     /**
      * Used as an int extra field in {@link android.app.AlarmManager} pending intents
@@ -6125,6 +6220,8 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_USER_HANDLE =
             "android.intent.extra.user_handle";
 
@@ -6988,6 +7085,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 0x01000000;
     /**
      * If set, the broadcast will never go to manifest receivers in background (cached
@@ -8022,6 +8120,37 @@ public class Intent implements Parcelable, Cloneable {
                     hasIntentInfo = true;
                 }
                 break;
+                case "--ed": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    intent.putExtra(key, Double.valueOf(value));
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--eda": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    double[] list = new double[strings.length];
+                    for (int i = 0; i < strings.length; i++) {
+                        list[i] = Double.valueOf(strings[i]);
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--edal": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    ArrayList<Double> list = new ArrayList<>(strings.length);
+                    for (int i = 0; i < strings.length; i++) {
+                        list.add(Double.valueOf(strings[i]));
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
                 case "--esa": {
                     String key = cmd.getNextArgRequired();
                     String value = cmd.getNextArgRequired();
@@ -8267,25 +8396,30 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]",
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]",
                 "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]",
+                "    [--ed <EXTRA_KEY> <EXTRA_DOUBLE_VALUE> ...]",
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]",
                 "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]",
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as Integer[])",
+                "        (multiple extras passed as Integer[])",
                 "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as List<Integer>)",
+                "        (multiple extras passed as List<Integer>)",
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as Long[])",
+                "        (multiple extras passed as Long[])",
                 "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as List<Long>)",
+                "        (multiple extras passed as List<Long>)",
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as Float[])",
+                "        (multiple extras passed as Float[])",
                 "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as List<Float>)",
+                "        (multiple extras passed as List<Float>)",
+                "    [--eda <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as Double[])",
+                "    [--edal <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as List<Double>)",
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as String[]; to embed a comma into a string,",
+                "        (multiple extras passed as String[]; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as List<String>; to embed a comma into a string,",
+                "        (multiple extras passed as List<String>; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [-f <FLAG>]",
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]",

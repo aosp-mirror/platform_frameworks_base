@@ -39,6 +39,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
+import static com.android.server.wm.AppTransition.isActivityTransitOld;
 import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -78,14 +79,17 @@ import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Pools;
+import android.util.RotationUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
@@ -96,6 +100,7 @@ import android.window.WindowContainerToken;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -195,6 +200,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final Point mTmpPos = new Point();
     protected final Point mLastSurfacePosition = new Point();
+    protected @Surface.Rotation int mLastDeltaRotation = Surface.ROTATION_0;
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
@@ -312,6 +318,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
+    protected TrustedOverlayHost mOverlayHost;
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mTransitionController = mWmService.mAtmService.getTransitionController();
@@ -341,6 +349,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         super.onConfigurationChanged(newParentConfig);
         updateSurfacePositionNonOrganized();
         scheduleAnimation();
+        if (mOverlayHost != null) {
+            mOverlayHost.dispatchConfigurationChanged(getConfiguration());
+        }
     }
 
     void reparent(WindowContainer newParent, int position) {
@@ -387,6 +398,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         if (mParent != null) {
             mParent.onChildAdded(this);
+        } else if (mSurfaceAnimator.hasLeash()) {
+            mSurfaceAnimator.cancelAnimation();
         }
         if (!mReparenting) {
             onSyncReparent(oldParent, mParent);
@@ -464,6 +477,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.remove(mSurfaceControl);
         // Clear the last position so the new SurfaceControl will get correct position
         mLastSurfacePosition.set(0, 0);
+        mLastDeltaRotation = Surface.ROTATION_0;
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
                 .setContainerLayer()
@@ -487,6 +501,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 t.reparent(sc, mSurfaceControl);
             }
         }
+
+        if (mOverlayHost != null) {
+            mOverlayHost.setParent(t, mSurfaceControl);
+        }
+
         scheduleAnimation();
     }
 
@@ -630,7 +649,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             getSyncTransaction().remove(mSurfaceControl);
             setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
+            mLastDeltaRotation = Surface.ROTATION_0;
             scheduleAnimation();
+        }
+        if (mOverlayHost != null) {
+            mOverlayHost.release();
+            mOverlayHost = null;
         }
 
         // This must happen after updating the surface so that sync transactions can be handled
@@ -642,6 +666,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onRemoved();
         }
+    }
+
+    /** Returns the total number of descendants, including self. */
+    int getTreeWeight() {
+        return mTreeWeight;
     }
 
     /**
@@ -2308,6 +2337,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 wc.assignLayer(t, layer++);
             }
         }
+        if (mOverlayHost != null) {
+            mOverlayHost.setLayer(t, layer++);
+        }
     }
 
     void assignChildLayers() {
@@ -2760,7 +2792,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             @TransitionOldType int transit, boolean isVoiceInteraction,
             @Nullable ArrayList<WindowContainer> sources) {
         final Task task = asTask();
-        if (task != null && !enter && !task.isHomeOrRecentsRootTask()) {
+        if (task != null && !enter && !task.isActivityTypeHomeOrRecents()) {
             final InsetsControlTarget imeTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
             final boolean isImeLayeringTarget = imeTarget != null && imeTarget.getWindow() != null
                     && imeTarget.getWindow().getTask() == task;
@@ -2788,6 +2820,25 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     animationRunnerBuilder.hideInsetSourceViewOverflows(
                             mWmService.mTaskTransitionSpec.animationBoundInsets);
                 }
+            }
+
+            final ActivityRecord activityRecord = asActivityRecord();
+            if (activityRecord != null && isActivityTransitOld(transit)
+                    && adapter.getShowBackground()) {
+                final @ColorInt int backgroundColorForTransition;
+                if (adapter.getBackgroundColor() != 0) {
+                    // If available use the background color provided through getBackgroundColor
+                    // which if set originates from a call to overridePendingAppTransition.
+                    backgroundColorForTransition = adapter.getBackgroundColor();
+                } else {
+                    // Otherwise default to the window's background color if provided through
+                    // the theme as the background color for the animation - the top most window
+                    // with a valid background color and showBackground set takes precedence.
+                    final Task arTask = activityRecord.getTask();
+                    backgroundColorForTransition = ColorUtils.setAlphaComponent(
+                            arTask.getTaskDescription().getBackgroundColor(), 255);
+                }
+                animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
             }
 
             animationRunnerBuilder.build()
@@ -3101,12 +3152,43 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         getRelativePosition(mTmpPos);
-        if (mTmpPos.equals(mLastSurfacePosition)) {
+        final int deltaRotation = getRelativeDisplayRotation();
+        if (mTmpPos.equals(mLastSurfacePosition) && deltaRotation == mLastDeltaRotation) {
             return;
         }
 
         t.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        // set first, since we don't want rotation included in this (for now).
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
+
+        if (mTransitionController.isShellTransitionsEnabled()
+                && !mTransitionController.useShellTransitionsRotation()) {
+            if (deltaRotation != Surface.ROTATION_0) {
+                updateSurfaceRotation(t, deltaRotation, null /* positionLeash */);
+            } else if (deltaRotation != mLastDeltaRotation) {
+                t.setMatrix(mSurfaceControl, 1, 0, 0, 1);
+            }
+        }
+        mLastDeltaRotation = deltaRotation;
+    }
+
+    /**
+     * Updates the surface transform based on a difference in displayed-rotation from its parent.
+     * @param positionLeash If non-null, the rotated position will be set on this surface instead
+     *                      of the window surface. {@see WindowToken#getOrCreateFixedRotationLeash}.
+     */
+    protected void updateSurfaceRotation(Transaction t, @Surface.Rotation int deltaRotation,
+            @Nullable SurfaceControl positionLeash) {
+        // parent must be non-null otherwise deltaRotation would be 0.
+        RotationUtils.rotateSurface(t, mSurfaceControl, deltaRotation);
+        mTmpPos.set(mLastSurfacePosition.x, mLastSurfacePosition.y);
+        final Rect parentBounds = getParent().getBounds();
+        final boolean flipped = (deltaRotation % 2) != 0;
+        RotationUtils.rotatePoint(mTmpPos, deltaRotation,
+                flipped ? parentBounds.height() : parentBounds.width(),
+                flipped ? parentBounds.width() : parentBounds.height());
+        t.setPosition(positionLeash != null ? positionLeash : mSurfaceControl,
+                mTmpPos.x, mTmpPos.y);
     }
 
     @VisibleForTesting
@@ -3144,6 +3226,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /** @return the difference in displayed-rotation from parent. */
+    @Surface.Rotation
+    int getRelativeDisplayRotation() {
+        final WindowContainer parent = getParent();
+        if (parent == null) return Surface.ROTATION_0;
+        final int rotation = getWindowConfiguration().getDisplayRotation();
+        final int parentRotation = parent.getWindowConfiguration().getDisplayRotation();
+        return RotationUtils.deltaRotation(rotation, parentRotation);
+    }
+
     void waitForAllWindowsDrawn() {
         forAllWindows(w -> {
             w.requestDrawIfNeeded(mWaitingForDrawn);
@@ -3177,6 +3269,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Cheap way of doing cast and instanceof. */
     WindowToken asWindowToken() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    WindowState asWindowState() {
         return null;
     }
 
@@ -3306,7 +3403,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "setSyncGroup #%d on %s", group.mSyncId, this);
         if (group != null) {
             if (mSyncGroup != null && mSyncGroup != group) {
-                throw new IllegalStateException("Can't sync on 2 engines simultaneously");
+                // This can still happen if WMCore starts a new transition when there is ongoing
+                // sync transaction from Shell. Please file a bug if it happens.
+                throw new IllegalStateException("Can't sync on 2 engines simultaneously"
+                        + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId);
             }
         }
         mSyncGroup = group;
@@ -3349,8 +3449,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             mChildren.get(i).finishSync(outMergedTransaction, cancel);
         }
-        mSyncState = SYNC_STATE_NONE;
         if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
+        clearSyncState();
+    }
+
+    void clearSyncState() {
+        mSyncState = SYNC_STATE_NONE;
         mSyncGroup = null;
     }
 
@@ -3560,5 +3664,36 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private interface IAnimationStarter {
         void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
+    }
+
+    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+        if (mOverlayHost == null) {
+            mOverlayHost = new TrustedOverlayHost(mWmService);
+        }
+        mOverlayHost.addOverlay(overlay, mSurfaceControl);
+
+        // Emit an initial onConfigurationChanged to ensure the overlay
+        // can receive any changes between their creation time and
+        // attach time.
+        try {
+            overlay.getRemoteInterface().onConfigurationChanged(getConfiguration());
+        } catch (Exception e) {
+            Slog.e(TAG, "Error sending initial configuration change to WindowContainer overlay");
+            removeTrustedOverlay(overlay);
+        }
+    }
+
+    void removeTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+        if (mOverlayHost != null && !mOverlayHost.removeOverlay(overlay)) {
+            mOverlayHost.release();
+            mOverlayHost = null;
+        }
+    }
+
+    void updateOverlayInsetsState(WindowState originalChange) {
+        final WindowContainer p = getParent();
+        if (p != null) {
+            p.updateOverlayInsetsState(originalChange);
+        }
     }
 }

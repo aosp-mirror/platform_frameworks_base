@@ -37,6 +37,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -146,6 +147,11 @@ public final class BackgroundDexOptService {
     @GuardedBy("mLock")
     @Status private int mLastExecutionStatus = STATUS_OK;
 
+    @GuardedBy("mLock")
+    private long mLastExecutionStartTimeMs;
+    @GuardedBy("mLock")
+    private long mLastExecutionDurationMs;
+
     // Keeps packages cancelled from PDO for last session. This is for debugging.
     @GuardedBy("mLock")
     private final ArraySet<String> mLastCancelledPackages = new ArraySet<String>();
@@ -218,9 +224,15 @@ public final class BackgroundDexOptService {
             writer.print("mDexOptCancellingThread:");
             writer.println(mDexOptCancellingThread);
             writer.print("mFinishedPostBootUpdate:");
-            writer.print(mFinishedPostBootUpdate);
-            writer.print(",mLastExecutionStatus:");
+            writer.println(mFinishedPostBootUpdate);
+            writer.print("mLastExecutionStatus:");
             writer.println(mLastExecutionStatus);
+            writer.print("mLastExecutionStartTimeMs:");
+            writer.println(mLastExecutionStartTimeMs);
+            writer.print("mLastExecutionDurationMs:");
+            writer.println(mLastExecutionDurationMs);
+            writer.print("now:");
+            writer.println(SystemClock.elapsedRealtime());
             writer.print("mLastCancelledPackages:");
             writer.println(String.join(",", mLastCancelledPackages));
             writer.print("mFailedPackageNamesPrimary:");
@@ -514,12 +526,17 @@ public final class BackgroundDexOptService {
     /** Returns true if completed */
     private boolean runIdleOptimization(PackageManagerService pm, ArraySet<String> pkgs,
             boolean isPostBootUpdate) {
+        synchronized (mLock) {
+            mLastExecutionStartTimeMs = SystemClock.elapsedRealtime();
+            mLastExecutionDurationMs = -1;
+        }
         long lowStorageThreshold = getLowStorageThreshold();
         int status = idleOptimizePackages(pm, pkgs, lowStorageThreshold,
                 isPostBootUpdate);
         logStatus(status);
         synchronized (mLock) {
             mLastExecutionStatus = status;
+            mLastExecutionDurationMs = SystemClock.elapsedRealtime() - mLastExecutionStartTimeMs;
         }
 
         return status == STATUS_OK;
@@ -879,10 +896,10 @@ public final class BackgroundDexOptService {
         synchronized (mLock) {
             if (!mFinishedPostBootUpdate) {
                 mFinishedPostBootUpdate = true;
-                JobScheduler js = mInjector.getJobScheduler();
-                js.cancel(JOB_POST_BOOT_UPDATE);
             }
         }
+        // Safe to do this outside lock.
+        mInjector.getJobScheduler().cancel(JOB_POST_BOOT_UPDATE);
     }
 
     private void notifyPinService(ArraySet<String> updatedPackages) {

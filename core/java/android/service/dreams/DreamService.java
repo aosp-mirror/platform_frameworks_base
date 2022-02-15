@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.service.dreams;
 
 import android.annotation.IdRes;
@@ -30,6 +31,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,9 +44,11 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.Xml;
 import android.view.ActionMode;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -56,10 +64,14 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.DumpUtils.Dump;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.function.Consumer;
@@ -111,7 +123,7 @@ import java.util.function.Consumer;
  * <p>If specified with the {@code <meta-data>} element,
  * additional information for the dream is defined using the
  * {@link android.R.styleable#Dream &lt;dream&gt;} element in a separate XML file.
- * Currently, the only addtional
+ * Currently, the only additional
  * information you can provide is for a settings activity that allows the user to configure
  * the dream behavior. For example:</p>
  * <p class="code-caption">res/xml/my_dream.xml</p>
@@ -159,7 +171,9 @@ import java.util.function.Consumer;
  * </pre>
  */
 public class DreamService extends Service implements Window.Callback {
-    private final String TAG = DreamService.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
+    private static final String TAG = DreamService.class.getSimpleName();
+    private final String mTag = TAG + "[" + getClass().getSimpleName() + "]";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * The name of the dream manager service.
@@ -189,6 +203,24 @@ public class DreamService extends Service implements Window.Callback {
      */
     public static final String DREAM_META_DATA = "android.service.dream";
 
+    /**
+     * Name of the root tag under which a Dream defines its metadata in an XML file.
+     */
+    private static final String DREAM_META_DATA_ROOT_TAG = "dream";
+
+    /**
+     * Extra containing a boolean for whether to show complications on the overlay.
+     * @hide
+     */
+    public static final String EXTRA_SHOW_COMPLICATIONS =
+            "android.service.dreams.SHOW_COMPLICATIONS";
+
+    /**
+     * The default value for whether to show complications on the overlay.
+     * @hide
+     */
+    public static final boolean DEFAULT_SHOW_COMPLICATIONS = true;
+
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private IBinder mDreamToken;
@@ -211,13 +243,13 @@ public class DreamService extends Service implements Window.Callback {
     private DreamServiceWrapper mDreamServiceWrapper;
     private Runnable mDispatchAfterOnAttachedToWindow;
 
-    private OverlayConnection mOverlayConnection;
+    private final OverlayConnection mOverlayConnection;
 
     private static class OverlayConnection implements ServiceConnection {
         // Overlay set during onBind.
         private IDreamOverlay mOverlay;
         // A Queue of pending requests to execute on the overlay.
-        private ArrayDeque<Consumer<IDreamOverlay>> mRequests;
+        private final ArrayDeque<Consumer<IDreamOverlay>> mRequests;
 
         private boolean mBound;
 
@@ -225,13 +257,16 @@ public class DreamService extends Service implements Window.Callback {
             mRequests = new ArrayDeque<>();
         }
 
-        public void bind(Context context, @Nullable ComponentName overlayService) {
+        public void bind(Context context, @Nullable ComponentName overlayService,
+                ComponentName dreamService) {
             if (overlayService == null) {
                 return;
             }
 
             final Intent overlayIntent = new Intent();
             overlayIntent.setComponent(overlayService);
+            overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
+                    fetchShouldShowComplications(context, dreamService));
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -279,7 +314,7 @@ public class DreamService extends Service implements Window.Callback {
         }
     }
 
-    private IDreamOverlayCallback mOverlayCallback = new IDreamOverlayCallback.Stub() {
+    private final IDreamOverlayCallback mOverlayCallback = new IDreamOverlayCallback.Stub() {
         @Override
         public void onExitRequested() {
             // Simply finish dream when exit is requested.
@@ -306,11 +341,11 @@ public class DreamService extends Service implements Window.Callback {
     public boolean dispatchKeyEvent(KeyEvent event) {
         // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on keyEvent");
+            if (mDebug) Slog.v(mTag, "Waking up on keyEvent");
             wakeUp();
             return true;
         } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (mDebug) Slog.v(TAG, "Waking up on back key");
+            if (mDebug) Slog.v(mTag, "Waking up on back key");
             wakeUp();
             return true;
         }
@@ -321,7 +356,7 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on keyShortcutEvent");
+            if (mDebug) Slog.v(mTag, "Waking up on keyShortcutEvent");
             wakeUp();
             return true;
         }
@@ -333,8 +368,8 @@ public class DreamService extends Service implements Window.Callback {
     public boolean dispatchTouchEvent(MotionEvent event) {
         // TODO: create more flexible version of mInteractive that allows clicks
         // but finish()es on any other kind of activity
-        if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on touchEvent");
+        if (!mInteractive && event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (mDebug) Slog.v(mTag, "Waking up on touchEvent");
             wakeUp();
             return true;
         }
@@ -345,7 +380,7 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on trackballEvent");
+            if (mDebug) Slog.v(mTag, "Waking up on trackballEvent");
             wakeUp();
             return true;
         }
@@ -356,7 +391,7 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
         if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on genericMotionEvent");
+            if (mDebug) Slog.v(mTag, "Waking up on genericMotionEvent");
             wakeUp();
             return true;
         }
@@ -611,7 +646,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Returns whether or not this dream is interactive.  Defaults to false.
+     * Returns whether this dream is interactive. Defaults to false.
      *
      * @see #setInteractive(boolean)
      */
@@ -635,7 +670,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Returns whether or not this dream is in fullscreen mode. Defaults to false.
+     * Returns whether this dream is in fullscreen mode. Defaults to false.
      *
      * @see #setFullscreen(boolean)
      */
@@ -657,7 +692,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Returns whether or not this dream keeps the screen bright while dreaming.
+     * Returns whether this dream keeps the screen bright while dreaming.
      * Defaults to false, allowing the screen to dim if necessary.
      *
      * @see #setScreenBright(boolean)
@@ -667,7 +702,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Marks this dream as windowless.  Only available to doze dreams.
+     * Marks this dream as windowless. Only available to doze dreams.
      *
      * @hide
      *
@@ -677,7 +712,7 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
-     * Returns whether or not this dream is windowless.  Only available to doze dreams.
+     * Returns whether this dream is windowless. Only available to doze dreams.
      *
      * @hide
      */
@@ -704,12 +739,12 @@ public class DreamService extends Service implements Window.Callback {
      * Starts dozing, entering a deep dreamy sleep.
      * <p>
      * Dozing enables the system to conserve power while the user is not actively interacting
-     * with the device.  While dozing, the display will remain on in a low-power state
+     * with the device. While dozing, the display will remain on in a low-power state
      * and will continue to show its previous contents but the application processor and
      * other system components will be allowed to suspend when possible.
      * </p><p>
      * While the application processor is suspended, the dream may stop executing code
-     * for long periods of time.  Prior to being suspended, the dream may schedule periodic
+     * for long periods of time. Prior to being suspended, the dream may schedule periodic
      * wake-ups to render new content by scheduling an alarm with the {@link AlarmManager}.
      * The dream may also keep the CPU awake by acquiring a
      * {@link android.os.PowerManager#PARTIAL_WAKE_LOCK partial wake lock} when necessary.
@@ -718,7 +753,7 @@ public class DreamService extends Service implements Window.Callback {
      * awake for very long.
      * </p><p>
      * It is a good idea to call this method some time after the dream's entry animation
-     * has completed and the dream is ready to doze.  It is important to completely
+     * has completed and the dream is ready to doze. It is important to completely
      * finish all of the work needed before dozing since the application processor may
      * be suspended at any moment once this method is called unless other wake locks
      * are being held.
@@ -739,7 +774,7 @@ public class DreamService extends Service implements Window.Callback {
 
     private void updateDoze() {
         if (mDreamToken == null) {
-            Slog.w(TAG, "Updating doze without a dream token.");
+            Slog.w(mTag, "Updating doze without a dream token.");
             return;
         }
 
@@ -755,7 +790,7 @@ public class DreamService extends Service implements Window.Callback {
     /**
      * Stops dozing, returns to active dreaming.
      * <p>
-     * This method reverses the effect of {@link #startDozing}.  From this moment onward,
+     * This method reverses the effect of {@link #startDozing}. From this moment onward,
      * the application processor will be kept awake as long as the dream is running
      * or until the dream starts dozing again.
      * </p>
@@ -777,12 +812,11 @@ public class DreamService extends Service implements Window.Callback {
 
     /**
      * Returns true if the dream will allow the system to enter a low-power state while
-     * it is running without actually turning off the screen.  Defaults to false,
+     * it is running without actually turning off the screen. Defaults to false,
      * keeping the application processor awake while the dream is running.
      *
      * @return True if the dream is dozing.
      *
-     * @see #setDozing(boolean)
      * @hide For use by system UI components only.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -809,7 +843,7 @@ public class DreamService extends Service implements Window.Callback {
      * Sets the screen state to use while dozing.
      * <p>
      * The value of this property determines the power state of the primary display
-     * once {@link #startDozing} has been called.  The default value is
+     * once {@link #startDozing} has been called. The default value is
      * {@link Display#STATE_UNKNOWN} which lets the system decide.
      * The dream may set a different state before starting to doze and may
      * perform transitions between states while dozing to conserve power and
@@ -823,7 +857,7 @@ public class DreamService extends Service implements Window.Callback {
      * If not using Sidekick, it is recommended that the state be set to
      * {@link Display#STATE_DOZE_SUSPEND} once the dream has completely
      * finished drawing and before it releases its wakelock
-     * to allow the display hardware to be fully suspended.  While suspended,
+     * to allow the display hardware to be fully suspended. While suspended,
      * the display will preserve its on-screen contents.
      * </p><p>
      * If the doze suspend state is used, the dream must make sure to set the mode back
@@ -831,7 +865,7 @@ public class DreamService extends Service implements Window.Callback {
      * since the display updates may be ignored and not seen by the user otherwise.
      * </p><p>
      * The set of available display power states and their behavior while dozing is
-     * hardware dependent and may vary across devices.  The dream may therefore
+     * hardware dependent and may vary across devices. The dream may therefore
      * need to be modified or configured to correctly support the hardware.
      * </p>
      *
@@ -870,19 +904,19 @@ public class DreamService extends Service implements Window.Callback {
      * Sets the screen brightness to use while dozing.
      * <p>
      * The value of this property determines the power state of the primary display
-     * once {@link #startDozing} has been called.  The default value is
+     * once {@link #startDozing} has been called. The default value is
      * {@link PowerManager#BRIGHTNESS_DEFAULT} which lets the system decide.
      * The dream may set a different brightness before starting to doze and may adjust
      * the brightness while dozing to conserve power and achieve various effects.
      * </p><p>
      * Note that dream may specify any brightness in the full 0-255 range, including
      * values that are less than the minimum value for manual screen brightness
-     * adjustments by the user.  In particular, the value may be set to 0 which may
+     * adjustments by the user. In particular, the value may be set to 0 which may
      * turn off the backlight entirely while still leaving the screen on although
      * this behavior is device dependent and not guaranteed.
      * </p><p>
      * The available range of display brightness values and their behavior while dozing is
-     * hardware dependent and may vary across devices.  The dream may therefore
+     * hardware dependent and may vary across devices. The dream may therefore
      * need to be modified or configured to correctly support the hardware.
      * </p>
      *
@@ -909,7 +943,7 @@ public class DreamService extends Service implements Window.Callback {
      */
     @Override
     public void onCreate() {
-        if (mDebug) Slog.v(TAG, "onCreate()");
+        if (mDebug) Slog.v(mTag, "onCreate()");
         super.onCreate();
     }
 
@@ -917,7 +951,7 @@ public class DreamService extends Service implements Window.Callback {
      * Called when the dream's window has been created and is visible and animation may now begin.
      */
     public void onDreamingStarted() {
-        if (mDebug) Slog.v(TAG, "onDreamingStarted()");
+        if (mDebug) Slog.v(mTag, "onDreamingStarted()");
         // hook for subclasses
     }
 
@@ -926,7 +960,7 @@ public class DreamService extends Service implements Window.Callback {
      * before the window has been removed.
      */
     public void onDreamingStopped() {
-        if (mDebug) Slog.v(TAG, "onDreamingStopped()");
+        if (mDebug) Slog.v(mTag, "onDreamingStopped()");
         // hook for subclasses
     }
 
@@ -934,11 +968,11 @@ public class DreamService extends Service implements Window.Callback {
      * Called when the dream is being asked to stop itself and wake.
      * <p>
      * The default implementation simply calls {@link #finish} which ends the dream
-     * immediately.  Subclasses may override this function to perform a smooth exit
+     * immediately. Subclasses may override this function to perform a smooth exit
      * transition then call {@link #finish} afterwards.
      * </p><p>
      * Note that the dream will only be given a short period of time (currently about
-     * five seconds) to wake up.  If the dream does not finish itself in a timely manner
+     * five seconds) to wake up. If the dream does not finish itself in a timely manner
      * then the system will forcibly finish it once the time allowance is up.
      * </p>
      */
@@ -949,12 +983,13 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public final IBinder onBind(Intent intent) {
-        if (mDebug) Slog.v(TAG, "onBind() intent = " + intent);
+        if (mDebug) Slog.v(mTag, "onBind() intent = " + intent);
         mDreamServiceWrapper = new DreamServiceWrapper();
 
         // Connect to the overlay service if present.
         if (!mWindowless) {
-            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT));
+            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+                    new ComponentName(this, getClass()));
         }
 
         return mDreamServiceWrapper;
@@ -968,7 +1003,7 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public final void finish() {
-        if (mDebug) Slog.v(TAG, "finish(): mFinished=" + mFinished);
+        if (mDebug) Slog.v(mTag, "finish(): mFinished=" + mFinished);
 
         Activity activity = mActivity;
         if (activity != null) {
@@ -985,7 +1020,7 @@ public class DreamService extends Service implements Window.Callback {
         mFinished = true;
 
         if (mDreamToken == null) {
-            Slog.w(TAG, "Finish was called before the dream was attached.");
+            Slog.w(mTag, "Finish was called before the dream was attached.");
             stopSelf();
             return;
         }
@@ -1013,8 +1048,10 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     private void wakeUp(boolean fromSystem) {
-        if (mDebug) Slog.v(TAG, "wakeUp(): fromSystem=" + fromSystem
-                + ", mWaking=" + mWaking + ", mFinished=" + mFinished);
+        if (mDebug) {
+            Slog.v(mTag, "wakeUp(): fromSystem=" + fromSystem + ", mWaking=" + mWaking
+                    + ", mFinished=" + mFinished);
+        }
 
         if (!mWaking && !mFinished) {
             mWaking = true;
@@ -1039,7 +1076,7 @@ public class DreamService extends Service implements Window.Callback {
             // it we were finishing immediately.
             if (!fromSystem && !mFinished) {
                 if (mActivity == null) {
-                    Slog.w(TAG, "WakeUp was called before the dream was attached.");
+                    Slog.w(mTag, "WakeUp was called before the dream was attached.");
                 } else {
                     try {
                         mDreamManager.finishSelf(mDreamToken, false /*immediate*/);
@@ -1054,7 +1091,7 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public void onDestroy() {
-        if (mDebug) Slog.v(TAG, "onDestroy()");
+        if (mDebug) Slog.v(mTag, "onDestroy()");
         // hook for subclasses
 
         // Just in case destroy came in before detach, let's take care of that now
@@ -1066,13 +1103,93 @@ public class DreamService extends Service implements Window.Callback {
     // end public api
 
     /**
+     * Parses and returns metadata of the dream service indicated by the service info. Returns null
+     * if metadata cannot be found.
+     *
+     * Note that {@link ServiceInfo} must be fetched with {@link PackageManager#GET_META_DATA} flag.
+     *
+     * @hide
+     */
+    @Nullable
+    public static DreamMetadata getDreamMetadata(Context context, ServiceInfo serviceInfo) {
+        final PackageManager pm = context.getPackageManager();
+
+        final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
+        if (rawMetadata == null) return null;
+
+        final DreamMetadata metadata = new DreamMetadata(
+                convertToComponentName(rawMetadata.getString(
+                        com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
+                rawMetadata.getDrawable(
+                        com.android.internal.R.styleable.Dream_previewImage),
+                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                        DEFAULT_SHOW_COMPLICATIONS));
+        rawMetadata.recycle();
+        return metadata;
+    }
+
+    /**
+     * Returns the raw XML metadata fetched from the {@link ServiceInfo}.
+     *
+     * Returns <code>null</code> if the {@link ServiceInfo} doesn't contain valid dream metadata.
+     */
+    @Nullable
+    private static TypedArray readMetadata(PackageManager pm, ServiceInfo serviceInfo) {
+        if (serviceInfo == null || serviceInfo.metaData == null) {
+            return null;
+        }
+
+        try (XmlResourceParser parser =
+                     serviceInfo.loadXmlMetaData(pm, DreamService.DREAM_META_DATA)) {
+            if (parser == null) {
+                if (DEBUG) Log.w(TAG, "No " + DreamService.DREAM_META_DATA + " metadata");
+                return null;
+            }
+
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            while (true) {
+                final int type = parser.next();
+                if (type == XmlPullParser.END_DOCUMENT || type == XmlPullParser.START_TAG) {
+                    break;
+                }
+            }
+
+            if (!parser.getName().equals(DREAM_META_DATA_ROOT_TAG)) {
+                if (DEBUG) {
+                    Log.w(TAG, "Metadata does not start with " + DREAM_META_DATA_ROOT_TAG + " tag");
+                }
+                return null;
+            }
+
+            return pm.getResourcesForApplication(serviceInfo.applicationInfo).obtainAttributes(
+                    attrs, com.android.internal.R.styleable.Dream);
+        } catch (PackageManager.NameNotFoundException | IOException | XmlPullParserException e) {
+            if (DEBUG) Log.e(TAG, "Error parsing: " + serviceInfo.packageName, e);
+            return null;
+        }
+    }
+
+    private static ComponentName convertToComponentName(String flattenedString,
+            ServiceInfo serviceInfo) {
+        if (flattenedString == null) {
+            return null;
+        }
+
+        if (!flattenedString.contains("/")) {
+            return new ComponentName(serviceInfo.packageName, flattenedString);
+        }
+
+        return ComponentName.unflattenFromString(flattenedString);
+    }
+
+    /**
      * Called by DreamController.stopDream() when the Dream is about to be unbound and destroyed.
      *
      * Must run on mHandler.
      */
-    private final void detach() {
+    private void detach() {
         if (mStarted) {
-            if (mDebug) Slog.v(TAG, "detach(): Calling onDreamingStopped()");
+            if (mDebug) Slog.v(mTag, "detach(): Calling onDreamingStopped()");
             mStarted = false;
             onDreamingStopped();
         }
@@ -1097,12 +1214,12 @@ public class DreamService extends Service implements Window.Callback {
      */
     private void attach(IBinder dreamToken, boolean canDoze, IRemoteCallback started) {
         if (mDreamToken != null) {
-            Slog.e(TAG, "attach() called when dream with token=" + mDreamToken
+            Slog.e(mTag, "attach() called when dream with token=" + mDreamToken
                     + " already attached");
             return;
         }
         if (mFinished || mWaking) {
-            Slog.w(TAG, "attach() called after dream already finished");
+            Slog.w(mTag, "attach() called after dream already finished");
             try {
                 mDreamManager.finishSelf(dreamToken, true /*immediate*/);
             } catch (RemoteException ex) {
@@ -1145,10 +1262,9 @@ public class DreamService extends Service implements Window.Callback {
             try {
                 if (!ActivityTaskManager.getService().startDreamActivity(i)) {
                     detach();
-                    return;
                 }
             } catch (RemoteException e) {
-                Log.w(TAG, "Could not connect to activity task manager to start dream activity");
+                Log.w(mTag, "Could not connect to activity task manager to start dream activity");
                 e.rethrowFromSystemServer();
             }
         } else {
@@ -1178,7 +1294,7 @@ public class DreamService extends Service implements Window.Callback {
         // along well. Dreams usually don't need such bars anyways, so disable them by default.
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-        // Hide all insets  when the dream is showing
+        // Hide all insets when the dream is showing
         mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
         mWindow.setDecorFitsSystemWindows(false);
 
@@ -1194,7 +1310,7 @@ public class DreamService extends Service implements Window.Callback {
                             try {
                                 overlay.startDream(mWindow.getAttributes(), mOverlayCallback);
                             } catch (RemoteException e) {
-                                Log.e(TAG, "could not send window attributes:" + e);
+                                Log.e(mTag, "could not send window attributes:" + e);
                             }
                         });
                     }
@@ -1228,19 +1344,38 @@ public class DreamService extends Service implements Window.Callback {
         return (oldFlags&~mask) | (flags&mask);
     }
 
+    /**
+     * Fetches metadata of the dream indicated by the {@link ComponentName}, and returns whether
+     * the dream should show complications on the overlay. If not defined, returns
+     * {@link DreamService#DEFAULT_SHOW_COMPLICATIONS}.
+     */
+    private static boolean fetchShouldShowComplications(Context context,
+            ComponentName componentName) {
+        final PackageManager pm = context.getPackageManager();
+
+        try {
+            final ServiceInfo si = pm.getServiceInfo(componentName,
+                    PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
+            final DreamMetadata metadata = getDreamMetadata(context, si);
+
+            if (metadata != null) {
+                return metadata.showComplications;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) Log.w(TAG, "cannot find component " + componentName.flattenToShortString());
+        }
+
+        return DEFAULT_SHOW_COMPLICATIONS;
+    }
+
     @Override
     protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
-        DumpUtils.dumpAsync(mHandler, new Dump() {
-            @Override
-            public void dump(PrintWriter pw, String prefix) {
-                dumpOnHandler(fd, pw, args);
-            }
-        }, pw, "", 1000);
+        DumpUtils.dumpAsync(mHandler, (pw1, prefix) -> dumpOnHandler(fd, pw1, args), pw, "", 1000);
     }
 
     /** @hide */
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print(TAG + ": ");
+        pw.print(mTag + ": ");
         if (mFinished) {
             pw.println("stopped");
         } else {
@@ -1291,6 +1426,29 @@ public class DreamService extends Service implements Window.Callback {
         void onActivityCreated(DreamActivity a) {
             mActivity = a;
             onWindowCreated(a.getWindow());
+        }
+    }
+
+    /**
+     * Represents metadata defined in {@link android.R.styleable#Dream &lt;dream&gt;}.
+     *
+     * @hide
+     */
+    public static final class DreamMetadata {
+        @Nullable
+        public final ComponentName settingsActivity;
+
+        @Nullable
+        public final Drawable previewImage;
+
+        @NonNull
+        public final boolean showComplications;
+
+        DreamMetadata(ComponentName settingsActivity, Drawable previewImage,
+                boolean showComplications) {
+            this.settingsActivity = settingsActivity;
+            this.previewImage = previewImage;
+            this.showComplications = showComplications;
         }
     }
 }

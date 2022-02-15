@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifUiAdjustmentProvider;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
@@ -92,6 +94,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifSection mNotifSection;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
+    @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionClassifier mSectionClassifier = new SectionClassifier();
     private final NotifUiAdjustmentProvider mAdjustmentProvider =
@@ -119,6 +122,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mock(NotifViewBarn.class),
                 mAdjustmentProvider,
                 mService,
+                mBindEventManagerImpl,
                 TEST_CHILD_BIND_CUTOFF,
                 TEST_MAX_GROUP_DELAY);
 
@@ -402,6 +406,14 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         assertFalse(mUninflatedFilter.shouldFilterOut(summary, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child0, 401));
         assertFalse(mUninflatedFilter.shouldFilterOut(child1, 401));
+    }
+
+    @Test
+    public void testCallConversationManagerBindWhenInflated() {
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+        mNotifInflater.getInflateCallback(mEntry).onInflationFinished(mEntry, null);
+        verify(mBindEventManagerImpl, times(1)).notifyViewBound(eq(mEntry));
+        verifyNoMoreInteractions(mBindEventManagerImpl);
     }
 
     @Test

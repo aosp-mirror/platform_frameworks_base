@@ -140,7 +140,7 @@ public final class InstantAppResolveInfo implements Parcelable {
             mFilters = Collections.emptyList();
             mVersionCode = -1;
         } else {
-            mDigest = in.readParcelable(null /*loader*/);
+            mDigest = in.readParcelable(null /*loader*/, android.content.pm.InstantAppResolveInfo.InstantAppDigest.class);
             mPackageName = in.readString();
             mFilters = new ArrayList<>();
             in.readTypedList(mFilters, InstantAppIntentFilter.CREATOR);

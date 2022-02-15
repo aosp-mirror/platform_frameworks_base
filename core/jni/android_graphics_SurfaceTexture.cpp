@@ -346,7 +346,7 @@ static jlong SurfaceTexture_getTimestamp(JNIEnv* env, jobject thiz)
     return surfaceTexture->getTimestamp();
 }
 
-static jlong SurfaceTexture_getDataSpace(JNIEnv* env, jobject thiz) {
+static jint SurfaceTexture_getDataSpace(JNIEnv* env, jobject thiz) {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     return surfaceTexture->getCurrentDataSpace();
 }
@@ -375,7 +375,7 @@ static const JNINativeMethod gSurfaceTextureMethods[] = {
         {"nativeAttachToGLContext", "(I)I", (void*)SurfaceTexture_attachToGLContext},
         {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix},
         {"nativeGetTimestamp", "()J", (void*)SurfaceTexture_getTimestamp},
-        {"nativeGetDataSpace", "()J", (void*)SurfaceTexture_getDataSpace},
+        {"nativeGetDataSpace", "()I", (void*)SurfaceTexture_getDataSpace},
         {"nativeRelease", "()V", (void*)SurfaceTexture_release},
         {"nativeIsReleased", "()Z", (void*)SurfaceTexture_isReleased},
 };

@@ -31,7 +31,6 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -51,7 +50,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -77,6 +75,7 @@ import android.content.pm.ActivityInfo.WindowLayout;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SigningDetails;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -86,15 +85,21 @@ import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.view.Gravity;
+import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Tests for the {@link ActivityStarter} class.
@@ -342,7 +347,7 @@ public class ActivityStarterTests extends WindowTestsBase {
             doReturn(stack).when(mRootWindowContainer)
                     .getLaunchRootTask(any(), any(), any(), anyBoolean());
             doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(), any(),
-                    anyBoolean(), any(), anyInt(), anyInt(), anyInt());
+                    anyBoolean(), any(), anyInt());
         }
 
         // Set up mock package manager internal and make sure no unmocked methods are called
@@ -457,7 +462,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord splitSecondReusableActivity = activities.second;
         final ActivityRecord splitSecondTopActivity = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setParentTask(splitSecondReusableActivity.getRootTask()).build();
-        assertTrue(splitSecondTopActivity.inSplitScreenSecondaryWindowingMode());
+        assertTrue(splitSecondTopActivity.inMultiWindowMode());
 
         // Let primary stack has focus.
         splitPrimaryFocusActivity.moveFocusableActivityToTop("testSplitScreenTaskToFront");
@@ -476,10 +481,13 @@ public class ActivityStarterTests extends WindowTestsBase {
         final TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm);
         // The fullscreen windowing mode activity will be moved to split-secondary by
         // TestSplitOrganizer when a split-primary task appears.
-        final ActivityRecord splitSecondActivity =
-                new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
                 .setParentTaskFragment(splitOrg.mPrimary)
+                .setCreateActivity(true)
+                .build()
+                .getTopMostActivity();
+        final ActivityRecord splitSecondActivity = new TaskBuilder(mSupervisor)
+                .setParentTaskFragment(splitOrg.mSecondary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
@@ -1090,7 +1098,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.setActivityOptions(options.toBundle())
                 .setReason("testWindowingModeOptionsLaunchAdjacent")
                 .setOutActivity(outActivity).execute();
-        assertThat(outActivity[0].inSplitScreenSecondaryWindowingMode()).isTrue();
+        assertThat(outActivity[0].inMultiWindowMode()).isTrue();
     }
 
     @Test
@@ -1108,30 +1116,14 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStartActivityInner_allSplitScreenPrimaryActivitiesVisible() {
-        // Given
+    public void testStartActivityInner_inTaskFragment_failsByDefault() {
         final ActivityStarter starter = prepareStarter(0, false);
-
-        starter.setReason("testAllSplitScreenPrimaryActivitiesAreResumed");
-
         final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
-        targetRecord.setFocusable(false);
-        targetRecord.setVisibility(false);
-        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
 
-        final Task stack = spy(
-                mRootWindowContainer.getDefaultTaskDisplayArea()
-                        .createRootTask(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
-                                /* onTop */true));
-
-        stack.addChild(targetRecord);
-
-        doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(), any(),
-                anyBoolean(), any(), anyInt(), anyInt(), anyInt());
-
-        starter.mStartActivity = new ActivityBuilder(mAtm).build();
-
-        // When
         starter.startActivityInner(
                 /* r */targetRecord,
                 /* sourceRecord */ sourceRecord,
@@ -1141,24 +1133,87 @@ public class ActivityStarterTests extends WindowTestsBase {
                 /* doResume */true,
                 /* options */null,
                 /* inTask */null,
-                /* inTaskFragment */ null,
+                /* inTaskFragment */ taskFragment,
                 /* restrictedBgActivity */false,
                 /* intentGrants */null);
 
-        // Then
-        verify(stack).ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        verify(targetRecord).makeVisibleIfNeeded(null, true);
-        assertTrue(targetRecord.mVisibleRequested);
+        assertFalse(taskFragment.hasChild());
     }
 
     @Test
-    public void testStartActivityInner_inTaskFragment() {
+    public void testStartActivityInner_inTaskFragment_allowedForSameUid() {
         final ActivityStarter starter = prepareStarter(0, false);
         final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
         final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
                 true /* createdByOrganizer */);
         sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class),
+                targetRecord.getUid(), "test_process_name");
+
+        starter.startActivityInner(
+                /* r */targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ taskFragment,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertTrue(taskFragment.hasChild());
+    }
+
+    @Test
+    public void testStartActivityInner_inTaskFragment_allowedTrustedCertUid() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class),
+                12345, "test_process_name");
+        AndroidPackage androidPackage = mock(AndroidPackage.class);
+        doReturn(androidPackage).when(mMockPackageManager).getPackage(eq(12345));
+
+        Set<String> certs = new HashSet(Arrays.asList("test_cert1", "test_cert1"));
+        targetRecord.info.setKnownActivityEmbeddingCerts(certs);
+        SigningDetails signingDetails = mock(SigningDetails.class);
+        doReturn(true).when(signingDetails).hasAncestorOrSelfWithDigest(any());
+        doReturn(signingDetails).when(androidPackage).getSigningDetails();
+
+        starter.startActivityInner(
+                /* r */targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ taskFragment,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertTrue(taskFragment.hasChild());
+    }
+
+    @Test
+    public void testStartActivityInner_inTaskFragment_allowedForUntrustedEmbedding() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        targetRecord.info.flags |= ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 
         starter.startActivityInner(
                 /* r */targetRecord,

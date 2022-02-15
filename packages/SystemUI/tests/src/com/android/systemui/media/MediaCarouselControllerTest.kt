@@ -25,7 +25,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -37,6 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import javax.inject.Provider
+import org.mockito.Mockito.`when` as whenever
 
 private val DATA = MediaData(
     userId = -1,
@@ -65,7 +66,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
     @Mock lateinit var panel: MediaControlPanel
-    @Mock lateinit var visualStabilityManager: VisualStabilityManager
+    @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock @Main private lateinit var executor: DelayableExecutor
@@ -74,6 +75,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var mediaFlags: MediaFlags
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -81,11 +83,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
+        whenever(mediaFlags.areMediaSessionActionsEnabled()).thenReturn(true)
         mediaCarouselController = MediaCarouselController(
             context,
             mediaControlPanelFactory,
-            visualStabilityManager,
+            visualStabilityProvider,
             mediaHostStatesManager,
             activityStarter,
             clock,
@@ -94,7 +96,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             configurationController,
             falsingCollector,
             falsingManager,
-            dumpManager
+            dumpManager,
+            mediaFlags
         )
 
         MediaPlayerData.clear()

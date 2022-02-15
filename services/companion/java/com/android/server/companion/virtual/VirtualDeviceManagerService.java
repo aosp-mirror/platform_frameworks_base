@@ -16,26 +16,38 @@
 
 package com.android.server.companion.virtual;
 
+import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
 import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.widget.Toast;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceImpl.PendingTrampoline;
+import com.android.server.wm.ActivityInterceptorCallback;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -47,10 +59,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VirtualDeviceManagerService extends SystemService {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "VirtualDeviceManagerService";
+    private static final String TAG = "VirtualDeviceManagerService";
 
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
+    private VirtualDeviceManagerInternal mLocalService;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
+    private final CameraAccessController mCameraAccessController;
 
     /**
      * Mapping from CDM association IDs to virtual devices. Only one virtual device is allowed for
@@ -77,12 +93,43 @@ public class VirtualDeviceManagerService extends SystemService {
     public VirtualDeviceManagerService(Context context) {
         super(context);
         mImpl = new VirtualDeviceManagerImpl();
+        mLocalService = new LocalService();
+        mCameraAccessController = new CameraAccessController(getContext(), mLocalService,
+                this::onCameraAccessBlocked);
     }
+
+    private final ActivityInterceptorCallback mActivityInterceptorCallback =
+            new ActivityInterceptorCallback() {
+
+        @Nullable
+        @Override
+        public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+            if (info.callingPackage == null) {
+                return null;
+            }
+            PendingTrampoline pt = mPendingTrampolines.remove(info.callingPackage);
+            if (pt == null) {
+                return null;
+            }
+            pt.mResultReceiver.send(Activity.RESULT_OK, null);
+            ActivityOptions options = info.checkedOptions;
+            if (options == null) {
+                options = ActivityOptions.makeBasic();
+            }
+            return new ActivityInterceptResult(
+                    info.intent, options.setLaunchDisplayId(pt.mDisplayId));
+        }
+    };
 
     @Override
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
-        publishLocalService(VirtualDeviceManagerInternal.class, new LocalService());
+        publishLocalService(VirtualDeviceManagerInternal.class, mLocalService);
+        ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
+                ActivityTaskManagerInternal.class);
+        activityTaskManagerInternal.registerActivityStartInterceptor(
+                VIRTUAL_DEVICE_SERVICE_ORDERED_ID,
+                mActivityInterceptorCallback);
     }
 
     @GuardedBy("mVirtualDeviceManagerLock")
@@ -127,11 +174,26 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
+    void onCameraAccessBlocked(int appUid) {
+        synchronized (mVirtualDeviceManagerLock) {
+            int size = mVirtualDevices.size();
+            for (int i = 0; i < size; i++) {
+                mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
+                        com.android.internal.R.string.vdm_camera_access_denied, Toast.LENGTH_LONG);
+            }
+        }
+    }
+
+    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
+            VirtualDeviceImpl.PendingTrampolineCallback {
 
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
-                IBinder token, String packageName, int associationId) {
+                IBinder token,
+                String packageName,
+                int associationId,
+                @NonNull VirtualDeviceParams params,
+                @NonNull IVirtualDeviceActivityListener activityListener) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
@@ -158,9 +220,14 @@ public class VirtualDeviceManagerService extends SystemService {
                             public void onClose(int associationId) {
                                 synchronized (mVirtualDeviceManagerLock) {
                                     mVirtualDevices.remove(associationId);
+                                    if (mVirtualDevices.size() == 0) {
+                                        mCameraAccessController.stopObserving();
+                                    }
                                 }
                             }
-                        });
+                        },
+                        this, activityListener, params);
+                mCameraAccessController.startObservingIfNeeded();
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
             }
@@ -181,7 +248,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 }
             } else {
-                Slog.w(LOG_TAG, "No associations for user " + callingUserId);
+                Slog.w(TAG, "No associations for user " + callingUserId);
             }
             return null;
         }
@@ -192,7 +259,7 @@ public class VirtualDeviceManagerService extends SystemService {
             try {
                 return super.onTransact(code, data, reply, flags);
             } catch (Throwable e) {
-                Slog.e(LOG_TAG, "Error during IPC", e);
+                Slog.e(TAG, "Error during IPC", e);
                 throw ExceptionUtils.propagate(e, RemoteException.class);
             }
         }
@@ -201,7 +268,7 @@ public class VirtualDeviceManagerService extends SystemService {
         public void dump(@NonNull FileDescriptor fd,
                 @NonNull PrintWriter fout,
                 @Nullable String[] args) {
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), LOG_TAG, fout)) {
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, fout)) {
                 return;
             }
             fout.println("Created virtual devices: ");
@@ -211,10 +278,24 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void startWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+            PendingTrampoline existing = mPendingTrampolines.put(
+                    pendingTrampoline.mPendingIntent.getCreatorPackage(),
+                    pendingTrampoline);
+            if (existing != null) {
+                existing.mResultReceiver.send(Activity.RESULT_CANCELED, null);
+            }
+        }
+
+        @Override
+        public void stopWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+            mPendingTrampolines.remove(pendingTrampoline.mPendingIntent.getCreatorPackage());
+        }
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
-
         @Override
         public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
             synchronized (mVirtualDeviceManagerLock) {
@@ -238,6 +319,11 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice) {
+            return ((VirtualDeviceImpl) virtualDevice).getBaseVirtualDisplayFlags();
+        }
+
+        @Override
         public boolean isAppOwnerOfAnyVirtualDevice(int uid) {
             synchronized (mVirtualDeviceManagerLock) {
                 int size = mVirtualDevices.size();
@@ -252,8 +338,66 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public boolean isAppRunningOnAnyVirtualDevice(int uid) {
-            // TODO(yukl): Implement this using DWPC.onRunningAppsChanged
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    if (mVirtualDevices.valueAt(i).isAppRunningOnVirtualDevice(uid)) {
+                        return true;
+                    }
+                }
+            }
             return false;
+        }
+
+        @Override
+        public boolean isDisplayOwnedByAnyVirtualDevice(int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    if (mVirtualDevices.valueAt(i).isDisplayOwnedByVirtualDevice(displayId)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    private static final class PendingTrampolineMap {
+        /**
+         * The maximum duration, in milliseconds, to wait for a trampoline activity launch after
+         * invoking a pending intent.
+         */
+        private static final int TRAMPOLINE_WAIT_MS = 5000;
+
+        private final ConcurrentHashMap<String, PendingTrampoline> mMap = new ConcurrentHashMap<>();
+        private final Handler mHandler;
+
+        PendingTrampolineMap(Handler handler) {
+            mHandler = handler;
+        }
+
+        PendingTrampoline put(
+                @NonNull String packageName, @NonNull PendingTrampoline pendingTrampoline) {
+            PendingTrampoline existing = mMap.put(packageName, pendingTrampoline);
+            mHandler.removeCallbacksAndMessages(existing);
+            mHandler.postDelayed(
+                    () -> {
+                        final String creatorPackage =
+                                pendingTrampoline.mPendingIntent.getCreatorPackage();
+                        if (creatorPackage != null) {
+                            remove(creatorPackage);
+                        }
+                    },
+                    pendingTrampoline,
+                    TRAMPOLINE_WAIT_MS);
+            return existing;
+        }
+
+        PendingTrampoline remove(@NonNull String packageName) {
+            PendingTrampoline pendingTrampoline = mMap.remove(packageName);
+            mHandler.removeCallbacksAndMessages(pendingTrampoline);
+            return pendingTrampoline;
         }
     }
 }
