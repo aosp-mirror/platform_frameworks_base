@@ -13241,6 +13241,7 @@ package android.telephony.ims {
     method @Nullable public android.telephony.ims.RcsContactPresenceTuple getCapabilityTuple(@NonNull String);
     method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getCapabilityTuples();
     method @NonNull public android.net.Uri getContactUri();
+    method @Nullable public android.net.Uri getEntityUri();
     method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
     method public int getRequestResult();
     method public int getSourceType();
@@ -13269,6 +13270,7 @@ package android.telephony.ims {
     method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuple(@NonNull android.telephony.ims.RcsContactPresenceTuple);
     method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuples(@NonNull java.util.List<android.telephony.ims.RcsContactPresenceTuple>);
     method @NonNull public android.telephony.ims.RcsContactUceCapability build();
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder setEntityUri(@NonNull android.net.Uri);
   }
 
   public class RcsUceAdapter {
