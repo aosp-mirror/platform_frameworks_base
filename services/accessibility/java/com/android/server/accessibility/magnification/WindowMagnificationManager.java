@@ -360,7 +360,7 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @param trackingTypingFocusEnabled Enabled or disable the function of tracking typing focus.
      */
-    private void setTrackingTypingFocusEnabled(int displayId, boolean trackingTypingFocusEnabled) {
+    void setTrackingTypingFocusEnabled(int displayId, boolean trackingTypingFocusEnabled) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
@@ -503,8 +503,11 @@ public class WindowMagnificationManager implements
                     animationCallback, windowPosition, id);
         }
 
-        if (enabled && !previousEnabled) {
-            mCallback.onWindowMagnificationActivationState(displayId, true);
+        if (enabled) {
+            setTrackingTypingFocusEnabled(displayId, true);
+            if (!previousEnabled) {
+                mCallback.onWindowMagnificationActivationState(displayId, true);
+            }
         }
         return enabled;
     }
@@ -886,7 +889,6 @@ public class WindowMagnificationManager implements
             mWindowMagnificationManager = windowMagnificationManager;
         }
 
-        @GuardedBy("mLock")
         boolean enableWindowMagnificationInternal(float scale, float centerX, float centerY,
                 @Nullable MagnificationAnimationCallback animationCallback,
                 @WindowPosition int windowPosition, int id) {
