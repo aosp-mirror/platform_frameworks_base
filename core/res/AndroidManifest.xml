@@ -1624,7 +1624,7 @@
                 android:permissionGroup="android.permission-group.UNDEFINED"
                 android:label="@string/permlab_postNotification"
                 android:description="@string/permdesc_postNotification"
-                android:protectionLevel="dangerous" />
+                android:protectionLevel="dangerous|instant" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- ====================================================================== -->
