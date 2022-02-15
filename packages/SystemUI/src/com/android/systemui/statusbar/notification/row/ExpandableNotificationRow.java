@@ -93,8 +93,8 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -206,7 +206,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** Are we showing the "public" version */
     private boolean mShowingPublic;
     private boolean mSensitive;
-    private boolean mSensitiveHiddenInGeneral;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
     private float mHeaderVisibleAmount = DEFAULT_HEADER_VISIBLE_AMOUNT;
@@ -1560,6 +1559,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mUseIncreasedHeadsUpHeight = use;
     }
 
+    // TODO: remove this method and mNeedsRedaction entirely once the old pipeline is gone
     public void setNeedsRedaction(boolean needsRedaction) {
         // TODO: Move inflation logic out of this call and remove this method
         if (mNeedsRedaction != needsRedaction) {
@@ -2644,9 +2644,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         getShowingLayout().requestSelectLayout(needsAnimation || isUserLocked());
     }
 
-    public void setSensitive(boolean sensitive, boolean hideSensitive) {
+    public void setSensitive(boolean sensitive) {
         mSensitive = sensitive;
-        mSensitiveHiddenInGeneral = hideSensitive;
     }
 
     @Override
@@ -2736,7 +2735,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      *         see {@link NotificationEntry#isDismissable()}.
      */
     public boolean canViewBeDismissed() {
-        return mEntry.isDismissable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        // Entry not dismissable.
+        if (!mEntry.isDismissable()) {
+            return false;
+        }
+        // Entry shouldn't be showing the public layout, it can be dismissed.
+        if (!shouldShowPublic()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2745,7 +2752,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * clearability see {@link NotificationEntry#isClearable()}.
      */
     public boolean canViewBeCleared() {
-        return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        return mEntry.isClearable() && !shouldShowPublic();
     }
 
     private boolean shouldShowPublic() {
@@ -3509,10 +3516,28 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", translation: " + getTranslation());
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
-            NotificationContentView showingLayout = getShowingLayout();
-            pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
-            pw.println();
-            showingLayout.dump(pw, args);
+            pw.print(", sensitive: " + mSensitive);
+            pw.print(", hideSensitiveForIntrinsicHeight: " + mHideSensitiveForIntrinsicHeight);
+            pw.println(", privateShowing: " + !shouldShowPublic());
+            pw.print("privateLayout: ");
+            if (mPrivateLayout != null) {
+                pw.println();
+                DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                    mPrivateLayout.dump(pw, args);
+                    mPrivateLayout.dumpSmartReplies(pw);
+                });
+            } else {
+                pw.println("null");
+            }
+            pw.print("publicLayout: ");
+            if (mPublicLayout != null) {
+                pw.println();
+                DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                    mPublicLayout.dump(pw, args);
+                });
+            } else {
+                pw.println("null");
+            }
 
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
@@ -3538,8 +3563,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 pw.decreaseIndent();
                 pw.println("}");
-            } else if (mPrivateLayout != null) {
-                mPrivateLayout.dumpSmartReplies(pw);
             }
         });
     }
