@@ -989,15 +989,6 @@ public class InputMethodService extends AbstractInputMethodService {
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
             dispatchOnCurrentInputMethodSubtypeChanged(subtype);
         }
-
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @Override
-        public void setCurrentShowInputToken(IBinder showInputToken) {
-            mCurShowInputToken = showInputToken;
-        }
     }
 
     /**
