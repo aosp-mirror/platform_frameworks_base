@@ -39,6 +39,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
 
 import java.io.PrintWriter;
+import java.util.OptionalInt;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
@@ -98,23 +99,14 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
-    public void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason) {
-        mService.mAnrController.notifyGestureMonitorUnresponsive(pid, reason);
+    public void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+            @NonNull String reason) {
+        mService.mAnrController.notifyWindowUnresponsive(token, pid, reason);
     }
 
     @Override
-    public void notifyWindowUnresponsive(@NonNull IBinder token, String reason) {
-        mService.mAnrController.notifyWindowUnresponsive(token, reason);
-    }
-
-    @Override
-    public void notifyGestureMonitorResponsive(int pid) {
-        mService.mAnrController.notifyGestureMonitorResponsive(pid);
-    }
-
-    @Override
-    public void notifyWindowResponsive(@NonNull IBinder token) {
-        mService.mAnrController.notifyWindowResponsive(token);
+    public void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid) {
+        mService.mAnrController.notifyWindowResponsive(token, pid);
     }
 
     /** Notifies that the input device configuration has changed. */
