@@ -314,9 +314,12 @@ public class WindowMagnificationManager implements
         float toCenterX = (float) (left + right) / 2;
         float toCenterY = (float) (top + bottom) / 2;
 
-        if (!isPositionInSourceBounds(displayId, toCenterX, toCenterY)
-                && isTrackingTypingFocusEnabled(displayId)) {
-            enableWindowMagnification(displayId, Float.NaN, toCenterX, toCenterY);
+        synchronized (mLock) {
+            if (!isPositionInSourceBounds(displayId, toCenterX, toCenterY)
+                    && isTrackingTypingFocusEnabled(displayId)) {
+                moveWindowMagnifierToPositionInternal(displayId, toCenterX, toCenterY,
+                        STUB_ANIMATION_CALLBACK);
+            }
         }
     }
 
@@ -563,14 +566,13 @@ public class WindowMagnificationManager implements
         }
     }
 
+    @GuardedBy("mLock")
     boolean isPositionInSourceBounds(int displayId, float x, float y) {
-        synchronized (mLock) {
-            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
-            if (magnifier == null) {
-                return false;
-            }
-            return magnifier.isPositionInSourceBounds(x, y);
+        WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+        if (magnifier == null) {
+            return false;
         }
+        return magnifier.isPositionInSourceBounds(x, y);
     }
 
     /**
@@ -962,7 +964,6 @@ public class WindowMagnificationManager implements
             return mIdOfLastServiceToControl;
         }
 
-        @GuardedBy("mLock")
         int pointersInWindow(MotionEvent motionEvent) {
             int count = 0;
             final int pointerCount = motionEvent.getPointerCount();
@@ -1050,8 +1051,16 @@ public class WindowMagnificationManager implements
                 displayId, animationCallback);
     }
 
+    @GuardedBy("mLock")
     private boolean moveWindowMagnifierInternal(int displayId, float offsetX, float offsetY) {
         return mConnectionWrapper != null && mConnectionWrapper.moveWindowMagnifier(
                 displayId, offsetX, offsetY);
+    }
+
+    @GuardedBy("mLock")
+    private boolean moveWindowMagnifierToPositionInternal(int displayId, float positionX,
+            float positionY, MagnificationAnimationCallback animationCallback) {
+        return mConnectionWrapper != null && mConnectionWrapper.moveWindowMagnifierToPosition(
+                displayId, positionX, positionY, animationCallback);
     }
 }
