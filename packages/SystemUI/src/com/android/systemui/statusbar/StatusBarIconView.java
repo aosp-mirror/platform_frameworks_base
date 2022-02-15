@@ -427,15 +427,17 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 typedValue, true);
         float scaleFactor = typedValue.getFloat();
 
-        // We downscale the loaded drawable to reasonable size to protect against applications
-        // using too much memory. The size can be tweaked in config.xml. Drawables
-        // that are already sized properly won't be touched.
-        boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-        Resources res = sysuiContext.getResources();
-        int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
-                                ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
-                                : com.android.internal.R.dimen.notification_small_icon_size);
-        icon = DrawableSize.downscaleToSize(res, icon, maxIconSize, maxIconSize);
+        if (icon != null) {
+            // We downscale the loaded drawable to reasonable size to protect against applications
+            // using too much memory. The size can be tweaked in config.xml. Drawables that are
+            // already sized properly won't be touched.
+            boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+            Resources res = sysuiContext.getResources();
+            int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
+                    ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
+                    : com.android.internal.R.dimen.notification_small_icon_size);
+            icon = DrawableSize.downscaleToSize(res, icon, maxIconSize, maxIconSize);
+        }
 
         // No need to scale the icon, so return it as is.
         if (scaleFactor == 1.f) {
