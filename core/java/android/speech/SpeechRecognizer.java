@@ -515,7 +515,7 @@ public class SpeechRecognizer {
     /**
      * Attempts to download the support for the given {@code recognizerIntent}. This might trigger
      * user interaction to approve the download. Callers can verify the status of the request via
-     * {@link #checkRecognitionSupport(Intent, RecognitionSupportCallback)}.
+     * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
      *
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
      *        may also contain optional extras, see {@link RecognizerIntent}.
