@@ -14,54 +14,42 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.bubble
+package com.android.server.wm.flicker.quickswitch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
-import org.junit.Test
+import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
+import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test creating a bubble notification
+ * Test quick switching back to previous app from last opened app
  *
- * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
+ * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsBackTest`
  *
  * Actions:
- *     Launch an app and enable app's bubble notification
- *     Send a bubble notification
+ *     Launch an app [testApp1]
+ *     Launch another app [testApp2]
+ *     Swipe right from the bottom of the screen to quick switch back to the first app [testApp1]
+ *
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
-open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
-
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Group1
+@FlakyTest(bugId = 219690120)
+class QuickSwitchBetweenTwoAppsBackTest_ShellTransit(testSpec: FlickerTestParameter)
+    : QuickSwitchBetweenTwoAppsBackTest(testSpec) {
     @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            transitions {
-                val addBubbleBtn = waitAndGetAddBubbleBtn()
-                addBubbleBtn?.click() ?: error("Bubble widget not found")
-            }
-        }
-
-    @FlakyTest(bugId = 218642026)
-    @Test
-    open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
+    override fun before() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
     }
 }
