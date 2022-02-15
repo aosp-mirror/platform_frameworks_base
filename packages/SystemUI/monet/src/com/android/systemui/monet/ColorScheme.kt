@@ -76,14 +76,14 @@ internal class CoreSpec(
 
 enum class Style(internal val coreSpec: CoreSpec) {
     SPRITZ(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
-            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
-            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 12.0)),
+            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0)),
+            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
             n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0))
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0))
     )),
     TONAL_SPOT(CoreSpec(
-            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 32.0)),
             a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
             a3 = TonalSpec(Hue(HueStrategy.ADD, 60.0), Chroma(ChromaStrategy.EQ, 24.0)),
             n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 4.0)),
@@ -91,17 +91,17 @@ enum class Style(internal val coreSpec: CoreSpec) {
     )),
     VIBRANT(CoreSpec(
             a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
-            a2 = TonalSpec(Hue(HueStrategy.ADD, 10.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            a3 = TonalSpec(Hue(HueStrategy.ADD, 20.0), Chroma(ChromaStrategy.GTE, 32.0)),
+            a2 = TonalSpec(Hue(HueStrategy.ADD, 15.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            a3 = TonalSpec(Hue(HueStrategy.ADD, 30.0), Chroma(ChromaStrategy.GTE, 32.0)),
             n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 8.0)),
             n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
     )),
     EXPRESSIVE(CoreSpec(
-            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 40.0), Chroma(ChromaStrategy.GTE, 64.0)),
-            a2 = TonalSpec(Hue(HueStrategy.ADD, 20.0), Chroma(ChromaStrategy.EQ, 24.0)),
-            a3 = TonalSpec(Hue(HueStrategy.SUBTRACT, 80.0), Chroma(ChromaStrategy.GTE, 64.0)),
-            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
-            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 32.0))
+            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 60.0), Chroma(ChromaStrategy.GTE, 64.0)),
+            a2 = TonalSpec(Hue(HueStrategy.SUBTRACT, 30.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 12.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
     )),
     RAINBOW(CoreSpec(
             a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
