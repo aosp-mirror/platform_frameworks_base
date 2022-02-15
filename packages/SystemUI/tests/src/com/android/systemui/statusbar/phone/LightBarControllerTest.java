@@ -20,8 +20,6 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
-import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -43,9 +41,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-
-import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -96,9 +91,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         mLightBarController.onStatusBarAppearanceChanged(
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
                 false /* navbarColorManagedByIme */);
-        ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
-        verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
-        assertTrue(captor.getValue().contains(firstBounds));
+        verify(mStatusBarIconController).setIconsDarkArea(eq(firstBounds));
         verify(mLightBarTransitionsController).setIconsDark(eq(true), anyBoolean());
     }
 
@@ -113,29 +106,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         mLightBarController.onStatusBarAppearanceChanged(
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
                 false /* navbarColorManagedByIme */);
-        ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
-        verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
-        assertTrue(captor.getValue().contains(secondBounds));
-        verify(mLightBarTransitionsController).setIconsDark(eq(true), anyBoolean());
-    }
-
-    @Test
-    public void testOnStatusBarAppearanceChanged_multipleStacks_oneStackLightMultipleStackDark() {
-        final Rect firstBounds = new Rect(0, 0, 1, 1);
-        final Rect secondBounds = new Rect(1, 0, 2, 1);
-        final Rect thirdBounds = new Rect(2, 0, 3, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
-                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
-                new AppearanceRegion(0 /* appearance */, secondBounds),
-                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, thirdBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
-        ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
-        verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
-        assertTrue(captor.getValue().contains(firstBounds));
-        assertTrue(captor.getValue().contains(thirdBounds));
+        verify(mStatusBarIconController).setIconsDarkArea(eq(secondBounds));
         verify(mLightBarTransitionsController).setIconsDark(eq(true), anyBoolean());
     }
 
