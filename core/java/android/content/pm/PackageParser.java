@@ -59,6 +59,7 @@ import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
@@ -2417,9 +2418,28 @@ public class PackageParser {
             Slog.i(TAG, newPermsMsg.toString());
         }
 
-        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
-                ActivityThread.currentApplication().getSystemService(PermissionManager.class)
-                        .getSplitPermissions();
+        // Must build permission info manually for legacy code, which can be called before
+        // Appication is available through the app process, so the normal API doesn't work.
+        List<SplitPermissionInfoParcelable> splitPermissionParcelables;
+        try {
+            splitPermissionParcelables = ActivityThread.getPermissionManager()
+                    .getSplitPermissions();
+        } catch (RemoteException e) {
+            splitPermissionParcelables = Collections.emptyList();
+        }
+
+        int splitPermissionsSize = splitPermissionParcelables.size();
+        List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                new ArrayList<>(splitPermissionsSize);
+        for (int index = 0; index < splitPermissionsSize; index++) {
+            SplitPermissionInfoParcelable splitPermissionParcelable =
+                    splitPermissionParcelables.get(index);
+            splitPermissions.add(new PermissionManager.SplitPermissionInfo(
+                    splitPermissionParcelable.getSplitPermission(),
+                    splitPermissionParcelable.getNewPermissions(),
+                    splitPermissionParcelable.getTargetSdk()
+            ));
+        }
 
         final int listSize = splitPermissions.size();
         for (int is = 0; is < listSize; is++) {
