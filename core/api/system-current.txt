@@ -5318,9 +5318,9 @@ package android.hardware.usb {
     method public int getCurrentDataRole();
     method public int getCurrentMode();
     method public int getCurrentPowerRole();
-    method public int getPowerBrickStatus();
+    method public int getPowerBrickConnectionStatus();
     method public int getSupportedRoleCombinations();
-    method @Nullable public int[] getUsbDataStatus();
+    method public int getUsbDataStatus();
     method public boolean isConnected();
     method public boolean isPowerTransferLimited();
     method public boolean isRoleCombinationSupported(int, int);
@@ -5329,6 +5329,13 @@ package android.hardware.usb {
     field public static final int DATA_ROLE_DEVICE = 2; // 0x2
     field public static final int DATA_ROLE_HOST = 1; // 0x1
     field public static final int DATA_ROLE_NONE = 0; // 0x0
+    field public static final int DATA_STATUS_DISABLED_CONTAMINANT = 4; // 0x4
+    field public static final int DATA_STATUS_DISABLED_DEBUG = 32; // 0x20
+    field public static final int DATA_STATUS_DISABLED_DOCK = 8; // 0x8
+    field public static final int DATA_STATUS_DISABLED_FORCE = 16; // 0x10
+    field public static final int DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
+    field public static final int DATA_STATUS_ENABLED = 1; // 0x1
+    field public static final int DATA_STATUS_UNKNOWN = 0; // 0x0
     field public static final int MODE_AUDIO_ACCESSORY = 4; // 0x4
     field public static final int MODE_DEBUG_ACCESSORY = 8; // 0x8
     field public static final int MODE_DFP = 2; // 0x2
@@ -5340,13 +5347,6 @@ package android.hardware.usb {
     field public static final int POWER_ROLE_NONE = 0; // 0x0
     field public static final int POWER_ROLE_SINK = 2; // 0x2
     field public static final int POWER_ROLE_SOURCE = 1; // 0x1
-    field public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3; // 0x3
-    field public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6; // 0x6
-    field public static final int USB_DATA_STATUS_DISABLED_DOCK = 4; // 0x4
-    field public static final int USB_DATA_STATUS_DISABLED_FORCE = 5; // 0x5
-    field public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
-    field public static final int USB_DATA_STATUS_ENABLED = 1; // 0x1
-    field public static final int USB_DATA_STATUS_UNKNOWN = 0; // 0x0
   }
 
 }
