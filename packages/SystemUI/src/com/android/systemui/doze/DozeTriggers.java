@@ -228,6 +228,7 @@ public class DozeTriggers implements DozeMachine.Part {
     @Override
     public void destroy() {
         mDozeSensors.destroy();
+        mProxCheck.destroy();
     }
 
     private void onNotification(Runnable onPulseSuppressedListener) {
