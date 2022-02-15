@@ -625,12 +625,16 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
 }
 
 static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
-                            jobject bufferObject) {
+                            jobject bufferObject, jlong fencePtr) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     sp<GraphicBuffer> graphicBuffer(GraphicBuffer::fromAHardwareBuffer(
             android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, bufferObject)));
-    transaction->setBuffer(ctrl, graphicBuffer);
+    std::optional<sp<Fence>> optFence = std::nullopt;
+    if (fencePtr != 0) {
+        optFence = sp<Fence>{reinterpret_cast<Fence*>(fencePtr)};
+    }
+    transaction->setBuffer(ctrl, graphicBuffer, optFence);
 }
 
 static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2133,7 +2137,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
             (void*)nativeSetGeometry },
-    {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;)V",
+    {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;J)V",
             (void*)nativeSetBuffer },
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetDataSpace", "(JJI)V",
