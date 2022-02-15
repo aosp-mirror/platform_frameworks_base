@@ -70,6 +70,7 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableTester;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.Watcher;
 
 import com.google.common.truth.Truth;
@@ -595,13 +596,13 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("getEnabled");
 
         // Enable/Disable a component
-        ArraySet<String> components = new ArraySet<String>();
+        WatchedArraySet<String> components = new WatchedArraySet<String>();
         String component1 = PACKAGE_NAME_1 + "/.Component1";
         components.add(component1);
         ps.setDisabledComponents(components, 0);
-        ArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
+        WatchedArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
         assertThat(componentsDisabled.size(), is(1));
-        assertThat(componentsDisabled.toArray()[0], is(component1));
+        assertThat(componentsDisabled.untrackedStorage().toArray()[0], is(component1));
         boolean hasEnabled =
                 ps.getEnabledComponents(0) != null && ps.getEnabledComponents(1).size() > 0;
         assertThat(hasEnabled, is(false));
@@ -704,7 +705,7 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID());
-        testPkgSetting01.copyPackageSetting(origPkgSetting01);
+        testPkgSetting01.copyPackageSetting(origPkgSetting01, true);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
         verifyUserStatesCopy(origPkgSetting01.readUserState(0),
                 testPkgSetting01.readUserState(0));

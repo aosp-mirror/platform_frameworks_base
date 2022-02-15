@@ -46,14 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"អនុញ្ញាត"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
-    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
-    <skip />
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"តើអ្នកចង់ប្ដូរ​ភាសាប្រព័ន្ធ​ទៅភាសា​<xliff:g id="LANGUAGE">%1$s</xliff:g>​ដែរទេ?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"ការប្ដូរភាសា​ប្រព័ន្ធដែលបានស្នើសុំ​ដោយ​ឧបករណ៍ផ្សេងទៀត"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"​ប្ដូរ​ភាសា"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"រក្សាភាសាបច្ចុប្បន្ន"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"អនុញ្ញាត​ការជួសជុល​ដោយឥតខ្សែ​នៅលើ​បណ្ដាញ​នេះ​ឬ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ឈ្មោះបណ្ដាញ (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nអាសយដ្ឋាន Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"អនុញ្ញាត​នៅលើ​បណ្ដាញ​នេះ​ជានិច្ច"</string>
@@ -240,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ពន្លឺ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ការ​កែតម្រូវ​ពណ៌"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"ការ​កំណត់​ច្រើន​ទៀត"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ការកំណត់អ្នកប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"បិទ"</string>
@@ -464,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"អ្នកនឹងមិនលឺម៉ោងរោទ៍ <xliff:g id="WHEN">%1$s</xliff:g> បន្ទាប់របស់អ្នកទេ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ការកំណត់រហ័ស <xliff:g id="TITLE">%s</xliff:g>។"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ហតស្ប៉ត"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ប្រវត្តិរូបការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
@@ -643,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"បានចូលជា <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ជ្រើសរើស​អ្នកប្រើប្រាស់"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"គ្មាន​អ៊ីនធឺណិតទេ"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"បើកព័ត៌មានលម្អិត"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"បើការកំណត់ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"កែលំដាប់ការកំណត់"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ម៉ឺនុយ​ថាមពល"</string>
@@ -884,13 +877,23 @@
       <item quantity="other">កម្មវិធីសកម្ម <xliff:g id="COUNT_1">%s</xliff:g></item>
       <item quantity="one">កម្មវិធីសកម្ម <xliff:g id="COUNT_0">%s</xliff:g></item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"កម្មវិធីសកម្ម"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ឈប់"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"បានឈប់"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"ចម្លង"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"បានចម្លង"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"ពី <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ច្រានចោល UI ចម្លង"</string>
+    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
+    <skip />
+    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
+    <skip />
+    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
+    <skip />
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

@@ -641,6 +641,5 @@
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"大気質"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"キャスト情報"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"プロフィール写真の選択"</string>
-    <!-- no translation found for default_user_icon_description (6554047177298972638) -->
-    <skip />
+    <string name="default_user_icon_description" msgid="6554047177298972638">"デフォルト ユーザー アイコン"</string>
 </resources>

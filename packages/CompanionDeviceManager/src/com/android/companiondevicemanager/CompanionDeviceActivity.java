@@ -51,6 +51,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.List;
+
 /**
  *  A CompanionDevice activity response for showing the available
  *  nearby devices to be associated with.
@@ -204,10 +206,7 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation(appLabel);
         } else if (mRequest.isSingleDevice()) {
-            // TODO(b/211722613)
-            // Treat singleDevice as the multipleDevices for now
-            // initUiForSingleDevice(appLabel);
-            initUiForMultipleDevices(appLabel);
+            initUiForSingleDevice(appLabel);
         } else {
             initUiForMultipleDevices(appLabel);
         }
@@ -221,12 +220,6 @@ public class CompanionDeviceActivity extends AppCompatActivity {
     }
 
     private void onUserSelectedDevice(@NonNull DeviceFilterPair<?> selectedDevice) {
-        if (mSelectedDevice != null) {
-            if (DEBUG) Log.w(TAG, "Already selected.");
-            return;
-        }
-        mSelectedDevice = requireNonNull(selectedDevice);
-
         final MacAddress macAddress = selectedDevice.getMacAddress();
         onAssociationApproved(macAddress);
     }
@@ -346,13 +339,26 @@ public class CompanionDeviceActivity extends AppCompatActivity {
     private void initUiForSingleDevice(CharSequence appLabel) {
         if (DEBUG) Log.i(TAG, "initUiFor_SingleDevice()");
 
-        // TODO: use real name
-        final String deviceName = "<device>";
         final String deviceProfile = mRequest.getDeviceProfile();
 
+        CompanionDeviceDiscoveryService.getScanResult().observe(this,
+                deviceFilterPairs -> updateSingleDeviceUi(
+                        deviceFilterPairs, deviceProfile, appLabel));
+
+        mListView.setVisibility(View.GONE);
+    }
+
+    private void updateSingleDeviceUi(List<DeviceFilterPair<?>> deviceFilterPairs,
+            String deviceProfile, CharSequence appLabel) {
+        // Ignore "empty" scan repots.
+        if (deviceFilterPairs.isEmpty()) return;
+        mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
+
+        final String deviceName = mSelectedDevice.getDisplayName();
         final Spanned title = getHtmlFromResources(
                 this, R.string.confirmation_title, appLabel, deviceName);
         final Spanned summary;
+
         if (deviceProfile == null) {
             summary = getHtmlFromResources(this, R.string.summary_generic);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
@@ -363,8 +369,6 @@ public class CompanionDeviceActivity extends AppCompatActivity {
 
         mTitle.setText(title);
         mSummary.setText(summary);
-
-        mListView.setVisibility(View.GONE);
     }
 
     private void initUiForMultipleDevices(CharSequence appLabel) {
@@ -405,6 +409,14 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         if (DEBUG) Log.d(TAG, "onListItemClick() " + position);
 
         final DeviceFilterPair<?> selectedDevice = mAdapter.getItem(position);
+
+        if (mSelectedDevice != null) {
+            if (DEBUG) Log.w(TAG, "Already selected.");
+            return;
+        }
+
+        mSelectedDevice = requireNonNull(selectedDevice);
+
         onUserSelectedDevice(selectedDevice);
     }
 
@@ -417,9 +429,7 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         if (mRequest.isSelfManaged()) {
             onAssociationApproved(null);
         } else {
-            // TODO(b/211722613): call onUserSelectedDevice().
-            throw new UnsupportedOperationException(
-                    "isSingleDevice() requests are not supported yet.");
+            onUserSelectedDevice(mSelectedDevice);
         }
     }
 

@@ -65,7 +65,7 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
         setImageResource(typedArray.getResourceId(0, 0));
         final int textResId = typedArray.getResourceId(1, 0);
         if (textResId != 0) {
-            setTextAndDescription(getContext().getString(textResId));
+            setTextAndDescription(textResId);
         }
         typedArray.recycle();
     }
@@ -108,6 +108,13 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
      */
     public void setTextAndDescription(CharSequence text) {
         mButtonView.setContentDescription(text);
+    }
+
+    /**
+     * Sets the text and description with the given string resource id.
+     */
+    public void setTextAndDescription(int resId) {
+        setTextAndDescription(getContext().getString(resId));
     }
 
     @Override

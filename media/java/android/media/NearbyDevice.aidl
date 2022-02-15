@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.media
+package android.media;
 
-import androidx.annotation.IntDef
-import kotlin.annotation.AnnotationRetention
-
-@IntDef(
-    INearbyMediaDevicesUpdateCallback.RANGE_UNKNOWN,
-    INearbyMediaDevicesUpdateCallback.RANGE_FAR,
-    INearbyMediaDevicesUpdateCallback.RANGE_LONG,
-    INearbyMediaDevicesUpdateCallback.RANGE_CLOSE,
-    INearbyMediaDevicesUpdateCallback.RANGE_WITHIN_REACH
-)
-@Retention(AnnotationRetention.SOURCE)
-/** The various range zones a device can be in, in relation to the current device. */
-annotation class RangeZone
+parcelable NearbyDevice;

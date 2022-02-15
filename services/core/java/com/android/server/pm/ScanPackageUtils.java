@@ -62,6 +62,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -85,6 +86,7 @@ import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProvider;
 import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.utils.WatchedArraySet;
 
 import dalvik.system.VMRuntime;
 
@@ -94,7 +96,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -400,7 +401,7 @@ final class ScanPackageUtils {
             // code and package path correct.
             changedAbiCodePath = applyAdjustedAbiToSharedUser(oldSharedUserSetting,
                     parsedPackage, packageAbiHelper.getAdjustedAbiForSharedUser(
-                            oldSharedUserSetting.packages, parsedPackage));
+                            oldSharedUserSetting.getPackageStates(), parsedPackage));
         }
 
         parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()
@@ -891,7 +892,7 @@ final class ScanPackageUtils {
 
     /**
      * Applies the adjusted ABI calculated by
-     * {@link PackageAbiHelper#getAdjustedAbiForSharedUser(Set, AndroidPackage)} to all
+     * {@link PackageAbiHelper#getAdjustedAbiForSharedUser(ArraySet, AndroidPackage)} to all
      * relevant packages and settings.
      * @param sharedUserSetting The {@code SharedUserSetting} to adjust
      * @param scannedPackage the package being scanned or null
@@ -904,7 +905,10 @@ final class ScanPackageUtils {
             scannedPackage.setPrimaryCpuAbi(adjustedAbi);
         }
         List<String> changedAbiCodePath = null;
-        for (PackageSetting ps : sharedUserSetting.packages) {
+        final WatchedArraySet<PackageSetting> sharedUserPackageSettings =
+                sharedUserSetting.getPackageSettings();
+        for (int i = 0; i < sharedUserPackageSettings.size(); i++) {
+            PackageSetting ps = sharedUserPackageSettings.valueAt(i);
             if (scannedPackage == null
                     || !scannedPackage.getPackageName().equals(ps.getPackageName())) {
                 if (ps.getPrimaryCpuAbi() != null) {
@@ -912,6 +916,7 @@ final class ScanPackageUtils {
                 }
 
                 ps.setPrimaryCpuAbi(adjustedAbi);
+                ps.onChanged();
                 if (ps.getPkg() != null) {
                     if (!TextUtils.equals(adjustedAbi,
                             AndroidPackageUtils.getRawPrimaryCpuAbi(ps.getPkg()))) {

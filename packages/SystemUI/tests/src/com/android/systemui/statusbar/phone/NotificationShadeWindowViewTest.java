@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -55,6 +56,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -79,6 +82,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private LockIconViewController mLockIconViewController;
+    @Mock private LowLightClockController mLowLightClockController;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -110,7 +114,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowStateController,
-                mLockIconViewController);
+                mLockIconViewController,
+                Optional.of(mLowLightClockController));
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);

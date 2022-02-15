@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.media;
+package android.media;
 
-import com.android.systemui.shared.media.INearbyMediaDevicesProvider;
+import android.media.AudioDeviceAttributes;
+import android.media.VolumeInfo;
 
 /**
- * An interface that can be invoked to notify System UI of nearby media devices.
+ * AIDL for the AudioService to signal audio device volume changes.
  *
- * External clients wanting to notify System UI about the status of nearby media devices should
- * implement {@link INearbyMediaDevicesProvider} and then register it with system UI using this
- * service.
- *
- * System UI will implement this interface and external clients will invoke it.
+ * {@hide}
  */
-interface INearbyMediaDevicesService {
-  /** Registers a new provider. */
-  oneway void registerProvider(INearbyMediaDevicesProvider provider) = 1;
+oneway interface IAudioDeviceVolumeDispatcher {
+
+    void dispatchDeviceVolumeChanged(in AudioDeviceAttributes device, in VolumeInfo vol);
+
 }

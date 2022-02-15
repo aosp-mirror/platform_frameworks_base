@@ -188,6 +188,7 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.PendingIntentStats;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.SyncNotedAppOp;
@@ -15952,6 +15953,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             implements ActivityManagerLocal {
 
         @Override
+        public List<PendingIntentStats> getPendingIntentStats() {
+            return mPendingIntentController.dumpPendingIntentStatsForStatsd();
+        }
+
+        @Override
         public Pair<String, String> getAppProfileStatsForDebugging(long time, int lines) {
             return mAppProfiler.getAppProfileStatsForDebugging(time, lines);
         }
@@ -17148,6 +17154,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void addBindServiceEventListener(@NonNull BindServiceEventListener listener) {
             // It's a CopyOnWriteArrayList, so no lock is needed.
             mBindServiceEventListeners.add(listener);
+        }
+
+        @Override
+        public void restart() {
+            ActivityManagerService.this.restart();
         }
     }
 

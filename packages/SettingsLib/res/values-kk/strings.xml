@@ -641,6 +641,5 @@
     <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Ауа сапасы"</string>
     <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Трансляция ақпараты"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Профиль суретін таңдау"</string>
-    <!-- no translation found for default_user_icon_description (6554047177298972638) -->
-    <skip />
+    <string name="default_user_icon_description" msgid="6554047177298972638">"Әдепкі пайдаланушы белгішесі"</string>
 </resources>

@@ -252,7 +252,7 @@ public class TimeDetectorServiceTest {
         int slotIndex = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
         return new TelephonyTimeSuggestion.Builder(slotIndex)
-                .setUtcTime(timeValue)
+                .setUnixEpochTime(timeValue)
                 .build();
     }
 

@@ -94,7 +94,7 @@ final class PackageSessionVerifier {
     /**
      * Runs verifications that are common to both staged and non-staged sessions.
      */
-    public void verifyNonStaged(PackageInstallerSession session, Callback callback) {
+    public void verify(PackageInstallerSession session, Callback callback) {
         mHandler.post(() -> {
             try {
                 storeSession(session.mStagedSession);
@@ -109,6 +109,8 @@ final class PackageSessionVerifier {
                 }
                 verifyAPK(session, callback);
             } catch (PackageManagerException e) {
+                String errorMessage = PackageManager.installStatusToString(e.error, e.getMessage());
+                session.setSessionFailed(SessionInfo.SESSION_VERIFICATION_FAILED, errorMessage);
                 callback.onResult(e.error, e.getMessage());
             }
         });
@@ -128,7 +130,19 @@ final class PackageSessionVerifier {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
-                callback.onResult(returnCode, msg);
+                if (session.isStaged() && returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                    // Continue verification for staged sessions
+                    verifyStaged(session.mStagedSession, callback);
+                    return;
+                }
+                if (returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                    String errorMessage = PackageManager.installStatusToString(returnCode, msg);
+                    session.setSessionFailed(SessionInfo.SESSION_VERIFICATION_FAILED, errorMessage);
+                    callback.onResult(returnCode, msg);
+                } else {
+                    session.setSessionReady();
+                    callback.onResult(PackageManager.INSTALL_SUCCEEDED, null);
+                }
             }
         };
         final VerificationParams verifyingSession = makeVerificationParams(session, observer);
@@ -171,7 +185,7 @@ final class PackageSessionVerifier {
      * Note it is the responsibility of the caller to ensure the staging files remain unchanged
      * while the verification is in progress.
      */
-    void verifyStaged(StagingManager.StagedSession session, Callback callback) {
+    private void verifyStaged(StagingManager.StagedSession session, Callback callback) {
         Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId());
         mHandler.post(() -> {
             try {
@@ -202,7 +216,7 @@ final class PackageSessionVerifier {
     }
 
     private void onVerificationSuccess(StagingManager.StagedSession session, Callback callback) {
-        callback.onResult(SessionInfo.SESSION_NO_ERROR, null);
+        callback.onResult(PackageManager.INSTALL_SUCCEEDED, null);
     }
 
     private void onVerificationFailure(StagingManager.StagedSession session, Callback callback,
@@ -213,7 +227,7 @@ final class PackageSessionVerifier {
             // failed on next step and staging directory for session will be deleted.
         }
         session.setSessionFailed(errorCode, errorMessage);
-        callback.onResult(errorCode, errorMessage);
+        callback.onResult(PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE, errorMessage);
     }
 
     private void dispatchVerifyApex(StagingManager.StagedSession session, Callback callback) {

@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.media;
+package android.app;
 
-parcelable NearbyDevice;
+/**
+ * Data about pending intents - size and count, per UID that sent the intent.
+ * @hide
+ */
+public class PendingIntentStats {
+    public final int uid;
+    public final int count;
+    public final int sizeKb;
+
+    public PendingIntentStats(int uid, int count, int sizeKb) {
+        this.uid = uid;
+        this.count = count;
+        this.sizeKb = sizeKb;
+    }
+}

@@ -43,6 +43,8 @@
     <dimen name="navigation_edge_panel_height">96dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+    <!-- The threshold to progress back animation for edge swipe -->
+    <dimen name="navigation_edge_action_progress_threshold">400dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->

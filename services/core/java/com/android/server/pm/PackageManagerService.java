@@ -2005,7 +2005,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         ScanPackageUtils.applyAdjustedAbiToSharedUser(
                                 setting, null /*scannedPackage*/,
                                 mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
-                                setting.packages, null /*scannedPackage*/));
+                                        setting.getPackageStates(), null /*scannedPackage*/));
                 if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                         final String codePathString = changedAbiCodePath.get(i);
@@ -7558,7 +7558,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (packageState == null) {
                 return new ArraySet<>();
             }
-            return packageState.getUserStateOrDefault(userId).getEnabledComponentsNoCopy();
+            return packageState.getUserStateOrDefault(userId).getEnabledComponents();
         }
 
         @Override
@@ -7567,7 +7567,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (packageState == null) {
                 return new ArraySet<>();
             }
-            return packageState.getUserStateOrDefault(userId).getDisabledComponentsNoCopy();
+            return packageState.getUserStateOrDefault(userId).getDisabledComponents();
         }
 
         @Override

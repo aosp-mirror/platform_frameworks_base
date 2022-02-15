@@ -236,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"रङ सच्याउने कार्य"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"थप सेटिङहरू"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"प्रयोगकर्तासम्बन्धी सेटिङ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"भयो"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
@@ -460,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"तपाईँले आफ्नो अर्को अलार्म <xliff:g id="WHEN">%1$s</xliff:g> सुन्नुहुने छैन"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"द्रुत सेटिङ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"केहीका लागि रमाइलो हुन्छ तर सबैका लागि होइन"</string>
@@ -639,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> को रूपमा साइन इन गरियो"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"प्रयोगकर्ता छान्नुहोस्"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"इन्टरनेट छैन"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"विवरणहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सम्बन्धी सेटिङहरूलाई खोल्नुहोस्।"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेनु"</string>
@@ -880,13 +877,20 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> वटा सक्रिय एप</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> सक्रिय एप</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"सक्रिय एपहरू"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"रोक्नुहोस्"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"रोकिएको छ"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"कपी गर्नुहोस्"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"कपी गरियो"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> बाट"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"कपी UI खारेज गर्नुहोस्"</string>
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"कपी गरिएको टेक्स्ट सम्पादन गर्नुहोस्"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कपी गरिएको फोटो सम्पादन गर्नुहोस्"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"नजिकैको डिभाइसमा पठाउनुहोस्"</string>
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

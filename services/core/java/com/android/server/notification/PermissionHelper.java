@@ -185,11 +185,13 @@ public final class PermissionHelper {
             return;
         }
         try {
-            if (grant && !reviewRequired) {
+            boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
+                    userId) != PackageManager.PERMISSION_DENIED;
+            if (grant && !reviewRequired && !currentlyGranted) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
-            } else {
-                mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId,
-                        TAG);
+            } else if (!grant && currentlyGranted) {
+                mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
+                        userId, TAG);
             }
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,

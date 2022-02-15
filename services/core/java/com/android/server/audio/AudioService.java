@@ -36,6 +36,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -87,6 +88,7 @@ import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -108,6 +110,7 @@ import android.media.MediaMetrics;
 import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
 import android.media.Spatializer;
+import android.media.VolumeInfo;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
@@ -4246,6 +4249,24 @@ public class AudioService extends IAudioService.Stub
         return (mStreamStates[streamType].getIndex(device) + 5) / 10;
     }
 
+    /**
+     * Default VolumeInfo returned by {@link VolumeInfo#getDefaultVolumeInfo()}
+     * Lazily initialized in {@link #getDefaultVolumeInfo()}
+     */
+    static VolumeInfo sDefaultVolumeInfo;
+
+    /** @see VolumeInfo#getDefaultVolumeInfo() */
+    public VolumeInfo getDefaultVolumeInfo() {
+        if (sDefaultVolumeInfo == null) {
+            sDefaultVolumeInfo = new VolumeInfo.Builder(AudioSystem.STREAM_MUSIC)
+                    .setMinVolumeIndex(getStreamMinVolume(AudioSystem.STREAM_MUSIC))
+                    .setMaxVolumeIndex(getStreamMaxVolume(AudioSystem.STREAM_MUSIC))
+                    .setMuted(false)
+                    .build();
+        }
+        return sDefaultVolumeInfo;
+    }
+
     /** @see AudioManager#getUiSoundsStreamType()
      * TODO(b/181140246): when using VolumeGroup alias, we are lacking configurability for
      * UI Sounds identification.
@@ -6307,6 +6328,37 @@ public class AudioService extends IAudioService.Stub
                 MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS,
                 SENDMSG_QUEUE, skipStream /*arg1*/, 0 /*arg2*/, null /*obj*/,
                 0 /*delay*/);
+    }
+
+    /**
+     * @see AudioDeviceVolumeManager#setDeviceAbsoluteMultiVolumeBehavior
+     * @param cb
+     * @param attr
+     * @param volumes
+     */
+    @RequiresPermission(anyOf = { android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED })
+    public void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
+            IAudioDeviceVolumeDispatcher cb, String packageName,
+            AudioDeviceAttributes device, List<VolumeInfo> volumes) {
+        // verify permissions
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Missing MODIFY_AUDIO_ROUTING or BLUETOOTH_PRIVILEGED permissions");
+        }
+        // verify arguments
+        Objects.requireNonNull(device);
+        Objects.requireNonNull(volumes);
+
+        // current implementation maps this call to existing abs volume API of AudioManager
+        // TODO implement the volume/device listener through IAudioDeviceVolumeDispatcher
+        final int volumeBehavior = volumes.size() == 1
+                ? AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE
+                : AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
+        setDeviceVolumeBehavior(device, volumeBehavior, packageName);
     }
 
     /**

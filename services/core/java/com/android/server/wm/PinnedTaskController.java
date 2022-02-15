@@ -93,6 +93,7 @@ class PinnedTaskController {
     // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
     private float mAspectRatio = -1f;
+    private float mExpandedAspectRatio = 0f;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
@@ -160,11 +161,19 @@ class PinnedTaskController {
     }
 
     /**
-     * @return whether the given {@param aspectRatio} is valid.
+     * @return whether the given {@param aspectRatio} is valid, i.e. min <= ratio <= max.
      */
     public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return Float.compare(mMinAspectRatio, aspectRatio) <= 0
                 && Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
+    }
+
+    /**
+     * @return whether the given {@param aspectRatio} is valid, i.e. ratio < min or ratio > max.
+     */
+    public boolean isValidExpandedPictureInPictureAspectRatio(float aspectRatio) {
+        return Float.compare(mMinAspectRatio, aspectRatio) > 0
+                || Float.compare(aspectRatio, mMaxAspectRatio) > 0;
     }
 
     /**
@@ -378,6 +387,25 @@ class PinnedTaskController {
     }
 
     /**
+     * Sets the current aspect ratio.
+     */
+    void setExpandedAspectRatio(float aspectRatio) {
+        if (Float.compare(mExpandedAspectRatio, aspectRatio) != 0) {
+            mExpandedAspectRatio = aspectRatio;
+            notifyExpandedAspectRatioChanged(aspectRatio);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+        }
+    }
+
+    /**
+     * @return the current aspect ratio.
+     */
+    float getExpandedAspectRatio() {
+        return mExpandedAspectRatio;
+    }
+
+
+    /**
      * Sets the current set of actions.
      */
     void setActions(List<RemoteAction> actions) {
@@ -405,6 +433,15 @@ class PinnedTaskController {
         if (mPinnedTaskListener == null) return;
         try {
             mPinnedTaskListener.onAspectRatioChanged(aspectRatio);
+        } catch (RemoteException e) {
+            Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
+        }
+    }
+
+    private void notifyExpandedAspectRatioChanged(float aspectRatio) {
+        if (mPinnedTaskListener == null) return;
+        try {
+            mPinnedTaskListener.onExpandedAspectRatioChanged(aspectRatio);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
         }

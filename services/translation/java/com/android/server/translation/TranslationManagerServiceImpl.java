@@ -24,6 +24,7 @@ import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -43,6 +44,7 @@ import android.view.translation.ITranslationServiceCallback;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationContext;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationController;
 import android.view.translation.UiTranslationManager.UiTranslationState;
 import android.view.translation.UiTranslationSpec;
 
@@ -253,7 +255,10 @@ final class TranslationManagerServiceImpl extends
             try (TransferPipe tp = new TransferPipe()) {
                 activityTokens.getApplicationThread().dumpActivity(tp.getWriteFd(),
                         activityTokens.getActivityToken(), prefix,
-                        new String[]{"--translation"});
+                        new String[] {
+                                Activity.DUMP_ARG_DUMP_DUMPABLE,
+                                UiTranslationController.DUMPABLE_NAME
+                        });
                 tp.go(fd);
             } catch (IOException e) {
                 pw.println(prefix + "Failure while dumping the activity: " + e);

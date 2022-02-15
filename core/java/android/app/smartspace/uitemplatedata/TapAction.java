@@ -33,7 +33,7 @@ import android.text.TextUtils;
 import java.util.Objects;
 
 /**
- * A {@link SmartspaceTapAction} represents an action which can be taken by a user by tapping on
+ * A {@link TapAction} represents an action which can be taken by a user by tapping on
  * either the title, the subtitle or on the icon. Supported instances are Intents and
  * PendingIntents. These actions can be called from another process or within the client process.
  *
@@ -42,9 +42,9 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class SmartspaceTapAction implements Parcelable {
+public final class TapAction implements Parcelable {
 
-    /** A unique Id of this {@link SmartspaceTapAction}. */
+    /** A unique Id of this {@link TapAction}. */
     @Nullable
     private final CharSequence mId;
 
@@ -60,7 +60,7 @@ public final class SmartspaceTapAction implements Parcelable {
     @Nullable
     private Bundle mExtras;
 
-    SmartspaceTapAction(@NonNull Parcel in) {
+    TapAction(@NonNull Parcel in) {
         mId = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mIntent = in.readTypedObject(Intent.CREATOR);
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
@@ -68,7 +68,7 @@ public final class SmartspaceTapAction implements Parcelable {
         mExtras = in.readBundle();
     }
 
-    private SmartspaceTapAction(@Nullable CharSequence id, @Nullable Intent intent,
+    private TapAction(@Nullable CharSequence id, @Nullable Intent intent,
             @Nullable PendingIntent pendingIntent, @Nullable UserHandle userHandle,
             @Nullable Bundle extras) {
         mId = id;
@@ -78,27 +78,32 @@ public final class SmartspaceTapAction implements Parcelable {
         mExtras = extras;
     }
 
+    /** Returns the unique id of the tap action. */
     @Nullable
     public CharSequence getId() {
         return mId;
     }
 
+    /** Returns the intent of the tap action. */
     @SuppressLint("IntentBuilderName")
     @Nullable
     public Intent getIntent() {
         return mIntent;
     }
 
+    /** Returns the pending intent of the tap action. */
     @Nullable
     public PendingIntent getPendingIntent() {
         return mPendingIntent;
     }
 
+    /** Returns the user handle of the tap action. */
     @Nullable
     public UserHandle getUserHandle() {
         return mUserHandle;
     }
 
+    /** Returns the extras bundle of the tap action. */
     @Nullable
     @SuppressLint("NullableCollection")
     public Bundle getExtras() {
@@ -120,23 +125,23 @@ public final class SmartspaceTapAction implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<SmartspaceTapAction> CREATOR = new Creator<SmartspaceTapAction>() {
+    public static final Creator<TapAction> CREATOR = new Creator<TapAction>() {
         @Override
-        public SmartspaceTapAction createFromParcel(Parcel in) {
-            return new SmartspaceTapAction(in);
+        public TapAction createFromParcel(Parcel in) {
+            return new TapAction(in);
         }
 
         @Override
-        public SmartspaceTapAction[] newArray(int size) {
-            return new SmartspaceTapAction[size];
+        public TapAction[] newArray(int size) {
+            return new TapAction[size];
         }
     };
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceTapAction)) return false;
-        SmartspaceTapAction that = (SmartspaceTapAction) o;
+        if (!(o instanceof TapAction)) return false;
+        TapAction that = (TapAction) o;
         return SmartspaceUtils.isEqual(mId, that.mId);
     }
 
@@ -157,7 +162,7 @@ public final class SmartspaceTapAction implements Parcelable {
     }
 
     /**
-     * A builder for {@link SmartspaceTapAction} object.
+     * A builder for {@link TapAction} object.
      *
      * @hide
      */
@@ -171,9 +176,9 @@ public final class SmartspaceTapAction implements Parcelable {
         private Bundle mExtras;
 
         /**
-         * A builder for {@link SmartspaceTapAction}.
+         * A builder for {@link TapAction}.
          *
-         * @param id A unique Id of this {@link SmartspaceTapAction}.
+         * @param id A unique Id of this {@link TapAction}.
          */
         public Builder(@NonNull CharSequence id) {
             mId = Objects.requireNonNull(id);
@@ -222,11 +227,11 @@ public final class SmartspaceTapAction implements Parcelable {
          * @throws IllegalStateException if the tap action is empty.
          */
         @NonNull
-        public SmartspaceTapAction build() {
+        public TapAction build() {
             if (mIntent == null && mPendingIntent == null && mExtras == null) {
                 throw new IllegalStateException("Please assign at least 1 valid tap field");
             }
-            return new SmartspaceTapAction(mId, mIntent, mPendingIntent, mUserHandle, mExtras);
+            return new TapAction(mId, mIntent, mPendingIntent, mUserHandle, mExtras);
         }
     }
 }
