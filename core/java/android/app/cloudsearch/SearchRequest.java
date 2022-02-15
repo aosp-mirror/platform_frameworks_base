@@ -83,11 +83,13 @@ public final class SearchRequest implements Parcelable {
      *  presubmit is the input before the user finishes the entire query, i.e. push "ENTER" or
      *  "SEARCH" button. After the user finishes the entire query, the behavior is postsubmit.
      */
-    public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
+    public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION =
+            "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
     /** The target search provider list of package names(separated by ;), String value expected.
      * If this is not provided or its value is empty, then no filter will be applied.
      */
-    public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER =
+            "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
 
     @NonNull
     private Bundle mSearchConstraints;

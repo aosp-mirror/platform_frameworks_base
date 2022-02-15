@@ -1656,8 +1656,8 @@ package android.app.cloudsearch {
     method @NonNull public android.os.Bundle getSearchConstraints();
     method @NonNull public String getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
-    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
+    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchRequest> CREATOR;
   }
 
@@ -1699,23 +1699,23 @@ package android.app.cloudsearch {
     method @NonNull public String getTitle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResult> CREATOR;
-    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
-    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "ACTION_BUTTON_TEXT";
-    field public static final String EXTRAINFO_APP_BADGES = "APP_BADGES";
-    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "APP_CONTAINS_ADS_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "APP_CONTAINS_IAP_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
-    field public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
-    field public static final String EXTRAINFO_APP_IARC = "APP_IARC";
-    field public static final String EXTRAINFO_APP_ICON = "APP_ICON";
-    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "APP_REVIEW_COUNT";
-    field public static final String EXTRAINFO_APP_SIZE_BYTES = "APP_SIZE_BYTES";
-    field public static final String EXTRAINFO_APP_STAR_RATING = "APP_STAR_RATING";
-    field public static final String EXTRAINFO_LONG_DESCRIPTION = "LONG_DESCRIPTION";
-    field public static final String EXTRAINFO_SCREENSHOTS = "SCREENSHOTS";
-    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "SHORT_DESCRIPTION";
-    field public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
-    field public static final String EXTRAINFO_WEB_URL = "WEB_URL";
+    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
+    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_TEXT";
+    field public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
+    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "android.app.cloudsearch.APP_DEVELOPER_NAME";
+    field public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
+    field public static final String EXTRAINFO_APP_IARC = "android.app.cloudsearch.APP_IARC";
+    field public static final String EXTRAINFO_APP_ICON = "android.app.cloudsearch.APP_ICON";
+    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "android.app.cloudsearch.APP_REVIEW_COUNT";
+    field public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
+    field public static final String EXTRAINFO_APP_STAR_RATING = "android.app.cloudsearch.APP_STAR_RATING";
+    field public static final String EXTRAINFO_LONG_DESCRIPTION = "android.app.cloudsearch.LONG_DESCRIPTION";
+    field public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
+    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "android.app.cloudsearch.SHORT_DESCRIPTION";
+    field public static final String EXTRAINFO_WEB_ICON = "android.app.cloudsearch.WEB_ICON";
+    field public static final String EXTRAINFO_WEB_URL = "android.app.cloudsearch.WEB_URL";
   }
 
   public static final class SearchResult.Builder {
