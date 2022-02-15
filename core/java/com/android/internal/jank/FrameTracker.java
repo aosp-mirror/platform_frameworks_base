@@ -464,8 +464,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
                 boolean missedFrame = false;
-                if ((info.jankType & PREDICTION_ERROR) != 0
-                        || ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0)) {
+                if ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0) {
                     Log.w(TAG, "Missed App frame:" + info.jankType);
                     missedAppFramesCount++;
                     missedFrame = true;
@@ -473,7 +472,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 if ((info.jankType & DISPLAY_HAL) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_DEADLINE_MISSED) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED) != 0
-                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0) {
+                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0
+                        || (info.jankType & PREDICTION_ERROR) != 0) {
                     Log.w(TAG, "Missed SF frame:" + info.jankType);
                     missedSfFramesCount++;
                     missedFrame = true;
