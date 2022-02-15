@@ -46,6 +46,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
@@ -266,6 +267,7 @@ class FgsManagerController @Inject constructor(
             runningApps[it] = RunningApp(it.userId, it.packageName,
                     runningServiceTokens[it]!!.startTime, it.uiControl,
                     ai.loadLabel(packageManager), ai.loadIcon(packageManager))
+            logEvent(stopped = false, it.packageName, it.userId, runningApps[it]!!.timeStarted)
         }
 
         removedPackages.forEach { pkg ->
@@ -284,8 +286,23 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    private fun stopPackage(userId: Int, packageName: String) {
+    private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
+        logEvent(stopped = true, packageName, userId, timeStarted)
         activityManager.stopAppForUser(packageName, userId)
+    }
+
+    private fun logEvent(stopped: Boolean, packageName: String, userId: Int, timeStarted: Long) {
+        val timeLogged = systemClock.elapsedRealtime()
+        val event = if (stopped) {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__STOPPED
+        } else {
+            SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED__EVENT__VIEWED
+        }
+        backgroundExecutor.execute {
+            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+            SysUiStatsLog.write(SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
+                    timeLogged - timeStarted)
+        }
     }
 
     private inner class AppListAdapter : RecyclerView.Adapter<AppItemViewHolder>() {
@@ -312,7 +329,7 @@ class FgsManagerController @Inject constructor(
                         DateUtils.LENGTH_MEDIUM)
                 stopButton.setOnClickListener {
                     stopButton.setText(R.string.fgs_manager_app_item_stop_button_stopped_label)
-                    stopPackage(runningApp.userId, runningApp.packageName)
+                    stopPackage(runningApp.userId, runningApp.packageName, runningApp.timeStarted)
                 }
                 if (runningApp.uiControl == UIControl.HIDE_BUTTON) {
                     stopButton.visibility = View.INVISIBLE
