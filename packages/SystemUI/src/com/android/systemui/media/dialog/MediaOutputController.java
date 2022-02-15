@@ -19,10 +19,10 @@ package com.android.systemui.media.dialog;
 import static android.provider.Settings.ACTION_BLUETOOTH_PAIRING_SETTINGS;
 
 import android.app.Notification;
+import android.app.WallpaperColors;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -57,6 +57,7 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -103,6 +104,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private MediaOutputMetricLogger mMetricLogger;
     private UiEventLogger mUiEventLogger;
 
+    private int mColorActiveItem;
+    private int mColorInactiveItem;
+    private int mColorSeekbarProgress;
+    private int mColorButtonBackground;
+
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
@@ -125,6 +131,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
         mDialogManager = dialogManager;
+        mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_active_item_main_content);
+        mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_inactive_item_main_content);
+        mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
+                android.R.color.system_accent1_200);
+        mColorButtonBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_item_background);
     }
 
     void start(@NonNull Callback cb) {
@@ -264,13 +278,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     }
 
     void setColorFilter(Drawable drawable, boolean isActive) {
-        final ColorStateList list =
-                mContext.getResources().getColorStateList(
-                        isActive
-                                ? R.color.media_dialog_active_item_main_content
-                                : R.color.media_dialog_inactive_item_main_content,
-                        mContext.getTheme());
-        drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
+        drawable.setColorFilter(new PorterDuffColorFilter(isActive
+                ? mColorActiveItem : mColorInactiveItem,
                 PorterDuff.Mode.SRC_IN));
     }
 
@@ -299,6 +308,38 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             }
         }
         return null;
+    }
+
+    void setCurrentColorScheme(WallpaperColors wallpaperColors, boolean isDarkTheme) {
+        ColorScheme mCurrentColorScheme = new ColorScheme(wallpaperColors,
+                isDarkTheme);
+        if (isDarkTheme) {
+            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
+            mColorInactiveItem = mCurrentColorScheme.getAccent1().get(2);
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(2);
+        } else {
+            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
+            mColorInactiveItem = mCurrentColorScheme.getAccent1().get(7);
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
+            mColorButtonBackground = mCurrentColorScheme.getAccent2().get(1);
+        }
+    }
+
+    public int getColorActiveItem() {
+        return mColorActiveItem;
+    }
+
+    public int getColorInactiveItem() {
+        return mColorInactiveItem;
+    }
+
+    public int getColorSeekbarProgress() {
+        return mColorSeekbarProgress;
+    }
+
+    public int getColorButtonBackground() {
+        return mColorButtonBackground;
     }
 
     private void buildMediaDevices(List<MediaDevice> devices) {

@@ -236,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kolore-alderantzikatzea"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koloreen zuzenketa"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Ezarpen gehiago"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Erabiltzaile-ezarpenak"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Eginda"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Itxi"</string>
@@ -460,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ezarpen bizkorrak: <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
@@ -639,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> gisa hasi duzu saioa"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"erabiltzailea aukeratzeko"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Ez dago Interneteko konexiorik"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Ireki xehetasunak."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Ireki <xliff:g id="ID_1">%s</xliff:g> ezarpenak."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Itzaltzeko menua"</string>
@@ -880,13 +877,23 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikazio aktibo</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikazio aktibo</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktibo dauden aplikazioak"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Gelditu"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Geldituta"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopiatu"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopiatu da"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"Jatorria: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Kopiatutako UIa baztertzeko botoia"</string>
+    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
+    <skip />
+    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
+    <skip />
+    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
+    <skip />
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

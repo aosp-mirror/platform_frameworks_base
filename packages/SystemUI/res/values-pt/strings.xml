@@ -37,7 +37,7 @@
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> para lidar com o <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nenhum apl. instalado funciona com o USB. Saiba mais sobre o acessório em <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Acessório USB"</string>
-    <string name="label_view" msgid="6815442985276363364">"Visualizar"</string>
+    <string name="label_view" msgid="6815442985276363364">"Ver"</string>
     <string name="always_use_device" msgid="210535878779644679">"Sempre abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> quando <xliff:g id="USB_DEVICE">%2$s</xliff:g> for conectado"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Sempre abrir o app <xliff:g id="APPLICATION">%1$s</xliff:g> quando <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> for conectado"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Permitir a depuração USB?"</string>
@@ -46,14 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuração USB não permitida"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, mude para o usuário principal \"NAME\"."</string>
-    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
-    <skip />
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Quer mudar o idioma do sistema para <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Mudança do idioma do sistema solicitada por outro dispositivo"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Alterar idioma"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Manter idioma atual"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Permitir a depuração por Wi-Fi nesta rede?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nome da rede (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nEndereço do Wi-Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Sempre permitir nesta rede"</string>
@@ -240,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brilho"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversão de cores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correção de cor"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Mais configurações"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Config. do usuário"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Concluído"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fechar"</string>
@@ -464,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Você não ouvirá o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Configurações rápidas, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Ponto de acesso"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabalho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
@@ -643,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Login efetuado como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"escolher o usuário"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Sem Internet"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Abrir detalhes."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Abrir configurações de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editar ordem das configurações."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu liga/desliga"</string>
@@ -884,13 +877,23 @@
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app ativo</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps ativos</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativos"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parado"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Copiar"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copiado"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"Do app <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Dispensar cópia da IU"</string>
+    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
+    <skip />
+    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
+    <skip />
+    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
+    <skip />
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

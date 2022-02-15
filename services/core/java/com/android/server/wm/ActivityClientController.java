@@ -746,8 +746,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will
                     // be used the next time the activity enters PiP.
                     final Task rootTask = r.getRootTask();
-                    rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatio());
+                    rootTask.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio(),
+                            r.pictureInPictureArgs.getExpandedAspectRatio());
                     rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
             }
@@ -808,15 +808,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                     + ": Current activity does not support picture-in-picture.");
         }
 
+        final float minAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+        final float maxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+
         if (params.hasSetAspectRatio()
                 && !mService.mWindowManager.isValidPictureInPictureAspectRatio(
                 r.mDisplayContent, params.getAspectRatio())) {
-            final float minAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-            final float maxAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             throw new IllegalArgumentException(String.format(caller
                             + ": Aspect ratio is too extreme (must be between %f and %f).",
+                    minAspectRatio, maxAspectRatio));
+        }
+
+        if (mService.mSupportsExpandedPictureInPicture && params.hasSetExpandedAspectRatio()
+                && !mService.mWindowManager.isValidExpandedPictureInPictureAspectRatio(
+                r.mDisplayContent, params.getExpandedAspectRatio())) {
+            throw new IllegalArgumentException(String.format(caller
+                            + ": Expanded aspect ratio is not extreme enough (must not be between"
+                            + " %f and %f).",
                     minAspectRatio, maxAspectRatio));
         }
 

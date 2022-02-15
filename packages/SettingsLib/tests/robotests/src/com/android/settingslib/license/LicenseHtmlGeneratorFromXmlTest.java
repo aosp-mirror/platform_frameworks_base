@@ -18,6 +18,7 @@ package com.android.settingslib.license;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
+@Ignore
 public class LicenseHtmlGeneratorFromXmlTest {
     private static final String VALID_OLD_XML_STRING =
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"

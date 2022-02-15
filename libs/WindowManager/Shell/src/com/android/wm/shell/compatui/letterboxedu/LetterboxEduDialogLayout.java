@@ -20,7 +20,8 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.FrameLayout;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.wm.shell.R;
 
@@ -31,7 +32,7 @@ import com.android.wm.shell.R;
  * background dim which dismisses the dialog when clicked.
  */
 // TODO(b/215316431): Add tests
-class LetterboxEduDialogLayout extends FrameLayout {
+class LetterboxEduDialogLayout extends ConstraintLayout {
 
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.

@@ -39,6 +39,7 @@ import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.SuspendParams;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -238,9 +239,12 @@ public class PackageUserStateTest {
         PackageUserStateImpl testUserState2 =
                 new PackageUserStateImpl(null, testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
-        testUserState2.setSuspendParams(paramsMap2);
-        // Should not be equal since suspendParams maps are different
-        assertThat(testUserState1.equals(testUserState2), is(false));
+        try {
+            testUserState2.setSuspendParams(paramsMap2);
+            Assert.fail("Changing sealed snapshot of suspendParams should throw");
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage().contains("attempt to change a sealed object"), is(true));
+        }
     }
 
     @Test

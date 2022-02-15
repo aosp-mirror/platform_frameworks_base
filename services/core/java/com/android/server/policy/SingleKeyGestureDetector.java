@@ -55,11 +55,14 @@ public final class SingleKeyGestureDetector {
     private volatile boolean mHandledByLongPress = false;
     private final Handler mHandler;
     private long mLastDownTime = 0;
-    private static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
 
     /** Supported gesture flags */
     public static final int KEY_LONGPRESS = 1 << 1;
     public static final int KEY_VERYLONGPRESS = 1 << 2;
+
+    static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
+    static long sDefaultLongPressTimeout;
+    static long sDefaultVeryLongPressTimeout;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -86,16 +89,10 @@ public final class SingleKeyGestureDetector {
     abstract static class SingleKeyRule {
         private final int mKeyCode;
         private final int mSupportedGestures;
-        private final long mDefaultLongPressTimeout;
-        private final long mDefaultVeryLongPressTimeout;
 
-        SingleKeyRule(Context context, int keyCode, @KeyGestureFlag int supportedGestures) {
+        SingleKeyRule(int keyCode, @KeyGestureFlag int supportedGestures) {
             mKeyCode = keyCode;
             mSupportedGestures = supportedGestures;
-            mDefaultLongPressTimeout =
-                ViewConfiguration.get(context).getDeviceGlobalActionKeyTimeout();
-            mDefaultVeryLongPressTimeout = context.getResources().getInteger(
-                com.android.internal.R.integer.config_veryLongPressTimeout);
         }
 
         /**
@@ -145,7 +142,7 @@ public final class SingleKeyGestureDetector {
          *  press timeout.
          */
         long getLongPressTimeoutMs() {
-            return mDefaultLongPressTimeout;
+            return sDefaultLongPressTimeout;
         }
         /**
          *  Callback when long press has been detected.
@@ -157,7 +154,7 @@ public final class SingleKeyGestureDetector {
          *  If long press is supported, this should always be longer than the long press timeout.
          */
         long getVeryLongPressTimeoutMs() {
-            return mDefaultVeryLongPressTimeout;
+            return sDefaultVeryLongPressTimeout;
         }
         /**
          *  Callback when very long press has been detected.
@@ -173,7 +170,16 @@ public final class SingleKeyGestureDetector {
         }
     }
 
-    public SingleKeyGestureDetector() {
+    static SingleKeyGestureDetector get(Context context) {
+        SingleKeyGestureDetector detector = new SingleKeyGestureDetector();
+        sDefaultLongPressTimeout = context.getResources().getInteger(
+                com.android.internal.R.integer.config_globalActionsKeyTimeout);
+        sDefaultVeryLongPressTimeout = context.getResources().getInteger(
+                com.android.internal.R.integer.config_veryLongPressTimeout);
+        return detector;
+    }
+
+    private SingleKeyGestureDetector() {
         mHandler = new KeyHandler();
     }
 

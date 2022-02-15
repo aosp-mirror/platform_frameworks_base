@@ -28,43 +28,49 @@ import java.util.Objects;
 /**
  * Holds all the relevant data needed to render a Smartspace card with the sub-card Ui Template.
  *
+ * This template will add a sub-card card within the default-template card:
+ * <ul>
+ *     <li> sub-card icon </li>
+ *     <li> sub-card text </li>
+ * </ul>
+ *
  * @hide
  */
 @SystemApi
-public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTemplateData {
+public final class SubCardTemplateData extends BaseTemplateData {
 
     /** Icon for the sub-card. */
     @NonNull
-    private final SmartspaceIcon mSubCardIcon;
+    private final Icon mSubCardIcon;
 
     /** Text for the sub-card, which shows below the icon when being set. */
     @Nullable
-    private final SmartspaceText mSubCardText;
+    private final Text mSubCardText;
 
     /** Tap action for the sub-card secondary card. */
     @Nullable
-    private final SmartspaceTapAction mSubCardAction;
+    private final TapAction mSubCardAction;
 
-    SmartspaceSubCardUiTemplateData(@NonNull Parcel in) {
+    SubCardTemplateData(@NonNull Parcel in) {
         super(in);
-        mSubCardIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
-        mSubCardText = in.readTypedObject(SmartspaceText.CREATOR);
-        mSubCardAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
+        mSubCardIcon = in.readTypedObject(Icon.CREATOR);
+        mSubCardText = in.readTypedObject(Text.CREATOR);
+        mSubCardAction = in.readTypedObject(TapAction.CREATOR);
     }
 
-    private SmartspaceSubCardUiTemplateData(int templateType,
-            @Nullable SmartspaceText titleText,
-            @Nullable SmartspaceIcon titleIcon,
-            @Nullable SmartspaceText subtitleText,
-            @Nullable SmartspaceIcon subTitleIcon,
-            @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable SmartspaceText supplementalSubtitleText,
-            @Nullable SmartspaceIcon supplementalSubtitleIcon,
-            @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable SmartspaceText supplementalAlarmText,
-            @NonNull SmartspaceIcon subCardIcon,
-            @Nullable SmartspaceText subCardText,
-            @Nullable SmartspaceTapAction subCardAction) {
+    private SubCardTemplateData(int templateType,
+            @Nullable Text titleText,
+            @Nullable Icon titleIcon,
+            @Nullable Text subtitleText,
+            @Nullable Icon subTitleIcon,
+            @Nullable TapAction primaryTapAction,
+            @Nullable Text supplementalSubtitleText,
+            @Nullable Icon supplementalSubtitleIcon,
+            @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable Text supplementalAlarmText,
+            @NonNull Icon subCardIcon,
+            @Nullable Text subCardText,
+            @Nullable TapAction subCardAction) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
                 supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
                 supplementalAlarmText);
@@ -73,18 +79,21 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
         mSubCardAction = subCardAction;
     }
 
+    /** Returns the sub-card card's icon. */
     @NonNull
-    public SmartspaceIcon getSubCardIcon() {
+    public Icon getSubCardIcon() {
         return mSubCardIcon;
     }
 
+    /** Returns the sub-card card's text. */
     @Nullable
-    public SmartspaceText getSubCardText() {
+    public Text getSubCardText() {
         return mSubCardText;
     }
 
+    /** Returns the sub-card card's tap action. */
     @Nullable
-    public SmartspaceTapAction getSubCardAction() {
+    public TapAction getSubCardAction() {
         return mSubCardAction;
     }
 
@@ -92,16 +101,16 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
      * @see Parcelable.Creator
      */
     @NonNull
-    public static final Creator<SmartspaceSubCardUiTemplateData> CREATOR =
-            new Creator<SmartspaceSubCardUiTemplateData>() {
+    public static final Creator<SubCardTemplateData> CREATOR =
+            new Creator<SubCardTemplateData>() {
                 @Override
-                public SmartspaceSubCardUiTemplateData createFromParcel(Parcel in) {
-                    return new SmartspaceSubCardUiTemplateData(in);
+                public SubCardTemplateData createFromParcel(Parcel in) {
+                    return new SubCardTemplateData(in);
                 }
 
                 @Override
-                public SmartspaceSubCardUiTemplateData[] newArray(int size) {
-                    return new SmartspaceSubCardUiTemplateData[size];
+                public SubCardTemplateData[] newArray(int size) {
+                    return new SubCardTemplateData[size];
                 }
             };
 
@@ -121,9 +130,9 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceSubCardUiTemplateData)) return false;
+        if (!(o instanceof SubCardTemplateData)) return false;
         if (!super.equals(o)) return false;
-        SmartspaceSubCardUiTemplateData that = (SmartspaceSubCardUiTemplateData) o;
+        SubCardTemplateData that = (SubCardTemplateData) o;
         return mSubCardIcon.equals(that.mSubCardIcon) && SmartspaceUtils.isEqual(mSubCardText,
                 that.mSubCardText) && Objects.equals(mSubCardAction,
                 that.mSubCardAction);
@@ -144,21 +153,21 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
     }
 
     /**
-     * A builder for {@link SmartspaceSubCardUiTemplateData} object.
+     * A builder for {@link SubCardTemplateData} object.
      *
      * @hide
      */
     @SystemApi
-    public static final class Builder extends SmartspaceDefaultUiTemplateData.Builder {
+    public static final class Builder extends BaseTemplateData.Builder {
 
-        private final SmartspaceIcon mSubCardIcon;
-        private SmartspaceText mSubCardText;
-        private SmartspaceTapAction mSubCardAction;
+        private final Icon mSubCardIcon;
+        private Text mSubCardText;
+        private TapAction mSubCardAction;
 
         /**
-         * A builder for {@link SmartspaceSubCardUiTemplateData}.
+         * A builder for {@link SubCardTemplateData}.
          */
-        public Builder(@NonNull SmartspaceIcon subCardIcon) {
+        public Builder(@NonNull Icon subCardIcon) {
             super(SmartspaceTarget.UI_TEMPLATE_SUB_CARD);
             mSubCardIcon = Objects.requireNonNull(subCardIcon);
         }
@@ -167,7 +176,7 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
          * Sets the card text.
          */
         @NonNull
-        public Builder setSubCardText(@NonNull SmartspaceText subCardText) {
+        public Builder setSubCardText(@NonNull Text subCardText) {
             mSubCardText = subCardText;
             return this;
         }
@@ -176,7 +185,7 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
          * Sets the card tap action.
          */
         @NonNull
-        public Builder setSubCardAction(@NonNull SmartspaceTapAction subCardAction) {
+        public Builder setSubCardAction(@NonNull TapAction subCardAction) {
             mSubCardAction = subCardAction;
             return this;
         }
@@ -185,8 +194,8 @@ public final class SmartspaceSubCardUiTemplateData extends SmartspaceDefaultUiTe
          * Builds a new SmartspaceSubCardUiTemplateData instance.
          */
         @NonNull
-        public SmartspaceSubCardUiTemplateData build() {
-            return new SmartspaceSubCardUiTemplateData(getTemplateType(), getTitleText(),
+        public SubCardTemplateData build() {
+            return new SubCardTemplateData(getTemplateType(), getTitleText(),
                     getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubCardIcon,

@@ -40,8 +40,6 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Date;
 
 public class ZenModeFiltering {
@@ -416,16 +414,10 @@ public class ZenModeFiltering {
                 if (person == null) continue;
                 final Uri uri = Uri.parse(person);
                 if ("tel".equals(uri.getScheme())) {
-                    String tel = uri.getSchemeSpecificPart();
-                    // while ideally we should not need to do this, sometimes we have seen tel
-                    // numbers given in a url-encoded format
-                    try {
-                        tel = URLDecoder.decode(tel, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        // ignore, keep the original tel string
-                        Slog.w(TAG, "unsupported encoding in tel: uri input");
-                    }
-                    mTelCalls.put(tel, now);
+                    // while ideally we should not need to decode this, sometimes we have seen tel
+                    // numbers given in an encoded format
+                    String tel = Uri.decode(uri.getSchemeSpecificPart());
+                    if (tel != null) mTelCalls.put(tel, now);
                 } else {
                     // for non-tel calls, store the entire string, uri-component and all
                     mOtherCalls.put(person, now);
@@ -436,7 +428,7 @@ public class ZenModeFiltering {
             // provided; these are in the format of just a phone number string
             if (phoneNumbers != null) {
                 for (String num : phoneNumbers) {
-                    mTelCalls.put(num, now);
+                    if (num != null) mTelCalls.put(num, now);
                 }
             }
         }
@@ -456,17 +448,13 @@ public class ZenModeFiltering {
                         return true;
                     } else {
                         // see if a number that matches via areSameNumber exists
-                        String numberToCheck = number;
-                        try {
-                            numberToCheck = URLDecoder.decode(number, "UTF-8");
-                        } catch (UnsupportedEncodingException e) {
-                            // ignore, continue to use the original string
-                            Slog.w(TAG, "unsupported encoding in tel: uri input");
-                        }
-                        for (String prev : mTelCalls.keySet()) {
-                            if (PhoneNumberUtils.areSamePhoneNumber(
-                                    numberToCheck, prev, defaultCountryCode)) {
-                                return true;
+                        String numberToCheck = Uri.decode(number);
+                        if (numberToCheck != null) {
+                            for (String prev : mTelCalls.keySet()) {
+                                if (PhoneNumberUtils.areSamePhoneNumber(
+                                        numberToCheck, prev, defaultCountryCode)) {
+                                    return true;
+                                }
                             }
                         }
                     }

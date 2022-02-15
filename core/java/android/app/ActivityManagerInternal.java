@@ -826,4 +826,9 @@ public abstract class ActivityManagerInternal {
      * Register the bind service event listener callback.
      */
     public abstract void addBindServiceEventListener(@NonNull BindServiceEventListener listener);
+
+    /**
+     * Restart android.
+     */
+    public abstract void restart();
 }

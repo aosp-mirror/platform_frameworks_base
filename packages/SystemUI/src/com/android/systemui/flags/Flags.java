@@ -146,6 +146,7 @@ public class Flags {
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
+    public static final BooleanFlag MEDIA_NEARBY_DEVICES = new BooleanFlag(903, true);
     public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
 
     // 1000 - dock

@@ -17,7 +17,6 @@ package com.android.systemui.qs
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
@@ -42,7 +41,6 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
     private lateinit var settingsButton: SettingsButton
     private lateinit var multiUserSwitch: MultiUserSwitch
     private lateinit var multiUserAvatar: ImageView
-    private lateinit var tunerIcon: View
 
     private var qsDisabled = false
     private var expansionAmount = 0f
@@ -53,50 +51,30 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         settingsContainer = findViewById(R.id.settings_button_container)
         multiUserSwitch = findViewById(R.id.multi_user_switch)
         multiUserAvatar = multiUserSwitch.findViewById(R.id.multi_user_avatar)
-        tunerIcon = requireViewById(R.id.tuner_icon)
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
         if (settingsButton.background is RippleDrawable) {
             (settingsButton.background as RippleDrawable).setForceSoftware(true)
         }
-        updateResources()
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        updateResources()
-    }
-
-    override fun onRtlPropertiesChanged(layoutDirection: Int) {
-        super.onRtlPropertiesChanged(layoutDirection)
-        updateResources()
-    }
-
-    private fun updateResources() {
-        val tunerIconTranslation = mContext.resources
-                .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation).toFloat()
-        tunerIcon.translationX = if (isLayoutRtl) (-tunerIconTranslation) else tunerIconTranslation
     }
 
     fun disable(
         state2: Int,
-        isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
     ) {
         val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
         if (disabled == qsDisabled) return
         qsDisabled = disabled
-        updateEverything(isTunerEnabled, multiUserEnabled)
+        updateEverything(multiUserEnabled)
     }
 
     fun updateEverything(
-        isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
     ) {
         post {
-            updateVisibilities(isTunerEnabled, multiUserEnabled)
+            updateVisibilities(multiUserEnabled)
             updateClickabilities()
             isClickable = false
         }
@@ -108,11 +86,9 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
     }
 
     private fun updateVisibilities(
-        isTunerEnabled: Boolean,
         multiUserEnabled: Boolean
     ) {
         settingsContainer.visibility = if (qsDisabled) GONE else VISIBLE
-        tunerIcon.visibility = if (isTunerEnabled) VISIBLE else INVISIBLE
         multiUserSwitch.visibility = if (multiUserEnabled) VISIBLE else GONE
         val isDemo = UserManager.isDeviceInDemoMode(context)
         settingsButton.visibility = if (isDemo) INVISIBLE else VISIBLE

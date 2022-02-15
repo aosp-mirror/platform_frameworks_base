@@ -90,6 +90,12 @@ public class PinnedStackListenerForwarder {
         }
     }
 
+    private void onExpandedAspectRatioChanged(float aspectRatio) {
+        for (PinnedTaskListener listener : mListeners) {
+            listener.onExpandedAspectRatioChanged(aspectRatio);
+        }
+    }
+
     @BinderThread
     private class PinnedTaskListenerImpl extends IPinnedTaskListener.Stub {
         @Override
@@ -126,6 +132,15 @@ public class PinnedStackListenerForwarder {
                 PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
             });
         }
+
+        @Override
+        public void onExpandedAspectRatioChanged(float aspectRatio) {
+            mMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onExpandedAspectRatioChanged(aspectRatio);
+            });
+        }
+
+
     }
 
     /**
@@ -142,5 +157,7 @@ public class PinnedStackListenerForwarder {
         public void onActivityHidden(ComponentName componentName) {}
 
         public void onAspectRatioChanged(float aspectRatio) {}
+
+        public void onExpandedAspectRatioChanged(float aspectRatio) {}
     }
 }

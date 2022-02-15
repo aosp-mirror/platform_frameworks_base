@@ -17124,12 +17124,17 @@ package android.hardware {
     field public static final int MICROPHONE = 1; // 0x1
   }
 
-  public final class SyncFence implements java.io.Closeable android.os.Parcelable {
-    method public void close() throws java.io.IOException;
+  public final class SyncFence implements java.lang.AutoCloseable android.os.Parcelable {
+    method public boolean await(@NonNull java.time.Duration);
+    method public boolean awaitForever();
+    method public void close();
     method public int describeContents();
+    method public long getSignalTime();
     method public boolean isValid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.SyncFence> CREATOR;
+    field public static final long SIGNAL_TIME_INVALID = -1L; // 0xffffffffffffffffL
+    field public static final long SIGNAL_TIME_PENDING = 9223372036854775807L; // 0x7fffffffffffffffL
   }
 
   public final class TriggerEvent {
@@ -27879,12 +27884,17 @@ package android.opengl {
 
   public class EGLExt {
     ctor public EGLExt();
+    method @NonNull public static android.hardware.SyncFence eglDupNativeFenceFDANDROID(@NonNull android.opengl.EGLDisplay, @NonNull android.opengl.EGLSync);
     method public static boolean eglPresentationTimeANDROID(android.opengl.EGLDisplay, android.opengl.EGLSurface, long);
     field public static final int EGL_CONTEXT_FLAGS_KHR = 12540; // 0x30fc
     field public static final int EGL_CONTEXT_MAJOR_VERSION_KHR = 12440; // 0x3098
     field public static final int EGL_CONTEXT_MINOR_VERSION_KHR = 12539; // 0x30fb
+    field public static final int EGL_NO_NATIVE_FENCE_FD_ANDROID = -1; // 0xffffffff
     field public static final int EGL_OPENGL_ES3_BIT_KHR = 64; // 0x40
     field public static final int EGL_RECORDABLE_ANDROID = 12610; // 0x3142
+    field public static final int EGL_SYNC_NATIVE_FENCE_ANDROID = 12612; // 0x3144
+    field public static final int EGL_SYNC_NATIVE_FENCE_FD_ANDROID = 12613; // 0x3145
+    field public static final int EGL_SYNC_NATIVE_FENCE_SIGNALED_ANDROID = 12614; // 0x3146
   }
 
   public class EGLImage extends android.opengl.EGLObjectHandle {
@@ -42724,16 +42734,16 @@ package android.telephony {
     ctor @Deprecated public ServiceState(android.os.Parcel);
     method protected void copyFrom(android.telephony.ServiceState);
     method public int describeContents();
-    method public int getCdmaNetworkId();
-    method public int getCdmaSystemId();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public int getCdmaNetworkId();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public int getCdmaSystemId();
     method public int[] getCellBandwidths();
     method public int getChannelNumber();
     method public int getDuplexMode();
     method public boolean getIsManualSelection();
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoList();
-    method public String getOperatorAlphaLong();
-    method public String getOperatorAlphaShort();
-    method public String getOperatorNumeric();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorAlphaLong();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorAlphaShort();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorNumeric();
     method public boolean getRoaming();
     method public int getState();
     method public boolean isSearching();
