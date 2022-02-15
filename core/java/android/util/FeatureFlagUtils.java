@@ -67,6 +67,13 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
             "settings_app_allow_dark_theme_activation_at_bedtime";
 
+    /**
+     * Hide back key in the Settings two pane design.
+     * @hide
+     */
+    public static final String SETTINGS_HIDE_SECONDARY_PAGE_BACK_BUTTON_IN_TWO_PANE =
+            "settings_hide_secondary_page_back_button_in_two_pane";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -92,6 +99,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "false");
+        DEFAULT_FLAGS.put(SETTINGS_HIDE_SECONDARY_PAGE_BACK_BUTTON_IN_TWO_PANE, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -101,6 +109,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
+        PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECONDARY_PAGE_BACK_BUTTON_IN_TWO_PANE);
     }
 
     /**
