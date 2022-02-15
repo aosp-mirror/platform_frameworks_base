@@ -205,6 +205,12 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(callback, times(1)).onLocationActiveChanged(false);
+
+        when(mAppOpsController.getActiveAppOps()).thenReturn(ImmutableList.of());
+        mLocationController.onActiveStateChanged(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, 0,
+                "com.google.android.googlequicksearchbox", true);
+        mTestableLooper.processAllMessages();
+        verify(callback, times(1)).onLocationActiveChanged(true);
     }
 
     @Test
