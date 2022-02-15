@@ -42,7 +42,6 @@ import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HighBrightnessMode;
-import com.android.server.display.config.Interpolation;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
@@ -1254,19 +1253,17 @@ public class DisplayDeviceConfig {
         }
     }
 
-    private int convertInterpolationType(Interpolation value) {
-        if (value == null) {
+    private int convertInterpolationType(String value) {
+        if (TextUtils.isEmpty(value)) {
             return INTERPOLATION_DEFAULT;
         }
-        switch (value) {
-            case _default:
-                return INTERPOLATION_DEFAULT;
-            case linear:
-                return INTERPOLATION_LINEAR;
-            default:
-                Slog.wtf(TAG, "Unexpected Interpolation Type: " + value);
-                return INTERPOLATION_DEFAULT;
+
+        if ("linear".equals(value)) {
+            return INTERPOLATION_LINEAR;
         }
+
+        Slog.wtf(TAG, "Unexpected Interpolation Type: " + value);
+        return INTERPOLATION_DEFAULT;
     }
 
     private void loadAmbientHorizonFromDdc(DisplayConfiguration config) {
