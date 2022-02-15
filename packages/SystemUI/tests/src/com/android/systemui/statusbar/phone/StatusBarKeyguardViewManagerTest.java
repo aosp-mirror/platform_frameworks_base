@@ -53,12 +53,15 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -100,6 +103,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
+    private SysUIUnfoldComponent mSysUiUnfoldComponent;
+    @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
     @Mock
     private LatencyTracker mLatencyTracker;
@@ -130,6 +135,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
                 mKeyguardMessageAreaFactory,
+                Optional.of(mSysUiUnfoldComponent),
                 () -> mShadeController,
                 mLatencyTracker);
         mStatusBarKeyguardViewManager.registerStatusBar(

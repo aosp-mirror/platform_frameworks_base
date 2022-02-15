@@ -48,16 +48,16 @@ constructor(
     private var pendingScrimReadyCallback: Runnable? = null
 
     private var shouldPlayAnimation = false
+    private var isAnimationPlaying = false
+
     private val statusListeners = arrayListOf<FoldAodAnimationStatus>()
 
     private val startAnimationRunnable = Runnable {
         statusBar.notificationPanelViewController.startFoldToAodAnimation {
             // End action
-            isAnimationPlaying = false
+            setAnimationState(playing = false)
         }
     }
-
-    private var isAnimationPlaying = false
 
     override fun initialize(statusBar: StatusBar, lightRevealScrim: LightRevealScrim) {
         this.statusBar = statusBar
@@ -71,17 +71,13 @@ constructor(
     override fun startAnimation(): Boolean =
         if (alwaysOnEnabled &&
             wakefulnessLifecycle.lastSleepReason == PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD &&
-            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0") {
-            shouldPlayAnimation = true
-
-            isAnimationPlaying = true
+            globalSettings.getString(Settings.Global.ANIMATOR_DURATION_SCALE) != "0"
+        ) {
+            setAnimationState(playing = true)
             statusBar.notificationPanelViewController.prepareFoldToAodAnimation()
-
-            statusListeners.forEach(FoldAodAnimationStatus::onFoldToAodAnimationChanged)
-
             true
         } else {
-            shouldPlayAnimation = false
+            setAnimationState(playing = false)
             false
         }
 
@@ -91,8 +87,13 @@ constructor(
             statusBar.notificationPanelViewController.cancelFoldToAodAnimation();
         }
 
-        shouldPlayAnimation = false
-        isAnimationPlaying = false
+        setAnimationState(playing = false)
+    }
+
+    private fun setAnimationState(playing: Boolean) {
+        shouldPlayAnimation = playing
+        isAnimationPlaying = playing
+        statusListeners.forEach(FoldAodAnimationStatus::onFoldToAodAnimationChanged)
     }
 
     /**
