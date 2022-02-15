@@ -208,6 +208,9 @@ class ActivityStarter {
     private boolean mAvoidMoveToFront;
     private boolean mFrozeTaskList;
     private boolean mTransientLaunch;
+    // The task which was above the targetTask before starting this activity. null if the targetTask
+    // was already on top or if the activity is in a new task.
+    private Task mPriorAboveTask;
 
     // We must track when we deliver the new intent since multiple code paths invoke
     // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
@@ -1666,7 +1669,8 @@ class ActivityStarter {
                 if (isTransient) {
                     // `r` isn't guaranteed to be the actual relevant activity, so we must wait
                     // until after we launched to identify the relevant activity.
-                    transitionController.setTransientLaunch(mLastStartActivityRecord);
+                    transitionController.setTransientLaunch(mLastStartActivityRecord,
+                            mPriorAboveTask);
                 }
                 if (newTransition != null) {
                     transitionController.requestStartTransition(newTransition,
@@ -1783,6 +1787,10 @@ class ActivityStarter {
         int startResult = isAllowedToStart(r, newTask, targetTask);
         if (startResult != START_SUCCESS) {
             return startResult;
+        }
+
+        if (targetTask != null) {
+            mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
         }
 
         final ActivityRecord targetTaskTop = newTask

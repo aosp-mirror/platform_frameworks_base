@@ -571,6 +571,24 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * If `container` was brought to front as a transient-launch (eg. recents), this will reorder
+     * the container back to where it was prior to the transient-launch. This way if a transient
+     * launch is "aborted", the z-ordering of containers in WM should be restored to before the
+     * launch.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction restoreTransientOrder(
+            @NonNull WindowContainerToken container) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER)
+                        .setContainer(container.asBinder())
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * When this {@link WindowContainerTransaction} failed to finish on the server side, it will
      * trigger callback with this {@param errorCallbackToken}.
      * @param errorCallbackToken    client provided token that will be passed back as parameter in
@@ -974,6 +992,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_PENDING_INTENT = 12;
         public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS = 13;
         public static final int HIERARCHY_OP_TYPE_START_SHORTCUT = 14;
+        public static final int HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER = 15;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.

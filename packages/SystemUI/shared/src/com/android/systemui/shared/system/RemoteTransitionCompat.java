@@ -132,12 +132,13 @@ public class RemoteTransitionCompat implements Parcelable {
                 // the current going-away task on top of recents, though, so move it to front
                 final ArrayList<WindowContainerToken> pausingTasks = new ArrayList<>();
                 WindowContainerToken pipTask = null;
+                WindowContainerToken recentsTask = null;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
+                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                     if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
                         t.setLayer(leashMap.get(change.getLeash()),
                                 info.getChanges().size() * 3 - i);
-                        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                         if (taskInfo == null) {
                             continue;
                         }
@@ -147,11 +148,14 @@ public class RemoteTransitionCompat implements Parcelable {
                                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
                             pipTask = taskInfo.token;
                         }
-                    } else if (change.getTaskInfo() != null
-                            && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_RECENTS) {
+                    } else if (taskInfo != null
+                            && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
                         // This task is for recents, keep it on top.
                         t.setLayer(leashMap.get(change.getLeash()),
                                 info.getChanges().size() * 3 - i);
+                        recentsTask = taskInfo.token;
+                    } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                        recentsTask = taskInfo.token;
                     }
                 }
                 // Also make all the wallpapers opaque since we want the visible from the start
@@ -160,7 +164,7 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
-                        leashMap, mToken);
+                        recentsTask, leashMap, mToken);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
             }
@@ -209,6 +213,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private IRemoteTransitionFinishedCallback mFinishCB = null;
         private ArrayList<WindowContainerToken> mPausingTasks = null;
         private WindowContainerToken mPipTask = null;
+        private WindowContainerToken mRecentsTask = null;
         private TransitionInfo mInfo = null;
         private ArrayList<SurfaceControl> mOpeningLeashes = null;
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
@@ -218,7 +223,8 @@ public class RemoteTransitionCompat implements Parcelable {
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB,
                 ArrayList<WindowContainerToken> pausingTasks, WindowContainerToken pipTask,
-                ArrayMap<SurfaceControl, SurfaceControl> leashMap, IBinder transition) {
+                WindowContainerToken recentsTask, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
+                IBinder transition) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -228,6 +234,7 @@ public class RemoteTransitionCompat implements Parcelable {
             mFinishCB = finishCB;
             mPausingTasks = pausingTasks;
             mPipTask = pipTask;
+            mRecentsTask = recentsTask;
             mLeashMap = leashMap;
             mTransition = transition;
         }
@@ -328,6 +335,9 @@ public class RemoteTransitionCompat implements Parcelable {
                     // reverse order so that index 0 ends up on top
                     wct.reorder(mPausingTasks.get(i), true /* onTop */);
                     t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                }
+                if (mRecentsTask != null) {
+                    wct.restoreTransientOrder(mRecentsTask);
                 }
             } else {
                 wct = null;

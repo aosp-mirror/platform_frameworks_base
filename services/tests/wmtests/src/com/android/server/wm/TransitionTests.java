@@ -713,7 +713,7 @@ public class TransitionTests extends WindowTestsBase {
         closeTransition.collectExistenceChange(activity1);
         closeTransition.collectExistenceChange(task2);
         closeTransition.collectExistenceChange(activity2);
-        closeTransition.setTransientLaunch(activity2);
+        closeTransition.setTransientLaunch(activity2, null /* restoreBelow */);
 
         activity1.mVisibleRequested = false;
         activity2.mVisibleRequested = true;

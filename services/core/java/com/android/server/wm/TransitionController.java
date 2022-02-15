@@ -520,10 +520,12 @@ class TransitionController {
     /**
      * Record that the launch of {@param activity} is transient (meaning its lifecycle is currently
      * tied to the transition).
+     * @param restoreBelowTask If non-null, the activity's task will be ordered right below this
+     *                         task if requested.
      */
-    void setTransientLaunch(@NonNull ActivityRecord activity) {
+    void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelowTask) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setTransientLaunch(activity);
+        mCollectingTransition.setTransientLaunch(activity, restoreBelowTask);
 
         // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
         // Also interpret HOME transient launch as recents

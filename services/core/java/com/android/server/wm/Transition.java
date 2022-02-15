@@ -167,8 +167,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private final ArraySet<WindowToken> mVisibleAtTransitionEndTokens = new ArraySet<>();
 
-    /** Set of transient activities (lifecycle initially tied to this transition). */
-    private ArraySet<ActivityRecord> mTransientLaunches = null;
+    /**
+     * Set of transient activities (lifecycle initially tied to this transition) and their
+     * restore-below tasks.
+     */
+    private ArrayMap<ActivityRecord, Task> mTransientLaunches = null;
 
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
@@ -196,17 +199,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /** Records an activity as transient-launch. This activity must be already collected. */
-    void setTransientLaunch(@NonNull ActivityRecord activity) {
+    void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelow) {
         if (mTransientLaunches == null) {
-            mTransientLaunches = new ArraySet<>();
+            mTransientLaunches = new ArrayMap<>();
         }
-        mTransientLaunches.add(activity);
+        mTransientLaunches.put(activity, restoreBelow);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
                 + "transient-launch", mSyncId, activity);
     }
 
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {
-        return mTransientLaunches != null && mTransientLaunches.contains(activity);
+        return mTransientLaunches != null && mTransientLaunches.containsKey(activity);
+    }
+
+    Task getTransientLaunchRestoreTarget(@NonNull WindowContainer container) {
+        for (int i = 0; i < mTransientLaunches.size(); ++i) {
+            if (mTransientLaunches.keyAt(i).isDescendantOf(container)) {
+                return mTransientLaunches.valueAt(i);
+            }
+        }
+        return null;
     }
 
     boolean isOnDisplay(@NonNull DisplayContent dc) {
@@ -464,7 +476,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                                 && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
                             if (mTransientLaunches != null) {
                                 for (int j = 0; j < mTransientLaunches.size(); ++j) {
-                                    if (mTransientLaunches.valueAt(j).isVisibleRequested()) {
+                                    if (mTransientLaunches.keyAt(j).isVisibleRequested()) {
                                         // force enable pip-on-task-switch now that we've committed
                                         // to actually launching to the transient activity.
                                         ar.supportsEnterPipOnTaskSwitch = true;
@@ -543,7 +555,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
                 // so re-compute in case the IME target is changed after transition.
                 for (int t = 0; t < mTransientLaunches.size(); ++t) {
-                    if (mTransientLaunches.valueAt(t).getDisplayContent() == dc) {
+                    if (mTransientLaunches.keyAt(t).getDisplayContent() == dc) {
                         dc.computeImeTarget(true /* updateImeTarget */);
                         break;
                     }
