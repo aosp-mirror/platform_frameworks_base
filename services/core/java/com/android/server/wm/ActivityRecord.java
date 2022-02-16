@@ -2515,7 +2515,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         removeStartingWindowAnimation(true /* prepareAnimation */);
 
-        // TODO(b/215316431): Add tests
         final Task task = getTask();
         if (prevEligibleForLetterboxEducation != isEligibleForLetterboxEducation()
                 && task != null) {
@@ -7695,7 +7694,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     once the starting window is removed in {@link #removeStartingWindow}).
      * </ul>
      */
-    // TODO(b/215316431): Add tests
     boolean isEligibleForLetterboxEducation() {
         return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
