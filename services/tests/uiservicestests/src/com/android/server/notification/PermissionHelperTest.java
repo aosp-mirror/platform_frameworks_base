@@ -221,6 +221,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_grantUserSet() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
         mPermissionHelper.setNotificationPermission("pkg", 10, true, true);
 
         verify(mPermManager).grantRuntimePermission(
@@ -232,9 +234,12 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_grantReviewRequired() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false, true);
 
-        verify(mPermManager).revokeRuntimePermission(
+        verify(mPermManager, never()).revokeRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
                 FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
@@ -242,11 +247,14 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_pkgPerm_grantReviewRequired() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+
         PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
                 "pkg", 10, true, false);
         mPermissionHelper.setNotificationPermission(pkgPerm);
 
-        verify(mPermManager).revokeRuntimePermission(
+        verify(mPermManager, never()).revokeRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
                 FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
@@ -255,6 +263,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Test
     public void testSetNotificationPermission_pkgPerm_notUserSet_grantedByDefaultPermNotSet()
             throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
                 anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
@@ -271,6 +281,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Test
     public void testSetNotificationPermission_pkgPerm_userSet_grantedByDefaultPermSet()
             throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
                 anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
@@ -287,6 +299,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_revokeUserSet() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
 
         verify(mPermManager).revokeRuntimePermission(
@@ -298,6 +313,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_grantNotUserSet() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
 
         verify(mPermManager).grantRuntimePermission(
@@ -308,6 +326,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_revokeNotUserSet() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
         verify(mPermManager).revokeRuntimePermission(
@@ -340,6 +361,26 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 anyString(), anyString(), anyInt(), anyString());
         verify(mPermManager, never()).updatePermissionFlags(
                 anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationPermission_alreadyGrantedNotRegranted() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+        mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
+
+        verify(mPermManager, never()).grantRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+    }
+
+    @Test
+    public void testSetNotificationPermission_alreadyRevokedNotRerevoked() throws Exception {
+        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
+
+        verify(mPermManager, never()).revokeRuntimePermission(
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
     }
 
     @Test

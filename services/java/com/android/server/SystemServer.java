@@ -417,6 +417,8 @@ public final class SystemServer implements Dumpable {
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
+    private static final String BLUETOOTH_SERVICE_CLASS =
+            "com.android.server.bluetooth.BluetoothService";
 
     private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
             "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
@@ -1624,7 +1626,7 @@ public final class SystemServer implements Dumpable {
                 Slog.i(TAG, "No Bluetooth Service (Bluetooth Hardware Not Present)");
             } else {
                 t.traceBegin("StartBluetoothService");
-                mSystemServiceManager.startService(BluetoothService.class);
+                mSystemServiceManager.startService(BLUETOOTH_SERVICE_CLASS);
                 t.traceEnd();
             }
 

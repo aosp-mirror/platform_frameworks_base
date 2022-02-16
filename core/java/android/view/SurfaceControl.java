@@ -46,10 +46,13 @@ import android.graphics.Region;
 import android.gui.DropInputMode;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSync;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -209,7 +212,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
     private static native void nativeSetBuffer(long transactionObj, long nativeObject,
-            HardwareBuffer buffer);
+            HardwareBuffer buffer, long fencePtr);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
@@ -3692,8 +3695,44 @@ public final class SurfaceControl implements Parcelable {
          */
         public @NonNull Transaction setBuffer(@NonNull SurfaceControl sc,
                 @Nullable HardwareBuffer buffer) {
+            return setBuffer(sc, buffer, null);
+        }
+
+        /**
+         * Updates the HardwareBuffer displayed for the SurfaceControl.
+         *
+         * Note that the buffer must be allocated with {@link HardwareBuffer#USAGE_COMPOSER_OVERLAY}
+         * as well as {@link HardwareBuffer#USAGE_GPU_SAMPLED_IMAGE} as the surface control might
+         * be composited using either an overlay or using the GPU.
+         *
+         * A presentation fence may be passed to improve performance by allowing the buffer
+         * to complete rendering while it is waiting for the transaction to be applied.
+         * For example, if the buffer is being produced by rendering with OpenGL ES then
+         * a fence created with
+         * {@link android.opengl.EGLExt#eglDupNativeFenceFDANDROID(EGLDisplay, EGLSync)} can be
+         * used to allow the GPU rendering to be concurrent with the transaction. The compositor
+         * will wait for the fence to be signaled before the buffer is displayed. If multiple
+         * buffers are set as part of the same transaction, the presentation fences of all of them
+         * must signal before any buffer is displayed. That is, the entire transaction is delayed
+         * until all presentation fences have signaled, ensuring the transaction remains consistent.
+         *
+         * @param sc The SurfaceControl to update
+         * @param buffer The buffer to be displayed
+         * @param fence The presentation fence. If null or invalid, this is equivalent to
+         *              {@link #setBuffer(SurfaceControl, HardwareBuffer)}
+         * @return this
+         */
+        public @NonNull Transaction setBuffer(@NonNull SurfaceControl sc,
+                @Nullable HardwareBuffer buffer, @Nullable SyncFence fence) {
             checkPreconditions(sc);
-            nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer);
+            if (fence != null) {
+                synchronized (fence.getLock()) {
+                    nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer,
+                            fence.getNativeFence());
+                }
+            } else {
+                nativeSetBuffer(mNativeObject, sc.mNativeObject, buffer, 0);
+            }
             return this;
         }
 

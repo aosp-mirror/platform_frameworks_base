@@ -20,9 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -46,7 +48,7 @@ import java.util.function.Consumer;
 /**
  * Singleton source of truth for the current state of PIP bounds.
  */
-public final class PipBoundsState {
+public class PipBoundsState {
     public static final int STASH_TYPE_NONE = 0;
     public static final int STASH_TYPE_LEFT = 1;
     public static final int STASH_TYPE_RIGHT = 2;
@@ -368,11 +370,11 @@ public final class PipBoundsState {
     /**
      * Initialize states when first entering PiP.
      */
-    public void setBoundsStateForEntry(ComponentName componentName, float aspectRatio,
-            Size overrideMinSize) {
+    public void setBoundsStateForEntry(ComponentName componentName, ActivityInfo activityInfo,
+            PictureInPictureParams params, PipBoundsAlgorithm pipBoundsAlgorithm) {
         setLastPipComponentName(componentName);
-        setAspectRatio(aspectRatio);
-        setOverrideMinSize(overrideMinSize);
+        setAspectRatio(pipBoundsAlgorithm.getAspectRatioOrDefault(params));
+        setOverrideMinSize(pipBoundsAlgorithm.getMinimalSize(activityInfo));
     }
 
     /** Returns whether the shelf is currently showing. */

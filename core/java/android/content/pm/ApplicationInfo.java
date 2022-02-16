@@ -39,6 +39,7 @@ import android.util.ArraySet;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.OnBackInvokedCallback;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
@@ -801,11 +802,24 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE = 1 << 2;
 
+
+    /**
+     * If false, {@link android.view.KeyEvent#KEYCODE_BACK} related events will be forwarded to
+     * the Activities, Dialogs and Views and {@link android.app.Activity#onBackPressed()},
+     * {@link android.app.Dialog#onBackPressed} will be called. Otherwise, those events will be
+     * replaced by a call to {@link OnBackInvokedCallback#onBackInvoked()} on the focused window.
+     *
+     * @hide
+     * @see android.R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
             PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION,
             PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE,
+            PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -1683,6 +1697,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "localeConfigRes=0x"
                         + Integer.toHexString(localeConfigRes));
             }
+            pw.println(prefix + "enableOnBackInvokedCallback=" + isOnBackInvokedCallbackEnabled());
         }
         pw.println(prefix + "createTimestamp=" + createTimestamp);
         if (mKnownActivityEmbeddingCerts != null) {
@@ -2563,6 +2578,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public boolean hasRequestForegroundServiceExemption() {
         return (privateFlagsExt
                 & ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION) != 0;
+    }
+
+    /**
+     * Returns whether the application will use the {@link android.view.OnBackInvokedCallback}
+     * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
+     * callbacks.
+     *
+     * @hide
+     */
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return ((privateFlagsExt & PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
     }
 
     /**

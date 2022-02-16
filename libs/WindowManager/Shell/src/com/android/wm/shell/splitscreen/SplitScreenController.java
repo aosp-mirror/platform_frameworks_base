@@ -349,17 +349,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
-
-                if (apps != null) {
-                    for (int i = 0; i < apps.length; ++i) {
-                        if (apps[i].mode == MODE_OPENING) {
-                            t.show(apps[i].leash);
-                        }
-                    }
+                if (apps == null || apps.length == 0) {
+                    // Do nothing when the animation was cancelled.
+                    t.apply();
+                    return;
                 }
 
+                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
+                for (int i = 0; i < apps.length; ++i) {
+                    if (apps[i].mode == MODE_OPENING) {
+                        t.show(apps[i].leash);
+                    }
+                }
                 t.apply();
+
                 if (finishedCallback != null) {
                     try {
                         finishedCallback.onAnimationFinished();
@@ -642,14 +645,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         @Override
         public void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent,
-                Intent fillInIntent, int taskId, boolean intentFirst, Bundle mainOptions,
-                Bundle sideOptions, int sidePosition, float splitRatio,
-                RemoteAnimationAdapter adapter) {
+                Intent fillInIntent, int taskId, Bundle mainOptions, Bundle sideOptions,
+                int sidePosition, float splitRatio, RemoteAnimationAdapter adapter) {
             executeRemoteCallWithTaskPermission(mController,
                     "startIntentAndTaskWithLegacyTransition", (controller) ->
                             controller.mStageCoordinator.startIntentAndTaskWithLegacyTransition(
-                                    pendingIntent, fillInIntent, taskId, intentFirst, mainOptions,
-                                    sideOptions, sidePosition, splitRatio, adapter));
+                                    pendingIntent, fillInIntent, taskId, mainOptions, sideOptions,
+                                    sidePosition, splitRatio, adapter));
         }
 
         @Override

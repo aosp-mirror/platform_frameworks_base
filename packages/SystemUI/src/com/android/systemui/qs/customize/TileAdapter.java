@@ -96,15 +96,20 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mFocusIndex;
 
     private boolean mNeedsFocus;
+    @Nullable
     private List<String> mCurrentSpecs;
+    @Nullable
     private List<TileInfo> mOtherTiles;
+    @Nullable
     private List<TileInfo> mAllTiles;
 
+    @Nullable
     private Holder mCurrentDrag;
     private int mAccessibilityAction = ACTION_NONE;
     private int mAccessibilityFromIndex;
     private final UiEventLogger mUiEventLogger;
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
+    @Nullable
     private RecyclerView mRecyclerView;
     private int mNumColumns;
 
@@ -240,6 +245,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         notifyDataSetChanged();
     }
 
+    @Nullable
     private TileInfo getAndRemoveOther(String s) {
         for (int i = 0; i < mOtherTiles.size(); i++) {
             if (mOtherTiles.get(i).spec.equals(s)) {
@@ -555,7 +561,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     public class Holder extends ViewHolder {
-        private QSTileViewImpl mTileView;
+        @Nullable private QSTileViewImpl mTileView;
 
         public Holder(View itemView) {
             super(itemView);

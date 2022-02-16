@@ -588,8 +588,12 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी रखने के लिए, अपने स्क्रीन लॉक की पुष्टि करें"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"पूरा फ़िंगरप्रिंट पहचाना नहीं जा सका"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फ़िंगरप्रिंट प्रोसेस नहीं हो सका. कृपया दोबारा कोशिश करें."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेंसर को साफ़ करें"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"उंगली को थोड़ी देर और सेंसर पर रखें"</string>
+    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"किसी दूसरे फ़िंगरप्रिंट से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"बहुत रोशनी है"</string>
@@ -597,6 +601,10 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"फ़िंगरप्रिंट सेट अप करते समय, अपनी उंगली को हर बार थोड़ी अलग स्थिति में रखें"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
+    <skip />
+    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फ़िंगरप्रिंट की पुष्टि हो गई"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरे की पहचान की गई"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
@@ -1500,7 +1508,8 @@
     <string name="skip_button_label" msgid="3566599811326688389">"अभी नहीं"</string>
     <string name="no_matches" msgid="6472699895759164599">"कोई मिलान नहीं"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पेज पर ढूंढें"</string>
-    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# नतीजा{total} में से }one{# {total} में से }other{# }} }"</string>
+    <!-- no translation found for matches_found (2296462299979507689) -->
+    <skip />
     <string name="action_mode_done" msgid="2536182504764803222">"हो गया"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"शेयर की गई मेमोरी हमेशा के लिए मिटाई जा रही है…"</string>
     <string name="share" msgid="4157615043345227321">"शेयर करें"</string>
@@ -1928,6 +1937,10 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करें"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर कोशिश करें."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर कोशिश करें."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर कोशिश करें."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यह ऐप्लिकेशन Android के पुराने वर्शन के लिए बनाया गया था, इसलिए हो सकता है कि यह सही से काम न करे. देखें कि अपडेट मौजूद हैं या नहीं, या फिर डेवलपर से संपर्क करें."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"देखें कि अपडेट मौजूद है या नहीं"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपके पास नए संदेश हैं"</string>
@@ -2017,16 +2030,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"अनइंस्‍टॉल करें"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"फिर भी खोलें"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"नुकसान पहुंचाने वाले ऐप का पता चला"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"सिस्टम लॉग को ऐक्सेस करने का अनुरोध"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"सिर्फ़ इस बार"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति न दें"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"फ़ंक्शनल डीबगिंग के लिए, <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> का सिस्टम लॉग के लिए अनुरोध. इन लॉग में आपके डिवाइस पर मौजूद ऐप्लिकेशन और सेवाओं से मिली जानकारी शामिल हो सकती है."</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फिर से न दिखाएं"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
@@ -2119,10 +2127,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"वर्क प्रोफ़ाइल चालू करने के लिए टैप करें"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यह कॉन्टेंट, ऑफ़िस के काम से जुड़े आपके किसी भी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यह कॉन्टेंट आपके किसी भी निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"क्या <xliff:g id="APP">%s</xliff:g> को निजी प्रोफ़ाइल में खोलना है?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"क्या <xliff:g id="APP">%s</xliff:g> को वर्क प्रोफ़ाइल में खोलना है?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ऑफ़िस के काम से जुड़े ब्राउज़र का इस्तेमाल करें"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क को अनलॉक करने का पिन"</string>
@@ -2257,4 +2263,6 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में चल रहा है और बैटरी खर्च कर रहा है. देखने के लिए टैप करें."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में बहुत देर से चल रहा है. देखने के लिए टैप करें."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
+    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <skip />
 </resources>

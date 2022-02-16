@@ -2205,6 +2205,11 @@
     <string name="media_output_dialog_connect_failed">Can\'t switch. Tap to try again.</string>
     <!-- Title for pairing item [CHAR LIMIT=60] -->
     <string name="media_output_dialog_pairing_new">Pair new device</string>
+    <!-- Title for launch app [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_launch_app_text">To cast this session, please open the app.</string>
+    <!-- App name when can't get app name [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
+
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>

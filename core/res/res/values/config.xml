@@ -2902,6 +2902,11 @@
     <string name="config_sensorUseStartedActivity" translatable="false"
             >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of hardware privacy switches. -->
+    <string name="config_sensorUseStartedActivity_hwToggle" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
+
     <!-- Component name of the activity used to ask a user to confirm system language change after
          receiving <Set Menu Language> CEC message. -->
     <string name="config_hdmiCecSetMenuLanguageActivity"
@@ -3663,6 +3668,9 @@
     <!-- Controls whether the navigation bar lets through taps. -->
     <bool name="config_navBarTapThrough">false</bool>
 
+    <!-- Controls whether the IME renders the back and IME switcher buttons or not. -->
+    <bool name="config_imeDrawsImeNavBar">false</bool>
+
     <!-- Controls whether the side edge gestures can always trigger the transient nav bar to
          show. -->
     <bool name="config_navBarAlwaysShowOnSideEdgeGesture">false</bool>
@@ -3729,6 +3737,10 @@
     <!-- The maximum number of actions that is supported for picture-in-picture. This number
          must be no less than 3 for back compatibility. -->
     <integer name="config_pictureInPictureMaxNumberOfActions">3</integer>
+
+    <!-- The behavior when an activity has not specified a preference to dock big overlays or not.
+         Docking puts the activity side-by-side next to the big overlay windows. -->
+    <bool name="config_dockBigOverlayWindows">false</bool>
 
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
@@ -5470,10 +5482,16 @@
     <!-- On-device package for providing companion device associations. -->
     <string name="config_systemCompanionDeviceProvider" translatable="false"></string>
 
-    <!-- Whether this device is supporting the microphone toggle -->
+    <!-- Whether this device is supporting the software microphone toggle -->
     <bool name="config_supportsMicToggle">false</bool>
     <!-- Whether this device is supporting the camera toggle -->
     <bool name="config_supportsCamToggle">false</bool>
+    <!-- Whether this device is supporting the hardware microphone toggle -->
+    <bool name="config_supportsHardwareMicToggle">false</bool>
+    <!-- Whether this device is supporting the hardware camera toggle -->
+    <bool name="config_supportsHardwareCamToggle">false</bool>
+    <!-- Whether a camera intent is launched when the lens cover is toggled -->
+    <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>

@@ -12,7 +12,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.testing.FakeMetricsLogger
-import com.android.systemui.Dependency
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.flags.FeatureFlags
@@ -23,9 +22,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
-import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.settings.FakeSettings
-import com.android.systemui.utils.leaks.FakeTunerService
 import com.android.systemui.utils.leaks.LeakCheckedTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -82,8 +79,6 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         fakeSettings = FakeSettings()
-        injectLeakCheckedDependencies(*LeakCheckedTest.ALL_SUPPORTED_CLASSES)
-        val fakeTunerService = Dependency.get(TunerService::class.java) as FakeTunerService
 
         whenever(multiUserSwitchControllerFactory.create(any()))
                 .thenReturn(multiUserSwitchController)
@@ -95,9 +90,8 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         controller = FooterActionsController(view, multiUserSwitchControllerFactory,
                 activityStarter, userManager, userTracker, userInfoController,
                 deviceProvisionedController, securityFooterController, fgsManagerController,
-                falsingManager, metricsLogger, fakeTunerService,
-                globalActionsDialog, uiEventLogger, showPMLiteButton = true, fakeSettings,
-                Handler(testableLooper.looper), featureFlags)
+                falsingManager, metricsLogger, globalActionsDialog, uiEventLogger,
+                showPMLiteButton = true, fakeSettings, Handler(testableLooper.looper), featureFlags)
         controller.init()
         ViewUtils.attachView(view)
         // View looper is the testable looper associated with the test

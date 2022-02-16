@@ -116,6 +116,8 @@ import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
 import com.android.server.job.JobSchedulerInternal;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -2169,6 +2171,7 @@ public class SyncManager {
         return true;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     protected void dumpSyncState(PrintWriter pw, SyncAdapterStateFetcher buckets) {
         final StringBuilder sb = new StringBuilder();
 

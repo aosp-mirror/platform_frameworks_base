@@ -179,11 +179,9 @@ class DragDropController {
 
                         final SurfaceControl.Transaction transaction = mDragState.mTransaction;
                         transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
-                        transaction.setPosition(
-                                surfaceControl, touchX - thumbCenterX, touchY - thumbCenterY);
                         transaction.show(surfaceControl);
                         displayContent.reparentToOverlay(transaction, surfaceControl);
-                        callingWin.scheduleAnimation();
+                        mDragState.updateDragSurfaceLocked(true, touchX, touchY);
                         if (SHOW_LIGHT_TRANSACTIONS) {
                             Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                         }

@@ -1397,29 +1397,46 @@ public final class UsageStatsManager {
      * Returns the broadcast response stats since the last boot corresponding to
      * {@code packageName} and {@code id}.
      *
-     * <p>Broadcast response stats will include the aggregated data of what actions an app took upon
-     * receiving a broadcast. This data will consider the broadcasts that the caller sent to
+     * <p> Broadcast response stats will include the aggregated data of what actions an app took
+     * upon receiving a broadcast. This data will consider the broadcasts that the caller sent to
      * {@code packageName} and explicitly requested to record the response events using
      * {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
      *
-     * @param packageName The name of the package that the caller wants to query for.
-     * @param id The ID corresponding to the broadcasts that the caller wants to query for. This is
-     *           the ID the caller specifies when requesting a broadcast response event to be
-     *           recorded using {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     * <p> The returned list could one or more {@link BroadcastResponseStats} objects or be empty
+     * depending on the {@code packageName} and {@code id} and whether there is any data
+     * corresponding to these. If the {@code packageName} is not {@code null} and {@code id} is
+     * {@code > 0}, then the returned list would contain at most one {@link BroadcastResponseStats}
+     * object. Otherwise, the returned list could contain more than one
+     * {@link BroadcastResponseStats} object in no particular order.
      *
-     * @return the broadcast response stats corresponding to {@code packageName} and {@code id}.
+     * <p> Note: It is possible that same {@code id} was used for broadcasts sent to different
+     * packages. So, callers can query the data corresponding to
+     * all broadcasts with a particular {@code id} by passing {@code packageName} as {@code null}.
      *
+     * @param packageName The name of the package that the caller wants to query for
+     *                    or {@code null} to indicate that data corresponding to all packages
+     *                    should be returned.
+     * @param id The ID corresponding to the broadcasts that the caller wants to query for, or
+     *           {@code 0} to indicate that data corresponding to all IDs should be returned.
+     *           This is the ID the caller specifies when requesting a broadcast response event
+     *           to be recorded using
+     *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @return the list of broadcast response stats corresponding to {@code packageName}
+     *         and {@code id}.
+     *
+     * @see #clearBroadcastResponseStats(String, long)
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @UserHandleAware
     @NonNull
-    public BroadcastResponseStats queryBroadcastResponseStats(
-            @NonNull String packageName, @IntRange(from = 1) long id) {
+    public List<BroadcastResponseStats> queryBroadcastResponseStats(
+            @Nullable String packageName, @IntRange(from = 0) long id) {
         try {
             return mService.queryBroadcastResponseStats(packageName, id,
-                    mContext.getOpPackageName(), mContext.getUserId());
+                    mContext.getOpPackageName(), mContext.getUserId()).getList();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1428,12 +1445,15 @@ public final class UsageStatsManager {
     /**
      * Clears the broadcast response stats corresponding to {@code packageName} and {@code id}.
      *
-     * When a caller uses this API, stats related to the events occurring till that point will be
-     * cleared and subsequent calls to {@link #queryBroadcastResponseStats(String, long)} will
+     * <p> When a caller uses this API, stats related to the events occurring till that point will
+     * be cleared and subsequent calls to {@link #queryBroadcastResponseStats(String, long)} will
      * return stats related to events occurring after this.
      *
-     * @param packageName The name of the package that the caller wants to clear the data for.
-     * @param id The ID corresponding to the broadcasts that the caller wants to clear the data for.
+     * @param packageName The name of the package that the caller wants to clear the data for or
+     *                    {@code null} to indicate that data corresponding to all packages should
+     *                    be cleared.
+     * @param id The ID corresponding to the broadcasts that the caller wants to clear the data
+     *           for, or {code 0} to indicate that data corresponding to all IDs should be deleted.
      *           This is the ID the caller specifies when requesting a broadcast response event
      *           to be recorded using
      *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
@@ -1444,11 +1464,26 @@ public final class UsageStatsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @UserHandleAware
-    public void clearBroadcastResponseStats(@NonNull String packageName,
-            @IntRange(from = 1) long id) {
+    public void clearBroadcastResponseStats(@Nullable String packageName,
+            @IntRange(from = 0) long id) {
         try {
             mService.clearBroadcastResponseStats(packageName, id,
                     mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the broadcast events that were sent by the caller uid.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @UserHandleAware
+    public void clearBroadcastEvents() {
+        try {
+            mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

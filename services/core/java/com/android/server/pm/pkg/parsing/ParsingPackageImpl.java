@@ -548,6 +548,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         private static final long RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED = 1L << 48;
         private static final long SDK_LIBRARY = 1L << 49;
         private static final long INHERIT_KEYSTORE_KEYS = 1L << 50;
+        private static final long ENABLE_ON_BACK_INVOKED_CALLBACK = 1L << 51;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -2397,6 +2398,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return getBoolean(Booleans.ENABLE_ON_BACK_INVOKED_CALLBACK);
+    }
+
+    @Override
     public ParsingPackageImpl setBaseRevisionCode(int value) {
         baseRevisionCode = value;
         return this;
@@ -2993,6 +2999,12 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     public ParsingPackage setKnownActivityEmbeddingCerts(
             @Nullable Set<String> knownEmbeddingCerts) {
         mKnownActivityEmbeddingCerts = knownEmbeddingCerts;
+        return this;
+    }
+
+    @Override
+    public ParsingPackage setOnBackInvokedCallbackEnabled(boolean value) {
+        setBoolean(Booleans.ENABLE_ON_BACK_INVOKED_CALLBACK, value);
         return this;
     }
 }

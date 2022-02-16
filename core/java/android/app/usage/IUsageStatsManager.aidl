@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.app.PendingIntent;
 import android.app.usage.BroadcastResponseStats;
+import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
 import android.content.pm.ParceledListSlice;
 
@@ -73,9 +74,11 @@ interface IUsageStatsManager {
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
-    BroadcastResponseStats queryBroadcastResponseStats(
+    BroadcastResponseStatsList queryBroadcastResponseStats(
             String packageName, long id, String callingPackage, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void clearBroadcastResponseStats(String packageName, long id, String callingPackage,
             int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    void clearBroadcastEvents(String callingPackage, int userId);
 }

@@ -11785,7 +11785,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user and that ideally it should not be covered. Setting this is only appropriate for UI
      * where the user would likely take action to uncover it.
      * <p>
-     * The system will try to respect this, but when not possible will ignore it.
+     * The system will try to respect this preference, but when not possible will ignore it.
+     * <p>
+     * Note: while this is set to {@code true}, the system will ignore the {@code Rect}s provided
+     * through {@link #setPreferKeepClearRects} (but not clear them).
      * <p>
      * @see #setPreferKeepClearRects
      * @see #isPreferKeepClear
@@ -11817,10 +11820,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * user and that ideally they should not be covered. Setting this is only appropriate for UI
      * where the user would likely take action to uncover it.
      * <p>
-     * If the whole view is preferred to be clear ({@link #isPreferKeepClear}), the rects set here
-     * will be ignored.
-     * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
+     * <p>
+     * Note: While {@link #isPreferKeepClear} is {@code true}, the {@code Rect}s set here are
+     * ignored.
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects

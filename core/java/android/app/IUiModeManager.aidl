@@ -73,6 +73,7 @@ interface IUiModeManager {
      * @param nightModeCustomType
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
     void setNightModeCustomType(int nightModeCustomType);
 
     /**
@@ -82,6 +83,7 @@ interface IUiModeManager {
      * {@link #MODE_NIGHT_CUSTOM_TYPE_UNKNOWN}.
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
     int getNightModeCustomType();
 
     /**
@@ -113,6 +115,7 @@ interface IUiModeManager {
      *         {@code nightModeCustomType}.
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
     boolean setNightModeActivatedForCustomMode(int nightModeCustom, boolean active);
 
     /**

@@ -2242,7 +2242,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private final class PowerKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
         PowerKeyRule(int gestures) {
-            super(mContext, KEYCODE_POWER, gestures);
+            super(KEYCODE_POWER, gestures);
         }
 
         @Override
@@ -2293,7 +2293,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private final class BackKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
         BackKeyRule(int gestures) {
-            super(mContext, KEYCODE_BACK, gestures);
+            super(KEYCODE_BACK, gestures);
         }
 
         @Override
@@ -2317,7 +2317,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private final class StemPrimaryKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
         StemPrimaryKeyRule(int gestures) {
-            super(mContext, KeyEvent.KEYCODE_STEM_PRIMARY, gestures);
+            super(KeyEvent.KEYCODE_STEM_PRIMARY, gestures);
         }
 
         @Override
@@ -2342,7 +2342,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void initSingleKeyGestureRules() {
-        mSingleKeyGestureDetector = new SingleKeyGestureDetector();
+        mSingleKeyGestureDetector = SingleKeyGestureDetector.get(mContext);
 
         int powerKeyGestures = 0;
         if (hasVeryLongPressOnPowerBehavior()) {
@@ -3545,6 +3545,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered) {
         int lensCoverState = lensCovered ? CAMERA_LENS_COVERED : CAMERA_LENS_UNCOVERED;
         if (mCameraLensCoverState == lensCoverState) {
+            return;
+        }
+        if (!mContext.getResources().getBoolean(
+                R.bool.config_launchCameraOnCameraLensCoverToggle)) {
             return;
         }
         if (mCameraLensCoverState == CAMERA_LENS_COVERED &&

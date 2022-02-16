@@ -108,17 +108,11 @@ package com.android.server.display.config {
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
 
-  public enum Interpolation {
-    method public String getRawName();
-    enum_constant public static final com.android.server.display.config.Interpolation _default;
-    enum_constant public static final com.android.server.display.config.Interpolation linear;
-  }
-
   public class NitsMap {
     ctor public NitsMap();
-    method public com.android.server.display.config.Interpolation getInterpolation();
+    method public String getInterpolation();
     method @NonNull public final java.util.List<com.android.server.display.config.Point> getPoint();
-    method public void setInterpolation(com.android.server.display.config.Interpolation);
+    method public void setInterpolation(String);
   }
 
   public class Point {

@@ -8035,6 +8035,7 @@ public abstract class PackageManager {
             return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
                     FrameworkPackageUserState.DEFAULT);
         } catch (PackageParser.PackageParserException e) {
+            Log.w(TAG, "Failure to parse package archive", e);
             return null;
         }
     }

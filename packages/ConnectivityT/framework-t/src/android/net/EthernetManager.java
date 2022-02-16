@@ -146,7 +146,7 @@ public class EthernetManager {
          * @param iface the name of the interface.
          * @param state the current state of the interface, or {@link #STATE_ABSENT} if the
          *              interface was removed.
-         * @param role whether the interface is in the client mode or server mode.
+         * @param role whether the interface is in client mode or server mode.
          * @param configuration the current IP configuration of the interface.
          * @hide
          */

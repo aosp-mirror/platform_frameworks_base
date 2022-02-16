@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
 
 import com.android.wm.shell.R;
@@ -109,11 +110,28 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     protected View createLayout() {
         setSeenLetterboxEducation();
         mLayout = inflateLayout();
+        updateDialogMargins();
 
         mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
                 this::setDismissOnClickListener);
 
         return mLayout;
+    }
+
+    private void updateDialogMargins() {
+        if (mLayout == null) {
+            return;
+        }
+        final View dialogContainer = mLayout.getDialogContainer();
+        MarginLayoutParams marginParams = (MarginLayoutParams) dialogContainer.getLayoutParams();
+        int verticalMargin = (int) mContext.getResources().getDimension(
+                R.dimen.letterbox_education_dialog_margin);
+
+        final Rect taskBounds = getTaskBounds();
+        final Rect taskStableBounds = getTaskStableBounds();
+        marginParams.topMargin = taskStableBounds.top - taskBounds.top + verticalMargin;
+        marginParams.bottomMargin = taskBounds.bottom - taskStableBounds.bottom + verticalMargin;
+        dialogContainer.setLayoutParams(marginParams);
     }
 
     private LetterboxEduDialogLayout inflateLayout() {
@@ -150,20 +168,26 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     @Override
-    protected void updateSurface() {
-        // We need to relayout because the layout dimensions depend on the task bounds.
-        relayout();
+    protected void onParentBoundsChanged() {
+        if (mLayout == null) {
+            return;
+        }
+        // Both the layout dimensions and dialog margins depend on the parent bounds.
+        WindowManager.LayoutParams windowLayoutParams = getWindowLayoutParams();
+        mLayout.setLayoutParams(windowLayoutParams);
+        updateDialogMargins();
+        relayout(windowLayoutParams);
     }
 
     @Override
-    protected void updateSurfacePosition(Rect taskBounds, Rect stableBounds) {
+    protected void updateSurfacePosition() {
         // Nothing to do, since the position of the surface is fixed to the top left corner (0,0)
         // of the task (parent surface), which is the default position of a surface.
     }
 
     @Override
     protected WindowManager.LayoutParams getWindowLayoutParams() {
-        final Rect taskBounds = mTaskConfig.windowConfiguration.getBounds();
+        final Rect taskBounds = getTaskBounds();
         return getWindowLayoutParams(/* width= */ taskBounds.width(), /* height= */
                 taskBounds.height());
     }

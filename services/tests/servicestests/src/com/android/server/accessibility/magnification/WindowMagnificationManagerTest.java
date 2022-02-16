@@ -62,6 +62,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
@@ -633,9 +634,15 @@ public class WindowMagnificationManagerTest {
     public void onWindowMagnificationActivationState_magnifierDisabled_notifyDeactivatedState() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
-        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, true);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
         verify(mMockCallback).onWindowMagnificationActivationState(TEST_DISPLAY, false);
+
+        Mockito.reset(mMockCallback);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
+
+        verify(mMockCallback, never()).onWindowMagnificationActivationState(eq(TEST_DISPLAY),
+                anyBoolean());
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {

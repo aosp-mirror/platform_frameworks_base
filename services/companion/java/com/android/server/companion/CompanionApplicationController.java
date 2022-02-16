@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -118,6 +119,12 @@ class CompanionApplicationController {
             serviceConnectors = CollectionUtils.map(companionServices, componentName ->
                             new CompanionDeviceServiceConnector(mContext, userId, componentName));
             mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
+        }
+
+        if (serviceConnectors.isEmpty()) {
+            Slog.e(TAG, "Can't find CompanionDeviceService implementer in package: "
+                    + packageName + ". Please check if they are correctly declared.");
+            return;
         }
 
         // The first connector in the list is always the primary connector: set a listener to it.

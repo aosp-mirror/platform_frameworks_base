@@ -80,6 +80,10 @@ platform_bootclasspath {
             module: "com.android.mediaprovider-bootclasspath-fragment",
         },
         {
+            apex: "com.android.ondevicepersonalization",
+            module: "com.android.ondevicepersonalization-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.os.statsd",
             module: "com.android.os.statsd-bootclasspath-fragment",
         },

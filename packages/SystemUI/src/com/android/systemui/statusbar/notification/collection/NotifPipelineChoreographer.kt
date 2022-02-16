@@ -21,8 +21,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.concurrency.DelayableExecutor
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
+import javax.inject.Inject
 
 /**
  * Choreographs evaluation resulting from multiple asynchronous sources. Specifically, it exposes
@@ -46,22 +47,21 @@ interface NotifPipelineChoreographer {
     fun removeOnEvalListener(onEvalListener: Runnable)
 }
 
+@Module(includes = [PrivateModule::class])
+object NotifPipelineChoreographerModule
+
 @Module
-object NotifPipelineChoreographerModule {
-    @Provides
-    @JvmStatic
-    @SysUISingleton
-    fun provideChoreographer(
-        choreographer: Choreographer,
-        @Main mainExecutor: DelayableExecutor
-    ): NotifPipelineChoreographer = NotifPipelineChoreographerImpl(choreographer, mainExecutor)
+private interface PrivateModule {
+    @Binds
+    fun bindChoreographer(impl: NotifPipelineChoreographerImpl): NotifPipelineChoreographer
 }
 
 private const val TIMEOUT_MS: Long = 100
 
-private class NotifPipelineChoreographerImpl(
+@SysUISingleton
+private class NotifPipelineChoreographerImpl @Inject constructor(
     private val viewChoreographer: Choreographer,
-    private val executor: DelayableExecutor
+    @Main private val executor: DelayableExecutor
 ) : NotifPipelineChoreographer {
 
     private val listeners = ListenerSet<Runnable>()

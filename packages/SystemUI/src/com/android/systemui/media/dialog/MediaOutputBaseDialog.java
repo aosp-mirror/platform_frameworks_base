@@ -19,8 +19,19 @@ package com.android.systemui.media.dialog;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 
+import android.app.WallpaperColors;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -70,9 +81,12 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private ImageView mAppResourceIcon;
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
+    private LinearLayout mCastAppLayout;
     private Button mDoneButton;
     private Button mStopButton;
+    private Button mAppButton;
     private int mListMaxHeight;
+    private WallpaperColors mWallpaperColors;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -122,7 +136,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
+        mAppButton = mDialogView.requireViewById(R.id.launch_app_button);
         mAppResourceIcon = mDialogView.requireViewById(R.id.app_source_icon);
+        mCastAppLayout = mDialogView.requireViewById(R.id.cast_app_section);
 
         mDeviceListLayout.getViewTreeObserver().addOnGlobalLayoutListener(
                 mDeviceListLayoutListener);
@@ -135,6 +151,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> {
             mMediaOutputController.releaseSession();
+            dismiss();
+        });
+        mAppButton.setOnClickListener(v -> {
+            mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            if (mMediaOutputController.getAppLaunchIntent() != null) {
+                mContext.startActivity(mMediaOutputController.getAppLaunchIntent());
+            }
             dismiss();
         });
     }
@@ -161,8 +184,17 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
         final Drawable appSourceDrawable = getAppSourceIcon();
+        boolean colorSetUpdated = false;
+        mCastAppLayout.setVisibility(
+                mMediaOutputController.shouldShowLaunchSection()
+                        ? View.VISIBLE : View.GONE);
         if (appSourceDrawable != null) {
             mAppResourceIcon.setImageDrawable(appSourceDrawable);
+            mAppButton.setCompoundDrawablesWithIntrinsicBounds(resizeDrawable(appSourceDrawable,
+                            mContext.getResources().getDimensionPixelSize(
+                                    R.dimen.media_output_dialog_app_tier_icon_size
+                            )),
+                    null, null, null);
         } else {
             mAppResourceIcon.setVisibility(View.GONE);
         }
@@ -170,8 +202,24 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
         } else if (iconCompat != null) {
+            Icon icon = iconCompat.toIcon(mContext);
+            Configuration config = mContext.getResources().getConfiguration();
+            int currentNightMode = config.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            boolean isDarkThemeOn = currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+            WallpaperColors wallpaperColors = WallpaperColors.fromBitmap(icon.getBitmap());
+            colorSetUpdated = !wallpaperColors.equals(mWallpaperColors);
+            if (colorSetUpdated) {
+                mAdapter.updateColorScheme(wallpaperColors, isDarkThemeOn);
+                ColorFilter buttonColorFilter = new PorterDuffColorFilter(
+                        mAdapter.getController().getColorButtonBackground(),
+                        PorterDuff.Mode.SRC_IN);
+                ColorFilter onlineButtonColorFilter = new PorterDuffColorFilter(
+                        mAdapter.getController().getColorInactiveItem(), PorterDuff.Mode.SRC_IN);
+                mDoneButton.getBackground().setColorFilter(buttonColorFilter);
+                mStopButton.getBackground().setColorFilter(onlineButtonColorFilter);
+            }
             mHeaderIcon.setVisibility(View.VISIBLE);
-            mHeaderIcon.setImageIcon(iconCompat.toIcon(mContext));
+            mHeaderIcon.setImageIcon(icon);
         } else {
             mHeaderIcon.setVisibility(View.GONE);
         }
@@ -181,6 +229,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     R.dimen.media_output_dialog_header_icon_padding);
             mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
+        mAppButton.setText(mMediaOutputController.getAppSourceName());
         // Update title and subtitle
         mHeaderTitle.setText(getHeaderText());
         final CharSequence subTitle = getHeaderSubtitle();
@@ -194,7 +243,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (!deviceSetChanged && currentActivePosition >= 0
+            if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
                     && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
@@ -203,6 +252,22 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         // Show when remote media session is available
         mStopButton.setVisibility(getStopButtonVisibility());
+    }
+
+    private Drawable resizeDrawable(Drawable drawable, int size) {
+        if (drawable == null) {
+            return null;
+        }
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, config);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(canvas);
+        return new BitmapDrawable(mContext.getResources(),
+                Bitmap.createScaledBitmap(bitmap, size, size, false));
     }
 
     abstract Drawable getAppSourceIcon();
