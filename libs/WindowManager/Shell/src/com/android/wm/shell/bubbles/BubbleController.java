@@ -423,7 +423,6 @@ public class BubbleController {
                             WindowContainerTransaction t) {
                         // This is triggered right before the rotation is applied
                         if (fromRotation != toRotation) {
-                            mBubblePositioner.setRotation(toRotation);
                             if (mStackView != null) {
                                 // Layout listener set on stackView will update the positioner
                                 // once the rotation is applied
