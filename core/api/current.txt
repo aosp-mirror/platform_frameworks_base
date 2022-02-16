@@ -14332,6 +14332,8 @@ package android.graphics {
     method @NonNull @Size(min=3) public abstract float[] fromXyz(@NonNull @Size(min=3) float[]);
     method @NonNull public static android.graphics.ColorSpace get(@NonNull android.graphics.ColorSpace.Named);
     method @IntRange(from=1, to=4) public int getComponentCount();
+    method public int getDataSpace();
+    method @Nullable public static android.graphics.ColorSpace getFromDataSpace(int);
     method @IntRange(from=android.graphics.ColorSpace.MIN_ID, to=android.graphics.ColorSpace.MAX_ID) public int getId();
     method public abstract float getMaxValue(@IntRange(from=0, to=3) int);
     method public abstract float getMinValue(@IntRange(from=0, to=3) int);
