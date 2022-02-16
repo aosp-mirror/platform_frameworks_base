@@ -21,6 +21,8 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
@@ -31,6 +33,7 @@ import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -38,6 +41,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -46,6 +50,8 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var controllerSender: MediaTttChipControllerSender
 
@@ -73,7 +79,11 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         context.setMockPackageManager(packageManager)
 
         controllerSender = MediaTttChipControllerSender(
-            commandQueue, context, windowManager, FakeExecutor(FakeSystemClock())
+            commandQueue,
+            context,
+            windowManager,
+            FakeExecutor(FakeSystemClock()),
+            TapGestureDetector(context)
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
