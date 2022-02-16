@@ -21,6 +21,8 @@ import static android.bluetooth.BluetoothAdapter.ACTION_BLE_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.EXTRA_PREVIOUS_STATE;
 import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
+import static android.bluetooth.BluetoothAdapter.STATE_BLE_ON;
+import static android.bluetooth.BluetoothAdapter.STATE_ON;
 import static android.bluetooth.BluetoothAdapter.nameForState;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_ALREADY_STARTED;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED;
@@ -232,8 +234,14 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             return;
         }
 
-        mBleScanner.stopScan(mScanCallback);
         mScanning = false;
+
+        if (mBtAdapter.getState() != STATE_ON && mBtAdapter.getState() != STATE_BLE_ON) {
+            Log.d(TAG, "BT Adapter is not turned ON");
+            return;
+        }
+
+        mBleScanner.stopScan(mScanCallback);
     }
 
     @MainThread
