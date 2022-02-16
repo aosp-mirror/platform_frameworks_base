@@ -18,15 +18,13 @@ package com.android.systemui.clipboardoverlay;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
 
-import static java.util.Objects.requireNonNull;
-
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.provider.DeviceConfig;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.screenshot.TimeoutHandler;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
 
@@ -37,19 +35,24 @@ import javax.inject.Inject;
 public class ClipboardListener extends CoreStartable
         implements ClipboardManager.OnPrimaryClipChangedListener {
 
+    private final DeviceConfigProxy mDeviceConfig;
+    private final ClipboardOverlayControllerFactory mOverlayFactory;
+    private final ClipboardManager mClipboardManager;
     private ClipboardOverlayController mClipboardOverlayController;
-    private ClipboardManager mClipboardManager;
 
     @Inject
-    public ClipboardListener(Context context) {
+    public ClipboardListener(Context context, DeviceConfigProxy deviceConfigProxy,
+            ClipboardOverlayControllerFactory overlayFactory, ClipboardManager clipboardManager) {
         super(context);
+        mDeviceConfig = deviceConfigProxy;
+        mOverlayFactory = overlayFactory;
+        mClipboardManager = clipboardManager;
     }
 
     @Override
     public void start() {
-        if (DeviceConfig.getBoolean(
+        if (mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED, true)) {
-            mClipboardManager = requireNonNull(mContext.getSystemService(ClipboardManager.class));
             mClipboardManager.addPrimaryClipChangedListener(this);
         }
     }
@@ -60,8 +63,7 @@ public class ClipboardListener extends CoreStartable
             return;
         }
         if (mClipboardOverlayController == null) {
-            mClipboardOverlayController =
-                    new ClipboardOverlayController(mContext, new TimeoutHandler(mContext));
+            mClipboardOverlayController = mOverlayFactory.create(mContext);
         }
         mClipboardOverlayController.setClipData(
                 mClipboardManager.getPrimaryClip(), mClipboardManager.getPrimaryClipSource());
