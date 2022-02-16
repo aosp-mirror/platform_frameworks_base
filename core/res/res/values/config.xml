@@ -3738,6 +3738,10 @@
          must be no less than 3 for back compatibility. -->
     <integer name="config_pictureInPictureMaxNumberOfActions">3</integer>
 
+    <!-- The behavior when an activity has not specified a preference to dock big overlays or not.
+         Docking puts the activity side-by-side next to the big overlay windows. -->
+    <bool name="config_dockBigOverlayWindows">false</bool>
+
     <!-- Controls the snap mode for the docked stack divider
              0 - 3 snap targets: left/top has 16:9 ratio, 1:1, and right/bottom has 16:9 ratio
              1 - 3 snap targets: fixed ratio, 1:1, (1 - fixed ratio)

@@ -4275,6 +4275,7 @@ package android.app {
     method public void setLocusContext(@Nullable android.content.LocusId, @Nullable android.os.Bundle);
     method public final void setMediaController(android.media.session.MediaController);
     method public void setPictureInPictureParams(@NonNull android.app.PictureInPictureParams);
+    method public void setPreferDockBigOverlays(boolean);
     method @Deprecated public final void setProgress(int);
     method @Deprecated public final void setProgressBarIndeterminate(boolean);
     method @Deprecated public final void setProgressBarIndeterminateVisibility(boolean);
