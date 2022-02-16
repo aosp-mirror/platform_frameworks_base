@@ -3364,7 +3364,7 @@
             area for the user and that ideally it should not be covered. Setting this is only
             appropriate for UI where the user would likely take action to uncover it.
             <p>The system will try to respect this, but when not possible will ignore it.
-            See {@link android.view.View#setPreferKeepClear}. -->
+            <p>This is equivalent to {@link android.view.View#setPreferKeepClear}.-->
         <attr name="preferKeepClear" format="boolean" />
 
         <!-- <p>Whether or not the auto handwriting initiation is enabled in this View.
