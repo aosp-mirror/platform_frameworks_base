@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -1048,6 +1049,15 @@ public final class CachedAppOptimizer {
             }
 
             mFrozenProcesses.delete(app.getPid());
+        }
+    }
+
+    void onWakefulnessChanged(int wakefulness) {
+        if(wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
+            // Remove any pending compaction we may have scheduled to happen while screen was off
+            Slog.e(TAG_AM, "Cancel pending or running compactions as system is awake");
+            mPendingCompactionProcesses.clear();
+            cancelCompaction();
         }
     }
 
