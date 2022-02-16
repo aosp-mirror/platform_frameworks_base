@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.notification.collection;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,6 @@ public class GroupEntryBuilder {
     private String mKey = "test_group_key";
     private long mCreationTime = 0;
     @Nullable private GroupEntry mParent = GroupEntry.ROOT_ENTRY;
-    private NotifSection mNotifSection;
     private NotificationEntry mSummary = null;
     private List<NotificationEntry> mChildren = new ArrayList<>();
 
@@ -38,7 +35,6 @@ public class GroupEntryBuilder {
     public GroupEntry build() {
         GroupEntry ge = new GroupEntry(mKey, mCreationTime);
         ge.setParent(mParent);
-        ge.getAttachState().setSection(mNotifSection);
 
         ge.setSummary(mSummary);
         mSummary.setParent(ge);
@@ -62,11 +58,6 @@ public class GroupEntryBuilder {
 
     public GroupEntryBuilder setParent(@Nullable GroupEntry entry) {
         mParent = entry;
-        return this;
-    }
-
-    public GroupEntryBuilder setSection(@Nullable NotifSection section) {
-        mNotifSection = section;
         return this;
     }
 

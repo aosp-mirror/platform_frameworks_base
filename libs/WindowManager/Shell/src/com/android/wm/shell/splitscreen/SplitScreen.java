@@ -17,12 +17,9 @@
 package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
-
-import java.util.concurrent.Executor;
+import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
 
 /**
  * Interface to engage split-screen feature.
@@ -56,17 +53,9 @@ public interface SplitScreen {
 
     /** Callback interface for listening to changes in a split-screen stage. */
     interface SplitScreenListener {
-        default void onStagePositionChanged(@StageType int stage, @SplitPosition int position) {}
-        default void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {}
-        default void onSplitVisibilityChanged(boolean visible) {}
+        void onStagePositionChanged(@StageType int stage, @SplitPosition int position);
+        void onTaskStageChanged(int taskId, @StageType int stage, boolean visible);
     }
-
-    /** Registers listener that gets split screen callback. */
-    void registerSplitScreenListener(@NonNull SplitScreenListener listener,
-            @NonNull Executor executor);
-
-    /** Unregisters listener that gets split screen callback. */
-    void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
 
     /**
      * Returns a binder that can be passed to an external process to manipulate SplitScreen.
@@ -74,15 +63,6 @@ public interface SplitScreen {
     default ISplitScreen createExternalInterface() {
         return null;
     }
-
-    /**
-     * Called when the visibility of the keyguard changes.
-     * @param showing Indicates if the keyguard is now visible.
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
-
-    /** Called when device waking up finished. */
-    void onFinishedWakingUp();
 
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {

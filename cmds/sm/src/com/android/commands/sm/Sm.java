@@ -259,8 +259,7 @@ public final class Sm {
     public void runDisableAppDataIsolation() throws RemoteException {
         if (!SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
-            System.err.println("Storage app data isolation is not enabled.");
-            return;
+            throw new IllegalStateException("Storage app data isolation is not enabled.");
         }
         final String pkgName = nextArg();
         final int pid = Integer.parseInt(nextArg());

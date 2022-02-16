@@ -24,7 +24,6 @@ import android.graphics.ImageFormat;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.extension.CaptureBundle;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
-import android.hardware.camera2.extension.IProcessResultImpl;
 import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
@@ -59,7 +58,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
 
     private static final class JpegParameters {
         public HashSet<Long> mTimeStamps = new HashSet<>();
-        public int mRotation = JPEG_DEFAULT_ROTATION; // CW multiple of 90 degrees
+        public int mRotation = JPEG_DEFAULT_ROTATION; // CCW multiple of 90 degrees
         public int mQuality = JPEG_DEFAULT_QUALITY; // [0..100]
     }
 
@@ -101,8 +100,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
             Integer orientation = captureBundles.get(0).captureResult.get(
                     CaptureResult.JPEG_ORIENTATION);
             if (orientation != null) {
-                // The jpeg encoder expects CCW rotation, convert from CW
-                ret.mRotation = (360 - (orientation % 360)) / 90;
+                ret.mRotation = orientation / 90;
             } else {
                 Log.w(TAG, "No jpeg rotation set, using default: " + JPEG_DEFAULT_ROTATION);
             }
@@ -184,13 +182,11 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
             int cropLeft, int cropTop, int cropRight, int cropBottom,
             int rot90);
 
-    @Override
-    public void process(List<CaptureBundle> captureBundle, IProcessResultImpl captureCallback)
-            throws RemoteException {
+    public void process(List<CaptureBundle> captureBundle) throws RemoteException {
         JpegParameters jpegParams = getJpegParameters(captureBundle);
         try {
             mJpegParameters.add(jpegParams);
-            mProcessor.process(captureBundle, captureCallback);
+            mProcessor.process(captureBundle);
         } catch (Exception e) {
             mJpegParameters.remove(jpegParams);
             throw e;

@@ -16,9 +16,9 @@
 
 package com.android.server.pm;
 
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.SigningDetails;
+import android.content.pm.parsing.component.ParsedProcess;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -26,44 +26,31 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.LegacyPermissionState;
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.utils.SnapshotCache;
 
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Settings data for a particular shared user ID we know about.
  */
-public final class SharedUserSetting extends SettingBase implements SharedUserApi {
+public final class SharedUserSetting extends SettingBase {
     final String name;
 
-    int mAppId;
+    int userId;
 
-    /** @see SharedUserApi#getUidFlags() **/
+    // flags that are associated with this uid, regardless of any package flags
     int uidFlags;
     int uidPrivateFlags;
 
-    /** @see SharedUserApi#getSeInfoTargetSdkVersion() **/
+    // The lowest targetSdkVersion of all apps in the sharedUserSetting, used to assign seinfo so
+    // that all apps within the sharedUser run in the same selinux context.
     int seInfoTargetSdkVersion;
 
     final ArraySet<PackageSetting> packages;
-    private ArraySet<PackageStateInternal> mPackagesSnapshot;
-
-    // It is possible for a system app to leave shared user ID by an update.
-    // We need to keep track of the shadowed PackageSettings so that it is possible to uninstall
-    // the update and revert the system app back into the original shared user ID.
-    final ArraySet<PackageSetting> mDisabledPackages;
-    private ArraySet<PackageStateInternal> mDisabledPackagesSnapshot;
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
@@ -90,7 +77,6 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         name = _name;
         seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
         packages = new ArraySet<>();
-        mDisabledPackages = new ArraySet<>();
         processes = new ArrayMap<>();
         mSnapshot = makeCache();
     }
@@ -99,29 +85,15 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     private SharedUserSetting(SharedUserSetting orig) {
         super(orig);
         name = orig.name;
-        mAppId = orig.mAppId;
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
-        packages = new ArraySet<>(orig.packages);
-        if (!packages.isEmpty()) {
-            mPackagesSnapshot = new ArraySet<>();
-            for (int index = 0; index < packages.size(); index++) {
-                mPackagesSnapshot.add(new PackageSetting(packages.valueAt(index)));
-            }
-        }
-        mDisabledPackages = new ArraySet<>(orig.mDisabledPackages);
-        if (!mDisabledPackages.isEmpty()) {
-            mDisabledPackagesSnapshot = new ArraySet<>();
-            for (int index = 0; index < mDisabledPackages.size(); index++) {
-                mDisabledPackagesSnapshot.add(new PackageSetting(mDisabledPackages.valueAt(index)));
-            }
-        }
-        // A SigningDetails seems to consist solely of final attributes, so
+        packages = new ArraySet(orig.packages);
+        // A PackageParser.SigningDetails seems to consist solely of final attributes, so
         // it is safe to copy the reference.
         signatures.mSigningDetails = orig.signatures.mSigningDetails;
         signaturesChanged = orig.signaturesChanged;
-        processes = new ArrayMap<>(orig.processes);
-        mSnapshot = new SnapshotCache.Sealed<>();
+        processes = new ArrayMap(orig.processes);
+        mSnapshot = new SnapshotCache.Sealed();
     }
 
     /**
@@ -134,26 +106,27 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     @Override
     public String toString() {
         return "SharedUserSetting{" + Integer.toHexString(System.identityHashCode(this)) + " "
-                + name + "/" + mAppId + "}";
+                + name + "/" + userId + "}";
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(PackageServiceDumpProto.SharedUserProto.UID, mAppId);
+        proto.write(PackageServiceDumpProto.SharedUserProto.UID, userId);
         proto.write(PackageServiceDumpProto.SharedUserProto.NAME, name);
         proto.end(token);
     }
 
     void addProcesses(Map<String, ParsedProcess> newProcs) {
         if (newProcs != null) {
+            final int numProcs = newProcs.size();
             for (String key : newProcs.keySet()) {
                 ParsedProcess newProc = newProcs.get(key);
                 ParsedProcess proc = processes.get(newProc.getName());
                 if (proc == null) {
-                    proc = new ParsedProcessImpl(newProc);
+                    proc = new ParsedProcess(newProc);
                     processes.put(newProc.getName(), proc);
                 } else {
-                    ComponentMutateUtils.addStateFrom(proc, newProc);
+                    proc.addStateFrom(newProc);
                 }
             }
             onChanged();
@@ -165,17 +138,17 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
             return false;
         }
         // recalculate the pkgFlags for this shared user if needed
-        if ((this.getFlags() & packageSetting.getFlags()) != 0) {
+        if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
             int aggregatedFlags = uidFlags;
             for (PackageSetting ps : packages) {
-                aggregatedFlags |= ps.getFlags();
+                aggregatedFlags |= ps.pkgFlags;
             }
             setFlags(aggregatedFlags);
         }
-        if ((this.getPrivateFlags() & packageSetting.getPrivateFlags()) != 0) {
+        if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
             int aggregatedPrivateFlags = uidPrivateFlags;
             for (PackageSetting ps : packages) {
-                aggregatedPrivateFlags |= ps.getPrivateFlags();
+                aggregatedPrivateFlags |= ps.pkgPrivateFlags;
             }
             setPrivateFlags(aggregatedPrivateFlags);
         }
@@ -188,38 +161,35 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     void addPackage(PackageSetting packageSetting) {
         // If this is the first package added to this shared user, temporarily (until next boot) use
         // its targetSdkVersion when assigning seInfo for the shared user.
-        if ((packages.size() == 0) && (packageSetting.getPkg() != null)) {
-            seInfoTargetSdkVersion = packageSetting.getPkg().getTargetSdkVersion();
+        if ((packages.size() == 0) && (packageSetting.pkg != null)) {
+            seInfoTargetSdkVersion = packageSetting.pkg.getTargetSdkVersion();
         }
         if (packages.add(packageSetting)) {
-            setFlags(this.getFlags() | packageSetting.getFlags());
-            setPrivateFlags(this.getPrivateFlags() | packageSetting.getPrivateFlags());
+            setFlags(this.pkgFlags | packageSetting.pkgFlags);
+            setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
             onChanged();
         }
-        if (packageSetting.getPkg() != null) {
-            addProcesses(packageSetting.getPkg().getProcesses());
+        if (packageSetting.pkg != null) {
+            addProcesses(packageSetting.pkg.getProcesses());
         }
     }
 
-    @NonNull
-    @Override
-    public List<AndroidPackage> getPackages() {
+    public @Nullable List<AndroidPackage> getPackages() {
         if (packages == null || packages.size() == 0) {
-            return Collections.emptyList();
+            return null;
         }
         final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.getPkg() == null)) {
+            if ((ps == null) || (ps.pkg == null)) {
                 continue;
             }
-            pkgList.add(ps.getPkg());
+            pkgList.add(ps.pkg);
         }
         return pkgList;
     }
 
-    @Override
     public boolean isPrivileged() {
-        return (this.getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+        return (this.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 
     /**
@@ -233,21 +203,21 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
             return;
         }
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.getPkg() == null)) {
+            if ((ps == null) || (ps.pkg == null)) {
                 continue;
             }
-            if (ps.getPkg().getTargetSdkVersion() < seInfoTargetSdkVersion) {
-                seInfoTargetSdkVersion = ps.getPkg().getTargetSdkVersion();
+            if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
                 onChanged();
             }
         }
 
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.getPkg() == null)) {
+            if ((ps == null) || (ps.pkg == null)) {
                 continue;
             }
-            final boolean isPrivileged = isPrivileged() | ps.getPkg().isPrivileged();
-            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.getPkg(), isPrivileged,
+            final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
+            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
                     seInfoTargetSdkVersion));
             onChanged();
         }
@@ -259,7 +229,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     public void updateProcesses() {
         processes.clear();
         for (int i = packages.size() - 1; i >= 0; i--) {
-            final AndroidPackage pkg = packages.valueAt(i).getPkg();
+            final AndroidPackage pkg = packages.valueAt(i).pkg;
             if (pkg != null) {
                 addProcesses(pkg.getProcesses());
             }
@@ -286,8 +256,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
 
     /** Updates all fields in this shared user setting from another. */
     public SharedUserSetting updateFrom(SharedUserSetting sharedUser) {
-        super.copySettingBase(sharedUser);
-        this.mAppId = sharedUser.mAppId;
+        copyFrom(sharedUser);
+        this.userId = sharedUser.userId;
         this.uidFlags = sharedUser.uidFlags;
         this.uidPrivateFlags = sharedUser.uidPrivateFlags;
         this.seInfoTargetSdkVersion = sharedUser.seInfoTargetSdkVersion;
@@ -299,7 +269,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
             this.processes.clear();
             this.processes.ensureCapacity(numProcs);
             for (int i = 0; i < numProcs; i++) {
-                ParsedProcess proc = new ParsedProcessImpl(sharedUser.processes.valueAt(i));
+                ParsedProcess proc =
+                        new ParsedProcess(sharedUser.processes.valueAt(i));
                 this.processes.put(proc.getName(), proc);
             }
         } else {
@@ -307,67 +278,5 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         }
         onChanged();
         return this;
-    }
-
-    @NonNull
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public int getAppId() {
-        return mAppId;
-    }
-
-    @Override
-    public int getUidFlags() {
-        return uidFlags;
-    }
-
-    @Override
-    public int getPrivateUidFlags() {
-        return uidPrivateFlags;
-    }
-
-    @Override
-    public int getSeInfoTargetSdkVersion() {
-        return seInfoTargetSdkVersion;
-    }
-
-    @NonNull
-    @Override
-    public ArraySet<? extends PackageStateInternal> getPackageStates() {
-        if (mPackagesSnapshot != null) {
-            return mPackagesSnapshot;
-        }
-        return packages;
-    }
-
-    @NonNull
-    @Override
-    public ArraySet<? extends PackageStateInternal> getDisabledPackageStates() {
-        if (mDisabledPackagesSnapshot != null) {
-            return mDisabledPackagesSnapshot;
-        }
-        return mDisabledPackages;
-    }
-
-    @NonNull
-    @Override
-    public SigningDetails getSigningDetails() {
-        return signatures.mSigningDetails;
-    }
-
-    @NonNull
-    @Override
-    public ArrayMap<String, ParsedProcess> getProcesses() {
-        return processes;
-    }
-
-    @NonNull
-    @Override
-    public LegacyPermissionState getSharedUserLegacyPermissionState() {
-        return super.getLegacyPermissionState();
     }
 }

@@ -15,7 +15,6 @@
  */
 package com.android.internal.view;
 
-import android.annotation.NonNull;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -37,8 +36,7 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
     private final Runnable mRunnable;
     private final boolean mReturnValue;
 
-    private OneShotPreDrawListener(@NonNull View view, boolean returnValue,
-            @NonNull Runnable runnable) {
+    private OneShotPreDrawListener(View view, boolean returnValue, Runnable runnable) {
         mView = view;
         mViewTreeObserver = view.getViewTreeObserver();
         mRunnable = runnable;
@@ -54,7 +52,7 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
      * @return The added OneShotPreDrawListener. It can be removed prior to
      * the onPreDraw by calling {@link #removeListener()}.
      */
-    public static OneShotPreDrawListener add(@NonNull View view, @NonNull Runnable runnable) {
+    public static OneShotPreDrawListener add(View view, Runnable runnable) {
         return add(view, true, runnable);
     }
 
@@ -67,8 +65,7 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
      * @return The added OneShotPreDrawListener. It can be removed prior to
      * the onPreDraw by calling {@link #removeListener()}.
      */
-    public static OneShotPreDrawListener add(@NonNull View view, boolean returnValue,
-            @NonNull Runnable runnable) {
+    public static OneShotPreDrawListener add(View view, boolean returnValue, Runnable runnable) {
         OneShotPreDrawListener listener = new OneShotPreDrawListener(view, returnValue, runnable);
         view.getViewTreeObserver().addOnPreDrawListener(listener);
         view.addOnAttachStateChangeListener(listener);
@@ -96,12 +93,12 @@ public class OneShotPreDrawListener implements ViewTreeObserver.OnPreDrawListene
     }
 
     @Override
-    public void onViewAttachedToWindow(@NonNull View v) {
+    public void onViewAttachedToWindow(View v) {
         mViewTreeObserver = v.getViewTreeObserver();
     }
 
     @Override
-    public void onViewDetachedFromWindow(@NonNull View v) {
+    public void onViewDetachedFromWindow(View v) {
         removeListener();
     }
 }

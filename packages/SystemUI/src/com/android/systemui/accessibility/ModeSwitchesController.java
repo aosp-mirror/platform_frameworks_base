@@ -18,8 +18,6 @@ package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 
-import static com.android.systemui.accessibility.MagnificationModeSwitch.SwitchListener;
-
 import android.annotation.MainThread;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
@@ -29,24 +27,21 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 
 /**
- * A class to control {@link MagnificationModeSwitch}. It shows the button UI with following
+ * A class to control {@link MagnificationModeSwitch}. It should show the button UI with following
  * conditions:
  * <ol>
  *   <li> Both full-screen and window magnification mode are capable.</li>
  *   <li> The magnification scale is changed by a user.</li>
  * <ol>
- * The switch action will be handled by {@link #mSwitchListenerDelegate} which informs the system
- * server about the changed mode.
  */
 @SysUISingleton
-public class ModeSwitchesController implements SwitchListener {
+public class ModeSwitchesController {
 
     private final DisplayIdIndexSupplier<MagnificationModeSwitch> mSwitchSupplier;
-    private SwitchListener mSwitchListenerDelegate;
 
     public ModeSwitchesController(Context context) {
         mSwitchSupplier = new SwitchSupplier(context,
-                context.getSystemService(DisplayManager.class), this::onSwitch);
+                context.getSystemService(DisplayManager.class));
     }
 
     @VisibleForTesting
@@ -55,8 +50,8 @@ public class ModeSwitchesController implements SwitchListener {
     }
 
     /**
-     * Shows a button that a user can click to switch magnification mode. And the button
-     * would be dismissed automatically after the button is displayed for a period of time.
+     * Shows a button that a user can click the button to switch magnification mode. And the
+     * button would be dismissed automatically after the button is displayed for a period of time.
      *
      * @param displayId The logical display id
      * @param mode      The magnification mode
@@ -98,41 +93,24 @@ public class ModeSwitchesController implements SwitchListener {
                 switchController -> switchController.onConfigurationChanged(configDiff));
     }
 
-    @Override
-    public void onSwitch(int displayId, int magnificationMode) {
-        if (mSwitchListenerDelegate != null) {
-            mSwitchListenerDelegate.onSwitch(displayId, magnificationMode);
-        }
-    }
-
-    public void setSwitchListenerDelegate(SwitchListener switchListenerDelegate) {
-        mSwitchListenerDelegate = switchListenerDelegate;
-    }
-
     private static class SwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
 
         private final Context mContext;
-        private final SwitchListener mSwitchListener;
 
         /**
-         * Supplies the switch for the given display.
-         *
          * @param context        Context
          * @param displayManager DisplayManager
-         * @param switchListener The callback that will run when the switch is clicked
          */
-        SwitchSupplier(Context context, DisplayManager displayManager,
-                SwitchListener switchListener) {
+        SwitchSupplier(Context context, DisplayManager displayManager) {
             super(displayManager);
             mContext = context;
-            mSwitchListener = switchListener;
         }
 
         @Override
         protected MagnificationModeSwitch createInstance(Display display) {
             final Context uiContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            return new MagnificationModeSwitch(uiContext, mSwitchListener);
+            return new MagnificationModeSwitch(uiContext);
         }
     }
 }

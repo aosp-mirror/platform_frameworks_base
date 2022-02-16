@@ -56,10 +56,6 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
-            apex: "com.android.auxiliary",
-            module: "com.android.auxiliary-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.conscrypt",
             module: "com.android.conscrypt-bootclasspath-fragment",
         },
@@ -96,25 +92,12 @@ platform_bootclasspath {
             module: "com.android.sdkext-bootclasspath-fragment",
         },
         {
-            apex: "com.android.supplementalprocess",
-            module: "com.android.supplementalprocess-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.tethering",
             module: "com.android.tethering-bootclasspath-fragment",
         },
         {
-            apex: "com.android.uwb",
-            module: "com.android.uwb-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.wifi",
             module: "com.android.wifi-bootclasspath-fragment",
-        },
-        // only used for auto
-        {
-            apex: "com.android.car.framework",
-            module: "com.android.car.framework-bootclasspath-fragment",
         },
     ],
 

@@ -34,6 +34,7 @@
 #include "io/FileSystem.h"
 #include "io/StringStream.h"
 #include "util/Files.h"
+#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
@@ -112,7 +113,7 @@ std::string GetLabel(const Element* element, IDiagnostics* diag) {
 }
 
 /** Returns the value of the version-code-order attribute for a given element. */
-std::optional<int32_t> GetVersionCodeOrder(const Element* element, IDiagnostics* diag) {
+Maybe<int32_t> GetVersionCodeOrder(const Element* element, IDiagnostics* diag) {
   const xml::Attribute* version = element->FindAttribute("", "version-code-order");
   if (version == nullptr) {
     std::string label = GetLabel(element, diag);
@@ -134,7 +135,7 @@ class NamespaceVisitor : public xml::Visitor {
 
 /** Copies the values referenced in a configuration group to the target list. */
 template <typename T>
-bool CopyXmlReferences(const std::optional<std::string>& name, const Group<T>& groups,
+bool CopyXmlReferences(const Maybe<std::string>& name, const Group<T>& groups,
                        std::vector<T>* target) {
   // If there was no item configured, there is nothing to do and no error.
   if (!name) {
@@ -158,7 +159,7 @@ bool CopyXmlReferences(const std::optional<std::string>& name, const Group<T>& g
  * success, or false if the either the placeholder is not found in the name, or the value is not
  * present and the placeholder was.
  */
-bool ReplacePlaceholder(const StringPiece& placeholder, const std::optional<StringPiece>& value,
+bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<StringPiece>& value,
                         std::string* name, IDiagnostics* diag) {
   size_t offset = name->find(placeholder.data());
   bool found = (offset != std::string::npos);
@@ -206,17 +207,17 @@ xml::XmlNodeAction::ActionFuncWithDiag Bind(configuration::PostProcessingConfigu
 }
 
 /** Converts a ConfiguredArtifact into an OutputArtifact. */
-std::optional<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifact,
-                                               const std::string& apk_name,
-                                               const PostProcessingConfiguration& config,
-                                               IDiagnostics* diag) {
+Maybe<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifact,
+                                       const std::string& apk_name,
+                                       const PostProcessingConfiguration& config,
+                                       IDiagnostics* diag) {
   if (!artifact.name && !config.artifact_format) {
     diag->Error(
         DiagMessage() << "Artifact does not have a name and no global name template defined");
     return {};
   }
 
-  std::optional<std::string> artifact_name =
+  Maybe<std::string> artifact_name =
       (artifact.name) ? artifact.Name(apk_name, diag)
                       : artifact.ToArtifactName(config.artifact_format.value(), apk_name, diag);
 
@@ -286,9 +287,9 @@ std::optional<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifac
 namespace configuration {
 
 /** Returns the binary reprasentation of the XML configuration. */
-std::optional<PostProcessingConfiguration> ExtractConfiguration(const std::string& contents,
-                                                                const std::string& config_path,
-                                                                IDiagnostics* diag) {
+Maybe<PostProcessingConfiguration> ExtractConfiguration(const std::string& contents,
+                                                        const std::string& config_path,
+                                                        IDiagnostics* diag) {
   StringInputStream in(contents);
   std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag, Source(config_path));
   if (!doc) {
@@ -350,8 +351,7 @@ const StringPiece& AbiToString(Abi abi) {
 /**
  * Returns the common artifact base name from a template string.
  */
-std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk_name,
-                                      IDiagnostics* diag) {
+Maybe<std::string> ToBaseName(std::string result, const StringPiece& apk_name, IDiagnostics* diag) {
   const StringPiece ext = file::GetExtension(apk_name);
   size_t end_index = apk_name.to_string().rfind(ext.to_string());
   const std::string base_name =
@@ -359,8 +359,8 @@ std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk
 
   // Base name is optional.
   if (result.find("${basename}") != std::string::npos) {
-    auto maybe_base_name = base_name.empty() ? std::nullopt
-                                             : std::optional<StringPiece>{base_name};
+    Maybe<StringPiece> maybe_base_name =
+        base_name.empty() ? Maybe<StringPiece>{} : Maybe<StringPiece>{base_name};
     if (!ReplacePlaceholder("${basename}", maybe_base_name, &result, diag)) {
       return {};
     }
@@ -383,10 +383,10 @@ std::optional<std::string> ToBaseName(std::string result, const StringPiece& apk
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece& format,
-                                                              const StringPiece& apk_name,
-                                                              IDiagnostics* diag) const {
-  std::optional<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
+Maybe<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece& format,
+                                                      const StringPiece& apk_name,
+                                                      IDiagnostics* diag) const {
+  Maybe<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
   if (!base) {
     return {};
   }
@@ -419,8 +419,7 @@ std::optional<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece&
   return result;
 }
 
-std::optional<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name,
-                                                    IDiagnostics* diag) const {
+Maybe<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name, IDiagnostics* diag) const {
   if (!name) {
     return {};
   }
@@ -431,7 +430,7 @@ std::optional<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name,
 }  // namespace configuration
 
 /** Returns a ConfigurationParser for the file located at the provided path. */
-std::optional<ConfigurationParser> ConfigurationParser::ForPath(const std::string& path) {
+Maybe<ConfigurationParser> ConfigurationParser::ForPath(const std::string& path) {
   std::string contents;
   if (!ReadFileToString(path, &contents, true)) {
     return {};
@@ -443,9 +442,9 @@ ConfigurationParser::ConfigurationParser(std::string contents, const std::string
     : contents_(std::move(contents)), config_path_(config_path), diag_(&noop_) {
 }
 
-std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
+Maybe<std::vector<OutputArtifact>> ConfigurationParser::Parse(
     const android::StringPiece& apk_path) {
-  std::optional<PostProcessingConfiguration> maybe_config =
+  Maybe<PostProcessingConfiguration> maybe_config =
       ExtractConfiguration(contents_, config_path_, diag_);
   if (!maybe_config) {
     return {};
@@ -461,8 +460,7 @@ std::optional<std::vector<OutputArtifact>> ConfigurationParser::Parse(
   int version = 1;
 
   for (const ConfiguredArtifact& artifact : config.artifacts) {
-    std::optional<OutputArtifact> output_artifact =
-        ToOutputArtifact(artifact, apk_name, config, diag_);
+    Maybe<OutputArtifact> output_artifact = ToOutputArtifact(artifact, apk_name, config, diag_);
     if (!output_artifact) {
       // Defer return an error condition so that all errors are reported.
       valid = false;
@@ -540,7 +538,7 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
 
   bool valid = true;
   OrderedEntry<Abi>& entry = config->abi_groups[label];
-  std::optional<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
   if (!order) {
     valid = false;
   } else {
@@ -591,7 +589,7 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
 
   bool valid = true;
   OrderedEntry<ConfigDescription>& entry = config->screen_density_groups[label];
-  std::optional<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
   if (!order) {
     valid = false;
   } else {
@@ -658,7 +656,7 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
 
   bool valid = true;
   OrderedEntry<ConfigDescription>& entry = config->locale_groups[label];
-  std::optional<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
   if (!order) {
     valid = false;
   } else {
@@ -726,19 +724,19 @@ bool AndroidSdkTagHandler(PostProcessingConfiguration* config, Element* root_ele
       entry.label = attr.value;
       valid_attr = true;
     } else if (attr.name == "minSdkVersion") {
-      std::optional<int> version = ResourceUtils::ParseSdkVersion(attr.value);
+      Maybe<int> version = ResourceUtils::ParseSdkVersion(attr.value);
       if (version) {
         valid_attr = true;
         entry.min_sdk_version = version.value();
       }
     } else if (attr.name == "targetSdkVersion") {
-      std::optional<int> version = ResourceUtils::ParseSdkVersion(attr.value);
+      Maybe<int> version = ResourceUtils::ParseSdkVersion(attr.value);
       if (version) {
         valid_attr = true;
         entry.target_sdk_version = version;
       }
     } else if (attr.name == "maxSdkVersion") {
-      std::optional<int> version = ResourceUtils::ParseSdkVersion(attr.value);
+      Maybe<int> version = ResourceUtils::ParseSdkVersion(attr.value);
       if (version) {
         valid_attr = true;
         entry.max_sdk_version = version;
@@ -780,7 +778,7 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
 
   bool valid = true;
   OrderedEntry<GlTexture>& entry = config->gl_texture_groups[label];
-  std::optional<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
   if (!order) {
     valid = false;
   } else {
@@ -830,7 +828,7 @@ bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* 
 
   bool valid = true;
   OrderedEntry<DeviceFeature>& entry = config->device_feature_groups[label];
-  std::optional<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
   if (!order) {
     valid = false;
   } else {

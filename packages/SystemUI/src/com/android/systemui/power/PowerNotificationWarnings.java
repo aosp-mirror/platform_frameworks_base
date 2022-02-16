@@ -58,8 +58,9 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIApplication;
+import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -246,7 +247,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(mContext.getString(R.string.invalid_charger_text))
                         .setColor(mContext.getColor(
                                 com.android.internal.R.color.system_notification_accent_color));
-        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, n, UserHandle.ALL);
@@ -297,7 +298,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         nb.setOnlyAlertOnce(!mPlaySound);
         mPlaySound = false;
-        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
@@ -319,7 +320,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 mContext.getString(R.string.no_auto_saver_action),
                 pendingBroadcast(ACTION_AUTO_SAVER_NO_THANKS));
 
-        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
 
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
@@ -396,7 +397,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
                         .setColor(Utils.getColorAttrDefaultColor(mContext,
                                 android.R.attr.colorError));
-        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
     }
@@ -420,7 +421,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mActivityStarter.startActivity(helpIntent,
+                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mHighTempDialog = null;
                                     });
@@ -455,7 +456,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mActivityStarter.startActivity(helpIntent,
+                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mThermalShutdownDialog = null;
                                     });
@@ -483,7 +484,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                 pendingBroadcast(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING))
                         .setColor(Utils.getColorAttrDefaultColor(mContext,
                                 android.R.attr.colorError));
-        SystemUIApplication.overrideNotificationAppName(mContext, nb, false);
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
                 TAG_TEMPERATURE, SystemMessage.NOTE_THERMAL_SHUTDOWN, n, UserHandle.ALL);
@@ -515,7 +516,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                     helpIntent.setClassName("com.android.settings",
                             "com.android.settings.HelpTrampoline");
                     helpIntent.putExtra(Intent.EXTRA_TEXT, contextString);
-                    mActivityStarter.startActivity(helpIntent,
+                    Dependency.get(ActivityStarter.class).startActivity(helpIntent,
                             true /* dismissShade */, resultCode -> {
                                 mUsbHighTempDialog = null;
                             });
@@ -748,7 +749,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_AUTO_SAVER_NO_THANKS);
             filter.addAction(ACTION_DISMISS_AUTO_SAVER_SUGGESTION);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
-                    android.Manifest.permission.DEVICE_POWER, mHandler, Context.RECEIVER_EXPORTED);
+                    android.Manifest.permission.DEVICE_POWER, mHandler);
         }
 
         @Override

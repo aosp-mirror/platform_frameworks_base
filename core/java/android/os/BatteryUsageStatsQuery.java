@@ -41,7 +41,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     @IntDef(flag = true, prefix = { "FLAG_BATTERY_USAGE_STATS_" }, value = {
             FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL,
             FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY,
-            FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BatteryUsageStatsFlags {}
@@ -53,21 +52,19 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      *
      * @hide
      */
-    public static final int FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL = 0x0001;
+    public static final int FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL = 1;
 
     /**
      * Indicates that battery history should be included in the BatteryUsageStats.
      * @hide
      */
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY = 0x0002;
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY = 2;
 
     /**
      * Indicates that identifiers of power models used for computations of power
      * consumption should be included in the BatteryUsageStats.
      */
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS = 0x0004;
-
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA = 0x0008;
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS = 4;
 
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
@@ -75,9 +72,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     @NonNull
     private final int[] mUserIds;
     private final long mMaxStatsAgeMs;
-    private final long mFromTimestamp;
-    private final long mToTimestamp;
-    private final @BatteryConsumer.PowerComponent int[] mPowerComponents;
+    private long mFromTimestamp;
+    private long mToTimestamp;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
@@ -86,7 +82,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mMaxStatsAgeMs = builder.mMaxStatsAgeMs;
         mFromTimestamp = builder.mFromTimestamp;
         mToTimestamp = builder.mToTimestamp;
-        mPowerComponents = builder.mPowerComponents;
     }
 
     @BatteryUsageStatsFlags
@@ -111,18 +106,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      */
     public boolean shouldForceUsePowerProfileModel() {
         return (mFlags & FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL) != 0;
-    }
-
-    public boolean isProcessStateDataNeeded() {
-        return (mFlags & FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
-    }
-
-    /**
-     * Returns the power components that should be estimated or null if all power components
-     * are being requested.
-     */
-    public int[] getPowerComponents() {
-        return mPowerComponents;
     }
 
     /**
@@ -157,7 +140,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mMaxStatsAgeMs = in.readLong();
         mFromTimestamp = in.readLong();
         mToTimestamp = in.readLong();
-        mPowerComponents = in.createIntArray();
     }
 
     @Override
@@ -168,7 +150,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         dest.writeLong(mMaxStatsAgeMs);
         dest.writeLong(mFromTimestamp);
         dest.writeLong(mToTimestamp);
-        dest.writeIntArray(mPowerComponents);
     }
 
     @Override
@@ -199,7 +180,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mMaxStatsAgeMs = DEFAULT_MAX_STATS_AGE_MS;
         private long mFromTimestamp;
         private long mToTimestamp;
-        private @BatteryConsumer.PowerComponent int[] mPowerComponents;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -229,16 +209,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         }
 
         /**
-         * Requests that per-process state data be included in the BatteryUsageStats, if
-         * available. Check {@link BatteryUsageStats#isProcessStateDataIncluded()} on the result
-         * to see if the data is available.
-         */
-        public Builder includeProcessStateData() {
-            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA;
-            return this;
-        }
-
-        /**
          * Requests to return modeled battery usage stats only, even if on-device
          * power monitoring data is available.
          *
@@ -257,16 +227,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includePowerModels() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS;
-            return this;
-        }
-
-        /**
-         * Requests to return only statistics for the specified power components.  The default
-         * is all power components.
-         */
-        public Builder includePowerComponents(
-                @BatteryConsumer.PowerComponent int[] powerComponents) {
-            mPowerComponents = powerComponents;
             return this;
         }
 

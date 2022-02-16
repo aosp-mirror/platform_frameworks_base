@@ -21,7 +21,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 
-import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -35,7 +35,6 @@ interface IInputMethodManager {
 
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList(int userId);
-    List<InputMethodInfo> getAwareLockedInputMethodList(int userId, int directBootAwareness);
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
@@ -55,6 +54,7 @@ interface IInputMethodManager {
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
+            /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
             int unverifiedTargetSdkVersion);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
@@ -81,7 +81,4 @@ interface IInputMethodManager {
     void startImeTrace();
     // Stops an ime trace.
     void stopImeTrace();
-
-    /** Start Stylus handwriting session **/
-    void startStylusHandwriting(in IInputMethodClient client);
 }

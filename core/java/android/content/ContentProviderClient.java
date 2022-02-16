@@ -109,7 +109,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
         mAuthority = authority;
         mStable = stable;
 
-        mCloseGuard.open("ContentProviderClient.close");
+        mCloseGuard.open("close");
     }
 
     /**
@@ -695,7 +695,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         CursorWrapperInner(Cursor cursor) {
             super(cursor);
-            mCloseGuard.open("CursorWrapperInner.close");
+            mCloseGuard.open("close");
         }
 
         @Override

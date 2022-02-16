@@ -23,16 +23,15 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
@@ -72,34 +71,23 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     public StatusBarIconControllerImpl(
             Context context,
             CommandQueue commandQueue,
-            DemoModeController demoModeController,
-            ConfigurationController configurationController,
-            TunerService tunerService,
-            DumpManager dumpManager) {
+            DemoModeController demoModeController) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
-        configurationController.addCallback(this);
+        Dependency.get(ConfigurationController.class).addCallback(this);
 
         mContext = context;
 
         loadDimens();
 
         commandQueue.addCallback(this);
-        tunerService.addTunable(this, ICON_HIDE_LIST);
+        Dependency.get(TunerService.class).addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
-        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /** */
     @Override
     public void addIconGroup(IconManager group) {
-        for (IconManager existingIconManager : mIconGroups) {
-            if (existingIconManager.mGroup == group.mGroup) {
-                Log.e(TAG, "Adding new IconManager for the same ViewGroup. This could cause "
-                        + "unexpected results.");
-            }
-        }
-
         mIconGroups.add(group);
         List<Slot> allSlots = getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
@@ -112,14 +100,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
                 int viewIndex = getViewIndex(getSlotIndex(slot.getName()), holder.getTag());
                 group.onIconAdded(viewIndex, slot.getName(), hidden, holder);
             }
-        }
-    }
-
-    private void refreshIconGroups() {
-        for (int i = mIconGroups.size() - 1; i >= 0; --i) {
-            IconManager group = mIconGroups.get(i);
-            removeIconGroup(group);
-            addIconGroup(group);
         }
     }
 
@@ -477,6 +457,5 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     @Override
     public void onDensityOrFontScaleChanged() {
         loadDimens();
-        refreshIconGroups();
     }
 }

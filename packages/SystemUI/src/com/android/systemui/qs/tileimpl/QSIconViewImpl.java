@@ -116,9 +116,6 @@ public class QSIconViewImpl extends QSIconView {
                     : icon.getInvisibleDrawable(mContext) : null;
             int padding = icon != null ? icon.getPadding() : 0;
             if (d != null) {
-                if (d.getConstantState() != null) {
-                    d = d.getConstantState().newDrawable();
-                }
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
             }
@@ -253,7 +250,7 @@ public class QSIconViewImpl extends QSIconView {
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
             case Tile.STATE_ACTIVE:
                 return Utils.getColorAttrDefaultColor(context,
-                        com.android.internal.R.attr.textColorOnAccent);
+                        android.R.attr.textColorPrimaryInverse);
             default:
                 Log.e("QSIconView", "Invalid state " + state);
                 return 0;

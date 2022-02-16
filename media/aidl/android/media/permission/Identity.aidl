@@ -20,7 +20,6 @@ package android.media.permission;
  *
  * {@hide}
  */
-@JavaDerive(equals = true, toString = true)
 parcelable Identity {
     /** Linux user ID. */
     int uid = -1;

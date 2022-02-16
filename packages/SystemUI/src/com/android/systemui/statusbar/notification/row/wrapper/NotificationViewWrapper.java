@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Pair;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +42,6 @@ import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.notification.FeedbackIcon;
-import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -101,8 +100,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void onContentUpdated(ExpandableNotificationRow row) {
     }
 
-    /** Shows the given feedback icon, or hides the icon if null. */
-    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
+    /**
+     * Shows or hides feedback icon.
+     */
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
     }
 
     public void onReinflated() {
@@ -393,14 +394,5 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * Set the view to have recently visibly alerted.
      */
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
-    }
-
-    /**
-     * Apply the faded state as a layer type change to the views which need to have overlapping
-     * contents render precisely.
-     */
-    public void setNotificationFaded(boolean faded) {
-        NotificationFadeAware.setLayerTypeForFaded(getIcon(), faded);
-        NotificationFadeAware.setLayerTypeForFaded(getExpandButton(), faded);
     }
 }

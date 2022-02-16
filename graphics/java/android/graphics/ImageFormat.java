@@ -827,7 +827,7 @@ public class ImageFormat {
             case RAW_SENSOR:
                 return 16;
             case YCBCR_P010:
-                return 24;
+                return 20;
             case RAW_DEPTH10:
             case RAW10:
                 return 10;

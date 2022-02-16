@@ -20,11 +20,13 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.TaskViewFactory
+import dagger.Lazy
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,14 +41,15 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class ControlActionCoordinatorImplTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var vibratorHelper: VibratorHelper
+    private lateinit var uiController: ControlsUiController
+    @Mock
+    private lateinit var lazyUiController: Lazy<ControlsUiController>
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
     @Mock
@@ -55,6 +58,8 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     private lateinit var uiExecutor: DelayableExecutor
     @Mock
     private lateinit var activityStarter: ActivityStarter
+    @Mock
+    private lateinit var globalActionsComponent: GlobalActionsComponent
     @Mock
     private lateinit var taskViewFactory: Optional<TaskViewFactory>
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -81,13 +86,14 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
             uiExecutor,
             activityStarter,
             keyguardStateController,
+            globalActionsComponent,
             taskViewFactory,
-            metricsLogger,
-            vibratorHelper
+            getFakeBroadcastDispatcher(),
+            lazyUiController,
+            metricsLogger
         ))
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
-        `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)
         action = spy(coordinator.Action(ID, {}, false))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean())
     }
@@ -97,7 +103,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isShowing()).thenReturn(false)
 
         coordinator.toggle(cvh, "", true)
-        verify(coordinator).bouncerOrRun(action, true /*authRequired */)
+        verify(coordinator).bouncerOrRun(action)
         verify(action).invoke()
     }
 
@@ -107,7 +113,7 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
 
         coordinator.toggle(cvh, "", true)
-        verify(coordinator).bouncerOrRun(action, true /*authRequired */)
+        verify(coordinator).bouncerOrRun(action)
         verify(activityStarter).dismissKeyguardThenExecute(any(), any(), anyBoolean())
         verify(action, never()).invoke()
 
@@ -119,17 +125,6 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         `when`(keyguardStateController.isUnlocked()).thenReturn(true)
         reset(action)
         coordinator.runPendingAction(ID)
-        verify(action).invoke()
-    }
-
-    @Test
-    fun testToggleRunsWhenLockedAndAuthNotRequired() {
-        `when`(keyguardStateController.isShowing()).thenReturn(true)
-        `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        `when`(cvh.cws.control?.isAuthRequired()).thenReturn(false)
-
-        coordinator.toggle(cvh, "", true)
-        verify(coordinator).bouncerOrRun(action, false /* authRequired */)
         verify(action).invoke()
     }
 }

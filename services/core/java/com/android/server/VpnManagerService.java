@@ -340,18 +340,17 @@ public class VpnManagerService extends IVpnManager.Stub {
      * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
      * exclusively by the Settings app, and passed into the platform at startup time.
      *
-     * @return A unique key corresponding to this session.
      * @throws IllegalArgumentException if no profile was found for the given package name.
      * @hide
      */
     @Override
-    public String startVpnProfile(@NonNull String packageName) {
+    public void startVpnProfile(@NonNull String packageName) {
         final int callingUid = Binder.getCallingUid();
         verifyCallingUidAndPackage(packageName, callingUid);
         final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            return mVpns.get(user).startVpnProfile(packageName);
+            mVpns.get(user).startVpnProfile(packageName);
         }
     }
 
@@ -682,7 +681,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         intentFilter = new IntentFilter();
         intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
         mUserAllContext.registerReceiver(
-                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler, Context.RECEIVER_EXPORTED);
+                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

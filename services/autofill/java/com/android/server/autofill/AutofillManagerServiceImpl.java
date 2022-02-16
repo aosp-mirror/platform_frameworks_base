@@ -284,9 +284,7 @@ final class AutofillManagerServiceImpl
         }
         final Session session = mSessions.get(sessionId);
         if (session != null && uid == session.uid) {
-            synchronized (session.mLock) {
-                session.setAuthenticationResultLocked(data, authenticationId);
-            }
+            session.setAuthenticationResultLocked(data, authenticationId);
         }
     }
 
@@ -376,9 +374,7 @@ final class AutofillManagerServiceImpl
                 + " hc=" + hasCallback + " f=" + flags + " aa=" + forAugmentedAutofillOnly;
         mMaster.logRequestLocked(historyItem);
 
-        synchronized (newSession.mLock) {
-            newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
-        }
+        newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
 
         if (forAugmentedAutofillOnly) {
             // Must embed the flag in the response, at the high-end side of the long.

@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.service.contentcapture.ContentCaptureService;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.translation.UiTranslationManager;
@@ -39,8 +38,7 @@ import com.android.internal.annotations.Immutable;
  */
 @Immutable
 @SystemApi
-@TestApi
-public final class ActivityId implements Parcelable {
+public class ActivityId {
 
     /**
      * The identifier of the task this activity is in.
@@ -55,7 +53,6 @@ public final class ActivityId implements Parcelable {
     /**
      * @hide
      */
-    @TestApi
     public ActivityId(int taskId, @Nullable IBinder activityId) {
         mTaskId = taskId;
         mActivityId = activityId;
@@ -90,38 +87,12 @@ public final class ActivityId implements Parcelable {
     }
 
     /**
-     * {@inheritDoc}
+     * @hide
      */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int parcelableFlags) {
         dest.writeInt(mTaskId);
         dest.writeStrongBinder(mActivityId);
     }
-
-    /**
-     * Creates {@link ActivityId} instances from parcels.
-     */
-    @NonNull
-    public static final Parcelable.Creator<ActivityId> CREATOR =
-            new Parcelable.Creator<ActivityId>() {
-                @Override
-                public ActivityId createFromParcel(Parcel parcel) {
-                    return new ActivityId(parcel);
-                }
-
-                @Override
-                public ActivityId[] newArray(int size) {
-                    return new ActivityId[size];
-                }
-            };
 
     @Override
     public String toString() {

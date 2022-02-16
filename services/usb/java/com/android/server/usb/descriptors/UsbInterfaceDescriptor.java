@@ -42,8 +42,6 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
     private ArrayList<UsbEndpointDescriptor> mEndpointDescriptors =
             new ArrayList<UsbEndpointDescriptor>();
 
-    private UsbDescriptor mClassSpecificInterfaceDescriptor;
-
     UsbInterfaceDescriptor(int length, byte type) {
         super(length, type);
         mHierarchyLevel = 3;
@@ -107,18 +105,7 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
         mEndpointDescriptors.add(endpoint);
     }
 
-    public void setClassSpecificInterfaceDescriptor(UsbDescriptor descriptor) {
-        mClassSpecificInterfaceDescriptor = descriptor;
-    }
-
-    public UsbDescriptor getClassSpecificInterfaceDescriptor() {
-        return mClassSpecificInterfaceDescriptor;
-    }
-
-    /**
-    * Returns a UsbInterface that this UsbInterfaceDescriptor is describing.
-    */
-    public UsbInterface toAndroid(UsbDescriptorParser parser) {
+    UsbInterface toAndroid(UsbDescriptorParser parser) {
         if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "toAndroid() class:" + Integer.toHexString(mUsbClass)
                     + " subclass:" + Integer.toHexString(mUsbSubclass)

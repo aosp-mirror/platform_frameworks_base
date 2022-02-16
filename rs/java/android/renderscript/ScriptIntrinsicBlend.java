@@ -104,7 +104,7 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
      * @param opt LaunchOptions for clipping
      */
     public void forEachSrc(Allocation ain, Allocation aout, Script.LaunchOptions opt) {
-        blend(1, ain, aout, opt);
+        blend(1, ain, aout, null);
     }
 
     /**
@@ -641,3 +641,4 @@ public class ScriptIntrinsicBlend extends ScriptIntrinsic {
     }
 */
 }
+

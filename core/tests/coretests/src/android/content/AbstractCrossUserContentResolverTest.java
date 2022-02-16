@@ -17,7 +17,6 @@
 package android.content;
 
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 import android.app.ActivityManager;
 import android.app.activity.LocalProvider;
@@ -59,12 +58,10 @@ abstract class AbstractCrossUserContentResolverTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        final PackageManager pm = mContext.getPackageManager();
-        assumeTrue("device doesn't have the " + PackageManager.FEATURE_MANAGED_USERS + " feature",
-                pm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS));
         mUm = UserManager.get(mContext);
         final UserInfo userInfo = createUser();
         mCrossUserId = userInfo.id;
+        final PackageManager pm = mContext.getPackageManager();
         pm.installExistingPackageAsUser(mContext.getPackageName(), mCrossUserId);
         unlockUser();
 

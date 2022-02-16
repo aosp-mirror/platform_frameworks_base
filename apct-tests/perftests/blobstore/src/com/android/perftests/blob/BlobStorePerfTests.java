@@ -85,7 +85,10 @@ public class BlobStorePerfTests {
 
     @After
     public void tearDown() {
-        runShellCommand("cmd blob_store idle-maintenance");
+        // TODO: Add a blob_store shell command to trigger idle maintenance to avoid hardcoding
+        // job id like this.
+        // From BlobStoreConfig.IDLE_JOB_ID = 191934935.
+        runShellCommand("cmd jobscheduler run -f android 191934935");
     }
 
     @Test

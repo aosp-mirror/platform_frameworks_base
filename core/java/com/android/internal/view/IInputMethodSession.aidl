@@ -22,10 +22,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
-
-import com.android.internal.view.IInputContext;
 
 /**
  * Sub-interface of IInputMethod which is safe to give to client applications.
@@ -55,6 +52,4 @@ oneway interface IInputMethodSession {
     void removeImeSurface();
 
     void finishInput();
-
-    void invalidateInput(in EditorInfo editorInfo, in IInputContext inputContext, int sessionId);
 }

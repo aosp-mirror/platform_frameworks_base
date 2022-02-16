@@ -22,12 +22,11 @@
     android:color="?android:attr/textColorPrimary">
   <item>
     <shape
-        android:shape="rectangle">
+        android:shape="oval">
       <solid android:color="?androidprv:attr/colorSurface"/>
       <size
           android:width="@dimen/keyguard_affordance_width"
           android:height="@dimen/keyguard_affordance_height"/>
-      <corners android:radius="@dimen/keyguard_affordance_fixed_radius"/>
     </shape>
   </item>
 </ripple>

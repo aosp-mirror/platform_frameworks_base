@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -28,6 +28,10 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
+import android.view.DisplayInfo;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -101,29 +105,18 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    /** Returns {@code true} if visibility is changed. */
-    boolean updateWallpaperWindows(boolean visible) {
-        boolean changed = false;
-        if (mVisibleRequested != visible) {
-            ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
-                    token, visible);
+    void updateWallpaperWindows(boolean visible) {
+        if (isVisible() != visible) {
+            if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
+                    "Wallpaper token " + token + " visible=" + visible);
             setVisibility(visible);
-            changed = true;
         }
-        if (mTransitionController.isShellTransitionsEnabled()) {
-            // Apply legacy fixed rotation to wallpaper if it is becoming visible
-            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
-                final WindowState wallpaperTarget =
-                        mDisplayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
-                    linkFixedRotationTransform(wallpaperTarget.mToken);
-                }
-            }
-            return changed;
+        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
+        if (mWmService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
+            return;
         }
 
-        final WindowState wallpaperTarget =
-                mDisplayContent.mWallpaperController.getWallpaperTarget();
+        final WindowState wallpaperTarget = wallpaperController.getWallpaperTarget();
 
         if (visible && wallpaperTarget != null) {
             final RecentsAnimationController recentsAnimationController =
@@ -145,7 +138,6 @@ class WallpaperWindowToken extends WindowToken {
         }
 
         setVisible(visible);
-        return changed;
     }
 
     private void setVisible(boolean visible) {
@@ -164,15 +156,13 @@ class WallpaperWindowToken extends WindowToken {
      * transition. In that situation, make sure to call {@link #commitVisibility} when done.
      */
     void setVisibility(boolean visible) {
-        if (mVisibleRequested != visible) {
-            // Before setting mVisibleRequested so we can track changes.
-            mTransitionController.collect(this);
+        // Before setting mVisibleRequested so we can track changes.
+        mWmService.mAtmService.getTransitionController().collect(this);
 
-            setVisibleRequested(visible);
-        }
+        setVisibleRequested(visible);
 
         // If in a transition, defer commits for activities that are going invisible
-        if (!visible && (mTransitionController.inTransition()
+        if (!visible && (mWmService.mAtmService.getTransitionController().inTransition()
                 || getDisplayContent().mAppTransition.isRunning())) {
             return;
         }
@@ -193,6 +183,23 @@ class WallpaperWindowToken extends WindowToken {
 
         setVisibleRequested(visible);
         setVisible(visible);
+    }
+
+    @Override
+    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
+        if (attrs.height == ViewGroup.LayoutParams.MATCH_PARENT
+                || attrs.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+            return;
+        }
+
+        final DisplayInfo displayInfo = win.getDisplayInfo();
+
+        final float layoutScale = Math.max(
+                (float) displayInfo.logicalHeight / (float) attrs.height,
+                (float) displayInfo.logicalWidth / (float) attrs.width);
+        attrs.height = (int) (attrs.height * layoutScale);
+        attrs.width = (int) (attrs.width * layoutScale);
+        attrs.flags |= WindowManager.LayoutParams.FLAG_SCALED;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {

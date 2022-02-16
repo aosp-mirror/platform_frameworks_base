@@ -48,13 +48,8 @@ import javax.inject.Inject;
  * Controller for coordinating winscope proto tracing.
  */
 @SysUISingleton
-public class ProtoTracer implements
-        Dumpable,
-        ProtoTraceParams<
-                MessageNano,
-                SystemUiTraceFileProto,
-                SystemUiTraceEntryProto,
-                SystemUiTraceProto> {
+public class ProtoTracer implements Dumpable, ProtoTraceParams<MessageNano, SystemUiTraceFileProto,
+        SystemUiTraceEntryProto, SystemUiTraceProto> {
 
     private static final String TAG = "ProtoTracer";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
@@ -67,7 +62,7 @@ public class ProtoTracer implements
     public ProtoTracer(Context context, DumpManager dumpManager) {
         mContext = context;
         mProtoTracer = new FrameProtoTracer<>(this);
-        dumpManager.registerDumpable(this);
+        dumpManager.registerDumpable(getClass().getName(), this);
     }
 
     @Override
