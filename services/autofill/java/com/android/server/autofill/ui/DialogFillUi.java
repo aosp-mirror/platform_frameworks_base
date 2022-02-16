@@ -275,12 +275,10 @@ final class DialogFillUi {
             if (index >= 0) {
                 RemoteViews presentation = dataset.getFieldDialogPresentation(index);
                 if (presentation == null) {
-                    Slog.w(TAG, "fallback to presentation");
-                    presentation = dataset.getFieldPresentation(index);
-                }
-                if (presentation == null) {
-                    Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "
-                            + "service didn't provide a presentation for it on " + dataset);
+                    if (sDebug) {
+                        Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "
+                                + "service didn't provide a presentation for it on " + dataset);
+                    }
                     continue;
                 }
                 final View view;
