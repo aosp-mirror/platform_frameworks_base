@@ -14,6 +14,8 @@ android_library {
 
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.core_core",
+        "windowExtLib",
         "SettingsLibUtils",
     ],
     sdk_version: "system_current",
