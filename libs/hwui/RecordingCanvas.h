@@ -97,7 +97,6 @@ private:
     void clipRect(const SkRect&, SkClipOp, bool aa);
     void clipRRect(const SkRRect&, SkClipOp, bool aa);
     void clipRegion(const SkRegion&, SkClipOp);
-    void resetClip();
 
     void drawPaint(const SkPaint&);
     void drawBehind(const SkPaint&);
@@ -170,7 +169,6 @@ public:
     void onClipRRect(const SkRRect&, SkClipOp, ClipEdgeStyle) override;
     void onClipPath(const SkPath&, SkClipOp, ClipEdgeStyle) override;
     void onClipRegion(const SkRegion&, SkClipOp) override;
-    void onResetClip() override;
 
     void onDrawPaint(const SkPaint&) override;
     void onDrawBehind(const SkPaint&) override;

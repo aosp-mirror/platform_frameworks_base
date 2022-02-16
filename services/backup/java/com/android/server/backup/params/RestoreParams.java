@@ -22,11 +22,14 @@ import android.app.backup.IRestoreObserver;
 import android.content.pm.PackageInfo;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
+import java.util.Map;
+import java.util.Set;
+
 public class RestoreParams {
-    public final TransportConnection mTransportConnection;
+    public final TransportClient transportClient;
     public final IRestoreObserver observer;
     public final IBackupManagerMonitor monitor;
     public final long token;
@@ -41,7 +44,7 @@ public class RestoreParams {
      * No kill after restore.
      */
     public static RestoreParams createForSinglePackage(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
@@ -49,7 +52,7 @@ public class RestoreParams {
             OnTaskFinishedListener listener,
             BackupEligibilityRules eligibilityRules) {
         return new RestoreParams(
-                transportConnection,
+                transportClient,
                 observer,
                 monitor,
                 token,
@@ -65,7 +68,7 @@ public class RestoreParams {
      * Kill after restore.
      */
     public static RestoreParams createForRestoreAtInstall(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
@@ -75,7 +78,7 @@ public class RestoreParams {
             BackupEligibilityRules backupEligibilityRules) {
         String[] filterSet = {packageName};
         return new RestoreParams(
-                transportConnection,
+                transportClient,
                 observer,
                 monitor,
                 token,
@@ -91,14 +94,14 @@ public class RestoreParams {
      * This is the form that Setup Wizard or similar restore UXes use.
      */
     public static RestoreParams createForRestoreAll(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
             OnTaskFinishedListener listener,
             BackupEligibilityRules backupEligibilityRules) {
         return new RestoreParams(
-                transportConnection,
+                transportClient,
                 observer,
                 monitor,
                 token,
@@ -114,7 +117,7 @@ public class RestoreParams {
      * Caller specifies whether is considered a system-level restore.
      */
     public static RestoreParams createForRestorePackages(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
@@ -123,7 +126,7 @@ public class RestoreParams {
             OnTaskFinishedListener listener,
             BackupEligibilityRules backupEligibilityRules) {
         return new RestoreParams(
-                transportConnection,
+                transportClient,
                 observer,
                 monitor,
                 token,
@@ -136,7 +139,7 @@ public class RestoreParams {
     }
 
     private RestoreParams(
-            TransportConnection transportConnection,
+            TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
@@ -146,7 +149,7 @@ public class RestoreParams {
             @Nullable String[] filterSet,
             OnTaskFinishedListener listener,
             BackupEligibilityRules backupEligibilityRules) {
-        this.mTransportConnection = transportConnection;
+        this.transportClient = transportClient;
         this.observer = observer;
         this.monitor = monitor;
         this.token = token;

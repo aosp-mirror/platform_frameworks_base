@@ -23,7 +23,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -43,9 +42,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -84,10 +81,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         private AlertEntry mLastCreatedEntry;
 
         private TestableAlertingNotificationManager() {
-            super(mock(HeadsUpManagerLogger.class));
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mHandler.removeCallbacksAndMessages(null);
             mHandler = mTestHandler;
         }
 
@@ -145,11 +140,6 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         mEntry.setRow(mRow);
 
         mAlertingNotificationManager = createAlertingNotificationManager();
-    }
-
-    @After
-    public void tearDown() {
-        mTestHandler.removeCallbacksAndMessages(null);
     }
 
     @Test

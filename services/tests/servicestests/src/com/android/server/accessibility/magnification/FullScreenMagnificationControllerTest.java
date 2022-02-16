@@ -16,8 +16,6 @@
 
 package com.android.server.accessibility.magnification;
 
-import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
-
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 
 import static org.junit.Assert.assertEquals;
@@ -25,8 +23,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,7 +37,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-import android.accessibilityservice.MagnificationConfig;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -53,7 +52,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
-import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
@@ -95,19 +93,12 @@ public class FullScreenMagnificationControllerTest {
             mock(FullScreenMagnificationController.ControllerContext.class);
     final Context mMockContext = mock(Context.class);
     final AccessibilityManagerService mMockAms = mock(AccessibilityManagerService.class);
-    final AccessibilityTraceManager mMockTraceManager = mock(AccessibilityTraceManager.class);
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
     private final MagnificationAnimationCallback mAnimationCallback = mock(
             MagnificationAnimationCallback.class);
     private final MagnificationInfoChangedCallback mRequestObserver = mock(
             MagnificationInfoChangedCallback.class);
-    private final MessageCapturingHandler mMessageCapturingHandler = new MessageCapturingHandler(
-            null);
-    private final MagnificationScaleProvider mScaleProvider = mock(
-            MagnificationScaleProvider.class);
-
-    private final ArgumentCaptor<MagnificationConfig> mConfigCaptor = ArgumentCaptor.forClass(
-            MagnificationConfig.class);
+    final MessageCapturingHandler mMessageCapturingHandler = new MessageCapturingHandler(null);
 
     ValueAnimator mMockValueAnimator;
     ValueAnimator.AnimatorUpdateListener mTargetAnimationListener;
@@ -122,15 +113,13 @@ public class FullScreenMagnificationControllerTest {
         when(mMockContext.getMainLooper()).thenReturn(looper);
         when(mMockControllerCtx.getContext()).thenReturn(mMockContext);
         when(mMockControllerCtx.getAms()).thenReturn(mMockAms);
-        when(mMockControllerCtx.getTraceManager()).thenReturn(mMockTraceManager);
         when(mMockControllerCtx.getWindowManager()).thenReturn(mMockWindowManager);
         when(mMockControllerCtx.getHandler()).thenReturn(mMessageCapturingHandler);
         when(mMockControllerCtx.getAnimationDuration()).thenReturn(1000L);
-        when(mMockAms.getTraceManager()).thenReturn(mMockTraceManager);
         initMockWindowManager();
 
         mFullScreenMagnificationController = new FullScreenMagnificationController(
-                mMockControllerCtx, new Object(), mRequestObserver, mScaleProvider);
+                mMockControllerCtx, new Object(), mRequestObserver);
     }
 
     @After
@@ -145,13 +134,13 @@ public class FullScreenMagnificationControllerTest {
         register(DISPLAY_1);
         register(INVALID_DISPLAY);
         verify(mMockContext).registerReceiver(
-                any(BroadcastReceiver.class), any(IntentFilter.class));
+                (BroadcastReceiver) anyObject(), (IntentFilter) anyObject());
         verify(mMockWindowManager).setMagnificationCallbacks(
-                eq(DISPLAY_0), any(MagnificationCallbacks.class));
+                eq(DISPLAY_0), (MagnificationCallbacks) anyObject());
         verify(mMockWindowManager).setMagnificationCallbacks(
-                eq(DISPLAY_1), any(MagnificationCallbacks.class));
+                eq(DISPLAY_1), (MagnificationCallbacks) anyObject());
         verify(mMockWindowManager).setMagnificationCallbacks(
-                eq(INVALID_DISPLAY), any(MagnificationCallbacks.class));
+                eq(INVALID_DISPLAY), (MagnificationCallbacks) anyObject());
         assertTrue(mFullScreenMagnificationController.isRegistered(DISPLAY_0));
         assertTrue(mFullScreenMagnificationController.isRegistered(DISPLAY_1));
         assertFalse(mFullScreenMagnificationController.isRegistered(INVALID_DISPLAY));
@@ -162,9 +151,9 @@ public class FullScreenMagnificationControllerTest {
         register(DISPLAY_0);
         register(DISPLAY_1);
         mFullScreenMagnificationController.unregister(DISPLAY_0);
-        verify(mMockContext, times(0)).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mMockContext, times(0)).unregisterReceiver((BroadcastReceiver) anyObject());
         mFullScreenMagnificationController.unregister(DISPLAY_1);
-        verify(mMockContext).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mMockContext).unregisterReceiver((BroadcastReceiver) anyObject());
         verify(mMockWindowManager).setMagnificationCallbacks(eq(DISPLAY_0), eq(null));
         verify(mMockWindowManager).setMagnificationCallbacks(eq(DISPLAY_1), eq(null));
         assertFalse(mFullScreenMagnificationController.isRegistered(DISPLAY_0));
@@ -346,7 +335,6 @@ public class FullScreenMagnificationControllerTest {
         MagnificationSpec startSpec = getCurrentMagnificationSpec(displayId);
         float scale = 2.5f;
         PointF newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
-        final MagnificationConfig config = buildConfig(scale, newCenter.x, newCenter.y);
         PointF offsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
         MagnificationSpec endSpec = getMagnificationSpec(scale, offsets);
 
@@ -357,9 +345,8 @@ public class FullScreenMagnificationControllerTest {
         assertEquals(newCenter.x, mFullScreenMagnificationController.getCenterX(displayId), 0.5);
         assertEquals(newCenter.y, mFullScreenMagnificationController.getCenterY(displayId), 0.5);
         assertThat(getCurrentMagnificationSpec(displayId), closeTo(endSpec));
-        verify(mMockAms).notifyMagnificationChanged(eq(displayId), eq(INITIAL_MAGNIFICATION_REGION),
-                mConfigCaptor.capture());
-        assertConfigEquals(config, mConfigCaptor.getValue());
+        verify(mMockAms).notifyMagnificationChanged(displayId,
+                INITIAL_MAGNIFICATION_REGION, scale, newCenter.x, newCenter.y);
         verify(mMockValueAnimator).start();
         verify(mRequestObserver).onRequestMagnificationSpec(displayId, SERVICE_ID_1);
 
@@ -421,12 +408,12 @@ public class FullScreenMagnificationControllerTest {
         MagnificationSpec startSpec = getCurrentMagnificationSpec(displayId);
         PointF newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
         PointF offsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter,
-                MagnificationScaleProvider.MAX_SCALE);
+                FullScreenMagnificationController.MAX_SCALE);
         MagnificationSpec endSpec = getMagnificationSpec(
-                MagnificationScaleProvider.MAX_SCALE, offsets);
+                FullScreenMagnificationController.MAX_SCALE, offsets);
 
         assertTrue(mFullScreenMagnificationController.setScaleAndCenter(displayId,
-                MagnificationScaleProvider.MAX_SCALE + 1.0f,
+                FullScreenMagnificationController.MAX_SCALE + 1.0f,
                 newCenter.x, newCenter.y, false, SERVICE_ID_1));
         mMessageCapturingHandler.sendAllMessages();
 
@@ -499,11 +486,8 @@ public class FullScreenMagnificationControllerTest {
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
         callbacks.onMagnificationRegionChanged(OTHER_REGION);
         mMessageCapturingHandler.sendAllMessages();
-        MagnificationConfig config = buildConfig(1.0f, OTHER_MAGNIFICATION_BOUNDS.centerX(),
-                OTHER_MAGNIFICATION_BOUNDS.centerY());
-        verify(mMockAms).notifyMagnificationChanged(eq(displayId), eq(OTHER_REGION),
-                mConfigCaptor.capture());
-        assertConfigEquals(config, mConfigCaptor.getValue());
+        verify(mMockAms).notifyMagnificationChanged(displayId, OTHER_REGION, 1.0f,
+                OTHER_MAGNIFICATION_BOUNDS.centerX(), OTHER_MAGNIFICATION_BOUNDS.centerY());
     }
 
     @Test
@@ -644,6 +628,31 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
+    public void testSetUserId_resetsOnlyIfIdChanges() {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            testSetUserId_resetsOnlyIfIdChanges(i);
+            resetMockWindowManager();
+        }
+    }
+
+    private void testSetUserId_resetsOnlyIfIdChanges(int displayId) {
+        final int userId1 = 1;
+        final int userId2 = 2;
+
+        register(displayId);
+        mFullScreenMagnificationController.setUserId(userId1);
+        PointF startCenter = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
+        float scale = 2.0f;
+        mFullScreenMagnificationController.setScale(displayId, scale, startCenter.x, startCenter.y,
+                false, SERVICE_ID_1);
+
+        mFullScreenMagnificationController.setUserId(userId1);
+        assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
+        mFullScreenMagnificationController.setUserId(userId2);
+        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+    }
+
+    @Test
     public void testResetIfNeeded_doesWhatItSays() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             testResetIfNeeded_doesWhatItSays(i);
@@ -658,7 +667,7 @@ public class FullScreenMagnificationControllerTest {
         reset(mMockAms);
         assertTrue(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
         verify(mMockAms).notifyMagnificationChanged(eq(displayId),
-                eq(INITIAL_MAGNIFICATION_REGION), any(MagnificationConfig.class));
+                eq(INITIAL_MAGNIFICATION_REGION), eq(1.0f), anyFloat(), anyFloat());
         assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
         assertFalse(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
     }
@@ -676,8 +685,8 @@ public class FullScreenMagnificationControllerTest {
         assertFalse(mFullScreenMagnificationController.reset(displayId, mAnimationCallback));
         mMessageCapturingHandler.sendAllMessages();
 
-        verify(mMockAms, never()).notifyMagnificationChanged(eq(displayId), any(Region.class),
-                any(MagnificationConfig.class));
+        verify(mMockAms, never()).notifyMagnificationChanged(eq(displayId),
+                any(Region.class), anyFloat(), anyFloat(), anyFloat());
         verify(mAnimationCallback).onResult(true);
     }
 
@@ -734,7 +743,7 @@ public class FullScreenMagnificationControllerTest {
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext).registerReceiver(
-                broadcastReceiverCaptor.capture(), any(IntentFilter.class));
+                broadcastReceiverCaptor.capture(), (IntentFilter) anyObject());
         BroadcastReceiver br = broadcastReceiverCaptor.getValue();
         zoomIn2xToMiddle(DISPLAY_0);
         zoomIn2xToMiddle(DISPLAY_1);
@@ -764,20 +773,20 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
-    public void testDisplaySizeChanged_resetsMagnification() {
+    public void testRotation_resetsMagnification() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
-            changeDisplaySize_resetsMagnification(i);
+            rotation_resetsMagnification(i);
             resetMockWindowManager();
         }
     }
 
-    private void changeDisplaySize_resetsMagnification(int displayId) {
+    private void rotation_resetsMagnification(int displayId) {
         register(displayId);
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
         zoomIn2xToMiddle(displayId);
         mMessageCapturingHandler.sendAllMessages();
         assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
-        callbacks.onDisplaySizeChanged();
+        callbacks.onRotationChanged(0);
         mMessageCapturingHandler.sendAllMessages();
         assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
     }
@@ -921,22 +930,6 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
-    public void requestRectOnScreen_disabledByPrefSetting_doesNothing() {
-        register(DISPLAY_0);
-        zoomIn2xToMiddle(DISPLAY_0);
-        Mockito.reset(mMockWindowManager);
-        MagnificationSpec startSpec = getCurrentMagnificationSpec(DISPLAY_0);
-        MagnificationSpec expectedEndSpec = getMagnificationSpec(2.0f, 0, 0);
-        mFullScreenMagnificationController.setMagnificationFollowTypingEnabled(false);
-
-        mFullScreenMagnificationController.onRectangleOnScreenRequested(DISPLAY_0, 0, 0, 1, 1);
-
-        assertThat(getCurrentMagnificationSpec(DISPLAY_0), closeTo(startSpec));
-        verify(mMockWindowManager, never()).setMagnificationSpec(eq(DISPLAY_0),
-                argThat(closeTo(expectedEndSpec)));
-    }
-
-    @Test
     public void testRequestRectOnScreen_rectCanFitOnScreen_pansToGetRectOnScreen() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             requestRectOnScreen_rectCanFitOnScreen_pansToGetRectOnScreen(i);
@@ -1055,7 +1048,6 @@ public class FullScreenMagnificationControllerTest {
         MagnificationSpec startSpec = getCurrentMagnificationSpec(displayId);
         float scale = 2.5f;
         PointF firstCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
-        final MagnificationConfig config = buildConfig(scale, firstCenter.x, firstCenter.y);
         MagnificationSpec firstEndSpec = getMagnificationSpec(
                 scale, computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, firstCenter, scale));
 
@@ -1072,9 +1064,8 @@ public class FullScreenMagnificationControllerTest {
         when(mMockValueAnimator.getAnimatedFraction()).thenReturn(0.0f);
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
         verify(mMockWindowManager).setMagnificationSpec(eq(displayId), eq(startSpec));
-        verify(mMockAms).notifyMagnificationChanged(eq(displayId), eq(INITIAL_MAGNIFICATION_REGION),
-                mConfigCaptor.capture());
-        assertConfigEquals(config, mConfigCaptor.getValue());
+        verify(mMockAms).notifyMagnificationChanged(displayId,
+                INITIAL_MAGNIFICATION_REGION, scale, firstCenter.x, firstCenter.y);
         Mockito.reset(mMockWindowManager);
 
         // Intermediate point
@@ -1088,7 +1079,6 @@ public class FullScreenMagnificationControllerTest {
         Mockito.reset(mMockWindowManager);
 
         PointF newCenter = INITIAL_BOUNDS_UPPER_LEFT_2X_CENTER;
-        final MagnificationConfig newConfig = buildConfig(scale, newCenter.x, newCenter.y);
         MagnificationSpec newEndSpec = getMagnificationSpec(
                 scale, computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale));
         assertTrue(mFullScreenMagnificationController.setCenter(displayId,
@@ -1097,9 +1087,8 @@ public class FullScreenMagnificationControllerTest {
 
         // Animation should have been restarted
         verify(mMockValueAnimator, times(2)).start();
-        verify(mMockAms, times(2)).notifyMagnificationChanged(eq(displayId),
-                eq(INITIAL_MAGNIFICATION_REGION), mConfigCaptor.capture());
-        assertConfigEquals(newConfig, mConfigCaptor.getValue());
+        verify(mMockAms).notifyMagnificationChanged(displayId,
+                INITIAL_MAGNIFICATION_REGION, scale, newCenter.x, newCenter.y);
 
         // New starting point should be where we left off
         when(mMockValueAnimator.getAnimatedFraction()).thenReturn(0.0f);
@@ -1145,7 +1134,7 @@ public class FullScreenMagnificationControllerTest {
     public void testSetScale_toMagnifying_shouldNotifyActivatedState() {
         setScaleToMagnifying();
 
-        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(true));
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(true));
     }
 
     @Test
@@ -1153,7 +1142,7 @@ public class FullScreenMagnificationControllerTest {
         setScaleToMagnifying();
 
         mFullScreenMagnificationController.reset(DISPLAY_0, mAnimationCallback);
-        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(false));
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(false));
     }
 
     @Test
@@ -1183,7 +1172,7 @@ public class FullScreenMagnificationControllerTest {
             Region regionArg = (Region) args[1];
             regionArg.set(INITIAL_MAGNIFICATION_REGION);
             return null;
-        }).when(mMockWindowManager).getMagnificationRegion(anyInt(), any(Region.class));
+        }).when(mMockWindowManager).getMagnificationRegion(anyInt(), (Region) anyObject());
     }
 
     private void resetMockWindowManager() {
@@ -1227,19 +1216,6 @@ public class FullScreenMagnificationControllerTest {
         return new PointF(
                 magnifiedBounds.centerX() - scale * center.x,
                 magnifiedBounds.centerY() - scale * center.y);
-    }
-
-    private MagnificationConfig buildConfig(float scale, float centerX, float centerY) {
-        return new MagnificationConfig.Builder().setMode(
-                MAGNIFICATION_MODE_FULLSCREEN).setScale(scale).setCenterX(centerX).setCenterY(
-                centerY).build();
-    }
-
-    private void assertConfigEquals(MagnificationConfig expected, MagnificationConfig result) {
-        assertEquals(expected.getMode(), result.getMode());
-        assertEquals(expected.getScale(), result.getScale(), 0f);
-        assertEquals(expected.getCenterX(), result.getCenterX(), 0f);
-        assertEquals(expected.getCenterY(), result.getCenterY(), 0f);
     }
 
     private MagnificationSpec getInterpolatedMagSpec(MagnificationSpec start, MagnificationSpec end,

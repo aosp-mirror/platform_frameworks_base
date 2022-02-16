@@ -27,8 +27,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,8 +45,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.notification.FeedbackIcon;
-import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -56,12 +54,9 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.RemoteInputView;
-import com.android.systemui.statusbar.policy.RemoteInputViewController;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
-import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
-import com.android.systemui.util.Compile;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
@@ -75,10 +70,10 @@ import java.util.List;
  * expanded and heads up layout. This class is responsible for clipping the content and and
  * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
-public class NotificationContentView extends FrameLayout implements NotificationFadeAware {
+public class NotificationContentView extends FrameLayout {
 
     private static final String TAG = "NotificationContentView";
-    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final int VISIBLE_TYPE_CONTRACTED = 0;
     public static final int VISIBLE_TYPE_EXPANDED = 1;
     public static final int VISIBLE_TYPE_HEADSUP = 2;
@@ -106,8 +101,6 @@ public class NotificationContentView extends FrameLayout implements Notification
     private SmartReplyConstants mSmartReplyConstants;
     private SmartReplyView mExpandedSmartReplyView;
     private SmartReplyView mHeadsUpSmartReplyView;
-    @Nullable private RemoteInputViewController mExpandedRemoteInputController;
-    @Nullable private RemoteInputViewController mHeadsUpRemoteInputController;
     private SmartReplyController mSmartReplyController;
     private InflatedSmartReplyViewHolder mExpandedInflatedSmartReplies;
     private InflatedSmartReplyViewHolder mHeadsUpInflatedSmartReplies;
@@ -132,8 +125,6 @@ public class NotificationContentView extends FrameLayout implements Notification
     private RemoteInputController mRemoteInputController;
     private Runnable mExpandedVisibleListener;
     private PeopleNotificationIdentifier mPeopleIdentifier;
-    private RemoteInputViewSubcomponent.Factory mRemoteInputSubcomponentFactory;
-
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
      */
@@ -168,17 +159,10 @@ public class NotificationContentView extends FrameLayout implements Notification
     private boolean mUserExpanding;
     private int mSingleLineWidthIndention;
     private boolean mForceSelectNextLayout = true;
-
-    // Cache for storing the RemoteInputView during a notification update. Needed because
-    // setExpandedChild sets the actual field to null, but then onNotificationUpdated will restore
-    // it from the cache, if present, otherwise inflate a new one.
-    // ONLY USED WHEN THE ORIGINAL WAS isActive() WHEN REPLACED
-    private RemoteInputView mCachedExpandedRemoteInput;
-    private RemoteInputView mCachedHeadsUpRemoteInput;
-    private RemoteInputViewController mCachedExpandedRemoteInputViewController;
-    private RemoteInputViewController mCachedHeadsUpRemoteInputViewController;
     private PendingIntent mPreviousExpandedRemoteInputIntent;
     private PendingIntent mPreviousHeadsUpRemoteInputIntent;
+    private RemoteInputView mCachedExpandedRemoteInput;
+    private RemoteInputView mCachedHeadsUpRemoteInput;
 
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
@@ -415,7 +399,6 @@ public class NotificationContentView extends FrameLayout implements Notification
                 if (mExpandedRemoteInput.isActive()) {
                     mPreviousExpandedRemoteInputIntent = mExpandedRemoteInput.getPendingIntent();
                     mCachedExpandedRemoteInput = mExpandedRemoteInput;
-                    mCachedExpandedRemoteInputViewController = mExpandedRemoteInputController;
                     mExpandedRemoteInput.dispatchStartTemporaryDetach();
                     ((ViewGroup)mExpandedRemoteInput.getParent()).removeView(mExpandedRemoteInput);
                 }
@@ -424,10 +407,6 @@ public class NotificationContentView extends FrameLayout implements Notification
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
             mExpandedRemoteInput = null;
-            if (mExpandedRemoteInputController != null) {
-                mExpandedRemoteInputController.unbind();
-            }
-            mExpandedRemoteInputController = null;
         }
         if (child == null) {
             mExpandedChild = null;
@@ -462,7 +441,6 @@ public class NotificationContentView extends FrameLayout implements Notification
                 if (mHeadsUpRemoteInput.isActive()) {
                     mPreviousHeadsUpRemoteInputIntent = mHeadsUpRemoteInput.getPendingIntent();
                     mCachedHeadsUpRemoteInput = mHeadsUpRemoteInput;
-                    mCachedHeadsUpRemoteInputViewController = mHeadsUpRemoteInputController;
                     mHeadsUpRemoteInput.dispatchStartTemporaryDetach();
                     ((ViewGroup)mHeadsUpRemoteInput.getParent()).removeView(mHeadsUpRemoteInput);
                 }
@@ -471,10 +449,6 @@ public class NotificationContentView extends FrameLayout implements Notification
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
             mHeadsUpRemoteInput = null;
-            if (mHeadsUpRemoteInputController != null) {
-                mHeadsUpRemoteInputController.unbind();
-            }
-            mHeadsUpRemoteInputController = null;
         }
         if (child == null) {
             mHeadsUpChild = null;
@@ -1153,7 +1127,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.onContentUpdated(row);
         }
-        applyRemoteInputAndSmartReply();
+        applyRemoteInputAndSmartReply(entry);
         updateLegacy();
         mForceSelectNextLayout = true;
         mPreviousExpandedRemoteInputIntent = null;
@@ -1191,10 +1165,12 @@ public class NotificationContentView extends FrameLayout implements Notification
         return null != notification.findRemoteInputActionPair(true /* freeform */);
     }
 
-    private void applyRemoteInputAndSmartReply() {
-        if (mRemoteInputController != null) {
-            applyRemoteInput();
+    private void applyRemoteInputAndSmartReply(final NotificationEntry entry) {
+        if (mRemoteInputController == null) {
+            return;
         }
+
+        applyRemoteInput(entry, hasFreeformRemoteInput(entry));
 
         if (mCurrentSmartReplyState == null) {
             if (DEBUG) {
@@ -1204,31 +1180,21 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
         if (DEBUG) {
             Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
-                    mNotificationEntry.getSbn().getKey(),
+                    entry.getSbn().getKey(),
                     mCurrentSmartReplyState.getSmartActionsList().size(),
                     mCurrentSmartReplyState.getSmartRepliesList().size()));
         }
-        applySmartReplyView();
+        applySmartReplyView(mCurrentSmartReplyState, entry);
     }
 
-    private void applyRemoteInput() {
-        boolean hasFreeformRemoteInput = hasFreeformRemoteInput(mNotificationEntry);
-        if (mExpandedChild != null) {
-            RemoteInputViewData expandedData = applyRemoteInput(mExpandedChild, mNotificationEntry,
-                    hasFreeformRemoteInput, mPreviousExpandedRemoteInputIntent,
-                    mCachedExpandedRemoteInput, mCachedExpandedRemoteInputViewController,
+    private void applyRemoteInput(NotificationEntry entry, boolean hasFreeformRemoteInput) {
+        View bigContentView = mExpandedChild;
+        if (bigContentView != null) {
+            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasFreeformRemoteInput,
+                    mPreviousExpandedRemoteInputIntent, mCachedExpandedRemoteInput,
                     mExpandedWrapper);
-            mExpandedRemoteInput = expandedData.mView;
-            mExpandedRemoteInputController = expandedData.mController;
-            if (mExpandedRemoteInputController != null) {
-                mExpandedRemoteInputController.bind();
-            }
         } else {
             mExpandedRemoteInput = null;
-            if (mExpandedRemoteInputController != null) {
-                mExpandedRemoteInputController.unbind();
-            }
-            mExpandedRemoteInputController = null;
         }
         if (mCachedExpandedRemoteInput != null
                 && mCachedExpandedRemoteInput != mExpandedRemoteInput) {
@@ -1236,24 +1202,14 @@ public class NotificationContentView extends FrameLayout implements Notification
             mCachedExpandedRemoteInput.dispatchFinishTemporaryDetach();
         }
         mCachedExpandedRemoteInput = null;
-        mCachedExpandedRemoteInputViewController = null;
 
-        if (mHeadsUpChild != null) {
-            RemoteInputViewData headsUpData = applyRemoteInput(mHeadsUpChild, mNotificationEntry,
-                    hasFreeformRemoteInput, mPreviousHeadsUpRemoteInputIntent,
-                    mCachedHeadsUpRemoteInput, mCachedHeadsUpRemoteInputViewController,
-                    mHeadsUpWrapper);
-            mHeadsUpRemoteInput = headsUpData.mView;
-            mHeadsUpRemoteInputController = headsUpData.mController;
-            if (mHeadsUpRemoteInputController != null) {
-                mHeadsUpRemoteInputController.bind();
-            }
+        View headsUpContentView = mHeadsUpChild;
+        if (headsUpContentView != null) {
+            mHeadsUpRemoteInput = applyRemoteInput(
+                    headsUpContentView, entry, hasFreeformRemoteInput,
+                    mPreviousHeadsUpRemoteInputIntent, mCachedHeadsUpRemoteInput, mHeadsUpWrapper);
         } else {
             mHeadsUpRemoteInput = null;
-            if (mHeadsUpRemoteInputController != null) {
-                mHeadsUpRemoteInputController.unbind();
-            }
-            mHeadsUpRemoteInputController = null;
         }
         if (mCachedHeadsUpRemoteInput != null
                 && mCachedHeadsUpRemoteInput != mHeadsUpRemoteInput) {
@@ -1261,24 +1217,22 @@ public class NotificationContentView extends FrameLayout implements Notification
             mCachedHeadsUpRemoteInput.dispatchFinishTemporaryDetach();
         }
         mCachedHeadsUpRemoteInput = null;
-        mCachedHeadsUpRemoteInputViewController = null;
     }
 
-    private RemoteInputViewData applyRemoteInput(View view, NotificationEntry entry,
-            boolean hasRemoteInput, PendingIntent existingPendingIntent, RemoteInputView cachedView,
-            RemoteInputViewController cachedController, NotificationViewWrapper wrapper) {
-        RemoteInputViewData result = new RemoteInputViewData();
+
+    private RemoteInputView applyRemoteInput(View view, NotificationEntry entry,
+            boolean hasRemoteInput, PendingIntent existingPendingIntent,
+            RemoteInputView cachedView, NotificationViewWrapper wrapper) {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
-            result.mView = view.findViewWithTag(RemoteInputView.VIEW_TAG);
+            RemoteInputView existing = view.findViewWithTag(RemoteInputView.VIEW_TAG);
 
-            if (result.mView != null) {
-                result.mView.onNotificationUpdateOrReset();
-                result.mController = result.mView.getController();
+            if (existing != null) {
+                existing.onNotificationUpdateOrReset();
             }
 
-            if (result.mView == null && hasRemoteInput) {
+            if (existing == null && hasRemoteInput) {
                 ViewGroup actionContainer = (FrameLayout) actionContainerCandidate;
                 if (cachedView == null) {
                     RemoteInputView riv = RemoteInputView.inflate(
@@ -1289,51 +1243,44 @@ public class NotificationContentView extends FrameLayout implements Notification
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT)
                     );
-                    result.mView = riv;
-                    // Create a new controller for the view. The lifetime of the controller is 1:1
-                    // with that of the view.
-                    RemoteInputViewSubcomponent subcomponent = mRemoteInputSubcomponentFactory
-                            .create(result.mView, mRemoteInputController);
-                    result.mController = subcomponent.getController();
-                    result.mView.setController(result.mController);
+                    existing = riv;
                 } else {
                     actionContainer.addView(cachedView);
                     cachedView.dispatchFinishTemporaryDetach();
                     cachedView.requestFocus();
-                    result.mView = cachedView;
-                    result.mController = cachedController;
+                    existing = cachedView;
                 }
             }
             if (hasRemoteInput) {
-                result.mView.setWrapper(wrapper);
-                result.mView.addOnVisibilityChangedListener(this::setRemoteInputVisible);
+                existing.setWrapper(wrapper);
+                existing.setOnVisibilityChangedListener(this::setRemoteInputVisible);
 
-                if (existingPendingIntent != null || result.mView.isActive()) {
+                if (existingPendingIntent != null || existing.isActive()) {
                     // The current action could be gone, or the pending intent no longer valid.
                     // If we find a matching action in the new notification, focus, otherwise close.
                     Notification.Action[] actions = entry.getSbn().getNotification().actions;
                     if (existingPendingIntent != null) {
-                        result.mView.setPendingIntent(existingPendingIntent);
-                        result.mController.setPendingIntent(existingPendingIntent);
+                        existing.setPendingIntent(existingPendingIntent);
                     }
-                    if (result.mController.updatePendingIntentFromActions(actions)) {
-                        if (!result.mView.isActive()) {
-                            result.mView.focus();
+                    if (existing.updatePendingIntentFromActions(actions)) {
+                        if (!existing.isActive()) {
+                            existing.focus();
                         }
                     } else {
-                        if (result.mView.isActive()) {
-                            result.mView.close();
+                        if (existing.isActive()) {
+                            existing.close();
                         }
                     }
                 }
             }
-            if (result.mView != null) {
+            if (existing != null) {
                 int backgroundColor = entry.getRow().getCurrentBackgroundTint();
-                boolean colorized = entry.getSbn().getNotification().isColorized();
-                result.mView.setBackgroundTintColor(backgroundColor, colorized);
+                boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
+                existing.setBackgroundTintColor(backgroundColor, colorized);
             }
+            return existing;
         }
-        return result;
+        return null;
     }
 
     /**
@@ -1426,19 +1373,19 @@ public class NotificationContentView extends FrameLayout implements Notification
         actionContainer.setVisibility(VISIBLE);
     }
 
-    private void applySmartReplyView() {
+    private void applySmartReplyView(
+            InflatedSmartReplyState state,
+            NotificationEntry entry) {
         if (mContractedChild != null) {
-            applyExternalSmartReplyState(mContractedChild, mCurrentSmartReplyState);
+            applyExternalSmartReplyState(mContractedChild, state);
         }
         if (mExpandedChild != null) {
-            applyExternalSmartReplyState(mExpandedChild, mCurrentSmartReplyState);
-            mExpandedSmartReplyView = applySmartReplyView(mExpandedChild, mCurrentSmartReplyState,
-                    mNotificationEntry, mExpandedInflatedSmartReplies);
+            applyExternalSmartReplyState(mExpandedChild, state);
+            mExpandedSmartReplyView = applySmartReplyView(mExpandedChild, state,
+                    entry, mExpandedInflatedSmartReplies);
             if (mExpandedSmartReplyView != null) {
-                SmartReplyView.SmartReplies smartReplies =
-                        mCurrentSmartReplyState.getSmartReplies();
-                SmartReplyView.SmartActions smartActions =
-                        mCurrentSmartReplyState.getSmartActions();
+                SmartReplyView.SmartReplies smartReplies = state.getSmartReplies();
+                SmartReplyView.SmartActions smartActions = state.getSmartActions();
                 if (smartReplies != null || smartActions != null) {
                     int numSmartReplies = smartReplies == null ? 0 : smartReplies.choices.size();
                     int numSmartActions = smartActions == null ? 0 : smartActions.actions.size();
@@ -1449,16 +1396,16 @@ public class NotificationContentView extends FrameLayout implements Notification
                             && mSmartReplyConstants.getEffectiveEditChoicesBeforeSending(
                                     smartReplies.remoteInput.getEditChoicesBeforeSending());
 
-                    mSmartReplyController.smartSuggestionsAdded(mNotificationEntry, numSmartReplies,
+                    mSmartReplyController.smartSuggestionsAdded(entry, numSmartReplies,
                             numSmartActions, fromAssistant, editBeforeSending);
                 }
             }
         }
         if (mHeadsUpChild != null) {
-            applyExternalSmartReplyState(mHeadsUpChild, mCurrentSmartReplyState);
+            applyExternalSmartReplyState(mHeadsUpChild, state);
             if (mSmartReplyConstants.getShowInHeadsUp()) {
-                mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, mCurrentSmartReplyState,
-                        mNotificationEntry, mHeadsUpInflatedSmartReplies);
+                mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, state,
+                        entry, mHeadsUpInflatedSmartReplies);
             }
         }
     }
@@ -1492,7 +1439,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     @Nullable
-    private static SmartReplyView applySmartReplyView(View view,
+    private SmartReplyView applySmartReplyView(View view,
             InflatedSmartReplyState smartReplyState,
             NotificationEntry entry, InflatedSmartReplyViewHolder inflatedSmartReplyViewHolder) {
         View smartReplyContainerCandidate = view.findViewById(
@@ -1534,7 +1481,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                     inflatedSmartReplyViewHolder.getSmartSuggestionButtons());
             // Ensure the colors of the smart suggestion buttons are up-to-date.
             int backgroundColor = entry.getRow().getCurrentBackgroundTint();
-            boolean colorized = entry.getSbn().getNotification().isColorized();
+            boolean colorized = mNotificationEntry.getSbn().getNotification().isColorized();
             smartReplyView.setBackgroundTintColor(backgroundColor, colorized);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
@@ -1657,16 +1604,15 @@ public class NotificationContentView extends FrameLayout implements Notification
         return null;
     }
 
-    /** Shows the given feedback icon, or hides the icon if null. */
-    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         if (mContractedChild != null) {
-            mContractedWrapper.setFeedbackIcon(icon);
+            mContractedWrapper.showFeedbackIcon(show, resIds);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.setFeedbackIcon(icon);
+            mExpandedWrapper.showFeedbackIcon(show, resIds);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.setFeedbackIcon(icon);
+            mHeadsUpWrapper.showFeedbackIcon(show, resIds);
         }
     }
 
@@ -1992,6 +1938,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("    ");
         pw.print("contentView visibility: " + getVisibility());
         pw.print(", alpha: " + getAlpha());
         pw.print(", clipBounds: " + getClipBounds());
@@ -2007,22 +1954,6 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
-    }
-
-    /** Add any existing SmartReplyView to the dump */
-    public void dumpSmartReplies(IndentingPrintWriter pw) {
-        if (mHeadsUpSmartReplyView != null) {
-            pw.println("HeadsUp SmartReplyView:");
-            pw.increaseIndent();
-            mHeadsUpSmartReplyView.dump(pw);
-            pw.decreaseIndent();
-        }
-        if (mExpandedSmartReplyView != null) {
-            pw.println("Expanded SmartReplyView:");
-            pw.increaseIndent();
-            mExpandedSmartReplyView.dump(pw);
-            pw.decreaseIndent();
-        }
     }
 
     public RemoteInputView getExpandedRemoteInput() {
@@ -2046,49 +1977,5 @@ public class NotificationContentView extends FrameLayout implements Notification
             return visibleWrapper.getOriginalIconColor();
         }
         return Notification.COLOR_INVALID;
-    }
-
-    /**
-     * Delegate the faded state to the notification content views which actually
-     * need to have overlapping contents render precisely.
-     */
-    @Override
-    public void setNotificationFaded(boolean faded) {
-        if (mContractedWrapper != null) {
-            mContractedWrapper.setNotificationFaded(faded);
-        }
-        if (mHeadsUpWrapper != null) {
-            mHeadsUpWrapper.setNotificationFaded(faded);
-        }
-        if (mExpandedWrapper != null) {
-            mExpandedWrapper.setNotificationFaded(faded);
-        }
-        if (mSingleLineView != null) {
-            mSingleLineView.setNotificationFaded(faded);
-        }
-    }
-
-    /**
-     * @return true if a visible view has a remote input active, as this requires that the entire
-     * row report that it has overlapping rendering.
-     */
-    public boolean requireRowToHaveOverlappingRendering() {
-        // This inexpensive check is done on both states to avoid state invalidating the result.
-        if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive()) {
-            return true;
-        }
-        if (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive()) {
-            return true;
-        }
-        return false;
-    }
-
-    public void setRemoteInputViewSubcomponentFactory(RemoteInputViewSubcomponent.Factory factory) {
-        mRemoteInputSubcomponentFactory = factory;
-    }
-
-    private static class RemoteInputViewData {
-        @Nullable RemoteInputView mView;
-        @Nullable RemoteInputViewController mController;
     }
 }

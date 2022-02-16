@@ -62,6 +62,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -124,7 +125,6 @@ static jmethodID gCallPostForkChildHooks;
 static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
 static jclass gZygoteInitClass;
 static jmethodID gGetOrCreateSystemServerClassLoader;
-static jmethodID gPrefetchStandaloneSystemServerJars;
 
 static bool gIsSecurityEnforced = true;
 
@@ -201,8 +201,6 @@ static constexpr unsigned int STORAGE_DIR_CHECK_MAX_INTERVAL_US = 1000;
  * so it's fine to assume max retries is 5 mins.
  */
 static constexpr int STORAGE_DIR_CHECK_TIMEOUT_US = 1000 * 1000 * 60 * 5;
-
-static void WaitUntilDirReady(const std::string& target, fail_fn_t fail_fn);
 
 /**
  * A helper class containing accounting information for USAPs.
@@ -852,6 +850,26 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   }
 }
 
+static bool NeedsNoRandomizeWorkaround() {
+#if !defined(__arm__)
+    return false;
+#else
+    int major;
+    int minor;
+    struct utsname uts;
+    if (uname(&uts) == -1) {
+        return false;
+    }
+
+    if (sscanf(uts.release, "%d.%d", &major, &minor) != 2) {
+        return false;
+    }
+
+    // Kernels before 3.4.* need the workaround.
+    return (major < 3) || ((major == 3) && (minor < 4));
+#endif
+}
+
 // Utility to close down the Zygote socket file descriptors while
 // the child is still running as root with Zygote's privileges.  Each
 // descriptor (if any) is closed via dup3(), replacing it with a valid
@@ -1145,14 +1163,14 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
 }
 
 // Relabel directory
-static void relabelDir(const char* path, const char* context, fail_fn_t fail_fn) {
+static void relabelDir(const char* path, security_context_t context, fail_fn_t fail_fn) {
   if (setfilecon(path, context) != 0) {
     fail_fn(CREATE_ERROR("Failed to setfilecon %s %s", path, strerror(errno)));
   }
 }
 
 // Relabel all directories under a path non-recursively.
-static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail_fn) {
+static void relabelAllDirs(const char* path, security_context_t context, fail_fn_t fail_fn) {
   DIR* dir = opendir(path);
   if (dir == nullptr) {
     fail_fn(CREATE_ERROR("Failed to opendir %s", path));
@@ -1227,7 +1245,7 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   snprintf(internalDePath, PATH_MAX, "/data/user_de");
   snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
 
-  char* dataDataContext = nullptr;
+  security_context_t dataDataContext = nullptr;
   if (getfilecon(internalDePath, &dataDataContext) < 0) {
     fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath,
         strerror(errno)));
@@ -1251,11 +1269,7 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
     auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
     auto cePath = StringPrintf("%s/user", volPath.c_str());
     auto dePath = StringPrintf("%s/user_de", volPath.c_str());
-    // Wait until dir user is created.
-    WaitUntilDirReady(cePath.c_str(), fail_fn);
     MountAppDataTmpFs(cePath.c_str(), fail_fn);
-    // Wait until dir user_de is created.
-    WaitUntilDirReady(dePath.c_str(), fail_fn);
     MountAppDataTmpFs(dePath.c_str(), fail_fn);
   }
   closedir(dir);
@@ -1624,12 +1638,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
             // at a later point (but may not have rights to use AoT artifacts).
             env->ExceptionClear();
         }
-        // Also prefetch standalone system server jars. The reason for doing this here is the same
-        // as above.
-        env->CallStaticObjectMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
-        if (env->ExceptionCheck()) {
-            env->ExceptionClear();
-        }
     }
 
     if (setresgid(gid, gid, gid) == -1) {
@@ -1731,6 +1739,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
     runtime_flags &= ~RuntimeFlags::GWP_ASAN_LEVEL_MASK;
+
+    if (NeedsNoRandomizeWorkaround()) {
+        // Work around ARM kernel ASLR lossage (http://b/5817320).
+        int old_personality = personality(0xffffffff);
+        int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
+        if (new_personality == -1) {
+            ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
+        }
+    }
 
     SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
                     fail_fn);
@@ -2691,9 +2708,6 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gGetOrCreateSystemServerClassLoader =
           GetStaticMethodIDOrDie(env, gZygoteInitClass, "getOrCreateSystemServerClassLoader",
                                  "()Ljava/lang/ClassLoader;");
-  gPrefetchStandaloneSystemServerJars =
-          GetStaticMethodIDOrDie(env, gZygoteInitClass, "prefetchStandaloneSystemServerJars",
-                                 "()V");
 
   RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 

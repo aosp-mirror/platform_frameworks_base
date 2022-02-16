@@ -16,10 +16,7 @@
 
 package android.view;
 
-import android.graphics.Rect;
 import android.content.res.Configuration;
-
-import java.util.List;
 
 /**
  * Interface to listen for changes to display window-containers.
@@ -35,8 +32,7 @@ import java.util.List;
 oneway interface IDisplayWindowListener {
 
     /**
-     * Called when a new display is added to the WM hierarchy. The existing display ids are returned
-     * when this listener is registered with WM via {@link #registerDisplayWindowListener}.
+     * Called when a display is added to the WM hierarchy.
      */
     void onDisplayAdded(int displayId);
 
@@ -59,9 +55,4 @@ oneway interface IDisplayWindowListener {
      * Called when the previous fixed rotation on a display is finished.
      */
     void onFixedRotationFinished(int displayId);
-
-    /**
-     * Called when the keep clear ares on a display have changed.
-     */
-    void onKeepClearAreasChanged(int displayId, in List<Rect> restricted, in List<Rect> unrestricted);
 }

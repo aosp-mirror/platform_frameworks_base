@@ -159,9 +159,7 @@ public class MediaProjectionPermissionActivity extends Activity
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
         final Window w = mDialog.getWindow();
-        // QS is not closed when pressing CastTile. Match the type of the dialog shown from the
-        // tile.
-        w.setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        w.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mDialog.show();

@@ -30,7 +30,7 @@ public class NotificationRankingUpdate implements Parcelable {
     }
 
     public NotificationRankingUpdate(Parcel in) {
-        mRankingMap = in.readParcelable(getClass().getClassLoader(), android.service.notification.NotificationListenerService.RankingMap.class);
+        mRankingMap = in.readParcelable(getClass().getClassLoader());
     }
 
     public NotificationListenerService.RankingMap getRankingMap() {

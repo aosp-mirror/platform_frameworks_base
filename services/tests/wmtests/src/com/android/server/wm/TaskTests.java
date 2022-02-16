@@ -44,7 +44,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
-import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -60,14 +59,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -129,15 +126,8 @@ public class TaskTests extends WindowTestsBase {
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
-        task.remove(false /* withTransition */, "testRemoveContainer");
-        // There is still an activity to be destroyed, so the task is not removed immediately.
-        assertNotNull(task.getParent());
-        assertTrue(rootTask.hasChild());
-        assertTrue(task.hasChild());
-        assertTrue(activity.finishing);
-
-        activity.destroyed("testRemoveContainer");
-        // Assert that the container was removed after the activity is destroyed.
+        task.removeIfPossible();
+        // Assert that the container was removed.
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
         assertNull(activity.getParent());
@@ -430,7 +420,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -760,7 +750,7 @@ public class TaskTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -1058,9 +1048,9 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity1 = task1.getBottomMostActivity();
 
         assertEquals(task0.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.token, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
         assertEquals(task1.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.token,  false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken,  false /* onlyRoot */));
     }
 
     /**
@@ -1079,11 +1069,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
-                ActivityRecord.getTaskForActivityLocked(activity2.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
     }
 
     /**
@@ -1102,11 +1092,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
-                ActivityRecord.getTaskForActivityLocked(activity2.token, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
     }
 
     /**
@@ -1128,11 +1118,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.token, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.token, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.appToken, false /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity2.token, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.appToken, false /* onlyRoot */));
     }
 
     /**
@@ -1307,8 +1297,7 @@ public class TaskTests extends WindowTestsBase {
         LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
-        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true)
-                .setCreateParentTask(true).build().getRootTask();
+        final Task task = getTestTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -1407,48 +1396,6 @@ public class TaskTests extends WindowTestsBase {
         assertNotNull(activity.getTask().getDimmer());
     }
 
-    @Test
-    public void testMoveToFront_moveAdjacentTask() {
-        final Task task1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final Task task2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        spyOn(task2);
-
-        task1.setAdjacentTaskFragment(task2, false /* moveTogether */);
-        task1.moveToFront("" /* reason */);
-        verify(task2, never()).moveToFrontInner(anyString(), isNull());
-
-        // Reset adjacent tasks to move together.
-        task1.setAdjacentTaskFragment(null, false /* moveTogether */);
-        task1.setAdjacentTaskFragment(task2, true /* moveTogether */);
-        task1.moveToFront("" /* reason */);
-        verify(task2).moveToFrontInner(anyString(), isNull());
-    }
-
-    @Test
-    public void testResumeTask_doNotResumeTaskFragmentBehindTranslucent() {
-        final Task task = createTask(mDisplayContent);
-        final TaskFragment tfBehind = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
-        final TaskFragment tfFront = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
-        spyOn(tfFront);
-        doReturn(true).when(tfFront).isTranslucent(any());
-
-        // TaskFragment behind another translucent TaskFragment should not be resumed.
-        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
-                tfBehind.getVisibility(null /* starting */));
-        assertTrue(tfBehind.isFocusable());
-        assertFalse(tfBehind.canBeResumed(null /* starting */));
-
-        spyOn(tfBehind);
-        task.resumeTopActivityUncheckedLocked(null /* prev */, ActivityOptions.makeBasic(),
-                false /* deferPause */);
-
-        verify(tfBehind, never()).resumeTopActivity(any(), any(), anyBoolean());
-    }
-
     private Task getTestTask() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         return task.getBottomMostTask();
@@ -1460,7 +1407,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
 
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

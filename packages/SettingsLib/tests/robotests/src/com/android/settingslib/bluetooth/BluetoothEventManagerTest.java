@@ -109,7 +109,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, /* userHandle= */ null);
 
         verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
-                eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
+                eq(null), eq(null));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, UserHandle.ALL);
 
         verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
-                any(IntentFilter.class), eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
+                any(IntentFilter.class), eq(null), eq(null));
     }
 
     /**

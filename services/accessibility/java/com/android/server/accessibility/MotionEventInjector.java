@@ -16,7 +16,6 @@
 
 package com.android.server.accessibility;
 
-import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.GestureDescription.GestureStep;
 import android.accessibilityservice.GestureDescription.TouchPoint;
@@ -69,7 +68,6 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     private final Handler mHandler;
     private final SparseArray<Boolean> mOpenGesturesInProgress = new SparseArray<>();
 
-    private final AccessibilityTraceManager mTrace;
     private IAccessibilityServiceClient mServiceInterfaceForCurrentGesture;
     private IntArray mSequencesInProgress = new IntArray(5);
     private boolean mIsDestroyed = false;
@@ -82,17 +80,15 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     /**
      * @param looper A looper on the main thread to use for dispatching new events
      */
-    public MotionEventInjector(Looper looper, AccessibilityTraceManager trace) {
+    public MotionEventInjector(Looper looper) {
         mHandler = new Handler(looper, this);
-        mTrace = trace;
     }
 
     /**
      * @param handler A handler to post messages. Exposes internal state for testing only.
      */
-    public MotionEventInjector(Handler handler, AccessibilityTraceManager trace) {
+    public MotionEventInjector(Handler handler) {
         mHandler = handler;
-        mTrace = trace;
     }
 
     /**
@@ -116,12 +112,6 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (mTrace.isA11yTracingEnabledForTypes(
-                AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE)) {
-            mTrace.logTrace(LOG_TAG + ".onMotionEvent",
-                    AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE,
-                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
-        }
         // MotionEventInjector would cancel any injected gesture when any MotionEvent arrives.
         // For user using an external device to control the pointer movement, it's almost
         // impossible to perform the gestures. Any slightly unintended movement results in the

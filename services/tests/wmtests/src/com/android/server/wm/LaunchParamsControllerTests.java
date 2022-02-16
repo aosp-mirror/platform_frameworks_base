@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -333,7 +334,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setCreateParentTask(true).build();
-        task.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         mController.registerModifier(positioner);
 

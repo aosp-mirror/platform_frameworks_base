@@ -19,6 +19,7 @@ package android.media;
 import static android.Manifest.permission.BIND_IMS_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -158,10 +159,18 @@ import java.util.concurrent.Executor;
  *         the user supplied callback method OnErrorListener.onError() will be
  *         invoked by the internal player engine and the object will be
  *         transfered to the <em>Error</em> state. </li>
- *         <li>You must call {@link #release()} once you have finished using an instance to release
- *         acquired resources, such as memory and codecs. Once you have called {@link #release}, you
- *         must no longer interact with the released instance.
- *         <li>MediaPlayer objects created using <code>new</code> is in the
+ *         <li>It is also recommended that once
+ *         a MediaPlayer object is no longer being used, call {@link #release()} immediately
+ *         so that resources used by the internal player engine associated with the
+ *         MediaPlayer object can be released immediately. Resource may include
+ *         singleton resources such as hardware acceleration components and
+ *         failure to call {@link #release()} may cause subsequent instances of
+ *         MediaPlayer objects to fallback to software implementations or fail
+ *         altogether. Once the MediaPlayer
+ *         object is in the <em>End</em> state, it can no longer be used and
+ *         there is no way to bring it back to any other state. </li>
+ *         <li>Furthermore,
+ *         the MediaPlayer objects created using <code>new</code> is in the
  *         <em>Idle</em> state, while those created with one
  *         of the overloaded convenient <code>create</code> methods are <em>NOT</em>
  *         in the <em>Idle</em> state. In fact, the objects are in the <em>Prepared</em>
@@ -399,7 +408,7 @@ import java.util.concurrent.Executor;
  * <tr><td>release </p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
- *     <td>After {@link #release()}, you must not interact with the object. </p></td></tr>
+ *     <td>After {@link #release()}, the object is no longer available. </p></td></tr>
  * <tr><td>reset </p></td>
  *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted, Error}</p></td>
@@ -649,13 +658,11 @@ public class MediaPlayer extends PlayerBase
     private ProvisioningThread mDrmProvisioningThread;
 
     /**
-     * Default constructor.
-     *
-     * <p>Consider using one of the create() methods for synchronously instantiating a MediaPlayer
-     * from a Uri or resource.
-     *
-     * <p>You must call {@link #release()} when you are finished using the instantiated instance.
-     * Doing so frees any resources you have previously acquired.
+     * Default constructor. Consider using one of the create() methods for
+     * synchronously instantiating a MediaPlayer from a Uri or resource.
+     * <p>When done with the MediaPlayer, you should call  {@link #release()},
+     * to free the resources. If not released, too many MediaPlayer instances may
+     * result in an exception.</p>
      */
     public MediaPlayer() {
         this(AudioSystem.AUDIO_SESSION_ALLOCATE);
@@ -867,10 +874,9 @@ public class MediaPlayer extends PlayerBase
     /**
      * Convenience method to create a MediaPlayer for a given Uri.
      * On success, {@link #prepare()} will already have been called and must not be called again.
-     *
-     * <p>You must call {@link #release()} when you are finished using the created instance. Doing
-     * so frees any resources you have previously acquired.
-     *
+     * <p>When done with the MediaPlayer, you should call  {@link #release()},
+     * to free the resources. If not released, too many MediaPlayer instances will
+     * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
      * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
@@ -887,10 +893,9 @@ public class MediaPlayer extends PlayerBase
     /**
      * Convenience method to create a MediaPlayer for a given Uri.
      * On success, {@link #prepare()} will already have been called and must not be called again.
-     *
-     * <p>You must call {@link #release()} when you are finished using the created instance. Doing
-     * so frees any resources you have previously acquired.
-     *
+     * <p>When done with the MediaPlayer, you should call  {@link #release()},
+     * to free the resources. If not released, too many MediaPlayer instances will
+     * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
      * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
@@ -951,10 +956,9 @@ public class MediaPlayer extends PlayerBase
     /**
      * Convenience method to create a MediaPlayer for a given resource id.
      * On success, {@link #prepare()} will already have been called and must not be called again.
-     *
-     * <p>You must call {@link #release()} when you are finished using the created instance. Doing
-     * so frees any resources you have previously acquired.
-     *
+     * <p>When done with the MediaPlayer, you should call  {@link #release()},
+     * to free the resources. If not released, too many MediaPlayer instances will
+     * result in an exception.</p>
      * <p>Note that since {@link #prepare()} is called automatically in this method,
      * you cannot change the audio
      * session ID (see {@link #setAudioSessionId(int)}) or audio attributes
@@ -2154,8 +2158,21 @@ public class MediaPlayer extends PlayerBase
 
     /**
      * Releases resources associated with this MediaPlayer object.
-     *
-     * <p>You must call this method once the instance is no longer required.
+     * It is considered good practice to call this method when you're
+     * done using the MediaPlayer. In particular, whenever an Activity
+     * of an application is paused (its onPause() method is called),
+     * or stopped (its onStop() method is called), this method should be
+     * invoked to release the MediaPlayer object, unless the application
+     * has a special need to keep the object around. In addition to
+     * unnecessary resources (such as memory and instances of codecs)
+     * being held, failure to call this method immediately if a
+     * MediaPlayer object is no longer needed may also lead to
+     * continuous battery consumption for mobile devices, and playback
+     * failure for other applications if no multiple instances of the
+     * same codec are supported on a device. Even if multiple instances
+     * of the same codec are supported, some performance degradation
+     * may be expected when unnecessary multiple instances are used
+     * at the same time.
      */
     public void release() {
         baseRelease();
@@ -4294,7 +4311,7 @@ public class MediaPlayer extends PlayerBase
     @RequiresPermission(BIND_IMS_SERVICE)
     public void setOnRtpRxNoticeListener(
             @NonNull Context context,
-            @NonNull Executor executor,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull OnRtpRxNoticeListener listener) {
         Objects.requireNonNull(context);
         Preconditions.checkArgument(

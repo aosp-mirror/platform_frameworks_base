@@ -36,6 +36,7 @@ import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.hardware.soundtrigger.SoundTrigger.SoundModelEvent;
 import android.hardware.soundtrigger.SoundTriggerModule;
 import android.os.Binder;
 import android.os.DeadObjectException;
@@ -108,6 +109,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private boolean mCallActive = false;
     private @SoundTriggerPowerSaveMode int mSoundTriggerPowerSaveMode =
             PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
+    // Indicates if the native sound trigger service is disabled or not.
+    // This is an indirect indication of the microphone being open in some other application.
+    private boolean mServiceDisabled = false;
 
     // Whether ANY recognition (keyphrase or generic) has been requested.
     private boolean mRecognitionRequested = false;
@@ -830,7 +834,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (!event.recognitionStillActive) {
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
             model.setStopped();
         }
 
@@ -858,19 +862,23 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     @Override
-    public void onModelUnloaded(int modelHandle) {
-        if (DBG) Slog.d(TAG, "onModelUnloaded: " + modelHandle);
+    public void onSoundModelUpdate(SoundModelEvent event) {
+        if (event == null) {
+            Slog.w(TAG, "Invalid sound model event!");
+            return;
+        }
+        if (DBG) Slog.d(TAG, "onSoundModelUpdate: " + event);
         synchronized (mLock) {
             MetricsLogger.count(mContext, "sth_sound_model_updated", 1);
-            onModelUnloadedLocked(modelHandle);
+            onSoundModelUpdatedLocked(event);
         }
     }
 
     @Override
-    public void onResourcesAvailable() {
-        if (DBG) Slog.d(TAG, "onResourcesAvailable");
+    public void onServiceStateChange(int state) {
+        if (DBG) Slog.d(TAG, "onServiceStateChange, state: " + state);
         synchronized (mLock) {
-            onResourcesAvailableLocked();
+            onServiceStateChangedLocked(SoundTrigger.SERVICE_STATE_DISABLED == state);
         }
     }
 
@@ -902,14 +910,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         updateAllRecognitionsLocked();
     }
 
-    private void onModelUnloadedLocked(int modelHandle) {
-        ModelData modelData = getModelDataForLocked(modelHandle);
-        if (modelData != null) {
-            modelData.setNotLoaded();
-        }
+    private void onSoundModelUpdatedLocked(SoundModelEvent event) {
+        // TODO: Handle sound model update here.
     }
 
-    private void onResourcesAvailableLocked() {
+    private void onServiceStateChangedLocked(boolean disabled) {
+        if (disabled == mServiceDisabled) {
+            return;
+        }
+        mServiceDisabled = disabled;
         updateAllRecognitionsLocked();
     }
 
@@ -971,7 +980,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (!event.recognitionStillActive) {
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
             modelData.setStopped();
         }
 
@@ -1030,6 +1039,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (mModule != null) {
                 mModule.detach();
                 mModule = null;
+                mServiceDisabled = false;
             }
         }
     }
@@ -1104,6 +1114,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             pw.print("  call active=");
             pw.println(mCallActive);
             pw.println("  SoundTrigger Power State=" + mSoundTriggerPowerSaveMode);
+            pw.print("  service disabled=");
+            pw.println(mServiceDisabled);
         }
     }
 
@@ -1317,7 +1329,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mSoundTriggerPowerSaveMode = mPowerManager.getSoundTriggerPowerSaveMode();
         }
 
-        return !mCallActive && isRecognitionAllowedByPowerState(
+        return !mCallActive && !mServiceDisabled
+                && isRecognitionAllowedByPowerState(
                 modelData);
     }
 
@@ -1556,10 +1569,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         synchronized void setLoaded() {
             mModelState = MODEL_LOADED;
-        }
-
-        synchronized void setNotLoaded() {
-            mModelState = MODEL_NOTLOADED;
         }
 
         synchronized boolean isModelStarted() {

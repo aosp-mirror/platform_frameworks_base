@@ -81,9 +81,9 @@ public class StatusBarIcon implements Parcelable {
     }
 
     public void readFromParcel(Parcel in) {
-        this.icon = (Icon) in.readParcelable(null, android.graphics.drawable.Icon.class);
+        this.icon = (Icon) in.readParcelable(null);
         this.pkg = in.readString();
-        this.user = (UserHandle) in.readParcelable(null, android.os.UserHandle.class);
+        this.user = (UserHandle) in.readParcelable(null);
         this.iconLevel = in.readInt();
         this.visible = in.readInt() != 0;
         this.number = in.readInt();

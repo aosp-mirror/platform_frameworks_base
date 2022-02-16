@@ -181,7 +181,7 @@ static const SkString stretchShader = SkString(R"(
         );
         coord.x = outU;
         coord.y = outV;
-        return uContentTexture.eval(coord);
+        return sample(uContentTexture, coord);
     })");
 
 static const float ZERO = 0.f;
@@ -227,7 +227,7 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
     mBuilder->uniform("viewportWidth").set(&width, 1);
     mBuilder->uniform("viewportHeight").set(&height, 1);
 
-    auto result = mBuilder->makeShader();
+    auto result = mBuilder->makeShader(nullptr, false);
     mBuilder->child(CONTENT_TEXTURE) = nullptr;
     return result;
 }

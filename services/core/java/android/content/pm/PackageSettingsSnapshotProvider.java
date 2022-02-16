@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import com.android.internal.util.FunctionalUtils;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
-import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,28 +29,28 @@ import java.util.function.Function;
 public interface PackageSettingsSnapshotProvider {
 
     /**
-     * Run a function block that requires access to {@link PackageStateInternal} data. This will
+     * Run a function block that requires access to {@link PackageSetting} data. This will
      * ensure the {@link PackageManagerService} lock is taken before any caller's internal lock
      * to avoid deadlock. Note that this method may or may not lock. If a snapshot is available
      * and valid, it will iterate the snapshot set of data.
      */
     void withPackageSettingsSnapshot(
-            @NonNull Consumer<Function<String, PackageStateInternal>> block);
+            @NonNull Consumer<Function<String, PackageSetting>> block);
 
     /**
      * Variant which returns a value to the caller.
      * @see #withPackageSettingsSnapshot(Consumer)
      */
     <Output> Output withPackageSettingsSnapshotReturning(
-            @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageStateInternal>,
-                    Output> block);
+            @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageSetting>, Output>
+                    block);
 
     /**
      * Variant which throws.
      * @see #withPackageSettingsSnapshot(Consumer)
      */
     <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
-            @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageStateInternal>,
+            @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageSetting>,
                     ExceptionType> block) throws ExceptionType;
 
     /**
@@ -61,8 +60,7 @@ public interface PackageSettingsSnapshotProvider {
     <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
             withPackageSettingsSnapshotThrowing2(
                     @NonNull FunctionalUtils.ThrowingChecked2Consumer<
-                            Function<String, PackageStateInternal>,
-                            ExceptionOne, ExceptionTwo> block)
+                            Function<String, PackageSetting>, ExceptionOne, ExceptionTwo> block)
             throws ExceptionOne, ExceptionTwo;
 
     /**
@@ -72,6 +70,6 @@ public interface PackageSettingsSnapshotProvider {
     <Output, ExceptionType extends Exception> Output
             withPackageSettingsSnapshotReturningThrowing(
                     @NonNull FunctionalUtils.ThrowingCheckedFunction<
-                            Function<String, PackageStateInternal>, Output, ExceptionType> block)
+                            Function<String, PackageSetting>, Output, ExceptionType> block)
             throws ExceptionType;
 }

@@ -43,14 +43,6 @@ public final class NotificationClicker implements View.OnClickListener {
     private final Optional<Bubbles> mBubblesOptional;
     private final NotificationActivityStarter mNotificationActivityStarter;
 
-    private ExpandableNotificationRow.OnDragSuccessListener mOnDragSuccessListener =
-            new ExpandableNotificationRow.OnDragSuccessListener() {
-                @Override
-                public void onDragSuccess(NotificationEntry entry) {
-                    mNotificationActivityStarter.onDragSuccess(entry);
-                }
-            };
-
     private NotificationClicker(
             NotificationClickerLogger logger,
             Optional<StatusBar> statusBarOptional,
@@ -119,10 +111,8 @@ public final class NotificationClicker implements View.OnClickListener {
         if (notification.contentIntent != null || notification.fullScreenIntent != null
                 || row.getEntry().isBubble()) {
             row.setOnClickListener(this);
-            row.setOnDragSuccessListener(mOnDragSuccessListener);
         } else {
             row.setOnClickListener(null);
-            row.setOnDragSuccessListener(null);
         }
     }
 

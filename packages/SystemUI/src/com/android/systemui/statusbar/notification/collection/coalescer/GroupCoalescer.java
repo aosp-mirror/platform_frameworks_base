@@ -260,8 +260,7 @@ public class GroupCoalescer implements Dumpable {
         }
         events.sort(mEventComparator);
 
-        long batchAge = mClock.uptimeMillis() - batch.mCreatedTimestamp;
-        mLogger.logEmitBatch(batch.mGroupKey, batch.mMembers.size(), batchAge);
+        mLogger.logEmitBatch(batch.mGroupKey);
 
         mHandler.onNotificationBatchPosted(events);
     }
@@ -338,6 +337,6 @@ public class GroupCoalescer implements Dumpable {
         void onNotificationBatchPosted(List<CoalescedEvent> events);
     }
 
-    private static final int MIN_GROUP_LINGER_DURATION = 200;
+    private static final int MIN_GROUP_LINGER_DURATION = 50;
     private static final int MAX_GROUP_LINGER_DURATION = 500;
 }

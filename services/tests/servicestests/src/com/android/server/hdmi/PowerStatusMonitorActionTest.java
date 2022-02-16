@@ -24,6 +24,7 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -31,9 +32,12 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -42,30 +46,45 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-/** Tests for {@link PowerStatusMonitorAction} */
+/** Tests for {@link ActiveSourceAction} */
 @SmallTest
-@Presubmit
 @RunWith(JUnit4.class)
 public class PowerStatusMonitorActionTest {
 
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
-    private FakePowerManagerWrapper mPowerManager;
 
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
     private HdmiCecLocalDeviceTv mTvDevice;
 
+    @Mock
+    private IPowerManager mIPowerManagerMock;
+    @Mock
+    private IThermalService mIThermalServiceMock;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(mContextSpy,
                 Collections.singletonList(HdmiDeviceInfo.DEVICE_TV)) {
@@ -81,8 +100,18 @@ public class PowerStatusMonitorActionTest {
             }
 
             @Override
+            void wakeUp() {
+            }
+
+            @Override
             boolean isPowerStandby() {
                 return false;
+            }
+
+            @Override
+            protected PowerManager getPowerManager() {
+                return new PowerManager(mContextSpy, mIPowerManagerMock,
+                        mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
             }
 
             @Override
@@ -99,6 +128,7 @@ public class PowerStatusMonitorActionTest {
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
+        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mTvDevice = new HdmiCecLocalDeviceTv(mHdmiControlService);
         mTvDevice.init();
         mLocalDevices.add(mTvDevice);
@@ -110,8 +140,6 @@ public class PowerStatusMonitorActionTest {
                 new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfo);
         mHdmiControlService.initService();
-        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
-        mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
@@ -128,9 +156,9 @@ public class PowerStatusMonitorActionTest {
         assertPowerStatus(ADDR_PLAYBACK_1, HdmiControlManager.POWER_STATUS_UNKNOWN);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage giveDevicePowerStatus =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_1);
+        HdmiCecMessage giveDevicePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_1);
         assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus);
 
         reportPowerStatus(ADDR_PLAYBACK_1, false, HdmiControlManager.POWER_STATUS_ON);
@@ -167,9 +195,9 @@ public class PowerStatusMonitorActionTest {
         assertPowerStatus(ADDR_PLAYBACK_1, HdmiControlManager.POWER_STATUS_ON);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage giveDevicePowerStatus =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_1);
+        HdmiCecMessage giveDevicePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_1);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveDevicePowerStatus);
 
@@ -196,14 +224,14 @@ public class PowerStatusMonitorActionTest {
         action.start();
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage giveDevicePowerStatus =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_1);
+        HdmiCecMessage giveDevicePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_1);
         assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus);
 
-        HdmiCecMessage giveDevicePowerStatus2 =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_2);
+        HdmiCecMessage giveDevicePowerStatus2 = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_2);
         assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus2);
     }
 
@@ -221,15 +249,15 @@ public class PowerStatusMonitorActionTest {
         action.start();
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage giveDevicePowerStatus =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_1);
+        HdmiCecMessage giveDevicePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_1);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus);
 
-        HdmiCecMessage giveDevicePowerStatus2 =
-                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
-                        mTvDevice.getDeviceInfo().getLogicalAddress(), ADDR_PLAYBACK_2);
+        HdmiCecMessage giveDevicePowerStatus2 = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mTvDevice.mAddress,
+                ADDR_PLAYBACK_2);
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveDevicePowerStatus2);
     }
@@ -242,8 +270,7 @@ public class PowerStatusMonitorActionTest {
     }
 
     private void reportPowerStatus(int logicalAddress, boolean broadcast, int powerStatus) {
-        int destination =
-                broadcast ? ADDR_BROADCAST : mTvDevice.getDeviceInfo().getLogicalAddress();
+        int destination = broadcast ? ADDR_BROADCAST : mTvDevice.mAddress;
         HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
                 logicalAddress, destination,
                 powerStatus);

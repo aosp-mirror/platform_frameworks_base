@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -172,8 +173,10 @@ class PinnedTaskController {
      * to avoid flickering when running PiP animation across different orientations.
      */
     void deferOrientationChangeForEnteringPipFromFullScreenIfNeeded() {
-        final ActivityRecord topFullscreen = mDisplayContent.getActivity(
-                a -> a.fillsParent() && !a.getTask().inMultiWindowMode());
+        final Task topFullscreenTask = mDisplayContent.getDefaultTaskDisplayArea()
+                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord topFullscreen = topFullscreenTask != null
+                ? topFullscreenTask.topRunningActivity() : null;
         if (topFullscreen == null || topFullscreen.hasFixedRotationTransform()) {
             return;
         }
@@ -208,9 +211,7 @@ class PinnedTaskController {
         }
         mFreezingTaskConfig = true;
         mDestRotatedBounds = new Rect(bounds);
-        if (!mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
-            continueOrientationChange();
-        }
+        continueOrientationChange();
     }
 
     /**
@@ -243,8 +244,7 @@ class PinnedTaskController {
             int oldRotation, int newRotation) {
         final Rect bounds = mDestRotatedBounds;
         final PictureInPictureSurfaceTransaction pipTx = mPipTransaction;
-        final boolean emptyPipPositionTx = pipTx == null || pipTx.mPosition == null;
-        if (bounds == null && emptyPipPositionTx) {
+        if (bounds == null && pipTx == null) {
             return;
         }
         final TaskDisplayArea taskArea = mDisplayContent.getDefaultTaskDisplayArea();
@@ -256,27 +256,25 @@ class PinnedTaskController {
         mDestRotatedBounds = null;
         mPipTransaction = null;
         final Rect areaBounds = taskArea.getBounds();
-        if (!emptyPipPositionTx) {
+        if (pipTx != null) {
             // The transaction from recents animation is in old rotation. So the position needs to
             // be rotated.
-            float dx = pipTx.mPosition.x;
-            float dy = pipTx.mPosition.y;
+            float dx = pipTx.mPositionX;
+            float dy = pipTx.mPositionY;
             final Matrix matrix = pipTx.getMatrix();
             if (pipTx.mRotation == 90) {
-                dx = pipTx.mPosition.y;
-                dy = areaBounds.right - pipTx.mPosition.x;
+                dx = pipTx.mPositionY;
+                dy = areaBounds.right - pipTx.mPositionX;
                 matrix.postRotate(-90);
             } else if (pipTx.mRotation == -90) {
-                dx = areaBounds.bottom - pipTx.mPosition.y;
-                dy = pipTx.mPosition.x;
+                dx = areaBounds.bottom - pipTx.mPositionY;
+                dy = pipTx.mPositionX;
                 matrix.postRotate(90);
             }
             matrix.postTranslate(dx, dy);
             final SurfaceControl leash = pinnedTask.getSurfaceControl();
-            t.setMatrix(leash, matrix, new float[9]);
-            if (pipTx.hasCornerRadiusSet()) {
-                t.setCornerRadius(leash, pipTx.mCornerRadius);
-            }
+            t.setMatrix(leash, matrix, new float[9])
+                    .setCornerRadius(leash, pipTx.mCornerRadius);
             Slog.i(TAG, "Seamless rotation PiP tx=" + pipTx + " pos=" + dx + "," + dy);
             return;
         }
@@ -319,11 +317,15 @@ class PinnedTaskController {
     }
 
     /** Resets the states which were used to perform fixed rotation with PiP task. */
-    void onCancelFixedRotationTransform() {
+    void onCancelFixedRotationTransform(Task task) {
         mFreezingTaskConfig = false;
         mDeferOrientationChanging = false;
         mDestRotatedBounds = null;
         mPipTransaction = null;
+        if (!task.isOrganized()) {
+            // Force clearing Task#mForceNotOrganized because the display didn't rotate.
+            task.onConfigurationChanged(task.getParent().getConfiguration());
+        }
     }
 
     /**

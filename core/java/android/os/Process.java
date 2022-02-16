@@ -18,14 +18,11 @@ package android.os;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build.VERSION_CODES;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -132,7 +129,6 @@ public class Process {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int NFC_UID = 1027;
 
     /**
@@ -278,26 +274,6 @@ public class Process {
      * {@link #FIRST_APPLICATION_UID}.
      */
     public static final int LAST_APPLICATION_UID = 19999;
-
-    /**
-     * Defines the start of a range of UIDs going from this number to
-     * {@link #LAST_SUPPLEMENTAL_UID} that are reserved for assigning to
-     * supplemental processes. There is a 1-1 mapping between a supplemental
-     * process UID and the app that it belongs to, which can be computed by
-     * subtracting (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID) from the
-     * uid of a supplemental process.
-     *
-     * Note that there are no GIDs associated with these processes; storage
-     * attribution for them will be done using project IDs.
-     * @hide
-     */
-    public static final int FIRST_SUPPLEMENTAL_UID = 20000;
-
-    /**
-     * Last UID that is used for supplemental processes.
-     * @hide
-     */
-    public static final int LAST_SUPPLEMENTAL_UID = 29999;
 
     /**
      * First uid used for fully isolated sandboxed processes spawned from an app zygote
@@ -577,25 +553,8 @@ public class Process {
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
 
-    /**
-     * When the process started and ActivityThread.handleBindApplication() was executed.
-     */
     private static long sStartElapsedRealtime;
-
-    /**
-     * When the process started and ActivityThread.handleBindApplication() was executed.
-     */
     private static long sStartUptimeMillis;
-
-    /**
-     * When the activity manager was about to ask zygote to fork.
-     */
-    private static long sStartRequestedElapsedRealtime;
-
-    /**
-     * When the activity manager was about to ask zygote to fork.
-     */
-    private static long sStartRequestedUptimeMillis;
 
     private static final int PIDFD_UNKNOWN = 0;
     private static final int PIDFD_SUPPORTED = 1;
@@ -645,12 +604,6 @@ public class Process {
      * @hide
      */
     public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
-
-
-    /**
-     * The process name set via {@link #setArgV0(String)}.
-     */
-    private static String sArgV0;
 
     /**
      * Start a new process.
@@ -763,56 +716,23 @@ public class Process {
     public static final native long getElapsedCpuTime();
 
     /**
-     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started,
-     * but before any of the application code was executed.
+     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
      */
-    @ElapsedRealtimeLong
-    public static long getStartElapsedRealtime() {
+    public static final long getStartElapsedRealtime() {
         return sStartElapsedRealtime;
     }
 
     /**
-     * Return the {@link SystemClock#uptimeMillis()} at which this process was started,
-     * but before any of the application code was executed.
+     * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
      */
-    @UptimeMillisLong
-    public static long getStartUptimeMillis() {
+    public static final long getStartUptimeMillis() {
         return sStartUptimeMillis;
     }
 
-    /**
-     * Return the {@link SystemClock#elapsedRealtime()} at which the system was about to
-     * start this process. i.e. before a zygote fork.
-     *
-     * <p>More precisely, the system may start app processes before there's a start request,
-     * in order to reduce the process start up latency, in which case this is set when the system
-     * decides to "specialize" the process into a requested app.
-     */
-    @ElapsedRealtimeLong
-    public static long getStartRequestedElapsedRealtime() {
-        return sStartRequestedElapsedRealtime;
-    }
-
-    /**
-     * Return the {@link SystemClock#uptimeMillis()} at which the system was about to
-     * start this process. i.e. before a zygote fork.
-     *
-     * <p>More precisely, the system may start app processes before there's a start request,
-     * in order to reduce the process start up latency, in which case this is set when the system
-     * decides to "specialize" the process into a requested app.
-     */
-    @UptimeMillisLong
-    public static long getStartRequestedUptimeMillis() {
-        return sStartRequestedUptimeMillis;
-    }
-
     /** @hide */
-    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis,
-            long startRequestedElapsedRealtime, long startRequestedUptime) {
+    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis) {
         sStartElapsedRealtime = elapsedRealtime;
         sStartUptimeMillis = uptimeMillis;
-        sStartRequestedElapsedRealtime = startRequestedElapsedRealtime;
-        sStartRequestedUptimeMillis = startRequestedUptime;
     }
 
     /**
@@ -898,47 +818,6 @@ public class Process {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
-    }
-
-    /**
-     * Returns whether the provided UID belongs to a supplemental process.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static final boolean isSupplemental(int uid) {
-        uid = UserHandle.getAppId(uid);
-        return (uid >= FIRST_SUPPLEMENTAL_UID && uid <= LAST_SUPPLEMENTAL_UID);
-    }
-
-    /**
-     *
-     * Returns the app process corresponding to a supplemental process.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public static final int toAppUid(int uid) {
-        return uid - (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID);
-    }
-
-    /**
-     *
-     * Returns the supplemental process corresponding to an app process.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    @TestApi
-    public static final int toSupplementalUid(int uid) {
-        return uid + (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID);
-    }
-
-    /**
-     * Returns whether the current process is a supplemental process.
-     */
-    public static final boolean isSupplemental() {
-        return isSupplemental(myUid());
     }
 
     /**
@@ -1256,27 +1135,8 @@ public class Process {
      * 
      * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.S, publicAlternatives = "Do not try to "
-            + "change the process name. (If you must, you could use {@code pthread_setname_np(3)}, "
-            + "but this could confuse the system)")
-    public static void setArgV0(@NonNull String text) {
-        sArgV0 = text;
-        setArgV0Native(text);
-    }
-
-    private static native void setArgV0Native(String text);
-
-    /**
-     * Return the name of this process. By default, the process name is the same as the app's
-     * package name, but this can be changed using {@code android:process}.
-     */
-    @NonNull
-    public static String myProcessName() {
-        // Note this could be different from the actual process name if someone changes the
-        // process name using native code (using pthread_setname_np()). But sArgV0
-        // is the name that the system thinks this process has.
-        return sArgV0;
-    }
+    @UnsupportedAppUsage
+    public static final native void setArgV0(String text);
 
     /**
      * Kill the process with the given PID.

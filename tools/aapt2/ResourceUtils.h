@@ -75,33 +75,35 @@ bool IsAttributeReference(const android::StringPiece& str);
 /**
  * Convert an android::ResTable::resource_name to an aapt::ResourceName struct.
  */
-std::optional<ResourceName> ToResourceName(const android::ResTable::resource_name& name);
+Maybe<ResourceName> ToResourceName(
+    const android::ResTable::resource_name& name);
 
 /**
  * Convert an android::AssetManager2::ResourceName to an aapt::ResourceName struct.
  */
-std::optional<ResourceName> ToResourceName(const android::AssetManager2::ResourceName& name_in);
+Maybe<ResourceName> ToResourceName(
+    const android::AssetManager2::ResourceName& name_in);
 
 /**
  * Returns a boolean value if the string is equal to TRUE, true, True, FALSE,
  * false, or False.
  */
-std::optional<bool> ParseBool(const android::StringPiece& str);
+Maybe<bool> ParseBool(const android::StringPiece& str);
 
 /**
  * Returns a uint32_t if the string is an integer.
  */
-std::optional<uint32_t> ParseInt(const android::StringPiece& str);
+Maybe<uint32_t> ParseInt(const android::StringPiece& str);
 
 /**
  * Returns an ID if it the string represented a valid ID.
  */
-std::optional<ResourceId> ParseResourceId(const android::StringPiece& str);
+Maybe<ResourceId> ParseResourceId(const android::StringPiece& str);
 
 /**
  * Parses an SDK version, which can be an integer, or a letter from A-Z.
  */
-std::optional<int> ParseSdkVersion(const android::StringPiece& str);
+Maybe<int> ParseSdkVersion(const android::StringPiece& str);
 
 /*
  * Returns a Reference, or None Maybe instance if the string `str` was parsed as
@@ -114,8 +116,7 @@ std::optional<int> ParseSdkVersion(const android::StringPiece& str);
  * ?[package:]style/<entry> or
  * <package>:[style/]<entry>
  */
-std::optional<Reference> ParseStyleParentReference(const android::StringPiece& str,
-                                                   std::string* out_error);
+Maybe<Reference> ParseStyleParentReference(const android::StringPiece& str, std::string* out_error);
 
 /*
  * Returns a Reference if the string `str` was parsed as a valid XML attribute
@@ -124,7 +125,7 @@ std::optional<Reference> ParseStyleParentReference(const android::StringPiece& s
  *
  * package:entry
  */
-std::optional<Reference> ParseXmlAttributeName(const android::StringPiece& str);
+Maybe<Reference> ParseXmlAttributeName(const android::StringPiece& str);
 
 /*
  * Returns a Reference object if the string was parsed as a resource or

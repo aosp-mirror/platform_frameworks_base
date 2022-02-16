@@ -98,7 +98,9 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
     ScopedLocalRef<jbyteArray> hmac = toJbyteArray(env, event->getHmac());
     jobject eventObj =
             env->CallStaticObjectMethod(gKeyEventClassInfo.clazz, gKeyEventClassInfo.obtain,
-                                        event->getId(), event->getDownTime(), event->getEventTime(),
+                                        event->getId(),
+                                        nanoseconds_to_milliseconds(event->getDownTime()),
+                                        nanoseconds_to_milliseconds(event->getEventTime()),
                                         event->getAction(), event->getKeyCode(),
                                         event->getRepeatCount(), event->getMetaState(),
                                         event->getDeviceId(), event->getScanCode(),
@@ -134,7 +136,8 @@ status_t android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
     jlong eventTime = env->GetLongField(eventObj, gKeyEventClassInfo.mEventTime);
 
     event->initialize(id, deviceId, source, displayId, *hmac, action, flags, keyCode, scanCode,
-                      metaState, repeatCount, downTime, eventTime);
+                      metaState, repeatCount, milliseconds_to_nanoseconds(downTime),
+                      milliseconds_to_nanoseconds(eventTime));
     return OK;
 }
 

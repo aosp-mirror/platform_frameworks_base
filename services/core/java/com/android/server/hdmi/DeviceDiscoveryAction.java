@@ -77,7 +77,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
         private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
         private int mPortId = Constants.INVALID_PORT_ID;
-        private int mVendorId = Constants.VENDOR_ID_UNKNOWN;
+        private int mVendorId = Constants.UNKNOWN_VENDOR_ID;
         private int mPowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         private String mDisplayName = "";
         private int mDeviceType = HdmiDeviceInfo.DEVICE_INACTIVE;
@@ -87,15 +87,8 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         }
 
         private HdmiDeviceInfo toHdmiDeviceInfo() {
-            return  HdmiDeviceInfo.cecDeviceBuilder()
-                    .setLogicalAddress(mLogicalAddress)
-                    .setPhysicalAddress(mPhysicalAddress)
-                    .setPortId(mPortId)
-                    .setVendorId(mVendorId)
-                    .setDeviceType(mDeviceType)
-                    .setDisplayName(mDisplayName)
-                    .setDevicePowerStatus(mPowerStatus)
-                    .build();
+            return new HdmiDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
+                    mVendorId, mDisplayName, mPowerStatus);
         }
     }
 

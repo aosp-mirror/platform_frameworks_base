@@ -518,13 +518,12 @@ final class ProcessProfileRecord {
         }
     }
 
-    void setProcessTrackerState(int procState, int memFactor) {
+    void setProcessTrackerState(int procState, int memFactor, long now) {
         synchronized (mService.mProcessStats.mLock) {
             final ProcessState tracker = mBaseProcessTracker;
             if (tracker != null) {
                 if (procState != PROCESS_STATE_NONEXISTENT) {
                     final PackageList pkgList = mApp.getPkgList();
-                    final long now = SystemClock.uptimeMillis();
                     synchronized (pkgList) {
                         tracker.setState(procState, memFactor, now,
                                 pkgList.getPackageListLocked());

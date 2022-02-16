@@ -45,15 +45,6 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
             groupInstanceId = groupId;
         }
 
-        CallRecord(NotificationRecord r, int position, int buzzBeepBlink, InstanceId groupId) {
-            super(r, null);
-            this.position = position;
-            this.buzzBeepBlink = buzzBeepBlink;
-            wasLogged = true;
-            event = NotificationReportedEvent.NOTIFICATION_ADJUSTED;
-            groupInstanceId = groupId;
-        }
-
         CallRecord(NotificationRecord r, UiEventLogger.UiEventEnum event) {
             super(r, null);
             wasLogged = true;
@@ -81,12 +72,6 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
     public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
             int position, int buzzBeepBlink, InstanceId groupId) {
         mCalls.add(new CallRecord(r, old, position, buzzBeepBlink, groupId));
-    }
-
-    @Override
-    public void logNotificationAdjusted(NotificationRecord r, int position, int buzzBeepBlink,
-            InstanceId groupId) {
-        mCalls.add(new CallRecord(r, position, buzzBeepBlink, groupId));
     }
 
     @Override
