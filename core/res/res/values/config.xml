@@ -2902,6 +2902,11 @@
     <string name="config_sensorUseStartedActivity" translatable="false"
             >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of hardware privacy switches. -->
+    <string name="config_sensorUseStartedActivity_hwToggle" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
+
     <!-- Component name of the activity used to ask a user to confirm system language change after
          receiving <Set Menu Language> CEC message. -->
     <string name="config_hdmiCecSetMenuLanguageActivity"
@@ -5473,10 +5478,16 @@
     <!-- On-device package for providing companion device associations. -->
     <string name="config_systemCompanionDeviceProvider" translatable="false"></string>
 
-    <!-- Whether this device is supporting the microphone toggle -->
+    <!-- Whether this device is supporting the software microphone toggle -->
     <bool name="config_supportsMicToggle">false</bool>
     <!-- Whether this device is supporting the camera toggle -->
     <bool name="config_supportsCamToggle">false</bool>
+    <!-- Whether this device is supporting the hardware microphone toggle -->
+    <bool name="config_supportsHardwareMicToggle">false</bool>
+    <!-- Whether this device is supporting the hardware camera toggle -->
+    <bool name="config_supportsHardwareCamToggle">false</bool>
+    <!-- Whether a camera intent is launched when the lens cover is toggled -->
+    <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>

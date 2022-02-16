@@ -26,6 +26,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -44,6 +45,7 @@ import android.media.ISpatializerOutputCallback;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
+import android.media.VolumeInfo;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -456,6 +458,8 @@ interface IAudioService {
 
     boolean isVolumeFixed();
 
+    VolumeInfo getDefaultVolumeInfo();
+
     boolean isPstnCallAudioInterceptable();
 
     oneway void muteAwaitConnection(in int[] usagesToMute, in AudioDeviceAttributes dev,
@@ -474,6 +478,7 @@ interface IAudioService {
 
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
 
+
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     void addAssistantServicesUids(in int[] assistantUID);
 
@@ -488,4 +493,10 @@ interface IAudioService {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     int[] getActiveAssistantServiceUids();
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
+            in IAudioDeviceVolumeDispatcher cb,
+            in String packageName,
+            in AudioDeviceAttributes device, in List<VolumeInfo> volumes);
 }

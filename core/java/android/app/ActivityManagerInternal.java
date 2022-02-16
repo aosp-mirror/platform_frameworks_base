@@ -831,4 +831,9 @@ public abstract class ActivityManagerInternal {
      * Restart android.
      */
     public abstract void restart();
+
+    /**
+     * Returns some summary statistics of the current PendingIntent queue - sizes and counts.
+     */
+    public abstract List<PendingIntentStats> getPendingIntentStats();
 }

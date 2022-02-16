@@ -1538,6 +1538,8 @@ public class StorageManager {
      * be reserved for cached data depending on the device state which is then passed on
      * to getStorageCacheBytes.
      *
+     * Input File path must point to a storage volume.
+     *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
