@@ -182,7 +182,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -1594,18 +1593,16 @@ final class InstallPackageHelper {
                         parsedPackage.setRestrictUpdateHash(oldPackage.getRestrictUpdateHash());
                     }
 
-                    // Check for shared user id changes
-                    if (!Objects.equals(oldPackage.getSharedUserId(),
-                            parsedPackage.getSharedUserId())
-                            // Don't mark as invalid if the app is trying to
-                            // leave a sharedUserId
-                            && parsedPackage.getSharedUserId() != null) {
+                    // APK should not change its sharedUserId declarations
+                    final var oldSharedUid = oldPackage.getSharedUserId() != null
+                            ? oldPackage.getSharedUserId() : "<nothing>";
+                    final var newSharedUid = parsedPackage.getSharedUserId() != null
+                            ? parsedPackage.getSharedUserId() : "<nothing>";
+                    if (!oldSharedUid.equals(newSharedUid)) {
                         throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
                                 "Package " + parsedPackage.getPackageName()
                                         + " shared user changed from "
-                                        + (oldPackage.getSharedUserId() != null
-                                        ? oldPackage.getSharedUserId() : "<nothing>")
-                                        + " to " + parsedPackage.getSharedUserId());
+                                        + oldSharedUid + " to " + newSharedUid);
                     }
 
                     // In case of rollback, remember per-user/profile install state
@@ -3692,10 +3689,13 @@ final class InstallPackageHelper {
             }
             disabledPkgSetting = mPm.mSettings.getDisabledSystemPkgLPr(
                     parsedPackage.getPackageName());
-            sharedUserSetting = (parsedPackage.getSharedUserId() != null)
-                    ? mPm.mSettings.getSharedUserLPw(parsedPackage.getSharedUserId(),
-                    0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true)
-                    : null;
+            if (parsedPackage.getSharedUserId() != null && !parsedPackage.isLeavingSharedUid()) {
+                sharedUserSetting = mPm.mSettings.getSharedUserLPw(
+                        parsedPackage.getSharedUserId(),
+                        0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
+            } else {
+                sharedUserSetting = null;
+            }
             if (DEBUG_PACKAGE_SCANNING
                     && (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0
                     && sharedUserSetting != null) {
