@@ -2254,13 +2254,20 @@ package android.app.smartspace.uitemplatedata {
 
   public class BaseTemplateData implements android.os.Parcelable {
     method public int describeContents();
+    method public int getLayoutWeight();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getPrimaryLoggingInfo();
     method @Nullable public android.app.smartspace.uitemplatedata.TapAction getPrimaryTapAction();
     method @Nullable public android.app.smartspace.uitemplatedata.Icon getSubtitleIcon();
     method @Nullable public android.app.smartspace.uitemplatedata.Text getSubtitleText();
     method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalAlarmText();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSupplementalIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getSupplementalLoggingInfo();
     method @Nullable public android.app.smartspace.uitemplatedata.Icon getSupplementalSubtitleIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getSupplementalSubtitleLoggingInfo();
     method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSupplementalSubtitleTapAction();
     method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalSubtitleText();
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSupplementalTapAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalText();
     method public int getTemplateType();
     method @Nullable public android.app.smartspace.uitemplatedata.Icon getTitleIcon();
     method @Nullable public android.app.smartspace.uitemplatedata.Text getTitleText();
@@ -2271,15 +2278,35 @@ package android.app.smartspace.uitemplatedata {
   public static class BaseTemplateData.Builder {
     ctor public BaseTemplateData.Builder(int);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData build();
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setLayoutWeight(int);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalAlarmText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalText(@NonNull android.app.smartspace.uitemplatedata.Text);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
+  }
+
+  public static final class BaseTemplateData.SubItemLoggingInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getFeatureType();
+    method public int getInstanceId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo> CREATOR;
+  }
+
+  public static final class BaseTemplateData.SubItemLoggingInfo.Builder {
+    ctor public BaseTemplateData.SubItemLoggingInfo.Builder(int, int);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo build();
   }
 
   public final class CarouselTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
@@ -2408,6 +2435,7 @@ package android.app.smartspace.uitemplatedata {
     method @Nullable public android.content.Intent getIntent();
     method @Nullable public android.app.PendingIntent getPendingIntent();
     method @Nullable public android.os.UserHandle getUserHandle();
+    method public boolean shouldShowOnLockscreen();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.TapAction> CREATOR;
   }
@@ -2418,6 +2446,7 @@ package android.app.smartspace.uitemplatedata {
     method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setIntent(@NonNull android.content.Intent);
     method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setPendingIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setShouldShowOnLockscreen(@NonNull boolean);
     method @NonNull public android.app.smartspace.uitemplatedata.TapAction.Builder setUserHandle(@Nullable android.os.UserHandle);
   }
 
@@ -2432,7 +2461,6 @@ package android.app.smartspace.uitemplatedata {
 
   public static final class Text.Builder {
     ctor public Text.Builder(@NonNull CharSequence);
-    ctor public Text.Builder(@NonNull CharSequence, @NonNull android.text.TextUtils.TruncateAt);
     method @NonNull public android.app.smartspace.uitemplatedata.Text build();
     method @NonNull public android.app.smartspace.uitemplatedata.Text.Builder setMaxLines(int);
     method @NonNull public android.app.smartspace.uitemplatedata.Text.Builder setTruncateAtType(@NonNull android.text.TextUtils.TruncateAt);

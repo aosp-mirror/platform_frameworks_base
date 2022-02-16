@@ -69,21 +69,33 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
             @Nullable Text titleText,
             @Nullable Icon titleIcon,
             @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
+            @Nullable Icon subtitleIcon,
             @Nullable TapAction primaryTapAction,
+            @Nullable SubItemLoggingInfo primaryLoggingInfo,
             @Nullable Text supplementalSubtitleText,
             @Nullable Icon supplementalSubtitleIcon,
             @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
+            @Nullable Text supplementalText,
+            @Nullable Icon supplementalIcon,
+            @Nullable TapAction supplementalTapAction,
+            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
             @Nullable Text supplementalAlarmText,
+            int layoutWeight,
             @Nullable Text headToHeadTitle,
             @Nullable Icon headToHeadFirstCompetitorIcon,
             @Nullable Icon headToHeadSecondCompetitorIcon,
             @Nullable Text headToHeadFirstCompetitorText,
             @Nullable Text headToHeadSecondCompetitorText,
             @Nullable TapAction headToHeadAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
+                primaryTapAction, primaryLoggingInfo,
+                supplementalSubtitleText, supplementalSubtitleIcon,
+                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
+                supplementalText, supplementalIcon,
+                supplementalTapAction, supplementalLoggingInfo,
+                supplementalAlarmText, layoutWeight);
+
         mHeadToHeadTitle = headToHeadTitle;
         mHeadToHeadFirstCompetitorIcon = headToHeadFirstCompetitorIcon;
         mHeadToHeadSecondCompetitorIcon = headToHeadSecondCompetitorIcon;
@@ -285,9 +297,13 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
         @NonNull
         public HeadToHeadTemplateData build() {
             return new HeadToHeadTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
+                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),
+                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
+                    getSupplementalText(), getSupplementalIcon(),
+                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
+                    getSupplementalAlarmText(), getLayoutWeight(),
                     mHeadToHeadTitle,
                     mHeadToHeadFirstCompetitorIcon,
                     mHeadToHeadSecondCompetitorIcon, mHeadToHeadFirstCompetitorText,
