@@ -79,15 +79,12 @@ message SecureSettingsProto {
         optional SettingProto accessibility_magnification_mode = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto button_targets = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_capability = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // Settings for accessibility button related config
+        // Settings for accessibility button mode (navigation bar or floating action menu).
         optional SettingProto accessibility_button_mode = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_size = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_icon_type = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_opacity = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_fade_enabled = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto odi_captions_volume_ui_enabled = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // Setting for accessibility magnification for following typing.
-        optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 
@@ -385,7 +382,6 @@ message SecureSettingsProto {
 
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto nav_bar_kids_mode = 91 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message NfcPayment {
@@ -668,5 +664,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 92;
+    // Next tag = 91;
 }

@@ -41,26 +41,24 @@ public final class DeviceStateTest {
     @Test
     public void testConstruct() {
         final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE /* identifier */,
-                "TEST_CLOSED" /* name */, DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS /* flags */);
+                "CLOSED" /* name */);
         assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE);
-        assertEquals(state.getName(), "TEST_CLOSED");
-        assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS);
+        assertEquals(state.getName(), "CLOSED");
     }
 
     @Test
     public void testConstruct_nullName() {
         final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE /* identifier */,
-                null /* name */, 0/* flags */);
+                null /* name */);
         assertEquals(state.getIdentifier(), MAXIMUM_DEVICE_STATE);
         assertNull(state.getName());
-        assertEquals(state.getFlags(), 0);
     }
 
     @Test
     public void testConstruct_tooLargeIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
             final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE + 1 /* identifier */,
-                    null /* name */, 0 /* flags */);
+                    null /* name */);
         });
     }
 
@@ -68,7 +66,7 @@ public final class DeviceStateTest {
     public void testConstruct_tooSmallIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
             final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE - 1 /* identifier */,
-                    null /* name */, 0 /* flags */);
+                    null /* name */);
         });
     }
 }

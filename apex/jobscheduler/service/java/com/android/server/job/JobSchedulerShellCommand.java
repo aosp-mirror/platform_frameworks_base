@@ -293,13 +293,13 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     }
 
     private int getBatteryCharging(PrintWriter pw) {
-        boolean val = mInternal.isBatteryCharging();
+        boolean val = mInternal.getBatteryCharging();
         pw.println(val);
         return 0;
     }
 
     private int getBatteryNotLow(PrintWriter pw) {
-        boolean val = mInternal.isBatteryNotLow();
+        boolean val = mInternal.getBatteryNotLow();
         pw.println(val);
         return 0;
     }

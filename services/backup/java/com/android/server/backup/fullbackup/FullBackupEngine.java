@@ -21,6 +21,7 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.UserBackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
 import android.annotation.UserIdInt;
@@ -38,7 +39,6 @@ import android.util.Slog;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
-import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.BackupEligibilityRules;
@@ -147,7 +147,7 @@ public class FullBackupEngine {
                         mToken,
                         timeout,
                         mTimeoutMonitor /* in parent class */,
-                        OpType.BACKUP_WAIT);
+                        OP_TYPE_BACKUP_WAIT);
                 mAgent.doFullBackup(
                         mPipe,
                         mQuota,

@@ -33,9 +33,16 @@ import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -52,17 +59,6 @@ import com.android.server.IntentResolver;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGenerator;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchableImpl;
@@ -318,7 +314,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, long flags,
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
             int userId) {
         synchronized (mLock) {
             return mActivities.queryIntent(intent, resolvedType, flags, userId);
@@ -326,7 +322,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, long flags,
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
             List<ParsedActivity> activities, int userId) {
         synchronized (mLock) {
             return mActivities.queryIntentForPackage(
@@ -335,14 +331,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, long flags, int userId) {
+    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mProviders.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, long flags,
+    List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags,
             List<ParsedProvider> providers, int userId) {
         synchronized (mLock) {
             return mProviders.queryIntentForPackage(intent, resolvedType, flags, providers, userId);
@@ -350,7 +346,7 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ProviderInfo> queryProviders(String processName, String metaDataKey, int uid, long flags,
+    List<ProviderInfo> queryProviders(String processName, String metaDataKey, int uid, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) {
             return null;
@@ -364,8 +360,9 @@ public class ComponentResolver
                     continue;
                 }
 
-                final PackageStateInternal ps =
-                        sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
+                final PackageSetting ps =
+                        (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                                p.getPackageName());
                 if (ps == null) {
                     continue;
                 }
@@ -380,13 +377,14 @@ public class ComponentResolver
                     continue;
                 }
                 // See PM.queryContentProviders()'s javadoc for why we have the metaData parameter.
-                if (metaDataKey != null && !p.getMetaData().containsKey(metaDataKey)) {
+                if (metaDataKey != null
+                        && (p.getMetaData() == null || !p.getMetaData().containsKey(metaDataKey))) {
                     continue;
                 }
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
+                final PackageUserState state = ps.readUserState(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, flags, state, userId, ps);
                 if (appInfo == null) {
@@ -408,14 +406,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    ProviderInfo queryProvider(String authority, long flags, int userId) {
+    ProviderInfo queryProvider(String authority, int flags, int userId) {
         synchronized (mLock) {
             final ParsedProvider p = mProvidersByAuthority.get(authority);
             if (p == null) {
                 return null;
             }
-            final PackageStateInternal ps =
-                    sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
+            final PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                    p.getPackageName());
             if (ps == null) {
                 return null;
             }
@@ -423,7 +421,7 @@ public class ComponentResolver
             if (pkg == null) {
                 return null;
             }
-            final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
+            final PackageUserState state = ps.readUserState(userId);
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
                     pkg, flags, state, userId, ps);
             if (appInfo == null) {
@@ -443,8 +441,9 @@ public class ComponentResolver
                     continue;
                 }
 
-                final PackageStateInternal ps =
-                        sPackageManagerInternal.getPackageStateInternal(p.getPackageName());
+                final PackageSetting ps =
+                        (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                                p.getPackageName());
                 if (ps == null) {
                     continue;
                 }
@@ -460,7 +459,7 @@ public class ComponentResolver
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
+                final PackageUserState state = ps.readUserState(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, 0, state, userId, ps);
                 if (appInfo == null) {
@@ -479,14 +478,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, long flags, int userId) {
+    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mReceivers.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, long flags,
+    List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags,
             List<ParsedActivity> receivers, int userId) {
         synchronized (mLock) {
             return mReceivers.queryIntentForPackage(intent, resolvedType, flags, receivers, userId);
@@ -494,14 +493,14 @@ public class ComponentResolver
     }
 
     @Nullable
-    List<ResolveInfo> queryServices(Intent intent, String resolvedType, long flags, int userId) {
+    List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mServices.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
     @Nullable
-    List<ResolveInfo> queryServices(Intent intent, String resolvedType, long flags,
+    List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags,
             List<ParsedService> services, int userId) {
         synchronized (mLock) {
             return mServices.queryIntentForPackage(intent, resolvedType, flags, services, userId);
@@ -542,7 +541,7 @@ public class ComponentResolver
             final PackageSetting disabledPkgSetting = (PackageSetting) sPackageManagerInternal
                     .getDisabledSystemPackage(pair.first.getPackageName());
             final AndroidPackage disabledPkg =
-                    disabledPkgSetting == null ? null : disabledPkgSetting.getPkg();
+                    disabledPkgSetting == null ? null : disabledPkgSetting.pkg;
             final List<ParsedActivity> systemActivities =
                     disabledPkg != null ? disabledPkg.getActivities() : null;
             adjustPriority(systemActivities, pair.first, pair.second, setupWizardPackage);
@@ -588,8 +587,7 @@ public class ComponentResolver
             for (int i = protectedFilters.size() - 1; i >= 0; --i) {
                 final Pair<ParsedMainComponent, ParsedIntentInfo> pair = protectedFilters.get(i);
                 ParsedMainComponent component = pair.first;
-                ParsedIntentInfo intentInfo = pair.second;
-                IntentFilter filter = intentInfo.getIntentFilter();
+                ParsedIntentInfo filter = pair.second;
                 String packageName = component.getPackageName();
                 String className = component.getClassName();
                 if (packageName.equals(setupWizardPackage)) {
@@ -616,113 +614,97 @@ public class ComponentResolver
     }
 
     void dumpActivityResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
-                            : "Activity Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
+        if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
+                : "Activity Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
         }
     }
 
     void dumpProviderResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
-                            : "Provider Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
+        if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
+                : "Provider Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
         }
     }
 
     void dumpReceiverResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
-                            : "Receiver Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
+        if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
+                : "Receiver Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
         }
     }
 
     void dumpServiceResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
-                            : "Service Resolver Table:", "  ", packageName,
-                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-                dumpState.setTitlePrinted(true);
-            }
+        if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
+                : "Service Resolver Table:", "  ", packageName,
+                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+            dumpState.setTitlePrinted(true);
         }
     }
 
     void dumpContentProviders(PrintWriter pw, DumpState dumpState, String packageName) {
-        synchronized (mLock) {
-            boolean printedSomething = false;
-            for (ParsedProvider p : mProviders.mProviders.values()) {
-                if (packageName != null && !packageName.equals(p.getPackageName())) {
-                    continue;
-                }
-                if (!printedSomething) {
-                    if (dumpState.onTitlePrinted()) {
-                        pw.println();
-                    }
-                    pw.println("Registered ContentProviders:");
-                    printedSomething = true;
-                }
-                pw.print("  ");
-                ComponentName.printShortString(pw, p.getPackageName(), p.getName());
-                pw.println(":");
-                pw.print("    ");
-                pw.println(p.toString());
+        boolean printedSomething = false;
+        for (ParsedProvider p : mProviders.mProviders.values()) {
+            if (packageName != null && !packageName.equals(p.getPackageName())) {
+                continue;
             }
-            printedSomething = false;
-            for (Map.Entry<String, ParsedProvider> entry :
-                    mProvidersByAuthority.entrySet()) {
-                ParsedProvider p = entry.getValue();
-                if (packageName != null && !packageName.equals(p.getPackageName())) {
-                    continue;
+            if (!printedSomething) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
                 }
-                if (!printedSomething) {
-                    if (dumpState.onTitlePrinted()) {
-                        pw.println();
-                    }
-                    pw.println("ContentProvider Authorities:");
-                    printedSomething = true;
+                pw.println("Registered ContentProviders:");
+                printedSomething = true;
+            }
+            pw.print("  ");
+            ComponentName.printShortString(pw, p.getPackageName(), p.getName());
+            pw.println(":");
+            pw.print("    ");
+            pw.println(p.toString());
+        }
+        printedSomething = false;
+        for (Map.Entry<String, ParsedProvider> entry :
+                mProvidersByAuthority.entrySet()) {
+            ParsedProvider p = entry.getValue();
+            if (packageName != null && !packageName.equals(p.getPackageName())) {
+                continue;
+            }
+            if (!printedSomething) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
                 }
-                pw.print("  [");
-                pw.print(entry.getKey());
-                pw.println("]:");
-                pw.print("    ");
-                pw.println(p.toString());
+                pw.println("ContentProvider Authorities:");
+                printedSomething = true;
+            }
+            pw.print("  ["); pw.print(entry.getKey()); pw.println("]:");
+            pw.print("    "); pw.println(p.toString());
 
-                AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
+            AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
-                if (pkg != null) {
-                    pw.print("      applicationInfo=");
-                    pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
-                }
+            if (pkg != null) {
+                pw.print("      applicationInfo="); pw.println(pkg.toAppInfoWithoutState());
             }
         }
     }
 
     void dumpServicePermissions(PrintWriter pw, DumpState dumpState) {
-        synchronized (mLock) {
-            if (dumpState.onTitlePrinted()) pw.println();
-            pw.println("Service permissions:");
+        if (dumpState.onTitlePrinted()) pw.println();
+        pw.println("Service permissions:");
 
-            final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
-                    mServices.filterIterator();
-            while (filterIterator.hasNext()) {
-                final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
-                ParsedService service = pair.first;
+        final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
+                mServices.filterIterator();
+        while (filterIterator.hasNext()) {
+            final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
+            ParsedService service = pair.first;
 
-                final String permission = service.getPermission();
-                if (permission != null) {
-                    pw.print("    ");
-                    pw.print(service.getComponentName().flattenToShortString());
-                    pw.print(": ");
-                    pw.println(permission);
-                }
+            final String permission = service.getPermission();
+            if (permission != null) {
+                pw.print("    ");
+                pw.print(service.getComponentName().flattenToShortString());
+                pw.print(": ");
+                pw.println(permission);
             }
         }
     }
@@ -760,7 +742,7 @@ public class ComponentResolver
                 String[] names = p.getAuthority().split(";");
 
                 // TODO(b/135203078): Remove this mutation
-                ComponentMutateUtils.setAuthority(p, null);
+                p.setAuthority(null);
                 for (int j = 0; j < names.length; j++) {
                     if (j == 1 && p.isSyncable()) {
                         // We only want the first authority for a provider to possibly be
@@ -770,15 +752,15 @@ public class ComponentResolver
                         // to a provider that we don't want to change.
                         // Only do this for the second authority since the resulting provider
                         // object can be the same for all future authorities for this provider.
-                        p = new ParsedProviderImpl(p);
-                        ComponentMutateUtils.setSyncable(p, false);
+                        p = new ParsedProvider(p);
+                        p.setSyncable(false);
                     }
                     if (!mProvidersByAuthority.containsKey(names[j])) {
                         mProvidersByAuthority.put(names[j], p);
                         if (p.getAuthority() == null) {
-                            ComponentMutateUtils.setAuthority(p, names[j]);
+                            p.setAuthority(names[j]);
                         } else {
-                            ComponentMutateUtils.setAuthority(p, p.getAuthority() + ";" + names[j]);
+                            p.setAuthority(p.getAuthority() + ";" + names[j]);
                         }
                         if (DEBUG_PACKAGE_SCANNING && chatty) {
                             Log.d(TAG, "Registered content provider: " + names[j]
@@ -860,7 +842,7 @@ public class ComponentResolver
      * MODIFIED. Do not pass in a list that should not be changed.
      */
     private static <T> void getIntentListSubset(List<ParsedIntentInfo> intentList,
-            Function<IntentFilter, Iterator<T>> generator, Iterator<T> searchIterator) {
+            Function<ParsedIntentInfo, Iterator<T>> generator, Iterator<T> searchIterator) {
         // loop through the set of actions; every one must be found in the intent filter
         while (searchIterator.hasNext()) {
             // we must have at least one filter in the list to consider a match
@@ -878,8 +860,7 @@ public class ComponentResolver
 
                 // loop through the intent filter's selection criteria; at least one
                 // of them must match the searched criteria
-                final Iterator<T> intentSelectionIter =
-                        generator.apply(intentInfo.getIntentFilter());
+                final Iterator<T> intentSelectionIter = generator.apply(intentInfo);
                 while (intentSelectionIter != null && intentSelectionIter.hasNext()) {
                     final T intentSelection = intentSelectionIter.next();
                     if (intentSelection != null && intentSelection.equals(searchAction)) {
@@ -897,7 +878,7 @@ public class ComponentResolver
         }
     }
 
-    private static boolean isProtectedAction(IntentFilter filter) {
+    private static boolean isProtectedAction(ParsedIntentInfo filter) {
         final Iterator<String> actionsIter = filter.actionsIterator();
         while (actionsIter != null && actionsIter.hasNext()) {
             final String filterAction = actionsIter.next();
@@ -946,10 +927,9 @@ public class ComponentResolver
      * allowed to obtain any priority on any action.
      */
     private void adjustPriority(List<ParsedActivity> systemActivities, ParsedActivity activity,
-            ParsedIntentInfo intentInfo, String setupWizardPackage) {
+            ParsedIntentInfo intent, String setupWizardPackage) {
         // nothing to do; priority is fine as-is
-        IntentFilter intentFilter = intentInfo.getIntentFilter();
-        if (intentFilter.getPriority() <= 0) {
+        if (intent.getPriority() <= 0) {
             return;
         }
 
@@ -964,13 +944,13 @@ public class ComponentResolver
                 Slog.i(TAG, "Non-privileged app; cap priority to 0;"
                         + " package: " + packageName
                         + " activity: " + className
-                        + " origPrio: " + intentFilter.getPriority());
+                        + " origPrio: " + intent.getPriority());
             }
-            intentFilter.setPriority(0);
+            intent.setPriority(0);
             return;
         }
 
-        if (isProtectedAction(intentFilter)) {
+        if (isProtectedAction(intent)) {
             if (mDeferProtectedFilters) {
                 // We can't deal with these just yet. No component should ever obtain a
                 // >0 priority for a protected actions, with ONE exception -- the setup
@@ -982,12 +962,12 @@ public class ComponentResolver
                 if (mProtectedFilters == null) {
                     mProtectedFilters = new ArrayList<>();
                 }
-                mProtectedFilters.add(Pair.create(activity, intentInfo));
+                mProtectedFilters.add(Pair.create(activity, intent));
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Protected action; save for later;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
             } else {
                 if (DEBUG_FILTERS && setupWizardPackage == null) {
@@ -997,10 +977,10 @@ public class ComponentResolver
                 if (packageName.equals(setupWizardPackage)) {
                     if (DEBUG_FILTERS) {
                         Slog.i(TAG, "Found setup wizard;"
-                                + " allow priority " + intentFilter.getPriority() + ";"
+                                + " allow priority " + intent.getPriority() + ";"
                                 + " package: " + packageName
                                 + " activity: " + className
-                                + " priority: " + intentFilter.getPriority());
+                                + " priority: " + intent.getPriority());
                     }
                     // setup wizard gets whatever it wants
                     return;
@@ -1009,9 +989,9 @@ public class ComponentResolver
                     Slog.i(TAG, "Protected action; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
-                intentFilter.setPriority(0);
+                intent.setPriority(0);
             }
             return;
         }
@@ -1032,9 +1012,9 @@ public class ComponentResolver
                 Slog.i(TAG, "New activity; cap priority to 0;"
                         + " package: " + packageName
                         + " activity: " + className
-                        + " origPrio: " + intentFilter.getPriority());
+                        + " origPrio: " + intent.getPriority());
             }
-            intentFilter.setPriority(0);
+            intent.setPriority(0);
             return;
         }
 
@@ -1045,7 +1025,7 @@ public class ComponentResolver
                 new ArrayList<>(foundActivity.getIntents());
 
         // find matching action subsets
-        final Iterator<String> actionsIterator = intentFilter.actionsIterator();
+        final Iterator<String> actionsIterator = intent.actionsIterator();
         if (actionsIterator != null) {
             getIntentListSubset(intentListCopy, IntentFilter::actionsIterator, actionsIterator);
             if (intentListCopy.size() == 0) {
@@ -1054,15 +1034,15 @@ public class ComponentResolver
                     Slog.i(TAG, "Mismatched action; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
-                intentFilter.setPriority(0);
+                intent.setPriority(0);
                 return;
             }
         }
 
         // find matching category subsets
-        final Iterator<String> categoriesIterator = intentFilter.categoriesIterator();
+        final Iterator<String> categoriesIterator = intent.categoriesIterator();
         if (categoriesIterator != null) {
             getIntentListSubset(intentListCopy, IntentFilter::categoriesIterator,
                     categoriesIterator);
@@ -1072,15 +1052,15 @@ public class ComponentResolver
                     Slog.i(TAG, "Mismatched category; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
-                intentFilter.setPriority(0);
+                intent.setPriority(0);
                 return;
             }
         }
 
         // find matching schemes subsets
-        final Iterator<String> schemesIterator = intentFilter.schemesIterator();
+        final Iterator<String> schemesIterator = intent.schemesIterator();
         if (schemesIterator != null) {
             getIntentListSubset(intentListCopy, IntentFilter::schemesIterator, schemesIterator);
             if (intentListCopy.size() == 0) {
@@ -1089,16 +1069,16 @@ public class ComponentResolver
                     Slog.i(TAG, "Mismatched scheme; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
-                intentFilter.setPriority(0);
+                intent.setPriority(0);
                 return;
             }
         }
 
         // find matching authorities subsets
         final Iterator<IntentFilter.AuthorityEntry> authoritiesIterator =
-                intentFilter.authoritiesIterator();
+                intent.authoritiesIterator();
         if (authoritiesIterator != null) {
             getIntentListSubset(intentListCopy, IntentFilter::authoritiesIterator,
                     authoritiesIterator);
@@ -1108,9 +1088,9 @@ public class ComponentResolver
                     Slog.i(TAG, "Mismatched authority; cap priority to 0;"
                             + " package: " + packageName
                             + " activity: " + className
-                            + " origPrio: " + intentFilter.getPriority());
+                            + " origPrio: " + intent.getPriority());
                 }
-                intentFilter.setPriority(0);
+                intent.setPriority(0);
                 return;
             }
         }
@@ -1118,18 +1098,17 @@ public class ComponentResolver
         // we found matching filter(s); app gets the max priority of all intents
         int cappedPriority = 0;
         for (int i = intentListCopy.size() - 1; i >= 0; --i) {
-            cappedPriority = Math.max(cappedPriority,
-                    intentListCopy.get(i).getIntentFilter().getPriority());
+            cappedPriority = Math.max(cappedPriority, intentListCopy.get(i).getPriority());
         }
-        if (intentFilter.getPriority() > cappedPriority) {
+        if (intent.getPriority() > cappedPriority) {
             if (DEBUG_FILTERS) {
                 Slog.i(TAG, "Found matching filter(s);"
                         + " cap priority to " + cappedPriority + ";"
                         + " package: " + packageName
                         + " activity: " + className
-                        + " origPrio: " + intentFilter.getPriority());
+                        + " origPrio: " + intent.getPriority());
             }
-            intentFilter.setPriority(cappedPriority);
+            intent.setPriority(cappedPriority);
             return;
         }
         // all this for nothing; the requested priority was <= what was on the system
@@ -1394,7 +1373,7 @@ public class ComponentResolver
             return super.queryIntent(intent, resolvedType, defaultOnly, userId);
         }
 
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -1406,7 +1385,7 @@ public class ComponentResolver
         }
 
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                long flags, List<ParsedActivity> packageActivities, int userId) {
+                int flags, List<ParsedActivity> packageActivities, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
@@ -1444,15 +1423,14 @@ public class ComponentResolver
             final int intentsSize = a.getIntents().size();
             for (int j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = a.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (newIntents != null && "activity".equals(type)) {
                     newIntents.add(Pair.create(a, intent));
                 }
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                if (!intentFilter.debugCheck()) {
+                if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Activity " + a.getName());
                 }
                 addFilter(Pair.create(a, intent));
@@ -1468,10 +1446,9 @@ public class ComponentResolver
             final int intentsSize = a.getIntents().size();
             for (int j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = a.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
                 removeFilter(Pair.create(a, intent));
             }
@@ -1521,7 +1498,6 @@ public class ComponentResolver
                 int match, int userId) {
             ParsedActivity activity = pair.first;
             ParsedIntentInfo info = pair.second;
-            IntentFilter intentFilter = info.getIntentFilter();
 
             if (!sUserManager.exists(userId)) {
                 if (DEBUG) {
@@ -1543,15 +1519,15 @@ public class ComponentResolver
                 }
                 return null;
             }
-            PackageStateInternal ps =
-                    sPackageManagerInternal.getPackageStateInternal(activity.getPackageName());
+            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                    activity.getPackageName());
             if (ps == null) {
                 if (DEBUG) {
                     log("info.activity.owner.mExtras == null", info, match, userId);
                 }
                 return null;
             }
-            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+            final PackageUserState userState = ps.readUserState(userId);
             ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
                     userState, userId, ps);
             if (ai == null) {
@@ -1567,27 +1543,25 @@ public class ComponentResolver
                     (mFlags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
             final boolean componentVisible =
                     matchVisibleToInstantApp
-                    && intentFilter.isVisibleToInstantApp()
-                    && (!matchExplicitlyVisibleOnly
-                            || intentFilter.isExplicitlyVisibleToInstantApp());
+                    && info.isVisibleToInstantApp()
+                    && (!matchExplicitlyVisibleOnly || info.isExplicitlyVisibleToInstantApp());
             final boolean matchInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to ephemeral apps
-            if (matchVisibleToInstantApp && !(componentVisible || userState.isInstantApp())) {
+            if (matchVisibleToInstantApp && !(componentVisible || userState.instantApp)) {
                 if (DEBUG) {
                     log("Filter(s) not visible to ephemeral apps"
                             + "; matchVisibleToInstantApp=" + matchVisibleToInstantApp
                             + "; matchInstantApp=" + matchInstantApp
-                            + "; info.isVisibleToInstantApp()="
-                                    + intentFilter.isVisibleToInstantApp()
+                            + "; info.isVisibleToInstantApp()=" + info.isVisibleToInstantApp()
                             + "; matchExplicitlyVisibleOnly=" + matchExplicitlyVisibleOnly
                             + "; info.isExplicitlyVisibleToInstantApp()="
-                                    + intentFilter.isExplicitlyVisibleToInstantApp(),
+                                    + info.isExplicitlyVisibleToInstantApp(),
                             info, match, userId);
                 }
                 return null;
             }
             // throw out instant app filters if we're not explicitly requesting them
-            if (!matchInstantApp && userState.isInstantApp()) {
+            if (!matchInstantApp && userState.instantApp) {
                 if (DEBUG) {
                     log("Instant app filter is not explicitly requested", info, match, userId);
                 }
@@ -1595,20 +1569,19 @@ public class ComponentResolver
             }
             // throw out instant app filters if updates are available; will trigger
             // instant app resolution
-            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
+            if (userState.instantApp && ps.isUpdateAvailable()) {
                 if (DEBUG) {
                     log("Instant app update is available", info, match, userId);
                 }
                 return null;
             }
-            final ResolveInfo res =
-                    new ResolveInfo(intentFilter.hasCategory(Intent.CATEGORY_BROWSABLE));
+            final ResolveInfo res = new ResolveInfo(info.hasCategory(Intent.CATEGORY_BROWSABLE));
             res.activityInfo = ai;
             if ((mFlags & PackageManager.GET_RESOLVED_FILTER) != 0) {
-                res.filter = intentFilter;
+                res.filter = info;
             }
-            res.handleAllWebDataURI = intentFilter.handleAllWebDataURI();
-            res.priority = intentFilter.getPriority();
+            res.handleAllWebDataURI = info.handleAllWebDataURI();
+            res.priority = info.getPriority();
             // TODO(b/135203078): This field was unwritten and does nothing
 //            res.preferredOrder = pkg.getPreferredOrder();
             //System.out.println("Result: " + res.activityInfo.className +
@@ -1624,7 +1597,7 @@ public class ComponentResolver
             }
             res.iconResourceId = info.getIcon();
             res.system = res.activityInfo.applicationInfo.isSystemApp();
-            res.isInstantAppAvailable = userState.isInstantApp();
+            res.isInstantAppAvailable = userState.instantApp;
             return res;
         }
 
@@ -1670,7 +1643,7 @@ public class ComponentResolver
         @Override
         protected IntentFilter getIntentFilter(
                 @NonNull Pair<ParsedActivity, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
+            return input.second;
         }
 
         protected List<ParsedActivity> getResolveList(AndroidPackage pkg) {
@@ -1683,7 +1656,7 @@ public class ComponentResolver
         // ActivityIntentResolver.
         protected final ArrayMap<ComponentName, ParsedActivity> mActivities =
                 new ArrayMap<>();
-        private long mFlags;
+        private int mFlags;
     }
 
     // Both receivers and activities share a class, but point to different get methods
@@ -1725,7 +1698,7 @@ public class ComponentResolver
         }
 
         @Nullable
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
                 int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
@@ -1738,7 +1711,7 @@ public class ComponentResolver
 
         @Nullable
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                long flags, List<ParsedProvider> packageProviders, int userId) {
+                int flags, List<ParsedProvider> packageProviders, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
@@ -1781,12 +1754,11 @@ public class ComponentResolver
             int j;
             for (j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = p.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                if (!intentFilter.debugCheck()) {
+                if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Provider " + p.getName());
                 }
                 addFilter(Pair.create(p, intent));
@@ -1803,10 +1775,9 @@ public class ComponentResolver
             int j;
             for (j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = p.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
                 removeFilter(Pair.create(p, intent));
             }
@@ -1851,8 +1822,7 @@ public class ComponentResolver
             }
 
             ParsedProvider provider = pair.first;
-            ParsedIntentInfo intentInfo = pair.second;
-            IntentFilter filter = intentInfo.getIntentFilter();
+            ParsedIntentInfo filter = pair.second;
 
             AndroidPackage pkg = sPackageManagerInternal.getPackage(provider.getPackageName());
             if (pkg == null) {
@@ -1863,27 +1833,27 @@ public class ComponentResolver
                 return null;
             }
 
-            PackageStateInternal ps =
-                    sPackageManagerInternal.getPackageStateInternal(provider.getPackageName());
+            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                    provider.getPackageName());
             if (ps == null) {
                 return null;
             }
-            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+            final PackageUserState userState = ps.readUserState(userId);
             final boolean matchVisibleToInstantApp = (mFlags
                     & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to instant applications
             if (matchVisibleToInstantApp
-                    && !(filter.isVisibleToInstantApp() || userState.isInstantApp())) {
+                    && !(filter.isVisibleToInstantApp() || userState.instantApp)) {
                 return null;
             }
             // throw out instant application filters if we're not explicitly requesting them
-            if (!isInstantApp && userState.isInstantApp()) {
+            if (!isInstantApp && userState.instantApp) {
                 return null;
             }
             // throw out instant application filters if updates are available; will trigger
             // instant application resolution
-            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
+            if (userState.instantApp && ps.isUpdateAvailable()) {
                 return null;
             }
             final ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
@@ -1905,10 +1875,10 @@ public class ComponentResolver
             // TODO(b/135203078): This field was unwritten and does nothing
 //            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
-            res.isDefault = intentInfo.isHasDefault();
-            res.labelRes = intentInfo.getLabelRes();
-            res.nonLocalizedLabel = intentInfo.getNonLocalizedLabel();
-            res.icon = intentInfo.getIcon();
+            res.isDefault = filter.isHasDefault();
+            res.labelRes = filter.getLabelRes();
+            res.nonLocalizedLabel = filter.getNonLocalizedLabel();
+            res.icon = filter.getIcon();
             res.system = res.providerInfo.applicationInfo.isSystemApp();
             return res;
         }
@@ -1956,11 +1926,11 @@ public class ComponentResolver
         @Override
         protected IntentFilter getIntentFilter(
                 @NonNull Pair<ParsedProvider, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
+            return input.second;
         }
 
         private final ArrayMap<ComponentName, ParsedProvider> mProviders = new ArrayMap<>();
-        private long mFlags;
+        private int mFlags;
     }
 
     private static final class ServiceIntentResolver
@@ -1983,7 +1953,7 @@ public class ComponentResolver
             return super.queryIntent(intent, resolvedType, defaultOnly, userId);
         }
 
-        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, long flags,
+        List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
                 int userId) {
             if (!sUserManager.exists(userId)) return null;
             mFlags = flags;
@@ -1993,7 +1963,7 @@ public class ComponentResolver
         }
 
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
-                long flags, List<ParsedService> packageServices, int userId) {
+                int flags, List<ParsedService> packageServices, int userId) {
             if (!sUserManager.exists(userId)) return null;
             if (packageServices == null) {
                 return Collections.emptyList();
@@ -2029,12 +1999,11 @@ public class ComponentResolver
             int j;
             for (j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = s.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                if (!intentFilter.debugCheck()) {
+                if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Service " + s.getName());
                 }
                 addFilter(Pair.create(s, intent));
@@ -2051,10 +2020,9 @@ public class ComponentResolver
             int j;
             for (j = 0; j < intentsSize; j++) {
                 ParsedIntentInfo intent = s.getIntents().get(j);
-                IntentFilter intentFilter = intent.getIntentFilter();
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
-                    intentFilter.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
+                    intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
                 removeFilter(Pair.create(s, intent));
             }
@@ -2096,8 +2064,7 @@ public class ComponentResolver
             if (!sUserManager.exists(userId)) return null;
 
             ParsedService service = pair.first;
-            ParsedIntentInfo intentInfo = pair.second;
-            IntentFilter filter = intentInfo.getIntentFilter();
+            ParsedIntentInfo filter = pair.second;
 
             AndroidPackage pkg = sPackageManagerInternal.getPackage(service.getPackageName());
             if (pkg == null) {
@@ -2108,12 +2075,12 @@ public class ComponentResolver
                 return null;
             }
 
-            PackageStateInternal ps =
-                    sPackageManagerInternal.getPackageStateInternal(service.getPackageName());
+            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                    service.getPackageName());
             if (ps == null) {
                 return null;
             }
-            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+            final PackageUserState userState = ps.readUserState(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
                     userState, userId, ps);
             if (si == null) {
@@ -2124,16 +2091,16 @@ public class ComponentResolver
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to ephemeral apps
             if (matchVisibleToInstantApp
-                    && !(filter.isVisibleToInstantApp() || userState.isInstantApp())) {
+                    && !(filter.isVisibleToInstantApp() || userState.instantApp)) {
                 return null;
             }
             // throw out ephemeral filters if we're not explicitly requesting them
-            if (!isInstantApp && userState.isInstantApp()) {
+            if (!isInstantApp && userState.instantApp) {
                 return null;
             }
             // throw out instant app filters if updates are available; will trigger
             // instant app resolution
-            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
+            if (userState.instantApp && ps.isUpdateAvailable()) {
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();
@@ -2145,10 +2112,10 @@ public class ComponentResolver
             // TODO(b/135203078): This field was unwritten and does nothing
 //            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
-            res.isDefault = intentInfo.isHasDefault();
-            res.labelRes = intentInfo.getLabelRes();
-            res.nonLocalizedLabel = intentInfo.getNonLocalizedLabel();
-            res.icon = intentInfo.getIcon();
+            res.isDefault = filter.isHasDefault();
+            res.labelRes = filter.getLabelRes();
+            res.nonLocalizedLabel = filter.getNonLocalizedLabel();
+            res.icon = filter.getIcon();
             res.system = res.serviceInfo.applicationInfo.isSystemApp();
             return res;
         }
@@ -2199,12 +2166,12 @@ public class ComponentResolver
         @Override
         protected IntentFilter getIntentFilter(
                 @NonNull Pair<ParsedService, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
+            return input.second;
         }
 
         // Keys are String (activity class name), values are Activity.
         private final ArrayMap<ComponentName, ParsedService> mServices = new ArrayMap<>();
-        private long mFlags;
+        private int mFlags;
     }
 
     static final class InstantAppIntentResolver
@@ -2307,8 +2274,8 @@ public class ComponentResolver
             return false;
         }
 
-        PackageStateInternal ps =
-                sPackageManagerInternal.getPackageStateInternal(pair.first.getPackageName());
+        PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                pair.first.getPackageName());
         if (ps == null) {
             return false;
         }
@@ -2316,7 +2283,46 @@ public class ComponentResolver
         // System apps are never considered stopped for purposes of
         // filtering, because there may be no way for the user to
         // actually re-launch them.
-        return !ps.isSystem() && ps.getUserStateOrDefault(userId).isStopped();
+        return !ps.isSystem() && ps.getStopped(userId);
+    }
+
+    /** Generic to create an {@link Iterator} for a data type */
+    static class IterGenerator<E> {
+        public Iterator<E> generate(ParsedIntentInfo info) {
+            return null;
+        }
+    }
+
+    /** Create an {@link Iterator} for intent actions */
+    static class ActionIterGenerator extends IterGenerator<String> {
+        @Override
+        public Iterator<String> generate(ParsedIntentInfo info) {
+            return info.actionsIterator();
+        }
+    }
+
+    /** Create an {@link Iterator} for intent categories */
+    static class CategoriesIterGenerator extends IterGenerator<String> {
+        @Override
+        public Iterator<String> generate(ParsedIntentInfo info) {
+            return info.categoriesIterator();
+        }
+    }
+
+    /** Create an {@link Iterator} for intent schemes */
+    static class SchemesIterGenerator extends IterGenerator<String> {
+        @Override
+        public Iterator<String> generate(ParsedIntentInfo info) {
+            return info.schemesIterator();
+        }
+    }
+
+    /** Create an {@link Iterator} for intent authorities */
+    static class AuthoritiesIterGenerator extends IterGenerator<IntentFilter.AuthorityEntry> {
+        @Override
+        public Iterator<IntentFilter.AuthorityEntry> generate(ParsedIntentInfo info) {
+            return info.authoritiesIterator();
+        }
     }
 
     /**

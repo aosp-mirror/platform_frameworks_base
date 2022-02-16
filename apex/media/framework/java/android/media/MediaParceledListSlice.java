@@ -18,11 +18,8 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.RequiresApi;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +41,6 @@ import java.util.List;
  * @hide
  */
 @Deprecated
-@RequiresApi(Build.VERSION_CODES.S)
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class MediaParceledListSlice<T extends Parcelable>
         extends BaseMediaParceledListSlice<T> {

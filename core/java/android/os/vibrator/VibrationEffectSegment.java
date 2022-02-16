@@ -57,26 +57,10 @@ public abstract class VibrationEffectSegment implements Parcelable {
      */
     public abstract long getDuration();
 
-    /**
-     * Returns true if this segment could be a haptic feedback effect candidate.
-     *
-     * @see VibrationEffect#isHapticFeedbackCandidate()
-     * @hide
-     */
-    public abstract boolean isHapticFeedbackCandidate();
-
-    /**
-     * Returns true if this segment plays at a non-zero amplitude at some point.
-     *
-     * @hide
-     */
+    /** Returns true if this segment plays at a non-zero amplitude at some point. */
     public abstract boolean hasNonZeroAmplitude();
 
-    /**
-     * Validates the segment, throwing exceptions if any parameter is invalid.
-     *
-     * @hide
-     */
+    /** Validates the segment, throwing exceptions if any parameter is invalid. */
     public abstract void validate();
 
     /**
@@ -84,8 +68,6 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * <p>This might fail with {@link IllegalArgumentException} if value is non-positive or larger
      * than {@link VibrationEffect#MAX_AMPLITUDE}.
-     *
-     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T resolve(int defaultAmplitude);
@@ -95,8 +77,6 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
-     *
-     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T scale(float scaleFactor);
@@ -106,8 +86,6 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * @param effectStrength new effect strength to be applied, one of
      *                       VibrationEffect.EFFECT_STRENGTH_*.
-     *
-     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T applyEffectStrength(int effectStrength);

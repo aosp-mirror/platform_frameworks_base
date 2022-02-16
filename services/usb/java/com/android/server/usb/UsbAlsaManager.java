@@ -237,7 +237,6 @@ public final class UsbAlsaManager {
         if (hasInput || hasOutput) {
             boolean isInputHeadset = parser.isInputHeadset();
             boolean isOutputHeadset = parser.isOutputHeadset();
-            boolean isDock = parser.isDock();
 
             if (mAudioService == null) {
                 Slog.e(TAG, "no AudioService");
@@ -247,7 +246,7 @@ public final class UsbAlsaManager {
             UsbAlsaDevice alsaDevice =
                     new UsbAlsaDevice(mAudioService, cardRec.getCardNum(), 0 /*device*/,
                                       deviceAddress, hasOutput, hasInput,
-                                      isInputHeadset, isOutputHeadset, isDock);
+                                      isInputHeadset, isOutputHeadset);
             if (alsaDevice != null) {
                 alsaDevice.setDeviceNameAndDescription(
                           cardRec.getCardName(), cardRec.getCardDescription());
@@ -258,11 +257,8 @@ public final class UsbAlsaManager {
 
         // look for MIDI devices
         boolean hasMidi = parser.hasMIDIInterface();
-        int midiNumInputs = parser.calculateNumLegacyMidiInputs();
-        int midiNumOutputs = parser.calculateNumLegacyMidiOutputs();
         if (DEBUG) {
             Slog.d(TAG, "hasMidi: " + hasMidi + " mHasMidiFeature:" + mHasMidiFeature);
-            Slog.d(TAG, "midiNumInputs: " + midiNumInputs + " midiNumOutputs:" + midiNumOutputs);
         }
         if (hasMidi && mHasMidiFeature) {
             int device = 0;
@@ -289,7 +285,7 @@ public final class UsbAlsaManager {
             properties.putParcelable(MidiDeviceInfo.PROPERTY_USB_DEVICE, usbDevice);
 
             UsbMidiDevice usbMidiDevice = UsbMidiDevice.create(mContext, properties,
-                    cardRec.getCardNum(), 0 /*device*/, midiNumInputs, midiNumOutputs);
+                    cardRec.getCardNum(), 0 /*device*/);
             if (usbMidiDevice != null) {
                 mMidiDevices.put(deviceAddress, usbMidiDevice);
             }
@@ -342,8 +338,7 @@ public final class UsbAlsaManager {
                     com.android.internal.R.string.usb_midi_peripheral_product_name));
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);
-            mPeripheralMidiDevice = UsbMidiDevice.create(mContext, properties, card, device,
-                    1 /* numInputs */, 1 /* numOutputs */);
+            mPeripheralMidiDevice = UsbMidiDevice.create(mContext, properties, card, device);
         } else if (!enabled && mPeripheralMidiDevice != null) {
             IoUtils.closeQuietly(mPeripheralMidiDevice);
             mPeripheralMidiDevice = null;

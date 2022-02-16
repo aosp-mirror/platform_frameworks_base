@@ -24,11 +24,15 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
+import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.statusBarLayerIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.layerBecomesVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -49,37 +53,31 @@ import org.junit.runners.Parameterized
 class OpenAppToLegacySplitScreen(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
             transitions {
                 device.launchSplitScreen(wmHelper)
                 wmHelper.waitForAppTransitionIdle()
             }
         }
 
-    override val ignoredWindows: List<FlickerComponentName>
-        get() = listOf(LAUNCHER_COMPONENT, splitScreenApp.component,
-            FlickerComponentName.SPLASH_SCREEN,
-            FlickerComponentName.SNAPSHOT)
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+            WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
 
     @FlakyTest
     @Test
-    fun appWindowBecomesVisible() {
-        testSpec.assertWm {
-            this.isAppWindowInvisible(splitScreenApp.component)
-                    .then()
-                    .isAppWindowVisible(splitScreenApp.component)
-        }
-    }
+    fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(splitScreenApp.getPackage())
+
+    @FlakyTest
+    @Test
+    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation)
 
     @Presubmit
     @Test
-    fun entireScreenCovered() = testSpec.entireScreenCovered()
-
-    @Presubmit
-    @Test
-    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
     @Presubmit
     @Test
@@ -87,27 +85,12 @@ class OpenAppToLegacySplitScreen(
 
     @FlakyTest
     @Test
-    fun layerBecomesVisible() {
-        testSpec.assertLayers {
-            this.isInvisible(splitScreenApp.component)
-                    .then()
-                    .isVisible(splitScreenApp.component)
-        }
-    }
+    fun layerBecomesVisible() = testSpec.layerBecomesVisible(splitScreenApp.getPackage())
 
-    @Presubmit
+    @FlakyTest(bugId = 151179149)
     @Test
-    fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges(splitScreenApp.`package`,
-                    "recents_animation_input_consumer", "NexusLauncherActivity")
-        }
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    fun focusChanges() = testSpec.focusChanges(splitScreenApp.`package`,
+        "recents_animation_input_consumer", "NexusLauncherActivity")
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

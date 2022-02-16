@@ -20,11 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.FrontendCableTimeInterleaveMode;
-import android.hardware.tv.tuner.FrontendDvbcAnnex;
-import android.hardware.tv.tuner.FrontendDvbcBandwidth;
-import android.hardware.tv.tuner.FrontendDvbcModulation;
-import android.hardware.tv.tuner.FrontendDvbcOuterFec;
+import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerVersionChecker;
 import android.media.tv.tuner.frontend.FrontendSettings.FrontendSpectralInversion;
 
@@ -40,7 +36,8 @@ import java.lang.annotation.RetentionPolicy;
 public class DvbcFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(prefix = "MODULATION_",
+    @IntDef(flag = true,
+            prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_16QAM,
                     MODULATION_MOD_32QAM, MODULATION_MOD_64QAM, MODULATION_MOD_128QAM,
                     MODULATION_MOD_256QAM})
@@ -50,31 +47,31 @@ public class DvbcFrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = FrontendDvbcModulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = Constants.FrontendDvbcModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically
      */
-    public static final int MODULATION_AUTO = FrontendDvbcModulation.AUTO;
+    public static final int MODULATION_AUTO = Constants.FrontendDvbcModulation.AUTO;
     /**
      * 16QAM Modulation.
      */
-    public static final int MODULATION_MOD_16QAM = FrontendDvbcModulation.MOD_16QAM;
+    public static final int MODULATION_MOD_16QAM = Constants.FrontendDvbcModulation.MOD_16QAM;
     /**
      * 32QAM Modulation.
      */
-    public static final int MODULATION_MOD_32QAM = FrontendDvbcModulation.MOD_32QAM;
+    public static final int MODULATION_MOD_32QAM = Constants.FrontendDvbcModulation.MOD_32QAM;
     /**
      * 64QAM Modulation.
      */
-    public static final int MODULATION_MOD_64QAM = FrontendDvbcModulation.MOD_64QAM;
+    public static final int MODULATION_MOD_64QAM = Constants.FrontendDvbcModulation.MOD_64QAM;
     /**
      * 128QAM Modulation.
      */
-    public static final int MODULATION_MOD_128QAM = FrontendDvbcModulation.MOD_128QAM;
+    public static final int MODULATION_MOD_128QAM = Constants.FrontendDvbcModulation.MOD_128QAM;
     /**
      * 256QAM Modulation.
      */
-    public static final int MODULATION_MOD_256QAM = FrontendDvbcModulation.MOD_256QAM;
+    public static final int MODULATION_MOD_256QAM = Constants.FrontendDvbcModulation.MOD_256QAM;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -85,19 +82,21 @@ public class DvbcFrontendSettings extends FrontendSettings {
     /**
      * Outer Forward Error Correction (FEC) Type undefined.
      */
-    public static final int OUTER_FEC_UNDEFINED = FrontendDvbcOuterFec.UNDEFINED;
+    public static final int OUTER_FEC_UNDEFINED = Constants.FrontendDvbcOuterFec.UNDEFINED;
     /**
      * None Outer Forward Error Correction (FEC) Type.
      */
-    public static final int OUTER_FEC_OUTER_FEC_NONE = FrontendDvbcOuterFec.OUTER_FEC_NONE;
+    public static final int OUTER_FEC_OUTER_FEC_NONE =
+            Constants.FrontendDvbcOuterFec.OUTER_FEC_NONE;
     /**
      * RS Outer Forward Error Correction (FEC) Type.
      */
-    public static final int OUTER_FEC_OUTER_FEC_RS = FrontendDvbcOuterFec.OUTER_FEC_RS;
+    public static final int OUTER_FEC_OUTER_FEC_RS = Constants.FrontendDvbcOuterFec.OUTER_FEC_RS;
 
 
     /** @hide */
-    @IntDef(prefix = "ANNEX_",
+    @IntDef(flag = true,
+            prefix = "ANNEX_",
             value = {ANNEX_UNDEFINED, ANNEX_A, ANNEX_B, ANNEX_C})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Annex {}
@@ -105,19 +104,19 @@ public class DvbcFrontendSettings extends FrontendSettings {
     /**
      * Annex Type undefined.
      */
-    public static final int ANNEX_UNDEFINED = FrontendDvbcAnnex.UNDEFINED;
+    public static final int ANNEX_UNDEFINED = Constants.FrontendDvbcAnnex.UNDEFINED;
     /**
      * Annex Type A.
      */
-    public static final int ANNEX_A = FrontendDvbcAnnex.A;
+    public static final int ANNEX_A = Constants.FrontendDvbcAnnex.A;
     /**
      * Annex Type B.
      */
-    public static final int ANNEX_B = FrontendDvbcAnnex.B;
+    public static final int ANNEX_B = Constants.FrontendDvbcAnnex.B;
     /**
      * Annex Type C.
      */
-    public static final int ANNEX_C = FrontendDvbcAnnex.C;
+    public static final int ANNEX_C = Constants.FrontendDvbcAnnex.C;
 
 
     /**
@@ -138,7 +137,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
      */
     @Deprecated
     public static final int SPECTRAL_INVERSION_UNDEFINED =
-            android.hardware.tv.tuner.FrontendSpectralInversion.UNDEFINED;
+            Constants.FrontendDvbcSpectralInversion.UNDEFINED;
     /**
      * Normal Spectral Inversion.
      *
@@ -146,7 +145,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
      */
     @Deprecated
     public static final int SPECTRAL_INVERSION_NORMAL =
-             android.hardware.tv.tuner.FrontendSpectralInversion.NORMAL;
+            Constants.FrontendDvbcSpectralInversion.NORMAL;
     /**
      * Inverted Spectral Inversion.
      *
@@ -154,10 +153,11 @@ public class DvbcFrontendSettings extends FrontendSettings {
      */
     @Deprecated
     public static final int SPECTRAL_INVERSION_INVERTED =
-            android.hardware.tv.tuner.FrontendSpectralInversion.INVERTED;
+            Constants.FrontendDvbcSpectralInversion.INVERTED;
 
     /** @hide */
-    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(flag = true,
+            prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_128_1_0, TIME_INTERLEAVE_MODE_128_1_1,
                     TIME_INTERLEAVE_MODE_64_2, TIME_INTERLEAVE_MODE_32_4,
@@ -171,59 +171,61 @@ public class DvbcFrontendSettings extends FrontendSettings {
      * Time interleave mode undefined.
      */
     public static final int TIME_INTERLEAVE_MODE_UNDEFINED =
-            FrontendCableTimeInterleaveMode.UNDEFINED;
+            android.hardware.tv.tuner.V1_1.Constants.FrontendCableTimeInterleaveMode.UNDEFINED;
     /**
      * Hardware is able to detect and set Time Interleave Mode automatically.
      */
-    public static final int TIME_INTERLEAVE_MODE_AUTO = FrontendCableTimeInterleaveMode.AUTO;
+    public static final int TIME_INTERLEAVE_MODE_AUTO =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendCableTimeInterleaveMode.AUTO;
     /**
      * 128/1/0 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_128_1_0 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_128_1_0;
+    public static final int TIME_INTERLEAVE_MODE_128_1_0 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_128_1_0;
     /**
      * 128/1/1 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_128_1_1 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_128_1_1;
+    public static final int TIME_INTERLEAVE_MODE_128_1_1 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_128_1_1;
     /**
      * 64/2 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_64_2 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_64_2;
+    public static final int TIME_INTERLEAVE_MODE_64_2 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_64_2;
     /**
      * 32/4 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_32_4 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_32_4;
+    public static final int TIME_INTERLEAVE_MODE_32_4 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_32_4;
     /**
      * 16/8 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_16_8 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_16_8;
+    public static final int TIME_INTERLEAVE_MODE_16_8 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_16_8;
     /**
      * 8/16 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_8_16 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_8_16;
+    public static final int TIME_INTERLEAVE_MODE_8_16 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_8_16;
     /**
      * 128/2 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_128_2 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_128_2;
+    public static final int TIME_INTERLEAVE_MODE_128_2 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_128_2;
     /**
      * 128/3 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_128_3 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_128_3;
+    public static final int TIME_INTERLEAVE_MODE_128_3 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_128_3;
     /**
      * 128/4 Time Interleave Mode.
      */
-    public static final int TIME_INTERLEAVE_MODE_128_4 =
-            FrontendCableTimeInterleaveMode.INTERLEAVING_128_4;
+    public static final int TIME_INTERLEAVE_MODE_128_4 = android.hardware.tv.tuner.V1_1.Constants
+            .FrontendCableTimeInterleaveMode.INTERLEAVING_128_4;
 
     /** @hide */
-    @IntDef(prefix = "BANDWIDTH_",
+    @IntDef(flag = true,
+            prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_5MHZ, BANDWIDTH_6MHZ, BANDWIDTH_7MHZ,
                     BANDWIDTH_8MHZ})
     @Retention(RetentionPolicy.SOURCE)
@@ -232,23 +234,28 @@ public class DvbcFrontendSettings extends FrontendSettings {
     /**
      * Bandwidth undefined.
      */
-    public static final int BANDWIDTH_UNDEFINED = FrontendDvbcBandwidth.UNDEFINED;
+    public static final int BANDWIDTH_UNDEFINED =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.UNDEFINED;
     /**
      * 5 MHz bandwidth.
      */
-    public static final int BANDWIDTH_5MHZ = FrontendDvbcBandwidth.BANDWIDTH_5MHZ;
+    public static final int BANDWIDTH_5MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_5MHZ;
     /**
      * 6 MHz bandwidth.
      */
-    public static final int BANDWIDTH_6MHZ = FrontendDvbcBandwidth.BANDWIDTH_6MHZ;
+    public static final int BANDWIDTH_6MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_6MHZ;
     /**
      * 7 MHz bandwidth.
      */
-    public static final int BANDWIDTH_7MHZ = FrontendDvbcBandwidth.BANDWIDTH_7MHZ;
+    public static final int BANDWIDTH_7MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_7MHZ;
     /**
      * 8 MHz bandwidth.
      */
-    public static final int BANDWIDTH_8MHZ = FrontendDvbcBandwidth.BANDWIDTH_8MHZ;
+    public static final int BANDWIDTH_8MHZ =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendDvbcBandwidth.BANDWIDTH_8MHZ;
 
 
     private final int mModulation;
@@ -262,7 +269,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
     // Dvbc bandwidth is only supported in Tuner 1.1 or higher.
     private final int mBandwidth;
 
-    private DvbcFrontendSettings(long frequency, int modulation, long innerFec, int symbolRate,
+    private DvbcFrontendSettings(int frequency, int modulation, long innerFec, int symbolRate,
             int outerFec, int annex, int spectralInversion, int interleaveMode, int bandwidth) {
         super(frequency);
         mModulation = modulation;
@@ -343,7 +350,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
      * Builder for {@link DvbcFrontendSettings}.
      */
     public static class Builder {
-        private long mFrequency = 0;
+        private int mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
         private long mInnerFec = FEC_UNDEFINED;
         private int mSymbolRate = 0;
@@ -360,23 +367,10 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
-         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
-        @Deprecated
         public Builder setFrequency(int frequency) {
-            return setFrequencyLong((long) frequency);
-        }
-
-        /**
-         * Sets frequency in Hz.
-         *
-         * <p>Default value is 0.
-         */
-        @NonNull
-        @IntRange(from = 1)
-        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

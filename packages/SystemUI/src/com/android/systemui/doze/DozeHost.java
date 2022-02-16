@@ -40,6 +40,7 @@ public interface DozeHost {
     void extendPulse(int reason);
 
     void setAnimateWakeup(boolean animateWakeup);
+    void setAnimateScreenOff(boolean animateScreenOff);
 
     /**
      * Reports that a tap event happend on the Sensors Low Power Island.

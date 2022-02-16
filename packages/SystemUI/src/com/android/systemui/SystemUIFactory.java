@@ -30,14 +30,11 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
-import com.android.wm.shell.transition.ShellTransitions;
+import com.android.wm.shell.transition.Transitions;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-
-import javax.inject.Provider;
 
 /**
  * Class factory to provide customizable SystemUI components.
@@ -121,12 +118,7 @@ public class SystemUIFactory {
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
                     .setTransitions(mWMComponent.getTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
-                    .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
-                    .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper())
-                    .setRecentTasks(mWMComponent.getRecentTasks())
-                    .setCompatUI(Optional.of(mWMComponent.getCompatUI()))
-                    .setDragAndDrop(Optional.of(mWMComponent.getDragAndDrop()))
-                    .setBackAnimation(mWMComponent.getBackAnimation());
+                    .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
@@ -140,14 +132,9 @@ public class SystemUIFactory {
                     .setShellCommandHandler(Optional.ofNullable(null))
                     .setAppPairs(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
-                    .setTransitions(new ShellTransitions() {})
-                    .setDisplayAreaHelper(Optional.ofNullable(null))
+                    .setTransitions(Transitions.createEmptyForTesting())
                     .setStartingSurface(Optional.ofNullable(null))
-                    .setTaskSurfaceHelper(Optional.ofNullable(null))
-                    .setRecentTasks(Optional.ofNullable(null))
-                    .setCompatUI(Optional.ofNullable(null))
-                    .setDragAndDrop(Optional.ofNullable(null))
-                    .setBackAnimation(Optional.ofNullable(null));
+                    .setTaskSurfaceHelper(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (mInitializeComponents) {
@@ -193,24 +180,17 @@ public class SystemUIFactory {
     }
 
     /**
-     * Returns the list of {@link CoreStartable} components that should be started at startup.
+     * Returns the list of system UI components that should be started.
      */
-    public Map<Class<?>, Provider<CoreStartable>> getStartableComponents() {
-        return mSysUIComponent.getStartables();
+    public String[] getSystemUIServiceComponents(Resources resources) {
+        return resources.getStringArray(R.array.config_systemUIServiceComponents);
     }
 
     /**
-     * Returns the list of additional system UI components that should be started.
+     * Returns the list of system UI components that should be started per user.
      */
-    public String getVendorComponent(Resources resources) {
-        return resources.getString(R.string.config_systemUIVendorServiceComponent);
-    }
-
-    /**
-     * Returns the list of {@link CoreStartable} components that should be started per user.
-     */
-    public Map<Class<?>, Provider<CoreStartable>> getStartableComponentsPerUser() {
-        return mSysUIComponent.getPerUserStartables();
+    public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
+        return resources.getStringArray(R.array.config_systemUIServiceComponentsPerUser);
     }
 
     /**

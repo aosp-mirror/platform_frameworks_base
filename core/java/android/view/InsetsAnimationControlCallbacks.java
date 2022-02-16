@@ -20,8 +20,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 
 /**
- * Provide an interface to let InsetsAnimationControlImpl and InsetsResizeAnimationRunner call back
- * into its owner.
+ * Provide an interface to let InsetsAnimationControlImpl call back into its owner.
  * @hide
  */
 public interface InsetsAnimationControlCallbacks {
@@ -35,9 +34,10 @@ public interface InsetsAnimationControlCallbacks {
      *     <li>Dispatch {@link WindowInsetsAnimationControlListener#onReady}</li>
      * </ul>
      */
-    <T extends InsetsAnimationControlRunner & InternalInsetsAnimationController>
-    void startAnimation(T runner, WindowInsetsAnimationControlListener listener, int types,
-            WindowInsetsAnimation animation, Bounds bounds);
+    void startAnimation(InsetsAnimationControlImpl controller,
+            WindowInsetsAnimationControlListener listener, int types,
+            WindowInsetsAnimation animation,
+            Bounds bounds);
 
     /**
      * Schedule the apply by posting the animation callback.

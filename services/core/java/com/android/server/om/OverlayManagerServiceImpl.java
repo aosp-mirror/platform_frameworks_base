@@ -33,7 +33,7 @@ import android.content.om.CriticalOverlayInfo;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.parsing.FrameworkParsingPackageUtils;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.FabricatedOverlayInfo;
 import android.os.FabricatedOverlayInternal;
 import android.text.TextUtils;
@@ -100,8 +100,7 @@ final class OverlayManagerServiceImpl {
         if (!Objects.equals(theTruth.getOverlayTarget(), oldSettings.targetPackageName)) {
             return true;
         }
-        if (!Objects.equals(theTruth.getOverlayTargetOverlayableName(),
-                oldSettings.targetOverlayableName)) {
+        if (!Objects.equals(theTruth.getOverlayTargetName(), oldSettings.targetOverlayableName)) {
             return true;
         }
         if (oldSettings.isFabricated) {
@@ -344,7 +343,7 @@ final class OverlayManagerServiceImpl {
                 }
 
                 currentInfo = mSettings.init(overlay, userId, pkg.getOverlayTarget(),
-                        pkg.getOverlayTargetOverlayableName(), pkg.getBaseApkPath(),
+                        pkg.getOverlayTargetName(), pkg.getBaseApkPath(),
                         isPackageConfiguredMutable(pkg),
                         isPackageConfiguredEnabled(pkg),
                         getPackageConfiguredPriority(pkg), pkg.getOverlayCategory(),
@@ -492,7 +491,7 @@ final class OverlayManagerServiceImpl {
     Set<PackageAndUser> registerFabricatedOverlay(
             @NonNull final FabricatedOverlayInternal overlay)
             throws OperationFailedException {
-        if (FrameworkParsingPackageUtils.validateName(overlay.overlayName,
+        if (ParsingPackageUtils.validateName(overlay.overlayName,
                 false /* requireSeparator */, true /* requireFilename */) != null) {
             throw new OperationFailedException(
                     "overlay name can only consist of alphanumeric characters, '_', and '.'");
@@ -718,11 +717,6 @@ final class OverlayManagerServiceImpl {
         // default overlays
         if (overlayIdmap == null) {
             pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
-        }
-
-        // overlay configurations
-        if (dumpState.getPackageName() == null) {
-            mOverlayConfig.dump(pw);
         }
     }
 

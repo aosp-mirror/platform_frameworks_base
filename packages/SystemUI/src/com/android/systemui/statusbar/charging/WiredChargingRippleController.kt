@@ -29,14 +29,13 @@ import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.Utils
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.R
-import com.android.systemui.flags.Flags
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -62,7 +61,7 @@ class WiredChargingRippleController @Inject constructor(
     private val uiEventLogger: UiEventLogger
 ) {
     private var pluggedIn: Boolean? = null
-    private val rippleEnabled: Boolean = featureFlags.isEnabled(Flags.CHARGING_RIPPLE) &&
+    private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
             !SystemProperties.getBoolean("persist.debug.suppress-charging-ripple", false)
     private var normalizedPortPosX: Float = context.resources.getFloat(
             R.dimen.physical_charger_port_location_normalized_x)
@@ -94,8 +93,9 @@ class WiredChargingRippleController @Inject constructor(
                 nowPluggedIn: Boolean,
                 charging: Boolean
             ) {
-                // Suppresses the ripple when the state change comes from wireless charging.
-                if (batteryController.isPluggedInWireless) {
+                // Suppresses the ripple when it's disabled, or when the state change comes
+                // from wireless charging.
+                if (!rippleEnabled || batteryController.isPluggedInWireless) {
                     return
                 }
                 val wasPluggedIn = pluggedIn
@@ -112,6 +112,9 @@ class WiredChargingRippleController @Inject constructor(
                 updateRippleColor()
             }
             override fun onThemeChanged() {
+                updateRippleColor()
+            }
+            override fun onOverlayChanged() {
                 updateRippleColor()
             }
 
@@ -145,7 +148,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress || rippleView.parent != null) {
+        if (!rippleEnabled || rippleView.rippleInProgress || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)

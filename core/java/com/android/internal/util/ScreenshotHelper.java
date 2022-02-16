@@ -71,11 +71,11 @@ public class ScreenshotHelper {
 
             if (in.readInt() == 1) {
                 mBitmapBundle = in.readBundle(getClass().getClassLoader());
-                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader(), android.graphics.Rect.class);
-                mInsets = in.readParcelable(Insets.class.getClassLoader(), android.graphics.Insets.class);
+                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader());
+                mInsets = in.readParcelable(Insets.class.getClassLoader());
                 mTaskId = in.readInt();
                 mUserId = in.readInt();
-                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
+                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader());
             }
         }
 
@@ -178,7 +178,7 @@ public class ScreenshotHelper {
     public ScreenshotHelper(Context context) {
         mContext = context;
         IntentFilter filter = new IntentFilter(ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
     /**

@@ -44,9 +44,7 @@ public class CreateUserActivity extends Activity {
      * Creates an intent to start this activity.
      */
     public static Intent createIntentForStart(Context context) {
-        Intent intent = new Intent(context, CreateUserActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        return intent;
+        return new Intent(context, CreateUserActivity.class);
     }
 
     private static final String TAG = "CreateUserActivity";

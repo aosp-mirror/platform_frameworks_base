@@ -29,8 +29,6 @@ enum class ColorMode {
     Hdr = 2,
     // HDR Rec2020 + 1010102
     Hdr10 = 3,
-    // Alpha 8
-    A8 = 4,
 };
 
 } // namespace android::uirenderer

@@ -35,7 +35,6 @@ import android.net.Uri;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 
 import androidx.test.InstrumentationRegistry;
@@ -46,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ContentResolverTest {
 

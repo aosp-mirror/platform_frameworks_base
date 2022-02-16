@@ -42,9 +42,7 @@ public class FooterPreference extends Preference {
     @VisibleForTesting
     View.OnClickListener mLearnMoreListener;
     private CharSequence mContentDescription;
-    private CharSequence mLearnMoreText;
     private CharSequence mLearnMoreContentDescription;
-    private FooterLearnMoreSpan mLearnMoreSpan;
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, R.attr.footerPreferenceStyle);
@@ -62,7 +60,6 @@ public class FooterPreference extends Preference {
         title.setMovementMethod(new LinkMovementMethod());
         title.setClickable(false);
         title.setLongClickable(false);
-        title.setFocusable(false);
         if (!TextUtils.isEmpty(mContentDescription)) {
             title.setContentDescription(mContentDescription);
         }
@@ -70,23 +67,13 @@ public class FooterPreference extends Preference {
         TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
         if (learnMore != null && mLearnMoreListener != null) {
             learnMore.setVisibility(View.VISIBLE);
-            if (TextUtils.isEmpty(mLearnMoreText)) {
-                mLearnMoreText = learnMore.getText();
-            } else {
-                learnMore.setText(mLearnMoreText);
-            }
-            SpannableString learnMoreText = new SpannableString(mLearnMoreText);
-            if (mLearnMoreSpan != null) {
-                learnMoreText.removeSpan(mLearnMoreSpan);
-            }
-            mLearnMoreSpan = new FooterLearnMoreSpan(mLearnMoreListener);
-            learnMoreText.setSpan(mLearnMoreSpan, 0,
+            SpannableString learnMoreText = new SpannableString(learnMore.getText());
+            learnMoreText.setSpan(new FooterLearnMoreSpan(mLearnMoreListener), 0,
                     learnMoreText.length(), 0);
             learnMore.setText(learnMoreText);
             if (!TextUtils.isEmpty(mLearnMoreContentDescription)) {
                 learnMore.setContentDescription(mLearnMoreContentDescription);
             }
-            learnMore.setFocusable(false);
         } else {
             learnMore.setVisibility(View.GONE);
         }
@@ -126,18 +113,6 @@ public class FooterPreference extends Preference {
     @VisibleForTesting
     CharSequence getContentDescription() {
         return mContentDescription;
-    }
-
-    /**
-     * Sets the learn more text.
-     *
-     * @param learnMoreText The string of the learn more text.
-     */
-    public void setLearnMoreText(CharSequence learnMoreText) {
-        if (!TextUtils.equals(mLearnMoreText, learnMoreText)) {
-            mLearnMoreText = learnMoreText;
-            notifyChanged();
-        }
     }
 
     /**

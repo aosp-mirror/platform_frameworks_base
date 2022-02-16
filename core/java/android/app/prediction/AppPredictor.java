@@ -105,7 +105,7 @@ public final class AppPredictor {
             e.rethrowAsRuntimeException();
         }
 
-        mCloseGuard.open("AppPredictor.close");
+        mCloseGuard.open("close");
     }
 
     /**

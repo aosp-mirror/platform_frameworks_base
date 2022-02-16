@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -38,12 +35,7 @@ public interface CommonNotifCollection {
      * Registers a listener to be informed when notifications are created, added, updated, removed,
      * or deleted.
      */
-    void addCollectionListener(@NonNull NotifCollectionListener listener);
-
-    /**
-     * Unregisters a listener previously added with {@link #addCollectionListener}
-     */
-    void removeCollectionListener(@NonNull NotifCollectionListener listener);
+    void addCollectionListener(NotifCollectionListener listener);
 
     /**
      * Returns the list of all known notifications, i.e. the notifications that are currently posted
@@ -52,11 +44,5 @@ public interface CommonNotifCollection {
      *
      * The returned collection is read-only, unsorted, unfiltered, and ungrouped.
      */
-    @NonNull Collection<NotificationEntry> getAllNotifs();
-
-    /**
-     * Returns the notification entry for the given notification key;
-     * the returned entry (if present) may be in any state.
-     */
-    @Nullable NotificationEntry getEntry(@NonNull String key);
+    Collection<NotificationEntry> getAllNotifs();
 }

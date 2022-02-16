@@ -28,6 +28,7 @@ import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -61,6 +62,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -117,6 +119,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private QuickAccessWalletController mController;
+    @Captor
+    ArgumentCaptor<Intent> mIntentCaptor;
     @Captor
     ArgumentCaptor<QuickAccessWalletClient.OnWalletCardsRetrievedCallback> mCallbackCaptor;
 
@@ -192,29 +196,63 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleClick_startQuickAccessUiIntent_noCard() {
+    public void testHandleClick_noCards_hasIntent_openWalletApp() {
+        Intent intent = new Intent("WalletIntent");
+        when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(intent);
         setUpWalletCard(/* hasCard= */ false);
 
-        mTile.handleClick(/* view= */ null);
+        mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mController).startQuickAccessUiIntent(
-                eq(mActivityStarter),
-                eq(null),
-                /* hasCard= */ eq(false));
+        verify(mActivityStarter, times(1))
+                .postStartActivityDismissingKeyguard(eq(intent), anyInt(),
+                        eq(null) /* animationController */);
     }
 
     @Test
-    public void testHandleClick_startQuickAccessUiIntent_hasCard() {
+    public void testHandleClick_noCards_noIntent_doNothing() {
+        when(mQuickAccessWalletClient.createWalletIntent()).thenReturn(null);
+        setUpWalletCard(/* hasCard= */ false);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verifyZeroInteractions(mActivityStarter);
+    }
+
+    @Test
+    public void testHandleClick_hasCards_deviceLocked_startWalletActivity() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         setUpWalletCard(/* hasCard= */ true);
 
         mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mController).startQuickAccessUiIntent(
-                eq(mActivityStarter),
-                eq(null),
-                /* hasCard= */ eq(true));
+        verify(mSpiedContext).startActivity(mIntentCaptor.capture());
+
+        Intent nextStartedIntent = mIntentCaptor.getValue();
+        String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
+
+        assertNotNull(nextStartedIntent);
+        assertThat(nextStartedIntent.getComponent().getClassName()).isEqualTo(walletClassName);
+    }
+
+    @Test
+    public void testHandleClick_hasCards_deviceUnlocked_startWalletActivity() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        setUpWalletCard(/* hasCard= */ true);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true) /* dismissShade */,
+                (ActivityLaunchAnimator.Controller) eq(null));
+
+        Intent nextStartedIntent = mIntentCaptor.getValue();
+        String walletClassName = "com.android.systemui.wallet.ui.WalletActivity";
+
+        assertNotNull(nextStartedIntent);
+        assertThat(nextStartedIntent.getComponent().getClassName()).isEqualTo(walletClassName);
     }
 
     @Test

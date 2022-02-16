@@ -42,7 +42,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<StatusBar> mStatusBarLazy;
 
     private Context mContext;
     private Handler mHandler;
@@ -51,8 +51,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Lazy<Optional<StatusBar>> statusBarOptionalLazy) {
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
+        mStatusBarLazy = statusBarLazy.orElse(null);
     }
 
     @Override
@@ -109,9 +109,10 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 }
             };
             // Preload only if device for current user is unlocked
-            final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-            if (statusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
-                statusBarOptional.get().executeRunnableDismissingKeyguard(() -> {
+            if (mStatusBarLazy != null && mStatusBarLazy.get().isKeyguardShowing()) {
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(() -> {
+                        // Flush trustmanager before checking device locked per user
+                        mTrustManager.reportKeyguardShowingChanged();
                         mHandler.post(toggleRecents);
                     }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
                     true /* deferred */);
