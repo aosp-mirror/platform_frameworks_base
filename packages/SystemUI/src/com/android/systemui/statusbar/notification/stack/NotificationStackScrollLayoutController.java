@@ -86,7 +86,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -109,7 +108,6 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
@@ -170,8 +168,6 @@ public class NotificationStackScrollLayoutController {
     private final NotificationEntryManager mNotificationEntryManager;
     private final IStatusBarService mIStatusBarService;
     private final UiEventLogger mUiEventLogger;
-    private final ForegroundServiceDismissalFeatureController mFgFeatureController;
-    private final ForegroundServiceSectionController mFgServicesSectionController;
     private final LayoutInflater mLayoutInflater;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
@@ -660,8 +656,6 @@ public class NotificationStackScrollLayoutController {
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
-            ForegroundServiceDismissalFeatureController fgFeatureController,
-            ForegroundServiceSectionController fgServicesSectionController,
             LayoutInflater layoutInflater,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
@@ -709,8 +703,6 @@ public class NotificationStackScrollLayoutController {
         mNotificationEntryManager = notificationEntryManager;
         mIStatusBarService = iStatusBarService;
         mUiEventLogger = uiEventLogger;
-        mFgFeatureController = fgFeatureController;
-        mFgServicesSectionController = fgServicesSectionController;
         mLayoutInflater = layoutInflater;
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
@@ -743,12 +735,6 @@ public class NotificationStackScrollLayoutController {
                 isEnabled -> mNotificationRoundnessManager.setShouldRoundPulsingViews(!isEnabled));
         mNotificationRoundnessManager.setShouldRoundPulsingViews(
                 !mKeyguardBypassController.getBypassEnabled());
-
-        if (mFgFeatureController.isForegroundServiceDismissalEnabled()) {
-            mView.initializeForegroundServiceSection(
-                    (ForegroundServiceDungeonView) mFgServicesSectionController.createView(
-                            mLayoutInflater));
-        }
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
                 .setSwipeDirection(SwipeHelper.X)
