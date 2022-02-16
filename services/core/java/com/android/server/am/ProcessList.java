@@ -1903,7 +1903,13 @@ public final class ProcessList {
                 uid = 0;
             }
             int runtimeFlags = 0;
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+
+            boolean debuggableFlag = (app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            if (!debuggableFlag && app.isSdkSandbox) {
+                debuggableFlag = isAppForSdkSandboxDebuggable(app);
+            }
+
+            if (debuggableFlag) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
                 runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
@@ -2070,6 +2076,25 @@ public final class ProcessList {
                     false, false, true, false, false, app.userId, "start failure");
             return false;
         }
+    }
+
+    /** Return true if the client app for the SDK sandbox process is debuggable. */
+    private boolean isAppForSdkSandboxDebuggable(ProcessRecord sandboxProcess) {
+        // TODO (b/221004701) use client app process name
+        final int appUid = Process.toAppUid(sandboxProcess.uid);
+        IPackageManager pm = mService.getPackageManager();
+        try {
+            String[] packages = pm.getPackagesForUid(appUid);
+            for (String aPackage : packages) {
+                ApplicationInfo i = pm.getApplicationInfo(aPackage, 0, sandboxProcess.userId);
+                if ((i.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            // shouldn't happen
+        }
+        return false;
     }
 
     @GuardedBy("mService")
