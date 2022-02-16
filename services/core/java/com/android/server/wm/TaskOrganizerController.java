@@ -729,6 +729,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // Skip if task still not appeared.
             return;
         }
+        if (force && mPendingTaskEvents.isEmpty()) {
+            // There are task-info changed events do not result in
+            // - RootWindowContainer#performSurfacePlacementNoTrace OR
+            // - WindowAnimator#animate
+            // For instance, when an app requesting aspect ratio change when in PiP mode.
+            // To solve this, we directly dispatch the pending event if there are no events queued (
+            // otherwise, all pending events should be dispatched on next drawn).
+            dispatchTaskInfoChanged(task, true /* force */);
+            return;
+        }
 
         // Defer task info reporting while layout is deferred. This is because layout defer
         // blocks tend to do lots of re-ordering which can mess up animations in receivers.
