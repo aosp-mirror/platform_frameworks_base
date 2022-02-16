@@ -29,7 +29,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.games.CreateGameSessionRequest;
@@ -45,12 +48,15 @@ import android.service.games.IGameSessionService;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.infra.ServiceConnector.ServiceLifecycleCallbacks;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -59,6 +65,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 final class GameServiceProviderInstanceImpl implements GameServiceProviderInstance {
     private static final String TAG = "GameServiceProviderInstance";
@@ -188,6 +195,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IActivityTaskManager mActivityTaskManager;
     private final WindowManagerService mWindowManagerService;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final ScreenshotHelper mScreenshotHelper;
     private final ServiceConnector<IGameService> mGameServiceConnector;
     private final ServiceConnector<IGameSessionService> mGameSessionServiceConnector;
 
@@ -207,7 +215,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             @NonNull WindowManagerService windowManagerService,
             @NonNull WindowManagerInternal windowManagerInternal,
             @NonNull ServiceConnector<IGameService> gameServiceConnector,
-            @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector) {
+            @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector,
+            @NonNull ScreenshotHelper screenshotHelper) {
         mUserHandle = userHandle;
         mBackgroundExecutor = backgroundExecutor;
         mContext = context;
@@ -218,6 +227,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mWindowManagerInternal = windowManagerInternal;
         mGameServiceConnector = gameServiceConnector;
         mGameSessionServiceConnector = gameSessionServiceConnector;
+        mScreenshotHelper = screenshotHelper;
     }
 
     @Override
@@ -651,7 +661,26 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 Slog.w(TAG, "Could not get bitmap for id: " + taskId);
                 callback.complete(GameScreenshotResult.createInternalErrorResult());
             } else {
-                callback.complete(GameScreenshotResult.createSuccessResult(bitmap));
+                final Bundle bundle = ScreenshotHelper.HardwareBitmapBundler.hardwareBitmapToBundle(
+                        bitmap);
+                final RunningTaskInfo runningTaskInfo = getRunningTaskInfoForTask(taskId);
+                if (runningTaskInfo == null) {
+                    Slog.w(TAG, "Could not get running task info for id: " + taskId);
+                    callback.complete(GameScreenshotResult.createInternalErrorResult());
+                }
+                final Rect crop = runningTaskInfo.configuration.windowConfiguration.getBounds();
+                final Consumer<Uri> completionConsumer = (uri) -> {
+                    if (uri == null) {
+                        callback.complete(GameScreenshotResult.createInternalErrorResult());
+                    } else {
+                        callback.complete(GameScreenshotResult.createSuccessResult());
+                    }
+                };
+                mScreenshotHelper.provideScreenshot(bundle, crop, Insets.NONE, taskId,
+                        mUserHandle.getIdentifier(), gameSessionRecord.getComponentName(),
+                        WindowManager.ScreenshotSource.SCREENSHOT_OTHER,
+                        BackgroundThread.getHandler(),
+                        completionConsumer);
             }
         });
     }

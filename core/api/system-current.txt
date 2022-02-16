@@ -11402,7 +11402,7 @@ package android.service.games {
 
   public static interface GameSession.ScreenshotCallback {
     method public void onFailure(int);
-    method public void onSuccess(@NonNull android.graphics.Bitmap);
+    method public void onSuccess();
     field public static final int ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR = 0; // 0x0
   }
 
