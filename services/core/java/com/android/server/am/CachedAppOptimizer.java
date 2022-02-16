@@ -1115,6 +1115,9 @@ public final class CachedAppOptimizer {
                     int lastOomAdj = msg.arg1;
                     int procState = msg.arg2;
                     synchronized (mProcLock) {
+                        if(mPendingCompactionProcesses.isEmpty()) {
+                            return;
+                        }
                         proc = mPendingCompactionProcesses.remove(0);
                         opt = proc.mOptRecord;
 
