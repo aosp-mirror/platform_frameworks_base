@@ -152,8 +152,8 @@ public:
     ChoreographerSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        AChoreographer_postExtendedFrameCallback(
-                mRenderThread->mChoreographer, RenderThread::extendedFrameCallback, mRenderThread);
+        AChoreographer_postVsyncCallback(mRenderThread->mChoreographer,
+                                         RenderThread::extendedFrameCallback, mRenderThread);
     }
 
     virtual void drainPendingEvents() override {
