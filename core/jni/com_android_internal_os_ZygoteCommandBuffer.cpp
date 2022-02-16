@@ -45,7 +45,7 @@ using android::zygote::ZygoteFailure;
 // WARNING: Knows a little about the wire protocol used to communicate with Zygote.
 // TODO: Fix error handling.
 
-constexpr size_t MAX_COMMAND_BYTES = 12200;
+constexpr size_t MAX_COMMAND_BYTES = 32768;
 constexpr size_t NICE_NAME_BYTES = 50;
 
 // A buffer optionally bundled with a file descriptor from which we can fill it.
@@ -272,8 +272,6 @@ class NativeCommandBuffer {
   char mNiceName[NICE_NAME_BYTES];
   char mBuffer[MAX_COMMAND_BYTES];
 };
-
-static_assert(sizeof(NativeCommandBuffer) < 3 * 4096);
 
 static int buffersAllocd(0);
 
