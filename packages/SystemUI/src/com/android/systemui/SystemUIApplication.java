@@ -38,13 +38,13 @@ import android.util.DumpableContainer;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
+import android.view.ThreadedRenderer;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -118,11 +118,11 @@ public class SystemUIApplication extends Application implements
             // The priority is defaulted at medium.
             int sfPriority = SurfaceControl.getGPUContextPriority();
             Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
-            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
+            if (sfPriority == ThreadedRenderer.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
                 Log.i(TAG, "Setting SysUI's GPU Context priority to: "
-                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-                ThreadedRendererCompat.setContextPriority(
-                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                        + ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                ThreadedRenderer.setContextPriority(
+                        ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
             }
 
             // Enable binder tracing on system server for calls originating from SysUI
