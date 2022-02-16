@@ -3007,7 +3007,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Disconnected from power @ " + sElapsedRealtimeClock.millis());
+                        Slog.d(TAG, "Battery discharging @ " + sElapsedRealtimeClock.millis());
                     }
                     if (mCharging) {
                         mCharging = false;
