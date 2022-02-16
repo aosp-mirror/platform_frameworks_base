@@ -175,20 +175,20 @@ interface IStatusBarService
     void cancelRequestAddTile(in String packageName);
 
     /**
-    * Overrides the navigation bar mode.
+    * Sets the navigation bar mode.
     *
-    * @param navBarModeOverride the mode of the navigation bar override to be set.
+    * @param navBarMode the mode of the navigation bar to be set.
     *
     * @hide
     */
-    void setNavBarModeOverride(int navBarModeOverride);
+    void setNavBarMode(int navBarMode);
 
     /**
-    * Gets the navigation bar mode override.
+    * Gets the navigation bar mode.
     *
     * @hide
     */
-    int getNavBarModeOverride();
+    int getNavBarMode();
 
     /**
     * Register a listener for certain sessions. Each session may be guarded by its own permission.
