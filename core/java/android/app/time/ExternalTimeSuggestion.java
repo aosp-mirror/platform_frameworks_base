@@ -101,11 +101,11 @@ public final class ExternalTimeSuggestion implements Parcelable {
     }
 
     private static ExternalTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class);
+        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
         ExternalTimeSuggestion suggestion =
                 new ExternalTimeSuggestion(utcTime.getReferenceTimeMillis(), utcTime.getValue());
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
+        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
         return suggestion;
     }

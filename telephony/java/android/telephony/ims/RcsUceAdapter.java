@@ -28,10 +28,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
+import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -268,13 +271,6 @@ public class RcsUceAdapter {
     @SystemApi
     public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11;
 
-    /**
-     * A capability update has been requested due to IMS being registered over INTERNET PDN.
-     * @hide
-     */
-    @SystemApi
-    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_INTERNET_PDN = 12;
-
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "ERROR_", value = {
@@ -289,8 +285,7 @@ public class RcsUceAdapter {
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN,
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN,
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED,
-            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED,
-            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_INTERNET_PDN
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED
     })
     public @interface StackPublishTriggerType {}
 
@@ -342,14 +337,6 @@ public class RcsUceAdapter {
     @SystemApi
     public static final int PUBLISH_STATE_OTHER_ERROR = 6;
 
-    /**
-     * The device is currently trying to publish its capabilities to the network.
-     * @hide
-     */
-    @SystemApi
-    public static final int PUBLISH_STATE_PUBLISHING = 7;
-
-
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "PUBLISH_STATE_", value = {
@@ -358,8 +345,7 @@ public class RcsUceAdapter {
             PUBLISH_STATE_VOICE_PROVISION_ERROR,
             PUBLISH_STATE_RCS_PROVISION_ERROR,
             PUBLISH_STATE_REQUEST_TIMEOUT,
-            PUBLISH_STATE_OTHER_ERROR,
-            PUBLISH_STATE_PUBLISHING
+            PUBLISH_STATE_OTHER_ERROR
     })
     public @interface PublishState {}
 
@@ -494,12 +480,9 @@ public class RcsUceAdapter {
      * <p>
      * Be sure to check the availability of this feature using
      * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
-     * {@link
-     * android.telephony.ims.feature.RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
-     * {@link
-     * android.telephony.ims.feature.RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is
-     * enabled or else this operation will fail with {@link #ERROR_NOT_AVAILABLE} or
-     * {@link #ERROR_NOT_ENABLED}.
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is enabled or else
+     * this operation will fail with {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
      *
      * @param contactNumbers A list of numbers that the capabilities are being requested for.
      * @param executor The executor that will be used when the request is completed and the
@@ -590,10 +573,8 @@ public class RcsUceAdapter {
      * <p>
      * Be sure to check the availability of this feature using
      * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
-     * {@link
-     * android.telephony.ims.feature.RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
-     * {@link
-     * android.telephony.ims.feature.RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
+     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is
      * enabled or else this operation will fail with
      * {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
      *
@@ -709,8 +690,7 @@ public class RcsUceAdapter {
      * Registers a {@link OnPublishStateChangedListener} with the system, which will provide publish
      * state updates for the subscription specified in {@link ImsManager@getRcsManager(subid)}.
      * <p>
-     * Use {@link android.telephony.SubscriptionManager.OnSubscriptionsChangedListener} to listen
-     * to subscription
+     * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to subscription
      * changed events and call
      * {@link #removeOnPublishStateChangedListener(OnPublishStateChangedListener)} to clean up.
      * <p>
@@ -812,8 +792,7 @@ public class RcsUceAdapter {
      * cache associated with those contacts as the local cache becomes stale.
      * <p>
      * This setting will only enable this feature if
-     * {@link android.telephony.CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is
-     * also enabled.
+     * {@link CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is also enabled.
      * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.
@@ -864,8 +843,7 @@ public class RcsUceAdapter {
      * session.
      * <p>
      * This setting will only enable this feature if
-     * {@link android.telephony.CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is
-     * also enabled.
+     * {@link CarrierConfigManager.Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is also enabled.
      * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.

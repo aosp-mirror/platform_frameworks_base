@@ -175,9 +175,7 @@ public class NumPadKey extends ViewGroup {
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
-        // the height to match the old pin bouncer.
-        // This is only used for PIN/PUK; the main PIN pad now uses ConstraintLayout, which will
-        // force our width/height to conform to the ratio in the layout.
+        // the height to match the old pin bouncer
         int width = getMeasuredWidth();
 
         boolean shortenHeight = mAnimator == null
@@ -213,8 +211,10 @@ public class NumPadKey extends ViewGroup {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        if (mLockPatternUtils.isTactileFeedbackEnabled()) {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        }
     }
 }

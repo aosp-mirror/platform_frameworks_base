@@ -16,8 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.content.pm.PackageManagerInternal.PACKAGE_INSTALLER;
-
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static junit.framework.Assert.assertFalse;
@@ -47,9 +45,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SigningInfo;
@@ -63,7 +59,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -89,8 +84,10 @@ public class AccessibilitySecurityPolicyTest {
     private static final int APP_PID = 2000;
     private static final int SYSTEM_PID = 558;
     private static final int TEST_USER_ID = UserHandle.USER_SYSTEM;
+    private static final String TEST_PACKAGE_NAME = "com.android.server.accessibility";
     private static final ComponentName TEST_COMPONENT_NAME = new ComponentName(
-            "com.android.server.accessibility", "AccessibilitySecurityPolicyTest");
+            TEST_PACKAGE_NAME, "AccessibilitySecurityPolicyTest");
+    private static final String ALLOWED_INSTALL_PACKAGE_NAME = "com.allowed.install.package";
 
     private static final int[] ALWAYS_DISPATCH_EVENTS = {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
@@ -161,8 +158,6 @@ public class AccessibilitySecurityPolicyTest {
     private PackageInfo mMockSourcePackageInfo;
     @Mock
     private PolicyWarningUIController mPolicyWarningUIController;
-    @Mock
-    private PackageManagerInternal mPackageManagerInternal;
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException {
@@ -172,6 +167,20 @@ public class AccessibilitySecurityPolicyTest {
         mContext.addMockSystemService(Context.APP_OPS_SERVICE, mMockAppOpsManager);
         mContext.getOrCreateTestableResources().addOverride(
                 R.dimen.accessibility_focus_highlight_stroke_width, 1);
+        mContext.getOrCreateTestableResources().addOverride(R.array
+                        .config_accessibility_allowed_install_source,
+                new String[]{ALLOWED_INSTALL_PACKAGE_NAME});
+
+        when(mMockA11yServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
+        when(mMockA11yServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
+        when(mMockA11yServiceConnection.getServiceInfo()).thenReturn(mMockA11yServiceInfo);
+        when(mMockPackageManager.getPackageInfo(ALLOWED_INSTALL_PACKAGE_NAME, 0)).thenReturn(
+                mMockSourcePackageInfo);
+
+        mMockResolveInfo.serviceInfo = mMockServiceInfo;
+        mMockServiceInfo.applicationInfo = mMockApplicationInfo;
+        mMockServiceInfo.packageName = TEST_PACKAGE_NAME;
+        mMockSourcePackageInfo.applicationInfo = mMockSourceApplicationInfo;
 
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(
                 mPolicyWarningUIController, mContext, mMockA11yUserManager);
@@ -252,8 +261,8 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void resolveValidReportedPackage_uidAndPkgNameMatched_returnPkgName()
             throws PackageManager.NameNotFoundException {
-        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME,
-                PackageManager.MATCH_ANY_USER, TEST_USER_ID)).thenReturn(APP_UID);
+        when(mMockPackageManager.getPackageUidAsUser(PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(APP_UID);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
                 PACKAGE_NAME, APP_UID, TEST_USER_ID, APP_PID),
@@ -586,7 +595,7 @@ public class AccessibilitySecurityPolicyTest {
         serviceInfo.permission = android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE;
         mA11ySecurityPolicy.canRegisterService(serviceInfo);
         verify(mMockAppOpsManager).noteOpNoThrow(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE,
-                serviceInfo.applicationInfo.uid, serviceInfo.packageName, null, null);
+                serviceInfo.applicationInfo.uid, serviceInfo.packageName);
     }
 
     @Test
@@ -608,152 +617,96 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy.checkAccessibilityAccess(mMockA11yServiceConnection);
         verify(mMockAppOpsManager).noteOpNoThrow(AppOpsManager.OPSTR_ACCESS_ACCESSIBILITY,
-                APP_UID, PACKAGE_NAME, null, null);
+                APP_UID, PACKAGE_NAME);
     }
 
     @Test
-    public void onBoundServicesChanged_nonA11yTool_invokeAction()
-            throws PackageManager.NameNotFoundException {
+    public void onBoundServicesChanged_bindNonA11yToolService_activateUIControllerAction() {
         final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
         boundServices.add(mMockA11yServiceConnection);
-        initServiceInfoAndConnection(TEST_COMPONENT_NAME,
-                mMockA11yServiceConnection,
-                /* isAccessibilityTool= */ false);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(false);
 
         mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
         verify(mPolicyWarningUIController).onNonA11yCategoryServiceBound(eq(TEST_USER_ID),
                 eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void onBoundServicesChanged_unbindNonA11yToolService_activateUIControllerAction() {
+        onBoundServicesChanged_bindNonA11yToolService_activateUIControllerAction();
 
         mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
+
         verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
                 eq(TEST_COMPONENT_NAME));
     }
 
     @Test
-    public void onBoundServicesChanged_sysA11yTool_noAction()
-            throws PackageManager.NameNotFoundException {
+    public void onBoundServicesChanged_bindSystemA11yToolService_noUIControllerAction() {
         final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
-        initServiceInfoAndConnection(TEST_COMPONENT_NAME,
-                mMockA11yServiceConnection,
-                /* isAccessibilityTool= */ true,
-                /* isSystemApp= */true,
-                /* installSourceInfo= */ null);
         boundServices.add(mMockA11yServiceConnection);
+        when(mMockApplicationInfo.isSystemApp()).thenReturn(true);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(true);
 
         mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
         verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceBound(anyInt(), any());
+    }
+
+    @Test
+    public void onBoundServicesChanged_unbindSystemA11yToolService_noUIControllerAction() {
+        onBoundServicesChanged_bindSystemA11yToolService_noUIControllerAction();
 
         mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
+
         verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceUnbound(anyInt(),
                 any());
     }
 
     @Test
-    public void onBoundServicesChanged_nonSysA11yToolFromAllowedInstallerInAllowedList_noAction()
+    public void onBoundServicesChanged_bindAllowedSourceA11yToolService_noUIControllerAction()
             throws PackageManager.NameNotFoundException {
         final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
-        final String allowedSourcePackageName = "com.allowed.install.package";
-        mContext.getOrCreateTestableResources().addOverride(R.array
-                        .config_accessibility_allowed_install_source,
-                new String[]{allowedSourcePackageName});
-        // The allowed Installer should be system app in the allowed list.
-        InstallSourceInfo allowedSource = initInstallSourceInfo(
-                allowedSourcePackageName, /* isSystemApp= */ true);
-        initServiceInfoAndConnection(TEST_COMPONENT_NAME,
-                mMockA11yServiceConnection,
-                /* isAccessibilityTool= */ true,
-                /* isSystemApp= */ false,
-                allowedSource);
         boundServices.add(mMockA11yServiceConnection);
-
-        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
-        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceBound(anyInt(), any());
-
-        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
-        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceUnbound(anyInt(),
-                any());
-    }
-
-    @Test
-    public void onBoundServicesChanged_nonSysA11yToolFromValidInstallerWithoutAllowedList_noAction()
-            throws PackageManager.NameNotFoundException {
-        final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
-        final String validInstallerPackageName = "com.valid.install.package";
-        final String defaultInstallerPackageName = "com.default.install.package";
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
-        when(mPackageManagerInternal.getKnownPackageNames(PACKAGE_INSTALLER,
-                TEST_USER_ID)).thenReturn(new String[]{defaultInstallerPackageName});
-        mContext.getOrCreateTestableResources().addOverride(R.array
-                        .config_accessibility_allowed_install_source,
-                new String[]{});
-        // The valid Installer should be system app and not the default installer.
-        InstallSourceInfo validSource = initInstallSourceInfo(
-                validInstallerPackageName, /* isSystemApp= */ true);
-        initServiceInfoAndConnection(TEST_COMPONENT_NAME,
-                mMockA11yServiceConnection, /* isAccessibilityTool= */ true,
-                /* isSystemApp= */ false,
-                validSource);
-        boundServices.add(mMockA11yServiceConnection);
-
-        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
-        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceBound(anyInt(), any());
-
-        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, new ArrayList<>());
-        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceUnbound(anyInt(),
-                any());
-    }
-
-    @Test
-    public void onSwitchUser_oldUserHadAction_invokeActionForOldUser()
-            throws PackageManager.NameNotFoundException {
-        final int newUserId = 2;
-        final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
-        initServiceInfoAndConnection(TEST_COMPONENT_NAME,
-                mMockA11yServiceConnection,
-                /* isAccessibilityTool= */ false);
-        boundServices.add(mMockA11yServiceConnection);
-        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
-        verify(mPolicyWarningUIController).onNonA11yCategoryServiceBound(eq(TEST_USER_ID),
-                eq(TEST_COMPONENT_NAME));
-
-        mA11ySecurityPolicy.onSwitchUserLocked(newUserId, new HashSet<>());
-
-        verify(mPolicyWarningUIController).onSwitchUserLocked(eq(newUserId), eq(new HashSet<>()));
-        verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
-                eq(TEST_COMPONENT_NAME));
-    }
-
-    private void initServiceInfoAndConnection(ComponentName componentName,
-            AccessibilityServiceConnection connection,
-            boolean isAccessibilityTool) throws PackageManager.NameNotFoundException {
-        initServiceInfoAndConnection(componentName, connection, isAccessibilityTool, false, null);
-    }
-
-    private void initServiceInfoAndConnection(ComponentName componentName,
-            AccessibilityServiceConnection connection,
-            boolean isAccessibilityTool, boolean isSystemApp, InstallSourceInfo installSourceInfo)
-            throws PackageManager.NameNotFoundException {
-        when(connection.getServiceInfo()).thenReturn(mMockA11yServiceInfo);
-        when(mMockA11yServiceInfo.getComponentName()).thenReturn(componentName);
-        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(isAccessibilityTool);
-        when(mMockA11yServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
-        mMockResolveInfo.serviceInfo = mMockServiceInfo;
-        mMockServiceInfo.applicationInfo = mMockApplicationInfo;
-        mMockServiceInfo.packageName = componentName.getPackageName();
-        when(mMockApplicationInfo.isSystemApp()).thenReturn(isSystemApp);
-        when(mMockPackageManager.getInstallSourceInfo(componentName.getPackageName())).thenReturn(
-                installSourceInfo);
-    }
-
-    private InstallSourceInfo initInstallSourceInfo(String packageName, boolean isSystemApp)
-            throws PackageManager.NameNotFoundException {
+        when(mMockApplicationInfo.isSystemApp()).thenReturn(false);
         final InstallSourceInfo installSourceInfo = new InstallSourceInfo(
-                packageName, new SigningInfo(), null,
-                packageName, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
-        when(mMockPackageManager.getPackageInfo(packageName, 0)).thenReturn(
-                mMockSourcePackageInfo);
-        mMockSourcePackageInfo.applicationInfo = mMockSourceApplicationInfo;
-        when(mMockSourceApplicationInfo.isSystemApp()).thenReturn(isSystemApp);
-        return installSourceInfo;
+                ALLOWED_INSTALL_PACKAGE_NAME, new SigningInfo(), null,
+                ALLOWED_INSTALL_PACKAGE_NAME);
+        when(mMockPackageManager.getInstallSourceInfo(TEST_PACKAGE_NAME)).thenReturn(
+                installSourceInfo);
+        when(mMockSourceApplicationInfo.isSystemApp()).thenReturn(true);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(true);
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
+        verify(mPolicyWarningUIController, never()).onNonA11yCategoryServiceBound(anyInt(), any());
+    }
+
+    @Test
+    public void onBoundServicesChanged_bindUnknownSourceA11yToolService_activateUIControllerAction()
+            throws PackageManager.NameNotFoundException {
+        final ArrayList<AccessibilityServiceConnection> boundServices = new ArrayList<>();
+        boundServices.add(mMockA11yServiceConnection);
+        when(mMockA11yServiceInfo.isAccessibilityTool()).thenReturn(true);
+        final InstallSourceInfo installSourceInfo = new InstallSourceInfo(null, null, null, null);
+        when(mMockPackageManager.getInstallSourceInfo(TEST_PACKAGE_NAME)).thenReturn(
+                installSourceInfo);
+
+        mA11ySecurityPolicy.onBoundServicesChangedLocked(TEST_USER_ID, boundServices);
+
+        verify(mPolicyWarningUIController).onNonA11yCategoryServiceBound(eq(TEST_USER_ID),
+                eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void onSwitchUser_differentUser_activateUIControllerAction() {
+        onBoundServicesChanged_bindNonA11yToolService_activateUIControllerAction();
+
+        mA11ySecurityPolicy.onSwitchUserLocked(2, new HashSet<>());
+
+        verify(mPolicyWarningUIController).onSwitchUserLocked(eq(2), eq(new HashSet<>()));
+        verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
+                eq(TEST_COMPONENT_NAME));
     }
 }

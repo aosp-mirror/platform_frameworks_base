@@ -16,6 +16,10 @@
         <!-- restart launcher to activate TAPL -->
         <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.DeviceCleaner">
+        <!-- reboot the device to teardown any crashed tests -->
+        <option name="cleanup-action" value="REBOOT" />
+    </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
         <option name="test-file-name" value="WMShellFlickerTests.apk"/>
@@ -26,15 +30,7 @@
         <option name="shell-timeout" value="6600s" />
         <option name="test-timeout" value="6000s" />
         <option name="hidden-api-checks" value="false" />
-        <option name="device-listeners"
-                value="com.android.server.wm.flicker.TraceFileReadyListener" />
     </test>
-    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
-        <option name="pull-pattern-keys" value="(\w)+\.winscope" />
-        <option name="pull-pattern-keys" value="(\w)+\.mp4" />
-        <option name="collect-on-run-ended-only" value="false" />
-        <option name="clean-up" value="true" />
-    </metrics_collector>
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="directory-keys" value="/sdcard/flicker" />
         <option name="collect-on-run-ended-only" value="true" />

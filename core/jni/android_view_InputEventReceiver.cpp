@@ -54,7 +54,6 @@ static struct {
     jmethodID onPointerCaptureEvent;
     jmethodID onDragEvent;
     jmethodID onBatchedInputEventPending;
-    jmethodID onTouchModeChanged;
 } gInputEventReceiverClassInfo;
 
 // Add prefix to the beginning of each line in 'str'
@@ -390,11 +389,13 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
             case AINPUT_EVENT_TYPE_FOCUS: {
                 FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
                 if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s.",
-                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()));
+                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s, inTouchMode=%s.",
+                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()),
+                          toString(focusEvent->getInTouchMode()));
                 }
                 env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onFocusEvent,
-                                    jboolean(focusEvent->getHasFocus()));
+                                    jboolean(focusEvent->getHasFocus()),
+                                    jboolean(focusEvent->getInTouchMode()));
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }
@@ -423,18 +424,6 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }
-            case AINPUT_EVENT_TYPE_TOUCH_MODE: {
-                const TouchModeEvent* touchModeEvent = static_cast<TouchModeEvent*>(inputEvent);
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received touch mode event: isInTouchMode=%s",
-                          getInputChannelName().c_str(), toString(touchModeEvent->isInTouchMode()));
-                }
-                env->CallVoidMethod(receiverObj.get(),
-                                    gInputEventReceiverClassInfo.onTouchModeChanged,
-                                    jboolean(touchModeEvent->isInTouchMode()));
-                finishInputEvent(seq, true /* handled */);
-                continue;
-            }
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
@@ -457,6 +446,10 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                         getInputChannelName().c_str());
                 skipCallbacks = true;
             }
+        }
+
+        if (skipCallbacks) {
+            mInputConsumer.sendFinishedSignal(seq, false);
         }
     }
 }
@@ -609,14 +602,12 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
             gInputEventReceiverClassInfo.clazz,
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
     gInputEventReceiverClassInfo.onFocusEvent =
-            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(Z)V");
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(ZZ)V");
     gInputEventReceiverClassInfo.onPointerCaptureEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onPointerCaptureEvent",
                              "(Z)V");
     gInputEventReceiverClassInfo.onDragEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onDragEvent", "(ZFF)V");
-    gInputEventReceiverClassInfo.onTouchModeChanged =
-            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onTouchModeChanged", "(Z)V");
     gInputEventReceiverClassInfo.onBatchedInputEventPending =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onBatchedInputEventPending",
                              "(I)V");

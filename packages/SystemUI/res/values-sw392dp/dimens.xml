@@ -20,7 +20,15 @@
     <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
 
     <dimen name="global_actions_grid_item_side_margin">10dp</dimen>
+    <dimen name="global_actions_grid_item_vertical_margin">6dp</dimen>
+    <dimen name="global_actions_grid_item_width">72dp</dimen>
     <dimen name="global_actions_grid_item_height">72dp</dimen>
+
+    <dimen name="global_actions_grid_item_icon_width">22dp</dimen>
+    <dimen name="global_actions_grid_item_icon_height">22dp</dimen>
+    <dimen name="global_actions_grid_item_icon_top_margin">14dp</dimen>
+    <dimen name="global_actions_grid_item_icon_side_margin">22dp</dimen>
+    <dimen name="global_actions_grid_item_icon_bottom_margin">4dp</dimen>
 
     <!-- Home Controls -->
     <dimen name="global_actions_side_margin">16dp</dimen>

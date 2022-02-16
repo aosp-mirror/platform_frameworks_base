@@ -30,7 +30,8 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.V1_0.ContextHubMsg;
+import android.hardware.contexthub.V1_0.Result;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubTransaction;
@@ -43,7 +44,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -209,11 +209,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
 
-    /**
-     * True if a permissions query has been issued and is being processed. Used to prevent too many
-     * queries from being issued by a single client at once.
+    /*
+     * True if the application creating the client has the ACCESS_CONTEXT_HUB permission.
      */
-    private AtomicBoolean mIsPermQueryIssued = new AtomicBoolean(false);
+    private final boolean mHasAccessContextHubPermission;
 
     /*
      * Map containing all nanoapps this client has a messaging channel with and whether it is
@@ -241,11 +240,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final IContextHubTransactionCallback mQueryPermsCallback =
             new IContextHubTransactionCallback.Stub() {
             @Override
-            public void onTransactionComplete(int result) {}
+            public void onTransactionComplete(int result) {
+            }
 
             @Override
             public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
-                mIsPermQueryIssued.set(false);
                 if (result != ContextHubTransaction.RESULT_SUCCESS && nanoAppStateList != null) {
                     Log.e(TAG, "Permissions query failed, but still received nanoapp state");
                 } else if (nanoAppStateList != null) {
@@ -328,10 +327,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
         mPid = Binder.getCallingPid();
         mUid = Binder.getCallingUid();
+        mHasAccessContextHubPermission = context.checkCallingPermission(
+                Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         startMonitoringOpChanges();
-        sendHostEndpointConnectedEvent();
     }
 
     /* package */ ContextHubClientBroker(
@@ -390,20 +390,23 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 checkNanoappPermsAsync();
             }
 
+            ContextHubMsg messageToNanoApp =
+                    ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
+
+            int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                result = mContextHubProxy.sendMessageToContextHub(
-                    mHostEndPointId, mAttachedContextHubInfo.getId(), message);
+                result = mContextHubProxy.getHub().sendMessageToHub(contextHubId, messageToNanoApp);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
-                        + mAttachedContextHubInfo.getId() + ")", e);
-                result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                        + contextHubId + ")", e);
+                result = Result.UNKNOWN_FAILURE;
             }
         } else {
             Log.e(TAG, "Failed to send message to nanoapp: client connection is closed");
-            result = ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            result = Result.UNKNOWN_FAILURE;
         }
 
-        return result;
+        return ContextHubServiceUtil.toTransactionResult(result);
     }
 
     /**
@@ -417,11 +420,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mPendingIntentRequest.clear();
         }
         onClientExit();
-    }
-
-    @Override
-    public int getId() {
-        return mHostEndPointId;
     }
 
     /**
@@ -548,9 +546,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /* package */ void onHubReset() {
         invokeCallback(callback -> callback.onHubReset());
         sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_HUB_RESET));
-
-        // Re-send the host endpoint connected event as the Context Hub restarted.
-        sendHostEndpointConnectedEvent();
     }
 
     /**
@@ -622,14 +617,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         for (String permission : permissions) {
             int opCode = mAppOpsManager.permissionToOpCode(permission);
             if (opCode != AppOpsManager.OP_NONE) {
-                try {
-                    if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
-                            != AppOpsManager.MODE_ALLOWED) {
-                        return false;
-                    }
-                } catch (SecurityException e) {
-                    Log.e(TAG, "SecurityException: noteOp for pkg " + mPackage + " opcode "
-                            + opCode + ": " + e.getMessage());
+                if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
+                        != AppOpsManager.MODE_ALLOWED) {
                     return false;
                 }
             }
@@ -667,11 +656,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * communicated with in the past.
      */
     private void checkNanoappPermsAsync() {
-        if (!mIsPermQueryIssued.getAndSet(true)) {
-            ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
-                    mAttachedContextHubInfo.getId(), mQueryPermsCallback, mPackage);
-            mTransactionManager.addTransaction(transaction);
-        }
+        ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
+                mAttachedContextHubInfo.getId(), mQueryPermsCallback, mPackage);
+        mTransactionManager.addTransaction(transaction);
     }
 
     private int updateNanoAppAuthState(
@@ -840,7 +827,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
-            String requiredPermission = Manifest.permission.ACCESS_CONTEXT_HUB;
+            String requiredPermission = mHasAccessContextHubPermission
+                    ? Manifest.permission.ACCESS_CONTEXT_HUB
+                    : Manifest.permission.LOCATION_HARDWARE;
             pendingIntent.send(
                     mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
                     requiredPermission, null /* options */);
@@ -873,8 +862,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mRegistered = false;
         }
         mAppOpsManager.stopWatchingMode(this);
-
-        mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
     }
 
     private String authStateToString(@ContextHubManager.AuthorizationState int state) {
@@ -888,17 +875,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             default:
                 return "UNKNOWN";
         }
-    }
-
-    private void sendHostEndpointConnectedEvent() {
-        HostEndpointInfo info = new HostEndpointInfo();
-        info.hostEndpointId = (char) mHostEndPointId;
-        info.packageName = mPackage;
-        info.attributionTag = mAttributionTag;
-        info.type = (mUid == Process.SYSTEM_UID)
-             ? HostEndpointInfo.Type.FRAMEWORK
-             : HostEndpointInfo.Type.APP;
-        mContextHubProxy.onHostEndpointConnected(info);
     }
 
     /**

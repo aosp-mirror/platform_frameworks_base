@@ -344,30 +344,6 @@ public class AppStateTrackerTest {
         callStart(instance);
 
         assertFalse(instance.isForceAllAppsStandbyEnabled());
-
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(false);
-
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false},
-                false);
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false},
-                true);
-        areAlarmsRestrictedByBatterySaver(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false});
-
-        // Toggle the auto restricted bucket feature flag on bg restriction, shouldn't make a
-        // difference.
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(true);
-
         areJobsRestricted(instance,
                 new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
                 new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
@@ -388,9 +364,6 @@ public class AppStateTrackerTest {
 
         assertTrue(instance.isForceAllAppsStandbyEnabled());
 
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(false);
-
         areJobsRestricted(instance,
                 new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
                 new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
@@ -405,29 +378,6 @@ public class AppStateTrackerTest {
                 new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
                 new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
                 new boolean[] {true, true, true, false});
-
-        // Toggle the auto restricted bucket feature flag on bg restriction, shouldn't make a
-        // difference.
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(true);
-
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {true, true, true, false},
-                false);
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false},
-                true);
-        areAlarmsRestrictedByBatterySaver(instance,
-                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {true, true, true, false});
-
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(false);
 
         // Toggle the foreground state.
 
@@ -550,35 +500,9 @@ public class AppStateTrackerTest {
                 new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
                 new boolean[] {true, false, false, true, false});
 
-        // Toggle the auto restricted bucket feature flag on bg restriction.
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(true);
-
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false},
-                false);
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false},
-                true);
-
-        areAlarmsRestrictedByBatterySaver(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false});
-        areAlarmsRestrictedByFAS(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false});
-
         // Toggle power saver, should still be the same.
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(false);
 
         areJobsRestricted(instance,
                 new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
@@ -600,35 +524,8 @@ public class AppStateTrackerTest {
                 new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
                 new boolean[] {true, false, false, true, false});
 
-        // Toggle the auto restricted bucket feature flag on bg restriction.
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(true);
-
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {true, true, true, true, false},
-                false);
-        areJobsRestricted(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false},
-                true);
-
-        areAlarmsRestrictedByBatterySaver(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {true, true, true, true, false});
-        areAlarmsRestrictedByFAS(instance,
-                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
-                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
-                new boolean[] {false, false, false, false, false});
-
         mPowerSaveMode = false;
         mPowerSaveObserver.accept(getPowerSaveState());
-
-        when(mMockIActivityManagerInternal.isBgAutoRestrictedBucketFeatureFlagEnabled())
-                .thenReturn(false);
 
         areJobsRestricted(instance,
                 new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
@@ -1106,8 +1003,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateBackgroundRestrictedForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(true));
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1122,8 +1017,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateBackgroundRestrictedForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(false));
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1137,8 +1030,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1156,8 +1047,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateBackgroundRestrictedForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(true));
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1174,8 +1063,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1194,8 +1081,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1210,8 +1095,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1228,8 +1111,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1245,8 +1126,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1263,8 +1142,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1281,8 +1158,6 @@ public class AppStateTrackerTest {
         verify(l, times(2)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1297,8 +1172,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1315,8 +1188,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1332,8 +1203,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1356,8 +1225,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1373,8 +1240,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1390,8 +1255,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1407,8 +1270,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1425,8 +1286,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(eq(UID_10_1));
@@ -1442,8 +1301,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1459,8 +1316,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1476,8 +1331,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1493,8 +1346,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateBackgroundRestrictedForUidPackage(anyInt(), anyString(),
-                anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));

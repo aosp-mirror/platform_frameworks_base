@@ -96,9 +96,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             mHandler.post(() -> {
                 updateDeviceRoute(newRoutes);
                 notifyProviderState();
-                if (updateSessionInfosIfNeeded()) {
-                    notifySessionInfoUpdated();
-                }
             });
         }
     };
@@ -123,7 +120,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // .getInstance returns null if there is no bt adapter available
         mBtRouteProvider = BluetoothRouteProvider.createInstance(context, (routes) -> {
             publishProviderState();
-            if (updateSessionInfosIfNeeded()) {
+
+            boolean sessionInfoChanged;
+            sessionInfoChanged = updateSessionInfosIfNeeded();
+            if (sessionInfoChanged) {
                 notifySessionInfoUpdated();
             }
         });
@@ -235,23 +235,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     public RoutingSessionInfo getDefaultSessionInfo() {
         return mDefaultSessionInfo;
-    }
-
-    public RoutingSessionInfo generateDeviceRouteSelectedSessionInfo(String packageName) {
-        synchronized (mLock) {
-            if (mSessionInfos.isEmpty()) {
-                return null;
-            }
-            RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                    SYSTEM_SESSION_ID, packageName).setSystemSession(true);
-            builder.addSelectedRoute(mDeviceRoute.getId());
-            if (mBtRouteProvider != null) {
-                for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
-                    builder.addTransferableRoute(route.getId());
-                }
-            }
-            return builder.setProviderId(mUniqueId).build();
-        }
     }
 
     private void updateDeviceRoute(AudioRoutesInfo newRoutes) {

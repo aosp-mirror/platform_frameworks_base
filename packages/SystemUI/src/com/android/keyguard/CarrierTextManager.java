@@ -261,10 +261,8 @@ public class CarrierTextManager {
             mCarrierTextCallback = callback;
             if (mNetworkSupported.get()) {
                 // Keyguard update monitor expects callbacks from main thread
-                mMainExecutor.execute(() -> {
-                    mKeyguardUpdateMonitor.registerCallback(mCallback);
-                    mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
-                });
+                mMainExecutor.execute(() -> mKeyguardUpdateMonitor.registerCallback(mCallback));
+                mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
@@ -274,10 +272,8 @@ public class CarrierTextManager {
             }
         } else {
             mCarrierTextCallback = null;
-            mMainExecutor.execute(() -> {
-                mKeyguardUpdateMonitor.removeCallback(mCallback);
-                mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
-            });
+            mMainExecutor.execute(() -> mKeyguardUpdateMonitor.removeCallback(mCallback));
+            mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
         }
     }

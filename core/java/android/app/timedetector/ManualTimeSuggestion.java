@@ -66,10 +66,10 @@ public final class ManualTimeSuggestion implements Parcelable {
     }
 
     private static ManualTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class);
+        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
         ManualTimeSuggestion suggestion = new ManualTimeSuggestion(utcTime);
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
+        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
         return suggestion;
     }

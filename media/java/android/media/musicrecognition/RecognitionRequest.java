@@ -152,8 +152,8 @@ public final class RecognitionRequest implements Parcelable {
     }
 
     private RecognitionRequest(Parcel in) {
-        mAudioFormat = in.readParcelable(AudioFormat.class.getClassLoader(), android.media.AudioFormat.class);
-        mAudioAttributes = in.readParcelable(AudioAttributes.class.getClassLoader(), android.media.AudioAttributes.class);
+        mAudioFormat = in.readParcelable(AudioFormat.class.getClassLoader());
+        mAudioAttributes = in.readParcelable(AudioAttributes.class.getClassLoader());
         mCaptureSession = in.readInt();
         mMaxAudioLengthSeconds = in.readInt();
         mIgnoreBeginningFrames = in.readInt();

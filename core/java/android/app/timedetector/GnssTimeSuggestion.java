@@ -66,10 +66,10 @@ public final class GnssTimeSuggestion implements Parcelable {
     }
 
     private static GnssTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class);
+        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
         GnssTimeSuggestion suggestion = new GnssTimeSuggestion(utcTime);
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
+        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
         return suggestion;
     }

@@ -1,10 +1,7 @@
 package com.android.settingslib;
 
-import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
-
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -22,6 +19,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -46,7 +44,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
-import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -127,8 +124,7 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return context.getSystemService(DevicePolicyManager.class).getString(
-                    WORK_PROFILE_USER_LABEL, () -> context.getString(R.string.managed_user_title));
+            return context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
             name = context.getString(R.string.user_guest);
         }
@@ -529,9 +525,9 @@ public class Utils {
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
-            return iconFactory
-                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
-                    .newIcon(context);
+            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(icon, user,
+                    true /* shrinkNonAdaptiveIcons */).icon;
+            return new BitmapDrawable(context.getResources(), iconBmp);
         }
     }
 

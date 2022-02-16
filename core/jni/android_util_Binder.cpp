@@ -873,7 +873,7 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             const char* exceptionToThrow;
             char msg[128];
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
-            // TODO(b/28321379): Transaction size is the most common cause for FAILED_TRANSACTION
+            // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
             //        for other reasons also, such as if the transaction is malformed or
             //        refers to an FD that has been closed.  We should change the driver
@@ -890,9 +890,8 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
                 exceptionToThrow = (canThrowRemoteException)
                         ? "android/os/DeadObjectException"
                         : "java/lang/RuntimeException";
-                snprintf(msg, sizeof(msg) - 1,
-                         "Transaction failed on small parcel; remote process probably died, but "
-                         "this could also be caused by running out of binder buffer space");
+                snprintf(msg, sizeof(msg)-1,
+                        "Transaction failed on small parcel; remote process probably died");
             }
             jniThrowException(env, exceptionToThrow, msg);
         } break;
@@ -960,7 +959,8 @@ static jint android_os_Binder_getCallingUid()
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isDirectlyHandlingTransaction() {
+static jboolean android_os_Binder_isHandlingTransaction()
+{
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
@@ -1056,7 +1056,6 @@ static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject ext
 
 // ----------------------------------------------------------------------------
 
-// clang-format off
 static const JNINativeMethod gBinderMethods[] = {
      /* name, signature, funcPtr */
     // @CriticalNative
@@ -1064,7 +1063,7 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
     // @CriticalNative
-    { "isDirectlyHandlingTransaction", "()Z", (void*)android_os_Binder_isDirectlyHandlingTransaction },
+    { "isHandlingTransaction", "()Z", (void*)android_os_Binder_isHandlingTransaction },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     // @CriticalNative
@@ -1089,7 +1088,6 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
     { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
 };
-// clang-format on
 
 const char* const kBinderPathName = "android/os/Binder";
 

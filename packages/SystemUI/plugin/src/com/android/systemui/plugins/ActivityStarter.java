@@ -60,16 +60,8 @@ public interface ActivityStarter {
      */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
-
-    default void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
-        startActivity(intent, dismissShade, animationController,
-                false /* showOverLockscreenWhenLocked */);
-    }
-
     void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked);
+            @Nullable ActivityLaunchAnimator.Controller animationController);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);

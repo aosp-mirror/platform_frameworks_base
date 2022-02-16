@@ -34,7 +34,6 @@ import android.util.Log;
 
 import com.android.internal.os.IDropBoxManagerService;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -258,8 +257,7 @@ public class DropBoxManager {
             } else {
                 return null;
             }
-            return (mFlags & IS_GZIPPED) != 0
-                ? new GZIPInputStream(new BufferedInputStream(is)) : is;
+            return (mFlags & IS_GZIPPED) != 0 ? new GZIPInputStream(is) : is;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {

@@ -21,34 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"ජාල සඳහා පරිලෝකනය කළ නොහැක"</string>
-    <string name="wifi_security_short_wep" msgid="7939809393561636237">"WEP"</string>
-    <string name="wifi_security_short_wpa" msgid="6998160832497442533">"WPA"</string>
-    <string name="wifi_security_short_wpa2" msgid="7697856994856831026">"WPA2"</string>
-    <string name="wifi_security_short_wpa_wpa2" msgid="2399839645955520093">"WPA/WPA2"</string>
-    <string name="wifi_security_short_eap" msgid="5029688687205212985">"802.1x"</string>
-    <string name="wifi_security_short_eap_wpa" msgid="8510772177310043426">"WPA-EAP"</string>
-    <string name="wifi_security_short_eap_wpa2_wpa3" msgid="6455656470422244501">"RSN-EAP"</string>
-    <string name="wifi_security_short_sae" msgid="78353562671556266">"WPA3"</string>
-    <string name="wifi_security_short_psk_sae" msgid="4965830739185952958">"WPA2/WPA3"</string>
-    <string name="wifi_security_short_none_owe" msgid="8827409046261759703">"නැත/OWE"</string>
-    <string name="wifi_security_short_owe" msgid="5073524307942025369">"OWE"</string>
-    <string name="wifi_security_short_eap_suiteb" msgid="4174071135081556115">"Suite-B-192"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"කිසිවක් නැත"</string>
-    <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
-    <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
-    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
-    <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
-    <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
-    <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
-    <string name="wifi_security_eap_wpa2_wpa3" msgid="2952912020876252266">"WPA2/WPA3-Enterprise"</string>
-    <string name="wifi_security_eap_wpa3" msgid="7961135182909018796">"WPA3-Enterprise"</string>
-    <string name="wifi_security_passpoint" msgid="2209078477216565387">"පාස්පොයින්ට්"</string>
-    <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Personal"</string>
-    <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Personal"</string>
-    <string name="wifi_security_none_owe" msgid="5241745828327404101">"නැත/වැඩි දියුණු කළ විවෘත"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"වැඩි දියුණු කළ විවෘත"</string>
-    <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise බිටු-192"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"සුරකින ලදි"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"විසන්ධි විය"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"අබලයි"</string>
@@ -122,9 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ශ්‍රව්‍යය: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ශ්‍රව්‍යය"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ශ්‍රවණාධාරක"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ශ්‍රවණාධාරක වෙත සම්බන්ධ කළා"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO වෙත සම්බන්ධ විය"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"මාධ්‍ය ශ්‍රව්‍යට සම්බන්ධ විය"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"දුරකතනයේ ශ්‍රව්‍යට සම්බන්ධ විය"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ගොනු හුවමාරු සේවාදායකය සමග සම්බන්ධ විය"</string>
@@ -142,7 +113,6 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ගොනු හුවමාරුව සඳහා භාවිතා කරන්න"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ආදානය සඳහා භාවිතා කරන්න"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ශ්‍රවණාධාර සඳහා භාවිත කරන්න"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO සඳහා භාවිත කරන්න"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"යුගල කරන්න"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"යුගල කරන්න"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"අවලංගු කරන්න"</string>
@@ -282,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"නොරැහැන් සංදර්ශක සහතිකය"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"විස්තරාත්මක Wi‑Fi ලොග් කිරීම සබල කරන්න"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ස්කෑන් අවකරණය"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi අඛණ්ඩ නොවන MAC සසම්භාවීකරණය"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Wi‑Fi අඛණ්ඩ නොවන MAC සසම්භාවීකරණය"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
@@ -314,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"බැටරි බැසීම අඩු කරන අතර ජාල කාර්ය සාධනය වැඩි දියුණු කරයි"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"මෙම ප්‍රකාරය සබල විට, මෙම උපාංගයේ MAC ලිපිනය එය MAC සසම්භාවීකරණය සබල කර ඇති ජාලයකට සම්බන්ධ වන එක් එක් අවස්ථාවල වෙනස් විය හැකිය."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"මෙම ප්‍රකාරය අබල කළ විට, මෙම උපාංගයේ MAC ලිපිනය එය MAC සසම්භාවීකරණය සබල කර ඇති ජාලයකට සම්බන්ධවන ඒ ඒ අවස්ථාවල වෙනස් විය හැකිය."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"මනිනු ලැබේ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"මනින්නේ නැත"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>
@@ -494,7 +464,6 @@
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"සම්බන්ධයි, ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"අරෝපිතයි"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"සීමා කළ සැකසීම මගින් පාලනය වේ"</string>
     <string name="disabled" msgid="8017887509554714950">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ඉඩ දුන්"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ඉඩ නොදෙන"</string>
@@ -527,7 +496,10 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ලියාපදිංචි වී නැත"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"ලබාගත නොහැක"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC සසම්භාවී වේ"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{උපාංග 0ක් සම්බන්ධිතයි}=1{උපාංග 1ක් සම්බන්ධිතයි}one{උපාංග #ක් සම්බන්ධිතයි}other{උපාංග #ක් සම්බන්ධිතයි}}"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
+      <item quantity="one">උපාංග %1$dක් සම්බන්ධ කරන ලදී</item>
+      <item quantity="other">උපාංග %1$dක් සම්බන්ධ කරන ලදී</item>
+    </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"වේලාව වැඩියෙන්."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"වේලාව අඩුවෙන්."</string>
     <string name="cancel" msgid="5665114069455378395">"අවලංගු කරන්න"</string>
@@ -538,6 +510,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"එලාම සැකසීමට සහ කාල සංවේදී ක්‍රියා කාලසටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. මෙය පසුබිමේ ධාවනය වීමට යෙදුමට ඉඩ දෙයි, එය වැඩි බැටරිය වැඩියෙන් භාවිත කළ හැකිය.\n\nමෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම මඟින් සැලසුම් කර ඇති තිබෙන එලාම සහ වේලාව පදනම් කර ගත් සිදුවීම් ක්‍රියා නොකරනු ඇත."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"කාල සටහන, එලාමය, සිහිකැඳවීම, ඔරලෝසුව"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"බාධා නොකරන්න ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"කිසි විටක නැත"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"ප්‍රමුඛතා පමණි"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,7 +522,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"සෑම විටම ඉල්ලන්න"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ඔබ ක්‍රියාවිරහිත කරන තුරු"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"මේ දැන්"</string>
-    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"මෙම දුරකථනය"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"දුරකථන ස්පීකරය"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"මෙම දුරකථනය"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
@@ -635,17 +608,4 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ඊතර්නෙට් විසන්ධි කරන ලදී."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ඊතර්නෙට්."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ඇමතුම් නැත."</string>
-    <!-- no translation found for dream_complication_title_time (701747800712893499) -->
-    <skip />
-    <!-- no translation found for dream_complication_title_date (8661176085446135789) -->
-    <skip />
-    <!-- no translation found for dream_complication_title_weather (598609151677172783) -->
-    <skip />
-    <!-- no translation found for dream_complication_title_aqi (4587552608957834110) -->
-    <skip />
-    <!-- no translation found for dream_complication_title_cast_info (4038776652841885084) -->
-    <skip />
-    <string name="avatar_picker_title" msgid="8492884172713170652">"පැතිකඩ පින්තූරයක් තේරීම"</string>
-    <!-- no translation found for default_user_icon_description (6554047177298972638) -->
-    <skip />
 </resources>

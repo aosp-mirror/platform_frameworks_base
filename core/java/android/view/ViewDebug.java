@@ -1066,7 +1066,6 @@ public class ViewDebug {
      */
     @TestApi
     @Nullable
-    @UnsupportedAppUsage // Visible for Studio; least-worst option available
     public static AutoCloseable startRenderingCommandsCapture(View tree, Executor executor,
             Callable<OutputStream> callback) {
         final View.AttachInfo attachInfo = tree.mAttachInfo;
@@ -1896,7 +1895,7 @@ public class ViewDebug {
 
         private Canvas mCanvas;
         private Bitmap mBitmap;
-        private boolean mEnabledHwFeaturesInSwMode;
+        private boolean mEnabledHwBitmapsInSwMode;
 
         @Override
         public Canvas getCanvas(View view, int width, int height) {
@@ -1913,7 +1912,7 @@ public class ViewDebug {
             if (mCanvas == null) {
                 mCanvas = new Canvas();
             }
-            mEnabledHwFeaturesInSwMode = mCanvas.isHwFeaturesInSwModeEnabled();
+            mEnabledHwBitmapsInSwMode = mCanvas.isHwBitmapsInSwModeEnabled();
             mCanvas.setBitmap(mBitmap);
             return mCanvas;
         }
@@ -1921,7 +1920,7 @@ public class ViewDebug {
         @Override
         public Bitmap createBitmap() {
             mCanvas.setBitmap(null);
-            mCanvas.setHwFeaturesInSwModeEnabled(mEnabledHwFeaturesInSwMode);
+            mCanvas.setHwBitmapsInSwModeEnabled(mEnabledHwBitmapsInSwMode);
             return mBitmap;
         }
     }

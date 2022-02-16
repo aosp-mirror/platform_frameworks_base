@@ -40,7 +40,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.RemoteException;
-import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -61,7 +60,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 @SmallTest
 @Presubmit
@@ -128,18 +126,6 @@ public class ApexManagerTest {
                 ParallelPackageParser.makeExecutorService());
 
         assertThat(mApexManager.getPackageInfo(TEST_APEX_PKG, 0)).isNull();
-    }
-
-    @Test
-    public void testGetApexSystemServices() throws RemoteException {
-        when(mApexService.getAllPackages()).thenReturn(createApexInfoForTestPkg(true, false));
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
-
-        List<ApexSystemServiceInfo> services = mApexManager.getApexSystemServices();
-        assertThat(services).hasSize(1);
-        assertThat(services.stream().map(ApexSystemServiceInfo::getName).findFirst().orElse(null))
-                .matches("com.android.apex.test.ApexSystemService");
     }
 
     @Test
@@ -246,21 +232,6 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testGetStagedApexInfos_throwRunTimeException() throws RemoteException {
-        doThrow(RemoteException.class).when(mApexService).getStagedApexInfos(any());
-
-        assertThrows(RuntimeException.class,
-                () -> mApexManager.getStagedApexInfos(testParamsWithChildren()));
-    }
-
-    @Test
-    public void testGetStagedApexInfos_returnsEmptyArrayOnError() throws RemoteException {
-        doThrow(ServiceSpecificException.class).when(mApexService).getStagedApexInfos(any());
-
-        assertThat(mApexManager.getStagedApexInfos(testParamsWithChildren())).hasLength(0);
-    }
-
-    @Test
     public void testMarkStagedSessionReady_throwPackageManagerException() throws RemoteException {
         doAnswer(invocation -> {
             throw new Exception();
@@ -358,6 +329,24 @@ public class ApexManagerTest {
         PackageManagerException e = expectThrows(PackageManagerException.class,
                 () -> mApexManager.installPackage(apex, mPackageParser2));
         assertThat(e).hasMessageThat().contains("It is forbidden to install new APEX packages");
+    }
+
+    @Test
+    public void testInstallPackageDowngrade() throws Exception {
+        File activeApex = extractResource("test.apex_rebootless_v2",
+                "test.rebootless_apex_v2.apex");
+        ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
+                /* isFactory= */ false, activeApex);
+        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        File installedApex = extractResource("test.apex_rebootless_v1",
+                "test.rebootless_apex_v1.apex");
+        PackageManagerException e = expectThrows(PackageManagerException.class,
+                () -> mApexManager.installPackage(installedApex, mPackageParser2));
+        assertThat(e).hasMessageThat().contains(
+                "Downgrade of APEX package test.apex.rebootless is not allowed");
     }
 
     @Test

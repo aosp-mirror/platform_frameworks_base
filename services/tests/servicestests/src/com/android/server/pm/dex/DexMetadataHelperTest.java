@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -30,7 +31,6 @@ import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DexMetadataHelperTest {
@@ -138,30 +137,25 @@ public class DexMetadataHelperTest {
     }
 
     private static void validatePackageDexMetadata(AndroidPackage pkg, boolean requireManifest)
-            throws PackageManagerException {
+            throws PackageParserException {
         Collection<String> apkToDexMetadataList =
                 AndroidPackageUtils.getPackageDexMetadata(pkg).values();
         String packageName = pkg.getPackageName();
-        long versionCode = pkg.getLongVersionCode();
-        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        long versionCode = pkg.toAppInfoWithoutState().longVersionCode;
         for (String dexMetadata : apkToDexMetadataList) {
-            final ParseResult result = DexMetadataHelper.validateDexMetadataFile(
-                    input.reset(), dexMetadata, packageName, versionCode, requireManifest);
-            if (result.isError()) {
-                throw new PackageManagerException(
-                        result.getErrorCode(), result.getErrorMessage(), result.getException());
-            }
+            DexMetadataHelper.validateDexMetadataFile(
+                    dexMetadata, packageName, versionCode, requireManifest);
         }
     }
 
     private static void validatePackageDexMetatadataVaryingRequireManifest(ParsedPackage pkg)
-            throws PackageManagerException {
+            throws PackageParserException {
         validatePackageDexMetadata(pkg, /*requireManifest=*/true);
         validatePackageDexMetadata(pkg, /*requireManifest=*/false);
     }
 
     @Test
-    public void testParsePackageWithDmFileValid() throws IOException, PackageManagerException {
+    public void testParsePackageWithDmFileValid() throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk");
         ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
@@ -178,7 +172,7 @@ public class DexMetadataHelperTest {
 
     @Test
     public void testParsePackageSplitsWithDmFileValid()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_base.apk");
@@ -201,7 +195,7 @@ public class DexMetadataHelperTest {
 
     @Test
     public void testParsePackageSplitsNoBaseWithDmFileValid()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_feature_a.apk");
@@ -227,7 +221,7 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: empty .dm file");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
 
@@ -235,14 +229,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/false);
             fail("Should fail validation: empty .dm file");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageSplitsWithDmFileInvalid()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_base.apk");
@@ -253,7 +247,7 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: empty .dm file");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
 
@@ -261,14 +255,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/false);
             fail("Should fail validation: empty .dm file");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileInvalidManifest()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", /*validManifest=*/false);
 
@@ -276,14 +270,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: missing manifest.json in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileEmptyManifest()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", /*packageName=*/"doesn't matter",
                 /*versionCode=*/-12345L, /*emptyManifest=*/true, /*validManifest=*/true);
@@ -292,14 +286,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: empty manifest.json in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileBadPackageName()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", /*packageName=*/"bad package name",
                 DEX_METADATA_VERSION_CODE, /*emptyManifest=*/false, /*validManifest=*/true);
@@ -308,14 +302,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: bad package name in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileBadVersionCode()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", DEX_METADATA_PACKAGE_NAME,
                 /*versionCode=*/12345L, /*emptyManifest=*/false, /*validManifest=*/true);
@@ -324,14 +318,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: bad version code in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileMissingPackageName()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", /*packageName=*/null,
                 DEX_METADATA_VERSION_CODE, /*emptyManifest=*/false, /*validManifest=*/true);
@@ -340,14 +334,14 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: missing package name in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
 
     @Test
     public void testParsePackageWithDmFileMissingVersionCode()
-            throws IOException, PackageManagerException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         createDexMetadataFile("install_split_base.apk", DEX_METADATA_PACKAGE_NAME,
                 /*versionCode=*/null, /*emptyManifest=*/false, /*validManifest=*/true);
@@ -356,7 +350,7 @@ public class DexMetadataHelperTest {
             ParsedPackage pkg = new TestPackageParser2().parsePackage(mTmpDir, /*flags=*/0, false);
             validatePackageDexMetadata(pkg, /*requireManifest=*/true);
             fail("Should fail validation: missing version code in the .dm archive");
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertEquals(e.error, PackageManager.INSTALL_FAILED_BAD_DEX_METADATA);
         }
     }
@@ -376,7 +370,7 @@ public class DexMetadataHelperTest {
 
     @Test
     public void testPackageSplitsWithDmFileNoMatch()
-            throws IOException {
+            throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         copyApkToToTmpDir("install_split_feature_a.apk", R.raw.install_split_feature_a);
         createDexMetadataFile("install_split_base.apk");
@@ -418,11 +412,8 @@ public class DexMetadataHelperTest {
                         result.getErrorMessage(), result.getException());
             }
             final ApkLite baseApk = result.getResult();
-            final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk,
-                    null /* splitNames */, null /* isFeatureSplits */, null /* usesSplitNames */,
-                    null /* configForSplit */, null /* splitApkPaths */,
-                    null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
-                    null /* requiredSplitTypes */, null /* splitTypes */);
+            final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk, null,
+                    null, null, null, null, null, baseApk.getTargetSdkVersion());
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 
