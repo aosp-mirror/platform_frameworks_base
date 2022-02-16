@@ -45,7 +45,6 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
-import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -138,7 +137,7 @@ final class NavigationBarController {
 
         private boolean mDestroyed = false;
 
-        private boolean mRenderGesturalNavButtons;
+        private boolean mImeDrawsImeNavBar;
 
         @Nullable
         private NavigationBarFrame mNavigationBarFrame;
@@ -185,7 +184,7 @@ final class NavigationBarController {
         }
 
         private void installNavigationBarFrameIfNecessary() {
-            if (!mRenderGesturalNavButtons) {
+            if (!mImeDrawsImeNavBar) {
                 return;
             }
             if (mNavigationBarFrame != null) {
@@ -253,7 +252,7 @@ final class NavigationBarController {
         @Override
         public void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
-            if (!mRenderGesturalNavButtons || mNavigationBarFrame == null
+            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null
                     || mService.isExtractViewShown()) {
                 return;
             }
@@ -360,13 +359,12 @@ final class NavigationBarController {
             });
         }
 
-        private boolean isGesturalNavigationEnabled() {
+        private boolean imeDrawsImeNavBar() {
             final Resources resources = mService.getResources();
             if (resources == null) {
                 return false;
             }
-            return resources.getInteger(com.android.internal.R.integer.config_navBarInteractionMode)
-                    == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+            return resources.getBoolean(com.android.internal.R.bool.config_imeDrawsImeNavBar);
         }
 
         @Override
@@ -381,7 +379,7 @@ final class NavigationBarController {
             if (mDestroyed) {
                 return;
             }
-            mRenderGesturalNavButtons = isGesturalNavigationEnabled();
+            mImeDrawsImeNavBar = imeDrawsImeNavBar();
             if (mSystemOverlayChangedReceiver == null) {
                 final IntentFilter intentFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
                 intentFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
@@ -392,8 +390,8 @@ final class NavigationBarController {
                         if (mDestroyed) {
                             return;
                         }
-                        mRenderGesturalNavButtons = isGesturalNavigationEnabled();
-                        if (mRenderGesturalNavButtons) {
+                        mImeDrawsImeNavBar = imeDrawsImeNavBar();
+                        if (mImeDrawsImeNavBar) {
                             installNavigationBarFrameIfNecessary();
                         } else {
                             uninstallNavigationBarFrameIfNecessary();
@@ -423,7 +421,7 @@ final class NavigationBarController {
 
         @Override
         public void onWindowShown() {
-            if (mDestroyed || !mRenderGesturalNavButtons || mNavigationBarFrame == null) {
+            if (mDestroyed || !mImeDrawsImeNavBar || mNavigationBarFrame == null) {
                 return;
             }
             final Insets systemInsets = getSystemInsets();
@@ -546,7 +544,7 @@ final class NavigationBarController {
 
         @Override
         public String toDebugString() {
-            return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons
+            return "{mImeDrawsImeNavBar=" + mImeDrawsImeNavBar
                     + " mNavigationBarFrame=" + mNavigationBarFrame
                     + " mShouldShowImeSwitcherWhenImeIsShown="
                     + mShouldShowImeSwitcherWhenImeIsShown

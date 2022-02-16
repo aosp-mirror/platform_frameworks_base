@@ -53,7 +53,11 @@ class BackNavigationController {
      * Returns true if the back predictability feature is enabled
      */
     static boolean isEnabled() {
-        return SystemProperties.getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
+        return SystemProperties.getInt(BACK_PREDICTABILITY_PROP, 1) > 0;
+    }
+
+    static boolean isScreenshotEnabled() {
+        return false;
     }
 
     /**
@@ -101,6 +105,13 @@ class BackNavigationController {
 
         synchronized (task.mWmService.mGlobalLock) {
             activityRecord = task.topRunningActivity();
+
+            if(!activityRecord.info.applicationInfo.isOnBackInvokedCallbackEnabled()) {
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Activity %s: enableOnBackInvokedCallback=false."
+                        + " Returning null BackNavigationInfo.", activityRecord.getName());
+                return null;
+            }
+
             removedWindowContainer = activityRecord;
             taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
             WindowState window = task.getWindow(WindowState::isFocused);

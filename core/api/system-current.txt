@@ -1656,8 +1656,8 @@ package android.app.cloudsearch {
     method @NonNull public android.os.Bundle getSearchConstraints();
     method @NonNull public String getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
-    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
+    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchRequest> CREATOR;
   }
 
@@ -1699,23 +1699,23 @@ package android.app.cloudsearch {
     method @NonNull public String getTitle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResult> CREATOR;
-    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
-    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "ACTION_BUTTON_TEXT";
-    field public static final String EXTRAINFO_APP_BADGES = "APP_BADGES";
-    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "APP_CONTAINS_ADS_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "APP_CONTAINS_IAP_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
-    field public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
-    field public static final String EXTRAINFO_APP_IARC = "APP_IARC";
-    field public static final String EXTRAINFO_APP_ICON = "APP_ICON";
-    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "APP_REVIEW_COUNT";
-    field public static final String EXTRAINFO_APP_SIZE_BYTES = "APP_SIZE_BYTES";
-    field public static final String EXTRAINFO_APP_STAR_RATING = "APP_STAR_RATING";
-    field public static final String EXTRAINFO_LONG_DESCRIPTION = "LONG_DESCRIPTION";
-    field public static final String EXTRAINFO_SCREENSHOTS = "SCREENSHOTS";
-    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "SHORT_DESCRIPTION";
-    field public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
-    field public static final String EXTRAINFO_WEB_URL = "WEB_URL";
+    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
+    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_TEXT";
+    field public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
+    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "android.app.cloudsearch.APP_DEVELOPER_NAME";
+    field public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
+    field public static final String EXTRAINFO_APP_IARC = "android.app.cloudsearch.APP_IARC";
+    field public static final String EXTRAINFO_APP_ICON = "android.app.cloudsearch.APP_ICON";
+    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "android.app.cloudsearch.APP_REVIEW_COUNT";
+    field public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
+    field public static final String EXTRAINFO_APP_STAR_RATING = "android.app.cloudsearch.APP_STAR_RATING";
+    field public static final String EXTRAINFO_LONG_DESCRIPTION = "android.app.cloudsearch.LONG_DESCRIPTION";
+    field public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
+    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "android.app.cloudsearch.SHORT_DESCRIPTION";
+    field public static final String EXTRAINFO_WEB_ICON = "android.app.cloudsearch.WEB_ICON";
+    field public static final String EXTRAINFO_WEB_URL = "android.app.cloudsearch.WEB_URL";
   }
 
   public static final class SearchResult.Builder {
@@ -5318,9 +5318,9 @@ package android.hardware.usb {
     method public int getCurrentDataRole();
     method public int getCurrentMode();
     method public int getCurrentPowerRole();
-    method public int getPowerBrickStatus();
+    method public int getPowerBrickConnectionStatus();
     method public int getSupportedRoleCombinations();
-    method @Nullable public int[] getUsbDataStatus();
+    method public int getUsbDataStatus();
     method public boolean isConnected();
     method public boolean isPowerTransferLimited();
     method public boolean isRoleCombinationSupported(int, int);
@@ -5329,6 +5329,13 @@ package android.hardware.usb {
     field public static final int DATA_ROLE_DEVICE = 2; // 0x2
     field public static final int DATA_ROLE_HOST = 1; // 0x1
     field public static final int DATA_ROLE_NONE = 0; // 0x0
+    field public static final int DATA_STATUS_DISABLED_CONTAMINANT = 4; // 0x4
+    field public static final int DATA_STATUS_DISABLED_DEBUG = 32; // 0x20
+    field public static final int DATA_STATUS_DISABLED_DOCK = 8; // 0x8
+    field public static final int DATA_STATUS_DISABLED_FORCE = 16; // 0x10
+    field public static final int DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
+    field public static final int DATA_STATUS_ENABLED = 1; // 0x1
+    field public static final int DATA_STATUS_UNKNOWN = 0; // 0x0
     field public static final int MODE_AUDIO_ACCESSORY = 4; // 0x4
     field public static final int MODE_DEBUG_ACCESSORY = 8; // 0x8
     field public static final int MODE_DFP = 2; // 0x2
@@ -5340,13 +5347,6 @@ package android.hardware.usb {
     field public static final int POWER_ROLE_NONE = 0; // 0x0
     field public static final int POWER_ROLE_SINK = 2; // 0x2
     field public static final int POWER_ROLE_SOURCE = 1; // 0x1
-    field public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3; // 0x3
-    field public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6; // 0x6
-    field public static final int USB_DATA_STATUS_DISABLED_DOCK = 4; // 0x4
-    field public static final int USB_DATA_STATUS_DISABLED_FORCE = 5; // 0x5
-    field public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
-    field public static final int USB_DATA_STATUS_ENABLED = 1; // 0x1
-    field public static final int USB_DATA_STATUS_UNKNOWN = 0; // 0x0
   }
 
 }
@@ -15621,7 +15621,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public android.graphics.Region getCurrentImeTouchRegion();
-    method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull android.window.TaskFpsCallback);
+    method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback);
     method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
   }
 
@@ -16213,12 +16213,9 @@ package android.webkit {
 
 package android.window {
 
-  public final class TaskFpsCallback {
-    ctor public TaskFpsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback.OnFpsCallbackListener);
-  }
-
-  public static interface TaskFpsCallback.OnFpsCallbackListener {
-    method public void onFpsReported(float);
+  public abstract class TaskFpsCallback {
+    ctor public TaskFpsCallback();
+    method public abstract void onFpsReported(float);
   }
 
 }

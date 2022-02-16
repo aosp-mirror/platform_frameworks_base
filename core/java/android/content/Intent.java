@@ -9209,6 +9209,16 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
+     * Returns the total size of the extras in bytes, or 0 if no extras are present.
+     * @hide
+     */
+    public int getExtrasTotalSize() {
+        return (mExtras != null)
+                ? mExtras.getSize()
+                : 0;
+    }
+
+    /**
      * @return Whether {@link #maybeStripForHistory} will return an lightened intent or
      * return itself as-is.
      * @hide

@@ -57,13 +57,16 @@ public final class PictureInPictureParams implements Parcelable {
 
         private Boolean mSeamlessResizeEnabled;
 
+        private CharSequence mTitle;
+
+        private CharSequence mSubtitle;
+
         /**
          * Sets the aspect ratio.  This aspect ratio is defined as the desired width / height, and
          * does not change upon device rotation.
          *
          * @param aspectRatio the new aspect ratio for the activity in picture-in-picture, must be
-         * between 2.39:1 and 1:2.39 (inclusive).
-         *
+         *                    between 2.39:1 and 1:2.39 (inclusive).
          * @return this builder instance.
          */
         public Builder setAspectRatio(Rational aspectRatio) {
@@ -168,6 +171,36 @@ public final class PictureInPictureParams implements Parcelable {
         }
 
         /**
+         * Sets a title for the picture-in-picture window, which may be displayed by the system to
+         * give the user information about what this PIP is generally being used for.
+         *
+         * @param title General information about the PIP content
+         * @return this builder instance.
+         */
+        @NonNull
+        public Builder setTitle(@Nullable CharSequence title) {
+            mTitle = title;
+            return this;
+        }
+
+        /**
+         * Sets a subtitle for the picture-in-picture window, which may be displayed by the system
+         * to give the user more detailed information about what this PIP is displaying.<br/>
+         *
+         * Setting a title via {@link PictureInPictureParams.Builder#setTitle(CharSequence)} should
+         * be prioritized.
+         *
+         * @param subtitle Details about the PIP content.
+         * @return this builder instance
+         */
+        @NonNull
+        public Builder setSubtitle(@Nullable CharSequence subtitle) {
+            mSubtitle = subtitle;
+            return this;
+        }
+
+
+        /**
          * @return an immutable {@link PictureInPictureParams} to be used when entering or updating
          * the activity in picture-in-picture.
          *
@@ -177,7 +210,7 @@ public final class PictureInPictureParams implements Parcelable {
         public PictureInPictureParams build() {
             PictureInPictureParams params = new PictureInPictureParams(mAspectRatio,
                     mExpandedAspectRatio, mUserActions,
-                    mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled);
+                    mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
             return params;
         }
     }
@@ -221,6 +254,18 @@ public final class PictureInPictureParams implements Parcelable {
      */
     private Boolean mSeamlessResizeEnabled;
 
+    /**
+     * Title of the picture-in-picture window to be displayed to the user.
+     */
+    @Nullable
+    private CharSequence mTitle;
+
+    /**
+     * Subtitle for the picture-in-picture window to be displayed to the user.
+     */
+    @Nullable
+    private CharSequence mSubtitle;
+
     /** {@hide} */
     PictureInPictureParams() {
     }
@@ -242,18 +287,26 @@ public final class PictureInPictureParams implements Parcelable {
         if (in.readInt() != 0) {
             mSeamlessResizeEnabled = in.readBoolean();
         }
+        if (in.readInt() != 0) {
+            mTitle = in.readCharSequence();
+        }
+        if (in.readInt() != 0) {
+            mSubtitle = in.readCharSequence();
+        }
     }
 
     /** {@hide} */
     PictureInPictureParams(Rational aspectRatio, Rational expandedAspectRatio,
             List<RemoteAction> actions, Rect sourceRectHint, Boolean autoEnterEnabled,
-            Boolean seamlessResizeEnabled) {
+            Boolean seamlessResizeEnabled, CharSequence title, CharSequence subtitle) {
         mAspectRatio = aspectRatio;
         mExpandedAspectRatio = expandedAspectRatio;
         mUserActions = actions;
         mSourceRectHint = sourceRectHint;
         mAutoEnterEnabled = autoEnterEnabled;
         mSeamlessResizeEnabled = seamlessResizeEnabled;
+        mTitle = title;
+        mSubtitle = subtitle;
     }
 
     /**
@@ -263,7 +316,8 @@ public final class PictureInPictureParams implements Parcelable {
     public PictureInPictureParams(PictureInPictureParams other) {
         this(other.mAspectRatio, other.mExpandedAspectRatio, other.mUserActions,
                 other.hasSourceBoundsHint() ? new Rect(other.getSourceRectHint()) : null,
-                other.mAutoEnterEnabled, other.mSeamlessResizeEnabled);
+                other.mAutoEnterEnabled, other.mSeamlessResizeEnabled, other.mTitle,
+                other.mSubtitle);
     }
 
     /**
@@ -289,6 +343,12 @@ public final class PictureInPictureParams implements Parcelable {
         }
         if (otherArgs.mSeamlessResizeEnabled != null) {
             mSeamlessResizeEnabled = otherArgs.mSeamlessResizeEnabled;
+        }
+        if (otherArgs.hasSetTitle()) {
+            mTitle = otherArgs.mTitle;
+        }
+        if (otherArgs.hasSetSubtitle()) {
+            mSubtitle = otherArgs.mSubtitle;
         }
     }
 
@@ -399,13 +459,50 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
+     * @return whether a title was set.
+     * @hide
+     */
+    public boolean hasSetTitle() {
+        return mTitle != null;
+    }
+
+    /**
+     * @return title of the pip.
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public CharSequence getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * @return whether a subtitle was set.
+     * @hide
+     */
+    public boolean hasSetSubtitle() {
+        return mSubtitle != null;
+    }
+
+    /**
+     * @return subtitle of the pip.
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public CharSequence getSubtitle() {
+        return mSubtitle;
+    }
+
+    /**
      * @return True if no parameters are set
      * @hide
      */
     public boolean empty() {
         return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
                 && !hasSetExpandedAspectRatio() && mAutoEnterEnabled != null
-                && mSeamlessResizeEnabled != null;
+                && mSeamlessResizeEnabled != null && !hasSetTitle()
+                && !hasSetSubtitle();
     }
 
     @Override
@@ -418,13 +515,15 @@ public final class PictureInPictureParams implements Parcelable {
                 && Objects.equals(mAspectRatio, that.mAspectRatio)
                 && Objects.equals(mExpandedAspectRatio, that.mExpandedAspectRatio)
                 && Objects.equals(mUserActions, that.mUserActions)
-                && Objects.equals(mSourceRectHint, that.mSourceRectHint);
+                && Objects.equals(mSourceRectHint, that.mSourceRectHint)
+                && Objects.equals(mTitle, that.mTitle)
+                && Objects.equals(mSubtitle, that.mSubtitle);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mAspectRatio, mExpandedAspectRatio, mUserActions, mSourceRectHint,
-                mAutoEnterEnabled, mSeamlessResizeEnabled);
+                mAutoEnterEnabled, mSeamlessResizeEnabled, mTitle, mSubtitle);
     }
 
     @Override
@@ -460,6 +559,18 @@ public final class PictureInPictureParams implements Parcelable {
         } else {
             out.writeInt(0);
         }
+        if (mTitle != null) {
+            out.writeInt(1);
+            out.writeCharSequence(mTitle);
+        } else {
+            out.writeInt(0);
+        }
+        if (mSubtitle != null) {
+            out.writeInt(1);
+            out.writeCharSequence(mSubtitle);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     private void writeRationalToParcel(Rational rational, Parcel out) {
@@ -488,6 +599,8 @@ public final class PictureInPictureParams implements Parcelable {
                 + " hasSetActions=" + hasSetActions()
                 + " isAutoPipEnabled=" + isAutoEnterEnabled()
                 + " isSeamlessResizeEnabled=" + isSeamlessResizeEnabled()
+                + " title=" + getTitle()
+                + " subtitle=" + getSubtitle()
                 + ")";
     }
 

@@ -214,6 +214,16 @@ public final class SyncFence implements AutoCloseable, Parcelable {
         return CONTENTS_FILE_DESCRIPTOR;
     }
 
+    /** @hide */
+    public Object getLock() {
+        return mCloser;
+    }
+
+    /** @hide */
+    public long getNativeFence() {
+        return mNativePtr;
+    }
+
     /**
      * Flatten this object into a Parcel.
      *

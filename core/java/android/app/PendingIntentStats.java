@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package android.window;
+package android.app;
 
 /**
+ * Data about pending intents - size and count, per UID that sent the intent.
  * @hide
  */
-oneway interface IOnFpsCallbackListener {
+public class PendingIntentStats {
+    public final int uid;
+    public final int count;
+    public final int sizeKb;
 
-    /**
-     * Reports the fps from the registered task
-     * @param fps The frame rate per second of the task that has the registered task id
-     *            and its children.
-     */
-    void onFpsReported(in float fps);
+    public PendingIntentStats(int uid, int count, int sizeKb) {
+        this.uid = uid;
+        this.count = count;
+        this.sizeKb = sizeKb;
+    }
 }

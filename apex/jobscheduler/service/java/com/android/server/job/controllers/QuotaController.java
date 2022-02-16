@@ -76,6 +76,8 @@ import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.AlarmQueue;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -4358,6 +4360,7 @@ public final class QuotaController extends StateController {
 
     //////////////////////////// DATA DUMP //////////////////////////////
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {

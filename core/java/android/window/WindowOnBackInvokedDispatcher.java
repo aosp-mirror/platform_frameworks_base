@@ -19,9 +19,11 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
+import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
@@ -50,10 +52,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
     private static final String TAG = "WindowOnBackDispatcher";
-    private static final boolean DEBUG = false;
     private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
     private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
-            .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
+            .getInt(BACK_PREDICTABILITY_PROP, 1) > 0;
 
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
@@ -227,10 +228,23 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      *
      * Legacy back behavior dispatches KEYCODE_BACK instead of invoking the application registered
      * {@link android.view.OnBackInvokedCallback}.
-     *
      */
-    public static boolean shouldUseLegacyBack() {
-        return !CompatChanges.isChangeEnabled(DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME)
-                || !IS_BACK_PREDICTABILITY_ENABLED;
+    public static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
+        // new back is enabled if the app targets T AND the feature flag is enabled AND the app
+        // does not explicitly request legacy back.
+        boolean targetsT = CompatChanges.isChangeEnabled(DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME);
+        boolean featureFlagEnabled = IS_BACK_PREDICTABILITY_ENABLED;
+        // If the context is null, we assume true and fallback on the two other conditions.
+        boolean appRequestsLegacy =
+                context == null || !context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
+
+        if (DEBUG) {
+            Log.d(TAG, TextUtils.formatSimple("App: %s isChangeEnabled=%s featureFlagEnabled=%s "
+                            + "onBackInvokedEnabled=%s",
+                    context != null ? context.getApplicationInfo().packageName : "null context",
+                    targetsT, featureFlagEnabled, !appRequestsLegacy));
+        }
+
+        return targetsT && featureFlagEnabled && !appRequestsLegacy;
     }
 }

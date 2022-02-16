@@ -57,6 +57,12 @@
         com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
     </string>
 
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of hardware privacy switches. -->
+    <string name="config_sensorUseStartedActivity_hwToggle" translatable="false">
+        com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
+    </string>
+
     <!-- Component name of the activity that shows the request for access to a usb device. -->
     <string name="config_usbPermissionActivity" translatable="false">
         com.android.systemui/com.android.systemui.usb.tv.TvUsbPermissionActivity

@@ -155,4 +155,19 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         mIconView.getIcon(largeIcon);
         // no crash? good
     }
+
+    @Test
+    public void testNullIcon() {
+        Icon mockIcon = mock(Icon.class);
+        when(mockIcon.loadDrawableAsUser(any(), anyInt())).thenReturn(null);
+        mStatusBarIcon.icon = mockIcon;
+        mIconView.set(mStatusBarIcon);
+
+        Bitmap bitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888);
+        Icon icon = Icon.createWithBitmap(bitmap);
+        StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                icon, 0, 0, "");
+        mIconView.getIcon(largeIcon);
+        // No crash? good
+    }
 }

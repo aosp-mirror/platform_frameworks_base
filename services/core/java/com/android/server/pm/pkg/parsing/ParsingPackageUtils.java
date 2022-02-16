@@ -2202,8 +2202,9 @@ public class ParsingPackageUtils {
                 .setAutoRevokePermissions(anInt(R.styleable.AndroidManifestApplication_autoRevokePermissions, sa))
                 .setAttributionsAreUserVisible(bool(false, R.styleable.AndroidManifestApplication_attributionsAreUserVisible, sa))
                 .setResetEnabledSettingsOnAppDataCleared(bool(false,
-                    R.styleable.AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared,
-                    sa))
+                        R.styleable.AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared,
+                        sa))
+                .setOnBackInvokedCallbackEnabled(bool(false, R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
                 .setBaseHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))

@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
@@ -135,6 +136,8 @@ import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedSparseArray;
 import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import libcore.io.IoUtils;
 
@@ -1117,6 +1120,9 @@ public final class Settings implements Watchable, Snappable {
                         "Updating application package " + pkgName + " failed");
             }
             pkgSetting.setSharedUserAppId(sharedUser.mAppId);
+        } else {
+            // migrating off shared user
+            pkgSetting.setSharedUserAppId(INVALID_UID);
         }
 
         if (!pkgSetting.getPath().equals(codePath)) {
@@ -4514,6 +4520,7 @@ public final class Settings implements Watchable, Snappable {
         pw.decreaseIndent();
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
             ArraySet<String> permissionNames, PackageSetting ps,
             LegacyPermissionState permissionsState, SimpleDateFormat sdf, Date date,

@@ -55,7 +55,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class MovePipDownShelfHeightChangeTest(
+open class MovePipDownShelfHeightChangeTest(
     testSpec: FlickerTestParameter
 ) : MovePipShelfHeightTransition(testSpec) {
     /**

@@ -42,4 +42,10 @@ public interface ProximitySensor extends ThresholdSensor {
      * of what is reported by the primary sensor.
      */
     void setSecondarySafe(boolean safe);
+
+    /**
+     * Called when the proximity sensor is no longer needed. All listeners should
+     * be unregistered and cleaned up.
+     */
+    void destroy();
 }

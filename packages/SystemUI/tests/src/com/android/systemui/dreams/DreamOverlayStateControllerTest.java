@@ -123,7 +123,7 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testComplicationFiltering() {
+    public void testComplicationFilteringWhenShouldShowComplications() {
         final DreamOverlayStateController stateController =
                 new DreamOverlayStateController(mExecutor);
 
@@ -159,5 +159,51 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
             assertThat(complications.contains(weatherComplication)).isTrue();
         }
 
+    }
+
+    @Test
+    public void testComplicationFilteringWhenShouldHideComplications() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+        stateController.setShouldShowComplications(true);
+
+        final Complication alwaysAvailableComplication = Mockito.mock(Complication.class);
+        final Complication weatherComplication = Mockito.mock(Complication.class);
+        when(alwaysAvailableComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_NONE);
+        when(weatherComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_WEATHER);
+
+        stateController.addComplication(alwaysAvailableComplication);
+        stateController.addComplication(weatherComplication);
+
+        final DreamOverlayStateController.Callback callback =
+                Mockito.mock(DreamOverlayStateController.Callback.class);
+
+        stateController.setAvailableComplicationTypes(Complication.COMPLICATION_TYPE_WEATHER);
+        stateController.addCallback(callback);
+        mExecutor.runAllReady();
+
+        {
+            clearInvocations(callback);
+            stateController.setShouldShowComplications(true);
+            mExecutor.runAllReady();
+
+            verify(callback).onAvailableComplicationTypesChanged();
+            final Collection<Complication> complications = stateController.getComplications();
+            assertThat(complications.contains(alwaysAvailableComplication)).isTrue();
+            assertThat(complications.contains(weatherComplication)).isTrue();
+        }
+
+        {
+            clearInvocations(callback);
+            stateController.setShouldShowComplications(false);
+            mExecutor.runAllReady();
+
+            verify(callback).onAvailableComplicationTypesChanged();
+            final Collection<Complication> complications = stateController.getComplications();
+            assertThat(complications.contains(alwaysAvailableComplication)).isTrue();
+            assertThat(complications.contains(weatherComplication)).isFalse();
+        }
     }
 }
