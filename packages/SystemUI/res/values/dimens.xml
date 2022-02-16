@@ -1332,12 +1332,16 @@
     <dimen name="fgs_manager_min_width_minor">100%</dimen>
 
     <!-- Dream overlay related dimensions -->
-    <dimen name="dream_overlay_status_bar_height">80dp</dimen>
+    <dimen name="dream_overlay_status_bar_height">60dp</dimen>
     <dimen name="dream_overlay_status_bar_margin">40dp</dimen>
     <dimen name="dream_overlay_status_icon_margin">8dp</dimen>
+    <dimen name="dream_overlay_status_bar_icon_size">
+        @*android:dimen/status_bar_system_icon_size</dimen>
     <!-- Height of the area at the top of the dream overlay to allow dragging down the notifications
          shade. -->
     <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
+    <dimen name="dream_overlay_camera_mic_off_indicator_size">8dp</dimen>
+    <dimen name="dream_overlay_notification_indicator_size">6dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
     <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>

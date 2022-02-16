@@ -25,17 +25,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
-import com.android.systemui.battery.BatteryMeterView;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 /**
  * {@link DreamOverlayStatusBarView} is the view responsible for displaying the status bar in a
- * dream. The status bar includes status icons such as battery and wifi.
+ * dream. The status bar displays conditional status icons such as "priority mode" and "no wifi".
  */
-public class DreamOverlayStatusBarView extends ConstraintLayout implements
-        BatteryStateChangeCallback {
+public class DreamOverlayStatusBarView extends ConstraintLayout {
 
-    private BatteryMeterView mBatteryView;
     private ImageView mWifiStatusView;
 
     public DreamOverlayStatusBarView(Context context) {
@@ -59,20 +55,8 @@ public class DreamOverlayStatusBarView extends ConstraintLayout implements
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mBatteryView = Preconditions.checkNotNull(findViewById(R.id.dream_overlay_battery),
-                "R.id.dream_overlay_battery must not be null");
         mWifiStatusView = Preconditions.checkNotNull(findViewById(R.id.dream_overlay_wifi_status),
                 "R.id.dream_overlay_wifi_status must not be null");
-
-        mWifiStatusView.setImageDrawable(getContext().getDrawable(R.drawable.ic_signal_wifi_off));
-    }
-
-    /**
-     * Whether to show the battery percent text next to the battery status icons.
-     * @param show True if the battery percent text should be shown.
-     */
-    void showBatteryPercentText(boolean show) {
-        mBatteryView.setForceShowPercent(show);
     }
 
     /**
