@@ -36,7 +36,7 @@ oneway interface ITunerCallback {
     void onProgramListUpdated(in ProgramList.Chunk chunk);
 
     /**
-     * @param parameters Vendor-specific key-value pairs
+     * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
      */
-    void onParametersUpdated(in Map<String, String> parameters);
+    void onParametersUpdated(in Map parameters);
 }

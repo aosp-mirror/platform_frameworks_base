@@ -422,14 +422,8 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x10000000;
 
-    /**
-     * Indicates whether the remote party supports RTT or not to the UI.
-     */
-
-    public static final int CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT = 0x20000000;
-
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x40000000
+    // Next CAPABILITY value: 0x20000000
     //**********************************************************************************************
 
     /**
@@ -560,15 +554,6 @@ public abstract class Connection extends Conferenceable {
      * <p>
      */
     public static final int PROPERTY_CROSS_SIM = 1 << 13;
-
-    /**
-     * Connection is a tethered external call.
-     * <p>
-     * Indicates that the {@link Connection} is fixed on this device but the audio streams are
-     * re-routed to another device.
-     * <p>
-     */
-    public static final int PROPERTY_TETHERED_CALL = 1 << 14;
 
     //**********************************************************************************************
     // Next PROPERTY value: 1<<14
@@ -844,17 +829,6 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_AUDIO_CODEC_BANDWIDTH_KHZ =
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
-
-    /**
-     * Last known cell identity key to be used to fill geo location header in case of an emergency
-     * call. This entry will not be filled if call is not identified as an emergency call.
-     * {@link Connection}. Only provided to the {@link ConnectionService} for the purpose
-     * of placing an emergency call; will not be present in the {@link InCallService} layer.
-     * The {@link ConnectionService}'s implementation will be logged for fine location access
-     * when an outgoing call is placed in this case.
-     */
-    public static final String EXTRA_LAST_KNOWN_CELL_IDENTITY =
-            "android.telecom.extra.LAST_KNOWN_CELL_IDENTITY";
 
     /**
      * Boolean connection extra key used to indicate whether device to device communication is
@@ -1163,10 +1137,6 @@ public abstract class Connection extends Conferenceable {
         if ((capabilities & CAPABILITY_TRANSFER_CONSULTATIVE)
                 == CAPABILITY_TRANSFER_CONSULTATIVE) {
             builder.append(isLong ? " CAPABILITY_TRANSFER_CONSULTATIVE" : " sup_cTrans");
-        }
-        if ((capabilities & CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT)
-                == CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT) {
-            builder.append(isLong ? " CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT" : " sup_rtt");
         }
         builder.append("]");
         return builder.toString();
@@ -1810,13 +1780,11 @@ public abstract class Connection extends Conferenceable {
         public abstract void onSetDeviceOrientation(int rotation);
 
         /**
-         * Sets the camera zoom ratio.
+         * Sets camera zoom ratio.
          * <p>
          * Sent from the {@link InCallService} via {@link InCallService.VideoCall#setZoom(float)}.
          *
-         * @param value The camera zoom ratio; for the current camera, should be a value in the
-         * range defined by
-         * {@link android.hardware.camera2.CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE}.
+         * @param value The camera zoom ratio.
          */
         public abstract void onSetZoom(float value);
 
@@ -3546,9 +3514,9 @@ public abstract class Connection extends Conferenceable {
             mIsBlocked = in.readByte() != 0;
             mIsInContacts = in.readByte() != 0;
             CallScreeningService.ParcelableCallResponse response
-                    = in.readParcelable(CallScreeningService.class.getClassLoader(), android.telecom.CallScreeningService.ParcelableCallResponse.class);
+                    = in.readParcelable(CallScreeningService.class.getClassLoader());
             mCallResponse = response == null ? null : response.toCallResponse();
-            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
         }
 
         @NonNull

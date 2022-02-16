@@ -149,7 +149,7 @@ public final class ConversationActions implements Parcelable {
         }
 
         private Message(Parcel in) {
-            mAuthor = in.readParcelable(null, android.app.Person.class);
+            mAuthor = in.readParcelable(null);
             mReferenceTime =
                     in.readInt() == 0
                             ? null
@@ -331,13 +331,13 @@ public final class ConversationActions implements Parcelable {
 
         private static Request readFromParcel(Parcel in) {
             List<Message> conversation = new ArrayList<>();
-            in.readParcelableList(conversation, null, android.view.textclassifier.ConversationActions.Message.class);
-            TextClassifier.EntityConfig typeConfig = in.readParcelable(null, android.view.textclassifier.TextClassifier.EntityConfig.class);
+            in.readParcelableList(conversation, null);
+            TextClassifier.EntityConfig typeConfig = in.readParcelable(null);
             int maxSuggestions = in.readInt();
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
             Bundle extras = in.readBundle();
-            SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
+            SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
 
             Request request = new Request(
                     conversation,

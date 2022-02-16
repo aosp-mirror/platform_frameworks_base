@@ -23,6 +23,7 @@ import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Handler
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
+import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingImageMessage
 import com.android.internal.widget.MessagingLayout
@@ -30,10 +31,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -72,8 +70,7 @@ class ConversationNotificationProcessor @Inject constructor(
  */
 @SysUISingleton
 class AnimatedImageNotificationManager @Inject constructor(
-    private val notifCollection: CommonNotifCollection,
-    private val bindEventManager: BindEventManager,
+    private val notificationEntryManager: NotificationEntryManager,
     private val headsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController
 ) {
@@ -84,22 +81,32 @@ class AnimatedImageNotificationManager @Inject constructor(
     fun bind() {
         headsUpManager.addListener(object : OnHeadsUpChangedListener {
             override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
-                updateAnimatedImageDrawables(entry)
+                entry.row?.let { row ->
+                    updateAnimatedImageDrawables(row, animating = isHeadsUp || isStatusBarExpanded)
+                }
             }
         })
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onExpandedChanged(isExpanded: Boolean) {
                 isStatusBarExpanded = isExpanded
-                notifCollection.allNotifs.forEach(::updateAnimatedImageDrawables)
+                notificationEntryManager.activeNotificationsForCurrentUser.forEach { entry ->
+                    entry.row?.let { row ->
+                        updateAnimatedImageDrawables(row, animating = isExpanded || row.isHeadsUp)
+                    }
+                }
             }
         })
-        bindEventManager.addListener(::updateAnimatedImageDrawables)
+        notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
+            override fun onEntryInflated(entry: NotificationEntry) {
+                entry.row?.let { row ->
+                    updateAnimatedImageDrawables(
+                            row,
+                            animating = isStatusBarExpanded || row.isHeadsUp)
+                }
+            }
+            override fun onEntryReinflated(entry: NotificationEntry) = onEntryInflated(entry)
+        })
     }
-
-    private fun updateAnimatedImageDrawables(entry: NotificationEntry) =
-        entry.row?.let { row ->
-            updateAnimatedImageDrawables(row, animating = row.isHeadsUp || isStatusBarExpanded)
-        }
 
     private fun updateAnimatedImageDrawables(row: ExpandableNotificationRow, animating: Boolean) =
             (row.layouts?.asSequence() ?: emptySequence())
@@ -125,15 +132,12 @@ class AnimatedImageNotificationManager @Inject constructor(
 /**
  * Tracks state related to conversation notifications, and updates the UI of existing notifications
  * when necessary.
- * TODO(b/214083332) Refactor this class to use the right coordinators and controllers
  */
 @SysUISingleton
 class ConversationNotificationManager @Inject constructor(
-    private val bindEventManager: BindEventManager,
+    private val notificationEntryManager: NotificationEntryManager,
     private val notificationGroupManager: NotificationGroupManagerLegacy,
     private val context: Context,
-    private val notifCollection: CommonNotifCollection,
-    private val featureFlags: NotifPipelineFlags,
     @Main private val mainHandler: Handler
 ) {
     // Need this state to be thread safe, since it's accessed from the ui thread
@@ -142,73 +146,76 @@ class ConversationNotificationManager @Inject constructor(
 
     private var notifPanelCollapsed = true
 
-    private fun updateNotificationRanking(rankingMap: RankingMap) {
-        fun getLayouts(view: NotificationContentView) =
-                sequenceOf(view.contractedChild, view.expandedChild, view.headsUpChild)
-        val ranking = Ranking()
-        val activeConversationEntries = states.keys.asSequence()
-                .mapNotNull { notifCollection.getEntry(it) }
-        for (entry in activeConversationEntries) {
-            if (rankingMap.getRanking(entry.sbn.key, ranking) && ranking.isConversation) {
-                val important = ranking.channel.isImportantConversation
-                var changed = false
-                entry.row?.layouts?.asSequence()
-                        ?.flatMap(::getLayouts)
-                        ?.mapNotNull { it as? ConversationLayout }
-                        ?.filterNot { it.isImportantConversation == important }
-                        ?.forEach { layout ->
-                            changed = true
-                            if (important && entry.isMarkedForUserTriggeredMovement) {
-                                // delay this so that it doesn't animate in until after
-                                // the notif has been moved in the shade
-                                mainHandler.postDelayed(
-                                        {
-                                            layout.setIsImportantConversation(
-                                                    important,
-                                                    true)
-                                        },
-                                        IMPORTANCE_ANIMATION_DELAY.toLong())
-                            } else {
-                                layout.setIsImportantConversation(important, false)
-                            }
-                        }
-                if (changed && !featureFlags.isNewPipelineEnabled()) {
-                    notificationGroupManager.updateIsolation(entry)
-                }
-            }
-        }
-    }
-    fun onEntryViewBound(entry: NotificationEntry) {
-        if (!entry.ranking.isConversation) {
-            return
-        }
-        fun updateCount(isExpanded: Boolean) {
-            if (isExpanded && (!notifPanelCollapsed || entry.isPinnedAndExpanded)) {
-                resetCount(entry.key)
-                entry.row?.let(::resetBadgeUi)
-            }
-        }
-        entry.row?.setOnExpansionChangedListener { isExpanded ->
-            if (entry.row?.isShown == true && isExpanded) {
-                entry.row.performOnIntrinsicHeightReached {
-                    updateCount(isExpanded)
-                }
-            } else {
-                updateCount(isExpanded)
-            }
-        }
-        updateCount(entry.row?.isExpanded == true)
-    }
-
     init {
-        notifCollection.addCollectionListener(object : NotifCollectionListener {
-            override fun onRankingUpdate(ranking: RankingMap) =
-                updateNotificationRanking(ranking)
+        notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
+            override fun onNotificationRankingUpdated(rankingMap: RankingMap) {
+                fun getLayouts(view: NotificationContentView) =
+                        sequenceOf(view.contractedChild, view.expandedChild, view.headsUpChild)
+                val ranking = Ranking()
+                val activeConversationEntries = states.keys.asSequence()
+                        .mapNotNull { notificationEntryManager.getActiveNotificationUnfiltered(it) }
+                for (entry in activeConversationEntries) {
+                    if (rankingMap.getRanking(entry.sbn.key, ranking) && ranking.isConversation) {
+                        val important = ranking.channel.isImportantConversation
+                        var changed = false
+                        entry.row?.layouts?.asSequence()
+                                ?.flatMap(::getLayouts)
+                                ?.mapNotNull { it as? ConversationLayout }
+                                ?.filterNot { it.isImportantConversation == important }
+                                ?.forEach { layout ->
+                                    changed = true
+                                    if (important && entry.isMarkedForUserTriggeredMovement) {
+                                        // delay this so that it doesn't animate in until after
+                                        // the notif has been moved in the shade
+                                        mainHandler.postDelayed(
+                                                {
+                                                    layout.setIsImportantConversation(
+                                                            important,
+                                                            true)
+                                                },
+                                                IMPORTANCE_ANIMATION_DELAY.toLong())
+                                    } else {
+                                        layout.setIsImportantConversation(important, false)
+                                    }
+                                }
+                        if (changed) {
+                            notificationGroupManager.updateIsolation(entry)
+                        }
+                    }
+                }
+            }
 
-            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) =
-                removeTrackedEntry(entry)
+            override fun onEntryInflated(entry: NotificationEntry) {
+                if (!entry.ranking.isConversation) {
+                    return
+                }
+                fun updateCount(isExpanded: Boolean) {
+                    if (isExpanded && (!notifPanelCollapsed || entry.isPinnedAndExpanded)) {
+                        resetCount(entry.key)
+                        entry.row?.let(::resetBadgeUi)
+                    }
+                }
+                entry.row?.setOnExpansionChangedListener { isExpanded ->
+                    if (entry.row?.isShown == true && isExpanded) {
+                        entry.row.performOnIntrinsicHeightReached {
+                            updateCount(isExpanded)
+                        }
+                    } else {
+                        updateCount(isExpanded)
+                    }
+                }
+                updateCount(entry.row?.isExpanded == true)
+            }
+
+            override fun onEntryReinflated(entry: NotificationEntry) = onEntryInflated(entry)
+
+            override fun onEntryRemoved(
+                entry: NotificationEntry,
+                visibility: NotificationVisibility?,
+                removedByUser: Boolean,
+                reason: Int
+            ) = removeTrackedEntry(entry)
         })
-        bindEventManager.addListener(::onEntryViewBound)
     }
 
     private fun ConversationState.shouldIncrementUnread(newBuilder: Notification.Builder) =
@@ -236,10 +243,11 @@ class ConversationNotificationManager @Inject constructor(
         val expanded = states
                 .asSequence()
                 .mapNotNull { (key, _) ->
-                    notifCollection.getEntry(key)?.let { entry ->
-                        if (entry.row?.isExpanded == true) key to entry
-                        else null
-                    }
+                    notificationEntryManager.getActiveNotificationUnfiltered(key)
+                            ?.let { entry ->
+                                if (entry.row?.isExpanded == true) key to entry
+                                else null
+                            }
                 }
                 .toMap()
         states.replaceAll { key, state ->

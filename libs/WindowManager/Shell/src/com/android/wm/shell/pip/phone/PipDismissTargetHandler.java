@@ -20,7 +20,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -31,7 +30,6 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -95,7 +93,6 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
     private int mTargetSize;
     private int mDismissAreaHeight;
     private float mMagneticFieldRadiusPercent = 1f;
-    private WindowInsets mWindowInsets;
 
     private SurfaceControl mTaskLeash;
     private boolean mHasDismissTargetSurface;
@@ -120,27 +117,14 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
 
-        if (mTargetViewContainer != null) {
-            // init can be called multiple times, remove the old one from view hierarchy first.
-            cleanUpDismissTarget();
-        }
-
         mTargetView = new DismissCircleView(mContext);
         mTargetViewContainer = new FrameLayout(mContext);
         mTargetViewContainer.setBackgroundDrawable(
                 mContext.getDrawable(R.drawable.floating_dismiss_gradient_transition));
         mTargetViewContainer.setClipChildren(false);
         mTargetViewContainer.addView(mTargetView);
-        mTargetViewContainer.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-            if (!windowInsets.equals(mWindowInsets)) {
-                mWindowInsets = windowInsets;
-                updateMagneticTargetSize();
-            }
-            return windowInsets;
-        });
 
         mMagnetizedPip = mMotionHelper.getMagnetizedPip();
-        mMagnetizedPip.clearAllTargets();
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
         updateMagneticTargetSize();
 
@@ -174,16 +158,14 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                if (mEnableDismissDragToEdge) {
-                    mMainExecutor.executeDelayed(() -> {
-                        mMotionHelper.notifyDismissalPending();
-                        mMotionHelper.animateDismiss();
-                        hideDismissTargetMaybe();
+                mMainExecutor.executeDelayed(() -> {
+                    mMotionHelper.notifyDismissalPending();
+                    mMotionHelper.animateDismiss();
+                    hideDismissTargetMaybe();
 
-                        mPipUiEventLogger.log(
-                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
-                    }, 0);
-                }
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
+                }, 0);
             }
         });
 
@@ -217,13 +199,10 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
         final Resources res = mContext.getResources();
         mTargetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
-        final WindowInsets insets = mWindowManager.getCurrentWindowMetrics().getWindowInsets();
-        final Insets navInset = insets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.navigationBars());
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(mTargetSize, mTargetSize);
         newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
-        newParams.bottomMargin = navInset.bottom + mContext.getResources().getDimensionPixelSize(
+        newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 

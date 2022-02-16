@@ -71,11 +71,7 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
         if (mNextAlarm != null) {
             pw.println(new Date(mNextAlarm.getTriggerTime()));
             pw.print("  PendingIntentPkg=");
-            if (mNextAlarm.getShowIntent() != null) {
-                pw.println(mNextAlarm.getShowIntent().getCreatorPackage());
-            } else {
-                pw.println("showIntent=null");
-            }
+            pw.println(mNextAlarm.getShowIntent().getCreatorPackage());
         } else {
             pw.println("null");
         }

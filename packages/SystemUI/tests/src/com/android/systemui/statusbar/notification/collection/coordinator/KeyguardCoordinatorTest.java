@@ -41,7 +41,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -71,7 +70,6 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
     @Mock private NotifPipeline mNotifPipeline;
 
     private NotificationEntry mEntry;
@@ -83,7 +81,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         KeyguardCoordinator keyguardCoordinator = new KeyguardCoordinator(
                 mContext, mMainHandler, mKeyguardStateController, mLockscreenUserManager,
                 mBroadcastDispatcher, mStatusBarStateController,
-                mKeyguardUpdateMonitor, mHighPriorityProvider, mSectionHeaderVisibilityProvider);
+                mKeyguardUpdateMonitor, mHighPriorityProvider);
 
         mEntry = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID))

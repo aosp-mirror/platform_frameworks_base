@@ -35,12 +35,10 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -51,8 +49,6 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 public interface StatusBarIconController {
 
@@ -217,20 +213,6 @@ public interface StatusBarIconController {
             icons.setColor(mColor);
             return icons;
         }
-
-        @SysUISingleton
-        public static class Factory {
-            private final FeatureFlags mFeatureFlags;
-
-            @Inject
-            public Factory(FeatureFlags featureFlags) {
-                mFeatureFlags = featureFlags;
-            }
-
-            public TintedIconManager create(ViewGroup group) {
-                return new TintedIconManager(group, mFeatureFlags);
-            }
-        }
     }
 
     /**
@@ -354,8 +336,7 @@ public interface StatusBarIconController {
 
         private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
             StatusBarMobileView view = StatusBarMobileView.fromContext(
-                            mContext, slot,
-                    mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
+                            mContext, slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
             return view;
         }
 

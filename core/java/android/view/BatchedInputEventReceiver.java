@@ -17,7 +17,6 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Handler;
 import android.os.Looper;
 
 /**
@@ -28,13 +27,6 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private Choreographer mChoreographer;
     private boolean mBatchingEnabled;
     private boolean mBatchedInputScheduled;
-    private final Handler mHandler;
-    private final Runnable mConsumeBatchedInputEvents = new Runnable() {
-        @Override
-        public void run() {
-            consumeBatchedInputEvents(-1);
-        }
-    };
 
     @UnsupportedAppUsage
     public BatchedInputEventReceiver(
@@ -42,7 +34,6 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
         super(inputChannel, looper);
         mChoreographer = choreographer;
         mBatchingEnabled = true;
-        mHandler = new Handler(looper);
     }
 
     @Override
@@ -66,19 +57,14 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
      * @hide
      */
     public void setBatchingEnabled(boolean batchingEnabled) {
-        if (mBatchingEnabled == batchingEnabled) {
-            return;
-        }
-
         mBatchingEnabled = batchingEnabled;
-        mHandler.removeCallbacks(mConsumeBatchedInputEvents);
         if (!batchingEnabled) {
             unscheduleBatchedInput();
-            mHandler.post(mConsumeBatchedInputEvents);
+            consumeBatchedInputEvents(-1);
         }
     }
 
-    protected void doConsumeBatchedInput(long frameTimeNanos) {
+    void doConsumeBatchedInput(long frameTimeNanos) {
         if (mBatchedInputScheduled) {
             mBatchedInputScheduled = false;
             if (consumeBatchedInputEvents(frameTimeNanos) && frameTimeNanos != -1) {
@@ -114,38 +100,4 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
         }
     }
     private final BatchedInputRunnable mBatchedInputRunnable = new BatchedInputRunnable();
-
-    /**
-     * A {@link BatchedInputEventReceiver} that reports events to an {@link InputEventListener}.
-     * @hide
-     */
-    public static class SimpleBatchedInputEventReceiver extends BatchedInputEventReceiver {
-
-        /** @hide */
-        public interface InputEventListener {
-            /**
-             * Process the input event.
-             * @return handled
-             */
-            boolean onInputEvent(InputEvent event);
-        }
-
-        protected InputEventListener mListener;
-
-        public SimpleBatchedInputEventReceiver(InputChannel inputChannel, Looper looper,
-                Choreographer choreographer, InputEventListener listener) {
-            super(inputChannel, looper, choreographer);
-            mListener = listener;
-        }
-
-        @Override
-        public void onInputEvent(InputEvent event) {
-            boolean handled = false;
-            try {
-                handled = mListener.onInputEvent(event);
-            } finally {
-                finishInputEvent(event, handled);
-            }
-        }
-    }
 }

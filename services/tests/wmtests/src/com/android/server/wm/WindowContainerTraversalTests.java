@@ -17,7 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -49,8 +50,11 @@ public class WindowContainerTraversalTests extends WindowTestsBase {
     @Test
     public void testDockedDividerPosition() {
         final WindowState splitScreenWindow = createWindow(null,
-                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "splitScreenWindow");
+        final WindowState splitScreenSecondaryWindow = createWindow(null,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
+                TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
 
         mDisplayContent.setImeLayeringTarget(splitScreenWindow);
 

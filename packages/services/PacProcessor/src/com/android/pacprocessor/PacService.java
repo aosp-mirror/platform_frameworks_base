@@ -21,7 +21,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.util.Log;
 import android.webkit.PacProcessor;
 
@@ -34,44 +33,16 @@ import java.net.URL;
 public class PacService extends Service {
     private static final String TAG = "PacService";
 
-    private final Object mLock = new Object();
+    private Object mLock = new Object();
 
-    // Webkit PacProcessor cannot be instantiated before the user is unlocked, so this field is
-    // initialized lazily.
     @GuardedBy("mLock")
-    private PacProcessor mPacProcessor;
-
-    // Stores PAC script when setPacFile is called before mPacProcessor is available. In case the
-    // script was already fed to the PacProcessor, it should be null.
-    @GuardedBy("mLock")
-    private String mPendingScript;
+    private final PacProcessor mPacProcessor = PacProcessor.getInstance();
 
     private ProxyServiceStub mStub = new ProxyServiceStub();
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        synchronized (mLock) {
-            checkPacProcessorLocked();
-        }
-    }
-
-    /**
-     * Initializes PacProcessor if it hasn't been initialized yet and if the system user is
-     * unlocked, e.g. after the user has entered their PIN after a reboot.
-     * Returns whether PacProcessor is available.
-     */
-    private boolean checkPacProcessorLocked() {
-        if (mPacProcessor != null) {
-            return true;
-        }
-        UserManager um = getSystemService(UserManager.class);
-        if (um.isUserUnlocked()) {
-            mPacProcessor = PacProcessor.getInstance();
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -103,20 +74,7 @@ public class PacService extends Service {
                 }
 
                 synchronized (mLock) {
-                    if (checkPacProcessorLocked()) {
-                        // Apply pending script in case it was set before processor was ready.
-                        if (mPendingScript != null) {
-                            if (!mPacProcessor.setProxyScript(mPendingScript)) {
-                                Log.e(TAG, "Unable to parse proxy script.");
-                            }
-                            mPendingScript = null;
-                        }
-                        return mPacProcessor.findProxyForUrl(url);
-                    } else {
-                        Log.e(TAG, "PacProcessor isn't ready during early boot,"
-                                + " request will be direct");
-                        return null;
-                    }
+                    return mPacProcessor.findProxyForUrl(url);
                 }
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Invalid URL was passed");
@@ -130,13 +88,8 @@ public class PacService extends Service {
                 throw new SecurityException();
             }
             synchronized (mLock) {
-                if (checkPacProcessorLocked()) {
-                    if (!mPacProcessor.setProxyScript(script)) {
-                        Log.e(TAG, "Unable to parse proxy script.");
-                    }
-                } else {
-                    Log.d(TAG, "PAC processor isn't ready, saving script for later.");
-                    mPendingScript = script;
+                if (!mPacProcessor.setProxyScript(script)) {
+                    Log.e(TAG, "Unable to parse proxy script.");
                 }
             }
         }

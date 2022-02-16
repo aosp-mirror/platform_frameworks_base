@@ -85,14 +85,6 @@ final class ChangeIdStateQuery {
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = 31 * result + type;
-        result = 31 * result + (int) (changeId ^ (changeId >>> 32));
-        if (packageName != null) {
-            result = 31 * result + packageName.hashCode();
-        }
-        result = 31 * result + uid;
-        result = 31 * result + userId;
-        return result;
+        return Objects.hash(type, changeId, packageName, uid, userId);
     }
 }

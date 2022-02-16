@@ -32,7 +32,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -72,7 +71,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
@@ -82,7 +80,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
@@ -96,7 +93,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton.IconState;
-import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ExtensionController;
@@ -107,6 +103,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
+import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
 
@@ -145,16 +142,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mLeftAffordanceView;
 
     private ImageView mWalletButton;
-    private ImageView mQRCodeScannerButton;
     private ImageView mControlsButton;
     private boolean mHasCard = false;
     private WalletCardRetriever mCardRetriever = new WalletCardRetriever();
     private QuickAccessWalletController mQuickAccessWalletController;
-    private QRCodeScannerController mQRCodeScannerController;
     private ControlsComponent mControlsComponent;
     private boolean mControlServicesAvailable = false;
 
-    @Nullable private View mAmbientIndicationArea;
     private ViewGroup mIndicationArea;
     private TextView mIndicationText;
     private TextView mIndicationTextBottom;
@@ -209,15 +203,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private ControlsListingController.ControlsListingCallback mListingCallback =
             new ControlsListingController.ControlsListingCallback() {
                 public void onServicesUpdated(List<ControlsServiceInfo> serviceInfos) {
-                    post(() -> {
-                        boolean available = !serviceInfos.isEmpty();
+                    boolean available = !serviceInfos.isEmpty();
 
-                        if (available != mControlServicesAvailable) {
-                            mControlServicesAvailable = available;
-                            updateControlsVisibility();
-                            updateAffordanceColors();
-                        }
-                    });
+                    if (available != mControlServicesAvailable) {
+                        mControlServicesAvailable = available;
+                        updateControlsVisibility();
+                        updateAffordanceColors();
+                    }
                 }
             };
 
@@ -275,29 +267,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void initFrom(KeyguardBottomAreaView oldBottomArea) {
         setStatusBar(oldBottomArea.mStatusBar);
-
-        // if it exists, continue to use the original ambient indication container
-        // instead of the newly inflated one
-        if (mAmbientIndicationArea != null) {
-            // remove old ambient indication from its parent
-            View originalAmbientIndicationView =
-                    oldBottomArea.findViewById(R.id.ambient_indication_container);
-            ((ViewGroup) originalAmbientIndicationView.getParent())
-                    .removeView(originalAmbientIndicationView);
-
-            // remove current ambient indication from its parent (discard)
-            ViewGroup ambientIndicationParent = (ViewGroup) mAmbientIndicationArea.getParent();
-            int ambientIndicationIndex =
-                    ambientIndicationParent.indexOfChild(mAmbientIndicationArea);
-            ambientIndicationParent.removeView(mAmbientIndicationArea);
-
-            // add the old ambient indication to this view
-            ambientIndicationParent.addView(originalAmbientIndicationView, ambientIndicationIndex);
-            mAmbientIndicationArea = originalAmbientIndicationView;
-
-            // update burn-in offsets
-            dozeTimeTick();
-        }
     }
 
     @Override
@@ -309,10 +278,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
         mWalletButton = findViewById(R.id.wallet_button);
-        mQRCodeScannerButton = findViewById(R.id.qr_code_scanner_button);
         mControlsButton = findViewById(R.id.controls_button);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
-        mAmbientIndicationArea = findViewById(R.id.ambient_indication_container);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
         mIndicationTextBottom = findViewById(R.id.keyguard_indication_text_bottom);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
@@ -335,7 +302,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_area_padding);
         updateWalletVisibility();
-        updateQRCodeButtonVisibility();
         updateControlsVisibility();
     }
 
@@ -390,12 +356,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     WALLET_PREFERENCE_CHANGE, DEFAULT_PAYMENT_APP_CHANGE);
         }
 
-        if (mQRCodeScannerController != null) {
-            mQRCodeScannerController.unregisterQRCodeScannerChangeObservers(
-                    QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
-                    QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE);
-        }
-
         if (mControlsComponent != null) {
             mControlsComponent.getControlsListingController().ifPresent(
                     c -> c.removeCallback(mListingCallback));
@@ -445,11 +405,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height);
         mWalletButton.setLayoutParams(lp);
 
-        lp = mQRCodeScannerButton.getLayoutParams();
-        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width);
-        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height);
-        mQRCodeScannerButton.setLayoutParams(lp);
-
         lp = mControlsButton.getLayoutParams();
         lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width);
         lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height);
@@ -459,7 +414,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 R.dimen.keyguard_indication_area_padding);
 
         updateWalletVisibility();
-        updateQRCodeButtonVisibility();
         updateAffordanceColors();
     }
 
@@ -552,10 +506,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private void updateControlsVisibility() {
         if (mControlsComponent == null) return;
-
-        mControlsButton.setImageResource(mControlsComponent.getTileImageId());
-        mControlsButton.setContentDescription(getContext()
-                .getString(mControlsComponent.getTileTitleId()));
 
         boolean hasFavorites = mControlsComponent.getControlsController()
                 .map(c -> c.getFavorites().size() > 0)
@@ -856,9 +806,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mWalletButton.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mWalletButton, delay);
         }
-        if (mQRCodeScannerButton.getVisibility() == View.VISIBLE) {
-            startFinishDozeAnimationElement(mQRCodeScannerButton, delay);
-        }
         if (mControlsButton.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mControlsButton, delay);
         }
@@ -936,7 +883,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateLeftAffordanceIcon();
         updateWalletVisibility();
         updateControlsVisibility();
-        updateQRCodeButtonVisibility();
 
         if (dozing) {
             mOverlayContainer.setVisibility(INVISIBLE);
@@ -952,9 +898,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         int burnInYOffset = getBurnInOffset(mBurnInYOffset * 2, false /* xAxis */)
                 - mBurnInYOffset;
         mIndicationArea.setTranslationY(burnInYOffset * mDarkAmount);
-        if (mAmbientIndicationArea != null) {
-            mAmbientIndicationArea.setTranslationY(burnInYOffset * mDarkAmount);
-        }
     }
 
     public void setAntiBurnInOffsetX(int burnInXOffset) {
@@ -963,9 +906,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mBurnInXOffset = burnInXOffset;
         mIndicationArea.setTranslationX(burnInXOffset);
-        if (mAmbientIndicationArea != null) {
-            mAmbientIndicationArea.setTranslationX(burnInXOffset);
-        }
     }
 
     /**
@@ -976,7 +916,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setAlpha(alpha);
         mIndicationArea.setAlpha(alpha);
         mWalletButton.setAlpha(alpha);
-        mQRCodeScannerButton.setAlpha(alpha);
         mControlsButton.setAlpha(alpha);
     }
 
@@ -1074,64 +1013,18 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateAffordanceColors();
     }
 
-    /**
-     * Initialize the qr code scanner feature, controlled by QRCodeScannerController.
-     */
-    public void initQRCodeScanner(QRCodeScannerController qrCodeScannerController) {
-        mQRCodeScannerController = qrCodeScannerController;
-        mQRCodeScannerController.registerQRCodeScannerChangeObservers(
-                QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
-                QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE);
-        updateQRCodeButtonVisibility();
-        updateAffordanceColors();
-    }
-
-    private void updateQRCodeButtonVisibility() {
-        if (mQuickAccessWalletController != null
-                && mQuickAccessWalletController.isWalletEnabled()) {
-            // Don't enable if quick access wallet is enabled
-            return;
-        }
-
-        if (mQRCodeScannerController != null
-                && mQRCodeScannerController.isEnabledForLockScreenButton()) {
-            mQRCodeScannerButton.setVisibility(VISIBLE);
-            mQRCodeScannerButton.setOnClickListener(this::onQRCodeScannerClicked);
-            mIndicationArea.setPadding(mIndicationPadding, 0, mIndicationPadding, 0);
-        } else {
-            mQRCodeScannerButton.setVisibility(GONE);
-            mIndicationArea.setPadding(0, 0, 0, 0);
-        }
-    }
-
-    private void onQRCodeScannerClicked(View view) {
-        Intent intent = mQRCodeScannerController.getIntent();
-        if (intent != null) {
-            try {
-                mContext.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                // This is unexpected. Nonetheless, just log the error and prevent the UI from
-                // crashing
-                Log.e(TAG, "Unexpected intent: " + intent
-                        + " when the QR code scanner button was clicked");
-            }
-        }
-    }
-
     private void updateAffordanceColors() {
         int iconColor = Utils.getColorAttrDefaultColor(
                 mContext,
                 com.android.internal.R.attr.textColorPrimary);
         mWalletButton.getDrawable().setTint(iconColor);
         mControlsButton.getDrawable().setTint(iconColor);
-        mQRCodeScannerButton.getDrawable().setTint(iconColor);
 
         ColorStateList bgColor = Utils.getColorAttr(
                 mContext,
                 com.android.internal.R.attr.colorSurface);
         mWalletButton.setBackgroundTintList(bgColor);
         mControlsButton.setBackgroundTintList(bgColor);
-        mQRCodeScannerButton.setBackgroundTintList(bgColor);
     }
 
     /**
@@ -1151,13 +1044,20 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
 
-        ActivityLaunchAnimator.Controller animationController = createLaunchAnimationController(v);
-        mQuickAccessWalletController.startQuickAccessUiIntent(
-                mActivityStarter, animationController, mHasCard);
-    }
-
-    protected ActivityLaunchAnimator.Controller createLaunchAnimationController(View view) {
-        return ActivityLaunchAnimator.Controller.fromView(view, null);
+        if (mHasCard) {
+            Intent intent = new Intent(mContext, WalletActivity.class)
+                    .setAction(Intent.ACTION_VIEW)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        } else {
+            if (mQuickAccessWalletController.getWalletClient().createWalletIntent() == null) {
+                Log.w(TAG, "Could not get intent of the wallet app.");
+                return;
+            }
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                    mQuickAccessWalletController.getWalletClient().createWalletIntent(),
+                    /* delay= */ 0);
+        }
     }
 
     private void onControlsClick(View v) {
@@ -1169,14 +1069,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(ControlsUiController.EXTRA_ANIMATE, true);
 
-        ActivityLaunchAnimator.Controller controller =
-                v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)
-                        : null;
         if (mControlsComponent.getVisibility() == AVAILABLE) {
-            mActivityStarter.startActivity(intent, true /* dismissShade */, controller,
-                    true /* showOverLockscreenWhenLocked */);
+            mContext.startActivity(intent);
         } else {
-            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */, controller);
+            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */);
         }
     }
 

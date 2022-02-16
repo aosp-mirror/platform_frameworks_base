@@ -35,9 +35,6 @@ import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Mocks the basic logic of window magnification in System UI. We assume the screen size is
  * unlimited, so source bounds is always on the center of the mirror window bounds.
@@ -45,8 +42,6 @@ import java.util.List;
 class MockWindowMagnificationConnection {
 
     public static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
-    public static final int TEST_DISPLAY_2 = Display.DEFAULT_DISPLAY + 1;
-    private final List mValidDisplayIds;
     private final IWindowMagnificationConnection mConnection;
     private final Binder mBinder;
     private final boolean mSuspendCallback;
@@ -65,10 +60,6 @@ class MockWindowMagnificationConnection {
     }
 
     MockWindowMagnificationConnection(boolean suspendCallback) throws RemoteException {
-        mValidDisplayIds = new ArrayList();
-        mValidDisplayIds.add(TEST_DISPLAY);
-        mValidDisplayIds.add(TEST_DISPLAY_2);
-
         mSuspendCallback = suspendCallback;
         mConnection = mock(IWindowMagnificationConnection.class);
         mBinder = mock(Binder.class);
@@ -95,14 +86,14 @@ class MockWindowMagnificationConnection {
     private void stubEnableWindowMagnification() throws RemoteException {
         doAnswer((invocation) -> {
             final int displayId = invocation.getArgument(0);
-            if (!mValidDisplayIds.contains(displayId)) {
-                throw new IllegalArgumentException("Not support display :" + displayId);
+            if (displayId != TEST_DISPLAY) {
+                throw new IllegalArgumentException("only support default display :" + displayId);
             }
             mWindowMagnificationEnabled = true;
             final float scale = invocation.getArgument(1);
             mScale = Float.isNaN(scale) ? mScale : scale;
             computeMirrorWindowFrame(invocation.getArgument(2), invocation.getArgument(3));
-            setAnimationCallback(invocation.getArgument(6));
+            setAnimationCallback(invocation.getArgument(4));
             computeSourceBounds();
             mHasPendingCallback = true;
             if (!mSuspendCallback) {
@@ -110,14 +101,14 @@ class MockWindowMagnificationConnection {
             }
             return null;
         }).when(mConnection).enableWindowMagnification(anyInt(), anyFloat(), anyFloat(), anyFloat(),
-                anyFloat(), anyFloat(), nullable(IRemoteMagnificationAnimationCallback.class));
+                nullable(IRemoteMagnificationAnimationCallback.class));
     }
 
     private void stubDisableWindowMagnification() throws RemoteException {
         doAnswer((invocation) -> {
             final int displayId = invocation.getArgument(0);
-            if (!mValidDisplayIds.contains(displayId)) {
-                throw new IllegalArgumentException("Not support display :" + displayId);
+            if (displayId != TEST_DISPLAY) {
+                throw new IllegalArgumentException("only support default display :" + displayId);
             }
             setAnimationCallback(invocation.getArgument(1));
             mHasPendingCallback = true;

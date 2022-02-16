@@ -18,7 +18,6 @@
 
 #include "Sound.h"
 
-#include <any>
 #include <android-base/thread_annotations.h>
 #include <audio_utils/clock.h>
 #include <media/AudioTrack.h>
@@ -91,9 +90,8 @@ public:
     void mute(bool muting);
     void dump() const NO_THREAD_SAFETY_ANALYSIS; // disable for ALOGV (see func for details).
 
-    // returns the pair stream if successful, nullptr otherwise.
-    // garbage is used to release tracks and data outside of any lock.
-    Stream* playPairStream(std::vector<std::any>& garbage);
+    // returns the pair stream if successful, nullptr otherwise
+    Stream* playPairStream();
 
     // These parameters are explicitly checked in the SoundPool class
     // so never deviate from the Java API specified values.
@@ -125,10 +123,9 @@ public:
     Stream* getPairStream() const;
 
 private:
-    // garbage is used to release tracks and data outside of any lock.
     void play_l(const std::shared_ptr<Sound>& sound, int streamID,
             float leftVolume, float rightVolume, int priority, int loop, float rate,
-            std::vector<std::any>& garbage) REQUIRES(mLock);
+            sp<AudioTrack> releaseTracks[2]) REQUIRES(mLock);
     void stop_l() REQUIRES(mLock);
     void setVolume_l(float leftVolume, float rightVolume) REQUIRES(mLock);
 

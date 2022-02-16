@@ -25,6 +25,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -32,7 +33,7 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
-import android.view.DisplayInfo;
+import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayWindowInsetsController;
@@ -52,20 +53,17 @@ import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
-import android.view.TaskTransitionSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
-import android.window.IOnFpsCallbackListener;
 
 /**
  * System private interface to the window manager.
@@ -347,14 +345,6 @@ interface IWindowManager
     Bitmap screenshotWallpaper();
 
     /**
-     * Mirrors the wallpaper for the given display.
-     *
-     * @param displayId ID of the display for the wallpaper.
-     * @return A SurfaceControl for the parent of the mirrored wallpaper.
-     */
-    SurfaceControl mirrorWallpaperSurface(int displayId);
-
-    /**
      * Registers a wallpaper visibility listener.
      * @return Current visibility.
      */
@@ -484,6 +474,16 @@ interface IWindowManager
     void getStableInsets(int displayId, out Rect outInsets);
 
     /**
+     * Set the forwarded insets on the display.
+     * <p>
+     * This is only used in case a virtual display is displayed on another display that has insets,
+     * and the bounds of the virtual display is overlapping with the insets from the host display.
+     * In that case, the contents on the virtual display won't be placed over the forwarded insets.
+     * Only the owner of the display is permitted to set the forwarded insets on it.
+     */
+    void setForwardedInsets(int displayId, in Insets insets);
+
+    /**
      * Register shortcut key. Shortcut code is packed as:
      * (MetaState << Integer.SIZE) | KeyCode
      * @hide
@@ -520,10 +520,9 @@ interface IWindowManager
     void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
-     * Registers an IDisplayContainerListener, and returns the set of existing display ids. The
-     * listener's onDisplayAdded() will not be called for the displays returned.
+     * Registers an IDisplayContainerListener
      */
-    int[] registerDisplayWindowListener(IDisplayWindowListener listener);
+    void registerDisplayWindowListener(IDisplayWindowListener listener);
 
     /**
      * Unregisters an IDisplayContainerListener.
@@ -541,14 +540,19 @@ interface IWindowManager
     void stopWindowTrace();
 
     /**
-    * If window tracing is active, saves the window trace to file, otherwise does nothing
-    */
-    void saveWindowTraceToFile();
-
-    /**
      * Returns true if window trace is enabled.
      */
     boolean isWindowTraceEnabled();
+
+    /**
+     * Notify WindowManager that it should not override the info in DisplayManager for the specified
+     * display. This can disable letter- or pillar-boxing applied in DisplayManager when the metrics
+     * of the logical display reported from WindowManager do not correspond to the metrics of the
+     * physical display it is based on.
+     *
+     * @param displayId The id of the display.
+     */
+    void dontOverrideDisplayInfo(int displayId);
 
     /**
      * Gets the windowing mode of the display.
@@ -716,29 +720,17 @@ interface IWindowManager
             int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
 
     /**
-     * Called when a remote process updates the requested visibilities of insets on a display window
-     * container.
+     * Called when a remote process modifies insets on a display window container.
      */
-    void updateDisplayWindowRequestedVisibilities(int displayId, in InsetsVisibilities vis);
+    void modifyDisplayWindowInsets(int displayId, in InsetsState state);
 
     /**
      * Called to get the expected window insets.
      *
-     * @return {@code true} if system bars are always consumed.
+     * @return {@code true} if system bars are always comsumed.
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out InsetsState outInsetsState);
-
-    /**
-     * Returns a list of {@link android.view.DisplayInfo} for the logical display. This is not
-     * guaranteed to include all possible device states. The list items are unique.
-     *
-     * If invoked through a package other than a launcher app, returns an empty list.
-     *
-     * @param displayId the id of the logical display
-     * @param packageName the name of the calling package
-     */
-    List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName);
 
     /**
      * Called to show global actions.
@@ -822,10 +814,9 @@ interface IWindowManager
      * @param displayId The display associated with the window context
      * @param options A bundle used to pass window-related options and choose the right DisplayArea
      *
-     * @return the DisplayArea's {@link android.app.res.Configuration} if the WindowContext is
-     * attached to the DisplayArea successfully. {@code null}, otherwise.
+     * @return {@code true} if the WindowContext is attached to the DisplayArea successfully.
      */
-    Configuration attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
+    boolean attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
             in Bundle options);
 
     /**
@@ -848,23 +839,6 @@ interface IWindowManager
      * @see #attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
      */
     void attachWindowContextToWindowToken(IBinder clientToken, IBinder token);
-
-    /**
-     * Attaches a {@code clientToken} to associate with DisplayContent.
-     * <p>
-     * Note that this API should be invoked after calling
-     * {@link android.window.WindowTokenClient#attachContext(Context)}
-     * </p>
-     *
-     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
-     * the WindowContext's token}
-     * @param displayId The display associated with the window context
-     *
-     * @return the DisplayContent's {@link android.app.res.Configuration} if the Context is
-     * attached to the DisplayContent successfully. {@code null}, otherwise.
-     * @throws android.view.WindowManager.InvalidDisplayException if the display ID is invalid
-     */
-    Configuration attachToDisplayContent(IBinder clientToken, int displayId);
 
     /**
      * Detaches {@link android.window.WindowContext} from the window manager node it's currently
@@ -891,64 +865,4 @@ interface IWindowManager
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
 
     boolean isTaskSnapshotSupported();
-
-    /**
-     * Returns the preferred display ID to show software keyboard.
-     *
-     * @see android.window.WindowProviderService#getLaunchedDisplayId
-     */
-    int getImeDisplayId();
-
-    /**
-     * Control if we should enable task snapshot features on this device.
-     * @hide
-     */
-    void setTaskSnapshotEnabled(boolean enabled);
-
-    /**
-     * Customized the task transition animation with a task transition spec.
-     *
-     * @param spec the spec that will be used to customize the task animations
-     */
-    void setTaskTransitionSpec(in TaskTransitionSpec spec);
-
-    /**
-     * Clears any task transition spec that has been previously set and
-     * reverts to using the default task transition with no spec changes.
-     */
-    void clearTaskTransitionSpec();
-
-    /**
-     * Registers the frame rate per second count callback for one given task ID.
-     * Each callback can only register for receiving FPS callback for one task id until unregister
-     * is called. If there's no task associated with the given task id,
-     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
-     * registered, the registered callback will not be unregistered until
-     * {@link unregisterTaskFpsCallback()} is called
-     * @param taskId task id of the task.
-     * @param listener listener to be registered.
-     *
-     * @hide
-     */
-    void registerTaskFpsCallback(in int taskId, in IOnFpsCallbackListener listener);
-
-    /**
-     * Unregisters the frame rate per second count callback which was registered with
-     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
-     *
-     * @param listener listener to be unregistered.
-     *
-     * @hide
-     */
-    void unregisterTaskFpsCallback(in IOnFpsCallbackListener listener);
-
-    /**
-     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
-     *
-     * @param taskId to take the snapshot of
-     *
-     * Returns a bitmap of the screenshot or {@code null} if it was unable to screenshot.
-     * @hide
-     */
-    Bitmap snapshotTaskForRecents(int taskId);
 }

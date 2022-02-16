@@ -2,7 +2,6 @@ LIBAMIDI {
   global:
     AMidiDevice_fromJava;
     AMidiDevice_release;
-    AMidiDevice_getDefaultProtocol; # introduced=Tiramisu
     AMidiDevice_getType;
     AMidiDevice_getNumInputPorts;
     AMidiDevice_getNumOutputPorts;

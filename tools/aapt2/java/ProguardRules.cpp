@@ -48,7 +48,7 @@ class BaseVisitor : public xml::Visitor {
 
   void Visit(xml::Element* node) override {
     if (!node->namespace_uri.empty()) {
-      std::optional<xml::ExtractedPackage> maybe_package =
+      Maybe<xml::ExtractedPackage> maybe_package =
           xml::ExtractPackageFromNamespace(node->namespace_uri);
       if (maybe_package) {
         // This is a custom view, let's figure out the class name from this.
@@ -270,16 +270,14 @@ class ManifestVisitor : public BaseVisitor {
         get_name = true;
         xml::Attribute* attr = node->FindAttribute(xml::kSchemaAndroid, "backupAgent");
         if (attr) {
-          std::optional<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value(), "");
           }
         }
         attr = node->FindAttribute(xml::kSchemaAndroid, "appComponentFactory");
         if (attr) {
-          std::optional<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value(), "");
           }
@@ -287,8 +285,7 @@ class ManifestVisitor : public BaseVisitor {
 
         attr = node->FindAttribute(xml::kSchemaAndroid, "zygotePreloadName");
         if (attr) {
-          std::optional<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value(), "");
           }
@@ -311,7 +308,7 @@ class ManifestVisitor : public BaseVisitor {
               component_process ? component_process->value : default_process_;
           get_name = !process.empty() && process[0] != ':';
         }
-      } else if (node->name == "instrumentation" || node->name == "process") {
+      } else if (node->name == "instrumentation") {
         get_name = true;
       }
 
@@ -320,8 +317,7 @@ class ManifestVisitor : public BaseVisitor {
         get_name = attr != nullptr;
 
         if (get_name) {
-          std::optional<std::string> result =
-              util::GetFullyQualifiedClassName(package_, attr->value);
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
             AddClass(node->line_number, result.value(), "");
           }

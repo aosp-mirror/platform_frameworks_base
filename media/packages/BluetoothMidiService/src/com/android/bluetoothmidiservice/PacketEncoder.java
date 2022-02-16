@@ -30,9 +30,8 @@ public abstract class PacketEncoder extends MidiReceiver {
         /** Called to write an accumulated packet.
          * @param buffer the packet buffer to write
          * @param count the number of bytes in the packet buffer to write
-         * @return whether the operation was successful
          */
-        boolean writePacket(byte[] buffer, int count);
+        public void writePacket(byte[] buffer, int count);
     }
 
     /**

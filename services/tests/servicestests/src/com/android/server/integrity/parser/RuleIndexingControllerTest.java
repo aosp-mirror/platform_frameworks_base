@@ -54,7 +54,6 @@ public class RuleIndexingControllerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName("ddd")
                         .setAppCertificates(Collections.singletonList("777"))
-                        .setAppCertificateLineage(Collections.singletonList("777"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -77,7 +76,6 @@ public class RuleIndexingControllerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName("ddd")
                         .setAppCertificates(Arrays.asList("777", "999"))
-                        .setAppCertificateLineage(Arrays.asList("777", "999"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -101,7 +99,6 @@ public class RuleIndexingControllerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName("bbb")
                         .setAppCertificates(Collections.singletonList("999"))
-                        .setAppCertificateLineage(Collections.singletonList("999"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -124,7 +121,6 @@ public class RuleIndexingControllerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName("ccc")
                         .setAppCertificates(Collections.singletonList("444"))
-                        .setAppCertificateLineage(Collections.singletonList("444"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -157,7 +153,6 @@ public class RuleIndexingControllerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName("ccc")
                         .setAppCertificates(Collections.singletonList("444"))
-                        .setAppCertificateLineage(Collections.singletonList("444"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
