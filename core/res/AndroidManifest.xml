@@ -6815,6 +6815,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.android.server.sdksandbox.SdkSandboxVerifierReceiver"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
