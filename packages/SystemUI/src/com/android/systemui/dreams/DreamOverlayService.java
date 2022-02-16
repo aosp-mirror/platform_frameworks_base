@@ -33,6 +33,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.DreamPreviewComplication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 
@@ -57,6 +58,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // content area).
     private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final DreamPreviewComplication mPreviewComplication;
 
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
@@ -96,12 +98,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             @Main Executor executor,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DreamPreviewComplication previewComplication) {
         mContext = context;
         mExecutor = executor;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
+        mPreviewComplication = previewComplication;
 
         final DreamOverlayComponent component =
                 dreamOverlayComponentFactory.create(mViewModelStore, mHost);
@@ -125,6 +129,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             windowManager.removeView(mWindow.getDecorView());
         }
         mStateController.setOverlayActive(false);
+        mPreviewComplication.setDreamLabel(null);
+        mStateController.removeComplication(mPreviewComplication);
         super.onDestroy();
     }
 
@@ -133,6 +139,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         setCurrentState(Lifecycle.State.STARTED);
         mExecutor.execute(() -> {
             mStateController.setShouldShowComplications(shouldShowComplications());
+            if (isPreviewMode()) {
+                mPreviewComplication.setDreamLabel(getDreamLabel());
+                mStateController.addComplication(mPreviewComplication);
+            }
             addOverlayWindowLocked(layoutParams);
             setCurrentState(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);
