@@ -1,15 +1,13 @@
 package com.android.systemui.statusbar
 
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.util.DisplayMetrics
+import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.MediaHierarchyManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
@@ -19,7 +17,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBar
@@ -57,19 +55,19 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     lateinit var transitionController: LockscreenShadeTransitionController
     lateinit var row: ExpandableNotificationRow
     @Mock lateinit var statusbarStateController: SysuiStatusBarStateController
-    @Mock lateinit var logger: LSShadeTransitionLogger
-    @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var lockscreenGestureLogger: LockscreenGestureLogger
     @Mock lateinit var keyguardBypassController: KeyguardBypassController
     @Mock lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var ambientState: AmbientState
-    @Mock lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock lateinit var displayMetrics: DisplayMetrics
     @Mock lateinit var mediaHierarchyManager: MediaHierarchyManager
     @Mock lateinit var scrimController: ScrimController
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
+    @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
@@ -84,23 +82,21 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 mDependency,
                 TestableLooper.get(this))
         row = helper.createRow()
-        context.getOrCreateTestableResources()
-                .addOverride(R.bool.config_use_split_notification_shade, false)
         transitionController = LockscreenShadeTransitionController(
             statusBarStateController = statusbarStateController,
-            logger = logger,
+            lockscreenGestureLogger = lockscreenGestureLogger,
             keyguardBypassController = keyguardBypassController,
             lockScreenUserManager = lockScreenUserManager,
             falsingCollector = falsingCollector,
             ambientState = ambientState,
+            displayMetrics = displayMetrics,
             mediaHierarchyManager = mediaHierarchyManager,
             scrimController = scrimController,
-            depthController = depthController,
-            wakefulnessLifecycle = wakefulnessLifecycle,
+            featureFlags = featureFlags,
             context = context,
             configurationController = configurationController,
             falsingManager = falsingManager,
-            dumpManager = dumpManager
+            depthController = depthController
         )
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
@@ -147,27 +143,12 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testWakingToShadeLockedWhenDozing() {
-        whenever(statusbarStateController.isDozing).thenReturn(true)
-        transitionController.goToLockedShade(null)
-        verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        assertTrue("Not waking to shade locked", transitionController.isWakingToShadeLocked)
-    }
-
-    @Test
-    fun testNotWakingToShadeLockedWhenNotDozing() {
-        whenever(statusbarStateController.isDozing).thenReturn(false)
-        transitionController.goToLockedShade(null)
-        verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        assertFalse("Waking to shade locked when not dozing",
-                transitionController.isWakingToShadeLocked)
-    }
-
-    @Test
     fun testGoToLockedShadeOnlyOnKeyguard() {
         whenever(statusbarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         transitionController.goToLockedShade(null)
         whenever(statusbarStateController.state).thenReturn(StatusBarState.SHADE)
+        transitionController.goToLockedShade(null)
+        whenever(statusbarStateController.state).thenReturn(StatusBarState.FULLSCREEN_USER_SWITCHER)
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
     }
@@ -225,23 +206,23 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testDragDownAmountDoesntCallOutInLockedDownShade() {
         whenever(nsslController.isInLockedDownShade).thenReturn(true)
         transitionController.dragDownAmount = 10f
-        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyBoolean())
     }
 
     @Test
     fun testDragDownAmountCallsOut() {
         transitionController.dragDownAmount = 10f
-        verify(nsslController).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(nsslController).setTransitionToFullShadeAmount(anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
+        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyBoolean())
         verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 }

@@ -331,9 +331,7 @@ public final class ContentObserverController extends StateController {
             // Let the scheduler know that state has changed. This may or may not result in an
             // execution.
             if (reportChange) {
-                ArraySet<JobStatus> changedJob = new ArraySet<>();
-                changedJob.add(mJobStatus);
-                mStateChangedListener.onControllerStateChanged(changedJob);
+                mStateChangedListener.onControllerStateChanged();
             }
         }
 

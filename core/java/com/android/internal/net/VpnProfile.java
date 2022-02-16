@@ -143,27 +143,17 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public boolean areAuthParamsInline = false;                  // 23
     public final boolean isRestrictedToTestNetworks;             // 24
 
-    public final boolean excludeLocalRoutes;                     // 25
-    public final boolean requiresInternetValidation;             // 26
-
     // Helper fields.
     @UnsupportedAppUsage
     public transient boolean saveLogin = false;
 
     public VpnProfile(String key) {
-        this(key, false, false, false);
+        this(key, false);
     }
 
     public VpnProfile(String key, boolean isRestrictedToTestNetworks) {
-        this(key, isRestrictedToTestNetworks, false, false);
-    }
-
-    public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes,
-            boolean requiresInternetValidation) {
         this.key = key;
         this.isRestrictedToTestNetworks = isRestrictedToTestNetworks;
-        this.excludeLocalRoutes = excludeLocalRoutes;
-        this.requiresInternetValidation = requiresInternetValidation;
     }
 
     @UnsupportedAppUsage
@@ -185,16 +175,14 @@ public final class VpnProfile implements Cloneable, Parcelable {
         ipsecCaCert = in.readString();
         ipsecServerCert = in.readString();
         saveLogin = in.readInt() != 0;
-        proxy = in.readParcelable(null, android.net.ProxyInfo.class);
+        proxy = in.readParcelable(null);
         mAllowedAlgorithms = new ArrayList<>();
-        in.readList(mAllowedAlgorithms, null, java.lang.String.class);
+        in.readList(mAllowedAlgorithms, null);
         isBypassable = in.readBoolean();
         isMetered = in.readBoolean();
         maxMtu = in.readInt();
         areAuthParamsInline = in.readBoolean();
         isRestrictedToTestNetworks = in.readBoolean();
-        excludeLocalRoutes = in.readBoolean();
-        requiresInternetValidation = in.readBoolean();
     }
 
     /**
@@ -242,8 +230,6 @@ public final class VpnProfile implements Cloneable, Parcelable {
         out.writeInt(maxMtu);
         out.writeBoolean(areAuthParamsInline);
         out.writeBoolean(isRestrictedToTestNetworks);
-        out.writeBoolean(excludeLocalRoutes);
-        out.writeBoolean(requiresInternetValidation);
     }
 
     /**
@@ -263,11 +249,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
             // 14-19: Standard profile, with option for serverCert, proxy
             // 24: Standard profile with serverCert, proxy and platform-VPN parameters
             // 25: Standard profile with platform-VPN parameters and isRestrictedToTestNetworks
-            // 26:                                            ...and excludeLocalRoutes
-            //     (26 can only be found on dogfood devices)
-            // 27:                                            ...and requiresInternetValidation
-            if ((values.length < 14 || (values.length > 19 && values.length < 24)
-                    || values.length > 27)) {
+            if ((values.length < 14 || values.length > 19)
+                    && values.length != 24 && values.length != 25) {
                 return null;
             }
 
@@ -278,22 +261,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 isRestrictedToTestNetworks = false;
             }
 
-            final boolean excludeLocalRoutes;
-            if (values.length >= 26) {
-                excludeLocalRoutes = Boolean.parseBoolean(values[25]);
-            } else {
-                excludeLocalRoutes = false;
-            }
-
-            final boolean requiresInternetValidation;
-            if (values.length >= 27) {
-                requiresInternetValidation = Boolean.parseBoolean(values[26]);
-            } else {
-                requiresInternetValidation = false;
-            }
-
-            VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks,
-                    excludeLocalRoutes, requiresInternetValidation);
+            VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks);
             profile.name = values[0];
             profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
@@ -403,9 +371,6 @@ public final class VpnProfile implements Cloneable, Parcelable {
         builder.append(VALUE_DELIMITER).append(areAuthParamsInline);
         builder.append(VALUE_DELIMITER).append(isRestrictedToTestNetworks);
 
-        builder.append(VALUE_DELIMITER).append(excludeLocalRoutes);
-        builder.append(VALUE_DELIMITER).append(requiresInternetValidation);
-
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
 
@@ -486,7 +451,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
             key, type, server, username, password, dnsServers, searchDomains, routes, mppe,
             l2tpSecret, ipsecIdentifier, ipsecSecret, ipsecUserCert, ipsecCaCert, ipsecServerCert,
             proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline,
-            isRestrictedToTestNetworks, excludeLocalRoutes, requiresInternetValidation);
+            isRestrictedToTestNetworks);
     }
 
     /** Checks VPN profiles for interior equality. */
@@ -519,13 +484,11 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 && isMetered == other.isMetered
                 && maxMtu == other.maxMtu
                 && areAuthParamsInline == other.areAuthParamsInline
-                && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks
-                && excludeLocalRoutes == other.excludeLocalRoutes
-                && requiresInternetValidation == other.requiresInternetValidation;
+                && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks;
     }
 
     @NonNull
-    public static final Creator<VpnProfile> CREATOR = new Creator<>() {
+    public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
         @Override
         public VpnProfile createFromParcel(Parcel in) {
             return new VpnProfile(in);

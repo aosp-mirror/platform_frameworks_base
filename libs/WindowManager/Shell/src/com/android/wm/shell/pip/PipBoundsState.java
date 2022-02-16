@@ -38,8 +38,6 @@ import com.android.wm.shell.common.DisplayLayout;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -91,7 +89,7 @@ public final class PipBoundsState {
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
-    private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
+    private @Nullable Consumer<Rect> mOnPipExclusionBoundsChangeCallback;
 
     public PipBoundsState(@NonNull Context context) {
         mContext = context;
@@ -110,8 +108,8 @@ public final class PipBoundsState {
     /** Set the current PIP bounds. */
     public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
-        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
-            callback.accept(bounds);
+        if (mOnPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallback.accept(bounds);
         }
     }
 
@@ -409,23 +407,15 @@ public final class PipBoundsState {
     }
 
     /**
-     * Add a callback to watch out for PiP bounds. This is mostly used by SystemUI's
+     * Set a callback to watch out for PiP bounds. This is mostly used by SystemUI's
      * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
      */
-    public void addPipExclusionBoundsChangeCallback(
+    public void setPipExclusionBoundsChangeCallback(
             @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
-        mOnPipExclusionBoundsChangeCallbacks.add(onPipExclusionBoundsChangeCallback);
-        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
-            callback.accept(getBounds());
+        mOnPipExclusionBoundsChangeCallback = onPipExclusionBoundsChangeCallback;
+        if (mOnPipExclusionBoundsChangeCallback != null) {
+            mOnPipExclusionBoundsChangeCallback.accept(getBounds());
         }
-    }
-
-    /**
-     * Remove a callback that was previously added.
-     */
-    public void removePipExclusionBoundsChangeCallback(
-            @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
-        mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
     }
 
     /** Source of truth for the current bounds of PIP that may be in motion. */

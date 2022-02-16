@@ -59,7 +59,7 @@ public class CaptureFailure {
 
     private final CaptureRequest mRequest;
     private final int mReason;
-    private final boolean mWasImageCaptured;
+    private final boolean mDropped;
     private final int mSequenceId;
     private final long mFrameNumber;
     private final String mErrorPhysicalCameraId;
@@ -68,11 +68,10 @@ public class CaptureFailure {
      * @hide
      */
     public CaptureFailure(CaptureRequest request, int reason,
-            boolean wasImageCaptured, int sequenceId, long frameNumber,
-            String errorPhysicalCameraId) {
+            boolean dropped, int sequenceId, long frameNumber, String errorPhysicalCameraId) {
         mRequest = request;
         mReason = reason;
-        mWasImageCaptured = wasImageCaptured;
+        mDropped = dropped;
         mSequenceId = sequenceId;
         mFrameNumber = frameNumber;
         mErrorPhysicalCameraId = errorPhysicalCameraId;
@@ -142,7 +141,7 @@ public class CaptureFailure {
      * @return boolean True if the image was captured, false otherwise.
      */
     public boolean wasImageCaptured() {
-        return mWasImageCaptured;
+        return !mDropped;
     }
 
     /**

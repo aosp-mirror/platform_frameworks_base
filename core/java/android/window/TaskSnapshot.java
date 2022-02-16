@@ -50,7 +50,6 @@ public class TaskSnapshot implements Parcelable {
     /** The size of the snapshot before scaling */
     private final Point mTaskSize;
     private final Rect mContentInsets;
-    private final Rect mLetterboxInsets;
     // Whether this snapshot is a down-sampled version of the high resolution snapshot, used
     // mainly for loading snapshots quickly from disk when user is flinging fast
     private final boolean mIsLowResolution;
@@ -68,10 +67,9 @@ public class TaskSnapshot implements Parcelable {
     public TaskSnapshot(long id,
             @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,
             @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
-            Rect contentInsets, Rect letterboxInsets, boolean isLowResolution,
-            boolean isRealSnapshot, int windowingMode,
-            @WindowInsetsController.Appearance int appearance, boolean isTranslucent,
-            boolean hasImeSurface) {
+            Rect contentInsets, boolean isLowResolution, boolean isRealSnapshot,
+            int windowingMode, @WindowInsetsController.Appearance int appearance,
+            boolean isTranslucent, boolean hasImeSurface) {
         mId = id;
         mTopActivityComponent = topActivityComponent;
         mSnapshot = snapshot;
@@ -81,7 +79,6 @@ public class TaskSnapshot implements Parcelable {
         mRotation = rotation;
         mTaskSize = new Point(taskSize);
         mContentInsets = new Rect(contentInsets);
-        mLetterboxInsets = new Rect(letterboxInsets);
         mIsLowResolution = isLowResolution;
         mIsRealSnapshot = isRealSnapshot;
         mWindowingMode = windowingMode;
@@ -102,7 +99,6 @@ public class TaskSnapshot implements Parcelable {
         mRotation = source.readInt();
         mTaskSize = source.readTypedObject(Point.CREATOR);
         mContentInsets = source.readTypedObject(Rect.CREATOR);
-        mLetterboxInsets = source.readTypedObject(Rect.CREATOR);
         mIsLowResolution = source.readBoolean();
         mIsRealSnapshot = source.readBoolean();
         mWindowingMode = source.readInt();
@@ -183,14 +179,6 @@ public class TaskSnapshot implements Parcelable {
     }
 
     /**
-     * @return The letterbox insets on the snapshot. These can be clipped off in order to
-     *         remove any letterbox areas in the snapshot.
-     */
-    public Rect getLetterboxInsets() {
-        return mLetterboxInsets;
-    }
-
-    /**
      * @return Whether this snapshot is a down-sampled version of the full resolution.
      */
     @UnsupportedAppUsage
@@ -253,7 +241,6 @@ public class TaskSnapshot implements Parcelable {
         dest.writeInt(mRotation);
         dest.writeTypedObject(mTaskSize, 0);
         dest.writeTypedObject(mContentInsets, 0);
-        dest.writeTypedObject(mLetterboxInsets, 0);
         dest.writeBoolean(mIsLowResolution);
         dest.writeBoolean(mIsRealSnapshot);
         dest.writeInt(mWindowingMode);
@@ -275,7 +262,6 @@ public class TaskSnapshot implements Parcelable {
                 + " mRotation=" + mRotation
                 + " mTaskSize=" + mTaskSize.toString()
                 + " mContentInsets=" + mContentInsets.toShortString()
-                + " mLetterboxInsets=" + mLetterboxInsets.toShortString()
                 + " mIsLowResolution=" + mIsLowResolution
                 + " mIsRealSnapshot=" + mIsRealSnapshot
                 + " mWindowingMode=" + mWindowingMode
@@ -303,7 +289,6 @@ public class TaskSnapshot implements Parcelable {
         private int mRotation;
         private Point mTaskSize;
         private Rect mContentInsets;
-        private Rect mLetterboxInsets;
         private boolean mIsRealSnapshot;
         private int mWindowingMode;
         private @WindowInsetsController.Appearance
@@ -355,11 +340,6 @@ public class TaskSnapshot implements Parcelable {
             return this;
         }
 
-        public Builder setLetterboxInsets(Rect letterboxInsets) {
-            mLetterboxInsets = letterboxInsets;
-            return this;
-        }
-
         public Builder setIsRealSnapshot(boolean realSnapshot) {
             mIsRealSnapshot = realSnapshot;
             return this;
@@ -407,7 +387,6 @@ public class TaskSnapshot implements Parcelable {
                     mRotation,
                     mTaskSize,
                     mContentInsets,
-                    mLetterboxInsets,
                     // When building a TaskSnapshot with the Builder class, isLowResolution
                     // is always false. Low-res snapshots are only created when loading from
                     // disk.

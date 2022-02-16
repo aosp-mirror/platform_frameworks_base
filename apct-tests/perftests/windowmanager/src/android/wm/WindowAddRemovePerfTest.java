@@ -29,7 +29,6 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -83,7 +82,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
 
     private static class TestWindow extends BaseIWindow {
         final WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
-        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        final InsetsState mRequestedVisibility = new InsetsState();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
 
@@ -103,7 +102,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
 
                 long startTime = SystemClock.elapsedRealtimeNanos();
                 session.addToDisplay(this, mLayoutParams, View.VISIBLE,
-                        Display.DEFAULT_DISPLAY, mRequestedVisibilities, inputChannel,
+                        Display.DEFAULT_DISPLAY, mRequestedVisibility, inputChannel,
                         mOutInsetsState, mOutControls);
                 final long elapsedTimeNsOfAdd = SystemClock.elapsedRealtimeNanos() - startTime;
                 state.addExtraResult("add", elapsedTimeNsOfAdd);

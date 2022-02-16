@@ -459,8 +459,7 @@ public class ShortcutParser {
                 disabledReason,
                 null /* persons */,
                 null /* locusId */,
-                splashScreenThemeResName,
-                null /* capabilityBindings */);
+                splashScreenThemeResName);
     }
 
     private static String parseCategory(ShortcutService service, AttributeSet attrs) {

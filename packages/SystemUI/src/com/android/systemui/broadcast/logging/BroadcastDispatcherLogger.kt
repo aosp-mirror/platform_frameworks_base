@@ -17,7 +17,6 @@
 package com.android.systemui.broadcast.logging
 
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import com.android.systemui.log.LogBuffer
@@ -33,25 +32,6 @@ private const val TAG = "BroadcastDispatcherLog"
 class BroadcastDispatcherLogger @Inject constructor(
     @BroadcastDispatcherLog private val buffer: LogBuffer
 ) {
-
-    companion object {
-        fun flagToString(@Context.RegisterReceiverFlags flag: Int): String {
-            val b = StringBuilder("")
-            if (flag and Context.RECEIVER_VISIBLE_TO_INSTANT_APPS != 0) {
-                b.append("instant_apps,")
-            }
-            if (flag and Context.RECEIVER_NOT_EXPORTED != 0) {
-                b.append("not_exported,")
-            }
-            if (flag and Context.RECEIVER_EXPORTED != 0) {
-                b.append("exported")
-            }
-            if (b.isEmpty()) {
-                b.append(flag)
-            }
-            return b.toString()
-        }
-    }
 
     fun logBroadcastReceived(broadcastId: Int, user: Int, intent: Intent) {
         val intentString = intent.toString()
@@ -75,15 +55,13 @@ class BroadcastDispatcherLogger @Inject constructor(
         })
     }
 
-    fun logReceiverRegistered(user: Int, receiver: BroadcastReceiver, flags: Int) {
+    fun logReceiverRegistered(user: Int, receiver: BroadcastReceiver) {
         val receiverString = receiver.toString()
-        val flagsString = flagToString(flags)
         log(INFO, {
             int1 = user
             str1 = receiverString
-            str2 = flagsString
         }, {
-            "Receiver $str1 ($str2) registered for user $int1"
+            "Receiver $str1 registered for user $int1"
         })
     }
 
@@ -97,7 +75,7 @@ class BroadcastDispatcherLogger @Inject constructor(
         })
     }
 
-    fun logContextReceiverRegistered(user: Int, flags: Int, filter: IntentFilter) {
+    fun logContextReceiverRegistered(user: Int, filter: IntentFilter) {
         val actions = filter.actionsIterator().asSequence()
                 .joinToString(separator = ",", prefix = "Actions(", postfix = ")")
         val categories = if (filter.countCategories() != 0) {
@@ -113,10 +91,9 @@ class BroadcastDispatcherLogger @Inject constructor(
             } else {
                 actions
             }
-            str2 = flagToString(flags)
         }, {
             """
-                Receiver registered with Context for user $int1. Flags=$str2
+                Receiver registered with Context for user $int1.
                 $str1
             """.trimIndent()
         })

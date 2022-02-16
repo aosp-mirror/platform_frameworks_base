@@ -35,6 +35,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistLogger;
 import com.android.systemui.assist.AssistManager;
@@ -44,8 +45,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import java.util.Locale;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Default UiController implementation. Shows white edge lights along the bottom of the phone,
@@ -66,8 +65,6 @@ public class DefaultUiController implements AssistManager.UiController {
     protected final AssistLogger mAssistLogger;
 
     private final WindowManager mWindowManager;
-    private final MetricsLogger mMetricsLogger;
-    private final Lazy<AssistManager> mAssistManagerLazy;
     private final WindowManager.LayoutParams mLayoutParams;
     private final PathInterpolator mProgressInterpolator = new PathInterpolator(.83f, 0, .84f, 1);
 
@@ -78,14 +75,10 @@ public class DefaultUiController implements AssistManager.UiController {
     private ValueAnimator mInvocationAnimator = new ValueAnimator();
 
     @Inject
-    public DefaultUiController(Context context, AssistLogger assistLogger,
-            WindowManager windowManager, MetricsLogger metricsLogger,
-            Lazy<AssistManager> assistManagerLazy) {
+    public DefaultUiController(Context context, AssistLogger assistLogger) {
         mAssistLogger = assistLogger;
         mRoot = new FrameLayout(context);
-        mWindowManager = windowManager;
-        mMetricsLogger = metricsLogger;
-        mAssistManagerLazy = assistManagerLazy;
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
         mLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -159,9 +152,9 @@ public class DefaultUiController implements AssistManager.UiController {
                     /* isInvocationComplete = */ false,
                     /* assistantComponent = */ null,
                     /* legacyDeviceState = */ null);
-            mMetricsLogger.write(new LogMaker(MetricsEvent.ASSISTANT)
+            MetricsLogger.action(new LogMaker(MetricsEvent.ASSISTANT)
                     .setType(MetricsEvent.TYPE_ACTION)
-                    .setSubtype(mAssistManagerLazy.get().toLoggingSubType(type)));
+                    .setSubtype(Dependency.get(AssistManager.class).toLoggingSubType(type)));
         }
         // Logs assistant invocation cancelled.
         if ((mInvocationAnimator == null || !mInvocationAnimator.isRunning())

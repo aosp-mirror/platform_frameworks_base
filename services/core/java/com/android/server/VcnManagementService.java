@@ -24,6 +24,7 @@ import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+import static android.telephony.SubscriptionManager.isValidSubscriptionId;
 
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
@@ -140,7 +141,7 @@ import java.util.concurrent.TimeUnit;
  *                      |                     or its properties
  *                      v                              |
  * +-----------------------------------------------------------------------+
- * |                       UnderlyingNetworkController                     |
+ * |                       UnderlyingNetworkTracker                        |
  * |                                                                       |
  * | Manages lifecycle of underlying physical networks, filing requests to |
  * | bring them up, and releasing them as they become no longer necessary  |
@@ -162,6 +163,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final String VCN_CONFIG_FILE = "/data/system/vcn/configs.xml";
+
+    // TODO(b/176956496): Directly use CarrierServiceBindHelper.UNBIND_DELAY_MILLIS
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final long CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS = TimeUnit.SECONDS.toMillis(30);
 
     /* Binder context for this service */
     @NonNull private final Context mContext;
@@ -367,15 +372,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
     public void systemReady() {
-        // Always run on the handler thread to ensure consistency.
-        mHandler.post(() -> {
-            mNetworkProvider.register();
-            mContext.getSystemService(ConnectivityManager.class)
-                    .registerNetworkCallback(
-                            new NetworkRequest.Builder().clearCapabilities().build(),
-                            mTrackingNetworkCallback);
-            mTelephonySubscriptionTracker.register();
-        });
+        mNetworkProvider.register();
+        mContext.getSystemService(ConnectivityManager.class)
+                .registerNetworkCallback(
+                        new NetworkRequest.Builder().clearCapabilities().build(),
+                        mTrackingNetworkCallback);
+        mTelephonySubscriptionTracker.register();
     }
 
     private void enforcePrimaryUser() {
@@ -469,15 +471,22 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         if (!mVcns.containsKey(subGrp)) {
                             startVcnLocked(subGrp, entry.getValue());
                         }
+
+                        // Cancel any scheduled teardowns for active subscriptions
+                        mHandler.removeCallbacksAndMessages(mVcns.get(subGrp));
                     }
                 }
 
-                // Schedule teardown of any VCN instances that have lost carrier privileges
+                // Schedule teardown of any VCN instances that have lost carrier privileges (after a
+                // delay)
                 for (Entry<ParcelUuid, Vcn> entry : mVcns.entrySet()) {
                     final ParcelUuid subGrp = entry.getKey();
                     final VcnConfig config = mConfigs.get(subGrp);
 
                     final boolean isActiveSubGrp = isActiveSubGroup(subGrp, snapshot);
+                    final boolean isValidActiveDataSubIdNotInVcnSubGrp =
+                            isValidSubscriptionId(snapshot.getActiveDataSubscriptionId())
+                                    && !isActiveSubGroup(subGrp, snapshot);
 
                     // TODO(b/193687515): Support multiple VCNs active at the same time
                     if (config == null
@@ -487,12 +496,31 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         final ParcelUuid uuidToTeardown = subGrp;
                         final Vcn instanceToTeardown = entry.getValue();
 
-                        stopVcnLocked(uuidToTeardown);
+                        // TODO(b/193687515): Support multiple VCNs active at the same time
+                        // If directly switching to a subscription not in the current group,
+                        // teardown immediately to prevent other subscription's network from being
+                        // outscored by the VCN. Otherwise, teardown after a delay to ensure that
+                        // SIM profile switches do not trigger the VCN to cycle.
+                        final long teardownDelayMs =
+                                isValidActiveDataSubIdNotInVcnSubGrp
+                                        ? 0
+                                        : CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS;
+                        mHandler.postDelayed(() -> {
+                            synchronized (mLock) {
+                                // Guard against case where this is run after a old instance was
+                                // torn down, and a new instance was started. Verify to ensure
+                                // correct instance is torn down. This could happen as a result of a
+                                // Carrier App manually removing/adding a VcnConfig.
+                                if (mVcns.get(uuidToTeardown) == instanceToTeardown) {
+                                    stopVcnLocked(uuidToTeardown);
 
-                        // TODO(b/181789060): invoke asynchronously after Vcn notifies
-                        // through VcnCallback
-                        notifyAllPermissionedStatusCallbacksLocked(
-                                uuidToTeardown, VCN_STATUS_CODE_INACTIVE);
+                                    // TODO(b/181789060): invoke asynchronously after Vcn notifies
+                                    // through VcnCallback
+                                    notifyAllPermissionedStatusCallbacksLocked(
+                                            uuidToTeardown, VCN_STATUS_CODE_INACTIVE);
+                                }
+                            }
+                        }, instanceToTeardown, teardownDelayMs);
                     } else {
                         // If this VCN's status has not changed, update it with the new snapshot
                         entry.getValue().updateSubscriptionSnapshot(mLastSnapshot);
@@ -539,13 +567,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @GuardedBy("mLock")
     private void notifyAllPolicyListenersLocked() {
         for (final PolicyListenerBinderDeath policyListener : mRegisteredPolicyListeners.values()) {
-            Binder.withCleanCallingIdentity(() -> {
-                try {
-                    policyListener.mListener.onPolicyChanged();
-                } catch (RemoteException e) {
-                    logDbg("VcnStatusCallback threw on VCN status change", e);
-                }
-            });
+            Binder.withCleanCallingIdentity(() -> policyListener.mListener.onPolicyChanged());
         }
     }
 
@@ -554,13 +576,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull ParcelUuid subGroup, @VcnStatusCode int statusCode) {
         for (final VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
             if (isCallbackPermissioned(cbInfo, subGroup)) {
-                Binder.withCleanCallingIdentity(() -> {
-                    try {
-                        cbInfo.mCallback.onVcnStatusChanged(statusCode);
-                    } catch (RemoteException e) {
-                        logDbg("VcnStatusCallback threw on VCN status change", e);
-                    }
-                });
+                Binder.withCleanCallingIdentity(
+                        () -> cbInfo.mCallback.onVcnStatusChanged(statusCode));
             }
         }
     }
@@ -1233,17 +1250,13 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 // Notify all registered StatusCallbacks for this subGroup
                 for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
                     if (isCallbackPermissioned(cbInfo, mSubGroup)) {
-                        Binder.withCleanCallingIdentity(() -> {
-                            try {
-                                cbInfo.mCallback.onGatewayConnectionError(
-                                        gatewayConnectionName,
-                                        errorCode,
-                                        exceptionClass,
-                                        exceptionMessage);
-                            } catch (RemoteException e) {
-                                logDbg("VcnStatusCallback threw on VCN status change", e);
-                            }
-                        });
+                        Binder.withCleanCallingIdentity(
+                                () ->
+                                        cbInfo.mCallback.onGatewayConnectionError(
+                                                gatewayConnectionName,
+                                                errorCode,
+                                                exceptionClass,
+                                                exceptionMessage));
                     }
                 }
             }

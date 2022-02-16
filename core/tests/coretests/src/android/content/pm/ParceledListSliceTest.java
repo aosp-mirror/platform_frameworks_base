@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.LargeTest;
 
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Presubmit
 @LargeTest
 public class ParceledListSliceTest extends TestCase {
 

@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
-import static com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.logGroupKey;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -28,7 +25,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -42,27 +39,23 @@ import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.util.Compile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.inject.Inject;
 
 /**
  * A helper class dealing with the alert interactions between {@link NotificationGroupManagerLegacy}
  * and {@link HeadsUpManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression and alertOverride.
  */
-@SysUISingleton
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
         StateListener {
 
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
     private static final String TAG = "NotifGroupAlertTransfer";
-    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = StatusBar.DEBUG;
+    private static final boolean SPEW = StatusBar.SPEW;
 
     /**
      * The list of entries containing group alert metadata for each group. Keyed by group key.
@@ -77,7 +70,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private HeadsUpManager mHeadsUpManager;
     private final RowContentBindStage mRowContentBindStage;
-    private final NotificationGroupManagerLegacy mGroupManager;
+    private final NotificationGroupManagerLegacy mGroupManager =
+            Dependency.get(NotificationGroupManagerLegacy.class);
 
     private NotificationEntryManager mEntryManager;
 
@@ -86,14 +80,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     /**
      * Injected constructor. See {@link StatusBarPhoneModule}.
      */
-    @Inject
-    public NotificationGroupAlertTransferHelper(
-            RowContentBindStage bindStage,
-            StatusBarStateController statusBarStateController,
-            NotificationGroupManagerLegacy notificationGroupManagerLegacy) {
+    public NotificationGroupAlertTransferHelper(RowContentBindStage bindStage) {
+        Dependency.get(StatusBarStateController.class).addCallback(this);
         mRowContentBindStage = bindStage;
-        mGroupManager = notificationGroupManagerLegacy;
-        statusBarStateController.addCallback(this);
     }
 
     /** Causes the TransferHelper to register itself as a listener to the appropriate classes. */
@@ -158,9 +147,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         @Override
         public void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {
             if (DEBUG) {
-                Log.d(TAG, "!! onGroupSuppressionChanged:"
-                        + " group=" + logGroupKey(group)
-                        + " group.summary=" + logKey(group.summary)
+                Log.d(TAG, "!! onGroupSuppressionChanged: group.summary=" + group.summary
                         + " suppressed=" + suppressed);
             }
             NotificationEntry oldAlertOverride = group.alertOverride;
@@ -172,11 +159,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                 @Nullable NotificationEntry oldAlertOverride,
                 @Nullable NotificationEntry newAlertOverride) {
             if (DEBUG) {
-                Log.d(TAG, "!! onGroupAlertOverrideChanged:"
-                        + " group=" + logGroupKey(group)
-                        + " group.summary=" + logKey(group.summary)
-                        + " oldAlertOverride=" + logKey(oldAlertOverride)
-                        + " newAlertOverride=" + logKey(newAlertOverride));
+                Log.d(TAG, "!! onGroupAlertOverrideChanged: group.summary=" + group.summary
+                        + " oldAlertOverride=" + oldAlertOverride
+                        + " newAlertOverride=" + newAlertOverride);
             }
             onGroupChanged(group, oldAlertOverride);
         }
@@ -222,9 +207,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         if (DEBUG) {
-            Log.d(TAG, "!! onHeadsUpStateChanged:"
-                    + " entry=" + logKey(entry)
-                    + " isHeadsUp=" + isHeadsUp);
+            Log.d(TAG, "!! onHeadsUpStateChanged: entry=" + entry + " isHeadsUp=" + isHeadsUp);
         }
         if (isHeadsUp && entry.getSbn().getNotification().isGroupSummary()) {
             // a group summary is alerting; trigger the forward transfer checks
@@ -256,9 +239,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         } else if (mGroupManager.isSummaryOfSuppressedGroup(summary.getSbn())) {
             handleSuppressedSummaryAlerted(summary, oldAlertOverride);
         }
-        if (DEBUG) {
-            Log.d(TAG, "checkForForwardAlertTransfer: done");
-        }
     }
 
     private final NotificationEntryListener mNotificationEntryListener =
@@ -268,7 +248,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
             if (DEBUG) {
-                Log.d(TAG, "!! onPendingEntryAdded: entry=" + logKey(entry));
+                Log.d(TAG, "!! onPendingEntryAdded: entry=" + entry);
             }
             String groupKey = mGroupManager.getGroupKey(entry.getSbn());
             GroupAlertEntry groupAlertEntry = mGroupAlertEntries.get(groupKey);
@@ -364,7 +344,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     private void handleSuppressedSummaryAlerted(@NonNull NotificationEntry summary,
             NotificationEntry oldAlertOverride) {
         if (DEBUG) {
-            Log.d(TAG, "handleSuppressedSummaryAlerted: summary=" + logKey(summary));
+            Log.d(TAG, "handleSuppressedSummaryAlerted: summary=" + summary);
         }
         GroupAlertEntry groupAlertEntry =
                 mGroupAlertEntries.get(mGroupManager.getGroupKey(summary.getSbn()));
@@ -426,7 +406,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      */
     private void handleOverriddenSummaryAlerted(NotificationEntry summary) {
         if (DEBUG) {
-            Log.d(TAG, "handleOverriddenSummaryAlerted: summary=" + logKey(summary));
+            Log.d(TAG, "handleOverriddenSummaryAlerted: summary=" + summary);
         }
         GroupAlertEntry groupAlertEntry =
                 mGroupAlertEntries.get(mGroupManager.getGroupKey(summary.getSbn()));
@@ -500,9 +480,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                 groupAlertEntry.mLastAlertTransferTime = SystemClock.elapsedRealtime();
             }
             if (DEBUG) {
-                Log.d(TAG, "transferAlertState:"
-                        + " fromEntry=" + logKey(fromEntry)
-                        + " toEntry=" + logKey(toEntry));
+                Log.d(TAG, "transferAlertState: fromEntry=" + fromEntry + " toEntry=" + toEntry);
             }
             transferAlertState(fromEntry, toEntry);
         }
@@ -604,8 +582,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         final RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         if ((params.getContentViews() & contentFlag) == 0) {
             if (DEBUG) {
-                Log.d(TAG, "alertNotificationWhenPossible:"
-                        + " async requestRebind entry=" + logKey(entry));
+                Log.d(TAG, "alertNotificationWhenPossible: async requestRebind entry=" + entry);
             }
             mPendingAlerts.put(entry.getKey(), new PendingAlertInfo(entry));
             params.requireContentViews(contentFlag);
@@ -615,10 +592,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                     if (alertInfo.isStillValid()) {
                         alertNotificationWhenPossible(entry);
                     } else {
-                        if (DEBUG) {
-                            Log.d(TAG, "alertNotificationWhenPossible:"
-                                    + " markContentViewsFreeable entry=" + logKey(entry));
-                        }
                         // The transfer is no longer valid. Free the content.
                         mRowContentBindStage.getStageParams(entry).markContentViewsFreeable(
                                 contentFlag);
@@ -630,14 +603,12 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         }
         if (mHeadsUpManager.isAlerting(entry.getKey())) {
             if (DEBUG) {
-                Log.d(TAG, "alertNotificationWhenPossible:"
-                        + " continue alerting entry=" + logKey(entry));
+                Log.d(TAG, "alertNotificationWhenPossible: continue alerting entry=" + entry);
             }
             mHeadsUpManager.updateNotification(entry.getKey(), true /* alert */);
         } else {
             if (DEBUG) {
-                Log.d(TAG, "alertNotificationWhenPossible:"
-                        + " start alerting entry=" + logKey(entry));
+                Log.d(TAG, "alertNotificationWhenPossible: start alerting entry=" + entry);
             }
             mHeadsUpManager.showNotification(entry);
         }
@@ -685,7 +656,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                 // Notification is aborted due to the transfer being explicitly cancelled
                 return false;
             }
-            if (!mEntry.getSbn().getGroupKey().equals(mOriginalNotification.getGroupKey())) {
+            if (mEntry.getSbn().getGroupKey() != mOriginalNotification.getGroupKey()) {
                 // Groups have changed
                 return false;
             }

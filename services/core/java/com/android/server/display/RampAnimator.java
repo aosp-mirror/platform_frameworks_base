@@ -23,8 +23,6 @@ import android.view.Choreographer;
 /**
  * A custom animator that progressively updates a property value at
  * a given variable rate until it reaches a particular target value.
- * The ramping at the given rate is done in the perceptual space using
- * the HLG transfer functions.
  */
 class RampAnimator<T> {
     private final T mObject;
@@ -55,13 +53,11 @@ class RampAnimator<T> {
      * If this is the first time the property is being set or if the rate is 0,
      * the value jumps directly to the target.
      *
-     * @param targetLinear The target value.
+     * @param target The target value.
      * @param rate The convergence rate in units per second, or 0 to set the value immediately.
      * @return True if the target differs from the previous target.
      */
-    public boolean animateTo(float targetLinear, float rate) {
-        // Convert the target from the linear into the HLG space.
-        final float target = BrightnessUtils.convertLinearToGamma(targetLinear);
+    public boolean animateTo(float target, float rate) {
 
         // Immediately jump to the target the first time.
         if (mFirstTime || rate <= 0) {
@@ -70,7 +66,7 @@ class RampAnimator<T> {
                 mRate = 0;
                 mTargetValue = target;
                 mCurrentValue = target;
-                setPropertyValue(target);
+                mProperty.setValue(mObject, target);
                 if (mAnimating) {
                     mAnimating = false;
                     cancelAnimationCallback();
@@ -125,15 +121,6 @@ class RampAnimator<T> {
         mListener = listener;
     }
 
-    /**
-     * Sets the brightness property by converting the given value from HLG space
-     * into linear space.
-     */
-    private void setPropertyValue(float val) {
-        final float linearVal = BrightnessUtils.convertGammaToLinear(val);
-        mProperty.setValue(mObject, linearVal);
-    }
-
     private void postAnimationCallback() {
         mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimationCallback, null);
     }
@@ -169,7 +156,7 @@ class RampAnimator<T> {
             final float oldCurrentValue = mCurrentValue;
             mCurrentValue = mAnimatedValue;
             if (oldCurrentValue != mCurrentValue) {
-                setPropertyValue(mCurrentValue);
+                mProperty.setValue(mObject, mCurrentValue);
             }
             if (mTargetValue != mCurrentValue) {
                 postAnimationCallback();
@@ -214,14 +201,14 @@ class RampAnimator<T> {
          * If this is the first time the property is being set or if the rate is 0,
          * the value jumps directly to the target.
          *
-         * @param linearFirstTarget The first target value in linear space.
-         * @param linearSecondTarget The second target value in linear space.
+         * @param firstTarget The first target value.
+         * @param secondTarget The second target value.
          * @param rate The convergence rate in units per second, or 0 to set the value immediately.
          * @return True if either target differs from the previous target.
          */
-        public boolean animateTo(float linearFirstTarget, float linearSecondTarget, float rate) {
-            final boolean firstRetval = mFirst.animateTo(linearFirstTarget, rate);
-            final boolean secondRetval = mSecond.animateTo(linearSecondTarget, rate);
+        public boolean animateTo(float firstTarget, float secondTarget, float rate) {
+            final boolean firstRetval = mFirst.animateTo(firstTarget, rate);
+            final boolean secondRetval = mSecond.animateTo(secondTarget, rate);
             return firstRetval && secondRetval;
         }
 

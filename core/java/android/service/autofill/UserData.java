@@ -43,7 +43,6 @@ import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * Defines the user data used for
@@ -109,7 +108,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
     @Nullable
     @Override
     public String getFieldClassificationAlgorithmForCategory(@NonNull String categoryId) {
-        Objects.requireNonNull(categoryId);
+        Preconditions.checkNotNull(categoryId);
         if (mCategoryAlgorithms == null || !mCategoryAlgorithms.containsKey(categoryId)) {
             return null;
         }
@@ -297,7 +296,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
         public Builder setFieldClassificationAlgorithmForCategory(@NonNull String categoryId,
                 @Nullable String name, @Nullable Bundle args) {
             throwIfDestroyed();
-            Objects.requireNonNull(categoryId);
+            Preconditions.checkNotNull(categoryId);
             if (mCategoryAlgorithms == null) {
                 mCategoryAlgorithms = new ArrayMap<>(getMaxCategoryCount());
             }
@@ -369,13 +368,13 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
         }
 
         private String checkNotEmpty(@NonNull String name, @Nullable String value) {
-            Objects.requireNonNull(value);
+            Preconditions.checkNotNull(value);
             Preconditions.checkArgument(!TextUtils.isEmpty(value), "%s cannot be empty", name);
             return value;
         }
 
         private void checkValidValue(@Nullable String value) {
-            Objects.requireNonNull(value);
+            Preconditions.checkNotNull(value);
             final int length = value.length();
             Preconditions.checkArgumentInRange(length, getMinValueLength(),
                     getMaxValueLength(), "value length (" + length + ")");

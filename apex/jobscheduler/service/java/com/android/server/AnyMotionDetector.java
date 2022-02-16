@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import android.annotation.Nullable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,8 +25,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Slog;
-
-import com.android.internal.annotations.GuardedBy;
 
 /**
  * Determines if the device has been set upon a stationary object.
@@ -57,7 +54,6 @@ public class AnyMotionDetector {
     private static final int STATE_ACTIVE = 1;
 
     /** Current measurement state. */
-    @GuardedBy("mLock")
     private int mState;
 
     /** Threshold energy above which the device is considered moving. */
@@ -86,47 +82,38 @@ public class AnyMotionDetector {
 
     private final Handler mHandler;
     private final Object mLock = new Object();
-    private final Sensor mAccelSensor;
-    private final SensorManager mSensorManager;
-    private final PowerManager.WakeLock mWakeLock;
+    private Sensor mAccelSensor;
+    private SensorManager mSensorManager;
+    private PowerManager.WakeLock mWakeLock;
 
     /** Threshold angle in degrees beyond which the device is considered moving. */
     private final float mThresholdAngle;
 
     /** The minimum number of samples required to detect AnyMotion. */
-    @GuardedBy("mLock")
     private int mNumSufficientSamples;
 
     /** True if an orientation measurement is in progress. */
-    @GuardedBy("mLock")
     private boolean mMeasurementInProgress;
 
     /** True if sendMessageDelayed() for the mMeasurementTimeout callback has been scheduled */
-    @GuardedBy("mLock")
     private boolean mMeasurementTimeoutIsActive;
 
     /** True if sendMessageDelayed() for the mWakelockTimeout callback has been scheduled */
-    private volatile boolean mWakelockTimeoutIsActive;
+    private boolean mWakelockTimeoutIsActive;
 
     /** True if sendMessageDelayed() for the mSensorRestart callback has been scheduled */
-    @GuardedBy("mLock")
     private boolean mSensorRestartIsActive;
 
     /** The most recent gravity vector. */
-    @Nullable
-    @GuardedBy("mLock")
     private Vector3 mCurrentGravityVector = null;
 
     /** The second most recent gravity vector. */
-    @Nullable
-    @GuardedBy("mLock")
     private Vector3 mPreviousGravityVector = null;
 
     /** Running sum of squared errors. */
-    @GuardedBy("mLock")
-    private final RunningSignalStats mRunningStats;
+    private RunningSignalStats mRunningStats;
 
-    private final DeviceIdleCallback mCallback;
+    private DeviceIdleCallback mCallback = null;
 
     public AnyMotionDetector(PowerManager pm, Handler handler, SensorManager sm,
             DeviceIdleCallback callback, float thresholdAngle) {
@@ -162,11 +149,11 @@ public class AnyMotionDetector {
      * Acquire accel data until we determine AnyMotion status.
      */
     public void checkForAnyMotion() {
-        synchronized (mLock) {
-            if (DEBUG) {
-                Slog.d(TAG, "checkForAnyMotion(). mState = " + mState);
-            }
-            if (mState != STATE_ACTIVE) {
+        if (DEBUG) {
+            Slog.d(TAG, "checkForAnyMotion(). mState = " + mState);
+        }
+        if (mState != STATE_ACTIVE) {
+            synchronized (mLock) {
                 mState = STATE_ACTIVE;
                 if (DEBUG) {
                     Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_ACTIVE.");
@@ -206,7 +193,6 @@ public class AnyMotionDetector {
         }
     }
 
-    @GuardedBy("mLock")
     private void startOrientationMeasurementLocked() {
         if (DEBUG) Slog.d(TAG, "startOrientationMeasurementLocked: mMeasurementInProgress=" +
             mMeasurementInProgress + ", (mAccelSensor != null)=" + (mAccelSensor != null));
@@ -222,7 +208,6 @@ public class AnyMotionDetector {
         }
     }
 
-    @GuardedBy("mLock")
     private int stopOrientationMeasurementLocked() {
         if (DEBUG) Slog.d(TAG, "stopOrientationMeasurement. mMeasurementInProgress=" +
                 mMeasurementInProgress);
@@ -246,7 +231,7 @@ public class AnyMotionDetector {
                 Slog.d(TAG, "mCurrentGravityVector = " + currentGravityVectorString);
                 Slog.d(TAG, "mPreviousGravityVector = " + previousGravityVectorString);
             }
-            status = getStationaryStatusLocked();
+            status = getStationaryStatus();
             mRunningStats.reset();
             if (DEBUG) Slog.d(TAG, "getStationaryStatus() returned " + status);
             if (status != RESULT_UNKNOWN) {
@@ -276,10 +261,9 @@ public class AnyMotionDetector {
     }
 
     /*
-     * Returns the current AnyMotion status.
+     * Updates mStatus to the current AnyMotion status.
      */
-    @GuardedBy("mLock")
-    private int getStationaryStatusLocked() {
+    public int getStationaryStatus() {
         if ((mPreviousGravityVector == null) || (mCurrentGravityVector == null)) {
             return RESULT_UNKNOWN;
         }
@@ -357,12 +341,12 @@ public class AnyMotionDetector {
                           "data within " + ACCELEROMETER_DATA_TIMEOUT_MILLIS + " ms. Stopping " +
                           "orientation measurement.");
                     status = stopOrientationMeasurementLocked();
+                    if (status != RESULT_UNKNOWN) {
+                        mHandler.removeCallbacks(mWakelockTimeout);
+                        mWakelockTimeoutIsActive = false;
+                        mCallback.onAnyMotionResult(status);
+                    }
                 }
-            }
-            if (status != RESULT_UNKNOWN) {
-                mHandler.removeCallbacks(mWakelockTimeout);
-                mWakelockTimeoutIsActive = false;
-                mCallback.onAnyMotionResult(status);
             }
         }
     };
@@ -504,10 +488,9 @@ public class AnyMotionDetector {
             }
         }
 
-        @Nullable
         public Vector3 getRunningAverage() {
             if (sampleCount > 0) {
-                return runningSum.times(1.0f / sampleCount);
+              return runningSum.times((float)(1.0f / sampleCount));
             }
             return null;
         }

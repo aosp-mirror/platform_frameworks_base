@@ -22,6 +22,7 @@ import android.os.IBinder;
 
 import com.android.internal.annotations.Immutable;
 
+
 /**
  * @hide
  * Private interface to the VoiceInteractionManagerService for use by ActivityManagerService.
@@ -48,13 +49,6 @@ public abstract class VoiceInteractionManagerInternal {
      * Returns whether the given package is currently in an active session
      */
     public abstract boolean hasActiveSession(String packageName);
-
-    /**
-     * Returns the package name of the active session.
-     *
-     * @param callingVoiceInteractor the voice interactor binder from the calling VoiceInteractor.
-     */
-    public abstract String getVoiceInteractorPackageName(IBinder callingVoiceInteractor);
 
     /**
      * Gets the identity of the currently active HotwordDetectionService.

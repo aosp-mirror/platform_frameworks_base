@@ -55,12 +55,8 @@ using android::base::unique_fd;
 
 #define SYNC_RECEIVED_WHILE_FROZEN (1)
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
-#define TXNS_PENDING_WHILE_FROZEN (4)
 
 namespace android {
-
-static bool cancelRunningCompaction;
-static bool compactionInProgress;
 
 // Legacy method for compacting processes, any new code should
 // use compactProcess instead.
@@ -86,18 +82,9 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
         // Skip compaction if failed to open pidfd with any error
         return -errno;
     }
-    compactionInProgress = true;
-    cancelRunningCompaction = false;
 
     int64_t totalBytesCompacted = 0;
     for (int iBase = 0; iBase < vmas.size(); iBase += UIO_MAXIOV) {
-        if (CC_UNLIKELY(cancelRunningCompaction)) {
-            // There could be a significant delay betweenwhen a compaction
-            // is requested and when it is handled during this time
-            // our OOM adjust could have improved.
-            cancelRunningCompaction = false;
-            break;
-        }
         int totalVmasToKernel = std::min(UIO_MAXIOV, (int)(vmas.size() - iBase));
         for (int iVec = 0, iVma = iBase; iVec < totalVmasToKernel; ++iVec, ++iVma) {
             vmasToKernel[iVec].iov_base = (void*)vmas[iVma].start;
@@ -107,13 +94,11 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
         auto bytesCompacted =
                 process_madvise(pidfd, vmasToKernel, totalVmasToKernel, madviseType, 0);
         if (CC_UNLIKELY(bytesCompacted == -1)) {
-            compactionInProgress = false;
             return -errno;
         }
 
         totalBytesCompacted += bytesCompacted;
     }
-    compactionInProgress = false;
 
     return totalBytesCompacted;
 }
@@ -242,31 +227,22 @@ static void com_android_server_am_CachedAppOptimizer_compactSystem(JNIEnv *, job
     }
 }
 
-static void com_android_server_am_CachedAppOptimizer_cancelCompaction(JNIEnv*, jobject) {
-    if (compactionInProgress) {
-        cancelRunningCompaction = true;
-    }
-}
-
 static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, jobject, jint pid,
                                                                     jint compactionFlags) {
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static jint com_android_server_am_CachedAppOptimizer_freezeBinder(
+static void com_android_server_am_CachedAppOptimizer_freezeBinder(
         JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
 
-    jint retVal = IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */);
-    if (retVal != 0 && retVal != -EAGAIN) {
+    if (IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */) != 0) {
         jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
     }
-
-    return retVal;
 }
 
 static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
         jobject clazz, jint pid) {
-    uint32_t syncReceived = 0, asyncReceived = 0;
+    bool syncReceived = false, asyncReceived = false;
 
     int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
 
@@ -276,12 +252,13 @@ static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv 
 
     jint retVal = 0;
 
-    // bit 0 of sync_recv goes to bit 0 of retVal
-    retVal |= syncReceived & SYNC_RECEIVED_WHILE_FROZEN;
-    // bit 0 of async_recv goes to bit 1 of retVal
-    retVal |= (asyncReceived << 1) & ASYNC_RECEIVED_WHILE_FROZEN;
-    // bit 1 of sync_recv goes to bit 2 of retVal
-    retVal |= (syncReceived << 1) & TXNS_PENDING_WHILE_FROZEN;
+    if(syncReceived) {
+        retVal |= SYNC_RECEIVED_WHILE_FROZEN;;
+    }
+
+    if(asyncReceived) {
+        retVal |= ASYNC_RECEIVED_WHILE_FROZEN;
+    }
 
     return retVal;
 }
@@ -299,11 +276,9 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
 
 static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
-        {"cancelCompaction", "()V",
-         (void*)com_android_server_am_CachedAppOptimizer_cancelCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+        {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",

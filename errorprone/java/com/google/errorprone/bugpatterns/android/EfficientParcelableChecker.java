@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.android;
 
-import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.enclosingClass;
@@ -46,7 +45,6 @@ import com.sun.source.tree.Tree;
 @BugPattern(
     name = "AndroidFrameworkEfficientParcelable",
     summary = "Verifies Parcelable performance best-practices",
-    linkType = NONE,
     severity = WARNING)
 public final class EfficientParcelableChecker extends BugChecker
         implements MethodInvocationTreeMatcher {

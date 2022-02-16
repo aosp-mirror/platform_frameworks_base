@@ -43,10 +43,10 @@ public class LauncherActivityInfoInternal implements Parcelable {
     }
 
     public LauncherActivityInfoInternal(Parcel source) {
-        mActivityInfo = source.readParcelable(ActivityInfo.class.getClassLoader(), android.content.pm.ActivityInfo.class);
+        mActivityInfo = source.readParcelable(ActivityInfo.class.getClassLoader());
         mComponentName = new ComponentName(mActivityInfo.packageName, mActivityInfo.name);
         mIncrementalStatesInfo = source.readParcelable(
-                IncrementalStatesInfo.class.getClassLoader(), android.content.pm.IncrementalStatesInfo.class);
+                IncrementalStatesInfo.class.getClassLoader());
     }
 
     public ComponentName getComponentName() {

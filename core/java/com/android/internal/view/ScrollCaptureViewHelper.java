@@ -18,11 +18,8 @@ package com.android.internal.view;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
-import android.os.CancellationSignal;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.function.Consumer;
 
 /**
  * Provides view-specific handling to ScrollCaptureViewSupport.
@@ -70,7 +67,10 @@ public interface ScrollCaptureViewHelper<V extends View> {
      * @param view the view being captured
      * @return true if the callback should respond to a request with scroll bounds
      */
-    boolean onAcceptSession(@NonNull V view);
+    default boolean onAcceptSession(@NonNull V view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
 
     /**
      * Given a scroll capture request for a view, adjust the provided rect to cover the scrollable
@@ -101,22 +101,21 @@ public interface ScrollCaptureViewHelper<V extends View> {
     /**
      * Map the request onto the screen.
      * <p>
-     * Given a rect describing the area to capture, relative to scrollBounds, take actions
+     * Given a  rect describing the area to capture, relative to scrollBounds, take actions
      * necessary to bring the content within the rectangle into the visible area of the view if
      * needed and return the resulting rectangle describing the position and bounds of the area
      * which is visible.
-     *  @param view the view being captured
+     *
+     * @param view the view being captured
      * @param scrollBounds the area in which scrolling content moves, local to the {@code containing
      *                     view}
      * @param requestRect  the area relative to {@code scrollBounds} which describes the location of
- *                     content to capture for the request
-     * @param cancellationSignal allows for the request to be cancelled by the caller
-     * @param resultConsumer accepts the result of the request as a {@link ScrollResult}
+     *                     content to capture for the request
+     * @return the result of the request as a {@link ScrollResult}
      */
     @NonNull
-    void onScrollRequested(@NonNull V view, @NonNull Rect scrollBounds,
-            @NonNull Rect requestRect, CancellationSignal cancellationSignal,
-            Consumer<ScrollResult> resultConsumer);
+    ScrollResult onScrollRequested(@NonNull V view, @NonNull Rect scrollBounds,
+            @NonNull Rect requestRect);
 
     /**
      * Restore the target after capture.

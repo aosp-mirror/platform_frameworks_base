@@ -68,7 +68,7 @@ public final class Session2CommandGroup implements Parcelable {
     /**
      * Used by parcelable creator.
      */
-    @SuppressWarnings({"WeakerAccess", "UnsafeParcelApi"}) /* synthetic access */
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
     Session2CommandGroup(Parcel in) {
         Parcelable[] commands = in.readParcelableArray(Session2Command.class.getClassLoader());
         if (commands != null) {

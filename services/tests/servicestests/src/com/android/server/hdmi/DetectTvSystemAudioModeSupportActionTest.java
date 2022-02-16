@@ -34,8 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Collections;
-
 /** Tests for {@link DetectTvSystemAudioModeSupportAction} class. */
 @SmallTest
 @Presubmit
@@ -53,10 +51,9 @@ public class DetectTvSystemAudioModeSupportActionTest {
 
     @Before
     public void SetUp() {
-        mDeviceInfoForTests = HdmiDeviceInfo.hardwarePort(1001, 1234);
+        mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
         HdmiControlService hdmiControlService =
-                new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
 
                     @Override
                     void sendCecCommand(
@@ -73,9 +70,7 @@ public class DetectTvSystemAudioModeSupportActionTest {
                                     mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
                                             HdmiCecMessageBuilder.buildFeatureAbortCommand(
                                                     Constants.ADDR_TV,
-                                                    mHdmiCecLocalDeviceAudioSystem
-                                                            .getDeviceInfo()
-                                                            .getLogicalAddress(),
+                                                    mHdmiCecLocalDeviceAudioSystem.mAddress,
                                                     Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
                                                     Constants.ABORT_UNRECOGNIZED_OPCODE));
                                 }
@@ -108,7 +103,6 @@ public class DetectTvSystemAudioModeSupportActionTest {
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem.init();
-        mHdmiCecLocalDeviceAudioSystem.setDeviceInfo(mDeviceInfoForTests);
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
 
