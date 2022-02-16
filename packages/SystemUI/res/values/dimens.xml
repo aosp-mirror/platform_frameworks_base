@@ -1038,6 +1038,7 @@
     <dimen name="control_spinner_padding_horizontal">20dp</dimen>
     <dimen name="control_text_size">14sp</dimen>
     <dimen name="control_icon_size">24dp</dimen>
+    <dimen name="control_chevron_icon_size">20dp</dimen>
     <dimen name="control_spacing">8dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">14dp</dimen>
