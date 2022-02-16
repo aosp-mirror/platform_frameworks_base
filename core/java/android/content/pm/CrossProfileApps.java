@@ -15,9 +15,6 @@
  */
 package android.content.pm;
 
-import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
-import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -25,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.AppOpsManager.Mode;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -184,7 +180,6 @@ public class CrossProfileApps {
      * {@link #startMainActivity}, this can start any activity of the caller package, not just
      * the main activity.
      * The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
-     * or {@link android.Manifest.permission#START_CROSS_PROFILE_ACTIVITIES}
      * permission and both the caller and target user profiles must be in the same profile group.
      *
      * @param component The ComponentName of the activity to launch. It must be exported.
@@ -194,9 +189,7 @@ public class CrossProfileApps {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-            android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES})
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)
     public void startActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
@@ -245,23 +238,11 @@ public class CrossProfileApps {
     public @NonNull CharSequence getProfileSwitchingLabel(@NonNull UserHandle userHandle) {
         verifyCanAccessUser(userHandle);
 
-        final boolean isManagedProfile = mUserManager.isManagedProfile(userHandle.getIdentifier());
-        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        return dpm.getString(
-                getUpdatableProfileSwitchingLabelId(isManagedProfile),
-                () -> getDefaultProfileSwitchingLabel(isManagedProfile));
-    }
-
-    private String getUpdatableProfileSwitchingLabelId(boolean isManagedProfile) {
-        return isManagedProfile ? SWITCH_TO_WORK_LABEL : SWITCH_TO_PERSONAL_LABEL;
-    }
-
-    private String getDefaultProfileSwitchingLabel(boolean isManagedProfile) {
-        final int stringRes = isManagedProfile
-                ? R.string.managed_profile_label : R.string.user_owner_label;
+        final int stringRes = mUserManager.isManagedProfile(userHandle.getIdentifier())
+                ? R.string.managed_profile_label
+                : R.string.user_owner_label;
         return mResources.getString(stringRes);
     }
-
 
     /**
      * Return a drawable that calling app can show to user for the semantic of profile switching --
@@ -282,8 +263,7 @@ public class CrossProfileApps {
         final boolean isManagedProfile =
                 mUserManager.isManagedProfile(userHandle.getIdentifier());
         if (isManagedProfile) {
-            return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
-                    userHandle, /* density= */ 0);
+            return mResources.getDrawable(R.drawable.ic_corp_badge, null);
         } else {
             return UserIcons.getDefaultUserIcon(
                     mResources, UserHandle.USER_SYSTEM, true /* light */);

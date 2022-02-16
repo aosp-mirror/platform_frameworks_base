@@ -22,12 +22,13 @@ import android.annotation.Nullable;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
  */
 public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCallback {
     private final NotificationEntryManager mNotificationEntryManager;
-    private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityManager mVisualStabilityManager;
@@ -44,14 +44,12 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
 
     public OnUserInteractionCallbackImplLegacy(
             NotificationEntryManager notificationEntryManager,
-            NotificationVisibilityProvider visibilityProvider,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             VisualStabilityManager visualStabilityManager,
             GroupMembershipManager groupMembershipManager
     ) {
         mNotificationEntryManager = notificationEntryManager;
-        mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mVisualStabilityManager = visualStabilityManager;
@@ -90,7 +88,12 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
                 new DismissedByUserStats(
                         dismissalSurface,
                         DISMISS_SENTIMENT_NEUTRAL,
-                        mVisibilityProvider.obtain(entry, true)),
+                        NotificationVisibility.obtain(
+                                entry.getKey(),
+                                entry.getRanking().getRank(),
+                                mNotificationEntryManager.getActiveNotificationsCount(),
+                                true,
+                                NotificationLogger.getNotificationLocation(entry))),
                 cancellationReason
         );
 
@@ -111,7 +114,7 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
     public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
         if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
             NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
-            return groupSummary.isDismissable() ? groupSummary : null;
+            return groupSummary.isClearable() ? groupSummary : null;
         }
         return null;
     }

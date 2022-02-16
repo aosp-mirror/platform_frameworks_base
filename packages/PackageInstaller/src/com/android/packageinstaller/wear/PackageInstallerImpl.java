@@ -264,8 +264,7 @@ public class PackageInstallerImpl {
         String action = ACTION_INSTALL_COMMIT + "." + packageName;
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(action);
-        mContext.registerReceiver(broadcastReceiver, intentFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        mContext.registerReceiver(broadcastReceiver, intentFilter);
 
         // Create a matching PendingIntent and use it to generate the IntentSender
         Intent broadcastIntent = new Intent(action);

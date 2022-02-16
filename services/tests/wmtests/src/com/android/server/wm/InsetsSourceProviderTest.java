@@ -31,7 +31,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
-import android.view.InsetsVisibilities;
+import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
@@ -203,9 +203,9 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindow(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        target.setRequestedVisibilities(requestedVisibilities);
+        InsetsState state = new InsetsState();
+        state.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        target.updateRequestedVisibility(state);
         mProvider.updateClientVisibility(target);
         assertFalse(mSource.isVisible());
     }
@@ -216,9 +216,9 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindow(statusBar, null, null);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        target.setRequestedVisibilities(requestedVisibilities);
+        InsetsState state = new InsetsState();
+        state.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        target.updateRequestedVisibility(state);
         mProvider.updateClientVisibility(target);
         assertTrue(mSource.isVisible());
     }

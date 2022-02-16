@@ -33,6 +33,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
@@ -46,6 +47,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
@@ -66,7 +68,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.ThreadFactory;
@@ -77,6 +78,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
@@ -133,7 +135,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
-    private final VibratorHelper mVibrator;
+    private final Optional<Vibrator> mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
     private boolean mShowVolumeDialog;
@@ -171,7 +173,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             ThreadFactory theadFactory,
             AudioManager audioManager,
             NotificationManager notificationManager,
-            VibratorHelper vibrator,
+            Optional<Vibrator> optionalVibrator,
             IAudioService iAudioService,
             AccessibilityManager accessibilityManager,
             PackageManager packageManager,
@@ -197,8 +199,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mBroadcastDispatcher = broadcastDispatcher;
         mObserver.init();
         mReceiver.init();
-        mVibrator = vibrator;
-        mHasVibrator = mVibrator.hasVibrator();
+        mVibrator = optionalVibrator;
+        mHasVibrator = mVibrator.isPresent() && mVibrator.get().hasVibrator();
         mAudioService = iAudioService;
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
@@ -382,8 +384,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private void playTouchFeedback() {
         if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
             try {
-                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD,
-                        UserHandle.USER_CURRENT);
+                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -391,7 +392,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void vibrate(VibrationEffect effect) {
-        mVibrator.vibrate(effect, SONIFICIATION_VIBRATION_ATTRIBUTES);
+        mVibrator.ifPresent(
+                vibrator -> vibrator.vibrate(effect, SONIFICIATION_VIBRATION_ATTRIBUTES));
     }
 
     public boolean hasVibrator() {
@@ -399,7 +401,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        if (mDestroyed) return;
+        if (mDestroyed) return; 
         mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
         if (!visible) {
             if (updateActiveStreamW(-1)) {

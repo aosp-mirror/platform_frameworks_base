@@ -18,31 +18,38 @@ package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarLayerIsVisible
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Test
 
-/**
- * Base class for app rotation tests
- */
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
     protected abstract val testApp: StandardAppHelper
 
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val startingPos get() = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
+    protected val endingPos get() = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
-    protected open val transition: FlickerBuilder.() -> Unit = {
+    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
         setup {
             eachRun {
-                this.setRotation(testSpec.startRotation)
+                this.setRotation(testSpec.config.startRotation)
             }
         }
         teardown {
@@ -51,68 +58,68 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             }
         }
         transitions {
-            this.setRotation(testSpec.endRotation)
+            this.setRotation(testSpec.config.endRotation)
         }
     }
 
-    /**
-     * Entry point for the test runner. It will use this method to initialize and cache
-     * flicker executions
-     */
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            transition()
+            transition(testSpec.config)
         }
     }
 
-    /**
-     * Checks that the navigation bar window is visible and above the app windows in all WM
-     * trace entries
-     */
-    @Presubmit
+    @FlakyTest
     @Test
-    open fun navBarWindowIsVisible() {
-        testSpec.navBarWindowIsVisible()
+    open fun navBarWindowIsAlwaysVisible() {
+        testSpec.navBarWindowIsAlwaysVisible()
     }
 
-    /**
-     * Checks that the navigation bar layer is visible at the start and end of the transition
-     */
-    @Presubmit
+    @FlakyTest
     @Test
-    open fun navBarLayerIsVisible() {
-        testSpec.navBarLayerIsVisible()
+    open fun navBarLayerIsAlwaysVisible() {
+        testSpec.navBarLayerIsAlwaysVisible(rotatesScreen = true)
     }
 
-    /**
-     * Checks the position of the navigation bar at the start and end of the transition
-     */
+    @FlakyTest
+    @Test
+    open fun navBarLayerRotatesAndScales() {
+        testSpec.navBarLayerRotatesAndScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
+
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+    open fun statusBarWindowIsAlwaysVisible() {
+        testSpec.statusBarWindowIsAlwaysVisible()
+    }
 
-    /**
-     * Checks that all layers that are visible on the trace, are visible for at least 2
-     * consecutive entries.
-     */
-    @Presubmit
+    @FlakyTest
+    @Test
+    open fun statusBarLayerIsAlwaysVisible() {
+        testSpec.statusBarLayerIsAlwaysVisible(rotatesScreen = true)
+    }
+
+    @FlakyTest
+    @Test
+    open fun statusBarLayerRotatesScales() {
+        testSpec.statusBarLayerRotatesScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
+
+    @FlakyTest
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(FlickerComponentName.SPLASH_SCREEN,
-                    FlickerComponentName.SNAPSHOT,
-                    FlickerComponentName("", "SecondaryHomeHandle")
+                ignoreLayers = listOf(WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                    WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+                    "SecondaryHomeHandle"
                 )
             )
         }
     }
 
-    /**
-     * Checks that all windows that are visible on the trace, are visible for at least 2
-     * consecutive entries.
-     */
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
@@ -121,36 +128,32 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    /**
-     * Checks that all parts of the screen are covered during the transition
-     */
     @Presubmit
     @Test
-    open fun entireScreenCovered() = testSpec.entireScreenCovered()
+    open fun noUncoveredRegions() {
+        testSpec.noUncoveredRegions(testSpec.config.startRotation,
+            testSpec.config.endRotation, allStates = false)
+    }
 
-    /**
-     * Checks that [testApp] layer covers the entire screen at the start of the transition
-     */
+    @Presubmit
+    @Test
+    open fun focusDoesNotChange() {
+        testSpec.focusDoesNotChange()
+    }
+
     @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.entry.displays.map { display ->
-                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
-            }
+            this.visibleRegion(testApp.getPackage()).coversExactly(startingPos)
         }
     }
 
-    /**
-     * Checks that [testApp] layer covers the entire screen at the end of the transition
-     */
     @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.entry.displays.map { display ->
-                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
-            }
+            this.visibleRegion(testApp.getPackage()).coversExactly(endingPos)
         }
     }
 }

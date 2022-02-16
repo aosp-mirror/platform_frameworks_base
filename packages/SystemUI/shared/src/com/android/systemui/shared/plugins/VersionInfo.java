@@ -119,8 +119,6 @@ public class VersionInfo {
 
     public static class InvalidVersionException extends RuntimeException {
         private final boolean mTooNew;
-        private int mExpected;
-        private int mActual;
 
         public InvalidVersionException(String str, boolean tooNew) {
             super(str);
@@ -130,20 +128,10 @@ public class VersionInfo {
         public InvalidVersionException(Class<?> cls, boolean tooNew, int expected, int actual) {
             super(cls.getSimpleName() + " expected version " + expected + " but had " + actual);
             mTooNew = tooNew;
-            mExpected = expected;
-            mActual = actual;
         }
 
         public boolean isTooNew() {
             return mTooNew;
-        }
-
-        public int getExpectedVersion() {
-            return mExpected;
-        }
-
-        public int getActualVersion() {
-            return mActual;
         }
     }
 

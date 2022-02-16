@@ -17,7 +17,6 @@ package android.hardware.camera2.extension;
 
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.view.Surface;
-import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.ParcelImage;
 import android.hardware.camera2.extension.Size;
 
@@ -27,6 +26,5 @@ interface IPreviewImageProcessorImpl
     void onOutputSurface(in Surface surface, int imageFormat);
     void onResolutionUpdate(in Size size);
     void onImageFormatUpdate(int imageFormat);
-    void process(in ParcelImage image, in CameraMetadataNative result, int sequenceId,
-            in IProcessResultImpl resultCallback);
+    void process(in ParcelImage image, in CameraMetadataNative result, int sequenceId);
 }

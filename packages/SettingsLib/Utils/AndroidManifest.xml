@@ -18,4 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.settingslib.utils">
 
+    <uses-sdk android:minSdkVersion="21" />
+
 </manifest>

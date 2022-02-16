@@ -24,8 +24,9 @@ import android.app.NotificationManager
 import android.content.Context
 import com.android.internal.messages.nano.SystemMessageProto
 import com.android.internal.net.VpnConfig
-import com.android.systemui.CoreStartable
+import com.android.systemui.Dependency
 import com.android.systemui.R
+import com.android.systemui.SystemUI
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.SecurityController
 import javax.inject.Inject
@@ -34,13 +35,12 @@ import javax.inject.Inject
  * Observes if a vpn connection is active and displays a notification to the user
  */
 @SysUISingleton
-class VpnStatusObserver @Inject constructor(
-    context: Context,
-    private val securityController: SecurityController
-) : CoreStartable(context),
+class VpnStatusObserver @Inject constructor(context: Context) : SystemUI(context),
         SecurityController.SecurityControllerCallback {
 
     private var vpnConnected = false
+    private val securityController: SecurityController =
+            Dependency.get(SecurityController::class.java)
     private val notificationManager = NotificationManager.from(context)
     private val notificationChannel = createNotificationChannel()
     private val vpnConnectedNotificationBuilder = createVpnConnectedNotificationBuilder()

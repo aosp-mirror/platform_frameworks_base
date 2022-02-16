@@ -124,7 +124,7 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
             throw new UnsupportedOperationException();
         }
 
-        mOut = FastDataOutput.obtain(os);
+        mOut = new FastDataOutput(os, BUFFER_SIZE);
         mOut.write(PROTOCOL_MAGIC_VERSION_0);
 
         mTagCount = 0;
@@ -138,9 +138,7 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
 
     @Override
     public void flush() throws IOException {
-        if (mOut != null) {
-            mOut.flush();
-        }
+        mOut.flush();
     }
 
     @Override
@@ -159,9 +157,6 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
     public void endDocument() throws IOException {
         mOut.writeByte(END_DOCUMENT | TYPE_NULL);
         flush();
-
-        mOut.release();
-        mOut = null;
     }
 
     @Override

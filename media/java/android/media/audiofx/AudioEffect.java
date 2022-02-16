@@ -511,12 +511,7 @@ public class AudioEffect {
         int deviceType = AudioSystem.DEVICE_NONE;
         String deviceAddress = "";
         if (device != null) {
-            if (device.getRole() == AudioDeviceAttributes.ROLE_OUTPUT) {
-                deviceType = AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType());
-            } else {
-                deviceType = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(
-                        device.getType(), device.getAddress());
-            }
+            deviceType = AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType());
             deviceAddress = device.getAddress();
         }
 

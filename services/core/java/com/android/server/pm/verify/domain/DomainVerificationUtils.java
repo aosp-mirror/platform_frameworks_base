@@ -49,7 +49,7 @@ public final class DomainVerificationUtils {
     }
 
     public static boolean isDomainVerificationIntent(Intent intent,
-            @PackageManager.ResolveInfoFlagsBits long resolveInfoFlags) {
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags) {
         if (!intent.isWebIntent()) {
             return false;
         }

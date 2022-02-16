@@ -58,19 +58,18 @@
     <!-- The color of the text in the Global Actions menu -->
     <color name="global_actions_alert_text">@color/GM2_red_300</color>
 
-    <!-- Floating overlay actions -->
-    <color name="overlay_button_ripple">#42FFFFFF</color>
-    <color name="overlay_background_protection_start">#80000000</color> <!-- 50% black -->
+    <!-- Global screenshot actions -->
+    <color name="global_screenshot_button_background">@color/GM2_grey_800</color>
+    <color name="global_screenshot_button_ripple">#42FFFFFF</color>
+    <color name="global_screenshot_button_text">#FFFFFF</color>
+    <color name="global_screenshot_button_border">@color/GM2_grey_600</color>
+    <color name="global_screenshot_button_icon">@color/GM2_blue_300</color>
+    <color name="global_screenshot_dismiss_background">@color/GM2_grey_800</color>
+    <color name="global_screenshot_dismiss_foreground">#FFFFFF</color>
+    <color name="global_screenshot_background_protection_start">#80000000</color> <!-- 50% black -->
 
     <!-- Media -->
     <color name="media_divider">#85ffffff</color>
-
-    <!-- media output dialog-->
-    <color name="media_dialog_background">@android:color/system_neutral1_900</color>
-    <color name="media_dialog_active_item_main_content">@android:color/system_accent2_800</color>
-    <color name="media_dialog_inactive_item_main_content">@android:color/system_accent1_100</color>
-    <color name="media_dialog_item_status">@android:color/system_accent1_100</color>
-    <color name="media_dialog_item_background">@android:color/system_neutral2_800</color>
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ffcccccc</color>
@@ -78,7 +77,7 @@
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
     <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#7DA7F1</color>
+    <color name="udfps_enroll_icon">#ffffff</color> <!-- 100% white -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>

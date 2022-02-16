@@ -54,7 +54,6 @@ class KeyguardLiftController constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(true)
-            keyguardUpdateMonitor.requestActiveUnlock()
         }
     }
 

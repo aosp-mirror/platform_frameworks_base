@@ -396,7 +396,6 @@ private:
      * SkImageFilter used to create the mSnapshotResult
      */
     sk_sp<SkImageFilter> mTargetImageFilter;
-    uint32_t mTargetImageFilterLayerSurfaceGenerationId = 0;
 
     /**
      * Clip bounds used to create the mSnapshotResult

@@ -24,16 +24,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
@@ -185,8 +181,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     @Override
     public int getPointerLayer() {
         return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_POINTER)
-                * WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER
-                + WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
+                * WindowManagerService.TYPE_LAYER_MULTIPLIER
+                + WindowManagerService.TYPE_LAYER_OFFSET;
     }
 
     /** Callback to get pointer display id. */
@@ -221,11 +217,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
-    public PointF getCursorPosition() {
-        return mService.getLatestMousePosition();
-    }
-
-    @Override
     public void onPointerDownOutsideFocus(IBinder touchedToken) {
         mService.mH.obtainMessage(ON_POINTER_DOWN_OUTSIDE_FOCUS, touchedToken).sendToTarget();
     }
@@ -240,38 +231,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     public void notifyDropWindow(IBinder token, float x, float y) {
         mService.mH.sendMessage(PooledLambda.obtainMessage(
                 mService.mDragDropController::reportDropWindow, token, x, y));
-    }
-
-    @Override
-    public SurfaceControl getParentSurfaceForPointers(int displayId) {
-        synchronized (mService.mGlobalLock) {
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                Slog.e(TAG, "Failed to get parent surface for pointers on display " + displayId
-                        + " - DisplayContent not found.");
-                return null;
-            }
-            return dc.getOverlayLayer();
-        }
-    }
-
-    @Override
-    @Nullable
-    public SurfaceControl createSurfaceForGestureMonitor(String name, int displayId) {
-        synchronized (mService.mGlobalLock) {
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
-                        + " - DisplayContent not found.");
-                return null;
-            }
-            return mService.makeSurfaceBuilder(dc.getSession())
-                    .setContainerLayer()
-                    .setName(name)
-                    .setCallsite("createSurfaceForGestureMonitor")
-                    .setParent(dc.getSurfaceControl())
-                    .build();
-        }
     }
 
     /** Waits until the built-in input devices have been configured. */

@@ -18,14 +18,11 @@ package com.android.systemui.media.dialog
 
 import android.content.Context
 import android.media.session.MediaSessionManager
-import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
+import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.phone.ShadeController
-import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import javax.inject.Inject
 
 /**
@@ -37,32 +34,20 @@ class MediaOutputDialogFactory @Inject constructor(
     private val lbm: LocalBluetoothManager?,
     private val shadeController: ShadeController,
     private val starter: ActivityStarter,
-    private val notifCollection: CommonNotifCollection,
-    private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val dialogManager: SystemUIDialogManager
+    private val notificationEntryManager: NotificationEntryManager,
+    private val uiEventLogger: UiEventLogger
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
-    fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
-        // Dismiss the previous dialog, if any.
+    fun create(packageName: String, aboveStatusBar: Boolean) {
         mediaOutputDialog?.dismiss()
-
-        val controller = MediaOutputController(context, packageName, aboveStatusBar,
-            mediaSessionManager, lbm, shadeController, starter, notifCollection,
-            uiEventLogger, dialogLaunchAnimator, dialogManager)
-        val dialog = MediaOutputDialog(context, aboveStatusBar, controller, uiEventLogger,
-                dialogManager)
-        mediaOutputDialog = dialog
-
-        // Show the dialog.
-        if (view != null) {
-            dialogLaunchAnimator.showFromView(dialog, view)
-        } else {
-            dialog.show()
+        mediaOutputDialog = MediaOutputController(context, packageName, aboveStatusBar,
+                mediaSessionManager, lbm, shadeController, starter, notificationEntryManager,
+                uiEventLogger).run {
+            MediaOutputDialog(context, aboveStatusBar, this, uiEventLogger)
         }
     }
 

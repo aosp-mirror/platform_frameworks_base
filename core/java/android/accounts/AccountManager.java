@@ -27,7 +27,6 @@ import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
-import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -350,7 +349,6 @@ public class AccountManager {
 
     private static final class UserIdPackage
     {
-        @UserIdInt
         public int userId;
         public String packageName;
 
@@ -381,10 +379,9 @@ public class AccountManager {
     }
 
     PropertyInvalidatedCache<UserIdPackage, Account[]> mAccountsForUserCache =
-                new PropertyInvalidatedCache<UserIdPackage, Account[]>(
-                CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
+        new PropertyInvalidatedCache<UserIdPackage, Account[]>(CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
         @Override
-        public Account[] recompute(UserIdPackage userAndPackage) {
+        protected Account[] recompute(UserIdPackage userAndPackage) {
             try {
                 return mService.getAccountsAsUser(null, userAndPackage.userId, userAndPackage.packageName);
             } catch (RemoteException e) {
@@ -392,11 +389,7 @@ public class AccountManager {
             }
         }
         @Override
-        public boolean bypass(UserIdPackage query) {
-            return query.userId < 0;
-        }
-        @Override
-        public boolean resultEquals(Account[] l, Account[] r) {
+        protected boolean debugCompareQueryResults(Account[] l, Account[] r) {
             if (l == r) {
                 return true;
             } else if (l == null || r == null) {
@@ -455,7 +448,7 @@ public class AccountManager {
             new PropertyInvalidatedCache<AccountKeyData, String>(CACHE_USER_DATA_SIZE,
                     CACHE_KEY_USER_DATA_PROPERTY) {
             @Override
-            public String recompute(AccountKeyData accountKeyData) {
+            protected String recompute(AccountKeyData accountKeyData) {
                 Account account = accountKeyData.account;
                 String key = accountKeyData.key;
 

@@ -80,7 +80,6 @@ public abstract class ContentSuggestionsService extends Service {
                         colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
                     }
                     wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, colorSpace);
-                    contextImage.close();
                 }
             }
 

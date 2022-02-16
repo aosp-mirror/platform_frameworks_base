@@ -116,7 +116,7 @@ public class WalletActivity extends LifecycleActivity implements
         if (toolbar != null) {
             setActionBar(toolbar);
         }
-        getActionBar().setDisplayShowTitleEnabled(false);
+        setTitle("");
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeAsUpIndicator(getHomeIndicatorDrawable());
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
@@ -217,12 +217,6 @@ public class WalletActivity extends LifecycleActivity implements
         super.onPause();
         mKeyguardViewManager.requestFp(false, -1);
         mKeyguardViewManager.requestFace(false);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        finish();
     }
 
     @Override

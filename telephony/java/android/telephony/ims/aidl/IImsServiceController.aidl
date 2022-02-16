@@ -32,19 +32,18 @@ import com.android.ims.internal.IImsFeatureStatusCallback;
  */
 interface IImsServiceController {
     void setListener(IImsServiceControllerListener l);
-    IImsMmTelFeature createMmTelFeature(int slotId, int subId);
-    IImsMmTelFeature createEmergencyOnlyMmTelFeature(int slotId);
-    IImsRcsFeature createRcsFeature(int slotId, int subId);
+    IImsMmTelFeature createMmTelFeature(int slotId);
+    IImsRcsFeature createRcsFeature(int slotId);
     ImsFeatureConfiguration querySupportedImsFeatures();
     long getImsServiceCapabilities();
     void addFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
     void removeFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
     // Synchronous call to ensure the ImsService is ready before continuing with feature creation.
     void notifyImsServiceReadyForFeatureCreation();
-    void removeImsFeature(int slotId, int featureType, boolean changeSubId);
-    IImsConfig getConfig(int slotId, int subId);
-    IImsRegistration getRegistration(int slotId, int subId);
+    void removeImsFeature(int slotId, int featureType);
+    IImsConfig getConfig(int slotId);
+    IImsRegistration getRegistration(int slotId);
     ISipTransport getSipTransport(int slotId);
-    oneway void enableIms(int slotId, int subId);
-    oneway void disableIms(int slotId, int subId);
+    oneway void enableIms(int slotId);
+    oneway void disableIms(int slotId);
 }

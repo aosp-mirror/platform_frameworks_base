@@ -44,10 +44,8 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.SmartReplyController;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
-import org.mockito.Mockito;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -122,13 +120,9 @@ public abstract class SysuiTestCase {
             TestableLooper.get(this).processAllMessages();
         }
         disallowTestableLooperAsMainThread();
+        SystemUIFactory.cleanup();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
         mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
-    }
-
-    @AfterClass
-    public static void mockitoTearDown() {
-        Mockito.framework().clearInlineMocks();
     }
 
     /**

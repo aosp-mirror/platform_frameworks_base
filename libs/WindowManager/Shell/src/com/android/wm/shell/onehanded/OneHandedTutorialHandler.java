@@ -32,7 +32,6 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -45,6 +44,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
@@ -64,7 +64,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
 
     private final float mTutorialHeightRatio;
     private final WindowManager mWindowManager;
-    private final BackgroundWindowManager mBackgroundWindowManager;
 
     private @OneHandedState.State int mCurrentState;
     private int mTutorialAreaHeight;
@@ -79,10 +78,9 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     private int mAlphaAnimationDurationMs;
 
     public OneHandedTutorialHandler(Context context, OneHandedSettingsUtil settingsUtil,
-            WindowManager windowManager, BackgroundWindowManager backgroundWindowManager) {
+            WindowManager windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        mBackgroundWindowManager = backgroundWindowManager;
         mTutorialHeightRatio = settingsUtil.getTranslationFraction(context);
         mAlphaAnimationDurationMs = settingsUtil.getTransitionDuration(context);
     }
@@ -111,19 +109,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     }
 
     @Override
-    public void onStartFinished(Rect bounds) {
-        fillBackgroundColor();
-    }
-
-    @Override
-    public void onStopFinished(Rect bounds) {
-        removeBackgroundSurface();
-    }
-
-    @Override
     public void onStateChanged(int newState) {
         mCurrentState = newState;
-        mBackgroundWindowManager.onStateChanged(newState);
         switch (newState) {
             case STATE_ENTERING:
                 createViewAndAttachToWindow(mContext);
@@ -138,6 +125,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
             case STATE_NONE:
                 checkTransitionEnd();
                 removeTutorialFromWindowManager();
+                break;
             default:
                 break;
         }
@@ -157,7 +145,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         }
         mTutorialAreaHeight = Math.round(mDisplayBounds.height() * mTutorialHeightRatio);
         mAlphaTransitionStart = mTutorialAreaHeight * START_TRANSITION_FRACTION;
-        mBackgroundWindowManager.onDisplayChanged(displayLayout);
     }
 
     @VisibleForTesting
@@ -181,7 +168,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
     private void attachTargetToWindow() {
         try {
             mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
-            mBackgroundWindowManager.showBackgroundLayer();
         } catch (IllegalStateException e) {
             // This shouldn't happen, but if the target is already added, just update its
             // layout params.
@@ -197,11 +183,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         mTargetViewContainer.setLayerType(LAYER_TYPE_NONE, null);
         mWindowManager.removeViewImmediate(mTargetViewContainer);
         mTargetViewContainer = null;
-    }
-
-    @VisibleForTesting
-    void removeBackgroundSurface() {
-        mBackgroundWindowManager.removeBackgroundLayer();
     }
 
     /**
@@ -231,12 +212,9 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
      * onConfigurationChanged events for updating tutorial text.
      */
     public void onConfigurationChanged() {
-        mBackgroundWindowManager.onConfigurationChanged();
-
         removeTutorialFromWindowManager();
         if (mCurrentState == STATE_ENTERING || mCurrentState == STATE_ACTIVE) {
             createViewAndAttachToWindow(mContext);
-            fillBackgroundColor();
             updateThemeColor();
             checkTransitionEnd();
         }
@@ -266,14 +244,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
                 R.id.one_handed_tutorial_description);
         tutorialTitle.setTextColor(textColorPrimary);
         tutorialDesc.setTextColor(themedTextColorSecondary);
-    }
-
-    private void fillBackgroundColor() {
-        if (mTargetViewContainer == null || mBackgroundWindowManager == null) {
-            return;
-        }
-        mTargetViewContainer.setBackgroundColor(
-                mBackgroundWindowManager.getThemeColorForBackground());
     }
 
     private void setupAlphaTransition(boolean isEntering) {
@@ -311,9 +281,5 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback,
         pw.println(mAlphaTransitionStart);
         pw.print(innerPrefix + "mAlphaAnimationDurationMs=");
         pw.println(mAlphaAnimationDurationMs);
-
-        if (mBackgroundWindowManager != null) {
-            mBackgroundWindowManager.dump(pw);
-        }
     }
 }

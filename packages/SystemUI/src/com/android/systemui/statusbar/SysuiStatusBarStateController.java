@@ -19,10 +19,7 @@ package com.android.systemui.statusbar;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
-import android.view.InsetsVisibilities;
 import android.view.View;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowInsetsController.Behavior;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -158,10 +155,9 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean isKeyguardRequested();
 
     /**
-     * Set the system bar attributes
+     * Set the fullscreen state
      */
-    void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName);
+    void setFullscreenState(boolean isFullscreen);
 
     /**
      * Set pulsing

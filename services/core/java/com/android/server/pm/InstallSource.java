@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.content.pm.PackageInstaller;
 
 import com.android.internal.util.Preconditions;
 
@@ -27,18 +26,17 @@ import java.util.Objects;
  * Immutable class holding information about where the request to install or update an app
  * came from.
  */
-public final class InstallSource {
+final class InstallSource {
     /**
      * An instance of InstallSource representing an absence of knowledge of the source of
      * a package. Used in preference to null.
      */
     static final InstallSource EMPTY = new InstallSource(null, null, null, null, false, false,
-            null, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+            null);
 
     /** We also memoize this case because it is common - all un-updated system apps. */
     private static final InstallSource EMPTY_ORPHANED = new InstallSource(
-            null, null, null, null, true, false, null,
-            PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+            null, null, null, null, true, false, null);
 
     /**
      * The package that requested the installation, if known. May not correspond to a currently
@@ -86,47 +84,28 @@ public final class InstallSource {
      */
     final boolean isInitiatingPackageUninstalled;
 
-    final int packageSource;
-
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
             @Nullable String installerAttributionTag) {
         return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerAttributionTag, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+                installerAttributionTag, false, false);
     }
 
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
             @Nullable String installerAttributionTag, boolean isOrphaned,
             boolean isInitiatingPackageUninstalled) {
-        return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerAttributionTag, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, isOrphaned,
-                isInitiatingPackageUninstalled);
-    }
-
-    static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            @Nullable String installerAttributionTag, int packageSource) {
-        return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerAttributionTag, packageSource, false, false);
-    }
-
-    static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            @Nullable String installerAttributionTag, int packageSource, boolean isOrphaned,
-            boolean isInitiatingPackageUninstalled) {
         return createInternal(
                 intern(initiatingPackageName),
                 intern(originatingPackageName),
                 intern(installerPackageName),
                 installerAttributionTag,
-                packageSource,
                 isOrphaned, isInitiatingPackageUninstalled, null);
     }
 
     private static InstallSource createInternal(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
-            @Nullable String installerAttributionTag, int packageSource, boolean isOrphaned,
+            @Nullable String installerAttributionTag, boolean isOrphaned,
             boolean isInitiatingPackageUninstalled,
             @Nullable PackageSignatures initiatingPackageSignatures) {
         if (initiatingPackageName == null && originatingPackageName == null
@@ -136,7 +115,7 @@ public final class InstallSource {
         }
         return new InstallSource(initiatingPackageName, originatingPackageName,
                 installerPackageName, installerAttributionTag, isOrphaned,
-                isInitiatingPackageUninstalled, initiatingPackageSignatures, packageSource
+                isInitiatingPackageUninstalled, initiatingPackageSignatures
         );
     }
 
@@ -144,8 +123,7 @@ public final class InstallSource {
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
             @Nullable String installerAttributionTag, boolean isOrphaned,
             boolean isInitiatingPackageUninstalled,
-            @Nullable PackageSignatures initiatingPackageSignatures,
-            int packageSource) {
+            @Nullable PackageSignatures initiatingPackageSignatures) {
         if (initiatingPackageName == null) {
             Preconditions.checkArgument(initiatingPackageSignatures == null);
             Preconditions.checkArgument(!isInitiatingPackageUninstalled);
@@ -157,7 +135,6 @@ public final class InstallSource {
         this.isOrphaned = isOrphaned;
         this.isInitiatingPackageUninstalled = isInitiatingPackageUninstalled;
         this.initiatingPackageSignatures = initiatingPackageSignatures;
-        this.packageSource = packageSource;
     }
 
     /**
@@ -169,8 +146,9 @@ public final class InstallSource {
             return this;
         }
         return createInternal(initiatingPackageName, originatingPackageName,
-                intern(installerPackageName), installerAttributionTag, packageSource, isOrphaned,
-                isInitiatingPackageUninstalled, initiatingPackageSignatures);
+                intern(installerPackageName), installerAttributionTag, isOrphaned,
+                isInitiatingPackageUninstalled, initiatingPackageSignatures
+        );
     }
 
     /**
@@ -182,7 +160,7 @@ public final class InstallSource {
             return this;
         }
         return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerAttributionTag, packageSource, isOrphaned, isInitiatingPackageUninstalled,
+                installerAttributionTag, isOrphaned, isInitiatingPackageUninstalled,
                 initiatingPackageSignatures);
     }
 
@@ -195,8 +173,7 @@ public final class InstallSource {
             return this;
         }
         return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
-                installerAttributionTag, packageSource, isOrphaned,
-                isInitiatingPackageUninstalled, signatures);
+                installerAttributionTag, isOrphaned, isInitiatingPackageUninstalled, signatures);
     }
 
     /**
@@ -238,8 +215,7 @@ public final class InstallSource {
         }
 
         return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
-                null, packageSource, isOrphaned,
-                isInitiatingPackageUninstalled, initiatingPackageSignatures);
+                null, isOrphaned, isInitiatingPackageUninstalled, initiatingPackageSignatures);
     }
 
     @Nullable

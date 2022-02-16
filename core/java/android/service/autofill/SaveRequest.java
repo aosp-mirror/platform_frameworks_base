@@ -22,9 +22,10 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This class represents a request to an {@link AutofillService
@@ -40,7 +41,7 @@ public final class SaveRequest implements Parcelable {
     /** @hide */
     public SaveRequest(@NonNull ArrayList<FillContext> fillContexts,
             @Nullable Bundle clientState, @Nullable ArrayList<String> datasetIds) {
-        mFillContexts = Objects.requireNonNull(fillContexts, "fillContexts");
+        mFillContexts = Preconditions.checkNotNull(fillContexts, "fillContexts");
         mClientState = clientState;
         mDatasetIds = datasetIds;
     }

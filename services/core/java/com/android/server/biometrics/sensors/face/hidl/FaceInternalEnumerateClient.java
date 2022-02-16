@@ -18,19 +18,17 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Face-specific internal enumerate client supporting the
@@ -40,12 +38,11 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFac
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context,
-            @NonNull Supplier<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Face> enrolledList,
-            @NonNull BiometricUtils<Face> utils, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricUtils<Face> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                logger, biometricContext);
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override

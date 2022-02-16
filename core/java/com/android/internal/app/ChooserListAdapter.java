@@ -299,19 +299,18 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 // Consolidate multiple targets from same app.
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
-                    String resolvedTarget = info.getResolvedComponentName().getPackageName()
-                        + '#' + info.getDisplayLabel();
-                    DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
+                    String packageName = info.getResolvedComponentName().getPackageName();
+                    DisplayResolveInfo multiDri = consolidated.get(packageName);
                     if (multiDri == null) {
-                        consolidated.put(resolvedTarget, info);
+                        consolidated.put(packageName, info);
                     } else if (multiDri instanceof MultiDisplayResolveInfo) {
                         ((MultiDisplayResolveInfo) multiDri).addTarget(info);
                     } else {
                         // create consolidated target from the single DisplayResolveInfo
                         MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(resolvedTarget, multiDri);
+                            new MultiDisplayResolveInfo(packageName, multiDri);
                         multiDisplayResolveInfo.addTarget(info);
-                        consolidated.put(resolvedTarget, multiDisplayResolveInfo);
+                        consolidated.put(packageName, multiDisplayResolveInfo);
                     }
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
@@ -492,7 +491,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
             @ChooserActivity.ShareTargetType int targetType,
-            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos) {
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
+            List<ChooserActivity.ChooserTargetServiceConnection>
+                    pendingChooserTargetServiceConnections) {
         if (DEBUG) {
             Log.d(TAG, "addServiceResults " + origTarget.getResolvedComponentName() + ", "
                     + targets.size()

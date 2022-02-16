@@ -18,30 +18,27 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
-import java.util.function.Supplier;
-
 /**
  * Fingerprint-specific resetLockout client for the {@link IFingerprint} AIDL HAL interface.
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
  * cleared.
  */
-class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implements ErrorConsumer {
+class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implements ErrorConsumer {
 
     private static final String TAG = "FingerprintResetLockoutClient";
 
@@ -50,12 +47,12 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
     FingerprintResetLockoutClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
-            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, biometricLogger, biometricContext);
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutCache = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
@@ -67,7 +64,7 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
         startHalOperation();
     }
@@ -75,7 +72,7 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().resetLockout(mHardwareAuthToken);
+            getFreshDaemon().resetLockout(mHardwareAuthToken);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to reset lockout", e);
             mCallback.onClientFinished(this, false /* success */);

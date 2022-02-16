@@ -136,9 +136,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             boolean isUpdatedSystemApp, File appLib32InstallDir) {
         // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
         // current state in PackageSetting is irrelevant.
-        return deriveNativeLibraryPaths(new Abis(AndroidPackageUtils.getRawPrimaryCpuAbi(pkg),
-                AndroidPackageUtils.getRawSecondaryCpuAbi(pkg)), appLib32InstallDir, pkg.getPath(),
-                pkg.getBaseApkPath(), pkg.isSystem(), isUpdatedSystemApp);
+        return deriveNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
+                appLib32InstallDir, pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
+                isUpdatedSystemApp);
     }
 
     private static NativeLibraryPaths deriveNativeLibraryPaths(final Abis abis,
@@ -511,16 +511,15 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // when scannedPackage is an update of an existing package. Without this check,
             // we will never be able to change the ABI of any package belonging to a shared
             // user, even if it's compatible with other packages.
-            if (scannedPackage != null && scannedPackage.getPackageName().equals(
-                    ps.getPackageName())) {
+            if (scannedPackage != null && scannedPackage.getPackageName().equals(ps.name)) {
                 continue;
             }
-            if (ps.getPrimaryCpuAbi() == null) {
+            if (ps.primaryCpuAbiString == null) {
                 continue;
             }
 
             final String instructionSet =
-                    VMRuntime.getInstructionSet(ps.getPrimaryCpuAbi());
+                    VMRuntime.getInstructionSet(ps.primaryCpuAbiString);
             if (requiredInstructionSet != null && !requiredInstructionSet.equals(instructionSet)) {
                 // We have a mismatch between instruction sets (say arm vs arm64) warn about
                 // this but there's not much we can do.
@@ -546,7 +545,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // scannedPackage did not require an ABI, in which case we have to adjust
             // scannedPackage to match the ABI of the set (which is the same as
             // requirer's ABI)
-            adjustedAbi = requirer.getPrimaryCpuAbi();
+            adjustedAbi = requirer.primaryCpuAbiString;
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.

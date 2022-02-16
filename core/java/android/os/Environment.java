@@ -189,11 +189,13 @@ public class Environment {
         }
 
         @UnsupportedAppUsage
+        @Deprecated
         public File getExternalStorageDirectory() {
             return getExternalDirs()[0];
         }
 
         @UnsupportedAppUsage
+        @Deprecated
         public File getExternalStoragePublicDirectory(String type) {
             return buildExternalStoragePublicDirs(type)[0];
         }
@@ -693,13 +695,14 @@ public class Environment {
      * <p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
-     * <p>
-     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
-     * {@link MediaStore} offer better performance.
      *
      * @see #getExternalStorageState()
      * @see #isExternalStorageRemovable()
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
+    @Deprecated
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
         return sCurrentUser.getExternalDirs()[0];
@@ -996,9 +999,6 @@ public class Environment {
      * </p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * public_picture}
-     * <p>
-     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
-     * {@link MediaStore} offer better performance.
      *
      * @param type The type of storage directory to return. Should be one of
      *            {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
@@ -1009,7 +1009,11 @@ public class Environment {
      * @return Returns the File path for the directory. Note that this directory
      *         may not yet exist, so you must make sure it exists before using
      *         it such as with {@link File#mkdirs File.mkdirs()}.
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
+    @Deprecated
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
@@ -1333,7 +1337,7 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
         // Isolated processes and Instant apps are never allowed to be in scoped storage
-        if (Process.isIsolated(uid) || Process.isSupplemental(uid)) {
+        if (Process.isIsolated(uid)) {
             return false;
         }
 

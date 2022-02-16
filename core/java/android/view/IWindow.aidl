@@ -58,6 +58,12 @@ oneway interface IWindow {
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
 
     /**
+     * Called when the window location in parent display has changed. The offset will only be a
+     * nonzero value if the window is on an embedded display that is re-parented to another window.
+     */
+    void locationInParentDisplayChanged(in Point offset);
+
+    /**
      * Called when the window insets configuration has changed.
      *
      * @param willMove The window frame will be moved soon.
@@ -93,6 +99,12 @@ oneway interface IWindow {
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
+
+    /**
+     * Tell the window that it is either gaining or losing focus.  Keep it up
+     * to date on the current state showing navigational focus (touch mode) too.
+     */
+    void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
 
     void closeSystemDialogs(String reason);
 
