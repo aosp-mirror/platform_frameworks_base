@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 
+import com.android.systemui.SystemUI;
 import com.android.systemui.recents.RecentsImplementation;
 
 /**
@@ -34,6 +35,9 @@ public interface ContextComponentHelper {
 
     /** Turns a classname into an instance of the class or returns null. */
     Service resolveService(String className);
+
+    /** Turns a classname into an instance of the class or returns null. */
+    SystemUI resolveSystemUI(String className);
 
     /** Turns a classname into an instance of the class or returns null. */
     BroadcastReceiver resolveBroadcastReceiver(String className);

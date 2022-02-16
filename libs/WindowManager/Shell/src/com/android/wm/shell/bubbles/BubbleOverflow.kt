@@ -54,7 +54,6 @@ class BubbleOverflow(
 
     /** Call before use and again if cleanUpExpandedState was called.  */
     fun initialize(controller: BubbleController) {
-        createExpandedView()
         getExpandedView()?.initialize(controller, controller.stackView, true /* isOverflow */)
     }
 
@@ -67,7 +66,7 @@ class BubbleOverflow(
         updateResources()
         getExpandedView()?.applyThemeAttrs()
         // Apply inset and new style to fresh icon drawable.
-        getIconView()?.setIconImageResource(R.drawable.bubble_ic_overflow_button)
+        getIconView()?.setImageResource(R.drawable.bubble_ic_overflow_button)
         updateBtnTheme()
     }
 
@@ -90,19 +89,20 @@ class BubbleOverflow(
         dotColor = colorAccent
 
         val shapeColor = res.getColor(android.R.color.system_accent1_1000)
-        overflowBtn?.iconDrawable?.setTint(shapeColor)
+        overflowBtn?.drawable?.setTint(shapeColor)
 
         val iconFactory = BubbleIconFactory(context)
 
         // Update bitmap
-        val fg = InsetDrawable(overflowBtn?.iconDrawable, overflowIconInset)
-        bitmap = iconFactory.createBadgedIconBitmap(
-                AdaptiveIconDrawable(ColorDrawable(colorAccent), fg)).icon
+        val fg = InsetDrawable(overflowBtn?.drawable, overflowIconInset)
+        bitmap = iconFactory.createBadgedIconBitmap(AdaptiveIconDrawable(
+                ColorDrawable(colorAccent), fg),
+            null /* user */, true /* shrinkNonAdaptiveIcons */).icon
 
         // Update dot path
         dotPath = PathParser.createPathFromPathData(
             res.getString(com.android.internal.R.string.config_icon_mask))
-        val scale = iconFactory.normalizer.getScale(iconView!!.iconDrawable,
+        val scale = iconFactory.normalizer.getScale(iconView!!.drawable,
             null /* outBounds */, null /* path */, null /* outMaskShape */)
         val radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f
         val matrix = Matrix()
@@ -124,15 +124,13 @@ class BubbleOverflow(
         overflowBtn?.updateDotVisibility(true /* animate */)
     }
 
-    fun createExpandedView(): BubbleExpandedView? {
-        expandedView = inflater.inflate(R.layout.bubble_expanded_view,
-                null /* root */, false /* attachToRoot */) as BubbleExpandedView
-        expandedView?.applyThemeAttrs()
-        updateResources()
-        return expandedView
-    }
-
     override fun getExpandedView(): BubbleExpandedView? {
+        if (expandedView == null) {
+            expandedView = inflater.inflate(R.layout.bubble_expanded_view,
+                    null /* root */, false /* attachToRoot */) as BubbleExpandedView
+            expandedView?.applyThemeAttrs()
+            updateResources()
+        }
         return expandedView
     }
 
@@ -141,10 +139,6 @@ class BubbleOverflow(
     }
 
     override fun getAppBadge(): Bitmap? {
-        return null
-    }
-
-    override fun getRawAppBadge(): Bitmap? {
         return null
     }
 
@@ -158,6 +152,10 @@ class BubbleOverflow(
 
     override fun getDotPath(): Path? {
         return dotPath
+    }
+
+    override fun setExpandedContentAlpha(alpha: Float) {
+        expandedView?.alpha = alpha
     }
 
     override fun setTaskViewVisibility(visible: Boolean) {

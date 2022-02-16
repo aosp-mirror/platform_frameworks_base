@@ -241,24 +241,24 @@ public final class DataCallResponse implements Parcelable {
         mProtocolType = source.readInt();
         mInterfaceName = source.readString();
         mAddresses = new ArrayList<>();
-        source.readList(mAddresses, LinkAddress.class.getClassLoader(), android.net.LinkAddress.class);
+        source.readList(mAddresses, LinkAddress.class.getClassLoader());
         mDnsAddresses = new ArrayList<>();
-        source.readList(mDnsAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mDnsAddresses, InetAddress.class.getClassLoader());
         mGatewayAddresses = new ArrayList<>();
-        source.readList(mGatewayAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mGatewayAddresses, InetAddress.class.getClassLoader());
         mPcscfAddresses = new ArrayList<>();
-        source.readList(mPcscfAddresses, InetAddress.class.getClassLoader(), java.net.InetAddress.class);
+        source.readList(mPcscfAddresses, InetAddress.class.getClassLoader());
         mMtu = source.readInt();
         mMtuV4 = source.readInt();
         mMtuV6 = source.readInt();
         mHandoverFailureMode = source.readInt();
         mPduSessionId = source.readInt();
-        mDefaultQos = source.readParcelable(Qos.class.getClassLoader(), android.telephony.data.Qos.class);
+        mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
         mQosBearerSessions = new ArrayList<>();
-        source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader(), android.telephony.data.QosBearerSession.class);
-        mSliceInfo = source.readParcelable(NetworkSliceInfo.class.getClassLoader(), android.telephony.data.NetworkSliceInfo.class);
+        source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader());
+        mSliceInfo = source.readParcelable(NetworkSliceInfo.class.getClassLoader());
         mTrafficDescriptors = new ArrayList<>();
-        source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader(), android.telephony.data.TrafficDescriptor.class);
+        source.readList(mTrafficDescriptors, TrafficDescriptor.class.getClassLoader());
     }
 
     /**

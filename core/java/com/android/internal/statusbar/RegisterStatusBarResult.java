@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.view.InsetsVisibilities;
 
 import com.android.internal.view.AppearanceRegion;
 
@@ -40,15 +39,14 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final IBinder mImeToken;
     public final boolean mNavbarColorManagedByIme;
     public final int mBehavior;
-    public final InsetsVisibilities mRequestedVisibilities;
-    public final String mPackageName;
+    public final boolean mAppFullscreen;
     public final int[] mTransientBarTypes;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
             int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
             int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
-            boolean navbarColorManagedByIme, int behavior, InsetsVisibilities requestedVisibilities,
-            String packageName, @NonNull int[] transientBarTypes) {
+            boolean navbarColorManagedByIme, int behavior, boolean appFullscreen,
+            @NonNull int[] transientBarTypes) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mAppearance = appearance;
@@ -60,8 +58,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         mImeToken = imeToken;
         mNavbarColorManagedByIme = navbarColorManagedByIme;
         mBehavior = behavior;
-        mRequestedVisibilities = requestedVisibilities;
-        mPackageName = packageName;
+        mAppFullscreen = appFullscreen;
         mTransientBarTypes = transientBarTypes;
     }
 
@@ -83,8 +80,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeStrongBinder(mImeToken);
         dest.writeBoolean(mNavbarColorManagedByIme);
         dest.writeInt(mBehavior);
-        dest.writeTypedObject(mRequestedVisibilities, 0);
-        dest.writeString(mPackageName);
+        dest.writeBoolean(mAppFullscreen);
         dest.writeIntArray(mTransientBarTypes);
     }
 
@@ -108,14 +104,12 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final IBinder imeToken = source.readStrongBinder();
                     final boolean navbarColorManagedByIme = source.readBoolean();
                     final int behavior = source.readInt();
-                    final InsetsVisibilities requestedVisibilities =
-                            source.readTypedObject(InsetsVisibilities.CREATOR);
-                    final String packageName = source.readString();
+                    final boolean appFullscreen = source.readBoolean();
                     final int[] transientBarTypes = source.createIntArray();
                     return new RegisterStatusBarResult(icons, disabledFlags1, appearance,
                             appearanceRegions, imeWindowVis, imeBackDisposition, showImeSwitcher,
                             disabledFlags2, imeToken, navbarColorManagedByIme, behavior,
-                            requestedVisibilities, packageName, transientBarTypes);
+                            appFullscreen, transientBarTypes);
                 }
 
                 @Override

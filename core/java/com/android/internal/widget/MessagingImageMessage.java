@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pools;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -43,8 +44,8 @@ import java.io.IOException;
 @RemoteViews.RemoteView
 public class MessagingImageMessage extends ImageView implements MessagingMessage {
     private static final String TAG = "MessagingImageMessage";
-    private static final MessagingPool<MessagingImageMessage> sInstancePool =
-            new MessagingPool<>(10);
+    private static Pools.SimplePool<MessagingImageMessage> sInstancePool
+            = new Pools.SynchronizedPool<>(10);
     private final MessagingMessageState mState = new MessagingMessageState(this);
     private final int mMinImageHeight;
     private final Path mPath = new Path();
@@ -193,7 +194,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
     }
 
     public static void dropCache() {
-        sInstancePool.clear();
+        sInstancePool = new Pools.SynchronizedPool<>(10);
     }
 
     @Override

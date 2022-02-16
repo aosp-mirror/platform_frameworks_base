@@ -20,8 +20,6 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,19 +37,12 @@ public class TouchAnimator {
     private final float mStartDelay;
     private final float mEndDelay;
     private final float mSpan;
-    @Nullable
     private final Interpolator mInterpolator;
-    @Nullable
     private final Listener mListener;
     private float mLastT = -1;
 
-    private TouchAnimator(
-            Object[] targets,
-            KeyframeSet[] keyframeSets,
-            float startDelay,
-            float endDelay,
-            @Nullable Interpolator interpolator,
-            @Nullable Listener listener) {
+    private TouchAnimator(Object[] targets, KeyframeSet[] keyframeSets,
+            float startDelay, float endDelay, Interpolator interpolator, Listener listener) {
         mTargets = targets;
         mKeyframeSets = keyframeSets;
         mStartDelay = startDelay;
@@ -135,9 +126,7 @@ public class TouchAnimator {
 
         private float mStartDelay;
         private float mEndDelay;
-        @Nullable
         private Interpolator mInterpolator;
-        @Nullable
         private Listener mListener;
 
         public Builder addFloat(Object target, String property, float... values) {
@@ -194,8 +183,7 @@ public class TouchAnimator {
             return this;
         }
 
-        /** Sets interpolator. */
-        public Builder setInterpolator(@Nullable Interpolator intepolator) {
+        public Builder setInterpolator(Interpolator intepolator) {
             mInterpolator = intepolator;
             return this;
         }

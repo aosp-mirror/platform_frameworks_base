@@ -110,20 +110,18 @@ public class ActivityOptionsTest {
             @Override
             public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
                 try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                    t.show(leash).apply();
+                    t.setVisibility(leash, true /* visible */).apply();
                 }
                 int cookieIndex = -1;
                 if (trampoline.equals(taskInfo.baseActivity)) {
                     cookieIndex = 0;
                 } else if (main.equals(taskInfo.baseActivity)) {
                     cookieIndex = 1;
+                    mainLatch.countDown();
                 }
                 if (cookieIndex >= 0) {
                     appearedCookies[cookieIndex] = taskInfo.launchCookies.isEmpty()
                             ? null : taskInfo.launchCookies.get(0);
-                    if (cookieIndex == 1) {
-                        mainLatch.countDown();
-                    }
                 }
             }
         };

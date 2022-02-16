@@ -67,7 +67,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock Vibrator mVibrator;
 
     private final String callPkg = "com.android.server.notification";
-    private final String sysPkg = "android";
     private final int callUid = 10;
     private String smsPkg;
     private final int smsUid = 11;
@@ -80,7 +79,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordHighCall;
     private NotificationRecord mRecordHighCallStyle;
     private NotificationRecord mRecordEmail;
-    private NotificationRecord mRecordSystemMax;
     private NotificationRecord mRecordInlineReply;
     private NotificationRecord mRecordSms;
     private NotificationRecord mRecordStarredContact;
@@ -193,12 +191,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordContact.setContactAffinity(ValidateNotificationPeople.VALID_CONTACT);
         mRecordContact.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
-        Notification nSystemMax = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
-        mRecordSystemMax = new NotificationRecord(mContext, new StatusBarNotification(sysPkg,
-                sysPkg, 1, "systemmax", uid2, uid2, nSystemMax, new UserHandle(userId),
-                "", 1244), getDefaultChannel());
-        mRecordSystemMax.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
-
         Notification n8 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
         mRecordUrgent = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "urgent", uid2, uid2, n8, new UserHandle(userId),
@@ -275,7 +267,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         }
         expected.add(mRecordStarredContact);
         expected.add(mRecordContact);
-        expected.add(mRecordSystemMax);
         expected.add(mRecordEmail);
         expected.add(mRecordUrgent);
         expected.add(mNoMediaSessionMedia);

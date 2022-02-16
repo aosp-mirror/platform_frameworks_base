@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.MeasuredEnergySnapshot.UNAVAILABLE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -118,7 +120,7 @@ public final class MeasuredEnergySnapshotTest {
         // results0
         MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
-            assertNull(delta.displayChargeUC);
+            assertEquals(UNAVAILABLE, delta.displayChargeUC);
             assertNull(delta.otherTotalChargeUC);
             assertNull(delta.otherUidChargesUC);
         }
@@ -128,7 +130,7 @@ public final class MeasuredEnergySnapshotTest {
         assertNotNull(delta);
         long expectedChargeUC;
         expectedChargeUC = calculateChargeConsumedUC(14_000, VOLTAGE_0, 24_000, VOLTAGE_1);
-        assertEquals(expectedChargeUC, delta.displayChargeUC[0]);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
 
         assertNotNull(delta.otherTotalChargeUC);
 
@@ -147,14 +149,14 @@ public final class MeasuredEnergySnapshotTest {
         delta = snapshot.updateAndGetDelta(RESULTS_2, VOLTAGE_2);
         assertNotNull(delta);
         expectedChargeUC = calculateChargeConsumedUC(24_000, VOLTAGE_1, 36_000, VOLTAGE_2);
-        assertEquals(expectedChargeUC, delta.displayChargeUC[0]);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
         assertNull(delta.otherUidChargesUC);
         assertNull(delta.otherTotalChargeUC);
 
         // results3
         delta = snapshot.updateAndGetDelta(RESULTS_3, VOLTAGE_3);
         assertNotNull(delta);
-        assertNull(delta.displayChargeUC);
+        assertEquals(UNAVAILABLE, delta.displayChargeUC);
 
         assertNotNull(delta.otherTotalChargeUC);
 
@@ -181,7 +183,7 @@ public final class MeasuredEnergySnapshotTest {
         delta = snapshot.updateAndGetDelta(RESULTS_4, VOLTAGE_4);
         assertNotNull(delta);
         expectedChargeUC = calculateChargeConsumedUC(36_000, VOLTAGE_2, 43_000, VOLTAGE_4);
-        assertEquals(expectedChargeUC, delta.displayChargeUC[0]);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
 
         assertNotNull(delta.otherTotalChargeUC);
         expectedChargeUC = calculateChargeConsumedUC(190_000, VOLTAGE_3, 290_000, VOLTAGE_4);
@@ -208,7 +210,7 @@ public final class MeasuredEnergySnapshotTest {
         // results0
         MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0, VOLTAGE_0);
         if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
-            assertNull(delta.displayChargeUC);
+            assertEquals(UNAVAILABLE, delta.displayChargeUC);
             assertNull(delta.otherTotalChargeUC);
             assertNull(delta.otherUidChargesUC);
         }
@@ -218,7 +220,7 @@ public final class MeasuredEnergySnapshotTest {
         assertNotNull(delta);
         final long expectedChargeUC =
                 calculateChargeConsumedUC(14_000, VOLTAGE_0, 24_000, VOLTAGE_1);
-        assertEquals(expectedChargeUC, delta.displayChargeUC[0]);
+        assertEquals(expectedChargeUC, delta.displayChargeUC);
         assertNull(delta.otherTotalChargeUC); // Although in the results, they're not in the idMap
         assertNull(delta.otherUidChargesUC);
     }

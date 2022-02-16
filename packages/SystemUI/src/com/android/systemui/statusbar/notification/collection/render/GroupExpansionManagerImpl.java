@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -92,7 +91,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
 
     @Override
     public void collapseGroups() {
-        for (NotificationEntry entry : new ArrayList<>(mExpandedGroups)) {
+        for (NotificationEntry entry : mExpandedGroups) {
             setGroupExpanded(entry, false);
         }
     }

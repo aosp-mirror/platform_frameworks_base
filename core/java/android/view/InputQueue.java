@@ -52,7 +52,7 @@ public final class InputQueue {
     public InputQueue() {
         mPtr = nativeInit(new WeakReference<InputQueue>(this), Looper.myQueue());
 
-        mCloseGuard.open("InputQueue.dispose");
+        mCloseGuard.open("dispose");
     }
 
     @Override

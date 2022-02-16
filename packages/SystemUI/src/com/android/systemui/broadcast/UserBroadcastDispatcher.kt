@@ -64,7 +64,7 @@ open class UserBroadcastDispatcher(
     private val bgHandler = object : Handler(bgLooper) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
-                MSG_REGISTER_RECEIVER -> handleRegisterReceiver(msg.obj as ReceiverData, msg.arg1)
+                MSG_REGISTER_RECEIVER -> handleRegisterReceiver(msg.obj as ReceiverData)
                 MSG_UNREGISTER_RECEIVER -> handleUnregisterReceiver(msg.obj as BroadcastReceiver)
                 else -> Unit
             }
@@ -73,7 +73,7 @@ open class UserBroadcastDispatcher(
 
     // Only modify in BG thread
     @VisibleForTesting
-    internal val actionsToActionsReceivers = ArrayMap<Pair<String, Int>, ActionReceiver>()
+    internal val actionsToActionsReceivers = ArrayMap<String, ActionReceiver>()
     private val receiverToActions = ArrayMap<BroadcastReceiver, MutableSet<String>>()
 
     @VisibleForTesting
@@ -86,8 +86,8 @@ open class UserBroadcastDispatcher(
     /**
      * Register a [ReceiverData] for this user.
      */
-    fun registerReceiver(receiverData: ReceiverData, flags: Int) {
-        bgHandler.obtainMessage(MSG_REGISTER_RECEIVER, flags, 0, receiverData).sendToTarget()
+    fun registerReceiver(receiverData: ReceiverData) {
+        bgHandler.obtainMessage(MSG_REGISTER_RECEIVER, receiverData).sendToTarget()
     }
 
     /**
@@ -97,7 +97,7 @@ open class UserBroadcastDispatcher(
         bgHandler.obtainMessage(MSG_UNREGISTER_RECEIVER, receiver).sendToTarget()
     }
 
-    private fun handleRegisterReceiver(receiverData: ReceiverData, flags: Int) {
+    private fun handleRegisterReceiver(receiverData: ReceiverData) {
         Preconditions.checkState(bgHandler.looper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Register receiver: ${receiverData.receiver}")
@@ -106,27 +106,20 @@ open class UserBroadcastDispatcher(
                 .addAll(receiverData.filter.actionsIterator()?.asSequence() ?: emptySequence())
         receiverData.filter.actionsIterator().forEach {
             actionsToActionsReceivers
-                    .getOrPut(it to flags, { createActionReceiver(it, flags) })
+                    .getOrPut(it, { createActionReceiver(it) })
                     .addReceiverData(receiverData)
         }
-        logger.logReceiverRegistered(userId, receiverData.receiver, flags)
+        logger.logReceiverRegistered(userId, receiverData.receiver)
     }
 
     @VisibleForTesting
-    internal open fun createActionReceiver(action: String, flags: Int): ActionReceiver {
+    internal open fun createActionReceiver(action: String): ActionReceiver {
         return ActionReceiver(
                 action,
                 userId,
                 {
-                    context.registerReceiverAsUser(
-                            this,
-                            UserHandle.of(userId),
-                            it,
-                            null,
-                            bgHandler,
-                            flags
-                    )
-                    logger.logContextReceiverRegistered(userId, flags, it)
+                    context.registerReceiverAsUser(this, UserHandle.of(userId), it, null, bgHandler)
+                    logger.logContextReceiverRegistered(userId, it)
                 },
                 {
                     try {
@@ -148,11 +141,7 @@ open class UserBroadcastDispatcher(
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
-            actionsToActionsReceivers.forEach { (key, value) ->
-                if (key.first == it) {
-                    value.removeReceiver(receiver)
-                }
-            }
+            actionsToActionsReceivers.get(it)?.removeReceiver(receiver)
         }
         receiverToActions.remove(receiver)
         logger.logReceiverUnregistered(userId, receiver)
@@ -160,9 +149,8 @@ open class UserBroadcastDispatcher(
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
-            actionsToActionsReceivers.forEach { (actionAndFlags, actionReceiver) ->
-                println("(${actionAndFlags.first}: " +
-                        "${BroadcastDispatcherLogger.flagToString(actionAndFlags.second)}):")
+            actionsToActionsReceivers.forEach { (action, actionReceiver) ->
+                println("$action:")
                 actionReceiver.dump(fd, pw, args)
             }
         }

@@ -2,5 +2,3 @@ mwachens@google.com
 varunshah@google.com
 huiyu@google.com
 yamasani@google.com
-
-per-file *StorageStats* = file:/core/java/android/os/storage/OWNERS

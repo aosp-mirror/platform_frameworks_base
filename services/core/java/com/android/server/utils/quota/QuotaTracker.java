@@ -29,11 +29,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.proto.ProtoOutputStream;
@@ -45,7 +45,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
-import com.android.server.utils.AlarmQueue;
+
+import java.util.PriorityQueue;
 
 /**
  * Base class for trackers that track whether an app has exceeded a count quota.
@@ -87,10 +88,10 @@ abstract class QuotaTracker {
     private final ArraySet<QuotaChangeListener> mQuotaChangeListeners = new ArraySet<>();
 
     /**
-     * Alarm queue to track and manage when each package comes back within quota.
+     * Listener to track and manage when each package comes back within quota.
      */
     @GuardedBy("mLock")
-    private final InQuotaAlarmQueue mInQuotaAlarmQueue;
+    private final InQuotaAlarmListener mInQuotaAlarmListener = new InQuotaAlarmListener();
 
     /** "Free quota status" for apps. */
     @GuardedBy("mLock")
@@ -162,8 +163,6 @@ abstract class QuotaTracker {
         mContext = context;
         mInjector = injector;
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        // The operation should be fast enough to put it on the FgThread.
-        mInQuotaAlarmQueue = new InQuotaAlarmQueue(mContext, FgThread.getHandler().getLooper());
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
@@ -180,7 +179,7 @@ abstract class QuotaTracker {
     /** Remove all saved events from the tracker. */
     public void clear() {
         synchronized (mLock) {
-            mInQuotaAlarmQueue.removeAllAlarms();
+            mInQuotaAlarmListener.clearLocked();
             mFreeQuota.clear();
 
             dropEverythingLocked();
@@ -368,7 +367,7 @@ abstract class QuotaTracker {
             return;
         }
 
-        mInQuotaAlarmQueue.removeAlarms(userId, packageName);
+        mInQuotaAlarmListener.removeAlarmsLocked(userId, packageName);
 
         mFreeQuota.delete(userId, packageName);
 
@@ -380,7 +379,7 @@ abstract class QuotaTracker {
 
     @GuardedBy("mLock")
     private void onUserRemovedLocked(int userId) {
-        mInQuotaAlarmQueue.removeAlarmsForUserId(userId);
+        mInQuotaAlarmListener.removeAlarmsLocked(userId);
         mFreeQuota.delete(userId);
 
         handleRemovedUserLocked(userId);
@@ -435,43 +434,190 @@ abstract class QuotaTracker {
                 Slog.e(TAG, "maybeScheduleStartAlarmLocked called for " + pkgString
                         + " even though it's within quota");
             }
-            mInQuotaAlarmQueue.removeAlarmForKey(new Uptc(userId, packageName, tag));
+            mInQuotaAlarmListener.removeAlarmLocked(new Uptc(userId, packageName, tag));
             maybeUpdateQuotaStatus(userId, packageName, tag);
             return;
         }
 
-        mInQuotaAlarmQueue.addAlarm(new Uptc(userId, packageName, tag),
+        mInQuotaAlarmListener.addAlarmLocked(new Uptc(userId, packageName, tag),
                 getInQuotaTimeElapsedLocked(userId, packageName, tag));
     }
 
     @GuardedBy("mLock")
     void cancelScheduledStartAlarmLocked(final int userId,
             @NonNull final String packageName, @Nullable final String tag) {
-        mInQuotaAlarmQueue.removeAlarmForKey(new Uptc(userId, packageName, tag));
+        mInQuotaAlarmListener.removeAlarmLocked(new Uptc(userId, packageName, tag));
+    }
+
+    static class AlarmQueue extends PriorityQueue<Pair<Uptc, Long>> {
+        AlarmQueue() {
+            super(1, (o1, o2) -> (int) (o1.second - o2.second));
+        }
+
+        /**
+         * Remove any instances of the Uptc from the queue.
+         *
+         * @return true if an instance was removed, false otherwise.
+         */
+        boolean remove(@NonNull Uptc uptc) {
+            boolean removed = false;
+            Pair[] alarms = toArray(new Pair[size()]);
+            for (int i = alarms.length - 1; i >= 0; --i) {
+                if (uptc.equals(alarms[i].first)) {
+                    remove(alarms[i]);
+                    removed = true;
+                }
+            }
+            return removed;
+        }
     }
 
     /** Track when UPTCs are expected to come back into quota. */
-    private class InQuotaAlarmQueue extends AlarmQueue<Uptc> {
-        private InQuotaAlarmQueue(Context context, Looper looper) {
-            super(context, looper, ALARM_TAG_QUOTA_CHECK, "In quota", false, 0);
+    private class InQuotaAlarmListener implements AlarmManager.OnAlarmListener {
+        @GuardedBy("mLock")
+        private final AlarmQueue mAlarmQueue = new AlarmQueue();
+        /** The next time the alarm is set to go off, in the elapsed realtime timebase. */
+        @GuardedBy("mLock")
+        private long mTriggerTimeElapsed = 0;
+
+        @GuardedBy("mLock")
+        void addAlarmLocked(@NonNull Uptc uptc, long inQuotaTimeElapsed) {
+            mAlarmQueue.remove(uptc);
+            mAlarmQueue.offer(new Pair<>(uptc, inQuotaTimeElapsed));
+            setNextAlarmLocked();
         }
 
-        @Override
-        protected boolean isForUser(@NonNull Uptc uptc, int userId) {
-            return userId == uptc.userId;
+        @GuardedBy("mLock")
+        void clearLocked() {
+            cancelAlarm(this);
+            mAlarmQueue.clear();
+            mTriggerTimeElapsed = 0;
         }
 
-        void removeAlarms(int userId, @NonNull String packageName) {
-            removeAlarmsIf((uptc) -> userId == uptc.userId && packageName.equals(uptc.packageName));
-        }
-
-        @Override
-        protected void processExpiredAlarms(@NonNull ArraySet<Uptc> expired) {
-            for (int i = 0; i < expired.size(); ++i) {
-                Uptc uptc = expired.valueAt(i);
-                getHandler().post(
-                        () -> maybeUpdateQuotaStatus(uptc.userId, uptc.packageName, uptc.tag));
+        @GuardedBy("mLock")
+        void removeAlarmLocked(@NonNull Uptc uptc) {
+            if (mAlarmQueue.remove(uptc)) {
+                if (mAlarmQueue.size() == 0) {
+                    cancelAlarm(this);
+                } else {
+                    setNextAlarmLocked();
+                }
             }
+        }
+
+        @GuardedBy("mLock")
+        void removeAlarmsLocked(int userId) {
+            boolean removed = false;
+            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+            for (int i = alarms.length - 1; i >= 0; --i) {
+                final Uptc uptc = (Uptc) alarms[i].first;
+                if (userId == uptc.userId) {
+                    mAlarmQueue.remove(alarms[i]);
+                    removed = true;
+                }
+            }
+            if (removed) {
+                setNextAlarmLocked();
+            }
+        }
+
+        @GuardedBy("mLock")
+        void removeAlarmsLocked(int userId, @NonNull String packageName) {
+            boolean removed = false;
+            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+            for (int i = alarms.length - 1; i >= 0; --i) {
+                final Uptc uptc = (Uptc) alarms[i].first;
+                if (userId == uptc.userId && packageName.equals(uptc.packageName)) {
+                    mAlarmQueue.remove(alarms[i]);
+                    removed = true;
+                }
+            }
+            if (removed) {
+                setNextAlarmLocked();
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void setNextAlarmLocked() {
+            if (mAlarmQueue.size() > 0) {
+                final long nextTriggerTimeElapsed = mAlarmQueue.peek().second;
+                // Only schedule the alarm if one of the following is true:
+                // 1. There isn't one currently scheduled
+                // 2. The new alarm is significantly earlier than the previous alarm. If it's
+                // earlier but not significantly so, then we essentially delay the notification a
+                // few extra minutes.
+                if (mTriggerTimeElapsed == 0
+                        || nextTriggerTimeElapsed < mTriggerTimeElapsed - 3 * MINUTE_IN_MILLIS
+                        || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
+                    // Use a non-wakeup alarm for this
+                    scheduleAlarm(AlarmManager.ELAPSED_REALTIME, nextTriggerTimeElapsed,
+                            ALARM_TAG_QUOTA_CHECK, this);
+                    mTriggerTimeElapsed = nextTriggerTimeElapsed;
+                }
+            } else {
+                cancelAlarm(this);
+                mTriggerTimeElapsed = 0;
+            }
+        }
+
+        @Override
+        public void onAlarm() {
+            synchronized (mLock) {
+                while (mAlarmQueue.size() > 0) {
+                    final Pair<Uptc, Long> alarm = mAlarmQueue.peek();
+                    if (alarm.second <= mInjector.getElapsedRealtime()) {
+                        getHandler().post(() -> maybeUpdateQuotaStatus(
+                                alarm.first.userId, alarm.first.packageName, alarm.first.tag));
+                        mAlarmQueue.remove(alarm);
+                    } else {
+                        break;
+                    }
+                }
+                setNextAlarmLocked();
+            }
+        }
+
+        @GuardedBy("mLock")
+        void dumpLocked(IndentingPrintWriter pw) {
+            pw.println("In quota alarms:");
+            pw.increaseIndent();
+
+            if (mAlarmQueue.size() == 0) {
+                pw.println("NOT WAITING");
+            } else {
+                Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+                for (int i = 0; i < alarms.length; ++i) {
+                    final Uptc uptc = (Uptc) alarms[i].first;
+                    pw.print(uptc);
+                    pw.print(": ");
+                    pw.print(alarms[i].second);
+                    pw.println();
+                }
+            }
+
+            pw.decreaseIndent();
+        }
+
+        @GuardedBy("mLock")
+        void dumpLocked(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            proto.write(QuotaTrackerProto.InQuotaAlarmListener.TRIGGER_TIME_ELAPSED,
+                    mTriggerTimeElapsed);
+
+            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
+            for (int i = 0; i < alarms.length; ++i) {
+                final long aToken = proto.start(QuotaTrackerProto.InQuotaAlarmListener.ALARMS);
+
+                final Uptc uptc = (Uptc) alarms[i].first;
+                uptc.dumpDebug(proto, QuotaTrackerProto.InQuotaAlarmListener.Alarm.UPTC);
+                proto.write(QuotaTrackerProto.InQuotaAlarmListener.Alarm.IN_QUOTA_TIME_ELAPSED,
+                        (Long) alarms[i].second);
+
+                proto.end(aToken);
+            }
+
+            proto.end(token);
         }
     }
 
@@ -489,7 +635,7 @@ abstract class QuotaTracker {
             pw.println();
 
             pw.println();
-            mInQuotaAlarmQueue.dump(pw);
+            mInQuotaAlarmListener.dumpLocked(pw);
 
             pw.println();
             pw.println("Per-app free quota:");
@@ -523,6 +669,7 @@ abstract class QuotaTracker {
             proto.write(QuotaTrackerProto.IS_ENABLED, mIsEnabled);
             proto.write(QuotaTrackerProto.IS_GLOBAL_QUOTA_FREE, mIsQuotaFree);
             proto.write(QuotaTrackerProto.ELAPSED_REALTIME, mInjector.getElapsedRealtime());
+            mInQuotaAlarmListener.dumpLocked(proto, QuotaTrackerProto.IN_QUOTA_ALARM_LISTENER);
         }
 
         proto.end(token);

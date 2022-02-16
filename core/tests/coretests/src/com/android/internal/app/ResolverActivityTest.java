@@ -384,10 +384,10 @@ public class ResolverActivityTest {
         info = createPackageManagerMockedInfo(true);
         pg = new ResolveInfoPresentationGetter(
                 info.ctx, 0, info.resolveInfo);
-        assertThat("With override permission label should match activity label if set",
-                pg.getLabel().equals(info.setActivityLabel));
-        assertThat("With override permission the sublabel should be the resolve info label",
-                pg.getSubLabel().equals(info.setResolveInfoLabel));
+        assertThat("With override permission label should match resolve info label if set",
+                pg.getLabel().equals(info.setResolveInfoLabel));
+        assertThat("With override permission sublabel should be empty",
+                TextUtils.isEmpty(pg.getSubLabel()));
     }
 
     @Test
@@ -728,25 +728,6 @@ public class ResolverActivityTest {
 
         onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void testMiniResolver() {
-        ResolverActivity.ENABLE_TABBED_VIEW = true;
-        markWorkProfileUserAvailable();
-        List<ResolvedComponentInfo> personalResolvedComponentInfos =
-                createResolvedComponentsForTest(1);
-        List<ResolvedComponentInfo> workResolvedComponentInfos =
-                createResolvedComponentsForTest(1);
-        // Personal profile only has a browser
-        personalResolvedComponentInfos.get(0).getResolveInfoAt(0).handleAllWebDataURI = true;
-        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
-        Intent sendIntent = createSendImageIntent();
-        sendIntent.setType("TestType");
-
-        mActivityRule.launchActivity(sendIntent);
-        waitForIdle();
-        onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
     }
 
     @Test

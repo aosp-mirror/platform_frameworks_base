@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -209,12 +210,14 @@ public class SystemVibratorManager extends VibratorManager {
 
         @Override
         public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
-                @Nullable VibrationEffect effect, @Nullable VibrationAttributes attrs) {
+                @Nullable VibrationEffect effect, @Nullable AudioAttributes attributes) {
+            VibrationAttributes attr = new VibrationAttributes.Builder(
+                    attributes, effect).build();
             CombinedVibration combined = CombinedVibration.startParallel()
                     .addVibrator(mVibratorInfo.getId(), effect)
                     .combine();
             return SystemVibratorManager.this.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combined,
-                    attrs);
+                    attr);
         }
 
         @Override

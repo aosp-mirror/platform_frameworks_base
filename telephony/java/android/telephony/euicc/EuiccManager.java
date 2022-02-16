@@ -19,7 +19,6 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
-@RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
 public class EuiccManager {
 
     /**
@@ -805,13 +803,6 @@ public class EuiccManager {
      */
     public static final int ERROR_OPERATION_BUSY = 10016;
 
-    /**
-     * Failure due to target port is not supported.
-     * @see #switchToSubscription(int, int, PendingIntent)
-     */
-    public static final int ERROR_INVALID_PORT = 10017;
-
-
     private final Context mContext;
     private int mCardId;
 
@@ -1127,15 +1118,6 @@ public class EuiccManager {
      * intent to prompt the user to accept the download. The caller should also be authorized to
      * manage the subscription to be enabled.
      *
-     * <p> From Android T, devices might support MEP(Multiple Enabled Profile), the subscription
-     * can be installed on different port from the eUICC. Calling apps with carrier privilege
-     * (see {@link TelephonyManager#hasCarrierPrivileges}) over the currently active subscriptions
-     * can use {@link #switchToSubscription(int, int, PendingIntent)} to specify which port to
-     * enable the subscription. Otherwise, use this API to enable the subscription on the eUICC
-     * and the platform will internally resolve a port. If there is no available port,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned in the callback
-     * intent to prompt the user to disable an already-active subscription.
-     *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
      *     current profile without activating another profile to replace it. If it's a disable
@@ -1153,47 +1135,6 @@ public class EuiccManager {
         try {
             getIEuiccController().switchToSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Switch to (enable) the given subscription.
-     *
-     * <p> Requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission,
-     * or the caller must be having both the carrier privileges
-     * (see {@link TelephonyManager#hasCarrierPrivileges}) over any currently active subscriptions
-     * and the subscription to be enabled according to the subscription metadata.
-     * Without the former permissions, an SecurityException is thrown.
-     *
-     * <p> If the caller is passing invalid port index,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_ERROR} with detailed error code
-     * {@link #ERROR_INVALID_PORT} will be returned.
-     *
-     * <p> Depending on the target port and permission check,
-     * an {@link #EMBEDDED_SUBSCRIPTION_RESULT_RESOLVABLE_ERROR} might be returned to the callback
-     * intent to prompt the user to authorize before the switch.
-     *
-     * @param subscriptionId the ID of the subscription to enable. May be
-     *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
-     *     current profile without activating another profile to replace it. If it's a disable
-     *     operation, requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS}
-     *     permission, or the calling app must be authorized to manage the active subscription on
-     *     the target eUICC.
-     * @param portIndex the index of the port to target for the enabled subscription
-     * @param callbackIntent a PendingIntent to launch when the operation completes.
-     */
-    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void switchToSubscription(int subscriptionId, int portIndex,
-            @NonNull PendingIntent callbackIntent) {
-        if (!isEnabled()) {
-            sendUnavailableError(callbackIntent);
-            return;
-        }
-        try {
-            getIEuiccController().switchToSubscriptionWithPort(mCardId,
-                    subscriptionId, portIndex, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1476,23 +1417,5 @@ public class EuiccManager {
                         .getTelephonyServiceManager()
                         .getEuiccControllerService()
                         .get());
-    }
-
-    /**
-     * Returns whether the passing portIndex is available.
-     * A port is available if it has no profiles enabled on it or calling app has carrier privilege
-     * over the profile installed on the selected port.
-     * Always returns false if the cardId is a physical card.
-     *
-     * @param portIndex is an enumeration of the ports available on the UICC.
-     * @return {@code true} if port is available
-     */
-    public boolean isSimPortAvailable(int portIndex) {
-        try {
-            return getIEuiccController().isSimPortAvailable(mCardId, portIndex,
-                    mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 }

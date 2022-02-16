@@ -472,9 +472,9 @@ public class PeopleSpaceTile implements Parcelable {
     public PeopleSpaceTile(Parcel in) {
         mId = in.readString();
         mUserName = in.readCharSequence();
-        mUserIcon = in.readParcelable(Icon.class.getClassLoader(), android.graphics.drawable.Icon.class);
-        mContactUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
-        mUserHandle = in.readParcelable(UserHandle.class.getClassLoader(), android.os.UserHandle.class);
+        mUserIcon = in.readParcelable(Icon.class.getClassLoader());
+        mContactUri = in.readParcelable(Uri.class.getClassLoader());
+        mUserHandle = in.readParcelable(UserHandle.class.getClassLoader());
         mPackageName = in.readString();
         mBirthdayText = in.readString();
         mLastInteractionTimestamp = in.readLong();
@@ -483,12 +483,12 @@ public class PeopleSpaceTile implements Parcelable {
         mNotificationContent = in.readCharSequence();
         mNotificationSender = in.readCharSequence();
         mNotificationCategory = in.readString();
-        mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
+        mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader());
         mMessagesCount = in.readInt();
-        mIntent = in.readParcelable(Intent.class.getClassLoader(), android.content.Intent.class);
+        mIntent = in.readParcelable(Intent.class.getClassLoader());
         mNotificationTimestamp = in.readLong();
         mStatuses = new ArrayList<>();
-        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader(), android.app.people.ConversationStatus.class);
+        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader());
         mCanBypassDnd = in.readBoolean();
         mIsPackageSuspended = in.readBoolean();
         mIsUserQuieted = in.readBoolean();

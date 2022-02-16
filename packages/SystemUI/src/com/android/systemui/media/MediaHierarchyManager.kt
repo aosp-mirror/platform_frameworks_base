@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.IntDef
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Rect
 import android.util.MathUtils
 import android.view.View
@@ -31,7 +30,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -43,7 +41,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
 
@@ -83,8 +80,7 @@ class MediaHierarchyManager @Inject constructor(
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-    private val dreamOverlayStateController: DreamOverlayStateController
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager
 ) {
 
     /**
@@ -169,7 +165,7 @@ class MediaHierarchyManager @Inject constructor(
         })
     }
 
-    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
+    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_LOCKSCREEN + 1)
     /**
      * The last location where this view was at before going to the desired location. This is
      * useful for guided transitions.
@@ -189,8 +185,6 @@ class MediaHierarchyManager @Inject constructor(
      */
     @MediaLocation
     private var currentAttachmentLocation = -1
-
-    private var inSplitShade = false
 
     /**
      * Is there any active media in the carousel?
@@ -351,17 +345,6 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     /**
-     * Is the doze animation currently Running
-     */
-    private var dreamOverlayActive: Boolean = false
-        private set(value) {
-            if (field != value) {
-                field = value
-                updateDesiredLocation(forceNoAnimation = true)
-            }
-        }
-
-    /**
      * The current cross fade progress. 0.5f means it's just switching
      * between the start and the end location and the content is fully faded, while 0.75f means
      * that we're halfway faded in again in the target state.
@@ -407,9 +390,8 @@ class MediaHierarchyManager @Inject constructor(
     init {
         updateConfiguration()
         configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
+            override fun onDensityOrFontScaleChanged() {
                 updateConfiguration()
-                updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = true)
             }
         })
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
@@ -457,12 +439,6 @@ class MediaHierarchyManager @Inject constructor(
             }
         })
 
-        dreamOverlayStateController.addCallback(object : DreamOverlayStateController.Callback {
-            override fun onStateChanged() {
-                dreamOverlayStateController.isOverlayActive.also { dreamOverlayActive = it }
-            }
-        })
-
         wakefulnessLifecycle.addObserver(object : WakefulnessLifecycle.Observer {
             override fun onFinishedGoingToSleep() {
                 goingToSleep = false
@@ -491,7 +467,6 @@ class MediaHierarchyManager @Inject constructor(
     private fun updateConfiguration() {
         distanceForFullShadeTransition = context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_media_transition_distance)
-        inSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**
@@ -567,7 +542,8 @@ class MediaHierarchyManager @Inject constructor(
                 previousLocation = this.desiredLocation
             } else if (forceStateUpdate) {
                 val onLockscreen = (!bypassController.bypassEnabled &&
-                        (statusbarState == StatusBarState.KEYGUARD))
+                        (statusbarState == StatusBarState.KEYGUARD ||
+                            statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
                 if (desiredLocation == LOCATION_QS && previousLocation == LOCATION_LOCKSCREEN &&
                         !onLockscreen) {
                     // If media active state changed and the device is now unlocked, update the
@@ -827,7 +803,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun getQSTransformationProgress(): Float {
         val currentHost = getHost(desiredLocation)
         val previousHost = getHost(previousLocation)
-        if (hasActiveMedia && (currentHost?.location == LOCATION_QS && !inSplitShade)) {
+        if (hasActiveMedia && currentHost?.location == LOCATION_QS) {
             if (previousHost?.location == LOCATION_QQS) {
                 if (previousHost.visible || statusbarState != StatusBarState.KEYGUARD) {
                     return qsExpansion
@@ -954,11 +930,11 @@ class MediaHierarchyManager @Inject constructor(
             return desiredLocation
         }
         val onLockscreen = (!bypassController.bypassEnabled &&
-            (statusbarState == StatusBarState.KEYGUARD))
+            (statusbarState == StatusBarState.KEYGUARD ||
+                statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
         val allowedOnLockscreen = notifLockscreenUserManager.shouldShowLockscreenNotifications()
         val location = when {
-            dreamOverlayActive -> LOCATION_DREAM_OVERLAY
-            (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
+            qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             !hasActiveMedia -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
@@ -1051,11 +1027,6 @@ class MediaHierarchyManager @Inject constructor(
          * Attached on the lock screen
          */
         const val LOCATION_LOCKSCREEN = 2
-
-        /**
-         * Attached on the dream overlay
-         */
-        const val LOCATION_DREAM_OVERLAY = 3
 
         /**
          * Attached at the root of the hierarchy in an overlay

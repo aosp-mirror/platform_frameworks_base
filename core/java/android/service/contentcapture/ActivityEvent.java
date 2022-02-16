@@ -149,7 +149,7 @@ public final class ActivityEvent implements Parcelable {
         @Override
         @NonNull
         public ActivityEvent createFromParcel(@NonNull Parcel parcel) {
-            final ComponentName componentName = parcel.readParcelable(null, android.content.ComponentName.class);
+            final ComponentName componentName = parcel.readParcelable(null);
             final int eventType = parcel.readInt();
             return new ActivityEvent(componentName, eventType);
         }

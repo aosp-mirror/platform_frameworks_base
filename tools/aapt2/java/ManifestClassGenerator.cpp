@@ -19,17 +19,19 @@
 #include <algorithm>
 
 #include "Source.h"
+#include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
 #include "java/JavaClassGenerator.h"
 #include "text/Unicode.h"
+#include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
 using ::aapt::text::IsJavaIdentifier;
 
 namespace aapt {
 
-static std::optional<std::string> ExtractJavaIdentifier(IDiagnostics* diag, const Source& source,
-                                                        const std::string& value) {
+static Maybe<std::string> ExtractJavaIdentifier(IDiagnostics* diag, const Source& source,
+                                                const std::string& value) {
   std::string result = value;
   size_t pos = value.rfind('.');
   if (pos != std::string::npos) {
@@ -61,7 +63,7 @@ static bool WriteSymbol(const Source& source, IDiagnostics* diag, xml::Element* 
     return false;
   }
 
-  std::optional<std::string> result =
+  Maybe<std::string> result =
       ExtractJavaIdentifier(diag, source.WithLine(el->line_number), attr->value);
   if (!result) {
     return false;

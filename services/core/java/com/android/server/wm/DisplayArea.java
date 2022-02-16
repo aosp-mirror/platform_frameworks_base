@@ -272,10 +272,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
-            return;
-        }
-
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
@@ -336,7 +332,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
-    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback,
+    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
             boolean traverseTopToBottom) {
         // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
         if (mType != DisplayArea.Type.ANY) {
@@ -499,10 +495,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
 
     DisplayAreaInfo getDisplayAreaInfo() {
-        final DisplayAreaInfo info = new DisplayAreaInfo(mRemoteToken.toWindowContainerToken(),
+        DisplayAreaInfo info = new DisplayAreaInfo(mRemoteToken.toWindowContainerToken(),
                 getDisplayContent().getDisplayId(), mFeatureId);
-        final RootDisplayArea root = getRootDisplayArea();
-        info.rootDisplayAreaId = root == null ? getDisplayContent().mFeatureId : root.mFeatureId;
         info.configuration.setTo(getConfiguration());
         return info;
     }
@@ -560,7 +554,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // Ignore the orientation of keyguard if it is going away or is not showing while
                 // the device is fully awake. In other words, use the orientation of keyguard if
                 // its window is visible while the device is going to sleep or is sleeping.
-                if (!mDisplayContent.isKeyguardLocked()
+                if (!mWmService.mAtmService.isKeyguardLocked()
                         && mDisplayContent.getDisplayPolicy().isAwake()
                         // Device is not going to sleep.
                         && policy.okToAnimate(true /* ignoreScreenOn */)) {
@@ -586,11 +580,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         };
 
         Tokens(WindowManagerService wms, Type type, String name) {
-            this(wms, type, name, FEATURE_WINDOW_TOKENS);
-        }
-
-        Tokens(WindowManagerService wms, Type type, String name, int featureId) {
-            super(wms, type, name, featureId);
+            super(wms, type, name, FEATURE_WINDOW_TOKENS);
         }
 
         void addChild(WindowToken token) {

@@ -17,7 +17,6 @@
 package com.android.systemui.media.dialog;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -29,7 +28,6 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Dialog for media output transferring.
@@ -39,14 +37,14 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     final UiEventLogger mUiEventLogger;
 
     MediaOutputDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController, UiEventLogger uiEventLogger,
-            SystemUIDialogManager dialogManager) {
-        super(context, mediaOutputController, dialogManager);
+            mediaOutputController, UiEventLogger uiEventLogger) {
+        super(context, mediaOutputController);
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController, this);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
+        show();
     }
 
     @Override
@@ -79,11 +77,6 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     CharSequence getHeaderSubtitle() {
         return mMediaOutputController.getHeaderSubTitle();
-    }
-
-    @Override
-    Drawable getAppSourceIcon() {
-        return mMediaOutputController.getAppSourceIcon();
     }
 
     @Override

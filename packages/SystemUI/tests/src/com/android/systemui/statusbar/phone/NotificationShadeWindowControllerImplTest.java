@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,7 +73,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock ColorExtractor.GradientColors mGradientColors;
     @Mock private DumpManager mDumpManager;
     @Mock private KeyguardStateController mKeyguardStateController;
-    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private AuthController mAuthController;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
@@ -90,7 +89,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController);
+                mUnlockedScreenOffAnimationController, mAuthController);
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
@@ -225,18 +224,5 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) != 0).isTrue();
         assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
-    }
-
-    @Test
-    public void batchApplyWindowLayoutParams_doesNotDispatchEvents() {
-        mNotificationShadeWindowController.setForceDozeBrightness(true);
-        verify(mWindowManager).updateViewLayout(any(), any());
-
-        clearInvocations(mWindowManager);
-        mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
-            mNotificationShadeWindowController.setForceDozeBrightness(false);
-            verify(mWindowManager, never()).updateViewLayout(any(), any());
-        });
-        verify(mWindowManager).updateViewLayout(any(), any());
     }
 }

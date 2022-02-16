@@ -19,17 +19,13 @@ package com.android.server.biometrics.sensors.face.aidl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.common.CommonProps;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
-import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
@@ -37,7 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -59,10 +55,6 @@ public class FaceProviderTest {
     private Context mContext;
     @Mock
     private UserManager mUserManager;
-    @Mock
-    private IFace mDaemon;
-    @Mock
-    private BiometricContext mBiometricContext;
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
@@ -73,12 +65,11 @@ public class FaceProviderTest {
     }
 
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         when(mUserManager.getAliveUsers()).thenReturn(new ArrayList<>());
-        when(mDaemon.createSession(anyInt(), anyInt(), any())).thenReturn(mock(ISession.class));
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -87,12 +78,12 @@ public class FaceProviderTest {
         sensor2.commonProps = new CommonProps();
         sensor2.commonProps.sensorId = 1;
 
-        mSensorProps = new SensorProps[]{sensor1, sensor2};
+        mSensorProps = new SensorProps[] {sensor1, sensor2};
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
-        mFaceProvider = new TestableFaceProvider(mDaemon, mContext, mSensorProps, TAG,
-                mLockoutResetDispatcher, mBiometricContext);
+        mFaceProvider = new TestableFaceProvider(mContext, mSensorProps, TAG,
+                mLockoutResetDispatcher);
     }
 
     @SuppressWarnings("rawtypes")
@@ -136,21 +127,17 @@ public class FaceProviderTest {
     }
 
     private static class TestableFaceProvider extends FaceProvider {
-        private final IFace mDaemon;
-
-        TestableFaceProvider(@NonNull IFace daemon,
-                @NonNull Context context,
+        public TestableFaceProvider(@NonNull Context context,
                 @NonNull SensorProps[] props,
                 @NonNull String halInstanceName,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull BiometricContext biometricContext) {
-            super(context, props, halInstanceName, lockoutResetDispatcher, biometricContext);
-            mDaemon = daemon;
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            super(context, props, halInstanceName, lockoutResetDispatcher);
         }
 
         @Override
         synchronized IFace getHalInstance() {
-            return mDaemon;
+            return mock(IFace.class);
         }
     }
+
 }

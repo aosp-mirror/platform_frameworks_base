@@ -63,6 +63,7 @@ public final class DozeServiceHost implements DozeHost {
     private final DozeLog mDozeLog;
     private final PowerManager mPowerManager;
     private boolean mAnimateWakeup;
+    private boolean mAnimateScreenOff;
     private boolean mIgnoreTouchWhilePulsing;
     private Runnable mPendingScreenOffCallback;
     @VisibleForTesting
@@ -225,11 +226,11 @@ public final class DozeServiceHost implements DozeHost {
             return;
         }
 
-        if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
+        if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
             mScrimController.setWakeLockScreenSensorActive(true);
         }
 
-        boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH
+        boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
                         && mWakeLockScreenPerformsAuth;
         // Set the state to pulsing, so ScrimController will know what to do once we ask it to
         // execute the transition. The pulse callback will then be invoked when the scrims
@@ -254,6 +255,7 @@ public final class DozeServiceHost implements DozeHost {
 
             private void setPulsing(boolean pulsing) {
                 mStatusBarKeyguardViewManager.setPulsing(pulsing);
+                mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
                 mStatusBarStateController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;
@@ -327,7 +329,7 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void extendPulse(int reason) {
-        if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
+        if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
             mScrimController.setWakeLockScreenSensorActive(true);
         }
         if (mDozeScrimController.isPulsing() && mHeadsUpManagerPhone.hasNotifications()) {
@@ -352,6 +354,11 @@ public final class DozeServiceHost implements DozeHost {
             return;
         }
         mAnimateWakeup = animateWakeup;
+    }
+
+    @Override
+    public void setAnimateScreenOff(boolean animateScreenOff) {
+        mAnimateScreenOff = animateScreenOff;
     }
 
     @Override
@@ -431,6 +438,10 @@ public final class DozeServiceHost implements DozeHost {
 
     boolean shouldAnimateWakeup() {
         return mAnimateWakeup;
+    }
+
+    boolean shouldAnimateScreenOff() {
+        return mAnimateScreenOff;
     }
 
     boolean getIgnoreTouchWhilePulsing() {

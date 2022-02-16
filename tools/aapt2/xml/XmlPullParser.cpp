@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 
+#include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
 #include "xml/XmlUtil.h"
@@ -83,7 +84,8 @@ XmlPullParser::Event XmlPullParser::Next() {
   // handling of references that use namespace aliases.
   if (next_event == Event::kStartNamespace ||
       next_event == Event::kEndNamespace) {
-    std::optional<ExtractedPackage> result = ExtractPackageFromNamespace(namespace_uri());
+    Maybe<ExtractedPackage> result =
+        ExtractPackageFromNamespace(namespace_uri());
     if (next_event == Event::kStartNamespace) {
       if (result) {
         package_aliases_.emplace_back(
@@ -140,8 +142,7 @@ const std::string& XmlPullParser::namespace_uri() const {
   return event_queue_.front().data2;
 }
 
-std::optional<ExtractedPackage> XmlPullParser::TransformPackageAlias(
-    const StringPiece& alias) const {
+Maybe<ExtractedPackage> XmlPullParser::TransformPackageAlias(const StringPiece& alias) const {
   if (alias.empty()) {
     return ExtractedPackage{{}, false /*private*/};
   }
@@ -307,7 +308,8 @@ void XMLCALL XmlPullParser::EndCdataSectionHandler(void* user_data) {
                                       parser->depth_ });
 }
 
-std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, const StringPiece& name) {
+Maybe<StringPiece> FindAttribute(const XmlPullParser* parser,
+                                 const StringPiece& name) {
   auto iter = parser->FindAttribute("", name);
   if (iter != parser->end_attributes()) {
     return StringPiece(util::TrimWhitespace(iter->value));
@@ -315,8 +317,8 @@ std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, const Stri
   return {};
 }
 
-std::optional<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
-                                                 const StringPiece& name) {
+Maybe<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
+                                         const StringPiece& name) {
   auto iter = parser->FindAttribute("", name);
   if (iter != parser->end_attributes()) {
     StringPiece trimmed = util::TrimWhitespace(iter->value);

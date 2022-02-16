@@ -22,8 +22,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
-import android.graphics.text.LineBreakConfig;
-import android.graphics.text.MeasuredText;
 import android.text.style.MetricAffectingSpan;
 
 import com.android.internal.util.Preconditions;
@@ -97,9 +95,6 @@ public class PrecomputedText implements Spannable {
         // The hyphenation frequency for this measured text.
         private final @Layout.HyphenationFrequency int mHyphenationFrequency;
 
-        // The line break configuration for calculating text wrapping.
-        private final @Nullable LineBreakConfig mLineBreakConfig;
-
         /**
          * A builder for creating {@link Params}.
          */
@@ -116,9 +111,6 @@ public class PrecomputedText implements Spannable {
             // The hyphenation frequency for this measured text.
             private @Layout.HyphenationFrequency int mHyphenationFrequency =
                     Layout.HYPHENATION_FREQUENCY_NORMAL;
-
-            // The line break configuration for calculating text wrapping.
-            private @Nullable LineBreakConfig mLineBreakConfig;
 
             /**
              * Builder constructor.
@@ -137,7 +129,6 @@ public class PrecomputedText implements Spannable {
                 mTextDir = params.mTextDir;
                 mBreakStrategy = params.mBreakStrategy;
                 mHyphenationFrequency = params.mHyphenationFrequency;
-                mLineBreakConfig = params.mLineBreakConfig;
             }
 
             /**
@@ -185,41 +176,24 @@ public class PrecomputedText implements Spannable {
             }
 
             /**
-             * Set the line break config for the text wrapping.
-             *
-             * @param lineBreakConfig the newly line break configuration.
-             * @return this builder, useful for chaining.
-             * @see StaticLayout.Builder#setLineBreakConfig
-             */
-            public @NonNull Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
-                mLineBreakConfig = lineBreakConfig;
-                return this;
-            }
-
-            /**
              * Build the {@link Params}.
              *
              * @return the layout parameter
              */
             public @NonNull Params build() {
-                return new Params(mPaint, mLineBreakConfig, mTextDir, mBreakStrategy,
-                        mHyphenationFrequency);
+                return new Params(mPaint, mTextDir, mBreakStrategy, mHyphenationFrequency);
             }
         }
 
         // This is public hidden for internal use.
         // For the external developers, use Builder instead.
         /** @hide */
-        public Params(@NonNull TextPaint paint,
-                @Nullable LineBreakConfig lineBreakConfig,
-                @NonNull TextDirectionHeuristic textDir,
-                @Layout.BreakStrategy int strategy,
-                @Layout.HyphenationFrequency int frequency) {
+        public Params(@NonNull TextPaint paint, @NonNull TextDirectionHeuristic textDir,
+                @Layout.BreakStrategy int strategy, @Layout.HyphenationFrequency int frequency) {
             mPaint = paint;
             mTextDir = textDir;
             mBreakStrategy = strategy;
             mHyphenationFrequency = frequency;
-            mLineBreakConfig = lineBreakConfig;
         }
 
         /**
@@ -258,15 +232,6 @@ public class PrecomputedText implements Spannable {
             return mHyphenationFrequency;
         }
 
-        /**
-         * Return the line break configuration for this text.
-         *
-         * @return the current line break configuration, null if no line break configuration is set.
-         */
-        public @Nullable LineBreakConfig getLineBreakConfig() {
-            return mLineBreakConfig;
-        }
-
         /** @hide */
         @IntDef(value = { UNUSABLE, NEED_RECOMPUTE, USABLE })
         @Retention(RetentionPolicy.SOURCE)
@@ -296,37 +261,13 @@ public class PrecomputedText implements Spannable {
         /** @hide */
         public @CheckResultUsableResult int checkResultUsable(@NonNull TextPaint paint,
                 @NonNull TextDirectionHeuristic textDir, @Layout.BreakStrategy int strategy,
-                @Layout.HyphenationFrequency int frequency, @Nullable LineBreakConfig lbConfig) {
+                @Layout.HyphenationFrequency int frequency) {
             if (mBreakStrategy == strategy && mHyphenationFrequency == frequency
-                    && isLineBreakEquals(mLineBreakConfig, lbConfig)
                     && mPaint.equalsForTextMeasurement(paint)) {
                 return mTextDir == textDir ? USABLE : NEED_RECOMPUTE;
             } else {
                 return UNUSABLE;
             }
-        }
-
-        /**
-         * Check the two LineBreakConfig instances are equal.
-         * This method assumes they are equal if one parameter is null and the other parameter has
-         * a LineBreakStyle value of LineBreakConfig.LINE_BREAK_STYLE_NONE.
-         *
-         * @param o1 the first LineBreakConfig instance.
-         * @param o2 the second LineBreakConfig instance.
-         * @return true if the two LineBreakConfig instances are equal.
-         */
-        private boolean isLineBreakEquals(LineBreakConfig o1, LineBreakConfig o2) {
-            if (Objects.equals(o1, o2)) {
-                return true;
-            }
-            if (o1 == null && (o2 != null
-                    && o2.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            } else if (o2 == null && (o1 != null
-                    && o1.getLineBreakStyle() == LineBreakConfig.LINE_BREAK_STYLE_NONE)) {
-                return true;
-            }
-            return false;
         }
 
         /**
@@ -344,28 +285,21 @@ public class PrecomputedText implements Spannable {
             }
             Params param = (Params) o;
             return checkResultUsable(param.mPaint, param.mTextDir, param.mBreakStrategy,
-                    param.mHyphenationFrequency, param.mLineBreakConfig) == Params.USABLE;
+                    param.mHyphenationFrequency) == Params.USABLE;
         }
 
         @Override
         public int hashCode() {
             // TODO: implement MinikinPaint::hashCode and use it to keep consistency with equals.
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
             return Objects.hash(mPaint.getTextSize(), mPaint.getTextScaleX(), mPaint.getTextSkewX(),
                     mPaint.getLetterSpacing(), mPaint.getWordSpacing(), mPaint.getFlags(),
                     mPaint.getTextLocales(), mPaint.getTypeface(),
                     mPaint.getFontVariationSettings(), mPaint.isElegantTextHeight(), mTextDir,
-                    mBreakStrategy, mHyphenationFrequency, lineBreakStyle);
+                    mBreakStrategy, mHyphenationFrequency);
         }
 
         @Override
         public String toString() {
-            int lineBreakStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lineBreakWordStyle = (mLineBreakConfig != null)
-                    ? mLineBreakConfig.getLineBreakWordStyle()
-                            : LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
             return "{"
                 + "textSize=" + mPaint.getTextSize()
                 + ", textScaleX=" + mPaint.getTextScaleX()
@@ -378,8 +312,6 @@ public class PrecomputedText implements Spannable {
                 + ", textDir=" + mTextDir
                 + ", breakStrategy=" + mBreakStrategy
                 + ", hyphenationFrequency=" + mHyphenationFrequency
-                + ", lineBreakStyle=" + lineBreakStyle
-                + ", lineBreakWordStyle=" + lineBreakWordStyle
                 + "}";
         }
     };
@@ -436,8 +368,7 @@ public class PrecomputedText implements Spannable {
             final PrecomputedText.Params hintParams = hintPct.getParams();
             final @Params.CheckResultUsableResult int checkResult =
                     hintParams.checkResultUsable(params.mPaint, params.mTextDir,
-                            params.mBreakStrategy, params.mHyphenationFrequency,
-                            params.mLineBreakConfig);
+                            params.mBreakStrategy, params.mHyphenationFrequency);
             switch (checkResult) {
                 case Params.USABLE:
                     return hintPct;
@@ -464,31 +395,18 @@ public class PrecomputedText implements Spannable {
         return new PrecomputedText(text, 0, text.length(), params, paraInfo);
     }
 
-    private static boolean isFastHyphenation(int frequency) {
-        return frequency == Layout.HYPHENATION_FREQUENCY_FULL_FAST
-                || frequency == Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
-    }
-
     private static ParagraphInfo[] createMeasuredParagraphsFromPrecomputedText(
             @NonNull PrecomputedText pct, @NonNull Params params, boolean computeLayout) {
         final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
                 && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
-        final int hyphenationMode;
-        if (needHyphenation) {
-            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
-                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
-                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
-        } else {
-            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
-        }
         ArrayList<ParagraphInfo> result = new ArrayList<>();
         for (int i = 0; i < pct.getParagraphCount(); ++i) {
             final int paraStart = pct.getParagraphStart(i);
             final int paraEnd = pct.getParagraphEnd(i);
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), pct, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout,
-                    pct.getMeasuredParagraph(i), null /* no recycle */)));
+                    params.getTextPaint(), pct, paraStart, paraEnd, params.getTextDirection(),
+                    needHyphenation, computeLayout, pct.getMeasuredParagraph(i),
+                    null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
     }
@@ -503,14 +421,6 @@ public class PrecomputedText implements Spannable {
         Preconditions.checkNotNull(params);
         final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
                 && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
-        final int hyphenationMode;
-        if (needHyphenation) {
-            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
-                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
-                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
-        } else {
-            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
-        }
 
         int paraEnd = 0;
         for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
@@ -524,8 +434,8 @@ public class PrecomputedText implements Spannable {
             }
 
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), params.getLineBreakConfig(), text, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout, null /* no hint */,
+                    params.getTextPaint(), text, paraStart, paraEnd, params.getTextDirection(),
+                    needHyphenation, computeLayout, null /* no hint */,
                     null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
@@ -613,11 +523,11 @@ public class PrecomputedText implements Spannable {
     public @Params.CheckResultUsableResult int checkResultUsable(@IntRange(from = 0) int start,
             @IntRange(from = 0) int end, @NonNull TextDirectionHeuristic textDir,
             @NonNull TextPaint paint, @Layout.BreakStrategy int strategy,
-            @Layout.HyphenationFrequency int frequency, @NonNull LineBreakConfig lbConfig) {
+            @Layout.HyphenationFrequency int frequency) {
         if (mStart != start || mEnd != end) {
             return Params.UNUSABLE;
         } else {
-            return mParams.checkResultUsable(paint, textDir, strategy, frequency, lbConfig);
+            return mParams.checkResultUsable(paint, textDir, strategy, frequency);
         }
     }
 

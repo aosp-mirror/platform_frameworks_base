@@ -402,21 +402,6 @@ public abstract class DataService extends Service {
         }
 
         /**
-         * Notify the system that a given DataProfile was unthrottled.
-         *
-         * @param dataProfile DataProfile associated with an APN returned from the modem
-         */
-        public final void notifyDataProfileUnthrottled(@NonNull DataProfile dataProfile) {
-            synchronized (mApnUnthrottledCallbacks) {
-                for (IDataServiceCallback callback : mApnUnthrottledCallbacks) {
-                    mHandler.obtainMessage(DATA_SERVICE_INDICATION_APN_UNTHROTTLED,
-                            mSlotIndex, 0, new ApnUnthrottledIndication(dataProfile,
-                                    callback)).sendToTarget();
-                }
-            }
-        }
-
-        /**
          * Called when the instance of data service is destroyed (e.g. got unbind or binder died)
          * or when the data service provider is removed. The extended class should implement this
          * method to perform cleanup works.
@@ -511,18 +496,11 @@ public abstract class DataService extends Service {
     }
 
     private static final class ApnUnthrottledIndication {
-        public final DataProfile dataProfile;
         public final String apn;
         public final IDataServiceCallback callback;
         ApnUnthrottledIndication(String apn,
                 IDataServiceCallback callback) {
-            this.dataProfile = null;
             this.apn = apn;
-            this.callback = callback;
-        }
-        ApnUnthrottledIndication(DataProfile dataProfile, IDataServiceCallback callback) {
-            this.dataProfile = dataProfile;
-            this.apn = null;
             this.callback = callback;
         }
     }
@@ -658,13 +636,8 @@ public abstract class DataService extends Service {
                     ApnUnthrottledIndication apnUnthrottledIndication =
                             (ApnUnthrottledIndication) message.obj;
                     try {
-                        if (apnUnthrottledIndication.dataProfile != null) {
-                            apnUnthrottledIndication.callback
-                                    .onDataProfileUnthrottled(apnUnthrottledIndication.dataProfile);
-                        } else {
-                            apnUnthrottledIndication.callback
-                                    .onApnUnthrottled(apnUnthrottledIndication.apn);
-                        }
+                        apnUnthrottledIndication.callback
+                                .onApnUnthrottled(apnUnthrottledIndication.apn);
                     } catch (RemoteException e) {
                         loge("Failed to call onApnUnthrottled. " + e);
                     }

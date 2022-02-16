@@ -18,15 +18,12 @@ package com.android.wm.shell.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
-import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -46,10 +43,10 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     private IBinder mTransition = null;
 
     /** The remote to delegate animation to */
-    private final RemoteTransition mRemote;
+    private final IRemoteTransition mRemote;
 
     public OneShotRemoteHandler(@NonNull ShellExecutor mainExecutor,
-            @NonNull RemoteTransition remote) {
+            @NonNull IRemoteTransition remote) {
         mMainExecutor = mainExecutor;
         mRemote = remote;
     }
@@ -60,8 +57,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull SurfaceControl.Transaction t,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mTransition != transition) return false;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
@@ -74,31 +70,19 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         };
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct,
-                    SurfaceControl.Transaction sct) {
+            public void onTransitionFinished(WindowContainerTransaction wct) {
                 if (mRemote.asBinder() != null) {
                     mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
-                mMainExecutor.execute(() -> {
-                    if (sct != null) {
-                        finishTransaction.merge(sct);
-                    }
-                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
-                });
+                mMainExecutor.execute(
+                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }
         };
         try {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
             }
-            try {
-                ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
-                        mRemote.getAppThread());
-            } catch (SecurityException e) {
-                Slog.e(Transitions.TAG, "Unable to boost animation thread. This should only happen"
-                        + " during unit tests");
-            }
-            mRemote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
+            mRemote.startAnimation(transition, info, t, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             if (mRemote.asBinder() != null) {
@@ -118,14 +102,13 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onTransitionFinished(WindowContainerTransaction wct,
-                    SurfaceControl.Transaction sct) {
+            public void onTransitionFinished(WindowContainerTransaction wct) {
                 mMainExecutor.execute(
                         () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }
         };
         try {
-            mRemote.getRemoteTransition().mergeAnimation(transition, info, t, mergeTarget, cb);
+            mRemote.mergeAnimation(transition, info, t, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error merging remote transition.", e);
         }
@@ -135,9 +118,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     @Nullable
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @Nullable TransitionRequestInfo request) {
-        RemoteTransition remote = request.getRemoteTransition();
-        IRemoteTransition iRemote = remote != null ? remote.getRemoteTransition() : null;
-        if (iRemote != mRemote.getRemoteTransition()) return null;
+        IRemoteTransition remote = request.getRemoteTransition();
+        if (remote != mRemote) return null;
         mTransition = transition;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);

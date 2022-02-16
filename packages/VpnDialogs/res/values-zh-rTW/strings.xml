@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"連線要求"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> 要求設定 VPN 連線，允許此要求即開放該來源監控網路流量。除非你信任該來源，否則請勿任意接受要求。&lt;br /&gt; &lt;br /&gt;VPN 啟用時，畫面頂端會顯示 &lt;img src=vpn_icon /&gt;。"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"「<xliff:g id="APP">%s</xliff:g>」要求設定 VPN 連線，以便監控網路流量。除非你信任該來源，否則請勿接受要求。&lt;br /&gt; &lt;br /&gt; VPN 啟用時，畫面上會顯示 &lt;img src=vpn_icon /&gt;。"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN 已連線"</string>
     <string name="session" msgid="6470628549473641030">"工作階段："</string>
     <string name="duration" msgid="3584782459928719435">"持續時間："</string>

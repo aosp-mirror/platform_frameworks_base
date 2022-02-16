@@ -33,7 +33,6 @@ import android.permission.PermissionManager;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
-import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
 import android.util.Slog;
@@ -169,18 +168,6 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         false /* invoke #cancel */);
                                 clientToken.unlinkToDeath(deathRecipient, 0);
                             }
-                        }
-
-                        @Override
-                        public void checkRecognitionSupport(
-                                Intent recognizerIntent,
-                                IRecognitionSupportCallback callback) {
-                            service.checkRecognitionSupport(recognizerIntent, callback);
-                        }
-
-                        @Override
-                        public void triggerModelDownload(Intent recognizerIntent) {
-                            service.triggerModelDownload(recognizerIntent);
                         }
                     });
                 } catch (RemoteException e) {

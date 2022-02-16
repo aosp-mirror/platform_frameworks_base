@@ -1088,10 +1088,6 @@ public class ThermalManagerService extends SystemService {
         @GuardedBy("mSamples")
         private long mLastForecastCallTimeMillis = 0;
 
-        private static final int INACTIVITY_THRESHOLD_MILLIS = 10000;
-        @VisibleForTesting
-        long mInactivityThresholdMillis = INACTIVITY_THRESHOLD_MILLIS;
-
         void updateSevereThresholds() {
             synchronized (mSamples) {
                 List<TemperatureThreshold> thresholds =
@@ -1111,12 +1107,13 @@ public class ThermalManagerService extends SystemService {
             }
         }
 
+        private static final int INACTIVITY_THRESHOLD_MILLIS = 10000;
         private static final int RING_BUFFER_SIZE = 30;
 
         private void updateTemperature() {
             synchronized (mSamples) {
                 if (SystemClock.elapsedRealtime() - mLastForecastCallTimeMillis
-                        < mInactivityThresholdMillis) {
+                        < INACTIVITY_THRESHOLD_MILLIS) {
                     // Trigger this again after a second as long as forecast has been called more
                     // recently than the inactivity timeout
                     mHandler.postDelayed(this::updateTemperature, 1000);
@@ -1202,7 +1199,7 @@ public class ThermalManagerService extends SystemService {
 
         float getForecast(int forecastSeconds) {
             synchronized (mSamples) {
-                mLastForecastCallTimeMillis = SystemClock.elapsedRealtime();
+                mLastForecastCallTimeMillis = System.currentTimeMillis();
                 if (mSamples.isEmpty()) {
                     updateTemperature();
                 }

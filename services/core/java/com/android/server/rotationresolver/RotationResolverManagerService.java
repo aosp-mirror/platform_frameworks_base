@@ -30,7 +30,6 @@ import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.os.Binder;
@@ -43,6 +42,7 @@ import android.rotationresolver.RotationResolverInternal;
 import android.service.rotationresolver.RotationResolutionRequest;
 import android.service.rotationresolver.RotationResolverService;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -143,30 +143,6 @@ public class RotationResolverManagerService extends
         return !TextUtils.isEmpty(getServiceConfigPackage(context));
     }
 
-    ComponentName getComponentNameShellCommand(@UserIdInt int userId) {
-        synchronized (mLock) {
-            final RotationResolverManagerPerUserService service = getServiceForUserLocked(userId);
-            if (service != null) {
-                return service.getComponentName();
-            }
-        }
-        return null;
-    }
-
-    void resolveRotationShellCommand(@UserIdInt int userId,
-            RotationResolverInternal.RotationResolverCallbackInternal callbackInternal,
-            RotationResolutionRequest request) {
-        synchronized (mLock) {
-            final RotationResolverManagerPerUserService service = getServiceForUserLocked(userId);
-            if (service != null) {
-                service.resolveRotationLocked(callbackInternal, request, new CancellationSignal());
-            } else {
-                Slog.i(TAG, "service not available for user_id: " + userId);
-            }
-        }
-    }
-
-
     static String getServiceConfigPackage(Context context) {
         return context.getPackageManager().getRotationResolverPackageName();
     }
@@ -225,7 +201,9 @@ public class RotationResolverManagerService extends
                 return;
             }
             synchronized (mLock) {
-                dumpLocked("", pw);
+                final RotationResolverManagerPerUserService service = getServiceForUserLocked(
+                        UserHandle.getCallingUserId());
+                service.dumpInternal(new IndentingPrintWriter(pw, "  "));
             }
         }
 
@@ -236,8 +214,9 @@ public class RotationResolverManagerService extends
                 ResultReceiver resultReceiver) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROTATION_RESOLVER,
                     TAG);
-            new RotationResolverShellCommand(RotationResolverManagerService.this).exec(this, in,
-                    out, err, args, callback,
+            final RotationResolverManagerPerUserService service = getServiceForUserLocked(
+                    UserHandle.getCallingUserId());
+            new RotationResolverShellCommand(service).exec(this, in, out, err, args, callback,
                     resultReceiver);
         }
     }

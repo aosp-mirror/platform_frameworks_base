@@ -23,7 +23,7 @@ import android.content.IntentSender;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.Objects;
+import com.android.internal.util.Preconditions;
 
 /**
  * Handles save requests from the {@link AutofillService} into the {@link Activity} being
@@ -70,7 +70,7 @@ public final class SaveCallback {
      * or {@link #onFailure(CharSequence)} was already called.
      */
     public void onSuccess(@NonNull IntentSender intentSender) {
-        onSuccessInternal(Objects.requireNonNull(intentSender));
+        onSuccessInternal(Preconditions.checkNotNull(intentSender));
     }
 
     private void onSuccessInternal(@Nullable IntentSender intentSender) {
