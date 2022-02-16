@@ -8226,7 +8226,9 @@ public class CarrierConfigManager {
             "store_sim_pin_for_unattended_reboot_bool";
 
     /**
-     * Determine whether "Enable 2G" toggle can be shown.
+     * Allow whether the user can use the "Allow 2G" toggle in Settings.
+     *
+     * If {@code true} then the toggle is disabled (i.e. grayed out).
      *
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
