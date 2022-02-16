@@ -81,8 +81,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Mock
     HeadsUpManager mHeadsUpManager;
     @Mock
-    NotificationInterruptLogger mLogger;
-    @Mock
     BatteryController mBatteryController;
     @Mock
     Handler mMockHandler;
@@ -103,7 +101,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mBatteryController,
                         mStatusBarStateController,
                         mHeadsUpManager,
-                        mLogger,
                         mMockHandler);
 
         mNotifInterruptionStateProvider.mUseHeadsUp = true;

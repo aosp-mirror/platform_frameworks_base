@@ -24,6 +24,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import android.widget.ImageView
 import android.widget.TextView
@@ -64,6 +65,7 @@ class PrivacyDialog(
         window?.apply {
             attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
             attributes.receiveInsetsIgnoringZOrder = true
+            setLayout(context.resources.getDimensionPixelSize(R.dimen.qs_panel_width), WRAP_CONTENT)
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         }
 

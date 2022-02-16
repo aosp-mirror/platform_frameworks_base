@@ -31,7 +31,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
-import android.service.SensorPrivacySensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -42,7 +41,6 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -76,7 +74,7 @@ public final class SensorPrivacyManager {
     private final SparseArray<Boolean> mToggleSupportCache = new SparseArray<>();
 
     /**
-     * Sensor constants which are used in {@link SensorPrivacyManager}
+     * Individual sensors not listed in {@link Sensors}
      */
     public static class Sensors {
 
@@ -85,12 +83,12 @@ public final class SensorPrivacyManager {
         /**
          * Constant for the microphone
          */
-        public static final int MICROPHONE = SensorPrivacySensorProto.MICROPHONE;
+        public static final int MICROPHONE = SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 
         /**
          * Constant for the camera
          */
-        public static final int CAMERA = SensorPrivacySensorProto.CAMERA;
+        public static final int CAMERA = SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 
         /**
          * Individual sensors not listed in {@link Sensors}
@@ -139,11 +137,6 @@ public final class SensorPrivacyManager {
         public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
 
         /**
-         * Constant for SAFETY_HUB.
-         */
-        public static final int SAFETY_HUB = SensorPrivacyToggleSourceProto.SAFETY_HUB;
-
-        /**
          * Source for toggling sensors
          *
          * @hide
@@ -153,73 +146,10 @@ public final class SensorPrivacyManager {
                 SETTINGS,
                 DIALOG,
                 SHELL,
-                OTHER,
-                SAFETY_HUB
+                OTHER
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
-
-    }
-
-    /**
-     * Types of toggles which can exist for sensor privacy
-     * @hide
-     */
-    public static class ToggleTypes {
-        private ToggleTypes() {}
-
-        /**
-         * Constant for software toggle.
-         */
-        public static final int SOFTWARE = SensorPrivacyIndividualEnabledSensorProto.SOFTWARE;
-
-        /**
-         * Constant for hardware toggle.
-         */
-        public static final int HARDWARE = SensorPrivacyIndividualEnabledSensorProto.HARDWARE;
-
-        /**
-         * Types of toggles which can exist for sensor privacy
-         *
-         * @hide
-         */
-        @IntDef(value = {
-                SOFTWARE,
-                HARDWARE
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface ToggleType {}
-
-    }
-
-    /**
-     * Types of state which can exist for the sensor privacy toggle
-     * @hide
-     */
-    public static class StateTypes {
-        private StateTypes() {}
-
-        /**
-         * Constant indicating privacy is enabled.
-         */
-        public static final int ENABLED = SensorPrivacyIndividualEnabledSensorProto.ENABLED;
-
-        /**
-         * Constant indicating privacy is disabled.
-         */
-        public static final int DISABLED = SensorPrivacyIndividualEnabledSensorProto.DISABLED;
-
-        /**
-         * Types of state which can exist for a sensor privacy toggle
-         *
-         * @hide
-         */
-        @IntDef(value = {
-                ENABLED,
-                DISABLED
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface StateType {}
 
     }
 
@@ -479,31 +409,6 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setSensorPrivacy(@Sensors.Sensor int sensor,
-            boolean enable) {
-        setSensorPrivacy(resolveSourceFromCurrentContext(), sensor, enable,
-                UserHandle.USER_CURRENT);
-    }
-
-    private @Sources.Source int resolveSourceFromCurrentContext() {
-        String packageName = mContext.getOpPackageName();
-        if (Objects.equals(packageName,
-                mContext.getPackageManager().getPermissionControllerPackageName())) {
-            return Sources.SAFETY_HUB;
-        }
-        return Sources.OTHER;
-    }
-
-    /**
-     * Sets sensor privacy to the specified state for an individual sensor.
-     *
-     * @param sensor the sensor which to change the state for
-     * @param enable the state to which sensor privacy should be set.
-     *
-     * @hide
-     */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
@@ -540,6 +445,7 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
@@ -570,6 +476,7 @@ public final class SensorPrivacyManager {
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
+     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      *
      * @hide
@@ -583,6 +490,7 @@ public final class SensorPrivacyManager {
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
+     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      * @param userId the user's id
      *

@@ -56,7 +56,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 PRE_INSTALLED,
                 STAMP_TRUSTED,
                 STAMP_CERTIFICATE_HASH,
-                APP_CERTIFICATE_LINEAGE,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Key {}
@@ -122,13 +121,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
      * <p>Can only be used in {@link StringAtomicFormula}.
      */
     public static final int STAMP_CERTIFICATE_HASH = 7;
-
-    /**
-     * SHA-256 of a certificate in the signing lineage of the app.
-     *
-     * <p>Can only be used in {@link StringAtomicFormula}.
-     */
-    public static final int APP_CERTIFICATE_LINEAGE = 8;
 
     public static final int EQ = 0;
     public static final int GT = 1;
@@ -233,11 +225,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         @Override
-        public boolean isAppCertificateLineageFormula() {
-            return false;
-        }
-
-        @Override
         public boolean isInstallerFormula() {
             return false;
         }
@@ -327,8 +314,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
-                            || key == STAMP_CERTIFICATE_HASH
-                            || key == APP_CERTIFICATE_LINEAGE,
+                            || key == STAMP_CERTIFICATE_HASH,
                     "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = null;
             mIsHashedValue = null;
@@ -349,8 +335,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
-                            || key == STAMP_CERTIFICATE_HASH
-                            || key == APP_CERTIFICATE_LINEAGE,
+                            || key == STAMP_CERTIFICATE_HASH,
                     "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = value;
             mIsHashedValue = isHashed;
@@ -363,9 +348,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
          * <p>The value will be automatically hashed with SHA256 and the hex digest will be computed
          * when the key is PACKAGE_NAME or INSTALLER_NAME and the value is more than 32 characters.
          *
-         * <p>The APP_CERTIFICATES, INSTALLER_CERTIFICATES, STAMP_CERTIFICATE_HASH and
-         * APP_CERTIFICATE_LINEAGE are always delivered in hashed form. So the isHashedValue is set
-         * to true by default.
+         * <p>The APP_CERTIFICATES, INSTALLER_CERTIFICATES, and STAMP_CERTIFICATE_HASH are always
+         * delivered in hashed form. So the isHashedValue is set to true by default.
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value.
          */
@@ -376,15 +360,13 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
                             || key == INSTALLER_NAME
-                            || key == STAMP_CERTIFICATE_HASH
-                            || key == APP_CERTIFICATE_LINEAGE,
+                            || key == STAMP_CERTIFICATE_HASH,
                     "Key %s cannot be used with StringAtomicFormula", keyToString(key));
             mValue = hashValue(key, value);
             mIsHashedValue =
                     (key == APP_CERTIFICATE
                                     || key == INSTALLER_CERTIFICATE
-                                    || key == STAMP_CERTIFICATE_HASH
-                                    || key == APP_CERTIFICATE_LINEAGE)
+                                    || key == STAMP_CERTIFICATE_HASH)
                             || !mValue.equals(value);
         }
 
@@ -424,11 +406,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
         @Override
         public boolean isAppCertificateFormula() {
             return getKey() == APP_CERTIFICATE;
-        }
-
-        @Override
-        public boolean isAppCertificateLineageFormula() {
-            return getKey() == APP_CERTIFICATE_LINEAGE;
         }
 
         @Override
@@ -497,8 +474,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     return Collections.singletonList(appInstallMetadata.getInstallerName());
                 case AtomicFormula.STAMP_CERTIFICATE_HASH:
                     return Collections.singletonList(appInstallMetadata.getStampCertificateHash());
-                case AtomicFormula.APP_CERTIFICATE_LINEAGE:
-                    return appInstallMetadata.getAppCertificateLineage();
                 default:
                     throw new IllegalStateException(
                             "Unexpected key in StringAtomicFormula: " + key);
@@ -602,11 +577,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         @Override
-        public boolean isAppCertificateLineageFormula() {
-            return false;
-        }
-
-        @Override
         public boolean isInstallerFormula() {
             return false;
         }
@@ -690,8 +660,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 return "STAMP_TRUSTED";
             case STAMP_CERTIFICATE_HASH:
                 return "STAMP_CERTIFICATE_HASH";
-            case APP_CERTIFICATE_LINEAGE:
-                return "APP_CERTIFICATE_LINEAGE";
             default:
                 throw new IllegalArgumentException("Unknown key " + key);
         }
@@ -718,7 +686,6 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 || key == INSTALLER_CERTIFICATE
                 || key == PRE_INSTALLED
                 || key == STAMP_TRUSTED
-                || key == STAMP_CERTIFICATE_HASH
-                || key == APP_CERTIFICATE_LINEAGE;
+                || key == STAMP_CERTIFICATE_HASH;
     }
 }

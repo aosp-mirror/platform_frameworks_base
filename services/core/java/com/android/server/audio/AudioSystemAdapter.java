@@ -17,15 +17,12 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioMix;
 import android.os.SystemClock;
 import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -62,9 +59,6 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     private ConcurrentHashMap<AudioAttributes, ArrayList<AudioDeviceAttributes>>
             mDevicesForAttrCache;
     private int[] mMethodCacheHit;
-    private static final Object sRoutingListenerLock = new Object();
-    @GuardedBy("sRoutingListenerLock")
-    private static @Nullable OnRoutingUpdatedListener sRoutingListener;
 
     /**
      * should be false except when trying to debug caching errors. When true, the value retrieved
@@ -82,23 +76,6 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
             Log.d(TAG, "---- onRoutingUpdated (from native) ----------");
         }
         invalidateRoutingCache();
-        final OnRoutingUpdatedListener listener;
-        synchronized (sRoutingListenerLock) {
-            listener = sRoutingListener;
-        }
-        if (listener != null) {
-            listener.onRoutingUpdatedFromNative();
-        }
-    }
-
-    interface OnRoutingUpdatedListener {
-        void onRoutingUpdatedFromNative();
-    }
-
-    static void setRoutingListener(@Nullable OnRoutingUpdatedListener listener) {
-        synchronized (sRoutingListenerLock) {
-            sRoutingListener = listener;
-        }
     }
 
     /**
@@ -258,16 +235,19 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     }
 
     /**
-     * Same as {@link AudioSystem#setDeviceConnectionState(AudioDeviceAttributes, int, int)}
-     * @param attributes
+     * Same as {@link AudioSystem#setDeviceConnectionState(int, int, String, String, int)}
+     * @param device
      * @param state
+     * @param deviceAddress
+     * @param deviceName
      * @param codecFormat
      * @return
      */
-    public int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
-            int codecFormat) {
+    public int setDeviceConnectionState(int device, int state, String deviceAddress,
+                                        String deviceName, int codecFormat) {
         invalidateRoutingCache();
-        return AudioSystem.setDeviceConnectionState(attributes, state, codecFormat);
+        return AudioSystem.setDeviceConnectionState(device, state, deviceAddress, deviceName,
+                codecFormat);
     }
 
     /**
@@ -384,6 +364,14 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
      */
     public int muteMicrophone(boolean on) {
         return AudioSystem.muteMicrophone(on);
+    }
+
+    /**
+     * Same as {@link AudioSystem#setHotwordDetectionServiceUid(int)}
+     * Communicate UID of current HotwordDetectionService to audio policy service.
+     */
+    public int setHotwordDetectionServiceUid(int uid) {
+        return AudioSystem.setHotwordDetectionServiceUid(uid);
     }
 
     /**
@@ -513,28 +501,11 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
      * @param pw
      */
     public void dump(PrintWriter pw) {
-        pw.println("\nAudioSystemAdapter:");
-        pw.println(" mDevicesForStreamCache:");
-        if (mDevicesForStreamCache != null) {
-            for (Integer stream : mDevicesForStreamCache.keySet()) {
-                pw.println("\t stream:" + stream + " device:"
-                        + AudioSystem.getOutputDeviceName(mDevicesForStreamCache.get(stream)));
-            }
-        }
-        pw.println(" mDevicesForAttrCache:");
-        if (mDevicesForAttrCache != null) {
-            for (AudioAttributes attr : mDevicesForAttrCache.keySet()) {
-                pw.println("\t" + attr);
-                for (AudioDeviceAttributes devAttr : mDevicesForAttrCache.get(attr)) {
-                    pw.println("\t\t" + devAttr);
-                }
-            }
-        }
-
         if (!ENABLE_GETDEVICES_STATS) {
-            // only stats in the rest of this dump
+            // only stats in this dump
             return;
         }
+        pw.println("\nAudioSystemAdapter:");
         for (int i = 0; i < NB_MEASUREMENTS; i++) {
             pw.println(mMethodNames[i]
                     + ": counter=" + mMethodCallCounter[i]

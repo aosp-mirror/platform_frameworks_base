@@ -16,12 +16,10 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.View.OVER_SCROLL_ALWAYS;
 import static android.view.View.OVER_SCROLL_NEVER;
-import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -40,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.testing.AndroidTestingRunner;
@@ -100,15 +97,14 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     private AccessibilityFloatingMenuView mMenuView;
     private RecyclerView mListView = new RecyclerView(mContext);
 
+    private int mScreenHeight;
     private int mMenuWindowHeight;
     private int mMenuHalfWidth;
     private int mMenuHalfHeight;
-    private int mDisplayHalfWidth;
-    private int mDisplayHalfHeight;
+    private int mScreenHalfWidth;
+    private int mScreenHalfHeight;
     private int mMaxWindowX;
     private int mMaxWindowY;
-    private final int mDisplayWindowWidth = 1080;
-    private final int mDisplayWindowHeight = 2340;
 
     @Before
     public void initMenuView() {
@@ -116,10 +112,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
-        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
-        when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, mDisplayWindowWidth,
-                mDisplayWindowHeight));
-        when(mWindowMetrics.getWindowInsets()).thenReturn(fakeDisplayInsets());
+
         mMenuView = spy(
                 new AccessibilityFloatingMenuView(mContext, mPlaceholderPosition, mListView));
     }
@@ -135,16 +128,15 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_width_height);
         final int menuWidth = padding * 2 + iconWidthHeight;
         final int menuHeight = (padding + iconWidthHeight) * mTargets.size() + padding;
+        final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+        mScreenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
         mMenuHalfWidth = menuWidth / 2;
         mMenuHalfHeight = menuHeight / 2;
-        mDisplayHalfWidth = mDisplayWindowWidth / 2;
-        mDisplayHalfHeight = mDisplayWindowHeight / 2;
-        int marginStartEnd =
-                mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT
-                        ? margin : 0;
-        mMaxWindowX = mDisplayWindowWidth - marginStartEnd - menuWidth;
+        mScreenHalfWidth = screenWidth / 2;
+        mScreenHalfHeight = mScreenHeight / 2;
+        mMaxWindowX = screenWidth - margin - menuWidth;
         mMenuWindowHeight = menuHeight + margin * 2;
-        mMaxWindowY = mDisplayWindowHeight - mMenuWindowHeight;
+        mMaxWindowY = mScreenHeight - mMenuWindowHeight;
     }
 
     @Test
@@ -283,15 +275,15 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final MotionEvent moveEvent =
                 mMotionEventHelper.obtainMotionEvent(2, 3,
                         MotionEvent.ACTION_MOVE,
-                        /* displayCenterX */mDisplayHalfWidth
-                                - /* offsetXToDisplayLeftHalfRegion */ 10,
-                        /* displayCenterY */ mDisplayHalfHeight);
+                        /* screenCenterX */mScreenHalfWidth
+                                - /* offsetXToScreenLeftHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
         final MotionEvent upEvent =
                 mMotionEventHelper.obtainMotionEvent(4, 5,
                         MotionEvent.ACTION_UP,
-                        /* displayCenterX */ mDisplayHalfWidth
-                                - /* offsetXToDisplayLeftHalfRegion */ 10,
-                        /* displayCenterY */ mDisplayHalfHeight);
+                        /* screenCenterX */ mScreenHalfWidth
+                                - /* offsetXToScreenLeftHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
 
         listView.dispatchTouchEvent(downEvent);
         listView.dispatchTouchEvent(moveEvent);
@@ -319,15 +311,15 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
         final MotionEvent moveEvent =
                 mMotionEventHelper.obtainMotionEvent(2, 3,
                         MotionEvent.ACTION_MOVE,
-                        /* displayCenterX */mDisplayHalfWidth
-                                + /* offsetXToDisplayRightHalfRegion */ 10,
-                        /* displayCenterY */ mDisplayHalfHeight);
+                        /* screenCenterX */mScreenHalfWidth
+                                + /* offsetXToScreenRightHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
         final MotionEvent upEvent =
                 mMotionEventHelper.obtainMotionEvent(4, 5,
                         MotionEvent.ACTION_UP,
-                        /* displayCenterX */ mDisplayHalfWidth
-                                + /* offsetXToDisplayRightHalfRegion */ 10,
-                        /* displayCenterY */ mDisplayHalfHeight);
+                        /* screenCenterX */ mScreenHalfWidth
+                                + /* offsetXToScreenRightHalfRegion */ 10,
+                        /* screenCenterY */ mScreenHalfHeight);
 
         listView.dispatchTouchEvent(downEvent);
         listView.dispatchTouchEvent(moveEvent);
@@ -336,12 +328,12 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
 
         assertThat((float) menuView.mCurrentLayoutParams.x).isWithin(1.0f).of(mMaxWindowX);
         assertThat((float) menuView.mCurrentLayoutParams.y).isWithin(1.0f).of(
-                /* newWindowY = displayCenterY - offsetY */ mDisplayHalfHeight - mMenuHalfHeight);
+                /* newWindowY = screenCenterY - offsetY */ mScreenHalfHeight - mMenuHalfHeight);
     }
 
 
     @Test
-    public void tapOnAndDragMenuToDisplaySide_transformShapeHalfOval() {
+    public void tapOnAndDragMenuToScreenSide_transformShapeHalfOval() {
         final Position alignRightPosition = new Position(1.0f, 0.8f);
         final RecyclerView listView = new RecyclerView(mContext);
         final AccessibilityFloatingMenuView menuView = new AccessibilityFloatingMenuView(mContext,
@@ -359,13 +351,13 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
                 mMotionEventHelper.obtainMotionEvent(2, 3,
                         MotionEvent.ACTION_MOVE,
                         /* downX */(currentWindowX + mMenuHalfWidth)
-                                + /* offsetXToDisplayRightSide */ mMenuHalfWidth,
+                                + /* offsetXToScreenRightSide */ mMenuHalfWidth,
                         /* downY */ (currentWindowY +  mMenuHalfHeight));
         final MotionEvent upEvent =
                 mMotionEventHelper.obtainMotionEvent(4, 5,
                         MotionEvent.ACTION_UP,
                         /* downX */(currentWindowX + mMenuHalfWidth)
-                                + /* offsetXToDisplayRightSide */ mMenuHalfWidth,
+                                + /* offsetXToScreenRightSide */ mMenuHalfWidth,
                         /* downY */ (currentWindowY +  mMenuHalfHeight));
 
         listView.dispatchTouchEvent(downEvent);
@@ -427,7 +419,7 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void showMenuAndIme_withHigherIme_alignDisplayTopEdge() {
+    public void showMenuAndIme_withHigherIme_alignScreenTopEdge() {
         final int offset = 99999;
 
         setupBasicMenuView(mMenuView);
@@ -479,21 +471,10 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     private WindowInsets fakeImeInsetWith(AccessibilityFloatingMenuView menuView, int offset) {
         // Ensure the keyboard has overlapped on the menu view.
         final int fakeImeHeight =
-                mDisplayWindowHeight - (menuView.mCurrentLayoutParams.y + mMenuWindowHeight)
-                        + offset;
+                mScreenHeight - (menuView.mCurrentLayoutParams.y + mMenuWindowHeight) + offset;
         return new WindowInsets.Builder()
-                .setVisible(ime(), true)
-                .setInsets(ime(), Insets.of(0, 0, 0, fakeImeHeight))
-                .build();
-    }
-
-    private WindowInsets fakeDisplayInsets() {
-        final int fakeStatusBarHeight = 75;
-        final int fakeNavigationBarHeight = 125;
-        return new WindowInsets.Builder()
-                .setVisible(systemBars() | displayCutout(), true)
-                .setInsets(systemBars() | displayCutout(),
-                        Insets.of(0, fakeStatusBarHeight, 0, fakeNavigationBarHeight))
+                .setVisible(ime() | navigationBars(), true)
+                .setInsets(ime() | navigationBars(), Insets.of(0, 0, 0, fakeImeHeight))
                 .build();
     }
 

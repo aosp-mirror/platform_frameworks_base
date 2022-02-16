@@ -24,12 +24,10 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.media.filterfw.FrameImage2D;
 import androidx.media.filterfw.FrameValue;
 import androidx.media.filterfw.RenderTarget;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @TargetApi(16)
@@ -278,13 +276,12 @@ public class MediaDecoder implements
     }
 
     @TargetApi(17)
-    private void retrieveDefaultRotation() throws IOException {
+    private void retrieveDefaultRotation() {
         MediaMetadataRetriever metadataRetriever = new MediaMetadataRetriever();
         metadataRetriever.setDataSource(mContext, mUri);
         String rotationString = metadataRetriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
         mDefaultRotation = rotationString == null ? 0 : Integer.parseInt(rotationString);
-        metadataRetriever.release();
     }
 
     private void onStop(boolean notifyListener) {

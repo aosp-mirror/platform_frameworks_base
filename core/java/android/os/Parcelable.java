@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 
@@ -45,13 +44,16 @@ import java.lang.annotation.RetentionPolicy;
  *         out.writeInt(mData)
  *     }
  *
- *     companion object CREATOR: Parcelable.Creator&lt;MyParcelable?&gt; {
- *         override fun createFromParcel(`in`: Parcel): MyParcelable? {
- *             return MyParcelable(`in`)
- *         }
+ *     companion object {
+ *         val CREATOR: Parcelable.Creator&lt;MyParcelable?&gt;
+ *                 = object : Parcelable.Creator&lt;MyParcelable?&gt; {
+ *             override fun createFromParcel(`in`: Parcel): MyParcelable? {
+ *                 return MyParcelable(`in`)
+ *             }
  *
- *         override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
- *             return arrayOfNulls(size)
+ *             override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
+ *                 return arrayOfNulls(size)
+ *             }
  *         }
  *     }
  * }
@@ -200,7 +202,7 @@ public interface Parcelable {
      * @param flags Additional flags about how the object should be written.
      * May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
      */
-    public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags);
+    public void writeToParcel(Parcel dest, @WriteFlags int flags);
 
     /**
      * Interface that must be implemented and provided as a public CREATOR

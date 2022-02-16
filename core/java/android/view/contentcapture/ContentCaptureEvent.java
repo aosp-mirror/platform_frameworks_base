@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Insets;
-import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Selection;
@@ -34,12 +33,13 @@ import android.util.Log;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.BaseInputConnection;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /** @hide */
 @SystemApi
@@ -122,12 +122,6 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     public static final int TYPE_VIEW_INSETS_CHANGED = 9;
 
-    /**
-     * Called before {@link #TYPE_VIEW_TREE_APPEARING}, or after the size of the window containing
-     * the views changed.
-     */
-    public static final int TYPE_WINDOW_BOUNDS_CHANGED = 10;
-
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_VIEW_APPEARED,
@@ -138,8 +132,7 @@ public final class ContentCaptureEvent implements Parcelable {
             TYPE_CONTEXT_UPDATED,
             TYPE_SESSION_PAUSED,
             TYPE_SESSION_RESUMED,
-            TYPE_VIEW_INSETS_CHANGED,
-            TYPE_WINDOW_BOUNDS_CHANGED,
+            TYPE_VIEW_INSETS_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
@@ -157,7 +150,6 @@ public final class ContentCaptureEvent implements Parcelable {
     private int mParentSessionId = NO_SESSION_ID;
     private @Nullable ContentCaptureContext mClientContext;
     private @Nullable Insets mInsets;
-    private @Nullable Rect mBounds;
 
     private int mComposingStart = MAX_INVALID_VALUE;
     private int mComposingEnd = MAX_INVALID_VALUE;
@@ -181,13 +173,13 @@ public final class ContentCaptureEvent implements Parcelable {
 
     /** @hide */
     public ContentCaptureEvent setAutofillId(@NonNull AutofillId id) {
-        mId = Objects.requireNonNull(id);
+        mId = Preconditions.checkNotNull(id);
         return this;
     }
 
     /** @hide */
     public ContentCaptureEvent setAutofillIds(@NonNull ArrayList<AutofillId> ids) {
-        mIds = Objects.requireNonNull(ids);
+        mIds = Preconditions.checkNotNull(ids);
         return this;
     }
 
@@ -197,7 +189,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * @hide
      */
     public ContentCaptureEvent addAutofillId(@NonNull AutofillId id) {
-        Objects.requireNonNull(id);
+        Preconditions.checkNotNull(id);
         if (mIds == null) {
             mIds = new ArrayList<>();
             if (mId == null) {
@@ -261,7 +253,7 @@ public final class ContentCaptureEvent implements Parcelable {
     /** @hide */
     @NonNull
     public ContentCaptureEvent setViewNode(@NonNull ViewNode node) {
-        mNode = Objects.requireNonNull(node);
+        mNode = Preconditions.checkNotNull(node);
         return this;
     }
 
@@ -354,13 +346,6 @@ public final class ContentCaptureEvent implements Parcelable {
         return this;
     }
 
-    /** @hide */
-    @NonNull
-    public ContentCaptureEvent setBounds(@NonNull Rect bounds) {
-        mBounds = bounds;
-        return this;
-    }
-
     /**
      * Gets the type of the event.
      *
@@ -434,23 +419,13 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     /**
-     * Gets the {@link Rect} bounds of the window associated with the event. Valid bounds will only
-     * be returned if the type of the event is {@link #TYPE_WINDOW_BOUNDS_CHANGED}, otherwise they
-     * will be null.
-     */
-    @Nullable
-    public Rect getBounds() {
-        return mBounds;
-    }
-
-    /**
      * Merges event of the same type, either {@link #TYPE_VIEW_TEXT_CHANGED}
      * or {@link #TYPE_VIEW_DISAPPEARED}.
      *
      * @hide
      */
     public void mergeEvent(@NonNull ContentCaptureEvent event) {
-        Objects.requireNonNull(event);
+        Preconditions.checkNotNull(event);
         final int eventType = event.getType();
         if (mType != eventType) {
             Log.e(TAG, "mergeEvent(" + getTypeAsString(eventType) + ") cannot be merged "
@@ -514,9 +489,6 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mInsets != null) {
             pw.print(", insets="); pw.println(mInsets);
         }
-        if (mBounds != null) {
-            pw.print(", bounds="); pw.println(mBounds);
-        }
         if (mComposingStart > MAX_INVALID_VALUE) {
             pw.print(", composing("); pw.print(mComposingStart);
             pw.print(", "); pw.print(mComposingEnd); pw.print(")");
@@ -561,9 +533,6 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mInsets != null) {
             string.append(", insets=").append(mInsets);
         }
-        if (mBounds != null) {
-            string.append(", bounds=").append(mBounds);
-        }
         if (mComposingStart > MAX_INVALID_VALUE) {
             string.append(", composing=[")
                     .append(mComposingStart).append(",").append(mComposingEnd).append("]");
@@ -599,9 +568,6 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mType == TYPE_VIEW_INSETS_CHANGED) {
             parcel.writeParcelable(mInsets, flags);
         }
-        if (mType == TYPE_WINDOW_BOUNDS_CHANGED) {
-            parcel.writeParcelable(mBounds, flags);
-        }
         if (mType == TYPE_VIEW_TEXT_CHANGED) {
             parcel.writeInt(mComposingStart);
             parcel.writeInt(mComposingEnd);
@@ -620,7 +586,7 @@ public final class ContentCaptureEvent implements Parcelable {
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
             final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, type, eventTime);
-            final AutofillId id = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
+            final AutofillId id = parcel.readParcelable(null);
             if (id != null) {
                 event.setAutofillId(id);
             }
@@ -637,13 +603,10 @@ public final class ContentCaptureEvent implements Parcelable {
                 event.setParentSessionId(parcel.readInt());
             }
             if (type == TYPE_SESSION_STARTED || type == TYPE_CONTEXT_UPDATED) {
-                event.setClientContext(parcel.readParcelable(null, android.view.contentcapture.ContentCaptureContext.class));
+                event.setClientContext(parcel.readParcelable(null));
             }
             if (type == TYPE_VIEW_INSETS_CHANGED) {
-                event.setInsets(parcel.readParcelable(null, android.graphics.Insets.class));
-            }
-            if (type == TYPE_WINDOW_BOUNDS_CHANGED) {
-                event.setBounds(parcel.readParcelable(null, android.graphics.Rect.class));
+                event.setInsets(parcel.readParcelable(null));
             }
             if (type == TYPE_VIEW_TEXT_CHANGED) {
                 event.setComposingIndex(parcel.readInt(), parcel.readInt());
@@ -686,8 +649,6 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "CONTEXT_UPDATED";
             case TYPE_VIEW_INSETS_CHANGED:
                 return "VIEW_INSETS_CHANGED";
-            case TYPE_WINDOW_BOUNDS_CHANGED:
-                return "TYPE_WINDOW_BOUNDS_CHANGED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }

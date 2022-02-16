@@ -61,7 +61,6 @@ public class RestrictedSwitchPreference extends SwitchPreference {
 
             final TypedValue restrictedSwitchSummary = attributes.peekValue(
                     R.styleable.RestrictedSwitchPreference_restrictedSwitchSummary);
-            attributes.recycle();
             if (restrictedSwitchSummary != null
                     && restrictedSwitchSummary.type == TypedValue.TYPE_STRING) {
                 if (restrictedSwitchSummary.resourceId != 0) {

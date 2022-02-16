@@ -143,10 +143,10 @@ public class AppDataRollbackHelper {
             int rollbackId, int appId, String seInfo, int flags) {
         if (packageRollbackInfo.isApex()) {
             switch (packageRollbackInfo.getRollbackDataPolicy()) {
-                case PackageManager.ROLLBACK_DATA_POLICY_WIPE:
+                case PackageManager.RollbackDataPolicy.WIPE:
                     // TODO: Implement WIPE for apex CE data
                     break;
-                case PackageManager.ROLLBACK_DATA_POLICY_RESTORE:
+                case PackageManager.RollbackDataPolicy.RESTORE:
                     // For APEX, only restore of CE may be done here.
                     if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
                         mApexManager.restoreCeData(
@@ -160,11 +160,11 @@ public class AppDataRollbackHelper {
             // APK
             try {
                 switch (packageRollbackInfo.getRollbackDataPolicy()) {
-                    case PackageManager.ROLLBACK_DATA_POLICY_WIPE:
+                    case PackageManager.RollbackDataPolicy.WIPE:
                         mInstaller.clearAppData(null, packageRollbackInfo.getPackageName(),
                                 userId, flags, 0);
                         break;
-                    case PackageManager.ROLLBACK_DATA_POLICY_RESTORE:
+                    case PackageManager.RollbackDataPolicy.RESTORE:
 
                         mInstaller.restoreAppDataSnapshot(packageRollbackInfo.getPackageName(),
                                 appId, seInfo, userId, rollbackId, flags);

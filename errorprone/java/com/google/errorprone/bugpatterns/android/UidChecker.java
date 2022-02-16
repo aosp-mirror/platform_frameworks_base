@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.android;
 
-import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 
 import com.google.auto.service.AutoService;
@@ -47,7 +46,6 @@ import java.util.regex.Pattern;
 @BugPattern(
     name = "AndroidFrameworkUid",
     summary = "Verifies that PID, UID and user ID arguments aren't crossed",
-    linkType = NONE,
     severity = WARNING)
 public final class UidChecker extends BugChecker implements MethodInvocationTreeMatcher,
         NewClassTreeMatcher {

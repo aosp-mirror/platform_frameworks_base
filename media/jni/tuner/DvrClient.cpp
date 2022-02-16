@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,48 @@
  * limitations under the License.
  */
 
-//#define LOG_NDEBUG 0
 #define LOG_TAG "DvrClient"
 
-#include "DvrClient.h"
-
-#include <aidl/android/hardware/tv/tuner/DemuxQueueNotifyBits.h>
 #include <android-base/logging.h>
-#include <inttypes.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include <fmq/ConvertMQDescriptors.h>
 #include <utils/Log.h>
 
 #include "ClientHelper.h"
+#include "DvrClient.h"
 
-using ::aidl::android::hardware::tv::tuner::DemuxQueueNotifyBits;
+using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
+using ::android::hardware::tv::tuner::V1_0::Result;
 
 namespace android {
+
 /////////////// DvrClient ///////////////////////
+
 DvrClient::DvrClient(shared_ptr<ITunerDvr> tunerDvr) {
     mTunerDvr = tunerDvr;
     mFd = -1;
-    mDvrMQ = nullptr;
-    mDvrMQEventFlag = nullptr;
+    mDvrMQ = NULL;
+    mDvrMQEventFlag = NULL;
 }
 
 DvrClient::~DvrClient() {
-    mTunerDvr = nullptr;
+    mTunerDvr = NULL;
+    mDvr = NULL;
     mFd = -1;
-    mDvrMQ = nullptr;
-    mDvrMQEventFlag = nullptr;
+    mDvrMQ = NULL;
+    mDvrMQEventFlag = NULL;
 }
 
-void DvrClient::setFd(int32_t fd) {
+// TODO: remove after migration to Tuner Service is done.
+void DvrClient::setHidlDvr(sp<IDvr> dvr) {
+    mDvr = dvr;
+}
+
+void DvrClient::setFd(int fd) {
     mFd = fd;
 }
 
-int64_t DvrClient::readFromFile(int64_t size) {
-    if (mDvrMQ == nullptr || mDvrMQEventFlag == nullptr) {
+long DvrClient::readFromFile(long size) {
+    if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to readFromFile. DVR mq is not configured");
         return -1;
     }
@@ -60,16 +64,16 @@ int64_t DvrClient::readFromFile(int64_t size) {
         return -1;
     }
 
-    int64_t available = mDvrMQ->availableToWrite();
-    int64_t write = min(size, available);
+    long available = mDvrMQ->availableToWrite();
+    long write = min(size, available);
 
     AidlMQ::MemTransaction tx;
-    int64_t ret = 0;
+    long ret = 0;
     if (mDvrMQ->beginWrite(write, &tx)) {
         auto first = tx.getFirstRegion();
         auto data = first.getAddress();
-        int64_t length = first.getLength();
-        int64_t firstToWrite = min(length, write);
+        long length = first.getLength();
+        long firstToWrite = min(length, write);
         ret = read(mFd, data, firstToWrite);
 
         if (ret < 0) {
@@ -77,20 +81,17 @@ int64_t DvrClient::readFromFile(int64_t size) {
             return -1;
         }
         if (ret < firstToWrite) {
-            ALOGW("file to MQ, first region: %" PRIu64 " bytes to write, but %" PRIu64
-                  " bytes written",
-                  firstToWrite, ret);
+            ALOGW("file to MQ, first region: %ld bytes to write, but %ld bytes written",
+                    firstToWrite, ret);
         } else if (firstToWrite < write) {
-            ALOGV("write second region: %" PRIu64 " bytes written, %" PRIu64 " bytes in total", ret,
-                  write);
+            ALOGD("write second region: %ld bytes written, %ld bytes in total", ret, write);
             auto second = tx.getSecondRegion();
             data = second.getAddress();
             length = second.getLength();
-            int64_t secondToWrite = std::min(length, write - firstToWrite);
+            int secondToWrite = std::min(length, write - firstToWrite);
             ret += read(mFd, data, secondToWrite);
         }
-        ALOGV("file to MQ: %" PRIu64 " bytes need to be written, %" PRIu64 " bytes written", write,
-              ret);
+        ALOGD("file to MQ: %ld bytes need to be written, %ld bytes written", write, ret);
         if (!mDvrMQ->commitWrite(ret)) {
             ALOGE("Error: failed to commit write!");
             return -1;
@@ -105,8 +106,8 @@ int64_t DvrClient::readFromFile(int64_t size) {
     return ret;
 }
 
-int64_t DvrClient::readFromBuffer(int8_t* buffer, int64_t size) {
-    if (mDvrMQ == nullptr || mDvrMQEventFlag == nullptr) {
+long DvrClient::readFromBuffer(int8_t* buffer, long size) {
+    if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to readFromBuffer. DVR mq is not configured");
         return -1;
     }
@@ -115,7 +116,7 @@ int64_t DvrClient::readFromBuffer(int8_t* buffer, int64_t size) {
         return -1;
     }
 
-    int64_t available = mDvrMQ->availableToWrite();
+    long available = mDvrMQ->availableToWrite();
     size = min(size, available);
 
     if (mDvrMQ->write(buffer, size)) {
@@ -127,8 +128,8 @@ int64_t DvrClient::readFromBuffer(int8_t* buffer, int64_t size) {
     return size;
 }
 
-int64_t DvrClient::writeToFile(int64_t size) {
-    if (mDvrMQ == nullptr || mDvrMQEventFlag == nullptr) {
+long DvrClient::writeToFile(long size) {
+    if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to writeToFile. DVR mq is not configured");
         return -1;
     }
@@ -137,16 +138,16 @@ int64_t DvrClient::writeToFile(int64_t size) {
         return -1;
     }
 
-    int64_t available = mDvrMQ->availableToRead();
-    int64_t toRead = min(size, available);
+    long available = mDvrMQ->availableToRead();
+    long toRead = min(size, available);
 
-    int64_t ret = 0;
+    long ret = 0;
     AidlMQ::MemTransaction tx;
     if (mDvrMQ->beginRead(toRead, &tx)) {
         auto first = tx.getFirstRegion();
         auto data = first.getAddress();
-        int64_t length = first.getLength();
-        int64_t firstToRead = std::min(length, toRead);
+        long length = first.getLength();
+        long firstToRead = std::min(length, toRead);
         ret = write(mFd, data, firstToRead);
 
         if (ret < 0) {
@@ -154,18 +155,16 @@ int64_t DvrClient::writeToFile(int64_t size) {
             return -1;
         }
         if (ret < firstToRead) {
-            ALOGW("MQ to file: %" PRIu64 " bytes read, but %" PRIu64 " bytes written", firstToRead,
-                  ret);
+            ALOGW("MQ to file: %ld bytes read, but %ld bytes written", firstToRead, ret);
         } else if (firstToRead < toRead) {
-            ALOGV("read second region: %" PRIu64 " bytes read, %" PRIu64 " bytes in total", ret,
-                  toRead);
+            ALOGD("read second region: %ld bytes read, %ld bytes in total", ret, toRead);
             auto second = tx.getSecondRegion();
             data = second.getAddress();
             length = second.getLength();
-            int32_t secondToRead = toRead - firstToRead;
+            int secondToRead = toRead - firstToRead;
             ret += write(mFd, data, secondToRead);
         }
-        ALOGV("MQ to file: %" PRIu64 " bytes to be read, %" PRIu64 " bytes written", toRead, ret);
+        ALOGD("MQ to file: %ld bytes to be read, %ld bytes written", toRead, ret);
         if (!mDvrMQ->commitRead(ret)) {
             ALOGE("Error: failed to commit read!");
             return 0;
@@ -180,8 +179,8 @@ int64_t DvrClient::writeToFile(int64_t size) {
     return ret;
 }
 
-int64_t DvrClient::writeToBuffer(int8_t* buffer, int64_t size) {
-    if (mDvrMQ == nullptr || mDvrMQEventFlag == nullptr) {
+long DvrClient::writeToBuffer(int8_t* buffer, long size) {
+    if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to writetoBuffer. DVR mq is not configured");
         return -1;
     }
@@ -190,7 +189,7 @@ int64_t DvrClient::writeToBuffer(int8_t* buffer, int64_t size) {
         return -1;
     }
 
-    int64_t available = mDvrMQ->availableToRead();
+    long available = mDvrMQ->availableToRead();
     size = min(size, available);
 
     if (mDvrMQ->read(buffer, size)) {
@@ -202,17 +201,10 @@ int64_t DvrClient::writeToBuffer(int8_t* buffer, int64_t size) {
     return size;
 }
 
-int64_t DvrClient::seekFile(int64_t pos) {
-    if (mFd < 0) {
-        ALOGE("Failed to seekFile. File is not configured");
-        return -1;
-    }
-    return lseek64(mFd, pos, SEEK_SET);
-}
-
 Result DvrClient::configure(DvrSettings settings) {
-    if (mTunerDvr != nullptr) {
-        Status s = mTunerDvr->configure(settings);
+    if (mTunerDvr != NULL) {
+        TunerDvrSettings dvrSettings = getAidlDvrSettingsFromHidl(settings);
+        Status s = mTunerDvr->configure(dvrSettings);
         Result res = ClientHelper::getServiceSpecificErrorCode(s);
         if (res != Result::SUCCESS) {
             return res;
@@ -229,99 +221,196 @@ Result DvrClient::configure(DvrSettings settings) {
         return res;
     }
 
+    if (mDvr != NULL) {
+        Result res = mDvr->configure(settings);
+        if (res == Result::SUCCESS) {
+            MQDescriptorSync<uint8_t> dvrMQDesc;
+            res = getQueueDesc(dvrMQDesc);
+            if (res == Result::SUCCESS) {
+                AidlMQDesc aidlMQDesc;
+                unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
+                        dvrMQDesc,  &aidlMQDesc);
+                mDvrMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
+                EventFlag::createEventFlag(mDvrMQ->getEventFlagWord(), &mDvrMQEventFlag);
+            }
+        }
+        return res;
+    }
+
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::attachFilter(sp<FilterClient> filterClient) {
-    if (filterClient == nullptr) {
-        return Result::INVALID_ARGUMENT;
-    }
-
-    if (mTunerDvr != nullptr) {
+    if (mTunerDvr != NULL) {
         Status s = mTunerDvr->attachFilter(filterClient->getAidlFilter());
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mDvr != NULL) {
+        sp<IFilter> hidlFilter = filterClient->getHalFilter();
+        if (hidlFilter == NULL) {
+            return Result::INVALID_ARGUMENT;
+        }
+        return mDvr->attachFilter(hidlFilter);
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::detachFilter(sp<FilterClient> filterClient) {
-    if (filterClient == nullptr) {
-        return Result::INVALID_ARGUMENT;
-    }
-
-    if (mTunerDvr != nullptr) {
+    if (mTunerDvr != NULL) {
         Status s = mTunerDvr->detachFilter(filterClient->getAidlFilter());
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mDvr != NULL) {
+        sp<IFilter> hidlFilter = filterClient->getHalFilter();
+        if (hidlFilter == NULL) {
+            return Result::INVALID_ARGUMENT;
+        }
+        return mDvr->detachFilter(hidlFilter);
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::start() {
-    if (mTunerDvr != nullptr) {
+    if (mTunerDvr != NULL) {
         Status s = mTunerDvr->start();
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mDvr != NULL) {
+        return mDvr->start();
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::stop() {
-    if (mTunerDvr != nullptr) {
+    if (mTunerDvr != NULL) {
         Status s = mTunerDvr->stop();
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mDvr != NULL) {
+        return mDvr->stop();
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::flush() {
-    if (mTunerDvr != nullptr) {
+    if (mTunerDvr != NULL) {
         Status s = mTunerDvr->flush();
         return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    if (mDvr != NULL) {
+        return mDvr->flush();
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DvrClient::close() {
-    if (mDvrMQEventFlag != nullptr) {
+    if (mDvrMQEventFlag != NULL) {
         EventFlag::deleteEventFlag(&mDvrMQEventFlag);
-        mDvrMQEventFlag = nullptr;
     }
-    if (mDvrMQ != nullptr) {
-        delete mDvrMQ;
-        mDvrMQ = nullptr;
+    mDvrMQ = NULL;
+
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->close();
+        mTunerDvr = NULL;
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
-    if (mTunerDvr != nullptr) {
-        Status s = mTunerDvr->close();
-        mTunerDvr = nullptr;
-        return ClientHelper::getServiceSpecificErrorCode(s);
+    if (mDvr != NULL) {
+        Result res = mDvr->close();
+        mDvr = NULL;
+        return res;
     }
 
     return Result::INVALID_STATE;
 }
 
+/////////////// IDvrCallback ///////////////////////
+
+HidlDvrCallback::HidlDvrCallback(sp<DvrClientCallback> dvrClientCallback)
+        : mDvrClientCallback(dvrClientCallback) {}
+
+Return<void> HidlDvrCallback::onRecordStatus(const RecordStatus status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onRecordStatus(status);
+    }
+    return Void();
+}
+
+Return<void> HidlDvrCallback::onPlaybackStatus(const PlaybackStatus status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onPlaybackStatus(status);
+    }
+    return Void();
+}
+
 /////////////// TunerDvrCallback ///////////////////////
+
 TunerDvrCallback::TunerDvrCallback(sp<DvrClientCallback> dvrClientCallback)
         : mDvrClientCallback(dvrClientCallback) {}
 
-Status TunerDvrCallback::onRecordStatus(RecordStatus status) {
-    if (mDvrClientCallback != nullptr) {
-        mDvrClientCallback->onRecordStatus(status);
+Status TunerDvrCallback::onRecordStatus(int status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onRecordStatus(static_cast<RecordStatus>(status));
         return Status::ok();
     }
     return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
 }
 
-Status TunerDvrCallback::onPlaybackStatus(PlaybackStatus status) {
-    if (mDvrClientCallback != nullptr) {
-        mDvrClientCallback->onPlaybackStatus(status);
+Status TunerDvrCallback::onPlaybackStatus(int status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onPlaybackStatus(static_cast<PlaybackStatus>(status));
         return Status::ok();
     }
     return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
 }
 
+/////////////// DvrClient Helper Methods ///////////////////////
+
+Result DvrClient::getQueueDesc(MQDesc& dvrMQDesc) {
+    if (mDvr != NULL) {
+        Result res = Result::UNKNOWN_ERROR;
+        mDvr->getQueueDesc([&](Result r, const MQDesc& desc) {
+            dvrMQDesc = desc;
+            res = r;
+        });
+        return res;
+    }
+
+    return Result::INVALID_STATE;
+}
+
+TunerDvrSettings DvrClient::getAidlDvrSettingsFromHidl(DvrSettings settings) {
+    TunerDvrSettings s;
+    switch (settings.getDiscriminator()) {
+        case DvrSettings::hidl_discriminator::record: {
+            s.statusMask = static_cast<int>(settings.record().statusMask);
+            s.lowThreshold = static_cast<int>(settings.record().lowThreshold);
+            s.highThreshold = static_cast<int>(settings.record().highThreshold);
+            s.dataFormat = static_cast<int>(settings.record().dataFormat);
+            s.packetSize = static_cast<int>(settings.record().packetSize);
+            return s;
+        }
+        case DvrSettings::hidl_discriminator::playback: {
+            s.statusMask = static_cast<int>(settings.playback().statusMask);
+            s.lowThreshold = static_cast<int>(settings.playback().lowThreshold);
+            s.highThreshold = static_cast<int>(settings.playback().highThreshold);
+            s.dataFormat = static_cast<int>(settings.playback().dataFormat);
+            s.packetSize = static_cast<int>(settings.playback().packetSize);
+            return s;
+        }
+        default:
+            break;
+    }
+    return s;
+}
 }  // namespace android

@@ -52,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -105,7 +106,7 @@ public class AuthContainerView extends LinearLayout
 
     private final float mTranslationY;
 
-    private final WakefulnessLifecycle mWakefulnessLifecycle;
+    @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
 
     @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
 
@@ -125,7 +126,6 @@ public class AuthContainerView extends LinearLayout
         boolean mCredentialAllowed;
         boolean mSkipIntro;
         long mOperationId;
-        long mRequestId;
         @BiometricMultiSensorMode int mMultiSensorConfig;
     }
 
@@ -172,12 +172,6 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        /** Unique id for this request. */
-        public Builder setRequestId(long requestId) {
-            mConfig.mRequestId = requestId;
-            return this;
-        }
-
         /** The multi-sensor mode. */
         public Builder setMultiSensorConfig(@BiometricMultiSensorMode int multiSensorConfig) {
             mConfig.mMultiSensorConfig = multiSensorConfig;
@@ -186,12 +180,10 @@ public class AuthContainerView extends LinearLayout
 
         public AuthContainerView build(int[] sensorIds, boolean credentialAllowed,
                 @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-                @Nullable List<FaceSensorPropertiesInternal> faceProps,
-                WakefulnessLifecycle wakefulnessLifecycle) {
+                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
             mConfig.mSensorIds = sensorIds;
             mConfig.mCredentialAllowed = credentialAllowed;
-            return new AuthContainerView(
-                    mConfig, new Injector(), fpProps, faceProps, wakefulnessLifecycle);
+            return new AuthContainerView(mConfig, new Injector(), fpProps, faceProps);
         }
     }
 
@@ -277,8 +269,7 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting
     AuthContainerView(Config config, Injector injector,
             @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-            @Nullable List<FaceSensorPropertiesInternal> faceProps,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            @Nullable List<FaceSensorPropertiesInternal> faceProps) {
         super(config.mContext);
 
         mConfig = config;
@@ -291,7 +282,7 @@ public class AuthContainerView extends LinearLayout
 
         mHandler = new Handler(Looper.getMainLooper());
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mWakefulnessLifecycle = wakefulnessLifecycle;
+        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
 
         mTranslationY = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);

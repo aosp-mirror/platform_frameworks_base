@@ -20,10 +20,8 @@ import static com.android.internal.util.CollectionUtils.isEmpty;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
-import android.view.Display;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -74,9 +72,17 @@ public class AccessibilityRecord {
     private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
-            AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS
-                    | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
-                    | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID;
+        AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
+
+    // Housekeeping
+    private static final int MAX_POOL_SIZE = 10;
+    private static final Object sPoolLock = new Object();
+    private static AccessibilityRecord sPool;
+    private static int sPoolSize;
+    private AccessibilityRecord mNext;
+    private boolean mIsInPool;
 
     @UnsupportedAppUsage
     boolean mSealed;
@@ -98,7 +104,6 @@ public class AccessibilityRecord {
     @UnsupportedAppUsage
     long mSourceNodeId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     int mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
-    int mSourceDisplayId = Display.INVALID_DISPLAY;
 
     CharSequence mClassName;
     CharSequence mContentDescription;
@@ -132,7 +137,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setSource(@Nullable View source) {
+    public void setSource(View source) {
         setSource(source, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
 
@@ -183,52 +188,17 @@ public class AccessibilityRecord {
      * </p>
      * @return The info of the source.
      */
-    public @Nullable AccessibilityNodeInfo getSource() {
-        return getSource(GET_SOURCE_PREFETCH_FLAGS);
-    }
-
-    /**
-     * Gets the {@link AccessibilityNodeInfo} of the event source.
-     *
-     * @param prefetchingStrategy the prefetching strategy.
-     * @return The info of the source.
-     *
-     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
-     */
-    @Nullable
-    public AccessibilityNodeInfo getSource(
-            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
+    public AccessibilityNodeInfo getSource() {
         enforceSealed();
         if ((mConnectionId == UNDEFINED)
                 || (mSourceWindowId == AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
                 || (AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId)
-                == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
+                        == AccessibilityNodeInfo.UNDEFINED_ITEM_ID)) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
-                mSourceNodeId, false, prefetchingStrategy, null);
-    }
-
-    /**
-     * Sets the display id.
-     *
-     * @param displayId The displayId id.
-     *
-     * @hide
-     */
-    @TestApi
-    public void setDisplayId(int displayId) {
-        mSourceDisplayId = displayId;
-    }
-
-    /**
-     * Gets the id of the display from which the event comes from.
-     *
-     * @return The display id.
-     */
-    public int getDisplayId() {
-        return mSourceDisplayId;
+                mSourceNodeId, false, GET_SOURCE_PREFETCH_FLAGS, null);
     }
 
     /**
@@ -642,7 +612,7 @@ public class AccessibilityRecord {
      *
      * @return The class name.
      */
-    public @Nullable CharSequence getClassName() {
+    public CharSequence getClassName() {
         return mClassName;
     }
 
@@ -653,7 +623,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setClassName(@Nullable CharSequence className) {
+    public void setClassName(CharSequence className) {
         enforceNotSealed();
         mClassName = className;
     }
@@ -664,7 +634,7 @@ public class AccessibilityRecord {
      *
      * @return The text.
      */
-    public @NonNull List<CharSequence> getText() {
+    public List<CharSequence> getText() {
         return mText;
     }
 
@@ -673,7 +643,7 @@ public class AccessibilityRecord {
      *
      * @return The text before the change.
      */
-    public @Nullable CharSequence getBeforeText() {
+    public CharSequence getBeforeText() {
         return mBeforeText;
     }
 
@@ -684,7 +654,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setBeforeText(@Nullable CharSequence beforeText) {
+    public void setBeforeText(CharSequence beforeText) {
         enforceNotSealed();
         mBeforeText = (beforeText == null) ? null
                 : beforeText.subSequence(0, beforeText.length());
@@ -695,7 +665,7 @@ public class AccessibilityRecord {
      *
      * @return The description.
      */
-    public @Nullable CharSequence getContentDescription() {
+    public CharSequence getContentDescription() {
         return mContentDescription;
     }
 
@@ -706,7 +676,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setContentDescription(@Nullable CharSequence contentDescription) {
+    public void setContentDescription(CharSequence contentDescription) {
         enforceNotSealed();
         mContentDescription = (contentDescription == null) ? null
                 : contentDescription.subSequence(0, contentDescription.length());
@@ -717,7 +687,7 @@ public class AccessibilityRecord {
      *
      * @return The parcelable data.
      */
-    public @Nullable Parcelable getParcelableData() {
+    public Parcelable getParcelableData() {
         return mParcelableData;
     }
 
@@ -728,7 +698,7 @@ public class AccessibilityRecord {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setParcelableData(@Nullable Parcelable parcelableData) {
+    public void setParcelableData(Parcelable parcelableData) {
         enforceNotSealed();
         mParcelableData = parcelableData;
     }
@@ -827,47 +797,74 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Instantiates a new record initialized with data from the
+     * Returns a cached instance if such is available or a new one is
+     * instantiated. The instance is initialized with data from the
      * given record.
      *
-     * @deprecated Object pooling has been discontinued. Create a new instance using the
-     * constructor {@link #AccessibilityRecord()} instead.
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityRecord(AccessibilityRecord)} instead.
+     *
      * @return An instance.
      */
-    @Deprecated
-    public static @NonNull AccessibilityRecord obtain(@NonNull AccessibilityRecord record) {
+    public static AccessibilityRecord obtain(AccessibilityRecord record) {
        AccessibilityRecord clone = AccessibilityRecord.obtain();
        clone.init(record);
        return clone;
     }
 
     /**
-     * Instantiates a new record.
+     * Returns a cached instance if such is available or a new one is
+     * instantiated.
      *
-     * @deprecated Object pooling has been discontinued. Create a new instance using the
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
      * constructor {@link #AccessibilityRecord()} instead.
+     *
      * @return An instance.
      */
-    @Deprecated
-    public static @NonNull AccessibilityRecord obtain() {
-        return new AccessibilityRecord();
+    public static AccessibilityRecord obtain() {
+        synchronized (sPoolLock) {
+            if (sPool != null) {
+                AccessibilityRecord record = sPool;
+                sPool = sPool.mNext;
+                sPoolSize--;
+                record.mNext = null;
+                record.mIsInPool = false;
+                return record;
+            }
+            return new AccessibilityRecord();
+        }
     }
 
     /**
-     * Would previously return an instance back to be reused.
+     * Return an instance back to be reused.
+     * <p>
+     * <strong>Note:</strong> You must not touch the object after calling this function.
      *
-     * @deprecated Object pooling has been discontinued. Calling this function now will have
-     * no effect.
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
+     *
+     * @throws IllegalStateException If the record is already recycled.
      */
-    @Deprecated
-    public void recycle() { }
+    public void recycle() {
+        if (mIsInPool) {
+            throw new IllegalStateException("Record already recycled!");
+        }
+        clear();
+        synchronized (sPoolLock) {
+            if (sPoolSize <= MAX_POOL_SIZE) {
+                mNext = sPool;
+                sPool = this;
+                mIsInPool = true;
+                sPoolSize++;
+            }
+        }
+    }
 
     /**
      * Initialize this record from another one.
      *
      * @param record The to initialize from.
      */
-    void init(@NonNull AccessibilityRecord record) {
+    void init(AccessibilityRecord record) {
         mSealed = record.mSealed;
         mBooleanProperties = record.mBooleanProperties;
         mCurrentItemIndex = record.mCurrentItemIndex;
@@ -889,7 +886,6 @@ public class AccessibilityRecord {
         mText.addAll(record.mText);
         mSourceWindowId = record.mSourceWindowId;
         mSourceNodeId = record.mSourceNodeId;
-        mSourceDisplayId = record.mSourceDisplayId;
         mConnectionId = record.mConnectionId;
     }
 
@@ -918,7 +914,6 @@ public class AccessibilityRecord {
         mText.clear();
         mSourceNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
         mSourceWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
-        mSourceDisplayId = Display.INVALID_DISPLAY;
         mConnectionId = UNDEFINED;
     }
 

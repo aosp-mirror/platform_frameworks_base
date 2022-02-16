@@ -66,8 +66,6 @@ public class ThemeOverlayApplier implements Dumpable {
             "android.theme.customization.accent_color";
     static final String OVERLAY_CATEGORY_SYSTEM_PALETTE =
             "android.theme.customization.system_palette";
-    static final String OVERLAY_CATEGORY_THEME_STYLE =
-            "android.theme.customization.theme_style";
 
     static final String OVERLAY_COLOR_SOURCE = "android.theme.customization.color_source";
 
@@ -134,18 +132,14 @@ public class ThemeOverlayApplier implements Dumpable {
     /* Target package for each overlay category. */
     private final Map<String, String> mCategoryToTargetPackage = new ArrayMap<>();
     private final OverlayManager mOverlayManager;
-    private final Executor mBgExecutor;
-    private final Executor mMainExecutor;
+    private final Executor mExecutor;
     private final String mLauncherPackage;
     private final String mThemePickerPackage;
 
-    public ThemeOverlayApplier(OverlayManager overlayManager,
-            Executor bgExecutor,
-            Executor mainExecutor,
+    public ThemeOverlayApplier(OverlayManager overlayManager, Executor executor,
             String launcherPackage, String themePickerPackage, DumpManager dumpManager) {
         mOverlayManager = overlayManager;
-        mBgExecutor = bgExecutor;
-        mMainExecutor = mainExecutor;
+        mExecutor = executor;
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
@@ -176,12 +170,12 @@ public class ThemeOverlayApplier implements Dumpable {
      * Apply the set of overlay packages to the set of {@code UserHandle}s provided. Overlays that
      * affect sysui will also be applied to the system user.
      */
-    public void applyCurrentUserOverlays(
+    void applyCurrentUserOverlays(
             Map<String, OverlayIdentifier> categoryToPackage,
             FabricatedOverlay[] pendingCreation,
             int currentUser,
             Set<UserHandle> managedProfiles) {
-        mBgExecutor.execute(() -> {
+        mExecutor.execute(() -> {
 
             // Disable all overlays that have not been specified in the user setting.
             final Set<String> overlayCategoriesToDisable = new HashSet<>(THEME_CATEGORIES);

@@ -18,20 +18,14 @@ package com.android.internal.statusbar;
 
 import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
-import android.graphics.drawable.Icon;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
-import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
-import android.view.InsetsVisibilities;
 
-import com.android.internal.statusbar.IAddTileResultCallback;
-import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 
@@ -49,7 +43,7 @@ oneway interface IStatusBar
     void showWirelessChargingAnimation(int batteryLevel);
 
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+            boolean showImeSwitcher, boolean isMultiClientImeEnabled);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
@@ -154,7 +148,7 @@ oneway interface IStatusBar
     */
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation, int userId,
-            long operationId, String opPackageName, long requestId, int multiSensorConfig);
+            String opPackageName, long operationId, int multiSensorConfig);
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */
@@ -169,8 +163,6 @@ oneway interface IStatusBar
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
     void hideAuthenticationDialog();
-    /* Used to notify the biometric service of events that occur outside of an operation. */
-    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
@@ -190,7 +182,7 @@ oneway interface IStatusBar
     /**
      * Notifies System UI side of system bar attribute change on the specified display.
      *
-     * @param displayId the ID of the display to notify.
+     * @param displayId the ID of the display to notify
      * @param appearance the appearance of the focused window. The light top bar appearance is not
      *                   controlled here, but primaryAppearance and secondaryAppearance.
      * @param appearanceRegions a set of appearances which will be only applied in their own bounds.
@@ -199,12 +191,11 @@ oneway interface IStatusBar
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
      * @param behavior the behavior of the focused window.
-     * @param requestedVisibilities the collection of the requested visibilities of system insets.
-     * @param packageName the package name of the focused app.
+     * @param isFullscreen whether any of status or navigation bar is requested invisible.
      */
     void onSystemBarAttributesChanged(int displayId, int appearance,
             in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            int behavior, in InsetsVisibilities requestedVisibilities, String packageName);
+            int behavior, boolean isFullscreen);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status
@@ -212,10 +203,8 @@ oneway interface IStatusBar
      *
      * @param displayId the ID of the display to notify.
      * @param types the internal insets types of the bars are about to show transiently.
-     * @param isGestureOnSystemBar whether the gesture to show the transient bar was a gesture on
-     *        one of the bars itself.
      */
-    void showTransient(int displayId, in int[] types, boolean isGestureOnSystemBar);
+    void showTransient(int displayId, in int[] types);
 
     /**
      * Notifies System UI to abort the transient state of system bars, which prevents the bars being
@@ -295,20 +284,4 @@ oneway interface IStatusBar
      * Triggers a GC in the system and status bar.
      */
     void runGcForTest();
-
-    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
-    void cancelRequestAddTile(in String packageName);
-
-    /** Notifies System UI about an update to the media tap-to-transfer sender state. */
-    void updateMediaTapToTransferSenderDisplay(
-        int displayState,
-        in MediaRoute2Info routeInfo,
-        in IUndoMediaTransferCallback undoCallback);
-
-    /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
-    void updateMediaTapToTransferReceiverDisplay(
-        int displayState,
-        in MediaRoute2Info routeInfo,
-        in Icon appIcon,
-        in CharSequence appName);
 }

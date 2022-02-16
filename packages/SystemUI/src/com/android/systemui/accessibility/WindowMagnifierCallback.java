@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility;
 
 import android.graphics.Rect;
-import android.view.ViewConfiguration;
 
 /**
  * A callback to inform {@link com.android.server.accessibility.AccessibilityManagerService} about
@@ -54,13 +53,4 @@ interface WindowMagnifierCallback {
      * @param displayId The logical display id.
      */
     void onAccessibilityActionPerformed(int displayId);
-
-    /**
-     * Called when the user is performing dragging gesture. It is started after the offset
-     * between the down location and the move event location exceed
-     * {@link ViewConfiguration#getScaledTouchSlop()}.
-     *
-     * @param displayId The logical display id.
-     */
-    void onDrag(int displayId);
 }

@@ -113,8 +113,6 @@ public class MobileMappings {
                     TelephonyIcons.UNKNOWN);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_EDGE),
                     TelephonyIcons.E);
-            networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_GPRS),
-                    TelephonyIcons.G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_CDMA),
                     TelephonyIcons.ONE_X);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_1xRTT),
@@ -123,8 +121,6 @@ public class MobileMappings {
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_UNKNOWN),
                     TelephonyIcons.THREE_G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_EDGE),
-                    TelephonyIcons.THREE_G);
-            networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_GPRS),
                     TelephonyIcons.THREE_G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_CDMA),
                     TelephonyIcons.THREE_G);

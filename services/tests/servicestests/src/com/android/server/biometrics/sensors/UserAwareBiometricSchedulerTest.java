@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors;
 
-import static android.testing.TestableLooper.RunWithLooper;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -30,62 +28,52 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.function.Supplier;
-
 @Presubmit
-@RunWith(AndroidTestingRunner.class)
-@RunWithLooper
 @SmallTest
 public class UserAwareBiometricSchedulerTest {
 
-    private static final String TAG = "UserAwareBiometricSchedulerTest";
+    private static final String TAG = "BiometricSchedulerTest";
     private static final int TEST_SENSOR_ID = 0;
 
-    private Handler mHandler;
     private UserAwareBiometricScheduler mScheduler;
-    private IBinder mToken = new Binder();
+    private IBinder mToken;
 
     @Mock
     private Context mContext;
     @Mock
     private IBiometricService mBiometricService;
-    @Mock
-    private BiometricLogger mBiometricLogger;
-    @Mock
-    private BiometricContext mBiometricContext;
 
-    private TestUserStartedCallback mUserStartedCallback = new TestUserStartedCallback();
-    private TestUserStoppedCallback mUserStoppedCallback = new TestUserStoppedCallback();
+    private TestUserStartedCallback mUserStartedCallback;
+    private TestUserStoppedCallback mUserStoppedCallback;
     private int mCurrentUserId = UserHandle.USER_NULL;
-    private boolean mStartOperationsFinish = true;
-    private int mStartUserClientCount = 0;
+    private boolean mStartOperationsFinish;
+    private int mStartUserClientCount;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mHandler = new Handler(TestableLooper.get(this).getLooper());
+
+        mToken = new Binder();
+        mStartOperationsFinish = true;
+        mStartUserClientCount = 0;
+        mUserStartedCallback = new TestUserStartedCallback();
+        mUserStoppedCallback = new TestUserStoppedCallback();
+
         mScheduler = new UserAwareBiometricScheduler(TAG,
-                mHandler,
                 BiometricScheduler.SENSOR_TYPE_UNKNOWN,
                 null /* gestureAvailabilityDispatcher */,
                 mBiometricService,
@@ -95,8 +83,7 @@ public class UserAwareBiometricSchedulerTest {
                     @Override
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new TestStopUserClient(mContext, Object::new, mToken, userId,
-                                TEST_SENSOR_ID, mBiometricLogger, mBiometricContext,
-                                mUserStoppedCallback);
+                                TEST_SENSOR_ID, mUserStoppedCallback);
                     }
 
                     @NonNull
@@ -104,8 +91,7 @@ public class UserAwareBiometricSchedulerTest {
                     public StartUserClient<?, ?> getStartUserClient(int newUserId) {
                         mStartUserClientCount++;
                         return new TestStartUserClient(mContext, Object::new, mToken, newUserId,
-                                TEST_SENSOR_ID,  mBiometricLogger, mBiometricContext,
-                                mUserStartedCallback, mStartOperationsFinish);
+                                TEST_SENSOR_ID, mUserStartedCallback, mStartOperationsFinish);
                     }
                 },
                 CoexCoordinator.getInstance());
@@ -131,7 +117,7 @@ public class UserAwareBiometricSchedulerTest {
         mCurrentUserId = UserHandle.USER_NULL;
         mStartOperationsFinish = false;
 
-        final BaseClientMonitor[] nextClients = new BaseClientMonitor[]{
+        final BaseClientMonitor[] nextClients = new BaseClientMonitor[] {
                 mock(BaseClientMonitor.class),
                 mock(BaseClientMonitor.class),
                 mock(BaseClientMonitor.class)
@@ -161,12 +147,12 @@ public class UserAwareBiometricSchedulerTest {
         waitForIdle();
 
         final TestStartUserClient startUserClient =
-                (TestStartUserClient) mScheduler.mCurrentOperation.getClientMonitor();
+                (TestStartUserClient) mScheduler.mCurrentOperation.mClientMonitor;
         mScheduler.reset();
         assertNull(mScheduler.mCurrentOperation);
 
-        final BiometricSchedulerOperation fakeOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), new ClientMonitorCallback() {});
+        final BiometricScheduler.Operation fakeOperation = new BiometricScheduler.Operation(
+                mock(BaseClientMonitor.class), new BaseClientMonitor.Callback() {});
         mScheduler.mCurrentOperation = fakeOperation;
         startUserClient.mCallback.onClientFinished(startUserClient, true);
         assertSame(fakeOperation, mScheduler.mCurrentOperation);
@@ -208,8 +194,8 @@ public class UserAwareBiometricSchedulerTest {
         verify(nextClient).start(any());
     }
 
-    private void waitForIdle() {
-        TestableLooper.get(this).processAllMessages();
+    private static void waitForIdle() {
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
     private class TestUserStoppedCallback implements StopUserClient.UserStoppedCallback {
@@ -226,7 +212,7 @@ public class UserAwareBiometricSchedulerTest {
         int numInvocations;
 
         @Override
-        public void onUserStarted(int newUserId, Object newObject, int halInterfaceVersion) {
+        public void onUserStarted(int newUserId, Object newObject) {
             numInvocations++;
             mCurrentUserId = newUserId;
         }
@@ -234,11 +220,9 @@ public class UserAwareBiometricSchedulerTest {
 
     private static class TestStopUserClient extends StopUserClient<Object> {
         public TestStopUserClient(@NonNull Context context,
-                @NonNull Supplier<Object> lazyDaemon, @Nullable IBinder token, int userId,
-                int sensorId, @NonNull BiometricLogger logger,
-                @NonNull BiometricContext biometricContext,
-                @NonNull UserStoppedCallback callback) {
-            super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
+                @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
+                int sensorId, @NonNull UserStoppedCallback callback) {
+            super(context, lazyDaemon, token, userId, sensorId, callback);
         }
 
         @Override
@@ -247,7 +231,7 @@ public class UserAwareBiometricSchedulerTest {
         }
 
         @Override
-        public void start(@NonNull ClientMonitorCallback callback) {
+        public void start(@NonNull Callback callback) {
             super.start(callback);
             onUserStopped();
         }
@@ -261,14 +245,12 @@ public class UserAwareBiometricSchedulerTest {
     private static class TestStartUserClient extends StartUserClient<Object, Object> {
         private final boolean mShouldFinish;
 
-        ClientMonitorCallback mCallback;
+        Callback mCallback;
 
         public TestStartUserClient(@NonNull Context context,
-                @NonNull Supplier<Object> lazyDaemon, @Nullable IBinder token, int userId,
-                int sensorId, @NonNull BiometricLogger logger,
-                @NonNull BiometricContext biometricContext,
-                @NonNull UserStartedCallback<Object> callback, boolean shouldFinish) {
-            super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
+                @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
+                int sensorId, @NonNull UserStartedCallback<Object> callback, boolean shouldFinish) {
+            super(context, lazyDaemon, token, userId, sensorId, callback);
             mShouldFinish = shouldFinish;
         }
 
@@ -278,13 +260,12 @@ public class UserAwareBiometricSchedulerTest {
         }
 
         @Override
-        public void start(@NonNull ClientMonitorCallback callback) {
+        public void start(@NonNull Callback callback) {
             super.start(callback);
 
             mCallback = callback;
             if (mShouldFinish) {
-                mUserStartedCallback.onUserStarted(
-                        getTargetUserId(), new Object(), 1 /* halInterfaceVersion */);
+                mUserStartedCallback.onUserStarted(getTargetUserId(), new Object());
                 callback.onClientFinished(this, true /* success */);
             }
         }

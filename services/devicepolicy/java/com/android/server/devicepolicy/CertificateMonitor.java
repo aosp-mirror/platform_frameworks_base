@@ -35,7 +35,6 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.util.PluralsMessageFormatter;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -47,9 +46,7 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CertificateMonitor {
     protected static final int MONITORING_CERT_NOTIFICATION_ID = SystemMessage.NOTE_SSL_CERT_INFO;
@@ -215,15 +212,10 @@ public class CertificateMonitor {
                 dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE,
                 null, UserHandle.of(parentUserId));
 
-        Map<String, Object> arguments = new HashMap<>();
-        arguments.put("count", pendingCertificateCount);
-
         return new Notification.Builder(userContext, SystemNotificationChannels.SECURITY)
                 .setSmallIcon(smallIconId)
-                .setContentTitle(PluralsMessageFormatter.format(
-                        resources,
-                        arguments,
-                        R.string.ssl_ca_cert_warning))
+                .setContentTitle(resources.getQuantityText(R.plurals.ssl_ca_cert_warning,
+                        pendingCertificateCount))
                 .setContentText(contentText)
                 .setContentIntent(notifyIntent)
                 .setShowWhen(false)

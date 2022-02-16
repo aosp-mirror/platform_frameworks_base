@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.IntentFilter;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -30,7 +29,6 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-@Presubmit
 @SmallTest
 public class WatchedIntentHandlingTest {
 

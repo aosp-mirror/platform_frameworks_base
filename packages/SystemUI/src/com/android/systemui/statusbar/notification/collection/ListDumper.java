@@ -55,26 +55,15 @@ public class ListDumper {
                     interactionTracker.hasUserInteractedWith(entry.getKey()));
             if (entry instanceof GroupEntry) {
                 GroupEntry ge = (GroupEntry) entry;
-                NotificationEntry summary = ge.getSummary();
-                if (summary != null) {
-                    dumpEntry(summary,
-                            topEntryIndex + ":*",
-                            childEntryIndent,
-                            sb,
-                            true,
-                            includeRecordKeeping,
-                            interactionTracker.hasUserInteractedWith(summary.getKey()));
-                }
                 List<NotificationEntry> children = ge.getChildren();
                 for (int childIndex = 0;  childIndex < children.size(); childIndex++) {
-                    NotificationEntry child = children.get(childIndex);
-                    dumpEntry(child,
+                    dumpEntry(children.get(childIndex),
                             topEntryIndex + "." + childIndex,
                             childEntryIndent,
                             sb,
                             true,
                             includeRecordKeeping,
-                            interactionTracker.hasUserInteractedWith(child.getKey()));
+                            interactionTracker.hasUserInteractedWith(entry.getKey()));
                 }
             }
         }

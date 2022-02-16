@@ -91,8 +91,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_DISABLE_ESIM),
-                PERMISSION_SELF, null /* scheduler */,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+                PERMISSION_SELF, null /* scheduler */);
     }
 
     public static boolean isEsimLocked(Context context, int subId) {

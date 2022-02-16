@@ -37,10 +37,6 @@ public class BackupUtils {
         public BadVersionException(String message) {
             super(message);
         }
-
-        public BadVersionException(String message, Throwable throwable) {
-            super(message, throwable);
-        }
     }
 
     public static String readString(DataInputStream in) throws IOException {

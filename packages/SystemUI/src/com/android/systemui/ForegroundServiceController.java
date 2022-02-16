@@ -42,8 +42,7 @@ public class ForegroundServiceController {
     private final Handler mMainHandler;
 
     @Inject
-    public ForegroundServiceController(
-            AppOpsController appOpsController,
+    public ForegroundServiceController(AppOpsController appOpsController,
             @Main Handler mainHandler) {
         mMainHandler = mainHandler;
         appOpsController.addCallback(APP_OPS, (code, uid, packageName, active) -> {

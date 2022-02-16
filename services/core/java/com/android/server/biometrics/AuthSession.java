@@ -53,7 +53,6 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -65,7 +64,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.biometrics.log.BiometricFrameworkStatsLogger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -130,7 +128,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @VisibleForTesting final IBinder mToken;
     // Info to be shown on BiometricDialog when all cookies are returned.
     @VisibleForTesting final PromptInfo mPromptInfo;
-    private final long mRequestId;
     private final long mOperationId;
     private final int mUserId;
     private final IBiometricSensorReceiver mSensorReceiver;
@@ -145,8 +142,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private @BiometricMultiSensorMode int mMultiSensorMode;
     private @MultiSensorState int mMultiSensorState;
     private int[] mSensors;
-    // TODO(b/197265902): merge into state
-    private boolean mCancelled;
     // For explicit confirmation, do not send to keystore until the user has confirmed
     // the authentication.
     private byte[] mTokenEscrow;
@@ -167,7 +162,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull ClientDeathReceiver clientDeathReceiver,
             @NonNull PreAuthInfo preAuthInfo,
             @NonNull IBinder token,
-            long requestId,
             long operationId,
             int userId,
             @NonNull IBiometricSensorReceiver sensorReceiver,
@@ -185,7 +179,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mClientDeathReceiver = clientDeathReceiver;
         mPreAuthInfo = preAuthInfo;
         mToken = token;
-        mRequestId = requestId;
         mOperationId = operationId;
         mUserId = userId;
         mSensorReceiver = sensorReceiver;
@@ -194,7 +187,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mPromptInfo = promptInfo;
         mDebugEnabled = debugEnabled;
         mFingerprintSensorProperties = fingerprintSensorProperties;
-        mCancelled = false;
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -241,7 +233,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 Slog.v(TAG, "waiting for cooking for sensor: " + sensor.id);
             }
             sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
-                    mUserId, mSensorReceiver, mOpPackageName, mRequestId, cookie,
+                    mUserId, mSensorReceiver, mOpPackageName, cookie,
                     mPromptInfo.isAllowBackgroundAuthentication());
         }
     }
@@ -263,9 +255,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     true /* credentialAllowed */,
                     false /* requireConfirmation */,
                     mUserId,
-                    mOperationId,
                     mOpPackageName,
-                    mRequestId,
+                    mOperationId,
                     mMultiSensorMode);
         } else if (!mPreAuthInfo.eligibleSensors.isEmpty()) {
             // Some combination of biometric or biometric|credential is requested
@@ -279,11 +270,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onCookieReceived(int cookie) {
-        if (mCancelled) {
-            Slog.w(TAG, "Received cookie but already cancelled (ignoring): " + cookie);
-            return;
-        }
-
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             sensor.goToStateCookieReturnedIfCookieMatches(cookie);
         }
@@ -315,9 +301,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mPreAuthInfo.shouldShowCredential(),
                             requireConfirmation,
                             mUserId,
-                            mOperationId,
                             mOpPackageName,
-                            mRequestId,
+                            mOperationId,
                             mMultiSensorMode);
                     mState = STATE_AUTH_STARTED;
                 } catch (RemoteException e) {
@@ -384,7 +369,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 final boolean shouldCancel = filter.apply(sensor);
                 Slog.d(TAG, "sensorId: " + sensor.id + ", shouldCancel: " + shouldCancel);
                 if (shouldCancel) {
-                    sensor.goToStateCancelling(mToken, mOpPackageName, mRequestId);
+                    sensor.goToStateCancelling(mToken, mOpPackageName);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to cancel authentication");
@@ -440,9 +425,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             true /* credentialAllowed */,
                             false /* requireConfirmation */,
                             mUserId,
-                            mOperationId,
                             mOpPackageName,
-                            mRequestId,
+                            mOperationId,
                             mMultiSensorMode);
                 } else {
                     mClientReceiver.onError(modality, error, vendorCode);
@@ -683,18 +667,16 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
 
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
-            BiometricFrameworkStatsLogger.getInstance().authenticate(
-                    operationContext,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                     statsModality(),
-                    BiometricsProtoEnums.ACTION_UNKNOWN,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mDebugEnabled,
-                    latency,
-                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
-                    mPreAuthInfo.confirmationRequested,
                     mUserId,
+                    isCrypto(),
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    mPreAuthInfo.confirmationRequested,
+                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                    latency,
+                    mDebugEnabled,
+                    -1 /* sensorId */,
                     -1f /* ambientLightLux */);
         } else {
             final long latency = System.currentTimeMillis() - mStartTimeMs;
@@ -715,18 +697,17 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
-            BiometricFrameworkStatsLogger.getInstance().error(
-                    operationContext,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                     statsModality(),
+                    mUserId,
+                    isCrypto(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mDebugEnabled,
-                    latency,
                     error,
                     0 /* vendorCode */,
-                    mUserId);
+                    mDebugEnabled,
+                    latency,
+                    -1 /* sensorId */);
         }
     }
 
@@ -794,8 +775,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * @return true if this AuthSession is finished, e.g. should be set to null
      */
     boolean onCancelAuthSession(boolean force) {
-        mCancelled = true;
-
         final boolean authStarted = mState == STATE_AUTH_CALLED
                 || mState == STATE_AUTH_STARTED
                 || mState == STATE_AUTH_STARTED_UI_SHOWING;
@@ -841,7 +820,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
         return Utils.isCredentialRequested(mPromptInfo);
     }
 
-    @VisibleForTesting
     boolean allCookiesReceived() {
         final int remainingCookies = mPreAuthInfo.numSensorsWaitingForCookie();
         Slog.d(TAG, "Remaining cookies: " + remainingCookies);
@@ -859,10 +837,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
     @SessionState int getState() {
         return mState;
-    }
-
-    long getRequestId() {
-        return mRequestId;
     }
 
     private int statsModality() {
@@ -927,9 +901,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @Override
     public String toString() {
         return "State: " + mState
-                + ", cancelled: " + mCancelled
                 + ", isCrypto: " + isCrypto()
-                + ", PreAuthInfo: " + mPreAuthInfo
-                + ", requestId: " + mRequestId;
+                + ", PreAuthInfo: " + mPreAuthInfo;
     }
 }

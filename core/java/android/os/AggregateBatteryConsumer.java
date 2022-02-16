@@ -31,23 +31,18 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
-public final class AggregateBatteryConsumer extends BatteryConsumer {
-    static final int CONSUMER_TYPE_AGGREGATE = 0;
+public final class AggregateBatteryConsumer extends BatteryConsumer implements Parcelable {
 
-    static final int COLUMN_INDEX_SCOPE = BatteryConsumer.COLUMN_COUNT;
-    static final int COLUMN_INDEX_CONSUMED_POWER = COLUMN_INDEX_SCOPE + 1;
-    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 2;
+    private final double mConsumedPowerMah;
 
-    AggregateBatteryConsumer(BatteryConsumerData data) {
-        super(data);
+    public AggregateBatteryConsumer(@NonNull Builder builder) {
+        super(builder.mPowerComponentsBuilder.build());
+        mConsumedPowerMah = builder.mConsumedPowerMah;
     }
 
-    private AggregateBatteryConsumer(@NonNull Builder builder) {
-        super(builder.mData, builder.mPowerComponentsBuilder.build());
-    }
-
-    int getScope() {
-        return mData.getInt(COLUMN_INDEX_SCOPE);
+    private AggregateBatteryConsumer(@NonNull Parcel source) {
+        super(new PowerComponents(source));
+        mConsumedPowerMah = source.readDouble();
     }
 
     @Override
@@ -56,8 +51,31 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
     }
 
     @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeDouble(mConsumedPowerMah);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @NonNull
+    public static final Creator<AggregateBatteryConsumer> CREATOR =
+            new Creator<AggregateBatteryConsumer>() {
+                public AggregateBatteryConsumer createFromParcel(@NonNull Parcel source) {
+                    return new AggregateBatteryConsumer(source);
+                }
+
+                public AggregateBatteryConsumer[] newArray(int size) {
+                    return new AggregateBatteryConsumer[size];
+                }
+            };
+
+    @Override
     public double getConsumedPower() {
-        return mData.getDouble(COLUMN_INDEX_CONSUMED_POWER);
+        return mConsumedPowerMah;
     }
 
     /** Serializes this object to XML */
@@ -65,7 +83,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
             @BatteryUsageStats.AggregateBatteryConsumerScope int scope) throws IOException {
         serializer.startTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
         serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_SCOPE, scope);
-        serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, getConsumedPower());
+        serializer.attributeDouble(null, BatteryUsageStats.XML_ATTR_POWER, mConsumedPowerMah);
         mPowerComponents.writeToXml(serializer);
         serializer.endTag(null, BatteryUsageStats.XML_TAG_AGGREGATE);
     }
@@ -101,16 +119,17 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
      * Builder for DeviceBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<AggregateBatteryConsumer.Builder> {
-        public Builder(BatteryConsumer.BatteryConsumerData data, int scope) {
-            super(data, CONSUMER_TYPE_AGGREGATE);
-            data.putInt(COLUMN_INDEX_SCOPE, scope);
+        private double mConsumedPowerMah;
+
+        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels) {
+            super(customPowerComponentNames, includePowerModels);
         }
 
         /**
          * Sets the total power included in this aggregate.
          */
         public Builder setConsumedPower(double consumedPowerMah) {
-            mData.putDouble(COLUMN_INDEX_CONSUMED_POWER, consumedPowerMah);
+            mConsumedPowerMah = consumedPowerMah;
             return this;
         }
 
@@ -118,8 +137,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
          * Adds power and usage duration from the supplied AggregateBatteryConsumer.
          */
         public void add(AggregateBatteryConsumer aggregateBatteryConsumer) {
-            setConsumedPower(mData.getDouble(COLUMN_INDEX_CONSUMED_POWER)
-                    + aggregateBatteryConsumer.getConsumedPower());
+            mConsumedPowerMah += aggregateBatteryConsumer.mConsumedPowerMah;
             mPowerComponentsBuilder.addPowerAndDuration(aggregateBatteryConsumer.mPowerComponents);
         }
 

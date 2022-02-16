@@ -18,7 +18,6 @@ package com.android.systemui.keyguard;
 
 
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 
@@ -57,8 +56,7 @@ import org.mockito.MockitoAnnotations;
 public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCase {
 
     private static final String TEST_MESSAGE = "test message";
-    private static final String TEST_MESSAGE_2 = "test message two";
-    private int mMsgId = 0;
+    private static final String TEST_MESSAGE_2 = "test message 2";
 
     @Mock
     private DelayableExecutor mExecutor;
@@ -203,24 +201,6 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     }
 
     @Test
-    public void testSameMessage_noIndicationUpdate() {
-        // GIVEN we are showing and indication with a test message
-        mController.updateIndication(
-                INDICATION_TYPE_OWNER_INFO, createIndication(TEST_MESSAGE), true);
-        reset(mView);
-        reset(mExecutor);
-
-        // WHEN the same type tries to show the same exact message
-        final KeyguardIndication sameIndication = createIndication(TEST_MESSAGE);
-        mController.updateIndication(
-                INDICATION_TYPE_OWNER_INFO, sameIndication, true);
-
-        // THEN
-        // - we don't update the indication b/c there's no reason the animate the same text
-        verify(mView, never()).switchIndication(sameIndication);
-    }
-
-    @Test
     public void testTransientIndication() {
         // GIVEN we already have two indication messages
         mController.updateIndication(
@@ -243,11 +223,8 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     @Test
     public void testHideIndicationOneMessage() {
         // GIVEN we have one indication message
-        KeyguardIndication indication = createIndication();
         mController.updateIndication(
-                INDICATION_TYPE_OWNER_INFO, indication, false);
-        verify(mView).switchIndication(indication);
-        reset(mView);
+                INDICATION_TYPE_OWNER_INFO, createIndication(), false);
 
         // WHEN we hide the current indication type
         mController.hideIndication(INDICATION_TYPE_OWNER_INFO);
@@ -277,10 +254,6 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
 
     @Test
     public void testStartDozing() {
-        // GIVEN a biometric message is showing
-        mController.updateIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE,
-                createIndication(), true);
-
         // WHEN the device is dozing
         mStatusBarStateListener.onDozingChanged(true);
 
@@ -320,19 +293,9 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
         verify(mView, never()).switchIndication(any());
     }
 
-    /**
-     * Create an indication with a unique message.
-     */
     private KeyguardIndication createIndication() {
-        return createIndication(TEST_MESSAGE + " " + mMsgId++);
-    }
-
-    /**
-     * Create an indication with the given message.
-     */
-    private KeyguardIndication createIndication(String msg) {
         return new KeyguardIndication.Builder()
-                .setMessage(msg)
+                .setMessage(TEST_MESSAGE)
                 .setTextColor(ColorStateList.valueOf(Color.WHITE))
                 .build();
     }

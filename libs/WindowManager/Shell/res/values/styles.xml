@@ -32,9 +32,8 @@
 
     <style name="DockedDividerBackground">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/split_divider_bar_width</item>
+        <item name="android:layout_height">10dp</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:background">@color/split_divider_background</item>
     </style>
 
     <style name="DockedDividerMinimizedShadow">
@@ -43,7 +42,7 @@
     </style>
 
     <style name="DockedDividerHandle">
-        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:layout_width">96dp</item>
         <item name="android:layout_height">48dp</item>
     </style>
