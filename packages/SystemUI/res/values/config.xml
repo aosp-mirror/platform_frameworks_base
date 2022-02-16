@@ -608,10 +608,6 @@
     <!-- Component name of communal source service -->
     <string name="config_communalSourceComponent" translatable="false">@null</string>
 
-    <!-- Whether idle mode should be enabled. When enabled, the lock screen will timeout to an idle
-         screen on inactivity. -->
-    <bool name="config_enableIdleMode">false</bool>
-
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
     <integer name="config_ambientLightModeThreshold">5</integer>
