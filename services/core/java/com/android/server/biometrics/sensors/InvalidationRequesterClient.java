@@ -20,11 +20,10 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 
 /**
  * ClientMonitor subclass responsible for coordination of authenticatorId invalidation of other
@@ -75,16 +74,17 @@ public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identi
     };
 
     public InvalidationRequesterClient(@NonNull Context context, int userId, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull BiometricUtils<S> utils) {
         super(context, null /* token */, null /* listener */, userId,
-                context.getOpPackageName(), 0 /* cookie */, sensorId, logger, biometricContext);
+                context.getOpPackageName(), 0 /* cookie */, sensorId,
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricManager = context.getSystemService(BiometricManager.class);
         mUtils = utils;
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
 
         mUtils.setInvalidationInProgress(getContext(), getTargetUserId(), true /* inProgress */);

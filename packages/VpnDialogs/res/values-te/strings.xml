@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="3183836924226407828">"కనెక్షన్ రిక్వెస్ట్‌"</string>
+    <string name="prompt" msgid="3183836924226407828">"కనెక్షన్ అభ్యర్థన"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించగలగడానికి VPN కనెక్షన్‌ను సెటప్ చేయాలనుకుంటోంది. మీరు మూలాన్ని విశ్వసిస్తే మాత్రమే ఆమోదించండి. VPN సక్రియంగా ఉన్నప్పుడు మీ స్క్రీన్ ఎగువన &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; కనిపిస్తుంది."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"నెట్‌వర్క్ ట్రాఫిక్‌ను పర్యవేక్షించగలగడానికి, <xliff:g id="APP">%s</xliff:g> VPN కనెక్షన్‌ను సెటప్ చేయాలనుకుంటోంది. మీరు సోర్స్‌ను విశ్వసిస్తే మాత్రమే ఆమోదించండి. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN యాక్టివ్‌గా ఉన్నప్పుడు మీ స్క్రీన్ పై కనిపిస్తుంది."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN కనెక్ట్ చేయబడింది"</string>
     <string name="session" msgid="6470628549473641030">"సెషన్:"</string>
     <string name="duration" msgid="3584782459928719435">"వ్యవధి:"</string>

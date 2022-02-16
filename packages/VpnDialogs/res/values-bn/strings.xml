@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"সংযোগের অনুরোধ"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> এমন একটি VPN সংযোগ সেট-আপ করতে চাচ্ছে যেটি দিয়ে এটি নেটওয়ার্ক ট্রাফিক নিরীক্ষণ করতে পারবে। আপনি যদি উৎসটিকে বিশ্বাস করেন, তাহলেই কেবল এতে সম্মতি দিন। VPN সক্রিয় থাকলে আপনার স্ক্রীনের উপরে &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; দেখা যাবে।"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> এমন একটি VPN সংযোগ সেট আপ করতে চাইছে যেটি দিয়ে এটি নেটওয়ার্ক ট্রাফিক নিরীক্ষণ করতে পারবে। আপনি সোর্সটি বিশ্বাস করলে একমাত্র তখনই অ্যাক্সেপ্ট করুন। PN অ্যাক্টিভ থাকলে &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; আপনার স্ক্রিনে দেখা যায়।"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN সংযুক্ত হয়েছে"</string>
     <string name="session" msgid="6470628549473641030">"অধিবেশন:"</string>
     <string name="duration" msgid="3584782459928719435">"সময়কাল:"</string>

@@ -65,17 +65,6 @@ class DualHeightHorizontalLinearLayout @JvmOverloads constructor(
 
     private var initialPadding = mPaddingTop // All vertical padding is the same
 
-    private var originalMaxLines = 1
-    var alwaysSingleLine: Boolean = false
-        set(value) {
-            field = value
-            if (field) {
-                textView?.setSingleLine()
-            } else {
-                textView?.maxLines = originalMaxLines
-            }
-        }
-
     init {
         if (orientation != HORIZONTAL) {
             throw IllegalStateException("This view should always have horizontal orientation")
@@ -131,7 +120,7 @@ class DualHeightHorizontalLinearLayout @JvmOverloads constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         textView?.let { tv ->
-            if (tv.lineCount < 2 || alwaysSingleLine) {
+            if (tv.lineCount < 2) {
                 setMeasuredDimension(measuredWidth, singleLineHeightPx)
                 mPaddingBottom = 0
                 mPaddingTop = 0
@@ -144,9 +133,7 @@ class DualHeightHorizontalLinearLayout @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        textView = findViewById<TextView>(textViewId)?.also {
-            originalMaxLines = it.maxLines
-        }
+        textView = findViewById(textViewId)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

@@ -20,10 +20,7 @@ import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseSoundModel;
-import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.SoundModel;
+import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
@@ -31,8 +28,13 @@ import android.media.permission.SafeCloseable;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.ModelParameterRange;
+import android.media.soundtrigger_middleware.PhraseSoundModel;
+import android.media.soundtrigger_middleware.RecognitionConfig;
+import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.server.SystemService;
 
@@ -77,6 +79,13 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             @NonNull Context context) {
         mDelegate = Objects.requireNonNull(delegate);
         mContext = context;
+        new ExternalCaptureStateTracker(active -> {
+            try {
+                mDelegate.setCaptureState(active);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        });
     }
 
     @Override
@@ -223,15 +232,23 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
 
         @Override
         public void onStart() {
-            HalFactory[] factories = new HalFactory[]{new DefaultHalFactory()};
+            HalFactory[] factories = new HalFactory[]{() -> {
+                try {
+                    Log.d(TAG, "Connecting to default ISoundTriggerHw");
+                    return ISoundTriggerHw.getService(true);
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }};
 
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
-                    new SoundTriggerMiddlewareService(new SoundTriggerMiddlewareLogging(
-                            new SoundTriggerMiddlewarePermission(
-                                    new SoundTriggerMiddlewareValidation(
-                                            new SoundTriggerMiddlewareImpl(factories,
-                                                    new AudioSessionProviderImpl())),
-                                    getContext())), getContext()));
+                    new SoundTriggerMiddlewareService(
+                            new SoundTriggerMiddlewareLogging(
+                                    new SoundTriggerMiddlewarePermission(
+                                            new SoundTriggerMiddlewareValidation(
+                                                    new SoundTriggerMiddlewareImpl(factories,
+                                                            new AudioSessionProviderImpl())),
+                                            getContext())), getContext()));
         }
     }
 }

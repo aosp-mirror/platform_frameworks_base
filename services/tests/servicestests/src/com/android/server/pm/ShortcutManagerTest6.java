@@ -15,15 +15,12 @@
  */
 package com.android.server.pm;
 
-import android.platform.test.annotations.Presubmit;
-
-import androidx.test.filters.SmallTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for {@link ShortcutService#hasShortcutHostPermissionInner}, which includes
  * {@link ShortcutService#getDefaultLauncher}.
  */
-@Presubmit
 @SmallTest
 public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
     public void testHasShortcutHostPermissionInner_with3pLauncher_complicated() {

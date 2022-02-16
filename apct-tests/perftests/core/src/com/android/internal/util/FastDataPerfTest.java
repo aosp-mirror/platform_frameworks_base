@@ -64,13 +64,9 @@ public class FastDataPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             os.reset();
-            final FastDataOutput out = FastDataOutput.obtain(os);
-            try {
-                doWrite(out);
-                out.flush();
-            } finally {
-                out.release();
-            }
+            final FastDataOutput out = new FastDataOutput(os, BUFFER_SIZE);
+            doWrite(out);
+            out.flush();
         }
     }
 

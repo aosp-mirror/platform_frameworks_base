@@ -59,7 +59,7 @@ public class VerifierInfo implements Parcelable {
 
     private VerifierInfo(Parcel source) {
         packageName = source.readString();
-        publicKey = (PublicKey) source.readSerializable(java.security.PublicKey.class.getClassLoader(), java.security.PublicKey.class);
+        publicKey = (PublicKey) source.readSerializable();
     }
 
     @Override

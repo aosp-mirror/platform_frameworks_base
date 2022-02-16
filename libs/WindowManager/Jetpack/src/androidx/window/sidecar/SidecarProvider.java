@@ -28,7 +28,7 @@ public class SidecarProvider {
      * an OEM by overriding this method.
      */
     public static SidecarInterface getSidecarImpl(Context context) {
-        return new SampleSidecarImpl(context.getApplicationContext());
+        return new SampleSidecarImpl(context);
     }
 
     /**
@@ -36,6 +36,6 @@ public class SidecarProvider {
      * @return API version string in MAJOR.MINOR.PATCH-description format.
      */
     public static String getApiVersion() {
-        return "1.0.0-reference";
+        return "0.1.0-settings_sample";
     }
 }

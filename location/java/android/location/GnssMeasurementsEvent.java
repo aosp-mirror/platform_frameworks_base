@@ -18,19 +18,16 @@ package android.location;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
+import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * A class implementing a container for data associated with a measurement event.
@@ -38,8 +35,7 @@ import java.util.List;
  */
 public final class GnssMeasurementsEvent implements Parcelable {
     private final GnssClock mClock;
-    private final List<GnssMeasurement> mMeasurements;
-    private final List<GnssAutomaticGainControl> mGnssAgcs;
+    private final Collection<GnssMeasurement> mReadOnlyMeasurements;
 
     /**
      * Used for receiving GNSS satellite measurements from the GNSS engine.
@@ -120,13 +116,20 @@ public final class GnssMeasurementsEvent implements Parcelable {
     }
 
     /**
-     * Create a {@link GnssMeasurementsEvent} instance with a full list of parameters.
+     * @hide
      */
-    private GnssMeasurementsEvent(@NonNull GnssClock clock,
-            @NonNull List<GnssMeasurement> measurements,
-            @NonNull List<GnssAutomaticGainControl> agcs) {
-        mMeasurements = measurements;
-        mGnssAgcs = agcs;
+    @TestApi
+    public GnssMeasurementsEvent(GnssClock clock, GnssMeasurement[] measurements) {
+        if (clock == null) {
+            throw new InvalidParameterException("Parameter 'clock' must not be null.");
+        }
+        if (measurements == null || measurements.length == 0) {
+            mReadOnlyMeasurements = Collections.emptyList();
+        } else {
+            Collection<GnssMeasurement> measurementCollection = Arrays.asList(measurements);
+            mReadOnlyMeasurements = Collections.unmodifiableCollection(measurementCollection);
+        }
+
         mClock = clock;
     }
 
@@ -140,31 +143,26 @@ public final class GnssMeasurementsEvent implements Parcelable {
     }
 
     /**
-     * Gets the collection of measurements associated with the current event.
+     * Gets a read-only collection of measurements associated with the current event.
      */
     @NonNull
     public Collection<GnssMeasurement> getMeasurements() {
-        return mMeasurements;
-    }
-
-    /**
-     * Gets the collection of {@link GnssAutomaticGainControl} associated with the
-     * current event.
-     */
-    @NonNull
-    public Collection<GnssAutomaticGainControl> getGnssAutomaticGainControls() {
-        return mGnssAgcs;
+        return mReadOnlyMeasurements;
     }
 
     public static final @android.annotation.NonNull Creator<GnssMeasurementsEvent> CREATOR =
             new Creator<GnssMeasurementsEvent>() {
         @Override
         public GnssMeasurementsEvent createFromParcel(Parcel in) {
-            GnssClock clock = in.readParcelable(getClass().getClassLoader(), android.location.GnssClock.class);
-            List<GnssMeasurement> measurements = in.createTypedArrayList(GnssMeasurement.CREATOR);
-            List<GnssAutomaticGainControl> agcs = in.createTypedArrayList(
-                    GnssAutomaticGainControl.CREATOR);
-            return new GnssMeasurementsEvent(clock, measurements, agcs);
+            ClassLoader classLoader = getClass().getClassLoader();
+
+            GnssClock clock = in.readParcelable(classLoader);
+
+            int measurementsLength = in.readInt();
+            GnssMeasurement[] measurementsArray = new GnssMeasurement[measurementsLength];
+            in.readTypedArray(measurementsArray, GnssMeasurement.CREATOR);
+
+            return new GnssMeasurementsEvent(clock, measurementsArray);
         }
 
         @Override
@@ -181,105 +179,28 @@ public final class GnssMeasurementsEvent implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mClock, flags);
-        parcel.writeTypedList(mMeasurements);
-        parcel.writeTypedList(mGnssAgcs);
+
+        int measurementsCount = mReadOnlyMeasurements.size();
+        GnssMeasurement[] measurementsArray =
+                mReadOnlyMeasurements.toArray(new GnssMeasurement[measurementsCount]);
+        parcel.writeInt(measurementsArray.length);
+        parcel.writeTypedArray(measurementsArray, flags);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("GnssMeasurementsEvent[");
-        builder.append(mClock);
-        builder.append(' ').append(mMeasurements.toString());
-        builder.append(' ').append(mGnssAgcs.toString());
+        StringBuilder builder = new StringBuilder("[ GnssMeasurementsEvent:\n\n");
+
+        builder.append(mClock.toString());
+        builder.append("\n");
+
+        for (GnssMeasurement measurement : mReadOnlyMeasurements) {
+            builder.append(measurement.toString());
+            builder.append("\n");
+        }
+
         builder.append("]");
+
         return builder.toString();
-    }
-
-    /** Builder for {@link GnssMeasurementsEvent} */
-    public static final class Builder {
-        private GnssClock mClock;
-        private List<GnssMeasurement> mMeasurements;
-        private List<GnssAutomaticGainControl> mGnssAgcs;
-
-        /**
-         * Constructs a {@link GnssMeasurementsEvent.Builder} instance.
-         */
-        public Builder() {
-            mClock = new GnssClock();
-            mMeasurements = new ArrayList<>();
-            mGnssAgcs = new ArrayList<>();
-        }
-
-        /**
-         * Constructs a {@link GnssMeasurementsEvent.Builder} instance by copying a
-         * {@link GnssMeasurementsEvent}.
-         */
-        public Builder(@NonNull GnssMeasurementsEvent event) {
-            mClock = event.getClock();
-            mMeasurements = (List<GnssMeasurement>) event.getMeasurements();
-            mGnssAgcs = (List<GnssAutomaticGainControl>) event.getGnssAutomaticGainControls();
-        }
-
-        /**
-         * Sets the {@link GnssClock}.
-         */
-        @NonNull
-        public Builder setClock(@NonNull GnssClock clock) {
-            Preconditions.checkNotNull(clock);
-            mClock = clock;
-            return this;
-        }
-
-        /**
-         * Sets the collection of {@link GnssMeasurement}.
-         *
-         * This API exists for JNI since it is easier for JNI to work with an array than a
-         * collection.
-         * @hide
-         */
-        @NonNull
-        public Builder setMeasurements(@Nullable GnssMeasurement... measurements) {
-            mMeasurements = measurements == null ? Collections.emptyList() : Arrays.asList(
-                    measurements);
-            return this;
-        }
-
-        /**
-         * Sets the collection of {@link GnssMeasurement}.
-         */
-        @NonNull
-        public Builder setMeasurements(@NonNull Collection<GnssMeasurement> measurements) {
-            mMeasurements = new ArrayList<>(measurements);
-            return this;
-        }
-
-        /**
-         * Sets the collection of {@link GnssAutomaticGainControl}.
-         *
-         * This API exists for JNI since it is easier for JNI to work with an array than a
-         * collection.
-         * @hide
-         */
-        @NonNull
-        public Builder setGnssAutomaticGainControls(@Nullable GnssAutomaticGainControl... agcs) {
-            mGnssAgcs = agcs == null ? Collections.emptyList() : Arrays.asList(agcs);
-            return this;
-        }
-
-        /**
-         * Sets the collection of {@link GnssAutomaticGainControl}.
-         */
-        @NonNull
-        public Builder setGnssAutomaticGainControls(
-                @NonNull Collection<GnssAutomaticGainControl> agcs) {
-            mGnssAgcs = new ArrayList<>(agcs);
-            return this;
-        }
-
-        /** Builds a {@link GnssMeasurementsEvent} instance as specified by this builder. */
-        @NonNull
-        public GnssMeasurementsEvent build() {
-            return new GnssMeasurementsEvent(mClock, mMeasurements, mGnssAgcs);
-        }
     }
 }

@@ -16,18 +16,19 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
-#include <android/performance_hint.h>
+#include <optional>
+#include <vector>
+
+#include <performance_hint_private.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
 
-#include <optional>
-#include <vector>
+#include "RenderTask.h"
 
 #include "../FrameInfo.h"
 #include "../Rect.h"
 #include "../TreeInfo.h"
-#include "RenderTask.h"
 
 namespace android {
 namespace uirenderer {
@@ -76,15 +77,11 @@ public:
 
     void run();
 
-    void setFrameCallback(std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
+    void setFrameCallback(std::function<void(int64_t)>&& callback) {
         mFrameCallback = std::move(callback);
     }
 
-    void setFrameCommitCallback(std::function<void(bool)>&& callback) {
-        mFrameCommitCallback = std::move(callback);
-    }
-
-    void setFrameCompleteCallback(std::function<void()>&& callback) {
+    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
         mFrameCompleteCallback = std::move(callback);
     }
 
@@ -125,9 +122,8 @@ private:
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
-    std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
-    std::function<void(bool)> mFrameCommitCallback;
-    std::function<void()> mFrameCompleteCallback;
+    std::function<void(int64_t)> mFrameCallback;
+    std::function<void(int64_t)> mFrameCompleteCallback;
 
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mLastTargetWorkDuration = 0;

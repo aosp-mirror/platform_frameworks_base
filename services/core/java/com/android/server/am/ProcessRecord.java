@@ -26,12 +26,12 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
+import android.app.RemoteServiceException;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -178,14 +178,9 @@ class ProcessRecord implements WindowProcessListener {
     private volatile String mSeInfo;
 
     /**
-     * When the process is started. (before zygote fork)
+     * When the process is started.
      */
-    private volatile long mStartUptime;
-
-    /**
-     * When the process is started. (before zygote fork)
-     */
-    private volatile long mStartElapsedTime;
+    private volatile long mStartTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -369,26 +364,17 @@ class ProcessRecord implements WindowProcessListener {
      */
     volatile ProcessRecord mSuccessor;
 
-    /**
-     * The routine to start its successor process.
-     *
-     * <p>Note: It should be accessed from process start thread only.</p>
-     */
-    Runnable mSuccessorStartRunnable;
-
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
-            long startUptime, long startElapsedTime) {
+            long startTime) {
         this.mStartUid = startUid;
         this.mHostingRecord = hostingRecord;
         this.mSeInfo = seInfo;
-        this.mStartUptime = startUptime;
-        this.mStartElapsedTime = startElapsedTime;
+        this.mStartTime = startTime;
     }
 
     @GuardedBy({"mService", "mProcLock"})
     void dump(PrintWriter pw, String prefix) {
         final long nowUptime = SystemClock.uptimeMillis();
-        final long nowElapsedTime = SystemClock.elapsedRealtime();
 
         pw.print(prefix); pw.print("user #"); pw.print(userId);
                 pw.print(" uid="); pw.print(info.uid);
@@ -449,10 +435,6 @@ class ProcessRecord implements WindowProcessListener {
         pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
-        pw.print(prefix); pw.print("startUptimeTime=");
-        TimeUtils.formatDuration(mStartElapsedTime, nowUptime, pw);
-        pw.print(prefix); pw.print("startElapsedTime=");
-        TimeUtils.formatDuration(mStartElapsedTime, nowElapsedTime, pw);
         pw.println();
         if (mPersistent || mRemoved) {
             pw.print(prefix); pw.print("persistent="); pw.print(mPersistent);
@@ -513,7 +495,7 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         processInfo = procInfo;
-        isolated = Process.isIsolated(_uid);
+        isolated = _info.uid != _uid;
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
         uid = _uid;
@@ -682,21 +664,12 @@ class ProcessRecord implements WindowProcessListener {
         mSeInfo = seInfo;
     }
 
-    long getStartUptime() {
-        return mStartUptime;
-    }
-
-    /**
-     * Same as {@link #getStartUptime()}.
-     * @deprecated use {@link #getStartUptime()} instead for clarity.
-     */
-    @Deprecated
     long getStartTime() {
-        return mStartUptime;
+        return mStartTime;
     }
 
-    long getStartElapsedTime() {
-        return mStartElapsedTime;
+    void setStartTime(long startTime) {
+        mStartTime = startTime;
     }
 
     int getStartUid() {
@@ -975,6 +948,11 @@ class ProcessRecord implements WindowProcessListener {
         return mServices.hasForegroundServices();
     }
 
+    @GuardedBy("mService")
+    void scheduleCrashLocked(String message) {
+        scheduleCrashLocked(message, RemoteServiceException.TYPE_ID);
+    }
+
     /**
      * Let an app process throw an exception on a binder thread, which typically crashes the
      * process, unless it has an unhandled exception handler.
@@ -986,7 +964,7 @@ class ProcessRecord implements WindowProcessListener {
      *                        of its subclasses.
      */
     @GuardedBy("mService")
-    void scheduleCrashLocked(String message, int exceptionTypeId, @Nullable Bundle extras) {
+    void scheduleCrashLocked(String message, int exceptionTypeId) {
         // Checking killedbyAm should keep it from showing the crash dialog if the process
         // was already dead for a good / normal reason.
         if (!mKilledByAm) {
@@ -997,7 +975,7 @@ class ProcessRecord implements WindowProcessListener {
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    mThread.scheduleCrash(message, exceptionTypeId, extras);
+                    mThread.scheduleCrash(message, exceptionTypeId);
                 } catch (RemoteException e) {
                     // If it's already dead our work is done. If it's wedged just kill it.
                     // We won't get the crash dialog or the error reporting.
@@ -1018,12 +996,6 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     void killLocked(String reason, @Reason int reasonCode, @SubReason int subReason,
             boolean noisy) {
-        killLocked(reason, reason, reasonCode, subReason, noisy);
-    }
-
-    @GuardedBy("mService")
-    void killLocked(String reason, String description, @Reason int reasonCode,
-            @SubReason int subReason, boolean noisy) {
         if (!mKilledByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
             if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
@@ -1032,7 +1004,7 @@ class ProcessRecord implements WindowProcessListener {
                         + "): " + reason, info.uid);
             }
             if (mPid > 0) {
-                mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
+                mService.mProcessList.noteAppKill(this, reasonCode, subReason, reason);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);

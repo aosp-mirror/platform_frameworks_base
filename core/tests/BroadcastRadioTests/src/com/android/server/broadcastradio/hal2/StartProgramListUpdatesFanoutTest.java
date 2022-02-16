@@ -65,7 +65,6 @@ public class StartProgramListUpdatesFanoutTest {
     @Mock ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
-    private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
 
@@ -97,7 +96,7 @@ public class StartProgramListUpdatesFanoutTest {
 
         mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(0, "",
                   0, "", "", "", "", 0, 0, false, false, null, false, new int[] {}, new int[] {},
-                  null, null), mLock);
+                  null, null));
 
         doAnswer((Answer) invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

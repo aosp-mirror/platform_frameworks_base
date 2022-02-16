@@ -28,6 +28,7 @@ import android.content.pm.ResolveInfo;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.BootCompleteCache;
+import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -69,7 +70,7 @@ public final class PhoneStateMonitor {
     };
 
     private final Context mContext;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mLauncherShowing;
@@ -77,11 +78,10 @@ public final class PhoneStateMonitor {
 
     @Inject
     PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache,
-            StatusBarStateController statusBarStateController) {
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache) {
         mContext = context;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
-        mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
         mDefaultHome = getCurrentDefaultHome();
         bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
@@ -171,8 +171,8 @@ public final class PhoneStateMonitor {
         return mStatusBarStateController.isDozing();
     }
 
-    private boolean isLauncherShowing(@Nullable ActivityManager.RunningTaskInfo runningTaskInfo) {
-        if (runningTaskInfo == null || runningTaskInfo.topActivity == null) {
+    private boolean isLauncherShowing(ActivityManager.RunningTaskInfo runningTaskInfo) {
+        if (runningTaskInfo == null) {
             return false;
         } else {
             return runningTaskInfo.topActivity.equals(mDefaultHome);
@@ -180,7 +180,8 @@ public final class PhoneStateMonitor {
     }
 
     private boolean isBouncerShowing() {
-        return mStatusBarOptionalLazy.get().map(StatusBar::isBouncerShowing).orElse(false);
+        return mStatusBarOptionalLazy.map(
+                statusBarLazy -> statusBarLazy.get().isBouncerShowing()).orElse(false);
     }
 
     private boolean isKeyguardLocked() {

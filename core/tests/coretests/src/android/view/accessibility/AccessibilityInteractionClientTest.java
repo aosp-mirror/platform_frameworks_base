@@ -17,9 +17,6 @@
 package android.view.accessibility;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -43,8 +40,6 @@ import org.mockito.Mock;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityInteractionClientTest {
     private static final int MOCK_CONNECTION_ID = 0xabcd;
-    private static final int MOCK_CONNECTION_OTHER_ID = 0xabce;
-
 
     private MockConnection mMockConnection = new MockConnection();
     @Mock private AccessibilityCache mMockCache;
@@ -52,8 +47,8 @@ public class AccessibilityInteractionClientTest {
     @Before
     public void setUp() {
         initMocks(this);
-        AccessibilityInteractionClient.addConnection(
-                MOCK_CONNECTION_ID, mMockConnection, /*initializeCache=*/true);
+        AccessibilityInteractionClient.setCache(mMockCache);
+        AccessibilityInteractionClient.addConnection(MOCK_CONNECTION_ID, mMockConnection);
     }
 
     /**
@@ -63,7 +58,6 @@ public class AccessibilityInteractionClientTest {
      */
     @Test
     public void findA11yNodeInfoByA11yId_whenBypassingCache_doesntTouchCache() {
-        AccessibilityInteractionClient.setCache(MOCK_CONNECTION_ID, mMockCache);
         final int windowId = 0x1234;
         final long accessibilityNodeId = 0x4321L;
         AccessibilityNodeInfo nodeFromConnection = AccessibilityNodeInfo.obtain();
@@ -75,42 +69,6 @@ public class AccessibilityInteractionClientTest {
         assertEquals("Node got lost along the way", nodeFromConnection, node);
 
         verifyZeroInteractions(mMockCache);
-    }
-
-    @Test
-    public void getCache_differentConnections_returnsDifferentCaches() {
-        MockConnection mOtherMockConnection = new MockConnection();
-        AccessibilityInteractionClient.addConnection(
-                MOCK_CONNECTION_OTHER_ID, mOtherMockConnection, /*initializeCache=*/true);
-
-        AccessibilityCache firstCache = AccessibilityInteractionClient.getCache(MOCK_CONNECTION_ID);
-        AccessibilityCache secondCache = AccessibilityInteractionClient.getCache(
-                MOCK_CONNECTION_OTHER_ID);
-        assertNotEquals(firstCache, secondCache);
-    }
-
-    @Test
-    public void getCache_addConnectionWithoutCache_returnsNullCache() {
-        // Need to first remove from process cache
-        AccessibilityInteractionClient.removeConnection(MOCK_CONNECTION_OTHER_ID);
-
-        MockConnection mOtherMockConnection = new MockConnection();
-        AccessibilityInteractionClient.addConnection(
-                MOCK_CONNECTION_OTHER_ID, mOtherMockConnection, /*initializeCache=*/false);
-
-        AccessibilityCache cache = AccessibilityInteractionClient.getCache(
-                MOCK_CONNECTION_OTHER_ID);
-        assertNull(cache);
-    }
-
-    @Test
-    public void getCache_removeConnection_returnsNull() {
-        AccessibilityCache cache = AccessibilityInteractionClient.getCache(MOCK_CONNECTION_ID);
-        assertNotNull(cache);
-
-        AccessibilityInteractionClient.removeConnection(MOCK_CONNECTION_ID);
-        cache = AccessibilityInteractionClient.getCache(MOCK_CONNECTION_ID);
-        assertNull(cache);
     }
 
     private static class MockConnection extends AccessibilityServiceConnectionImpl {

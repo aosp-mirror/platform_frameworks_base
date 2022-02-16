@@ -16,5 +16,4 @@
 
 package android.content;
 
-@JavaOnlyStableParcelable
 parcelable AttributionSource;

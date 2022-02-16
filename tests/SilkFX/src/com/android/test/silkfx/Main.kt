@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import com.android.test.silkfx.app.EXTRA_LAYOUT
 import com.android.test.silkfx.app.EXTRA_TITLE
 import com.android.test.silkfx.hdr.GlowActivity
 import com.android.test.silkfx.materials.GlassActivity
-import com.android.test.silkfx.materials.BackgroundBlurActivity
 import kotlin.reflect.KClass
 
 class Demo(val name: String, val makeIntent: (Context) -> Intent) {
@@ -52,8 +51,7 @@ private val AllDemos = listOf(
                 Demo("Blingy Notifications", R.layout.bling_notifications)
         )),
         DemoGroup("Materials", listOf(
-                Demo("Glass", GlassActivity::class),
-                Demo("Background Blur", BackgroundBlurActivity::class)
+                Demo("Glass", GlassActivity::class)
         ))
 )
 

@@ -33,7 +33,7 @@ import android.widget.FrameLayout;
  * - sends sensor rect updates to fingerprint drawable
  * - optionally can override dozeTimeTick to adjust views for burn-in mitigation
  */
-public abstract class UdfpsAnimationView extends FrameLayout {
+abstract class UdfpsAnimationView extends FrameLayout {
     // mAlpha takes into consideration the status bar expansion amount to fade out icon when
     // the status bar is expanded
     private int mAlpha;
@@ -111,7 +111,7 @@ public abstract class UdfpsAnimationView extends FrameLayout {
         return (int) ((1 - percent) * 255);
     }
 
-    public void onExpansionChanged(float expansion) {
+    public void onExpansionChanged(float expansion, boolean expanded) {
         mAlpha = expansionToAlpha(expansion);
         updateAlpha();
     }

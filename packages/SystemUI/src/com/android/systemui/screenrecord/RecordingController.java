@@ -18,6 +18,7 @@ package com.android.systemui.screenrecord;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -26,12 +27,10 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -45,13 +44,15 @@ import javax.inject.Inject;
 public class RecordingController
         implements CallbackController<RecordingController.RecordingStateChangeCallback> {
     private static final String TAG = "RecordingController";
+    private static final String SYSUI_PACKAGE = "com.android.systemui";
+    private static final String SYSUI_SCREENRECORD_LAUNCHER =
+            "com.android.systemui.screenrecord.ScreenRecordDialog";
 
     private boolean mIsStarting;
     private boolean mIsRecording;
     private PendingIntent mStopIntent;
     private CountDownTimer mCountDownTimer = null;
     private BroadcastDispatcher mBroadcastDispatcher;
-    private UserContextProvider mUserContextProvider;
 
     protected static final String INTENT_UPDATE_STATE =
             "com.android.systemui.screenrecord.UPDATE_STATE";
@@ -87,16 +88,20 @@ public class RecordingController
      * Create a new RecordingController
      */
     @Inject
-    public RecordingController(BroadcastDispatcher broadcastDispatcher,
-            UserContextProvider userContextProvider) {
+    public RecordingController(BroadcastDispatcher broadcastDispatcher) {
         mBroadcastDispatcher = broadcastDispatcher;
-        mUserContextProvider = userContextProvider;
     }
 
-    /** Create a dialog to show screen recording options to the user. */
-    public ScreenRecordDialog createScreenRecordDialog(Context context,
-            @Nullable Runnable onStartRecordingClicked) {
-        return new ScreenRecordDialog(context, this, mUserContextProvider, onStartRecordingClicked);
+    /**
+     * Get an intent to show screen recording options to the user.
+     */
+    public Intent getPromptIntent() {
+        final ComponentName launcherComponent = new ComponentName(SYSUI_PACKAGE,
+                SYSUI_SCREENRECORD_LAUNCHER);
+        final Intent intent = new Intent();
+        intent.setComponent(launcherComponent);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     /**

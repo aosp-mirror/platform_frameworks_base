@@ -20,10 +20,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLASHSCREEN_AVD;
-
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,13 +54,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.android.internal.R;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ContrastColorUtil;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Consumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -150,8 +144,6 @@ public final class SplashScreenView extends FrameLayout {
         private Bitmap mParceledBrandingBitmap;
         private Instant mIconAnimationStart;
         private Duration mIconAnimationDuration;
-        private Consumer<Runnable> mUiThreadInitTask;
-        private boolean mAllowHandleEmpty = true;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -240,30 +232,12 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
-         * Set the Runnable that can receive the task which should be executed on UI thread.
-         * @param uiThreadInitTask
-         */
-        public Builder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
-            mUiThreadInitTask = uiThreadInitTask;
-            return this;
-        }
-
-        /**
          * Set the Drawable object and size for the branding view.
          */
         public Builder setBrandingDrawable(@Nullable Drawable branding, int width, int height) {
             mBrandingDrawable = branding;
             mBrandingImageWidth = width;
             mBrandingImageHeight = height;
-            return this;
-        }
-
-        /**
-         * Sets whether this view can be copied and transferred to the client if the view is
-         * empty style splash screen.
-         */
-        public Builder setAllowHandleEmpty(boolean allowHandleEmpty) {
-            mAllowHandleEmpty = allowHandleEmpty;
             return this;
         }
 
@@ -288,11 +262,7 @@ public final class SplashScreenView extends FrameLayout {
             // center icon
             if (mIconDrawable instanceof SplashScreenView.IconAnimateListener
                     || mSurfacePackage != null) {
-                if (mUiThreadInitTask != null) {
-                    mUiThreadInitTask.accept(() -> view.mIconView = createSurfaceView(view));
-                } else {
-                    view.mIconView = createSurfaceView(view);
-                }
+                view.mIconView = createSurfaceView(view);
                 view.initIconAnimation(mIconDrawable,
                         mIconAnimationDuration != null ? mIconAnimationDuration.toMillis() : 0);
                 view.mIconAnimationStart = mIconAnimationStart;
@@ -313,7 +283,7 @@ public final class SplashScreenView extends FrameLayout {
                 }
                 view.mIconView = imageView;
             }
-            if (mOverlayDrawable != null || (view.mIconView == null && !mAllowHandleEmpty)) {
+            if (mOverlayDrawable != null || mIconDrawable == null) {
                 view.setNotCopyable();
             }
 
@@ -346,9 +316,7 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         private SurfaceView createSurfaceView(@NonNull SplashScreenView view) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "SplashScreenView#createSurfaceView");
-            final Context viewContext = view.getContext();
-            final SurfaceView surfaceView = new SurfaceView(viewContext);
+            final SurfaceView surfaceView = new SurfaceView(view.getContext());
             surfaceView.setPadding(0, 0, 0, 0);
             surfaceView.setBackground(mIconBackground);
             if (mSurfacePackage == null) {
@@ -358,10 +326,10 @@ public final class SplashScreenView extends FrameLayout {
                                     + Thread.currentThread().getId());
                 }
 
-                SurfaceControlViewHost viewHost = new SurfaceControlViewHost(viewContext,
-                        viewContext.getDisplay(),
+                SurfaceControlViewHost viewHost = new SurfaceControlViewHost(mContext,
+                        mContext.getDisplay(),
                         surfaceView.getHostToken());
-                ImageView imageView = new ImageView(viewContext);
+                ImageView imageView = new ImageView(mContext);
                 imageView.setBackground(mIconDrawable);
                 viewHost.setView(imageView, mIconSize, mIconSize);
                 SurfaceControlViewHost.SurfacePackage surfacePackage = viewHost.getSurfacePackage();
@@ -392,7 +360,6 @@ public final class SplashScreenView extends FrameLayout {
 
             view.addView(surfaceView);
             view.mSurfaceView = surfaceView;
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return surfaceView;
         }
     }
@@ -479,10 +446,7 @@ public final class SplashScreenView extends FrameLayout {
     }
 
 
-    /**
-     * @hide
-     */
-    public void syncTransferSurfaceOnDraw() {
+    void transferSurface() {
         if (mSurfacePackage == null) {
             return;
         }
@@ -492,8 +456,8 @@ public final class SplashScreenView extends FrameLayout {
                             String.format("SurfacePackage'surface reparented to %s", parent)));
             Log.d(TAG, "Transferring surface " + mSurfaceView.toString());
         }
-
         mSurfaceView.setChildSurfacePackage(mSurfacePackage);
+
     }
 
     void initIconAnimation(Drawable iconDrawable, long duration) {
@@ -502,23 +466,6 @@ public final class SplashScreenView extends FrameLayout {
         }
         IconAnimateListener aniDrawable = (IconAnimateListener) iconDrawable;
         aniDrawable.prepareAnimate(duration, this::animationStartCallback);
-        aniDrawable.setAnimationJankMonitoring(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                InteractionJankMonitor.getInstance().cancel(CUJ_SPLASHSCREEN_AVD);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                InteractionJankMonitor.getInstance().end(CUJ_SPLASHSCREEN_AVD);
-            }
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                InteractionJankMonitor.getInstance().begin(
-                        SplashScreenView.this, CUJ_SPLASHSCREEN_AVD);
-            }
-        });
     }
 
     private void animationStartCallback() {
@@ -568,6 +515,10 @@ public final class SplashScreenView extends FrameLayout {
             restoreSystemUIColors();
             mWindow = null;
         }
+        if (mHostActivity != null) {
+            mHostActivity.setSplashScreenView(null);
+            mHostActivity = null;
+        }
         mHasRemoved = true;
     }
 
@@ -580,30 +531,21 @@ public final class SplashScreenView extends FrameLayout {
 
     private void releaseAnimationSurfaceHost() {
         if (mSurfaceHost != null && !mIsCopied) {
-            if (DEBUG) {
-                Log.d(TAG,
-                        "Shell removed splash screen."
-                                + " Releasing SurfaceControlViewHost on thread #"
-                                + Thread.currentThread().getId());
-            }
-            releaseIconHost(mSurfaceHost);
+            final SurfaceControlViewHost finalSurfaceHost = mSurfaceHost;
             mSurfaceHost = null;
+            finalSurfaceHost.getView().post(() -> {
+                if (DEBUG) {
+                    Log.d(TAG,
+                            "Shell removed splash screen."
+                                    + " Releasing SurfaceControlViewHost on thread #"
+                                    + Thread.currentThread().getId());
+                }
+                finalSurfaceHost.release();
+            });
         } else if (mSurfacePackage != null && mSurfaceHost == null) {
             mSurfacePackage = null;
             mClientCallback.sendResult(null);
         }
-    }
-
-    /**
-     * Release the host which hold the SurfaceView of the icon.
-     * @hide
-     */
-    public static void releaseIconHost(SurfaceControlViewHost host) {
-        final Drawable background = host.getView().getBackground();
-        if (background instanceof SplashScreenView.IconAnimateListener) {
-            ((SplashScreenView.IconAnimateListener) background).stopAnimation();
-        }
-        host.release();
     }
 
     /**
@@ -613,6 +555,7 @@ public final class SplashScreenView extends FrameLayout {
      * @hide
      */
     public void attachHostActivityAndSetSystemUIColors(Activity activity, Window window) {
+        activity.setSplashScreenView(this);
         mHostActivity = activity;
         mWindow = window;
         final WindowManager.LayoutParams attr = window.getAttributes();
@@ -696,17 +639,6 @@ public final class SplashScreenView extends FrameLayout {
          * @return true if this drawable object can also be animated and it can be played now.
          */
         boolean prepareAnimate(long duration, Runnable startListener);
-
-        /**
-         * Stop animation.
-         */
-        void stopAnimation();
-
-        /**
-         * Provides a chance to start interaction jank monitoring in avd animation.
-         * @param listener a listener to start jank monitoring
-         */
-        default void setAnimationJankMonitoring(AnimatorListenerAdapter listener) {}
     }
 
     /**
@@ -730,15 +662,13 @@ public final class SplashScreenView extends FrameLayout {
         private RemoteCallback mClientCallback;
 
         public SplashScreenViewParcelable(SplashScreenView view) {
-            final View iconView = view.getIconView();
-            mIconSize = iconView != null ? iconView.getWidth() : 0;
+            mIconSize = view.mIconView.getWidth();
             mBackgroundColor = view.getInitBackgroundColor();
-            mIconBackground = iconView != null ? copyDrawable(iconView.getBackground()) : null;
+            mIconBackground = copyDrawable(view.getIconView().getBackground());
             mSurfacePackage = view.mSurfacePackageCopy;
             if (mSurfacePackage == null) {
                 // We only need to copy the drawable if we are not using a SurfaceView
-                mIconBitmap = iconView != null
-                        ? copyDrawable(((ImageView) view.getIconView()).getDrawable()) : null;
+                mIconBitmap = copyDrawable(((ImageView) view.getIconView()).getDrawable());
             }
             mBrandingBitmap = copyDrawable(view.getBrandingView().getBackground());
 

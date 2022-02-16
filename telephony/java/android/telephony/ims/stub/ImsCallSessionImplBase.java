@@ -30,20 +30,12 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.util.ArraySet;
-import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
-import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 /**
  * Base implementation of IImsCallSession, which implements stub versions of the methods available.
@@ -56,8 +48,6 @@ import java.util.function.Supplier;
 // DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
 // will break other implementations of ImsCallSession maintained by other ImsServices.
 public class ImsCallSessionImplBase implements AutoCloseable {
-
-    private static final String LOG_TAG = "ImsCallSessionImplBase";
     /**
      * Notify USSD Mode.
      */
@@ -120,235 +110,185 @@ public class ImsCallSessionImplBase implements AutoCloseable {
         }
     }
 
-    private Executor mExecutor = Runnable::run;
-
     // Non-final for injection by tests
     private IImsCallSession mServiceImpl = new IImsCallSession.Stub() {
         @Override
         public void close() {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.close(), "close");
+            ImsCallSessionImplBase.this.close();
         }
 
         @Override
         public String getCallId() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.getCallId(),
-                    "getCallId");
+            return ImsCallSessionImplBase.this.getCallId();
         }
 
         @Override
         public ImsCallProfile getCallProfile() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.getCallProfile(),
-                    "getCallProfile");
+            return ImsCallSessionImplBase.this.getCallProfile();
         }
 
         @Override
         public ImsCallProfile getLocalCallProfile() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this
-                    .getLocalCallProfile(), "getLocalCallProfile");
+            return ImsCallSessionImplBase.this.getLocalCallProfile();
         }
 
         @Override
         public ImsCallProfile getRemoteCallProfile() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this
-                    .getRemoteCallProfile(), "getRemoteCallProfile");
+            return ImsCallSessionImplBase.this.getRemoteCallProfile();
         }
 
         @Override
         public String getProperty(String name) {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.getProperty(name),
-                    "getProperty");
+            return ImsCallSessionImplBase.this.getProperty(name);
         }
 
         @Override
         public int getState() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.getState(),
-                    "getState");
+            return ImsCallSessionImplBase.this.getState();
         }
 
         @Override
         public boolean isInCall() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.isInCall(),
-                    "isInCall");
+            return ImsCallSessionImplBase.this.isInCall();
         }
 
         @Override
         public void setListener(IImsCallSessionListener listener) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.setListener(
-                    new ImsCallSessionListener(listener)), "setListener");
+            ImsCallSessionImplBase.this.setListener(new ImsCallSessionListener(listener));
         }
 
         @Override
         public void setMute(boolean muted) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.setMute(muted), "setMute");
+            ImsCallSessionImplBase.this.setMute(muted);
         }
 
         @Override
         public void start(String callee, ImsCallProfile profile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.start(callee, profile), "start");
+            ImsCallSessionImplBase.this.start(callee, profile);
         }
 
         @Override
         public void startConference(String[] participants, ImsCallProfile profile) throws
                 RemoteException {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.startConference(participants,
-                    profile), "startConference");
+            ImsCallSessionImplBase.this.startConference(participants, profile);
         }
 
         @Override
         public void accept(int callType, ImsStreamMediaProfile profile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.accept(callType, profile),
-                    "accept");
+            ImsCallSessionImplBase.this.accept(callType, profile);
         }
 
         @Override
         public void deflect(String deflectNumber) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.deflect(deflectNumber),
-                    "deflect");
+            ImsCallSessionImplBase.this.deflect(deflectNumber);
         }
 
         @Override
         public void reject(int reason) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.reject(reason), "reject");
+            ImsCallSessionImplBase.this.reject(reason);
         }
 
         @Override
         public void transfer(@NonNull String number, boolean isConfirmationRequired) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.transfer(number,
-                    isConfirmationRequired), "transfer");
+            ImsCallSessionImplBase.this.transfer(number, isConfirmationRequired);
         }
 
         @Override
         public void consultativeTransfer(@NonNull IImsCallSession transferToSession) {
-            executeMethodAsync(() -> {
-                ImsCallSessionImplBase otherSession = new ImsCallSessionImplBase();
-                otherSession.setServiceImpl(transferToSession);
-                ImsCallSessionImplBase.this.transfer(otherSession);
-            }, "consultativeTransfer");
+            ImsCallSessionImplBase otherSession = new ImsCallSessionImplBase();
+            otherSession.setServiceImpl(transferToSession);
+            ImsCallSessionImplBase.this.transfer(otherSession);
         }
 
         @Override
         public void terminate(int reason) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.terminate(reason), "terminate");
+            ImsCallSessionImplBase.this.terminate(reason);
         }
 
         @Override
         public void hold(ImsStreamMediaProfile profile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.hold(profile), "hold");
+            ImsCallSessionImplBase.this.hold(profile);
         }
 
         @Override
         public void resume(ImsStreamMediaProfile profile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.resume(profile), "resume");
+            ImsCallSessionImplBase.this.resume(profile);
         }
 
         @Override
         public void merge() {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.merge(), "merge");
+            ImsCallSessionImplBase.this.merge();
         }
 
         @Override
         public void update(int callType, ImsStreamMediaProfile profile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.update(callType, profile),
-                    "update");
+            ImsCallSessionImplBase.this.update(callType, profile);
         }
 
         @Override
         public void extendToConference(String[] participants) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.extendToConference(participants),
-                    "extendToConference");
+            ImsCallSessionImplBase.this.extendToConference(participants);
         }
 
         @Override
         public void inviteParticipants(String[] participants) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.inviteParticipants(participants),
-                    "inviteParticipants");
+            ImsCallSessionImplBase.this.inviteParticipants(participants);
         }
 
         @Override
         public void removeParticipants(String[] participants) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.removeParticipants(participants),
-                    "removeParticipants");
+            ImsCallSessionImplBase.this.removeParticipants(participants);
         }
 
         @Override
         public void sendDtmf(char c, Message result) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendDtmf(c, result), "sendDtmf");
+            ImsCallSessionImplBase.this.sendDtmf(c, result);
         }
 
         @Override
         public void startDtmf(char c) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.startDtmf(c), "startDtmf");
+            ImsCallSessionImplBase.this.startDtmf(c);
         }
 
         @Override
         public void stopDtmf() {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.stopDtmf(), "stopDtmf");
+            ImsCallSessionImplBase.this.stopDtmf();
         }
 
         @Override
         public void sendUssd(String ussdMessage) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendUssd(ussdMessage), "sendUssd");
+            ImsCallSessionImplBase.this.sendUssd(ussdMessage);
         }
 
         @Override
         public IImsVideoCallProvider getVideoCallProvider() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this
-                    .getVideoCallProvider(), "getVideoCallProvider");
+            return ImsCallSessionImplBase.this.getVideoCallProvider();
         }
 
         @Override
         public boolean isMultiparty() {
-            return executeMethodAsyncForResult(() -> ImsCallSessionImplBase.this.isMultiparty(),
-                    "isMultiparty");
+            return ImsCallSessionImplBase.this.isMultiparty();
         }
 
         @Override
         public void sendRttModifyRequest(ImsCallProfile toProfile) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendRttModifyRequest(toProfile),
-                    "sendRttModifyRequest");
+            ImsCallSessionImplBase.this.sendRttModifyRequest(toProfile);
         }
 
         @Override
         public void sendRttModifyResponse(boolean status) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendRttModifyResponse(status),
-                    "sendRttModifyResponse");
+            ImsCallSessionImplBase.this.sendRttModifyResponse(status);
         }
 
         @Override
         public void sendRttMessage(String rttMessage) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendRttMessage(rttMessage),
-                    "sendRttMessage");
+            ImsCallSessionImplBase.this.sendRttMessage(rttMessage);
         }
 
         @Override
         public void sendRtpHeaderExtensions(@NonNull List<RtpHeaderExtension> extensions) {
-            executeMethodAsync(() -> ImsCallSessionImplBase.this.sendRtpHeaderExtensions(
-                    new ArraySet<RtpHeaderExtension>(extensions)), "sendRtpHeaderExtensions");
-        }
-
-        // Call the methods with a clean calling identity on the executor and wait indefinitely for
-        // the future to return.
-        private void executeMethodAsync(Runnable r, String errorLogName) {
-            try {
-                CompletableFuture.runAsync(
-                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
-            } catch (CancellationException | CompletionException e) {
-                Log.w(LOG_TAG, "ImsCallSessionImplBase Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-            }
-        }
-
-        private <T> T executeMethodAsyncForResult(Supplier<T> r,
-                String errorLogName) {
-            CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
-            try {
-                return future.get();
-            } catch (ExecutionException | InterruptedException e) {
-                Log.w(LOG_TAG, "ImsCallSessionImplBase Binder - " + errorLogName + " exception: "
-                        + e.getMessage());
-                return null;
-            }
+            ImsCallSessionImplBase.this.sendRtpHeaderExtensions(
+                    new ArraySet<RtpHeaderExtension>(extensions));
         }
     };
 
@@ -733,15 +673,5 @@ public class ImsCallSessionImplBase implements AutoCloseable {
     /** @hide */
     public void setServiceImpl(IImsCallSession serviceImpl) {
         mServiceImpl = serviceImpl;
-    }
-
-    /**
-     * Set default Executor from MmTelFeature.
-     * @param executor The default executor for the framework to use when executing the methods
-     * overridden by the implementation of ImsCallSession.
-     * @hide
-     */
-    public final void setDefaultExecutor(@NonNull Executor executor) {
-        mExecutor = executor;
     }
 }

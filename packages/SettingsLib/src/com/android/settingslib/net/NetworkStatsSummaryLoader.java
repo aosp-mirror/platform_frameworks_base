@@ -20,6 +20,7 @@ import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.NetworkTemplate;
+import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.loader.content.AsyncTaskLoader;
@@ -54,7 +55,7 @@ public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
     public NetworkStats loadInBackground() {
         try {
             return mNetworkStatsManager.querySummary(mNetworkTemplate, mStart, mEnd);
-        } catch (RuntimeException e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Exception querying network detail.", e);
             return null;
         }

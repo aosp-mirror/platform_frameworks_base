@@ -31,6 +31,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
+import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.Slog;
@@ -75,8 +76,8 @@ class WindowSurfaceController {
     // Used to track whether we have called detach children on the way to invisibility.
     boolean mChildrenDetached;
 
-    WindowSurfaceController(String name, int format, int flags, WindowStateAnimator animator,
-            int windowType) {
+    WindowSurfaceController(String name, int w, int h, int format,
+            int flags, WindowStateAnimator animator, int windowType) {
         mAnimator = animator;
 
         title = name;
@@ -90,6 +91,7 @@ class WindowSurfaceController {
         final SurfaceControl.Builder b = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
+                .setBufferSize(w, h)
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)

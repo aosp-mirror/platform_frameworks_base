@@ -1,2 +1,3 @@
-# Bug component: 24949
-include platform/libcore:/OWNERS
+# Bug component: 847766
+mingaleev@google.com
+include /core/java/android/app/timedetector/OWNERS

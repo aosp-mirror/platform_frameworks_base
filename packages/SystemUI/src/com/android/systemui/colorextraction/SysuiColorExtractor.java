@@ -29,7 +29,6 @@ import com.android.internal.colorextraction.types.Tonal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
@@ -51,32 +50,19 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
     private final GradientColors mBackdropColors;
 
     @Inject
-    public SysuiColorExtractor(
-            Context context,
-            ConfigurationController configurationController,
-            DumpManager dumpManager) {
-        this(
-                context,
-                new Tonal(context),
-                configurationController,
-                context.getSystemService(WallpaperManager.class),
-                dumpManager,
-                false /* immediately */);
+    public SysuiColorExtractor(Context context, ConfigurationController configurationController) {
+        this(context, new Tonal(context), configurationController,
+                context.getSystemService(WallpaperManager.class), false /* immediately */);
     }
 
     @VisibleForTesting
-    public SysuiColorExtractor(
-            Context context,
-            ExtractionType type,
+    public SysuiColorExtractor(Context context, ExtractionType type,
             ConfigurationController configurationController,
-            WallpaperManager wallpaperManager,
-            DumpManager dumpManager,
-            boolean immediately) {
+            WallpaperManager wallpaperManager, boolean immediately) {
         super(context, type, immediately, wallpaperManager);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mNeutralColorsLock = new GradientColors();
         configurationController.addCallback(this);
-        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         mBackdropColors = new GradientColors();
         mBackdropColors.setMainColor(Color.BLACK);

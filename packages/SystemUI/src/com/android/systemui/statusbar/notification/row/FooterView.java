@@ -20,25 +20,16 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.IndentingPrintWriter;
 import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
-import com.android.systemui.util.DumpUtilsKt;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 public class FooterView extends StackScrollerDecorView {
-    private FooterViewButton mClearAllButton;
+    private FooterViewButton mDismissButton;
     private FooterViewButton mManageButton;
     private boolean mShowHistory;
-    // String cache, for performance reasons.
-    // Reading them from a Resources object can be quite slow sometimes.
-    private String mManageNotificationText;
-    private String mManageNotificationHistoryText;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -54,34 +45,18 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
-        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
-        super.dump(fd, pw, args);
-        DumpUtilsKt.withIncreasedIndent(pw, () -> {
-            pw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
-            pw.println("manageButton showHistory: " + mShowHistory);
-            pw.println("manageButton visibility: "
-                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
-            pw.println("dismissButton visibility: "
-                    + DumpUtilsKt.visibilityString(mClearAllButton.getVisibility()));
-        });
-    }
-
-    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mClearAllButton = (FooterViewButton) findSecondaryView();
+        mDismissButton = (FooterViewButton) findSecondaryView();
         mManageButton = findViewById(R.id.manage_text);
-        updateResources();
-        updateText();
     }
 
     public void setManageButtonClickListener(OnClickListener listener) {
         mManageButton.setOnClickListener(listener);
     }
 
-    public void setClearAllButtonClickListener(OnClickListener listener) {
-        mClearAllButton.setOnClickListener(listener);
+    public void setDismissButtonClickListener(OnClickListener listener) {
+        mDismissButton.setOnClickListener(listener);
     }
 
     public boolean isOnEmptySpace(float touchX, float touchY) {
@@ -92,20 +67,15 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     public void showHistory(boolean showHistory) {
-        if (mShowHistory == showHistory) {
-            return;
-        }
         mShowHistory = showHistory;
-        updateText();
-    }
-
-    private void updateText() {
         if (mShowHistory) {
-            mManageButton.setText(mManageNotificationHistoryText);
-            mManageButton.setContentDescription(mManageNotificationHistoryText);
+            mManageButton.setText(R.string.manage_notifications_history_text);
+            mManageButton.setContentDescription(
+                    mContext.getString(R.string.manage_notifications_history_text));
         } else {
-            mManageButton.setText(mManageNotificationText);
-            mManageButton.setContentDescription(mManageNotificationText);
+            mManageButton.setText(R.string.manage_notifications_text);
+            mManageButton.setContentDescription(
+                    mContext.getString(R.string.manage_notifications_text));
         }
     }
 
@@ -117,11 +87,10 @@ public class FooterView extends StackScrollerDecorView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateColors();
-        mClearAllButton.setText(R.string.clear_all_notifications_text);
-        mClearAllButton.setContentDescription(
+        mDismissButton.setText(R.string.clear_all_notifications_text);
+        mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
-        updateResources();
-        updateText();
+        showHistory(mShowHistory);
     }
 
     /**
@@ -130,16 +99,10 @@ public class FooterView extends StackScrollerDecorView {
     public void updateColors() {
         Resources.Theme theme = mContext.getTheme();
         int textColor = getResources().getColor(R.color.notif_pill_text, theme);
-        mClearAllButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
-        mClearAllButton.setTextColor(textColor);
+        mDismissButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
+        mDismissButton.setTextColor(textColor);
         mManageButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
         mManageButton.setTextColor(textColor);
-    }
-
-    private void updateResources() {
-        mManageNotificationText = getContext().getString(R.string.manage_notifications_text);
-        mManageNotificationHistoryText = getContext()
-                .getString(R.string.manage_notifications_history_text);
     }
 
     @Override
