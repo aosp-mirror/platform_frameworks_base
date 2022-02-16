@@ -22,9 +22,12 @@ struct RegJNIRec {
     int (*mProc)(JNIEnv*);
 };
 
-static const RegJNIRec gRegJNI[] = {
+static const RegJNIRec sqliteJNI[] = {
         REG_JNI(register_android_database_CursorWindow),
         REG_JNI(register_android_database_SQLiteConnection),
+};
+
+static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Matrix),
         REG_JNI(register_android_graphics_Graphics),
         REG_JNI(register_android_graphics_Paint),
@@ -69,8 +72,21 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
-    if (register_jni_procs(gRegJNI, NELEM(gRegJNI), env) < 0) {
+
+    if (register_jni_procs(sqliteJNI, NELEM(sqliteJNI), env) < 0) {
         return JNI_ERR;
+    }
+    jclass runtimeEnvironment = FindClassOrDie(env, "org/robolectric/RuntimeEnvironment");
+    jmethodID getApiLevelMethod =
+            GetStaticMethodIDOrDie(env, runtimeEnvironment, "getApiLevel", "()I");
+
+    jint apiLevel = (jint)env->CallStaticIntMethod(runtimeEnvironment, getApiLevelMethod);
+
+    // Native graphics currently supports SDK 26 and above
+    if (apiLevel >= 26) {
+        if (register_jni_procs(graphicsJNI, NELEM(graphicsJNI), env) < 0) {
+            return JNI_ERR;
+        }
     }
 
     // Configuration is stored as java System properties.
