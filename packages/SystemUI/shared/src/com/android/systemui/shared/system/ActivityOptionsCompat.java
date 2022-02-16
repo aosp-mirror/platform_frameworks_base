@@ -104,15 +104,4 @@ public abstract class ActivityOptionsCompat {
         opts.setSourceInfo(ActivityOptions.SourceInfo.TYPE_LAUNCHER, uptimeMillis);
         return opts;
     }
-
-    /**
-     * Sets Task specific information to the activity options
-     */
-    public static void addTaskInfo(ActivityOptions opts, Task.TaskKey taskKey) {
-        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // We show non-visible docked tasks in Recents, but we always want to launch
-            // them in the fullscreen stack.
-            opts.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        }
-    }
 }
