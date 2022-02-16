@@ -46,6 +46,7 @@ import android.os.LocaleList;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.PackageConfig;
 
@@ -86,6 +87,8 @@ public class LocaleManagerServiceTest {
     private ActivityTaskManagerInternal mMockActivityTaskManager;
     @Mock
     private ActivityManagerInternal mMockActivityManager;
+    @Mock
+    PackageMonitor mMockPackageMonitor;
 
     @Before
     public void setUp() throws Exception {
@@ -93,6 +96,7 @@ public class LocaleManagerServiceTest {
         mMockActivityTaskManager = mock(ActivityTaskManagerInternal.class);
         mMockActivityManager = mock(ActivityManagerInternal.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+        mMockPackageMonitor = mock(PackageMonitor.class);
 
         // For unit tests, set the default installer info
         PackageManager mockPackageManager = mock(PackageManager.class);
@@ -113,7 +117,8 @@ public class LocaleManagerServiceTest {
 
         mMockBackupHelper = mock(ShadowLocaleManagerBackupHelper.class);
         mLocaleManagerService = new LocaleManagerService(mMockContext, mMockActivityTaskManager,
-                mMockActivityManager, mMockPackageManagerInternal, mMockBackupHelper);
+                mMockActivityManager, mMockPackageManagerInternal,
+                mMockBackupHelper, mMockPackageMonitor);
     }
 
     @Test(expected = SecurityException.class)
