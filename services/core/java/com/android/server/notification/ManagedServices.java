@@ -1447,6 +1447,16 @@ abstract public class ManagedServices {
         }
     }
 
+    @VisibleForTesting
+    void reregisterService(final ComponentName cn, final int userId) {
+        // If rebinding a package that died, ensure it still has permission
+        // after the rebind delay
+        if (isPackageOrComponentAllowed(cn.getPackageName(), userId)
+                || isPackageOrComponentAllowed(cn.flattenToString(), userId)) {
+            registerService(cn, userId);
+        }
+    }
+
     /**
      * Inject a system service into the management list.
      */
@@ -1545,12 +1555,9 @@ abstract public class ManagedServices {
                         unbindService(this, name, userid);
                         if (!mServicesRebinding.contains(servicesBindingTag)) {
                             mServicesRebinding.add(servicesBindingTag);
-                            mHandler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        registerService(name, userid);
-                                    }
-                               }, ON_BINDING_DIED_REBIND_DELAY_MS);
+                            mHandler.postDelayed(() ->
+                                    reregisterService(name, userid),
+                                    ON_BINDING_DIED_REBIND_DELAY_MS);
                         } else {
                             Slog.v(TAG, getCaption() + " not rebinding in user " + userid
                                     + " as a previous rebind attempt was made: " + name);
