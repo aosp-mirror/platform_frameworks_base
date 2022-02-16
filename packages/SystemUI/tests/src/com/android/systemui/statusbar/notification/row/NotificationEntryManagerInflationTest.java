@@ -61,7 +61,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -191,7 +190,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
-                mock(ForegroundServiceDismissalFeatureController.class),
                 mock(IStatusBarService.class),
                 NotifLiveDataStoreMocksKt.createNotifLiveDataStoreImplMock(),
                 mock(DumpManager.class)
