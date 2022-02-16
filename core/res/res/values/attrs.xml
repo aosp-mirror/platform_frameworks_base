@@ -3644,6 +3644,14 @@
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
+        <!-- Specifies whether the IME supports showing inline suggestions when touch
+             exploration is enabled. This does nothing if supportsInlineSuggestions is false.
+             The default value is false and most IMEs should not set this
+             to true since the older menu-style Autofill works better with touch exploration.
+             This attribute should be set to true in special situations, such as if this is an
+             accessibility-focused IME which blocks user interaction with the app window while the
+             IME is displayed. -->
+        <attr name="supportsInlineSuggestionsWithTouchExploration" format="boolean" />
         <!-- Specifies whether the IME suppresses system spell checker.
              The default value is false. If an IME sets this attribute to true,
              the system spell checker will be disabled while the IME has an

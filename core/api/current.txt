@@ -1453,6 +1453,7 @@ package android {
     field public static final int supportsAssist = 16844016; // 0x10104f0
     field public static final int supportsBatteryGameMode;
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
+    field public static final int supportsInlineSuggestionsWithTouchExploration;
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
     field public static final int supportsLocalInteraction = 16844047; // 0x101050f
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
