@@ -41,6 +41,9 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.graphics.PointF;
+import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManager.Sensors;
+import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -548,6 +551,19 @@ public class InputManagerService extends IInputManager.Stub
                 LidSwitchCallback callback = mLidSwitchCallbacks.get(i);
                 callback.notifyLidSwitchChanged(0 /* whenNanos */, switchState == KEY_STATE_UP);
             }
+        }
+
+        // Set the HW mic toggle switch state
+        final int micMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
+                SW_MUTE_DEVICE);
+        if (micMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
+            setSensorPrivacy(Sensors.MICROPHONE, micMuteState != InputManager.SWITCH_STATE_OFF);
+        }
+        // Set the HW camera toggle switch state
+        final int cameraMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
+                SW_CAMERA_LENS_COVER);
+        if (cameraMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
+            setSensorPrivacy(Sensors.CAMERA, cameraMuteState != InputManager.SWITCH_STATE_OFF);
         }
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
@@ -2816,6 +2832,8 @@ public class InputManagerService extends IInputManager.Stub
         if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
             final boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) != 0);
             mWindowManagerCallbacks.notifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
+            // Use SW_CAMERA_LENS_COVER code for camera privacy toggles
+            setSensorPrivacy(Sensors.CAMERA, lensCovered);
         }
 
         if (mUseDevInputEventForAudioJack && (switchMask & SW_JACK_BITS) != 0) {
@@ -2836,7 +2854,18 @@ public class InputManagerService extends IInputManager.Stub
             final boolean micMute = ((switchValues & SW_MUTE_DEVICE_BIT) != 0);
             AudioManager audioManager = mContext.getSystemService(AudioManager.class);
             audioManager.setMicrophoneMuteFromSwitch(micMute);
+
+            setSensorPrivacy(Sensors.MICROPHONE, micMute);
         }
+    }
+
+    // Set the sensor privacy state based on the hardware toggles switch states
+    private void setSensorPrivacy(@SensorPrivacyManager.Sensors.Sensor int sensor,
+            boolean enablePrivacy) {
+        final SensorPrivacyManagerInternal sensorPrivacyManagerInternal =
+                LocalServices.getService(SensorPrivacyManagerInternal.class);
+        sensorPrivacyManagerInternal.setPhysicalToggleSensorPrivacy(UserHandle.USER_CURRENT, sensor,
+                enablePrivacy);
     }
 
     // Native callback.

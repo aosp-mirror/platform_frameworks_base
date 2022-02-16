@@ -36,6 +36,7 @@ import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -49,6 +50,7 @@ import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -84,6 +86,7 @@ public class NotificationShadeWindowViewController {
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final PanelExpansionStateManager mPanelExpansionStateManager;
+    private final Optional<LowLightClockController> mLowLightClockController;
 
     private boolean mIsTrackingBarGesture = false;
 
@@ -101,7 +104,8 @@ public class NotificationShadeWindowViewController {
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             StatusBarWindowStateController statusBarWindowStateController,
-            LockIconViewController lockIconViewController) {
+            LockIconViewController lockIconViewController,
+            Optional<LowLightClockController> lowLightClockController) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mTunerService = tunerService;
@@ -115,6 +119,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
+        mLowLightClockController = lowLightClockController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -170,6 +175,8 @@ public class NotificationShadeWindowViewController {
                     }
                 };
         mGestureDetector = new GestureDetector(mView.getContext(), gestureListener);
+
+        mLowLightClockController.ifPresent(controller -> controller.attachLowLightClockView(mView));
 
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -448,6 +455,21 @@ public class NotificationShadeWindowViewController {
     public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
         mService = statusBar;
         mNotificationShadeWindowController = controller;
+    }
+
+    /**
+     * Tell the controller that dozing has begun or ended.
+     * @param dozing True if dozing has begun.
+     */
+    public void setDozing(boolean dozing) {
+        mLowLightClockController.ifPresent(controller -> controller.showLowLightClock(dozing));
+    }
+
+    /**
+     * Tell the controller to perform burn-in prevention.
+     */
+    public void dozeTimeTick() {
+        mLowLightClockController.ifPresent(LowLightClockController::dozeTimeTick);
     }
 
     @VisibleForTesting

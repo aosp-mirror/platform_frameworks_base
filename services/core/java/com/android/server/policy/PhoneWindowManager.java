@@ -3547,6 +3547,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mCameraLensCoverState == lensCoverState) {
             return;
         }
+        if (!mContext.getResources().getBoolean(
+                R.bool.config_launchCameraOnCameraLensCoverToggle)) {
+            return;
+        }
         if (mCameraLensCoverState == CAMERA_LENS_COVERED &&
                 lensCoverState == CAMERA_LENS_UNCOVERED) {
             Intent intent;

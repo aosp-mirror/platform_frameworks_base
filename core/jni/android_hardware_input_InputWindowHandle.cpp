@@ -130,10 +130,6 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
 
-    mInfo.flags = Flags<WindowInfo::Flag>(
-            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
-    mInfo.type = static_cast<WindowInfo::Type>(
-            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
     mInfo.dispatchingTimeout = std::chrono::milliseconds(
             env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
     mInfo.frameLeft = env->GetIntField(obj,
@@ -159,14 +155,77 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(regionObj);
     }
 
-    mInfo.visible = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.visible);
-    mInfo.focusable = env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable);
-    mInfo.hasWallpaper = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.hasWallpaper);
-    mInfo.paused = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.paused);
-    mInfo.trustedOverlay = env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay);
+    const auto flags = Flags<WindowInfo::Flag>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
+    const auto type = static_cast<WindowInfo::Type>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
+    mInfo.layoutParamsFlags = flags;
+    mInfo.layoutParamsType = type;
+
+    using InputConfig = gui::WindowInfo::InputConfig;
+    // Determine the value for each of the InputConfig flags. We rely on a switch statement and
+    // -Wswitch-enum to give us a build error if we forget to explicitly handle an InputConfig flag.
+    mInfo.inputConfig = InputConfig::NONE;
+    InputConfig enumerationStart = InputConfig::NONE;
+    switch (enumerationStart) {
+        case InputConfig::NONE:
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_VISIBLE:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.visible) == JNI_FALSE) {
+                mInfo.inputConfig |= InputConfig::NOT_VISIBLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_FOCUSABLE:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable) == JNI_FALSE) {
+                mInfo.inputConfig |= InputConfig::NOT_FOCUSABLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_TOUCHABLE:
+            if (flags.test(WindowInfo::Flag::NOT_TOUCHABLE)) {
+                mInfo.inputConfig |= InputConfig::NOT_TOUCHABLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_TOUCH_MODAL:
+            if (flags.test(WindowInfo::Flag::NOT_TOUCH_MODAL)) {
+                mInfo.inputConfig |= InputConfig::NOT_TOUCH_MODAL;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::SPLIT_TOUCH:
+            if (flags.test(WindowInfo::Flag::SPLIT_TOUCH)) {
+                mInfo.inputConfig |= InputConfig::SPLIT_TOUCH;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.hasWallpaper) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::IS_WALLPAPER:
+            if (type == WindowInfo::Type::WALLPAPER) {
+                mInfo.inputConfig |= InputConfig::IS_WALLPAPER;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::PAUSE_DISPATCHING:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.paused) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::PAUSE_DISPATCHING;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::TRUSTED_OVERLAY:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::TRUSTED_OVERLAY;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::WATCH_OUTSIDE_TOUCH:
+            if (flags.test(WindowInfo::Flag::WATCH_OUTSIDE_TOUCH)) {
+                mInfo.inputConfig |= InputConfig::WATCH_OUTSIDE_TOUCH;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::SLIPPERY:
+            if (flags.test(WindowInfo::Flag::SLIPPERY)) {
+                mInfo.inputConfig |= InputConfig::SLIPPERY;
+            }
+    }
+
     mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
     mInfo.ownerPid = env->GetIntField(obj,
@@ -274,9 +333,9 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name,
                         env->NewStringUTF(windowInfo.name.data()));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsFlags,
-                     static_cast<uint32_t>(windowInfo.flags.get()));
+                     static_cast<uint32_t>(windowInfo.layoutParamsFlags.get()));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsType,
-                     static_cast<int32_t>(windowInfo.type));
+                     static_cast<int32_t>(windowInfo.layoutParamsType));
     env->SetLongField(inputWindowHandle, gInputWindowHandleClassInfo.dispatchingTimeoutMillis,
                       std::chrono::duration_cast<std::chrono::milliseconds>(
                               windowInfo.dispatchingTimeout)
@@ -305,15 +364,17 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.touchableRegion,
                         regionObj.get());
 
+    using InputConfig = gui::WindowInfo::InputConfig;
     env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.visible,
-                         windowInfo.visible);
+                         !windowInfo.inputConfig.test(InputConfig::NOT_VISIBLE));
     env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.focusable,
-                         windowInfo.focusable);
+                         !windowInfo.inputConfig.test(gui::WindowInfo::InputConfig::NOT_FOCUSABLE));
     env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.hasWallpaper,
-                         windowInfo.hasWallpaper);
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.paused, windowInfo.paused);
+                         windowInfo.inputConfig.test(InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER));
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.paused,
+                         windowInfo.inputConfig.test(InputConfig::PAUSE_DISPATCHING));
     env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.trustedOverlay,
-                         windowInfo.trustedOverlay);
+                         windowInfo.inputConfig.test(InputConfig::TRUSTED_OVERLAY));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.touchOcclusionMode,
                      static_cast<int32_t>(windowInfo.touchOcclusionMode));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerPid, windowInfo.ownerPid);
