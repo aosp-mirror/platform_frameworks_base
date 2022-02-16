@@ -191,6 +191,13 @@ public class TaskInfo {
     public boolean preferDockBigOverlays;
 
     /**
+     * The task id of the host Task of the launch-into-pip Activity, i.e., it points to the Task
+     * the launch-into-pip Activity is originated from.
+     * @hide
+     */
+    public int launchIntoPipHostTaskId;
+
+    /**
      * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
      * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
      * {@code null} otherwise.
@@ -516,6 +523,7 @@ public class TaskInfo {
         topActivityType = source.readInt();
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
         preferDockBigOverlays = source.readBoolean();
+        launchIntoPipHostTaskId = source.readInt();
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
@@ -562,6 +570,7 @@ public class TaskInfo {
         dest.writeInt(topActivityType);
         dest.writeTypedObject(pictureInPictureParams, flags);
         dest.writeBoolean(preferDockBigOverlays);
+        dest.writeInt(launchIntoPipHostTaskId);
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
@@ -602,6 +611,7 @@ public class TaskInfo {
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " preferDockBigOverlays=" + preferDockBigOverlays
+                + " launchIntoPipHostTaskId=" + launchIntoPipHostTaskId
                 + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies

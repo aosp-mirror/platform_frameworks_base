@@ -628,6 +628,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // it references to gets removed. This should also be cleared when we move out of pip.
     private Task mLastParentBeforePip;
 
+    // Only set if this instance is a launch-into-pip Activity, points to the
+    // host Activity the launch-into-pip Activity is originated from.
+    private ActivityRecord mLaunchIntoPipHostActivity;
+
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
     private boolean mReportedDrawn;
@@ -1225,6 +1229,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLastParentBeforePip != null) {
             pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
         }
+        if (mLaunchIntoPipHostActivity != null) {
+            pw.println(prefix + "launchIntoPipHostActivity=" + mLaunchIntoPipHostActivity);
+        }
 
         mLetterboxUiController.dump(pw, prefix);
 
@@ -1559,10 +1566,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Sets {@link #mLastParentBeforePip} to the current parent Task, it's caller's job to ensure
      * {@link #getTask()} is set before this is called.
+     *
+     * @param launchIntoPipHostActivity {@link ActivityRecord} as the host Activity for the
+     *        launch-int-pip Activity see also {@link #mLaunchIntoPipHostActivity}.
      */
-    void setLastParentBeforePip() {
-        mLastParentBeforePip = getTask();
+    void setLastParentBeforePip(@Nullable ActivityRecord launchIntoPipHostActivity) {
+        mLastParentBeforePip = (launchIntoPipHostActivity == null)
+                ? getTask()
+                : launchIntoPipHostActivity.getTask();
         mLastParentBeforePip.mChildPipActivity = this;
+        mLaunchIntoPipHostActivity = launchIntoPipHostActivity;
     }
 
     private void clearLastParentBeforePip() {
@@ -1570,10 +1583,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastParentBeforePip.mChildPipActivity = null;
             mLastParentBeforePip = null;
         }
+        mLaunchIntoPipHostActivity = null;
     }
 
     @Nullable Task getLastParentBeforePip() {
         return mLastParentBeforePip;
+    }
+
+    @Nullable ActivityRecord getLaunchIntoPipHostActivity() {
+        return mLaunchIntoPipHostActivity;
     }
 
     private void updateColorTransform() {
@@ -1854,6 +1872,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Only override manifest supplied option if set.
             if (rotationAnimation >= 0) {
                 mRotationAnimationHint = rotationAnimation;
+            }
+
+            if (options.getLaunchIntoPipParams() != null) {
+                pictureInPictureArgs = options.getLaunchIntoPipParams();
             }
 
             mOverrideTaskTransition = options.getOverrideTaskTransition();

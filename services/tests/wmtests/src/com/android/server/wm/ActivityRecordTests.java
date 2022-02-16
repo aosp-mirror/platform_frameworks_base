@@ -109,6 +109,7 @@ import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
 import android.app.ICompatCameraControlCallback;
+import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
@@ -2198,6 +2199,20 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Activity not supports PIP
         activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
         assertFalse(activity.supportsPictureInPicture());
+    }
+
+    @Test
+    public void testLaunchIntoPip() {
+        final PictureInPictureParams params = new PictureInPictureParams.Builder()
+                .build();
+        final ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setLaunchIntoPipActivityOptions(opts)
+                .build();
+
+        // Verify the pictureInPictureArgs is set on the new Activity
+        assertNotNull(activity.pictureInPictureArgs);
+        assertTrue(activity.pictureInPictureArgs.isLaunchIntoPip());
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,

@@ -3398,6 +3398,12 @@ class Task extends TaskFragment {
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
         info.preferDockBigOverlays = getPreferDockBigOverlays();
+        if (info.pictureInPictureParams != null
+                && info.pictureInPictureParams.isLaunchIntoPip()
+                && top.getTopMostActivity().getLastParentBeforePip() != null) {
+            info.launchIntoPipHostTaskId =
+                    top.getTopMostActivity().getLastParentBeforePip().mTaskId;
+        }
         info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
