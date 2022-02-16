@@ -33,6 +33,7 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
+import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
@@ -42,7 +43,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -56,6 +56,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -79,7 +81,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Mock
     private NotificationManager mNotificationManager;
     @Mock
-    private VibratorHelper mVibrator;
+    private Vibrator mVibrator;
     @Mock
     private IAudioService mIAudioService;
     @Mock
@@ -108,7 +110,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
-                mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
+                mNotificationManager, Optional.of(mVibrator), mIAudioService, mAccessibilityManager,
                 mPackageManager, mWakefullnessLifcycle, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
@@ -179,7 +181,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 ThreadFactory theadFactory,
                 AudioManager audioManager,
                 NotificationManager notificationManager,
-                VibratorHelper optionalVibrator,
+                Optional<Vibrator> optionalVibrator,
                 IAudioService iAudioService,
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,

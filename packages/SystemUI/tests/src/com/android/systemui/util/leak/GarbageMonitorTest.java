@@ -17,97 +17,124 @@
 package com.android.systemui.util.leak;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.os.Looper;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.concurrency.MessageRouterImpl;
-import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class GarbageMonitorTest extends SysuiTestCase {
 
-    @Mock private LeakReporter mLeakReporter;
-    @Mock private TrackedGarbage mTrackedGarbage;
-    @Mock private DumpManager mDumpManager;
-    private GarbageMonitor mGarbageMonitor;
-    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private LeakReporter mLeakReporter;
+    private TrackedGarbage mTrackedGarbage;
+    private TestableGarbageMonitor mGarbageMonitor;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        mTrackedGarbage = mock(TrackedGarbage.class);
+        mLeakReporter = mock(LeakReporter.class);
         mGarbageMonitor =
-                new GarbageMonitor(
+                new TestableGarbageMonitor(
                         mContext,
-                        mFakeExecutor,
-                        new MessageRouterImpl(mFakeExecutor),
-                        new LeakDetector(null, mTrackedGarbage, null, mDumpManager),
-                        mLeakReporter,
-                        mDumpManager);
+                        TestableLooper.get(this).getLooper(),
+                        new LeakDetector(null, mTrackedGarbage, null),
+                        mLeakReporter);
+    }
+
+    @Test
+    public void testCallbacks_getScheduled() {
+        mGarbageMonitor.startLeakMonitor();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
+    }
+
+    @Test
+    public void testNoGarbage_doesntDump() {
+        when(mTrackedGarbage.countOldGarbage()).thenReturn(0);
+
+        mGarbageMonitor.startLeakMonitor();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
+
+        verify(mLeakReporter, never()).dumpLeak(anyInt());
     }
 
     @Test
     public void testALittleGarbage_doesntDump() {
-        when(mTrackedGarbage.countOldGarbage()).thenReturn(GarbageMonitor.GARBAGE_ALLOWANCE);
+        when(mTrackedGarbage.countOldGarbage()).thenReturn(4);
 
-        mGarbageMonitor.reinspectGarbageAfterGc();
+        mGarbageMonitor.startLeakMonitor();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
+        mGarbageMonitor.runCallbacksOnce();
 
         verify(mLeakReporter, never()).dumpLeak(anyInt());
     }
 
     @Test
     public void testTransientGarbage_doesntDump() {
-        when(mTrackedGarbage.countOldGarbage()).thenReturn(GarbageMonitor.GARBAGE_ALLOWANCE + 1);
+        when(mTrackedGarbage.countOldGarbage()).thenReturn(100);
 
-        // Start the leak monitor. Nothing gets reported immediately.
         mGarbageMonitor.startLeakMonitor();
-        mFakeExecutor.runAllReady();
-        verify(mLeakReporter, never()).dumpLeak(anyInt());
+        mGarbageMonitor.runInspectCallback();
 
-        // Garbage gets reset to 0 before the leak reporte actually gets called.
         when(mTrackedGarbage.countOldGarbage()).thenReturn(0);
-        mFakeExecutor.advanceClockToLast();
-        mFakeExecutor.runAllReady();
 
-        // Therefore nothing gets dumped.
+        mGarbageMonitor.runReinspectCallback();
+
         verify(mLeakReporter, never()).dumpLeak(anyInt());
     }
 
     @Test
     public void testLotsOfPersistentGarbage_dumps() {
-        when(mTrackedGarbage.countOldGarbage()).thenReturn(GarbageMonitor.GARBAGE_ALLOWANCE + 1);
+        when(mTrackedGarbage.countOldGarbage()).thenReturn(100);
 
-        mGarbageMonitor.reinspectGarbageAfterGc();
+        mGarbageMonitor.startLeakMonitor();
+        mGarbageMonitor.runCallbacksOnce();
 
-        verify(mLeakReporter).dumpLeak(GarbageMonitor.GARBAGE_ALLOWANCE + 1);
+        verify(mLeakReporter).dumpLeak(anyInt());
     }
 
-    @Test
-    public void testLotsOfPersistentGarbage_dumpsAfterAtime() {
-        when(mTrackedGarbage.countOldGarbage()).thenReturn(GarbageMonitor.GARBAGE_ALLOWANCE + 1);
+    private static class TestableGarbageMonitor extends GarbageMonitor {
+        public TestableGarbageMonitor(
+                Context context,
+                Looper looper,
+                LeakDetector leakDetector,
+                LeakReporter leakReporter) {
+            super(context, looper, leakDetector, leakReporter);
+        }
 
-        // Start the leak monitor. Nothing gets reported immediately.
-        mGarbageMonitor.startLeakMonitor();
-        mFakeExecutor.runAllReady();
-        verify(mLeakReporter, never()).dumpLeak(anyInt());
+        void runInspectCallback() {
+            startLeakMonitor();
+        }
 
-        mFakeExecutor.advanceClockToLast();
-        mFakeExecutor.runAllReady();
+        void runReinspectCallback() {
+            reinspectGarbageAfterGc();
+        }
 
-        verify(mLeakReporter).dumpLeak(GarbageMonitor.GARBAGE_ALLOWANCE + 1);
+        void runCallbacksOnce() {
+            // Note that TestableLooper doesn't currently support delayed messages so we need to run
+            // callbacks explicitly.
+            runInspectCallback();
+            runReinspectCallback();
+        }
     }
 }

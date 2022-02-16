@@ -15,7 +15,6 @@
 package com.android.systemui;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -80,7 +79,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, testUri);
 
         mRelayHandler.handleIntent(intent);
-        verify(mSpyContext).registerReceiver(any(), eq(value), anyInt());
+        verify(mSpyContext).registerReceiver(any(), eq(value));
     }
 
     @Test
@@ -100,7 +99,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
 
         mRelayHandler.handleIntent(intent);
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mSpyContext).registerReceiver(relay.capture(), eq(value), anyInt());
+        verify(mSpyContext).registerReceiver(relay.capture(), eq(value));
 
         intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
@@ -139,7 +138,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
 
         mRelayHandler.handleIntent(intent);
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mSpyContext).registerReceiver(relay.capture(), eq(value), anyInt());
+        verify(mSpyContext).registerReceiver(relay.capture(), eq(value));
         relay.getValue().onReceive(mSpyContext, new Intent(TEST_ACTION));
 
         verify(Receiver.sReceiver, timeout(2000)).onReceive(any(), any());

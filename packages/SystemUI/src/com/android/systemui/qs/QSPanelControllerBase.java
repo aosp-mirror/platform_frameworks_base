@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
-import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -37,6 +36,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -45,7 +45,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -69,8 +68,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
+    private final FeatureFlags mFeatureFlags;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
-    protected boolean mShouldUseSplitNotificationShade;
+    private boolean mShouldUseSplitNotificationShade;
 
     @Nullable
     private Consumer<Boolean> mMediaVisibilityChangedListener;
@@ -87,16 +87,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
-                            Utils.shouldUseSplitNotificationShade(getResources());
-                    onConfigurationChanged();
+                            Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
                         switchTileLayout(false);
                     }
                 }
             };
-
-    protected void onConfigurationChanged() { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
@@ -120,7 +117,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            FeatureFlags featureFlags
     ) {
         super(view);
         mHost = host;
@@ -131,8 +129,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUiEventLogger = uiEventLogger;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mFeatureFlags = featureFlags;
         mShouldUseSplitNotificationShade =
-                Utils.shouldUseSplitNotificationShade(getResources());
+                Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources());
     }
 
     @Override
@@ -146,10 +145,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
      */
     public MediaHost getMediaHost() {
         return mMediaHost;
-    }
-
-    public void setSquishinessFraction(float squishinessFraction) {
-        mView.setSquishinessFraction(squishinessFraction);
     }
 
     @Override
@@ -220,8 +215,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        final TileRecord r =
-                new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
+        final TileRecord r = new TileRecord();
+        r.tile = tile;
+        r.tileView = mHost.createTileView(getContext(), tile, collapsedView);
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();
@@ -259,15 +255,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return null;
     }
 
-    QSTileView getTileView(String spec) {
-        for (QSPanelControllerBase.TileRecord r : mRecords) {
-            if (Objects.equals(r.tile.getTileSpec(), spec)) {
-                return r.tileView;
-            }
-        }
-        return null;
-    }
-
     private String getTilesSpecs() {
         return mRecords.stream()
                 .map(tileRecord ->  tileRecord.tile.getTileSpec())
@@ -298,7 +285,20 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsCustomizerController.hide();
             return;
         }
+        mView.closeDetail();
     }
+
+    /** */
+    public void openDetails(String subPanel) {
+        QSTile tile = getTile(subPanel);
+        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
+        // QSFactory will not be able to create a tile and getTile will return null
+        if (tile != null) {
+            mView.showDetailAdapter(
+                    true, tile.getDetailAdapter(), new int[]{mView.getWidth() / 2, 0});
+        }
+    }
+
 
     void setListening(boolean listening) {
         mView.setListening(listening);
@@ -388,9 +388,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 pw.print("    "); pw.println(record.tileView.toString());
             }
         }
-        if (mMediaHost != null) {
-            pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
-        }
     }
 
     public QSPanel.QSTileLayout getTileLayout() {
@@ -411,17 +408,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUsingHorizontalLayoutChangedListener = listener;
     }
 
-    public View getBrightnessView() {
-        return mView.getBrightnessView();
-    }
-
     /** */
-    public static final class TileRecord {
-        public TileRecord(QSTile tile, com.android.systemui.plugins.qs.QSTileView tileView) {
-            this.tile = tile;
-            this.tileView = tileView;
-        }
-
+    public static final class TileRecord extends QSPanel.Record {
         public QSTile tile;
         public com.android.systemui.plugins.qs.QSTileView tileView;
         public boolean scanState;

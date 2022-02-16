@@ -55,7 +55,6 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
-import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
@@ -73,8 +72,8 @@ public class UriGrantsManagerServiceTest {
 
     // we expect the following only during grant if a grant is expected
     private void verifyNoVisibilityGrant() {
-        verify(mContext.mPmInternal, never()).grantImplicitAccess(
-                anyInt(), any(), anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mContext.mPmInternal, never())
+                .grantImplicitAccess(anyInt(), any(), anyInt(), anyInt(), anyBoolean());
     }
 
     @Before
@@ -357,7 +356,7 @@ public class UriGrantsManagerServiceTest {
         final UriPermissionOwner owner = new UriPermissionOwner(mService, "primary");
 
         final ProviderInfo cameraInfo = mContext.mPmInternal.resolveContentProvider(
-                PKG_CAMERA, 0, USER_PRIMARY, Process.SYSTEM_UID);
+                PKG_CAMERA, 0, USER_PRIMARY);
 
         // By default no social can see any camera
         assertFalse(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,

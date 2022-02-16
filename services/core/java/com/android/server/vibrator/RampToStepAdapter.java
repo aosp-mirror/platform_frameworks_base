@@ -21,7 +21,6 @@ import android.os.VibratorInfo;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.util.MathUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +52,7 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
             if (!(segment instanceof RampSegment)) {
                 continue;
             }
-            List<StepSegment> steps = apply(info, (RampSegment) segment);
+            List<StepSegment> steps = apply((RampSegment) segment);
             segments.remove(i);
             segments.addAll(i, steps);
             int addedSegments = steps.size() - 1;
@@ -66,12 +65,11 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
         return repeatIndex;
     }
 
-    private List<StepSegment> apply(VibratorInfo info, RampSegment ramp) {
+    private List<StepSegment> apply(RampSegment ramp) {
         if (Float.compare(ramp.getStartAmplitude(), ramp.getEndAmplitude()) == 0) {
             // Amplitude is the same, so return a single step to simulate this ramp.
             return Arrays.asList(
-                    new StepSegment(ramp.getStartAmplitude(),
-                            fillEmptyFrequency(info, ramp.getStartFrequencyHz()),
+                    new StepSegment(ramp.getStartAmplitude(), ramp.getStartFrequency(),
                             (int) ramp.getDuration()));
         }
 
@@ -79,21 +77,17 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
         int stepCount = (int) (ramp.getDuration() + mStepDuration - 1) / mStepDuration;
         for (int i = 0; i < stepCount - 1; i++) {
             float pos = (float) i / stepCount;
-            // Fill zero frequency values with the device resonant frequency before interpolating.
-            float startFrequencyHz = fillEmptyFrequency(info, ramp.getStartFrequencyHz());
-            float endFrequencyHz = fillEmptyFrequency(info, ramp.getEndFrequencyHz());
             steps.add(new StepSegment(
-                    MathUtils.lerp(ramp.getStartAmplitude(), ramp.getEndAmplitude(), pos),
-                    MathUtils.lerp(startFrequencyHz, endFrequencyHz, pos),
+                    interpolate(ramp.getStartAmplitude(), ramp.getEndAmplitude(), pos),
+                    interpolate(ramp.getStartFrequency(), ramp.getEndFrequency(), pos),
                     mStepDuration));
         }
         int duration = (int) ramp.getDuration() - mStepDuration * (stepCount - 1);
-        float endFrequencyHz = fillEmptyFrequency(info, ramp.getEndFrequencyHz());
-        steps.add(new StepSegment(ramp.getEndAmplitude(), endFrequencyHz, duration));
+        steps.add(new StepSegment(ramp.getEndAmplitude(), ramp.getEndFrequency(), duration));
         return steps;
     }
 
-    private static float fillEmptyFrequency(VibratorInfo info, float frequencyHz) {
-        return frequencyHz == 0 ? info.getResonantFrequencyHz() : frequencyHz;
+    private static float interpolate(float start, float end, float position) {
+        return start + position * (end - start);
     }
 }

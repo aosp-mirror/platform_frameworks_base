@@ -27,30 +27,34 @@ public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
     public long mNativeObject; // BLASTBufferQueue*
 
-    private static native long nativeCreate(String name);
+    private static native long nativeCreate(String name, long surfaceControl, long width,
+            long height, int format);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
-    private static native void nativeSetSyncTransaction(long ptr, long transactionPtr,
-            boolean acquireSingleBuffer);
+    private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
             int format, long transactionPtr);
+    private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
-    private static native long nativeGetLastAcquiredFrameNum(long ptr);
-    private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
-    private static native boolean nativeIsSameSurfaceControl(long ptr, long surfaceControlPtr);
-    private static native SurfaceControl.Transaction nativeGatherPendingTransactions(long ptr,
-            long frameNumber);
+    private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
+            TransactionCompleteCallback callback);
+
+    /**
+     * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
+     */
+    public interface TransactionCompleteCallback {
+        /**
+         * Invoked when the transaction has completed.
+         * @param frameNumber The frame number of the buffer that was in that transaction
+         */
+        void onTransactionComplete(long frameNumber);
+    }
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        this(name);
-        update(sc, width, height, format);
-    }
-
-    public BLASTBufferQueue(String name) {
-        mNativeObject = nativeCreate(name);
+        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, format);
     }
 
     public void destroy() {
@@ -74,25 +78,12 @@ public final class BLASTBufferQueue {
     }
 
     /**
-     * Send the transaction to BBQ so the next frame can be added and not applied immediately. This
-     * gives the caller a chance to apply the transaction when it's ready.
-     *
-     * @param t                   The transaction to add the frame to. This can be null to clear the
-     *                            transaction.
-     * @param acquireSingleBuffer If true, only acquire a single buffer when processing frames. The
-     *                            transaction will be cleared once a single buffer has been
-     *                            acquired. If false, continue to acquire all buffers into the
-     *                            transaction until setSyncTransaction is called again with a null
-     *                            transaction.
+     * Send the transaction to BBQ so the next frame can be added and not applied immediately.
+     * This gives the caller a chance to apply the transaction when it's ready.
+     * @param t The transaction to add the frame to. This can be null to clear the transaction.
      */
-    public void setSyncTransaction(@Nullable SurfaceControl.Transaction t,
-            boolean acquireSingleBuffer) {
-        nativeSetSyncTransaction(mNativeObject, t == null ? 0 : t.mNativeObject,
-                acquireSingleBuffer);
-    }
-
-    public void setSyncTransaction(@Nullable SurfaceControl.Transaction t) {
-        setSyncTransaction(t, true /* acquireSingleBuffer */);
+    public void setNextTransaction(@Nullable SurfaceControl.Transaction t) {
+        nativeSetNextTransaction(mNativeObject, t == null ? 0 : t.mNativeObject);
     }
 
     /**
@@ -112,6 +103,16 @@ public final class BLASTBufferQueue {
         nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, 0);
     }
 
+    /**
+     * Set a callback when the transaction with the frame number has been completed.
+     * @param frameNumber The frame number to get the transaction complete callback for
+     * @param completeCallback The callback that should be invoked.
+     */
+    public void setTransactionCompleteCallback(long frameNumber,
+            @Nullable TransactionCompleteCallback completeCallback) {
+        nativeSetTransactionCompleteCallback(mNativeObject, frameNumber, completeCallback);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -121,6 +122,10 @@ public final class BLASTBufferQueue {
         } finally {
             super.finalize();
         }
+    }
+
+    public void flushShadowQueue() {
+        nativeFlushShadowQueue(mNativeObject);
     }
 
     /**
@@ -140,38 +145,4 @@ public final class BLASTBufferQueue {
         nativeMergeWithNextTransaction(mNativeObject, nativeTransaction, frameNumber);
     }
 
-    /**
-     * Apply any transactions that were passed to {@link #mergeWithNextTransaction} with the
-     * specified frameNumber. This is intended to ensure transactions don't get stuck as pending
-     * if the specified frameNumber is never drawn.
-     *
-     * @param frameNumber The frameNumber used to determine which transactions to apply.
-     */
-    public void applyPendingTransactions(long frameNumber) {
-        nativeApplyPendingTransactions(mNativeObject, frameNumber);
-    }
-
-    public long getLastAcquiredFrameNum() {
-        return nativeGetLastAcquiredFrameNum(mNativeObject);
-    }
-
-    /**
-     * @return True if the associated SurfaceControl has the same handle as {@param sc}.
-     */
-    public boolean isSameSurfaceControl(SurfaceControl sc) {
-        return nativeIsSameSurfaceControl(mNativeObject, sc.mNativeObject);
-    }
-
-    /**
-     * Get any transactions that were passed to {@link #mergeWithNextTransaction} with the
-     * specified frameNumber. This is intended to ensure transactions don't get stuck as pending
-     * if the specified frameNumber is never drawn.
-     *
-     * @param frameNumber The frameNumber used to determine which transactions to apply.
-     * @return a Transaction that contains the merge of all the transactions that were sent to
-     *         mergeWithNextTransaction
-     */
-    public SurfaceControl.Transaction gatherPendingTransactions(long frameNumber) {
-        return nativeGatherPendingTransactions(mNativeObject, frameNumber);
-    }
 }

@@ -27,11 +27,11 @@
     <!-- The percentage of the screen width to use for the default width or height of
          picture-in-picture windows. Regardless of the percent set here, calculated size will never
          be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
-    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.2</item>
+    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.14</item>
 
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
-    <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">24x24</string>
+    <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">56x27</string>
 
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
@@ -45,18 +45,5 @@
 
     <!-- Component name of the activity used to inform a user about a sensory being blocked because
      of privacy settings. -->
-    <string name="config_sensorUseStartedActivity" translatable="false">
-        com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
-    </string>
-
-    <!-- Component name of the activity that shows the request for access to a usb device. -->
-    <string name="config_usbPermissionActivity" translatable="false">
-        com.android.systemui/com.android.systemui.usb.tv.TvUsbPermissionActivity
-    </string>
-
-    <!-- Component name of the activity that confirms the activity to start when a usb device is
-     plugged in. -->
-    <string name="config_usbConfirmActivity" translatable="false">
-        com.android.systemui/com.android.systemui.usb.tv.TvUsbConfirmActivity
-    </string>
+    <string name="config_sensorUseStartedActivity">com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity</string>
 </resources>

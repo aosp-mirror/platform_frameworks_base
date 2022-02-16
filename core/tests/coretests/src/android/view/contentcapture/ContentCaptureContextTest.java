@@ -39,10 +39,9 @@ public class ContentCaptureContextTest {
     public void testConstructorAdditionalFlags() {
         final ComponentName componentName = new ComponentName("component", "name");
         final IBinder token = new Binder();
-        final IBinder windowToken = new Binder();
         final ContentCaptureContext ctx = new ContentCaptureContext(/* clientContext= */ null,
                 new ActivityId(/* taskId= */ 666, token), componentName, /* displayId= */
-                42, windowToken, /* flags= */ 1);
+                42, /* flags= */ 1);
         final ContentCaptureContext newCtx = new ContentCaptureContext(ctx, /* extraFlags= */ 2);
         assertThat(newCtx.getFlags()).isEqualTo(3);
         assertThat(newCtx.getActivityComponent()).isEqualTo(componentName);
@@ -51,7 +50,6 @@ public class ContentCaptureContextTest {
         assertThat(activityId.getTaskId()).isEqualTo(666);
         assertThat(activityId.getToken()).isEqualTo(token);
         assertThat(newCtx.getDisplayId()).isEqualTo(42);
-        assertThat(newCtx.getWindowToken()).isEqualTo(windowToken);
         assertThat(newCtx.getExtras()).isNull();
         assertThat(newCtx.getLocusId()).isNull();
         assertThat(newCtx.getParentSessionId()).isNull();

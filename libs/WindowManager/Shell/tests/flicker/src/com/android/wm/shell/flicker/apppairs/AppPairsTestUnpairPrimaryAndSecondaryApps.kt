@@ -25,10 +25,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER_COMPONENT
-import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
+import com.android.server.wm.flicker.traces.layers.getVisibleBounds
+import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
+import com.android.wm.shell.flicker.appPairsDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
-import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,15 +47,13 @@ import org.junit.runners.Parameterized
 class AppPairsTestUnpairPrimaryAndSecondaryApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
-            super.transition(this)
+            super.transition(this, it)
             setup {
-                eachRun {
-                    executeShellCommand(
-                            composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                    waitAppsShown(primaryApp, secondaryApp)
-                }
+                executeShellCommand(
+                    composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
             transitions {
                 // TODO pair apps through normal UX flow
@@ -69,20 +67,20 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
+    @FlakyTest
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
+    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
 
     @Presubmit
     @Test
     fun bothAppWindowsInvisible() {
         testSpec.assertWmEnd {
-            isAppWindowInvisible(primaryApp.component)
-            isAppWindowInvisible(secondaryApp.component)
+            isInvisible(primaryApp.defaultWindowName)
+            isInvisible(secondaryApp.defaultWindowName)
         }
     }
 
@@ -90,10 +88,10 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsStartingBounds() {
         testSpec.assertLayersStart {
-            val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
-            visibleRegion(primaryApp.component)
+            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
+            visibleRegion(primaryApp.defaultWindowName)
                 .coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion))
-            visibleRegion(secondaryApp.component)
+            visibleRegion(secondaryApp.defaultWindowName)
                 .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion))
         }
     }
@@ -102,14 +100,16 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {
-            notContains(primaryApp.component)
-            notContains(secondaryApp.component)
+            notContains(primaryApp.defaultWindowName)
+            notContains(secondaryApp.defaultWindowName)
         }
     }
 
-    @Presubmit
+    @FlakyTest
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    override fun navBarLayerIsAlwaysVisible() {
+        super.navBarLayerIsAlwaysVisible()
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

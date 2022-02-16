@@ -24,7 +24,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,9 +67,10 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     private final Queue<ApiCaller> mRequestQueue;
     private final Map<WalletServiceEventListener, String> mEventListeners;
     private boolean mIsConnected;
-    /** Timeout for active service connections (1 minute) */
+    /**
+     * Timeout for active service connections (1 minute)
+     */
     private static final long SERVICE_CONNECTION_TIMEOUT_MS = 60 * 1000;
-
     @Nullable
     private IQuickAccessWalletService mService;
 
@@ -146,6 +146,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
                 serviceCallback.onGetWalletCardsFailure(new GetWalletCardsError(null, null));
             }
         });
+
     }
 
     @Override
@@ -246,25 +247,6 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     }
 
     @Override
-    public void getWalletPendingIntent(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull WalletPendingIntentCallback pendingIntentCallback) {
-        BaseCallbacks callbacks = new BaseCallbacks() {
-            @Override
-            public void onTargetActivityPendingIntentReceived(PendingIntent pendingIntent) {
-                executor.execute(
-                        () -> pendingIntentCallback.onWalletPendingIntentRetrieved(pendingIntent));
-            }
-        };
-        executeApiCall(new ApiCaller("getTargetActivityPendingIntent") {
-            @Override
-            void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                service.onTargetActivityIntentRequested(callbacks);
-            }
-        });
-    }
-
-    @Override
     @Nullable
     public Intent createWalletSettingsIntent() {
         if (mServiceInfo == null) {
@@ -348,11 +330,6 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         return mServiceInfo == null ? null : mServiceInfo.getShortcutLongLabel(mContext);
     }
 
-    @Override
-    public boolean useTargetActivityForQuickAccess() {
-        return mServiceInfo.getUseTargetActivityForQuickAccess();
-    }
-
     private void connect() {
         mHandler.post(this::connectInternal);
     }
@@ -411,7 +388,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
             return;
         }
         mIsConnected = false;
-        mContext.unbindService(/*conn=*/ this);
+        mContext.unbindService(/*conn=*/this);
         mService = null;
         mEventListeners.clear();
         mRequestQueue.clear();
@@ -503,10 +480,6 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         }
 
         public void onWalletServiceEvent(WalletServiceEvent event) {
-            throw new IllegalStateException();
-        }
-
-        public void onTargetActivityPendingIntentReceived(PendingIntent pendingIntent) {
             throw new IllegalStateException();
         }
     }

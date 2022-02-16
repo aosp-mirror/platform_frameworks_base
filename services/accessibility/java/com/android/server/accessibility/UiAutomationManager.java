@@ -16,9 +16,7 @@
 
 package com.android.server.accessibility;
 
-import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
 import android.app.UiAutomation;
@@ -128,6 +126,7 @@ class UiAutomationManager {
             mUiAutomationServiceOwner = owner;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
             mUiAutomationService.mServiceInterface = serviceClient;
+            mUiAutomationService.onAdded();
             try {
                 mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
                         0);
@@ -136,8 +135,6 @@ class UiAutomationManager {
                 destroyUiAutomationService();
                 return;
             }
-
-            mUiAutomationService.onAdded();
 
             mUiAutomationService.connectServiceUnknownThread();
         }
@@ -272,14 +269,6 @@ class UiAutomationManager {
                     // If the serviceInterface is null, the UiAutomation has been shut down on
                     // another thread.
                     if (serviceInterface != null) {
-                        if (mTrace.isA11yTracingEnabledForTypes(
-                                AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
-                            mTrace.logTrace("UiAutomationService.connectServiceUnknownThread",
-                                    AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT,
-                                    "serviceConnection=" + this + ";connectionId=" + mId
-                                    + "windowToken="
-                                    + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
-                        }
                         serviceInterface.init(this, mId,
                                 mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
                     }
@@ -331,11 +320,6 @@ class UiAutomationManager {
         @Override
         public boolean switchToInputMethod(String imeId) {
             return false;
-        }
-
-        @Override
-        public int setInputMethodEnabled(String imeId, boolean enabled) {
-            return AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
         }
 
         @Override

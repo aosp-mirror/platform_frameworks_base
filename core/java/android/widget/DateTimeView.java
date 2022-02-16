@@ -33,7 +33,6 @@ import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.PluralsMessageFormatter;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
@@ -49,8 +48,6 @@ import java.time.ZoneId;
 import java.time.temporal.JulianFields;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 //
 // TODO
@@ -263,17 +260,19 @@ public class DateTimeView extends TextView {
             return;
         } else if (duration < HOUR_IN_MILLIS) {
             count = (int)(duration / MINUTE_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_minutes_shortest
-                    : com.android.internal.R.string.duration_minutes_shortest_future,
+            result = String.format(getContext().getResources().getQuantityString(past
+                            ? com.android.internal.R.plurals.duration_minutes_shortest
+                            : com.android.internal.R.plurals.duration_minutes_shortest_future,
+                            count),
                     count);
             millisIncrease = MINUTE_IN_MILLIS;
         } else if (duration < DAY_IN_MILLIS) {
             count = (int)(duration / HOUR_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                            ? com.android.internal.R.string.duration_hours_shortest
-                            : com.android.internal.R.string.duration_hours_shortest_future,
-                            count);
+            result = String.format(getContext().getResources().getQuantityString(past
+                            ? com.android.internal.R.plurals.duration_hours_shortest
+                            : com.android.internal.R.plurals.duration_hours_shortest_future,
+                            count),
+                    count);
             millisIncrease = HOUR_IN_MILLIS;
         } else if (duration < YEAR_IN_MILLIS) {
             // In weird cases it can become 0 because of daylight savings
@@ -282,9 +281,10 @@ public class DateTimeView extends TextView {
             LocalDateTime localNow = toLocalDateTime(now, zoneId);
 
             count = Math.max(Math.abs(dayDistance(localDateTime, localNow)), 1);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_days_shortest
-                    : com.android.internal.R.string.duration_days_shortest_future,
+            result = String.format(getContext().getResources().getQuantityString(past
+                            ? com.android.internal.R.plurals.duration_days_shortest
+                            : com.android.internal.R.plurals.duration_days_shortest_future,
+                            count),
                     count);
             if (past || count != 1) {
                 mUpdateTimeMillis = computeNextMidnight(localNow, zoneId);
@@ -295,9 +295,10 @@ public class DateTimeView extends TextView {
 
         } else {
             count = (int)(duration / YEAR_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_years_shortest
-                    : com.android.internal.R.string.duration_years_shortest_future,
+            result = String.format(getContext().getResources().getQuantityString(past
+                            ? com.android.internal.R.plurals.duration_years_shortest
+                            : com.android.internal.R.plurals.duration_years_shortest_future,
+                            count),
                     count);
             millisIncrease = YEAR_IN_MILLIS;
         }
@@ -362,25 +363,26 @@ public class DateTimeView extends TextView {
             int count;
             boolean past = (now >= mTimeMillis);
             String result;
-            Map<String, Object> arguments = new HashMap<>();
             if (duration < MINUTE_IN_MILLIS) {
                 result = mNowText;
             } else if (duration < HOUR_IN_MILLIS) {
                 count = (int)(duration / MINUTE_IN_MILLIS);
-                arguments.put("count", count);
-                result = PluralsMessageFormatter.format(
-                        getContext().getResources(),
-                        arguments,
-                        past ? R.string.duration_minutes_relative
-                                : R.string.duration_minutes_relative_future);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_minutes_relative
+                                : com.android.internal.
+                                        R.plurals.duration_minutes_relative_future,
+                        count),
+                        count);
             } else if (duration < DAY_IN_MILLIS) {
                 count = (int)(duration / HOUR_IN_MILLIS);
-                arguments.put("count", count);
-                result = PluralsMessageFormatter.format(
-                        getContext().getResources(),
-                        arguments,
-                        past ? R.string.duration_hours_relative
-                                : R.string.duration_hours_relative_future);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_hours_relative
+                                : com.android.internal.
+                                        R.plurals.duration_hours_relative_future,
+                        count),
+                        count);
             } else if (duration < YEAR_IN_MILLIS) {
                 // In weird cases it can become 0 because of daylight savings
                 LocalDateTime localDateTime = mLocalTime;
@@ -388,20 +390,23 @@ public class DateTimeView extends TextView {
                 LocalDateTime localNow = toLocalDateTime(now, zoneId);
 
                 count = Math.max(Math.abs(dayDistance(localDateTime, localNow)), 1);
-                arguments.put("count", count);
-                result = PluralsMessageFormatter.format(
-                        getContext().getResources(),
-                        arguments,
-                        past ? R.string.duration_days_relative
-                                : R.string.duration_days_relative_future);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_days_relative
+                                : com.android.internal.
+                                        R.plurals.duration_days_relative_future,
+                        count),
+                        count);
+
             } else {
                 count = (int)(duration / YEAR_IN_MILLIS);
-                arguments.put("count", count);
-                result = PluralsMessageFormatter.format(
-                        getContext().getResources(),
-                        arguments,
-                        past ? R.string.duration_years_relative
-                                : R.string.duration_years_relative_future);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_years_relative
+                                : com.android.internal.
+                                        R.plurals.duration_years_relative_future,
+                        count),
+                        count);
             }
             info.setText(result);
         }

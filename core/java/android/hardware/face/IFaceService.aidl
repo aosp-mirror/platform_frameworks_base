@@ -44,48 +44,45 @@ interface IFaceService {
     // Retrieve static sensor properties for the specified sensor
     FaceSensorPropertiesInternal getSensorProperties(int sensorId, String opPackageName);
 
-    // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
-    long authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
+    // Authenticate the given sessionId with a face
+    void authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
             String opPackageName, boolean isKeyguardBypassEnabled);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
-    // about accept/reject/lockout. A requestId is returned that can be used to cancel this
-    // operation.
-    long detectFace(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
+    // about accept/reject/lockout.
+    void detectFace(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
-    void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token,
-            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, long requestId, int cookie,
-            boolean allowBackgroundAuthentication);
+    void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token, long operationId,
+            int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
+            int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int sensorId, int cookie);
 
-    // Cancel authentication for the given requestId.
-    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
+    // Cancel authentication for the given sessionId
+    void cancelAuthentication(IBinder token, String opPackageName);
 
-    // Cancel face detection for the given requestId.
-    void cancelFaceDetect(IBinder token, String opPackageName, long requestId);
+    // Cancel face detection
+    void cancelFaceDetect(IBinder token, String opPackageName);
 
     // Same as above, with extra arguments.
-    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName, long requestId);
+    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName);
 
     // Start face enrollment
-    long enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures,
-            in Surface previewSurface, boolean debugConsent);
+    void enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
+            String opPackageName, in int [] disabledFeatures, in Surface previewSurface, boolean debugConsent);
 
     // Start remote face enrollment
-    long enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
+    void enrollRemotely(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
-    void cancelEnrollment(IBinder token, long requestId);
+    void cancelEnrollment(IBinder token);
 
     // Removes the specified face enrollment for the specified userId.
     void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,

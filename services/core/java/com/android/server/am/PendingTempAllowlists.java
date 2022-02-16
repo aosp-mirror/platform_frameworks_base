@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.os.Process.INVALID_UID;
-
 import android.util.SparseArray;
 
 /** Allowlists of uids to temporarily bypass Power Save mode. */
@@ -33,42 +31,29 @@ final class PendingTempAllowlists {
     }
 
     void put(int uid, ActivityManagerService.PendingTempAllowlist value) {
-        synchronized (mPendingTempAllowlist) {
-            mPendingTempAllowlist.put(uid, value);
-        }
+        mPendingTempAllowlist.put(uid, value);
         mService.mAtmInternal.onUidAddedToPendingTempAllowlist(uid, value.tag);
     }
 
     void removeAt(int index) {
-        int uid = INVALID_UID;
-        synchronized (mPendingTempAllowlist) {
-            uid = mPendingTempAllowlist.keyAt(index);
-            mPendingTempAllowlist.removeAt(index);
-        }
+        final int uid = mPendingTempAllowlist.keyAt(index);
+        mPendingTempAllowlist.removeAt(index);
         mService.mAtmInternal.onUidRemovedFromPendingTempAllowlist(uid);
     }
 
     ActivityManagerService.PendingTempAllowlist get(int uid) {
-        synchronized (mPendingTempAllowlist) {
-            return mPendingTempAllowlist.get(uid);
-        }
+        return mPendingTempAllowlist.get(uid);
     }
 
     int size() {
-        synchronized (mPendingTempAllowlist) {
-            return mPendingTempAllowlist.size();
-        }
+        return mPendingTempAllowlist.size();
     }
 
     ActivityManagerService.PendingTempAllowlist valueAt(int index) {
-        synchronized (mPendingTempAllowlist) {
-            return mPendingTempAllowlist.valueAt(index);
-        }
+        return mPendingTempAllowlist.valueAt(index);
     }
 
     int indexOfKey(int key) {
-        synchronized (mPendingTempAllowlist) {
-            return mPendingTempAllowlist.indexOfKey(key);
-        }
+        return mPendingTempAllowlist.indexOfKey(key);
     }
 }

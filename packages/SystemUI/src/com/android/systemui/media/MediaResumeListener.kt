@@ -35,7 +35,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
-import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -54,13 +53,11 @@ class MediaResumeListener @Inject constructor(
     @Background private val backgroundExecutor: Executor,
     private val tunerService: TunerService,
     private val mediaBrowserFactory: ResumeMediaBrowserFactory,
-    dumpManager: DumpManager,
-    private val systemClock: SystemClock
+    dumpManager: DumpManager
 ) : MediaDataManager.Listener, Dumpable {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
-    private val resumeComponents: ConcurrentLinkedQueue<Pair<ComponentName, Long>> =
-            ConcurrentLinkedQueue()
+    private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
 
     private lateinit var mediaDataManager: MediaDataManager
 
@@ -134,32 +131,14 @@ class MediaResumeListener @Inject constructor(
         val listString = prefs.getString(MEDIA_PREFERENCE_KEY + currentUserId, null)
         val components = listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())
             ?.dropLastWhile { it.isEmpty() }
-        var needsUpdate = false
         components?.forEach {
             val info = it.split("/")
             val packageName = info[0]
             val className = info[1]
             val component = ComponentName(packageName, className)
-
-            val lastPlayed = if (info.size == 3) {
-                try {
-                    info[2].toLong()
-                } catch (e: NumberFormatException) {
-                    needsUpdate = true
-                    systemClock.currentTimeMillis()
-                }
-            } else {
-                needsUpdate = true
-                systemClock.currentTimeMillis()
-            }
-            resumeComponents.add(component to lastPlayed)
+            resumeComponents.add(component)
         }
         Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
-
-        if (needsUpdate) {
-            // Save any missing times that we had to fill in
-            writeSharedPrefs()
-        }
     }
 
     /**
@@ -170,12 +149,9 @@ class MediaResumeListener @Inject constructor(
             return
         }
 
-        val now = systemClock.currentTimeMillis()
         resumeComponents.forEach {
-            if (now.minus(it.second) <= RESUME_MEDIA_TIMEOUT) {
-                val browser = mediaBrowserFactory.create(mediaBrowserCallback, it.first)
-                browser.findRecentMedia()
-            }
+            val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
+            browser.findRecentMedia()
         }
     }
 
@@ -184,7 +160,7 @@ class MediaResumeListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        isSsReactivated: Boolean
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
@@ -193,7 +169,7 @@ class MediaResumeListener @Inject constructor(
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
-            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession()) {
+            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
@@ -258,24 +234,18 @@ class MediaResumeListener @Inject constructor(
      */
     private fun updateResumptionList(componentName: ComponentName) {
         // Remove if exists
-        resumeComponents.remove(resumeComponents.find { it.first.equals(componentName) })
+        resumeComponents.remove(componentName)
         // Insert at front of queue
-        val currentTime = systemClock.currentTimeMillis()
-        resumeComponents.add(componentName to currentTime)
+        resumeComponents.add(componentName)
         // Remove old components if over the limit
         if (resumeComponents.size > ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
             resumeComponents.remove()
         }
 
-        writeSharedPrefs()
-    }
-
-    private fun writeSharedPrefs() {
+        // Save changes
         val sb = StringBuilder()
         resumeComponents.forEach {
-            sb.append(it.first.flattenToString())
-            sb.append("/")
-            sb.append(it.second)
+            sb.append(it.flattenToString())
             sb.append(ResumeMediaBrowser.DELIMITER)
         }
         val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)

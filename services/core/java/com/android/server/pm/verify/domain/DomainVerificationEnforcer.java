@@ -70,11 +70,8 @@ public class DomainVerificationEnforcer {
                 break;
             default:
                 if (!proxy.isCallerVerifier(callingUid)) {
-                    mContext.enforcePermission(android.Manifest.permission.DUMP,
-                            Binder.getCallingPid(), callingUid,
-                            "Caller " + callingUid
-                                    + " is not allowed to query domain verification state");
-                    break;
+                    throw new SecurityException(
+                            "Caller is not allowed to query domain verification state");
                 }
 
                 mContext.enforcePermission(android.Manifest.permission.QUERY_ALL_PACKAGES,

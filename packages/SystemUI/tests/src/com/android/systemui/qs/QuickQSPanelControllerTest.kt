@@ -16,28 +16,23 @@
 
 package com.android.systemui.qs
 
-import android.content.res.Configuration
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.MediaFlags
 import com.android.systemui.media.MediaHost
-import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.util.leak.RotationUtils
+import com.android.systemui.statusbar.FeatureFlags
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -58,8 +53,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mediaHost: MediaHost
     @Mock
-    private lateinit var mediaFlags: MediaFlags
-    @Mock
     private lateinit var metricsLogger: MetricsLogger
     private val uiEventLogger = UiEventLoggerFake()
     @Mock
@@ -71,34 +64,30 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tileLayout: TileLayout
     @Mock
     private lateinit var tileView: QSTileView
-    @Captor
-    private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
 
-    private lateinit var controller: TestQuickQSPanelController
+    private lateinit var controller: QuickQSPanelController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
-        `when`(quickQSPanel.isAttachedToWindow).thenReturn(true)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
-        `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
-        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(false)
 
-        controller = TestQuickQSPanelController(
+        controller = QuickQSPanelController(
                 quickQSPanel,
                 qsTileHost,
                 qsCustomizerController,
                 false,
                 mediaHost,
-                true,
-                mediaFlags,
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager
+                dumpManager,
+                featureFlags
         )
 
         controller.init()
@@ -127,49 +116,5 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
 
         verify(quickQSPanel, times(limit)).addTile(any())
-    }
-
-    @Test
-    fun testMediaExpansionUpdatedWhenConfigurationChanged() {
-        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(true)
-
-        // times(2) because both controller and base controller are registering their listeners
-        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
-
-        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
-        verify(mediaHost).expansion = MediaHostState.EXPANDED
-
-        // Rotate device, verify media size updated
-        controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
-        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
-
-        // times(2) because init will have set to collapsed because the flag was off
-        verify(mediaHost, times(2)).expansion = MediaHostState.COLLAPSED
-    }
-
-    class TestQuickQSPanelController(
-        view: QuickQSPanel,
-        qsTileHost: QSTileHost,
-        qsCustomizerController: QSCustomizerController,
-        usingMediaPlayer: Boolean,
-        mediaHost: MediaHost,
-        usingCollapsedLandscapeMedia: Boolean,
-        mediaFlags: MediaFlags,
-        metricsLogger: MetricsLogger,
-        uiEventLogger: UiEventLoggerFake,
-        qsLogger: QSLogger,
-        dumpManager: DumpManager
-    ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
-        mediaHost, usingCollapsedLandscapeMedia, mediaFlags, metricsLogger, uiEventLogger, qsLogger,
-        dumpManager) {
-
-        private var rotation = RotationUtils.ROTATION_NONE
-
-        @Override
-        override fun getRotation(): Int = rotation
-
-        fun setRotation(newRotation: Int) {
-            rotation = newRotation
-        }
     }
 }

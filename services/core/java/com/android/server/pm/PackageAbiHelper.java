@@ -134,8 +134,8 @@ public interface PackageAbiHelper {
             //
             // If the settings aren't null, sync them up with what we've derived.
             if (pkgSetting != null) {
-                pkgSetting.setPrimaryCpuAbi(primary);
-                pkgSetting.setSecondaryCpuAbi(secondary);
+                pkgSetting.primaryCpuAbiString = primary;
+                pkgSetting.secondaryCpuAbiString = secondary;
             }
         }
     }

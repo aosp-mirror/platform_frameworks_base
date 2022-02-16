@@ -62,7 +62,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
         whenever(mockHolder.elapsedTimeView).thenReturn(elapsedTimeView)
         whenever(mockHolder.totalTimeView).thenReturn(totalTimeView)
 
-        observer = SeekBarObserver(mockHolder, false /* useSessionLayout */)
+        observer = SeekBarObserver(mockHolder)
     }
 
     @Test
@@ -76,7 +76,6 @@ public class SeekBarObserverTest : SysuiTestCase() {
         assertThat(seekBarView.getThumb().getAlpha()).isEqualTo(0)
         assertThat(elapsedTimeView.getText()).isEqualTo("")
         assertThat(totalTimeView.getText()).isEqualTo("")
-        assertThat(seekBarView.contentDescription).isEqualTo("")
         assertThat(seekBarView.maxHeight).isEqualTo(disabledHeight)
     }
 
@@ -103,9 +102,6 @@ public class SeekBarObserverTest : SysuiTestCase() {
         assertThat(seekBarView.max).isEqualTo(120000)
         assertThat(elapsedTimeView.getText()).isEqualTo("00:03")
         assertThat(totalTimeView.getText()).isEqualTo("02:00")
-
-        val desc = context.getString(R.string.controls_media_seekbar_description, "00:03", "02:00")
-        assertThat(seekBarView.contentDescription).isEqualTo(desc)
     }
 
     @Test

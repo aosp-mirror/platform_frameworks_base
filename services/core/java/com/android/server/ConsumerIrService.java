@@ -19,19 +19,17 @@ package com.android.server;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.IConsumerIrService;
-import android.hardware.ir.ConsumerIrFreqRange;
-import android.hardware.ir.IConsumerIr;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Slog;
+
+import java.lang.RuntimeException;
 
 public class ConsumerIrService extends IConsumerIrService.Stub {
     private static final String TAG = "ConsumerIrService";
 
     private static final int MAX_XMIT_TIME = 2000000; /* in microseconds */
 
-    private static native boolean getHidlHalService();
+    private static native boolean halOpen();
     private static native int halTransmit(int carrierFrequency, int[] pattern);
     private static native int[] halGetCarrierFrequencies();
 
@@ -39,7 +37,6 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     private final PowerManager.WakeLock mWakeLock;
     private final boolean mHasNativeHal;
     private final Object mHalLock = new Object();
-    private IConsumerIr mAidlService = null;
 
     ConsumerIrService(Context context) {
         mContext = context;
@@ -48,8 +45,7 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
 
-        mHasNativeHal = getHalService();
-
+        mHasNativeHal = halOpen();
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CONSUMER_IR)) {
             if (!mHasNativeHal) {
                 throw new RuntimeException("FEATURE_CONSUMER_IR present, but no IR HAL loaded!");
@@ -62,19 +58,6 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     @Override
     public boolean hasIrEmitter() {
         return mHasNativeHal;
-    }
-
-    private boolean getHalService() {
-        // Attempt to get the AIDL HAL service first
-        final String fqName = IConsumerIr.DESCRIPTOR + "/default";
-        mAidlService = IConsumerIr.Stub.asInterface(
-                        ServiceManager.waitForDeclaredService(fqName));
-        if (mAidlService != null) {
-            return true;
-        }
-
-        // Fall back to the HIDL HAL service
-        return getHidlHalService();
     }
 
     private void throwIfNoIrEmitter() {
@@ -108,18 +91,10 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
 
         // Right now there is no mechanism to ensure fair queing of IR requests
         synchronized (mHalLock) {
-            if (mAidlService != null) {
-                try {
-                    mAidlService.transmit(carrierFrequency, pattern);
-                } catch (RemoteException ignore) {
-                    Slog.e(TAG, "Error transmitting frequency: " + carrierFrequency);
-                }
-            } else {
-                int err = halTransmit(carrierFrequency, pattern);
+            int err = halTransmit(carrierFrequency, pattern);
 
-                if (err < 0) {
-                    Slog.e(TAG, "Error transmitting: " + err);
-                }
+            if (err < 0) {
+                Slog.e(TAG, "Error transmitting: " + err);
             }
         }
     }
@@ -134,24 +109,7 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
         throwIfNoIrEmitter();
 
         synchronized(mHalLock) {
-            if (mAidlService != null) {
-                try {
-                    ConsumerIrFreqRange[] output = mAidlService.getCarrierFreqs();
-                    if (output.length <= 0) {
-                        Slog.e(TAG, "Error getting carrier frequencies.");
-                    }
-                    int[] result = new int[output.length * 2];
-                    for (int i = 0; i < output.length; i++) {
-                        result[i * 2] = output[i].minHz;
-                        result[i * 2 + 1] = output[i].maxHz;
-                    }
-                    return result;
-                } catch (RemoteException ignore) {
-                    return null;
-                }
-            } else {
-                return halGetCarrierFrequencies();
-            }
+            return halGetCarrierFrequencies();
         }
     }
 }

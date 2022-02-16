@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class BroadcastRadioService {
     private static final String TAG = "BcRadio2Srv";
 
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     @GuardedBy("mLock")
     private int mNextModuleId = 0;
@@ -68,7 +68,7 @@ public class BroadcastRadioService {
                     moduleId = mNextModuleId;
                 }
 
-                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName, mLock);
+                RadioModule module = RadioModule.tryLoadingModule(moduleId, serviceName);
                 if (module == null) {
                     return;
                 }
@@ -116,9 +116,8 @@ public class BroadcastRadioService {
         }
     };
 
-    public BroadcastRadioService(int nextModuleId, Object lock) {
+    public BroadcastRadioService(int nextModuleId) {
         mNextModuleId = nextModuleId;
-        mLock = lock;
         try {
             IServiceManager manager = IServiceManager.getService();
             if (manager == null) {
@@ -175,7 +174,7 @@ public class BroadcastRadioService {
 
     public ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
             @NonNull IAnnouncementListener listener) {
-        AnnouncementAggregator aggregator = new AnnouncementAggregator(listener, mLock);
+        AnnouncementAggregator aggregator = new AnnouncementAggregator(listener);
         boolean anySupported = false;
         synchronized (mLock) {
             for (RadioModule module : mModules.values()) {

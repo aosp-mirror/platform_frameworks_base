@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
@@ -47,7 +48,6 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -174,10 +174,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mImeWindow.setHasSurface(true);
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
         getController().onImeControlTargetChanged(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_IME, true);
+        final InsetsState requestedState = new InsetsState();
+        requestedState.getSource(ITYPE_IME).setVisible(true);
         mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow()
-                .setRequestedVisibilities(requestedVisibilities);
+                .updateRequestedVisibility(requestedState);
         getController().onInsetsModified(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
 
         // Send our spy window (app) into the system so that we can detect the invocation.
@@ -245,7 +245,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
         app.mAboveInsetsState.addSource(getController().getRawInsetsState().peekSource(ITYPE_IME));
         child.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
-        child.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        child.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
         mDisplayContent.computeImeTarget(true);
         mDisplayContent.setLayoutNeeded();
@@ -331,8 +331,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
 
         provider.getSource().setVisible(false);
-        mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR },
-                true /* isGestureOnSystemBar */);
+        mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR });
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR));
         assertFalse(app.getInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());

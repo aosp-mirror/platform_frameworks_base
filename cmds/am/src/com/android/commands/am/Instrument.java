@@ -545,8 +545,6 @@ public class Instrument {
                 mWm.setAnimationScales(oldAnims);
             }
         }
-        // Exit from here instead of going down the path of normal shutdown which is slow.
-        System.exit(0);
     }
 
     private static String readLogcat(long startTimeMs) {

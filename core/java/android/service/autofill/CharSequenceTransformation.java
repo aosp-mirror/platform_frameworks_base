@@ -32,7 +32,6 @@ import com.android.internal.util.Preconditions;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,9 +147,9 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         public Builder addField(@NonNull AutofillId id, @NonNull Pattern regex,
                 @NonNull String subst) {
             throwIfDestroyed();
-            Objects.requireNonNull(id);
-            Objects.requireNonNull(regex);
-            Objects.requireNonNull(subst);
+            Preconditions.checkNotNull(id);
+            Preconditions.checkNotNull(regex);
+            Preconditions.checkNotNull(subst);
 
             mFields.put(id, new Pair<>(regex, subst));
             return this;

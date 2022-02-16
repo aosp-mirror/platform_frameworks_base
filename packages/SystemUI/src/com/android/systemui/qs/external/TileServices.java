@@ -35,11 +35,9 @@ import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -48,9 +46,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Objects;
-
-import javax.inject.Inject;
 
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
@@ -67,21 +62,14 @@ public class TileServices extends IQSService.Stub {
     private final Handler mHandler;
     private final Handler mMainHandler;
     private final QSTileHost mHost;
-    private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final UserTracker mUserTracker;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
-    @Inject
-    public TileServices(
-            QSTileHost host,
-            @Main Looper looper,
-            BroadcastDispatcher broadcastDispatcher,
-            UserTracker userTracker,
-            KeyguardStateController keyguardStateController) {
+    public TileServices(QSTileHost host, Looper looper, BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker) {
         mHost = host;
-        mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
@@ -105,7 +93,8 @@ public class TileServices extends IQSService.Stub {
 
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
-        TileServiceManager service = onCreateTileService(component, mBroadcastDispatcher);
+        TileServiceManager service = onCreateTileService(component, tile.getQsTile(),
+                mBroadcastDispatcher);
         synchronized (mServices) {
             mServices.put(tile, service);
             mTiles.put(component, tile);
@@ -116,9 +105,9 @@ public class TileServices extends IQSService.Stub {
         return service;
     }
 
-    protected TileServiceManager onCreateTileService(ComponentName component,
+    protected TileServiceManager onCreateTileService(ComponentName component, Tile tile,
             BroadcastDispatcher broadcastDispatcher) {
-        return new TileServiceManager(this, mHandler, component,
+        return new TileServiceManager(this, mHandler, component, tile,
                 broadcastDispatcher, mUserTracker);
     }
 
@@ -189,13 +178,6 @@ public class TileServices extends IQSService.Stub {
                 return;
             }
             TileServiceManager service = mServices.get(customTile);
-            if (service == null) {
-                Log.e(
-                        TAG,
-                        "No TileServiceManager found in requestListening for tile "
-                                + customTile.getTileSpec());
-                return;
-            }
             if (!service.isActiveTile()) {
                 return;
             }
@@ -254,7 +236,7 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             customTile.onDialogShown();
             mHost.forceCollapsePanels();
-            Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(true);
+            mServices.get(customTile).setShowingDialog(true);
         }
     }
 
@@ -263,7 +245,7 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(false);
+            mServices.get(customTile).setShowingDialog(false);
             customTile.onDialogHidden();
         }
     }
@@ -307,7 +289,6 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
-    @Nullable
     @Override
     public Tile getTile(IBinder token) {
         CustomTile customTile = getTileForToken(token);
@@ -329,22 +310,24 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public boolean isLocked() {
-        return mKeyguardStateController.isShowing();
+        KeyguardStateController keyguardStateController =
+                Dependency.get(KeyguardStateController.class);
+        return keyguardStateController.isShowing();
     }
 
     @Override
     public boolean isSecure() {
-        return mKeyguardStateController.isMethodSecure() && mKeyguardStateController.isShowing();
+        KeyguardStateController keyguardStateController =
+                Dependency.get(KeyguardStateController.class);
+        return keyguardStateController.isMethodSecure() && keyguardStateController.isShowing();
     }
 
-    @Nullable
     private CustomTile getTileForToken(IBinder token) {
         synchronized (mServices) {
             return mTokenMap.get(token);
         }
     }
 
-    @Nullable
     private CustomTile getTileForComponent(ComponentName component) {
         synchronized (mServices) {
             return mTiles.get(component);
@@ -362,12 +345,8 @@ public class TileServices extends IQSService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (TileService.ACTION_REQUEST_LISTENING.equals(intent.getAction())) {
-                try {
-                    ComponentName c = intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME);
-                    requestListening(c);
-                } catch (ClassCastException ex) {
-                    Log.e(TAG, "Bad component name", ex);
-                }
+                requestListening(
+                        (ComponentName) intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
             }
         }
     };

@@ -74,7 +74,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    layerUpdater->updateLayer(true, nullptr, 0, SkRect::MakeEmpty());
+    layerUpdater->updateLayer(true, SkMatrix::I(), nullptr);
     return layerUpdater;
 }
 

@@ -34,7 +34,6 @@ import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ServiceManager;
-import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.provider.Settings;
@@ -109,7 +108,7 @@ public class NotifierTest {
         mTestLooper.dispatchAll();
 
         // THEN the device vibrates once
-        verify(mVibrator, times(1)).vibrate(any(), any(VibrationAttributes.class));
+        verify(mVibrator, times(1)).vibrate(any(), any());
     }
 
     @Test
@@ -124,7 +123,7 @@ public class NotifierTest {
         mTestLooper.dispatchAll();
 
         // THEN the device doesn't vibrate
-        verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
+        verify(mVibrator, never()).vibrate(any(), any());
     }
 
     @Test
@@ -139,7 +138,7 @@ public class NotifierTest {
         mTestLooper.dispatchAll();
 
         // THEN the device vibrates once
-        verify(mVibrator, times(1)).vibrate(any(), any(VibrationAttributes.class));
+        verify(mVibrator, times(1)).vibrate(any(), any());
     }
 
     @Test
@@ -154,7 +153,7 @@ public class NotifierTest {
         mTestLooper.dispatchAll();
 
         // THEN the device doesn't vibrate
-        verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
+        verify(mVibrator, never()).vibrate(any(), any());
     }
 
     @Test
@@ -172,7 +171,7 @@ public class NotifierTest {
         mTestLooper.dispatchAll();
 
         // THEN the device doesn't vibrate
-        verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
+        verify(mVibrator, never()).vibrate(any(), any());
     }
 
     @Test
@@ -211,7 +210,7 @@ public class NotifierTest {
         @Override
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+                FaceDownDetector faceDownDetector) {
             return mNotifierMock;
         }
 
@@ -298,7 +297,6 @@ public class NotifierTest {
                 IBatteryStats.Stub.asInterface(ServiceManager.getService(
                         BatteryStats.SERVICE_NAME)),
                 mInjector.createSuspendBlocker(mService, "testBlocker"),
-                null,
                 null,
                 null);
     }

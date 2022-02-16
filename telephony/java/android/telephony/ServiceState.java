@@ -444,9 +444,7 @@ public class ServiceState implements Parcelable {
         mArfcnRsrpBoost = s.mArfcnRsrpBoost;
         synchronized (mNetworkRegistrationInfos) {
             mNetworkRegistrationInfos.clear();
-            for (NetworkRegistrationInfo nri : s.getNetworkRegistrationInfoList()) {
-                mNetworkRegistrationInfos.add(new NetworkRegistrationInfo(nri));
-            }
+            mNetworkRegistrationInfos.addAll(s.getNetworkRegistrationInfoList());
         }
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
@@ -479,7 +477,7 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = in.readInt() != 0;
         mArfcnRsrpBoost = in.readInt();
         synchronized (mNetworkRegistrationInfos) {
-            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader(), android.telephony.NetworkRegistrationInfo.class);
+            in.readList(mNetworkRegistrationInfos, NetworkRegistrationInfo.class.getClassLoader());
         }
         mChannelNumber = in.readInt();
         mCellBandwidths = in.createIntArray();
@@ -612,7 +610,7 @@ public class ServiceState implements Parcelable {
     /**
      * Get the channel number of the current primary serving cell, or -1 if unknown
      *
-     * <p>This is NRARFCN for NR, EARFCN for LTE, UARFCN for UMTS, and ARFCN for GSM.
+     * <p>This is EARFCN for LTE, UARFCN for UMTS, and ARFCN for GSM.
      *
      * @return Channel number of primary serving cell
      */
@@ -1409,7 +1407,7 @@ public class ServiceState implements Parcelable {
         m.putString("data-operator-numeric", mOperatorNumeric);
         m.putBoolean("manual", mIsManualNetworkSelection);
         m.putInt("radioTechnology", getRilVoiceRadioTechnology());
-        m.putInt("dataRadioTechnology", getRilDataRadioTechnology());
+        m.putInt("dataRadioTechnology", getRadioTechnology());
         m.putBoolean("cssIndicator", mCssIndicator);
         m.putInt("networkId", mNetworkId);
         m.putInt("systemId", mSystemId);
@@ -1545,6 +1543,17 @@ public class ServiceState implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getRilDataRadioTechnology() {
         return networkTypeToRilRadioTechnology(getDataNetworkType());
+    }
+
+    /**
+     * @hide
+     * @Deprecated to be removed Q3 2013 use {@link #getRilDataRadioTechnology} or
+     * {@link #getRilVoiceRadioTechnology}
+     */
+    @UnsupportedAppUsage
+    public int getRadioTechnology() {
+        Rlog.e(LOG_TAG, "ServiceState.getRadioTechnology() DEPRECATED will be removed *******");
+        return getRilDataRadioTechnology();
     }
 
     /**

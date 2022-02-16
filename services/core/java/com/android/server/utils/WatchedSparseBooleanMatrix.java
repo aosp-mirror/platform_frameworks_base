@@ -263,33 +263,6 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
-     * Removes all of the mappings whose index is between {@code fromIndex}, inclusive, and
-     * {@code toIndex}, exclusive. The matrix does not shrink.
-     */
-    public void removeRange(int fromIndex, int toIndex) {
-        if (toIndex < fromIndex) {
-            throw new ArrayIndexOutOfBoundsException("toIndex < fromIndex");
-        }
-        final int num = toIndex - fromIndex;
-        if (num == 0) {
-            return;
-        }
-        validateIndex(fromIndex);
-        validateIndex(toIndex - 1);
-        for (int i = fromIndex; i < toIndex; i++) {
-            mInUse[mMap[i]] = false;
-        }
-        System.arraycopy(mKeys, toIndex, mKeys, fromIndex, mSize - toIndex);
-        System.arraycopy(mMap, toIndex, mMap, fromIndex, mSize - toIndex);
-        for (int i = mSize - num; i < mSize; i++) {
-            mKeys[i] = 0;
-            mMap[i] = 0;
-        }
-        mSize -= num;
-        onChanged();
-    }
-
-    /**
      * Returns the number of key-value mappings that this WatchedSparseBooleanMatrix
      * currently stores.
      */
@@ -398,7 +371,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
                 // Preemptively grow the matrix, which also grows the free list.
                 growMatrix();
             }
-            int newIndex = nextFree(true /* acquire */);
+            int newIndex = nextFree();
             mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
             mMap = GrowingArrayUtils.insert(mMap, mSize, i, newIndex);
             mSize++;
@@ -474,12 +447,12 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
-     * Find an unused storage index, and return it. Mark it in-use if the {@code acquire} is true.
+     * Find an unused storage index, mark it in-use, and return it.
      */
-    private int nextFree(boolean acquire) {
+    private int nextFree() {
         for (int i = 0; i < mInUse.length; i++) {
             if (!mInUse[i]) {
-                mInUse[i] = acquire;
+                mInUse[i] = true;
                 return i;
             }
         }
@@ -515,8 +488,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         }
         // dst and src are identify raw (row, col) in mValues.  srcIndex is the index (as
         // in the result of keyAt()) of the key being relocated.
-        for (int dst = nextFree(false); dst < mSize; dst = nextFree(false)) {
-            mInUse[dst] = true;
+        for (int dst = nextFree(); dst < mSize; dst = nextFree()) {
             int srcIndex = lastInuse();
             int src = mMap[srcIndex];
             mInUse[src] = false;
@@ -564,20 +536,6 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      */
     public int capacity() {
         return mOrder;
-    }
-
-    /**
-     * Set capacity to enlarge the size of the 2D matrix. Capacity less than the {@link #capacity()}
-     * is not supported.
-     */
-    public void setCapacity(int capacity) {
-        if (capacity <= mOrder) {
-            return;
-        }
-        if (capacity % STEP != 0) {
-            capacity = ((capacity / STEP) + 1) * STEP;
-        }
-        resizeMatrix(capacity);
     }
 
     /**

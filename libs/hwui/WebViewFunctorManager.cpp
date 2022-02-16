@@ -118,24 +118,6 @@ void WebViewFunctor::onRemovedFromTree() {
     }
 }
 
-bool WebViewFunctor::prepareRootSurfaceControl() {
-    if (!Properties::enableWebViewOverlays) return false;
-
-    renderthread::CanvasContext* activeContext = renderthread::CanvasContext::getActiveContext();
-    if (!activeContext) return false;
-
-    ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
-    if (!rootSurfaceControl) return false;
-
-    int32_t rgid = activeContext->getSurfaceControlGenerationId();
-    if (mParentSurfaceControlGenerationId != rgid) {
-        reparentSurfaceControl(rootSurfaceControl);
-        mParentSurfaceControlGenerationId = rgid;
-    }
-
-    return true;
-}
-
 void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
     ATRACE_NAME("WebViewFunctor::drawGl");
     if (!mHasContext) {
@@ -149,8 +131,20 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
             .mergeTransaction = currentFunctor.mergeTransaction,
     };
 
-    if (!drawInfo.isLayer && prepareRootSurfaceControl()) {
-        overlayParams.overlaysMode = OverlaysMode::Enabled;
+    if (Properties::enableWebViewOverlays && !drawInfo.isLayer) {
+        renderthread::CanvasContext* activeContext =
+                renderthread::CanvasContext::getActiveContext();
+        if (activeContext != nullptr) {
+            ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
+            if (rootSurfaceControl) {
+                overlayParams.overlaysMode = OverlaysMode::Enabled;
+                int32_t rgid = activeContext->getSurfaceControlGenerationId();
+                if (mParentSurfaceControlGenerationId != rgid) {
+                    reparentSurfaceControl(rootSurfaceControl);
+                    mParentSurfaceControlGenerationId = rgid;
+                }
+            }
+        }
     }
 
     mCallbacks.gles.draw(mFunctor, mData, drawInfo, overlayParams);
@@ -176,10 +170,7 @@ void WebViewFunctor::drawVk(const VkFunctorDrawParams& params) {
             .mergeTransaction = currentFunctor.mergeTransaction,
     };
 
-    if (!params.is_layer && prepareRootSurfaceControl()) {
-        overlayParams.overlaysMode = OverlaysMode::Enabled;
-    }
-
+    // TODO, enable surface control once offscreen mode figured out
     mCallbacks.vk.draw(mFunctor, mData, params, overlayParams);
 }
 

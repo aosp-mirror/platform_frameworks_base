@@ -22,7 +22,6 @@ import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.LegacyPermissionState;
-import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
@@ -30,11 +29,15 @@ import com.android.server.utils.Watcher;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public abstract class SettingBase implements Watchable, Snappable {
+    // TODO: make this variable protected, or even private with a getter and setter.
+    // Simply making it protected or private requires that the name be changed to conformm
+    // to the Android naming convention, and that touches quite a few files.
+    int pkgFlags;
 
-    // TODO: Remove in favor of individual boolean APIs. It's not clear what flag values are saved
-    //  and bugs exist where callers query for an unsaved flag.
-    private int mPkgFlags;
-    private int mPkgPrivateFlags;
+    // TODO: make this variable protected, or even private with a getter and setter.
+    // Simply making it protected or private requires that the name be changed to conformm
+    // to the Android naming convention, and that touches quite a few files.
+    int pkgPrivateFlags;
 
     /**
      * Watchable machinery
@@ -88,8 +91,7 @@ public abstract class SettingBase implements Watchable, Snappable {
     /**
      * Notify listeners that this object has changed.
      */
-    public void onChanged() {
-        PackageStateMutator.onPackageStateChanged();
+    protected void onChanged() {
         dispatchChange(this);
     }
 
@@ -99,22 +101,26 @@ public abstract class SettingBase implements Watchable, Snappable {
      * purposes other than migration.
      */
     @Deprecated
-    protected final LegacyPermissionState mLegacyPermissionsState = new LegacyPermissionState();
+    protected final LegacyPermissionState mLegacyPermissionsState;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
         setPrivateFlags(pkgPrivateFlags);
+        mLegacyPermissionsState = new LegacyPermissionState();
     }
 
-    SettingBase(@Nullable SettingBase orig) {
-        if (orig != null) {
-            copySettingBase(orig);
-        }
+    SettingBase(SettingBase orig) {
+        mLegacyPermissionsState = new LegacyPermissionState();
+        doCopy(orig);
     }
 
-    public final void copySettingBase(SettingBase orig) {
-        mPkgFlags = orig.mPkgFlags;
-        mPkgPrivateFlags = orig.mPkgPrivateFlags;
+    public void copyFrom(SettingBase orig) {
+        doCopy(orig);
+    }
+
+    private void doCopy(SettingBase orig) {
+        pkgFlags = orig.pkgFlags;
+        pkgPrivateFlags = orig.pkgPrivateFlags;
         mLegacyPermissionsState.copyFrom(orig.mLegacyPermissionsState);
         onChanged();
     }
@@ -124,17 +130,15 @@ public abstract class SettingBase implements Watchable, Snappable {
         return mLegacyPermissionsState;
     }
 
-    public SettingBase setFlags(int pkgFlags) {
-        this.mPkgFlags = pkgFlags
+    void setFlags(int pkgFlags) {
+        this.pkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
-                        | ApplicationInfo.FLAG_EXTERNAL_STORAGE
-                        | ApplicationInfo.FLAG_TEST_ONLY);
+                        | ApplicationInfo.FLAG_EXTERNAL_STORAGE);
         onChanged();
-        return this;
     }
 
-    public SettingBase setPrivateFlags(int pkgPrivateFlags) {
-        this.mPkgPrivateFlags = pkgPrivateFlags
+    void setPrivateFlags(int pkgPrivateFlags) {
+        this.pkgPrivateFlags = pkgPrivateFlags
                 & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
                 | ApplicationInfo.PRIVATE_FLAG_OEM
                 | ApplicationInfo.PRIVATE_FLAG_VENDOR
@@ -143,14 +147,5 @@ public abstract class SettingBase implements Watchable, Snappable {
                 | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER
                 | ApplicationInfo.PRIVATE_FLAG_ODM);
         onChanged();
-        return this;
-    }
-
-    public int getFlags() {
-        return mPkgFlags;
-    }
-
-    public int getPrivateFlags() {
-        return mPkgPrivateFlags;
     }
 }

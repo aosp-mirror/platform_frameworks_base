@@ -62,13 +62,6 @@ public class TranslationTransformationMethod implements TransformationMethod2 {
         return mOriginalTranslationMethod;
     }
 
-    /**
-     * Returns the {@link TextView}'s {@link ViewTranslationResponse}.
-     */
-    public ViewTranslationResponse getViewTranslationResponse() {
-        return mTranslationResponse;
-    }
-
     @Override
     public CharSequence getTransformation(CharSequence source, View view) {
         if (!mAllowLengthChanges) {

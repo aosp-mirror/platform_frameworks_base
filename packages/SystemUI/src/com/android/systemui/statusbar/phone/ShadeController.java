@@ -55,9 +55,6 @@ public interface ShadeController {
      */
     boolean closeShadeIfOpen();
 
-    /** Returns whether the shade is currently open or opening. */
-    boolean isShadeOpen();
-
     /**
      * Add a runnable for NotificationPanelView to post when the panel is expanded.
      *

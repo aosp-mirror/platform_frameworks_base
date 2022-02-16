@@ -16,7 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.annotation.BytesLong;
 import android.annotation.SystemApi;
 
 /**
@@ -29,10 +28,10 @@ public class SectionEvent extends FilterEvent {
     private final int mTableId;
     private final int mVersion;
     private final int mSectionNum;
-    private final long mDataLength;
+    private final int mDataLength;
 
     // This constructor is used by JNI code only
-    private SectionEvent(int tableId, int version, int sectionNum, long dataLength) {
+    private SectionEvent(int tableId, int version, int sectionNum, int dataLength) {
         mTableId = tableId;
         mVersion = version;
         mSectionNum = sectionNum;
@@ -62,19 +61,8 @@ public class SectionEvent extends FilterEvent {
 
     /**
      * Gets data size in bytes of filtered data.
-     *
-     * @deprecated Use {@link #getDataLengthLong()}
      */
-    @Deprecated
     public int getDataLength() {
-        return (int) getDataLengthLong();
-    }
-
-    /**
-     * Gets data size in bytes of filtered data.
-     */
-    @BytesLong
-    public long getDataLengthLong() {
         return mDataLength;
     }
 }

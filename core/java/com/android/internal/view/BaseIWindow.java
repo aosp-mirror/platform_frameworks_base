@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -61,6 +62,10 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
+    public void locationInParentDisplayChanged(Point offset) {
+    }
+
+    @Override
     public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
     }
 
@@ -87,6 +92,10 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void dispatchGetNewSurface() {
+    }
+
+    @Override
+    public void windowFocusChanged(boolean hasFocus, boolean touchEnabled) {
     }
 
     @Override
