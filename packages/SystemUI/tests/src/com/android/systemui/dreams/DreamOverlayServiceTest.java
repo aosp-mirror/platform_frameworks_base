@@ -163,6 +163,22 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPreviewModeFalseByDefault() {
+        mService.onBind(new Intent());
+
+        assertThat(mService.isPreviewMode()).isFalse();
+    }
+
+    @Test
+    public void testPreviewModeSetByIntentExtra() {
+        final Intent intent = new Intent();
+        intent.putExtra(DreamService.EXTRA_IS_PREVIEW, true);
+        mService.onBind(intent);
+
+        assertThat(mService.isPreviewMode()).isTrue();
+    }
+
+    @Test
     public void testDestroy() {
         mService.onDestroy();
         mMainExecutor.runAllReady();
