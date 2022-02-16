@@ -71,6 +71,7 @@ import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -792,7 +793,7 @@ public final class AppRestrictionController {
         mInjector = injector;
         mContext = injector.getContext();
         mActivityManagerService = service;
-        mBgHandlerThread = new HandlerThread("bgres-controller");
+        mBgHandlerThread = new HandlerThread("bgres-controller", THREAD_PRIORITY_BACKGROUND);
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
         mBgExecutor = new HandlerExecutor(mBgHandler);
@@ -816,9 +817,11 @@ public final class AppRestrictionController {
         mInjector.getAppStandbyInternal().addListener(mAppIdleStateChangeListener);
         mInjector.getRoleManager().addOnRoleHoldersChangedListenerAsUser(mBgExecutor,
                 mRoleHolderChangedListener, UserHandle.ALL);
-        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
-            mAppStateTrackers.get(i).onSystemReady();
-        }
+        mInjector.scheduleInitTrackers(mBgHandler, () -> {
+            for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+                mAppStateTrackers.get(i).onSystemReady();
+            }
+        });
     }
 
     @VisibleForTesting
@@ -2137,6 +2140,10 @@ public final class AppRestrictionController {
             }
             return null;
         }
+
+        void scheduleInitTrackers(Handler handler, Runnable initializers) {
+            handler.post(initializers);
+        }
     }
 
     private void registerForSystemBroadcasts() {
@@ -2221,6 +2228,21 @@ public final class AppRestrictionController {
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         userFilter.addAction(Intent.ACTION_UID_REMOVED);
         mContext.registerReceiverForAllUsers(broadcastReceiver, userFilter, null, mBgHandler);
+        final BroadcastReceiver bootReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                switch (intent.getAction()) {
+                    case Intent.ACTION_LOCKED_BOOT_COMPLETED: {
+                        onLockedBootCompleted();
+                    } break;
+                }
+            }
+        };
+        final IntentFilter bootFilter = new IntentFilter();
+        bootFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
+        mContext.registerReceiverAsUser(bootReceiver, UserHandle.SYSTEM,
+                bootFilter, null, mBgHandler);
     }
 
     void forEachTracker(Consumer<BaseAppStateTracker> sink) {
@@ -2273,6 +2295,12 @@ public final class AppRestrictionController {
             mAppStateTrackers.get(i).onUidRemoved(uid);
         }
         mRestrictionSettings.removeUid(uid);
+    }
+
+    private void onLockedBootCompleted() {
+        for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
+            mAppStateTrackers.get(i).onLockedBootCompleted();
+        }
     }
 
     boolean isBgAutoRestrictedBucketFeatureFlagEnabled() {
