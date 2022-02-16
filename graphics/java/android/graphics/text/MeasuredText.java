@@ -34,6 +34,7 @@ import libcore.util.NativeAllocationRegistry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Result of text shaping of the single paragraph string.
@@ -56,18 +57,22 @@ import java.lang.annotation.RetentionPolicy;
 public class MeasuredText {
     private static final String TAG = "MeasuredText";
 
-    private long mNativePtr;
-    private boolean mComputeHyphenation;
-    private boolean mComputeLayout;
-    private @NonNull char[] mChars;
+    private final long mNativePtr;
+    private final boolean mComputeHyphenation;
+    private final boolean mComputeLayout;
+    @NonNull private final char[] mChars;
+    private final int mTop;
+    private final int mBottom;
 
     // Use builder instead.
     private MeasuredText(long ptr, @NonNull char[] chars, boolean computeHyphenation,
-            boolean computeLayout) {
+            boolean computeLayout, int top, int bottom) {
         mNativePtr = ptr;
         mChars = chars;
         mComputeHyphenation = computeHyphenation;
         mComputeLayout = computeLayout;
+        mTop = top;
+        mBottom = bottom;
     }
 
     /**
@@ -124,6 +129,30 @@ public class MeasuredText {
     }
 
     /**
+     * Retrieves the font metrics of the given range
+     *
+     * @param start an inclusive start index of the range
+     * @param end an exclusive end index of the range
+     * @param outMetrics an output metrics object
+     */
+    public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Paint.FontMetricsInt outMetrics) {
+        Preconditions.checkArgument(0 <= start && start <= mChars.length,
+                "start(%d) must be 0 <= start <= %d", start, mChars.length);
+        Preconditions.checkArgument(0 <= end && end <= mChars.length,
+                "end(%d) must be 0 <= end <= %d", end, mChars.length);
+        Preconditions.checkArgument(start <= end,
+                "start(%d) is larger than end(%d)", start, end);
+        Objects.requireNonNull(outMetrics);
+
+        long packed = nGetExtent(mNativePtr, mChars, start, end);
+        outMetrics.ascent = (int) (packed >> 32);
+        outMetrics.descent = (int) (packed & 0xFFFFFFFF);
+        outMetrics.top = Math.min(outMetrics.ascent, mTop);
+        outMetrics.bottom = Math.max(outMetrics.descent, mBottom);
+    }
+
+    /**
      * Returns the width of the character at the given offset.
      *
      * @param offset an offset of the character.
@@ -160,6 +189,8 @@ public class MeasuredText {
     @CriticalNative
     private static native float nGetCharWidthAt(long nativePtr, int offset);
 
+    private static native long nGetExtent(long nativePtr, char[] buf, int start, int end);
+
     /**
      * Helper class for creating a {@link MeasuredText}.
      * <p>
@@ -189,6 +220,9 @@ public class MeasuredText {
         private boolean mFastHyphenation = false;
         private int mCurrentOffset = 0;
         private @Nullable MeasuredText mHintMt = null;
+        private int mTop = 0;
+        private int mBottom = 0;
+        private Paint.FontMetricsInt mCachedMetrics = new Paint.FontMetricsInt();
 
         /**
          * Construct a builder.
@@ -269,6 +303,10 @@ public class MeasuredText {
             nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
                     mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
+
+            paint.getFontMetricsInt(mCachedMetrics);
+            mTop = Math.min(mTop, mCachedMetrics.top);
+            mBottom = Math.max(mBottom, mCachedMetrics.bottom);
             return this;
         }
 
@@ -419,7 +457,7 @@ public class MeasuredText {
                 long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
                         mComputeLayout, mFastHyphenation);
                 final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
-                        mComputeLayout);
+                        mComputeLayout, mTop, mBottom);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {

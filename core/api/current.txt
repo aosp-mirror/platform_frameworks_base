@@ -16448,6 +16448,7 @@ package android.graphics.text {
   public class MeasuredText {
     method public void getBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Rect);
     method @FloatRange(from=0.0f) @Px public float getCharWidthAt(@IntRange(from=0) int);
+    method public void getFontMetricsInt(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Paint.FontMetricsInt);
     method @FloatRange(from=0.0) @Px public float getWidth(@IntRange(from=0) int, @IntRange(from=0) int);
   }
 
@@ -45010,6 +45011,7 @@ package android.text {
     method public char charAt(int);
     method public static android.text.PrecomputedText create(@NonNull CharSequence, @NonNull android.text.PrecomputedText.Params);
     method public void getBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Rect);
+    method public void getFontMetricsInt(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Paint.FontMetricsInt);
     method @IntRange(from=0) public int getParagraphCount();
     method @IntRange(from=0) public int getParagraphEnd(@IntRange(from=0) int);
     method @IntRange(from=0) public int getParagraphStart(@IntRange(from=0) int);
