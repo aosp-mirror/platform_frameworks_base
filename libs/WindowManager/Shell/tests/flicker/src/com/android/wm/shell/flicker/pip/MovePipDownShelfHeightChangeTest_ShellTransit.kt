@@ -58,7 +58,7 @@ class MovePipDownShelfHeightChangeTest_ShellTransit(
     testSpec: FlickerTestParameter
 ) : MovePipDownShelfHeightChangeTest(testSpec) {
     @Before
-    fun before() {
+    override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
 }

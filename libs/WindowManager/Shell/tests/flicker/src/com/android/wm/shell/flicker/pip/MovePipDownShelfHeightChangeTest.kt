@@ -61,6 +61,11 @@ import org.junit.runners.Parameterized
 open class MovePipDownShelfHeightChangeTest(
     testSpec: FlickerTestParameter
 ) : MovePipShelfHeightTransition(testSpec) {
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
+
     /**
      * Defines the transition used to run the test
      */
