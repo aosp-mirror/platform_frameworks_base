@@ -2876,6 +2876,7 @@ package android.view {
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
     method public static int getLongPressTooltipHideTimeout();
+    method public int getPreferKeepClearForFocusDelay();
   }
 
   public class ViewDebug {
