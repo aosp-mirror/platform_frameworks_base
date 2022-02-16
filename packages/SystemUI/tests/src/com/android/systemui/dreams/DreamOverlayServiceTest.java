@@ -179,6 +179,15 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDreamLabel() {
+        final Intent intent = new Intent();
+        intent.putExtra(DreamService.EXTRA_DREAM_LABEL, "TestDream");
+        mService.onBind(intent);
+
+        assertThat(mService.getDreamLabel()).isEqualTo("TestDream");
+    }
+
+    @Test
     public void testDestroy() {
         mService.onDestroy();
         mMainExecutor.runAllReady();
