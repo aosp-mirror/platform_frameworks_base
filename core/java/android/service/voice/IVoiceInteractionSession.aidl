@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.service.voice.VisibleActivityInfo;
 
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 
@@ -40,5 +39,4 @@ oneway interface IVoiceInteractionSession {
     void closeSystemDialogs();
     void onLockscreenShown();
     void destroy();
-    void updateVisibleActivityInfo(in VisibleActivityInfo visibleActivityInfo, int type);
 }

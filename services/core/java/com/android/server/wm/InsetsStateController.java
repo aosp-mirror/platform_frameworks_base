@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
@@ -40,7 +40,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
-import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -138,10 +137,10 @@ class InsetsStateController {
                 return rotatedState;
             }
         }
+        final @WindowingMode int windowingMode = token != null
+                ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        // Always use windowing mode fullscreen when get insets for window metrics to make sure it
-        // contains all insets types.
-        return getInsetsForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop, mState);
+        return getInsetsForTarget(type, windowingMode, alwaysOnTop, mState);
     }
 
     private static @InternalInsetsType
@@ -187,6 +186,7 @@ class InsetsStateController {
 
             // Navigation bar doesn't get influenced by anything else
             if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
+                state.removeSource(ITYPE_IME);
                 state.removeSource(ITYPE_STATUS_BAR);
                 state.removeSource(ITYPE_CLIMATE_BAR);
                 state.removeSource(ITYPE_CAPTION_BAR);
@@ -248,6 +248,16 @@ class InsetsStateController {
         return result;
     }
 
+    public void addProvidersToTransition() {
+        for (int i = mProviders.size() - 1; i >= 0; --i) {
+            final InsetsSourceProvider p = mProviders.valueAt(i);
+            if (p == null) continue;
+            final WindowContainer wc = p.mWin;
+            if (wc == null) continue;
+            mDisplayContent.mAtmService.getTransitionController().collect(wc);
+        }
+    }
+
     /**
      * @return The provider of a specific type.
      */
@@ -281,10 +291,19 @@ class InsetsStateController {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).onPostLayout();
         }
+        final ArrayList<WindowState> winInsetsChanged = mDisplayContent.mWinInsetsChanged;
         if (!mLastState.equals(mState)) {
             mLastState.set(mState, true /* copySources */);
             notifyInsetsChanged();
+        } else {
+            // The global insets state has not changed but there might be windows whose conditions
+            // (e.g., z-order) have changed. They can affect the insets states that we dispatch to
+            // the clients.
+            for (int i = winInsetsChanged.size() - 1; i >= 0; i--) {
+                mDispatchInsetsChanged.accept(winInsetsChanged.get(i));
+            }
         }
+        winInsetsChanged.clear();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -366,8 +385,7 @@ class InsetsStateController {
         if (changed) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
-            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+            mDisplayContent.getDisplayPolicy().updateSystemUiVisibilityLw();
         }
     }
 
@@ -376,14 +394,15 @@ class InsetsStateController {
      *
      * @param win The owner window of insets provider.
      * @param displayFrames The display frames to create insets source.
-     * @param winFrame The frame of the insets source window.
+     * @param windowFrames The specified frames to represent the owner window.
      */
-    void computeSimulatedState(WindowState win, DisplayFrames displayFrames, Rect winFrame) {
+    void computeSimulatedState(WindowState win, DisplayFrames displayFrames,
+            WindowFrames windowFrames) {
         final InsetsState state = displayFrames.mInsetsState;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
             if (provider.mWin == win) {
-                state.addSource(provider.createSimulatedSource(displayFrames, winFrame));
+                state.addSource(provider.createSimulatedSource(displayFrames, windowFrames));
             }
         }
     }

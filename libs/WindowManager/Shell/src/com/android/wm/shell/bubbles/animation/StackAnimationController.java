@@ -127,6 +127,9 @@ public class StackAnimationController extends
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
+    /** The height of the most recently visible IME. */
+    private float mImeHeight = 0f;
+
     /**
      * The Y position of the stack before the IME became visible, or {@link Float#MIN_VALUE} if the
      * IME is not visible or the user moved the stack since the IME became visible.
@@ -170,7 +173,7 @@ public class StackAnimationController extends
      */
     private boolean mSpringToTouchOnNextMotionEvent = false;
 
-    /** Offset of bubbles in the stack (i.e. how much they overlap). */
+    /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
     /** Offset between stack y and animation y for bubble swap. */
     private float mSwapAnimationOffset;
@@ -302,7 +305,10 @@ public class StackAnimationController extends
         if (mLayout == null || !isStackPositionSet()) {
             return true; // Default to left, which is where it starts by default.
         }
-        return mPositioner.isStackOnLeft(mStackPosition);
+
+        float stackCenter = mStackPosition.x + mBubbleSize / 2;
+        float screenCenter = mLayout.getWidth() / 2;
+        return stackCenter < screenCenter;
     }
 
     /**
@@ -518,6 +524,16 @@ public class StackAnimationController extends
         removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
     }
 
+    /** Save the current IME height so that we know where the stack bounds should be. */
+    public void setImeHeight(int imeHeight) {
+        mImeHeight = imeHeight;
+    }
+
+    /** Returns the current IME height that the stack is offset by. */
+    public float getImeHeight() {
+        return mImeHeight;
+    }
+
     /**
      * Animates the stack either away from the newly visible IME, or back to its original position
      * due to the IME going away.
@@ -576,14 +592,11 @@ public class StackAnimationController extends
      */
     public RectF getAllowableStackPositionRegion() {
         final RectF allowableRegion = new RectF(mPositioner.getAvailableRect());
-        final int imeHeight = mPositioner.getImeHeight();
-        final float bottomPadding = getBubbleCount() > 1
-                ? mBubblePaddingTop + mStackOffset
-                : mBubblePaddingTop;
         allowableRegion.left -= mBubbleOffscreen;
         allowableRegion.top += mBubblePaddingTop;
         allowableRegion.right += mBubbleOffscreen - mBubbleSize;
-        allowableRegion.bottom -= imeHeight + bottomPadding + mBubbleSize;
+        allowableRegion.bottom -= mBubblePaddingTop + mBubbleSize
+                + (mImeHeight != UNSET ? mImeHeight + mBubblePaddingTop : 0f);
         return allowableRegion;
     }
 
@@ -750,12 +763,6 @@ public class StackAnimationController extends
             // Otherwise, animate the bubble in if it's the newest bubble. If we're adding a bubble
             // to the back of the stack, it'll be largely invisible so don't bother animating it in.
             animateInBubble(child, index);
-        } else {
-            // We are not animating the bubble in. Make sure it has the right alpha and scale values
-            // in case this view was previously removed and is being re-added.
-            child.setAlpha(1f);
-            child.setScaleX(1f);
-            child.setScaleY(1f);
         }
     }
 
@@ -791,24 +798,23 @@ public class StackAnimationController extends
             }
         };
 
-        boolean swapped = false;
         for (int newIndex = 0; newIndex < bubbleViews.size(); newIndex++) {
             View view = bubbleViews.get(newIndex);
             final int oldIndex = mLayout.indexOfChild(view);
-            swapped |= animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
-        }
-        if (!swapped) {
-            // All bubbles were at the right position. Make sure badges and z order is correct.
-            updateAllIcons.run();
+            animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
         }
     }
 
-    private boolean animateSwap(View view, int oldIndex, int newIndex,
+    private void animateSwap(View view, int oldIndex, int newIndex,
             Runnable updateAllIcons, Runnable finishReorder) {
         if (newIndex == oldIndex) {
-            // View order did not change. Make sure position is correct.
-            moveToFinalIndex(view, newIndex, finishReorder);
-            return false;
+            // Add new bubble to index 0; move existing bubbles down
+            updateBadgesAndZOrder(view, newIndex);
+            if (newIndex == 0) {
+                animateInBubble(view, newIndex);
+            } else {
+                moveToFinalIndex(view, newIndex, finishReorder);
+            }
         } else {
             // Reorder existing bubbles
             if (newIndex == 0) {
@@ -816,7 +822,6 @@ public class StackAnimationController extends
             } else {
                 moveToFinalIndex(view, newIndex, finishReorder);
             }
-            return true;
         }
     }
 
@@ -1019,9 +1024,11 @@ public class StackAnimationController extends
     }
 
     /**
-     * Returns the {@link MagnetizedObject} instance for the bubble stack.
+     * Returns the {@link MagnetizedObject} instance for the bubble stack, with the provided
+     * {@link MagnetizedObject.MagneticTarget} added as a target.
      */
-    public MagnetizedObject<StackAnimationController> getMagnetizedStack() {
+    public MagnetizedObject<StackAnimationController> getMagnetizedStack(
+            MagnetizedObject.MagneticTarget target) {
         if (mMagnetizedStack == null) {
             mMagnetizedStack = new MagnetizedObject<StackAnimationController>(
                     mLayout.getContext(),
@@ -1046,6 +1053,7 @@ public class StackAnimationController extends
                     loc[1] = (int) mStackPosition.y;
                 }
             };
+            mMagnetizedStack.addTarget(target);
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
         }

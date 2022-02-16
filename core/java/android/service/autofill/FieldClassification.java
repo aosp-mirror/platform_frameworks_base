@@ -22,11 +22,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.view.autofill.Helper;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Represents the <a href="AutofillService.html#FieldClassification">field classification</a>
@@ -38,7 +39,7 @@ public final class FieldClassification {
 
     /** @hide */
     public FieldClassification(@NonNull ArrayList<Match> matches) {
-        mMatches = Objects.requireNonNull(matches);
+        mMatches = Preconditions.checkNotNull(matches);
         Collections.sort(mMatches, new Comparator<Match>() {
             @Override
             public int compare(Match o1, Match o2) {
@@ -112,7 +113,7 @@ public final class FieldClassification {
 
         /** @hide */
         public Match(String categoryId, float score) {
-            mCategoryId = Objects.requireNonNull(categoryId);
+            mCategoryId = Preconditions.checkNotNull(categoryId);
             mScore = score;
         }
 

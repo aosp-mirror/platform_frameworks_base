@@ -282,6 +282,7 @@ status_t JMediaExtractor::getMetrics(Parcel *reply) const {
     return status;
 }
 
+
 status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
     return mImpl->getSampleMeta(sampleMeta);
 }

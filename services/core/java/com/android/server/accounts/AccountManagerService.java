@@ -60,14 +60,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Bundle;
@@ -3143,7 +3142,7 @@ public class AccountManagerService
                 GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE);
         final String titleAndSubtitle =
                 mContext.getString(R.string.permission_request_notification_for_app_with_subtitle,
-                getApplicationLabel(packageName, userId), account.name);
+                getApplicationLabel(packageName), account.name);
         final int index = titleAndSubtitle.indexOf('\n');
         String title = titleAndSubtitle;
         String subtitle = "";
@@ -3169,10 +3168,10 @@ public class AccountManagerService
                 account, authTokenType, uid), n, "android", user.getIdentifier());
     }
 
-    private String getApplicationLabel(String packageName, int userId) {
+    private String getApplicationLabel(String packageName) {
         try {
             return mPackageManager.getApplicationLabel(
-                    mPackageManager.getApplicationInfoAsUser(packageName, 0, userId)).toString();
+                    mPackageManager.getApplicationInfo(packageName, 0)).toString();
         } catch (PackageManager.NameNotFoundException e) {
             return packageName;
         }
@@ -4877,7 +4876,9 @@ public class AccountManagerService
                 int targetUid = targetActivityInfo.applicationInfo.uid;
                 PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
                 if (!isExportedSystemActivity(targetActivityInfo)
-                        && !pmi.hasSignatureCapability(targetUid, authUid, CertCapabilities.AUTH)) {
+                        && !pmi.hasSignatureCapability(
+                                targetUid, authUid,
+                                PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                     String pkgName = targetActivityInfo.packageName;
                     String activityName = targetActivityInfo.name;
                     String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
@@ -5249,7 +5250,7 @@ public class AccountManagerService
                     logStatement.bindLong(6, userDebugDbInsertionPoint);
                     try {
                         logStatement.execute();
-                    } catch (IllegalStateException | SQLiteFullException e) {
+                    } catch (IllegalStateException e) {
                         // Guard against crash, DB can already be closed
                         // since this statement is executed on a handler thread
                         Slog.w(TAG, "Failed to insert a log record. accountId=" + accountId
@@ -5630,7 +5631,8 @@ public class AccountManagerService
                     return SIGNATURE_CHECK_UID_MATCH;
                 }
                 if (pmi.hasSignatureCapability(
-                        serviceInfo.uid, callingUid, CertCapabilities.AUTH)) {
+                        serviceInfo.uid, callingUid,
+                        PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                     return SIGNATURE_CHECK_MATCH;
                 }
             }
@@ -5671,7 +5673,8 @@ public class AccountManagerService
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 serviceInfos) {
             if (isOtherwisePermitted || pmi.hasSignatureCapability(
-                    serviceInfo.uid, callingUid, CertCapabilities.AUTH)) {
+                    serviceInfo.uid, callingUid,
+                    PackageParser.SigningDetails.CertCapabilities.AUTH)) {
                 managedAccountTypes.add(serviceInfo.type.type);
             }
         }

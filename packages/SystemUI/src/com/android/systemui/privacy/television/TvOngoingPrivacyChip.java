@@ -24,17 +24,13 @@ import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,8 +41,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
+import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.privacy.PrivacyChipBuilder;
 import com.android.systemui.privacy.PrivacyItem;
@@ -67,7 +63,7 @@ import javax.inject.Inject;
  * recording audio, accessing the camera or accessing the location.
  */
 @SysUISingleton
-public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemController.Callback,
+public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemController.Callback,
         PrivacyChipDrawable.PrivacyChipDrawableListener {
     private static final String TAG = "TvOngoingPrivacyChip";
     private static final boolean DEBUG = false;
@@ -102,10 +98,6 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
     private final Context mContext;
     private final PrivacyItemController mPrivacyItemController;
 
-    private final IWindowManager mIWindowManager;
-    private final Rect[] mBounds = new Rect[4];
-    private boolean mIsRtl;
-
     private ViewGroup mIndicatorView;
     private boolean mViewAndWindowAdded;
     private ObjectAnimator mAnimator;
@@ -132,22 +124,16 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
     private int mState = STATE_NOT_SHOWN;
 
     @Inject
-    public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController,
-            IWindowManager iWindowManager) {
+    public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController) {
         super(context);
         if (DEBUG) Log.d(TAG, "Privacy chip running");
         mContext = context;
         mPrivacyItemController = privacyItemController;
-        mIWindowManager = iWindowManager;
 
         Resources res = mContext.getResources();
         mIconMarginStart = Math.round(
                 res.getDimension(R.dimen.privacy_chip_icon_margin_in_between));
         mIconSize = res.getDimensionPixelSize(R.dimen.privacy_chip_icon_size);
-
-        mIsRtl = mContext.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_RTL;
-        updateStaticPrivacyIndicatorBounds();
 
         mAnimationDurationMs = res.getInteger(R.integer.privacy_chip_animation_millis);
 
@@ -158,24 +144,6 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
             Log.d(TAG, "micCameraIndicators: " + mMicCameraIndicatorFlagEnabled);
             Log.d(TAG, "allIndicators: " + mAllIndicatorsEnabled);
         }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration config) {
-        boolean updatedRtl = config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        if (mIsRtl == updatedRtl) {
-            return;
-        }
-        mIsRtl = updatedRtl;
-
-        updateStaticPrivacyIndicatorBounds();
-
-        // Update privacy chip location.
-        if (mState == STATE_NOT_SHOWN || mIndicatorView == null) {
-            return;
-        }
-        fadeOutIndicator();
-        createAndShowIndicator();
     }
 
     @Override
@@ -211,32 +179,6 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
 
         postAccessibilityAnnouncement();
         updateChip();
-    }
-
-    private void updateStaticPrivacyIndicatorBounds() {
-        Resources res = mContext.getResources();
-        int mMaxExpandedWidth = res.getDimensionPixelSize(R.dimen.privacy_chip_max_width);
-        int mMaxExpandedHeight = res.getDimensionPixelSize(R.dimen.privacy_chip_height);
-        int mChipMarginTotal = 2 * res.getDimensionPixelSize(R.dimen.privacy_chip_margin);
-
-        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        Rect screenBounds = windowManager.getCurrentWindowMetrics().getBounds();
-        mBounds[0] = new Rect(
-                mIsRtl ? screenBounds.left
-                        : screenBounds.right - mChipMarginTotal - mMaxExpandedWidth,
-                screenBounds.top,
-                mIsRtl ? screenBounds.left + mChipMarginTotal + mMaxExpandedWidth
-                        : screenBounds.right,
-                screenBounds.top + mChipMarginTotal + mMaxExpandedHeight
-        );
-
-        if (DEBUG) Log.v(TAG, "privacy indicator bounds: " + mBounds[0].toShortString());
-
-        try {
-            mIWindowManager.updateStaticPrivacyIndicatorBounds(mContext.getDisplayId(), mBounds);
-        } catch (RemoteException e) {
-            Log.w(TAG, "could not update privacy indicator bounds");
-        }
     }
 
     private void updateChip() {
@@ -374,9 +316,13 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
                             }
                         });
 
+        final boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        if (DEBUG) Log.d(TAG, "is RTL: " + isRtl);
+
         mChipDrawable = new PrivacyChipDrawable(mContext);
         mChipDrawable.setListener(this);
-        mChipDrawable.setRtl(mIsRtl);
+        mChipDrawable.setRtl(isRtl);
         ImageView chipBackground = mIndicatorView.findViewById(R.id.chip_drawable);
         if (chipBackground != null) {
             chipBackground.setImageDrawable(mChipDrawable);
@@ -386,21 +332,17 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
         mIconsContainer.setAlpha(0f);
         updateIcons();
 
-        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        windowManager.addView(mIndicatorView, getWindowLayoutParams());
-    }
-
-    private WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WRAP_CONTENT,
                 WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | (mIsRtl ? Gravity.LEFT : Gravity.RIGHT);
+        layoutParams.gravity = Gravity.TOP | (isRtl ? Gravity.LEFT : Gravity.RIGHT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
-        return layoutParams;
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        windowManager.addView(mIndicatorView, layoutParams);
     }
 
     private void updateIcons() {

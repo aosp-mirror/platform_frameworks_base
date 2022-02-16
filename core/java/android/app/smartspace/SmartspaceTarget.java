@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.smartspace.uitemplatedata.SmartspaceDefaultUiTemplateData;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.net.Uri;
@@ -132,9 +131,6 @@ public final class SmartspaceTarget implements Parcelable {
     @Nullable
     private final AppWidgetProviderInfo mWidget;
 
-    @Nullable
-    private final SmartspaceDefaultUiTemplateData mTemplateData;
-
     public static final int FEATURE_UNDEFINED = 0;
     public static final int FEATURE_WEATHER = 1;
     public static final int FEATURE_CALENDAR = 2;
@@ -193,32 +189,6 @@ public final class SmartspaceTarget implements Parcelable {
     public @interface FeatureType {
     }
 
-    public static final int UI_TEMPLATE_UNDEFINED = 0;
-    public static final int UI_TEMPLATE_DEFAULT = 1;
-    public static final int UI_TEMPLATE_SUB_IMAGE = 2;
-    public static final int UI_TEMPLATE_SUB_LIST = 3;
-    public static final int UI_TEMPLATE_CAROUSEL = 4;
-    public static final int UI_TEMPLATE_HEAD_TO_HEAD = 5;
-    public static final int UI_TEMPLATE_COMBINED_CARDS = 6;
-    public static final int UI_TEMPLATE_SUB_CARD = 7;
-
-    /**
-     * @hide
-     */
-    @IntDef(prefix = {"UI_TEMPLATE_"}, value = {
-            UI_TEMPLATE_UNDEFINED,
-            UI_TEMPLATE_DEFAULT,
-            UI_TEMPLATE_SUB_IMAGE,
-            UI_TEMPLATE_SUB_LIST,
-            UI_TEMPLATE_CAROUSEL,
-            UI_TEMPLATE_HEAD_TO_HEAD,
-            UI_TEMPLATE_COMBINED_CARDS,
-            UI_TEMPLATE_SUB_CARD
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface UiTemplateType {
-    }
-
     private SmartspaceTarget(Parcel in) {
         this.mSmartspaceTargetId = in.readString();
         this.mHeaderAction = in.readTypedObject(SmartspaceAction.CREATOR);
@@ -237,7 +207,6 @@ public final class SmartspaceTarget implements Parcelable {
         this.mAssociatedSmartspaceTargetId = in.readString();
         this.mSliceUri = in.readTypedObject(Uri.CREATOR);
         this.mWidget = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
-        this.mTemplateData = in.readTypedObject(SmartspaceDefaultUiTemplateData.CREATOR);
     }
 
     private SmartspaceTarget(String smartspaceTargetId,
@@ -248,7 +217,7 @@ public final class SmartspaceTarget implements Parcelable {
             boolean shouldShowExpanded, String sourceNotificationKey,
             ComponentName componentName, UserHandle userHandle,
             String associatedSmartspaceTargetId, Uri sliceUri,
-            AppWidgetProviderInfo widget, SmartspaceDefaultUiTemplateData templateData) {
+            AppWidgetProviderInfo widget) {
         mSmartspaceTargetId = smartspaceTargetId;
         mHeaderAction = headerAction;
         mBaseAction = baseAction;
@@ -266,7 +235,6 @@ public final class SmartspaceTarget implements Parcelable {
         mAssociatedSmartspaceTargetId = associatedSmartspaceTargetId;
         mSliceUri = sliceUri;
         mWidget = widget;
-        mTemplateData = templateData;
     }
 
     /**
@@ -403,14 +371,6 @@ public final class SmartspaceTarget implements Parcelable {
     }
 
     /**
-     * Returns the UI template data.
-     */
-    @Nullable
-    public SmartspaceDefaultUiTemplateData getTemplateData() {
-        return mTemplateData;
-    }
-
-    /**
      * @see Parcelable.Creator
      */
     @NonNull
@@ -445,7 +405,6 @@ public final class SmartspaceTarget implements Parcelable {
         dest.writeString(this.mAssociatedSmartspaceTargetId);
         dest.writeTypedObject(this.mSliceUri, flags);
         dest.writeTypedObject(this.mWidget, flags);
-        dest.writeTypedObject(this.mTemplateData, flags);
     }
 
     @Override
@@ -473,7 +432,6 @@ public final class SmartspaceTarget implements Parcelable {
                 + ", mAssociatedSmartspaceTargetId='" + mAssociatedSmartspaceTargetId + '\''
                 + ", mSliceUri=" + mSliceUri
                 + ", mWidget=" + mWidget
-                + ", mTemplateData=" + mTemplateData
                 + '}';
     }
 
@@ -499,8 +457,7 @@ public final class SmartspaceTarget implements Parcelable {
                 && Objects.equals(mAssociatedSmartspaceTargetId,
                 that.mAssociatedSmartspaceTargetId)
                 && Objects.equals(mSliceUri, that.mSliceUri)
-                && Objects.equals(mWidget, that.mWidget)
-                && Objects.equals(mTemplateData, that.mTemplateData);
+                && Objects.equals(mWidget, that.mWidget);
     }
 
     @Override
@@ -508,7 +465,7 @@ public final class SmartspaceTarget implements Parcelable {
         return Objects.hash(mSmartspaceTargetId, mHeaderAction, mBaseAction, mCreationTimeMillis,
                 mExpiryTimeMillis, mScore, mActionChips, mIconGrid, mFeatureType, mSensitive,
                 mShouldShowExpanded, mSourceNotificationKey, mComponentName, mUserHandle,
-                mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData);
+                mAssociatedSmartspaceTargetId, mSliceUri, mWidget);
     }
 
     /**
@@ -519,9 +476,6 @@ public final class SmartspaceTarget implements Parcelable {
     @SystemApi
     public static final class Builder {
         private final String mSmartspaceTargetId;
-        private final ComponentName mComponentName;
-        private final UserHandle mUserHandle;
-
         private SmartspaceAction mHeaderAction;
         private SmartspaceAction mBaseAction;
         private long mCreationTimeMillis;
@@ -533,10 +487,11 @@ public final class SmartspaceTarget implements Parcelable {
         private boolean mSensitive;
         private boolean mShouldShowExpanded;
         private String mSourceNotificationKey;
+        private final ComponentName mComponentName;
+        private final UserHandle mUserHandle;
         private String mAssociatedSmartspaceTargetId;
         private Uri mSliceUri;
         private AppWidgetProviderInfo mWidget;
-        private SmartspaceDefaultUiTemplateData mTemplateData;
 
         /**
          * A builder for {@link SmartspaceTarget}.
@@ -685,16 +640,6 @@ public final class SmartspaceTarget implements Parcelable {
         }
 
         /**
-         * Sets the UI template data.
-         */
-        @NonNull
-        public Builder setTemplateData(
-                @Nullable SmartspaceDefaultUiTemplateData templateData) {
-            mTemplateData = templateData;
-            return this;
-        }
-
-        /**
          * Builds a new {@link SmartspaceTarget}.
          *
          * @throws IllegalStateException when non null fields are set as null.
@@ -710,7 +655,7 @@ public final class SmartspaceTarget implements Parcelable {
                     mHeaderAction, mBaseAction, mCreationTimeMillis, mExpiryTimeMillis, mScore,
                     mActionChips, mIconGrid, mFeatureType, mSensitive, mShouldShowExpanded,
                     mSourceNotificationKey, mComponentName, mUserHandle,
-                    mAssociatedSmartspaceTargetId, mSliceUri, mWidget, mTemplateData);
+                    mAssociatedSmartspaceTargetId, mSliceUri, mWidget);
         }
     }
 }

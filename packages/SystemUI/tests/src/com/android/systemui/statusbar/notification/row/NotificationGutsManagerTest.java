@@ -68,7 +68,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.settings.UserContextProvider;
@@ -92,12 +91,15 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
+
+import javax.inject.Provider;
 
 /**
  * Tests for {@link NotificationGutsManager}.
@@ -155,12 +157,11 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext,
-                () -> Optional.of(mStatusBar), mHandler, mHandler, mAccessibilityManager,
-                mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
-                mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
-                mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
-                Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController, mock(DumpManager.class));
+                () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
+                mINotificationManager, mNotificationEntryManager, mPeopleSpaceWidgetManager,
+                mLauncherApps, mShortcutManager, mChannelEditorDialogController, mContextTracker,
+                mAssistantFeedbackController, Optional.of(mBubblesManager),
+                new UiEventLoggerFake(), mOnUserInteractionCallback, mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);

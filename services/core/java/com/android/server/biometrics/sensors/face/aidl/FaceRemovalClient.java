@@ -18,44 +18,42 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * Face-specific removal client for the {@link IFace} AIDL HAL interface.
  */
-class FaceRemovalClient extends RemovalClient<Face, AidlSession> {
+class FaceRemovalClient extends RemovalClient<Face, ISession> {
     private static final String TAG = "FaceRemovalClient";
 
     final int[] mBiometricIds;
 
-    FaceRemovalClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int[] biometricIds, int userId, @NonNull String owner,
             @NonNull BiometricUtils<Face> utils, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
-                logger, biometricContext, authenticatorIds);
+                authenticatorIds, BiometricsProtoEnums.MODALITY_FACE);
         mBiometricIds = biometricIds;
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().removeEnrollments(mBiometricIds);
+            getFreshDaemon().removeEnrollments(mBiometricIds);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
             mCallback.onClientFinished(this, false /* success */);

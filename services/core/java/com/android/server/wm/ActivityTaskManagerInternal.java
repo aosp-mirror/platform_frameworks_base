@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -31,14 +30,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.LocaleList;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.IntArray;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
@@ -243,6 +240,21 @@ public abstract class ActivityTaskManagerInternal {
             int startFlags, @Nullable Bundle options, int userId);
 
     /**
+     * Called when Keyguard flags might have changed.
+     *
+     * @param callback Callback to run after activity visibilities have been reevaluated. This can
+     *                 be used from window manager so that when the callback is called, it's
+     *                 guaranteed that all apps have their visibility updated accordingly.
+     * @param displayId The id of the display where the keyguard flags changed.
+     */
+    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId);
+
+    /**
+     * Called when the trusted state of Keyguard has changed.
+     */
+    public abstract void notifyKeyguardTrustedChanged();
+
+    /**
      * Called after virtual display Id is updated by
      * {@link com.android.server.vr.Vr2dDisplay} with a specific
      * {@param vr2dDisplayId}.
@@ -251,7 +263,7 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Set focus on an activity.
-     * @param token The activity token.
+     * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
 
@@ -327,8 +339,8 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessMapped(int pid, WindowProcessController proc);
     public abstract void onProcessUnMapped(int pid);
 
-    public abstract void onPackageDataCleared(String name, int userId);
-    public abstract void onPackageUninstalled(String name, int userId);
+    public abstract void onPackageDataCleared(String name);
+    public abstract void onPackageUninstalled(String name);
     public abstract void onPackageAdded(String name, boolean replacing);
     public abstract void onPackageReplaced(ApplicationInfo aInfo);
 
@@ -583,55 +595,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isBaseOfLockedTask(String packageName);
 
     /**
-     * Creates an interface to update configuration for the calling application.
+     * Create an interface to update configuration for an application.
      */
     public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
-
-    /**
-     * Creates an interface to update configuration for an arbitrary application specified by it's
-     * packageName and userId.
-     */
-    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater(
-            String packageName, int userId);
-
-    /**
-     * Retrieves and returns the app-specific configuration for an arbitrary application specified
-     * by its packageName and userId. Returns null if no app-specific configuration has been set.
-     */
-    @Nullable
-    public abstract PackageConfig getApplicationConfig(String packageName,
-            int userId);
-
-    /**
-     * Holds app-specific configurations.
-     */
-    public static class PackageConfig {
-        /**
-         * nightMode for the application, null if app-specific nightMode is not set.
-         */
-        @Nullable
-        public final Integer mNightMode;
-
-        /**
-         * {@link LocaleList} for the application, null if app-specific locales are not set.
-         */
-        @Nullable
-        public final LocaleList mLocales;
-
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public PackageConfig(Integer nightMode, LocaleList locales) {
-            mNightMode = nightMode;
-            mLocales = locales;
-        }
-
-        /**
-         * Returns the string representation of the app-specific configuration.
-         */
-        @Override
-        public String toString() {
-            return "PackageConfig: nightMode " + mNightMode + " locales " + mLocales;
-        }
-    }
 
     /**
      * An interface to update configuration for an application, and will persist override
@@ -645,27 +611,9 @@ public abstract class ActivityTaskManagerInternal {
         PackageConfigurationUpdater setNightMode(int nightMode);
 
         /**
-         * Sets the app-specific locales for the application referenced by this updater.
-         * This setting is persisted and will overlay on top of the system locales for
-         * the said application.
-         * @return the current {@link PackageConfigurationUpdater} updated with the provided locale.
-         *
-         * <p>NOTE: This method should not be called by clients directly to set app locales,
-         * instead use the {@link LocaleManagerService#setApplicationLocales}
-         */
-        PackageConfigurationUpdater setLocales(LocaleList locales);
-
-        /**
          * Commit changes.
-         * @return true if the configuration changes were persisted,
-         * false if there were no changes, or if erroneous inputs were provided, such as:
-         * <ui>
-         *     <li>Invalid packageName</li>
-         *     <li>Invalid userId</li>
-         *     <li>no WindowProcessController found for the package</li>
-         * </ui>
          */
-        boolean commit();
+        void commit();
     }
 
     /**
@@ -673,21 +621,4 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
             String callingPackage);
-
-    /** Called when the device is waking up */
-    public abstract void notifyWakingUp();
-
-    /**
-     * Registers a callback which can intercept activity starts.
-     * @throws IllegalArgumentException if duplicate ids are provided
-     */
-    public abstract void registerActivityStartInterceptor(
-            @ActivityInterceptorCallback.OrderedId int id,
-            ActivityInterceptorCallback callback);
-
-    /** Get the most recent task excluding the first running task (the one on the front most). */
-    public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
-
-    /** Get the app tasks for a package */
-    public abstract List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid);
 }

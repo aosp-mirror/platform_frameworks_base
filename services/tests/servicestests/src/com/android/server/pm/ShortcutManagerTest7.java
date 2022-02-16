@@ -33,9 +33,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.platform.test.annotations.Presubmit;
-
-import androidx.test.filters.SmallTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
@@ -50,7 +48,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Launcher related commands are tested in
  */
-@Presubmit
 @SmallTest
 public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
 

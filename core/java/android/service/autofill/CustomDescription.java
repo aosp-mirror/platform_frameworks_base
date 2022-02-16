@@ -32,7 +32,6 @@ import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * Defines a custom description for the autofill save UI.
@@ -158,7 +157,7 @@ public final class CustomDescription implements Parcelable {
          * {@link android.os.Build.VERSION_CODES#P} or higher).
          */
         public Builder(@NonNull RemoteViews parentPresentation) {
-            mPresentation = Objects.requireNonNull(parentPresentation);
+            mPresentation = Preconditions.checkNotNull(parentPresentation);
         }
 
         /**
@@ -277,7 +276,7 @@ public final class CustomDescription implements Parcelable {
             throwIfDestroyed();
             Preconditions.checkArgument((condition instanceof InternalValidator),
                     "not provided by Android System: %s", condition);
-            Objects.requireNonNull(updates);
+            Preconditions.checkNotNull(updates);
             if (mUpdates == null) {
                 mUpdates = new ArrayList<>();
             }
@@ -437,7 +436,7 @@ public final class CustomDescription implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final RemoteViews parentPresentation = parcel.readParcelable(null, android.widget.RemoteViews.class);
+            final RemoteViews parentPresentation = parcel.readParcelable(null);
             if (parentPresentation == null) return null;
 
             final Builder builder = new Builder(parentPresentation);

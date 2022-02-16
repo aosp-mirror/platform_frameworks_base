@@ -2071,6 +2071,15 @@ public class TextUtils {
     }
 
     /**
+     * Return localized string representing the given number of selected items.
+     *
+     * @hide
+     */
+    public static CharSequence formatSelectedCount(int count) {
+        return Resources.getSystem().getQuantityString(R.plurals.selected_count, count, count);
+    }
+
+    /**
      * Simple alternative to {@link String#format} which purposefully supports
      * only a small handful of substitutions to improve execution speed.
      * Benchmarking reveals this optimized alternative performs 6.5x faster for

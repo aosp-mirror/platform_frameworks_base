@@ -58,17 +58,14 @@ class CredstoreIdentityCredential extends IdentityCredential {
     private @IdentityCredentialStore.Ciphersuite int mCipherSuite;
     private Context mContext;
     private ICredential mBinder;
-    private CredstorePresentationSession mSession;
 
     CredstoreIdentityCredential(Context context, String credentialName,
             @IdentityCredentialStore.Ciphersuite int cipherSuite,
-            ICredential binder,
-            @Nullable CredstorePresentationSession session) {
+            ICredential binder) {
         mContext = context;
         mCredentialName = credentialName;
         mCipherSuite = cipherSuite;
         mBinder = binder;
-        mSession = session;
     }
 
     private KeyPair mEphemeralKeyPair = null;
@@ -242,7 +239,6 @@ class CredstoreIdentityCredential extends IdentityCredential {
 
     private boolean mAllowUsingExhaustedKeys = true;
     private boolean mAllowUsingExpiredKeys = false;
-    private boolean mIncrementKeyUsageCount = true;
 
     @Override
     public void setAllowUsingExhaustedKeys(boolean allowUsingExhaustedKeys) {
@@ -252,11 +248,6 @@ class CredstoreIdentityCredential extends IdentityCredential {
     @Override
     public void setAllowUsingExpiredKeys(boolean allowUsingExpiredKeys) {
         mAllowUsingExpiredKeys = allowUsingExpiredKeys;
-    }
-
-    @Override
-    public void setIncrementKeyUsageCount(boolean incrementKeyUsageCount) {
-        mIncrementKeyUsageCount = incrementKeyUsageCount;
     }
 
     private boolean mOperationHandleSet = false;
@@ -273,8 +264,7 @@ class CredstoreIdentityCredential extends IdentityCredential {
         if (!mOperationHandleSet) {
             try {
                 mOperationHandle = mBinder.selectAuthKey(mAllowUsingExhaustedKeys,
-                                                         mAllowUsingExpiredKeys,
-                                                         mIncrementKeyUsageCount);
+                        mAllowUsingExpiredKeys);
                 mOperationHandleSet = true;
             } catch (android.os.RemoteException e) {
                 throw new RuntimeException("Unexpected RemoteException ", e);
@@ -325,8 +315,7 @@ class CredstoreIdentityCredential extends IdentityCredential {
                 sessionTranscript != null ? sessionTranscript : new byte[0],
                 readerSignature != null ? readerSignature : new byte[0],
                 mAllowUsingExhaustedKeys,
-                mAllowUsingExpiredKeys,
-                mIncrementKeyUsageCount);
+                mAllowUsingExpiredKeys);
         } catch (android.os.RemoteException e) {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {

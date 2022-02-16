@@ -33,7 +33,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -73,11 +72,10 @@ public class FlashlightControllerImpl implements FlashlightController {
     private boolean mTorchAvailable;
 
     @Inject
-    public FlashlightControllerImpl(Context context, DumpManager dumpManager) {
+    public FlashlightControllerImpl(Context context) {
         mContext = context;
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
 
-        dumpManager.registerDumpable(getClass().getSimpleName(), this);
         tryInitCamera();
     }
 

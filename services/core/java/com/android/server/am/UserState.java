@@ -56,6 +56,7 @@ public final class UserState {
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
     public boolean switching;
+    public boolean tokenProvided;
 
     /** Callback for key eviction. */
     public interface KeyEvictedCallback {
@@ -143,11 +144,5 @@ public final class UserState {
         proto.write(UserStateProto.STATE, stateToProtoEnum(state));
         proto.write(UserStateProto.SWITCHING, switching);
         proto.end(token);
-    }
-
-    @Override
-    public String toString() {
-        return "[UserState: id=" + mHandle.getIdentifier() + ", state=" + stateToString(state)
-            + ", lastState=" + stateToString(lastState) + ", switching=" + switching + "]";
     }
 }

@@ -56,7 +56,6 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +75,6 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
     private @Mock AuthDialogCallback mCallback;
     private @Mock UserManager mUserManager;
-    private @Mock WakefulnessLifecycle mWakefulnessLifecycle;
 
     @Before
     public void setup() {
@@ -265,17 +263,15 @@ public class AuthContainerViewTest extends SysuiTestCase {
                 componentInfo,
                 FingerprintSensorProperties.TYPE_REAR,
                 false /* resetLockoutRequiresHardwareAuthToken */));
-        mAuthContainer = new TestableAuthContainer(config, fpProps, null /* faceProps */,
-                mWakefulnessLifecycle);
+        mAuthContainer = new TestableAuthContainer(config, fpProps, null /* faceProps */);
     }
 
     private class TestableAuthContainer extends AuthContainerView {
         TestableAuthContainer(AuthContainerView.Config config,
                 @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-                @Nullable List<FaceSensorPropertiesInternal> faceProps,
-                WakefulnessLifecycle wakefulnessLifecycle) {
+                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
 
-            super(config, new MockInjector(), fpProps, faceProps, wakefulnessLifecycle);
+            super(config, new MockInjector(), fpProps, faceProps);
         }
 
         @Override

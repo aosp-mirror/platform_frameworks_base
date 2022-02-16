@@ -26,10 +26,6 @@ import androidx.preference.CheckBoxPreference;
 import androidx.preference.PreferenceViewHolder;
 
 /**
- * DEPRECATED. Please use SelectorWithWidgetPreference instead.
- *
- * This file has been moved there and will be removed once all callers are updated.
- *
  * Check box preference with check box replaced by radio button.
  *
  * Functionally speaking, it's actually a CheckBoxPreference. We only modified
@@ -41,8 +37,6 @@ import androidx.preference.PreferenceViewHolder;
  *
  * RadioButtonPreference can assign a extraWidgetListener to show a gear icon
  * on the right side that can open another page.
- *
- * @Deprecated
  */
 public class RadioButtonPreference extends CheckBoxPreference {
 

@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
@@ -224,6 +223,14 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
+    void setPortalToDisplayId(int displayId) {
+        if (mHandle.portalToDisplayId == displayId) {
+            return;
+        }
+        mHandle.portalToDisplayId = displayId;
+        mChanged = true;
+    }
+
     void setFrame(int left, int top, int right, int bottom) {
         if (mHandle.frameLeft == left && mHandle.frameTop == top && mHandle.frameRight == right
                 && mHandle.frameBottom == bottom) {
@@ -266,18 +273,6 @@ class InputWindowHandleWrapper {
         }
         mHandle.replaceTouchableRegionWithCrop = replace;
         mChanged = true;
-    }
-
-    void setWindowToken(IWindow windowToken) {
-        if (mHandle.getWindow() == windowToken) {
-            return;
-        }
-        mHandle.setWindowToken(windowToken);
-        mChanged = true;
-    }
-
-    boolean isTrustedOverlay() {
-        return mHandle.trustedOverlay;
     }
 
     @Override

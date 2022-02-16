@@ -17,4 +17,3 @@
 package android.window;
 
 parcelable TransitionRequestInfo;
-parcelable TransitionRequestInfo.DisplayChange;

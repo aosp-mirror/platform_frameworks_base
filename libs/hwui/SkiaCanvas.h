@@ -23,10 +23,8 @@
 #include "VectorDrawable.h"
 #include "hwui/Canvas.h"
 #include "hwui/Paint.h"
-#include "hwui/BlurDrawLooper.h"
 
 #include <SkCanvas.h>
-#include <SkDeque.h>
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "src/core/SkArenaAlloc.h"
 
@@ -75,7 +73,7 @@ public:
     virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
-    virtual void restoreUnclippedLayer(int saveCount, const Paint& paint) override;
+    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) override;
@@ -94,9 +92,6 @@ public:
     virtual bool quickRejectPath(const SkPath& path) const override;
     virtual bool clipRect(float left, float top, float right, float bottom, SkClipOp op) override;
     virtual bool clipPath(const SkPath* path, SkClipOp op) override;
-    virtual bool replaceClipRect_deprecated(float left, float top, float right,
-                                            float bottom) override;
-    virtual bool replaceClipPath_deprecated(const SkPath* path) override;
 
     virtual PaintFilter* getPaintFilter() override;
     virtual void setPaintFilter(sk_sp<PaintFilter> paintFilter) override;
@@ -104,7 +99,7 @@ public:
     virtual SkCanvasState* captureCanvasState() const override;
 
     virtual void drawColor(int color, SkBlendMode mode) override;
-    virtual void drawPaint(const Paint& paint) override;
+    virtual void drawPaint(const SkPaint& paint) override;
 
     virtual void drawPoint(float x, float y, const Paint& paint) override;
     virtual void drawPoints(const float* points, int count, const Paint& paint) override;
@@ -172,10 +167,10 @@ protected:
                                   const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) override;
 
-    void onFilterPaint(Paint& paint);
+    void onFilterPaint(SkPaint& paint);
 
-    Paint filterPaint(const Paint& src) {
-        Paint dst(src);
+    SkPaint filterPaint(const SkPaint& src) {
+        SkPaint dst(src);
         this->onFilterPaint(dst);
         return dst;
     }
@@ -184,20 +179,21 @@ protected:
     template <typename Proc>
     void applyLooper(const Paint* paint, Proc proc, void (*preFilter)(SkPaint&) = nullptr) {
         BlurDrawLooper* looper = paint ? paint->getLooper() : nullptr;
-        Paint pnt = paint ? *paint : Paint();
+        const SkPaint* skpPtr = paint;
+        SkPaint skp = skpPtr ? *skpPtr : SkPaint();
         if (preFilter) {
-            preFilter(pnt);
+            preFilter(skp);
         }
-        this->onFilterPaint(pnt);
+        this->onFilterPaint(skp);
         if (looper) {
-            looper->apply(pnt, [&](SkPoint offset, const Paint& modifiedPaint) {
+            looper->apply(skp, [&](SkPoint offset, const SkPaint& modifiedPaint) {
                 mCanvas->save();
                 mCanvas->translate(offset.fX, offset.fY);
                 proc(modifiedPaint);
                 mCanvas->restore();
             });
         } else {
-            proc(pnt);
+            proc(skp);
         }
     }
 

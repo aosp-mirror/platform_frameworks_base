@@ -20,8 +20,6 @@
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 
-#include <log/log.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -35,6 +33,7 @@ Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alp
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
     renderState.registerLayer(this);
+    texTransform.setIdentity();
     transform.setIdentity();
 }
 
@@ -91,7 +90,7 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
 void Layer::draw(SkCanvas* canvas) {
     GrRecordingContext* context = canvas->recordingContext();
     if (context == nullptr) {
-        ALOGD("Attempting to draw LayerDrawable into an unsupported surface");
+        SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
         return;
     }
     SkMatrix layerTransform = getTransform();
@@ -100,6 +99,7 @@ void Layer::draw(SkCanvas* canvas) {
     const int layerHeight = getHeight();
     if (layerImage) {
         SkMatrix textureMatrixInv;
+        textureMatrixInv = getTexTransform();
         // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;

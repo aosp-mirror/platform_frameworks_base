@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -154,37 +155,9 @@ public final class DeviceStateManagerGlobalTest {
         verify(callback).onStateChanged(eq(OTHER_DEVICE_STATE));
         Mockito.reset(callback);
 
-        mDeviceStateManagerGlobal.cancelStateRequest();
+        mDeviceStateManagerGlobal.cancelRequest(request);
 
         verify(callback).onStateChanged(eq(mService.getBaseState()));
-    }
-
-    @Test
-    public void verifyDeviceStateRequestCallbacksCalled() {
-        DeviceStateRequest.Callback callback = mock(TestDeviceStateRequestCallback.class);
-
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE).build();
-        mDeviceStateManagerGlobal.requestState(request,
-                ConcurrentUtils.DIRECT_EXECUTOR /* executor */,
-                callback /* callback */);
-
-        verify(callback).onRequestActivated(eq(request));
-        Mockito.reset(callback);
-
-        mDeviceStateManagerGlobal.cancelStateRequest();
-
-        verify(callback).onRequestCanceled(eq(request));
-    }
-
-    public static class TestDeviceStateRequestCallback implements DeviceStateRequest.Callback {
-        @Override
-        public void onRequestActivated(DeviceStateRequest request) { }
-
-        @Override
-        public void onRequestCanceled(DeviceStateRequest request) { }
-
-        @Override
-        public void onRequestSuspended(DeviceStateRequest request) { }
     }
 
     private static final class TestDeviceStateManagerService extends IDeviceStateManager.Stub {
@@ -202,13 +175,13 @@ public final class DeviceStateManagerGlobalTest {
 
         private int[] mSupportedStates = new int[] { DEFAULT_DEVICE_STATE, OTHER_DEVICE_STATE };
         private int mBaseState = DEFAULT_DEVICE_STATE;
-        private Request mRequest;
+        private ArrayList<Request> mRequests = new ArrayList<>();
 
         private Set<IDeviceStateManagerCallback> mCallbacks = new HashSet<>();
 
         private DeviceStateInfo getInfo() {
-            final int mergedState = mRequest == null
-                    ? mBaseState : mRequest.state;
+            final int mergedState = mRequests.isEmpty()
+                    ? mBaseState : mRequests.get(mRequests.size() - 1).state;
             return new DeviceStateInfo(mSupportedStates, mBaseState, mergedState);
         }
 
@@ -244,10 +217,11 @@ public final class DeviceStateManagerGlobalTest {
 
         @Override
         public void requestState(IBinder token, int state, int flags) {
-            if (mRequest != null) {
+            if (!mRequests.isEmpty()) {
+                final Request topRequest = mRequests.get(mRequests.size() - 1);
                 for (IDeviceStateManagerCallback callback : mCallbacks) {
                     try {
-                        callback.onRequestCanceled(mRequest.token);
+                        callback.onRequestSuspended(topRequest.token);
                     } catch (RemoteException e) {
                         // Do nothing. Should never happen.
                     }
@@ -255,7 +229,7 @@ public final class DeviceStateManagerGlobalTest {
             }
 
             final Request request = new Request(token, state, flags);
-            mRequest = request;
+            mRequests.add(request);
             notifyDeviceStateInfoChanged();
 
             for (IDeviceStateManagerCallback callback : mCallbacks) {
@@ -268,9 +242,20 @@ public final class DeviceStateManagerGlobalTest {
         }
 
         @Override
-        public void cancelStateRequest() {
-            IBinder token = mRequest.token;
-            mRequest = null;
+        public void cancelRequest(IBinder token) {
+            int index = -1;
+            for (int i = 0; i < mRequests.size(); i++) {
+                if (mRequests.get(i).token.equals(token)) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == -1) {
+                throw new IllegalArgumentException("Unknown request: " + token);
+            }
+
+            mRequests.remove(index);
             for (IDeviceStateManagerCallback callback : mCallbacks) {
                 try {
                     callback.onRequestCanceled(token);

@@ -24,7 +24,6 @@ import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.DozeLog
-import com.android.systemui.statusbar.policy.DevicePostureController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,14 +62,6 @@ class DozeLogger @Inject constructor(
             bool1 = isDozing
         }, {
             "Dozing=$bool1"
-        })
-    }
-
-    fun logDozingChanged(isDozing: Boolean) {
-        buffer.log(TAG, INFO, {
-            bool1 = isDozing
-        }, {
-            "Dozing changed dozing=$bool1"
         })
     }
 
@@ -204,16 +195,6 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logPostureChanged(posture: Int, partUpdated: String) {
-        buffer.log(TAG, INFO, {
-            int1 = posture
-            str1 = partUpdated
-        }, {
-            "Posture changed, posture=${DevicePostureController.devicePostureToString(int1)}" +
-                    " partUpdated=$str1"
-        })
-    }
-
     fun logPulseDropped(pulsePending: Boolean, state: DozeMachine.State, blocked: Boolean) {
         buffer.log(TAG, INFO, {
             bool1 = pulsePending
@@ -221,15 +202,6 @@ class DozeLogger @Inject constructor(
             bool2 = blocked
         }, {
             "Pulse dropped, pulsePending=$bool1 state=$str1 blocked=$bool2"
-        })
-    }
-
-    fun logSensorEventDropped(sensorEvent: Int, reason: String) {
-        buffer.log(TAG, INFO, {
-            int1 = sensorEvent
-            str1 = reason
-        }, {
-            "SensorEvent [$int1] dropped, reason=$str1"
         })
     }
 

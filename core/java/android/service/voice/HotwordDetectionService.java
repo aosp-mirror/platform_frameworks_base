@@ -140,7 +140,9 @@ public abstract class HotwordDetectionService extends Service {
                 Log.d(TAG, "#detectFromDspSource");
             }
             HotwordDetectionService.this.onDetect(
-                    new AlwaysOnHotwordDetector.EventPayload.Builder(event).build(),
+                    new AlwaysOnHotwordDetector.EventPayload(
+                            event.triggerInData, event.captureAvailable,
+                            event.captureFormat, event.captureSession, event.data),
                     timeoutMillis,
                     new Callback(callback));
         }

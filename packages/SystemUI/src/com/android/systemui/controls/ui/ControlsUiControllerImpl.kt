@@ -120,7 +120,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
             if (accepted) {
-                selectedStructure = controlsController.get().getFavorites().maxByOrNull {
+                selectedStructure = controlsController.get().getFavorites().maxBy {
                     it.controls.size
                 } ?: EMPTY_STRUCTURE
                 updatePreferences(selectedStructure)
@@ -256,13 +256,13 @@ class ControlsUiControllerImpl @Inject constructor (
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
 
-        if (keyguardStateController.isShowing()) {
-            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
-        } else {
+        if (keyguardStateController.isUnlocked()) {
             activityContext.startActivity(
                 intent,
                 ActivityOptions.makeSceneTransitionAnimation(activityContext as Activity).toBundle()
             )
+        } else {
+            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
         }
     }
 
@@ -437,7 +437,7 @@ class ControlsUiControllerImpl @Inject constructor (
      * number of columns. This helps prevent text truncation on these devices.
      */
     private fun findMaxColumns(): Int {
-        val res = activityContext.resources
+        val res = context.resources
         var maxColumns = res.getInteger(R.integer.controls_max_columns)
         val maxColumnsAdjustWidth =
             res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)

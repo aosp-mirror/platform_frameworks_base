@@ -26,29 +26,16 @@ import com.android.systemui.R
  *
  * <p>Updates the seek bar views in response to changes to the model.
  */
-class SeekBarObserver(
-    private val holder: MediaViewHolder,
-    private val useSessionLayout: Boolean
-) : Observer<SeekBarViewModel.Progress> {
+class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarViewModel.Progress> {
 
     val seekBarEnabledMaxHeight = holder.seekBar.context.resources
         .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_height)
     val seekBarDisabledHeight = holder.seekBar.context.resources
         .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_height)
-    val seekBarEnabledVerticalPadding = if (useSessionLayout) {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_session_enabled_seekbar_vertical_padding)
-    } else {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_vertical_padding)
-    }
-    val seekBarDisabledVerticalPadding = if (useSessionLayout) {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_session_disabled_seekbar_vertical_padding)
-    } else {
-        holder.seekBar.context.resources
-                .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_vertical_padding)
-    }
+    val seekBarEnabledVerticalPadding = holder.seekBar.context.resources
+            .getDimensionPixelSize(R.dimen.qs_media_enabled_seekbar_vertical_padding)
+    val seekBarDisabledVerticalPadding = holder.seekBar.context.resources
+            .getDimensionPixelSize(R.dimen.qs_media_disabled_seekbar_vertical_padding)
 
     /** Updates seek bar views when the data model changes. */
     @UiThread
@@ -61,9 +48,8 @@ class SeekBarObserver(
             holder.seekBar.setEnabled(false)
             holder.seekBar.getThumb().setAlpha(0)
             holder.seekBar.setProgress(0)
-            holder.elapsedTimeView?.setText("")
-            holder.totalTimeView?.setText("")
-            holder.seekBar.contentDescription = ""
+            holder.elapsedTimeView.setText("")
+            holder.totalTimeView.setText("")
             return
         }
 
@@ -75,22 +61,16 @@ class SeekBarObserver(
             setVerticalPadding(seekBarEnabledVerticalPadding)
         }
 
-        holder.seekBar.setMax(data.duration)
-        val totalTimeString = DateUtils.formatElapsedTime(
-            data.duration / DateUtils.SECOND_IN_MILLIS)
-        holder.totalTimeView?.setText(totalTimeString)
+        data.duration?.let {
+            holder.seekBar.setMax(it)
+            holder.totalTimeView.setText(DateUtils.formatElapsedTime(
+                    it / DateUtils.SECOND_IN_MILLIS))
+        }
 
         data.elapsedTime?.let {
             holder.seekBar.setProgress(it)
-            val elapsedTimeString = DateUtils.formatElapsedTime(
-                it / DateUtils.SECOND_IN_MILLIS)
-            holder.elapsedTimeView?.setText(elapsedTimeString)
-
-            holder.seekBar.contentDescription = holder.seekBar.context.getString(
-                R.string.controls_media_seekbar_description,
-                elapsedTimeString,
-                totalTimeString
-            )
+            holder.elapsedTimeView.setText(DateUtils.formatElapsedTime(
+                    it / DateUtils.SECOND_IN_MILLIS))
         }
     }
 

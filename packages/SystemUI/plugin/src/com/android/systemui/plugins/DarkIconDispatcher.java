@@ -25,8 +25,6 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
-import java.util.ArrayList;
-
 /**
  * Dispatches events to {@link DarkReceiver}s about changes in darkness, tint area and dark
  * intensity. Accessible through {@link PluginDependency}
@@ -34,15 +32,15 @@ import java.util.ArrayList;
 @ProvidesInterface(version = DarkIconDispatcher.VERSION)
 @DependsOn(target = DarkReceiver.class)
 public interface DarkIconDispatcher {
-    int VERSION = 2;
+    int VERSION = 1;
 
     /**
      * Sets the dark area so {@link #applyDark} only affects the icons in the specified area.
      *
-     * @param r the areas in which icons should change its tint, in logical screen
+     * @param r the area in which icons should change its tint, in logical screen
      *                 coordinates
      */
-    void setIconsDarkArea(ArrayList<Rect> r);
+    void setIconsDarkArea(Rect r);
 
     /**
      * Adds a receiver to receive callbacks onDarkChanged
@@ -78,8 +76,8 @@ public interface DarkIconDispatcher {
      * @return the tint to apply to view depending on the desired tint color and
      *         the screen tintArea in which to apply that tint
      */
-    static int getTint(ArrayList<Rect> tintAreas, View view, int color) {
-        if (isInAreas(tintAreas, view)) {
+    static int getTint(Rect tintArea, View view, int color) {
+        if (isInArea(tintArea, view)) {
             return color;
         } else {
             return DEFAULT_ICON_TINT;
@@ -87,16 +85,15 @@ public interface DarkIconDispatcher {
     }
 
     /**
-     * @return true if more than half of the view area are in any of the given
-     *         areas, false otherwise
+     * @return the dark intensity to apply to view depending on the desired dark
+     *         intensity and the screen tintArea in which to apply that intensity
      */
-    static boolean isInAreas(ArrayList<Rect> areas, View view) {
-        for (Rect area : areas) {
-            if (isInArea(area, view)) {
-                return true;
-            }
+    static float getDarkIntensity(Rect tintArea, View view, float intensity) {
+        if (isInArea(tintArea, view)) {
+            return intensity;
+        } else {
+            return 0f;
         }
-        return false;
     }
 
     /**
@@ -125,7 +122,7 @@ public interface DarkIconDispatcher {
      */
     @ProvidesInterface(version = DarkReceiver.VERSION)
     interface DarkReceiver {
-        int VERSION = 2;
-        void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint);
+        int VERSION = 1;
+        void onDarkChanged(Rect area, float darkIntensity, int tint);
     }
 }

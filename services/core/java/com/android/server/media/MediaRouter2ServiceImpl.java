@@ -64,11 +64,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -191,8 +189,7 @@ class MediaRouter2ServiceImpl {
     }
 
     @NonNull
-    public RoutingSessionInfo getSystemSessionInfo(
-            @Nullable String packageName, boolean setDeviceRouteSelected) {
+    public RoutingSessionInfo getSystemSessionInfo() {
         final int uid = Binder.getCallingUid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
         final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
@@ -206,22 +203,14 @@ class MediaRouter2ServiceImpl {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 List<RoutingSessionInfo> sessionInfos;
                 if (hasModifyAudioRoutingPermission) {
-                    if (setDeviceRouteSelected) {
-                        systemSessionInfo = userRecord.mHandler.mSystemProvider
-                                .generateDeviceRouteSelectedSessionInfo(packageName);
+                    sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
+                    if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                        systemSessionInfo = sessionInfos.get(0);
                     } else {
-                        sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
-                        if (sessionInfos != null && !sessionInfos.isEmpty()) {
-                            systemSessionInfo = new RoutingSessionInfo.Builder(sessionInfos.get(0))
-                                    .setClientPackageName(packageName).build();
-                        } else {
-                            Slog.w(TAG, "System provider does not have any session info.");
-                        }
+                        Slog.w(TAG, "System provider does not have any session info.");
                     }
                 } else {
-                    systemSessionInfo = new RoutingSessionInfo.Builder(
-                            userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
-                            .setClientPackageName(packageName).build();
+                    systemSessionInfo = userRecord.mHandler.mSystemProvider.getDefaultSessionInfo();
                 }
             }
             return systemSessionInfo;
@@ -414,12 +403,12 @@ class MediaRouter2ServiceImpl {
     ////////////////////////////////////////////////////////////////
 
     @NonNull
-    public List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager) {
+    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
         Objects.requireNonNull(manager, "manager must not be null");
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                return getRemoteSessionsLocked(manager);
+                return getActiveSessionsLocked(manager);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -679,9 +668,9 @@ class MediaRouter2ServiceImpl {
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
+                obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
                         routerRecord.mUserRecord.mHandler,
-                        routerRecord.mPackageName, null));
+                        routerRecord.mPackageName, /* preferredFeatures=*/ null));
         userRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         userRecord.mHandler));
@@ -696,10 +685,10 @@ class MediaRouter2ServiceImpl {
         }
         routerRecord.mDiscoveryPreference = discoveryRequest;
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
+                obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
                         routerRecord.mUserRecord.mHandler,
                         routerRecord.mPackageName,
-                        routerRecord.mDiscoveryPreference));
+                        routerRecord.mDiscoveryPreference.getPreferredFeatures()));
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         routerRecord.mUserRecord.mHandler));
@@ -872,21 +861,19 @@ class MediaRouter2ServiceImpl {
     ////   - Should have @NonNull/@Nullable on all arguments
     ////////////////////////////////////////////////////////////
 
-    private List<RoutingSessionInfo> getRemoteSessionsLocked(
+    private List<RoutingSessionInfo> getActiveSessionsLocked(
             @NonNull IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord == null) {
-            Slog.w(TAG, "getRemoteSessionLocked: Ignoring unknown manager");
+            Slog.w(TAG, "getActiveSessionLocked: Ignoring unknown manager");
             return Collections.emptyList();
         }
 
         List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
         for (MediaRoute2Provider provider : managerRecord.mUserRecord.mHandler.mRouteProviders) {
-            if (!provider.mIsSystemRouteProvider) {
-                sessionInfos.addAll(provider.getSessionInfos());
-            }
+            sessionInfos.addAll(provider.getSessionInfos());
         }
         return sessionInfos;
     }
@@ -923,7 +910,7 @@ class MediaRouter2ServiceImpl {
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
             routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManager,
+                    obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManager,
                         routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
 
@@ -2120,19 +2107,19 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyDiscoveryPreferenceChangedToManager(@NonNull RouterRecord routerRecord,
+        private void notifyPreferredFeaturesChangedToManager(@NonNull RouterRecord routerRecord,
                 @NonNull IMediaRouter2Manager manager) {
             try {
-                manager.notifyDiscoveryPreferenceChanged(routerRecord.mPackageName,
-                        routerRecord.mDiscoveryPreference);
+                manager.notifyPreferredFeaturesChanged(routerRecord.mPackageName,
+                        routerRecord.mDiscoveryPreference.getPreferredFeatures());
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify preferred features changed."
                         + " Manager probably died.", ex);
             }
         }
 
-        private void notifyDiscoveryPreferenceChangedToManagers(@NonNull String routerPackageName,
-                @Nullable RouteDiscoveryPreference discoveryPreference) {
+        private void notifyPreferredFeaturesChangedToManagers(@NonNull String routerPackageName,
+                @Nullable List<String> preferredFeatures) {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
                 return;
@@ -2145,8 +2132,7 @@ class MediaRouter2ServiceImpl {
             }
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyDiscoveryPreferenceChanged(routerPackageName,
-                            discoveryPreference);
+                    manager.notifyPreferredFeaturesChanged(routerPackageName, preferredFeatures);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify preferred features changed."
                             + " Manager probably died.", ex);
@@ -2202,21 +2188,9 @@ class MediaRouter2ServiceImpl {
                 }
             }
 
-            // Build a composite RouteDiscoveryPreference that matches all of the routes
-            // that match one or more of the individual discovery preferences. It may also
-            // match additional routes. The composite RouteDiscoveryPreference can be used
-            // to query route providers once to obtain all of the routes of interest, which
-            // can be subsequently filtered for the individual discovery preferences.
-            Set<String> preferredFeatures = new HashSet<>();
-            boolean activeScan = false;
-            for (RouteDiscoveryPreference preference : discoveryPreferences) {
-                preferredFeatures.addAll(preference.getPreferredFeatures());
-                activeScan |= preference.shouldPerformActiveScan();
-            }
-            RouteDiscoveryPreference newPreference = new RouteDiscoveryPreference.Builder(
-                    List.copyOf(preferredFeatures), activeScan).build();
-
             synchronized (service.mLock) {
+                RouteDiscoveryPreference newPreference =
+                        new RouteDiscoveryPreference.Builder(discoveryPreferences).build();
                 if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)) {
                     return;
                 }
