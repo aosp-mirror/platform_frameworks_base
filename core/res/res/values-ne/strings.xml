@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"फाइल र डकुमेन्टहरू"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"आफ्नो डिभाइसमा भएका फाइल र डकुमेन्टहरू प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"सङ्गीत तथा अन्य अडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"तपाईंको डिभाइसमा भएका अडियो फाइलहरू प्रयोग गर्ने"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फोटो तथा भिडियोहरू"</string>
@@ -588,8 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी राख्न आफ्नो स्क्रिन लक हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"फिंगरप्रिन्ट आंशिक रूपमा पत्ता लाग्यो"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"सेन्सर सफा गर्नुहोस्"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"औँला अलि बढी समयसम्म सेन्सरमा राख्नुहोस्"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिन्ट सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
@@ -597,6 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"हरेक पटक आफ्नो औँला थोरै यताउता सार्नुहोस्"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिन्ट पहिचान गर्न सकिएन"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिन्ट प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"अनुहार प्रमाणीकरण गरियो, कृपया पुष्टि गर्नुहोस् थिच्नुहोस्"</string>
@@ -1500,7 +1501,8 @@
     <string name="skip_button_label" msgid="3566599811326688389">"छोड्नुहोस्"</string>
     <string name="no_matches" msgid="6472699895759164599">"कुनै मिलेन"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पृष्ठमा फेला पार्नुहोस्"</string>
-    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# खेल{total} वटा खेलमध्ये }other{# औँ खेल}} }"</string>
+    <!-- no translation found for matches_found (2296462299979507689) -->
+    <skip />
     <string name="action_mode_done" msgid="2536182504764803222">"भयो"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"साझेदारी गरिएको भण्डारण मेट्दै…"</string>
     <string name="share" msgid="4157615043345227321">"सेयर गर्नुहोस्"</string>
@@ -1928,6 +1930,10 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"सक्रिय गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यो एप Android को पुरानो संस्करणका लागि बनाइएको हुनाले यसले सही ढङ्गले काम नगर्न सक्छ। अद्यावधिकहरू उपलब्ध छन् वा छैनन् भनी जाँच गरी हेर्नुहोस् वा यसको विकासकर्तालाई सम्पर्क गर्नुहोस्।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेट उपलब्ध छ वा छैन जाँच्नुहोस्"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"तपाईंलाई नयाँ सन्देश आएको छ"</string>
@@ -2017,16 +2023,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"स्थापना रद्द गर्नु…"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"जे भए पनि खोल्नुहोस्"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"हानिकारक एप भेटियो"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"सिस्टम लग प्रयोग गर्ने अनुमति"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"यस पटक मात्र"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति नदिनुहोस्"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ले फङ्सनल डिबग प्रक्रियाका लागि सिस्टम लगहरू हेर्ने तथा प्रयोग गर्ने अनुमति माग्दै छ। यी लगहरूमा तपाईंको डिभाइसमा रहेका एप र सेवाहरूले राइट गरेको जानकारी समावेश हुन सक्छ।"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फेरि नदेखाइयोस्"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ले <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन चाहन्छ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"सम्पादन गर्नुहोस्"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कल तथा सूचनाहरू आउँदा कम्पन हुने छ"</string>
@@ -2119,10 +2120,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"अन गर्न ट्याप गर्नुहोस्"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यो सामग्री खोल्न मिल्ने कुनै पनि कामसम्बन्धी एप छैन"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यो सामग्री खोल्न मिल्ने कुनै पनि व्यक्तिगत एप छैन"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> तपाईंको व्यक्तिगत प्रोफाइलमा खोल्ने हो?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> तपाईंको कार्य प्रोफाइलमा खोल्ने हो?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>
@@ -2257,4 +2256,6 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको हुनाले ब्याट्री खपत भइरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
+    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <skip />
 </resources>

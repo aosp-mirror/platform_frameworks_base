@@ -11720,8 +11720,8 @@ public final class Settings {
                 "night_display_forced_auto_mode_available";
 
         /**
-         * If UTC time between two NITZ signals is greater than this value then the second signal
-         * cannot be ignored.
+         * If Unix epoch time between two NITZ signals is greater than this value then the second
+         * signal cannot be ignored.
          *
          * <p>This value is in milliseconds. It is used for telephony-based time and time zone
          * detection.
@@ -16863,6 +16863,14 @@ public final class Settings {
          */
         public static final String WATCHDOG_TIMEOUT_MILLIS =
                 "system_server_watchdog_timeout_ms";
+
+        /**
+         * Whether to enable managed device provisioning via the role holder.
+         *
+         * @hide
+         */
+        public static final String MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER =
+                "managed_provisioning_defer_provisioning_to_role_holder";
 
         /**
          * Settings migrated from Wear OS settings provider.

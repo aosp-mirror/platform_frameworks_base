@@ -111,7 +111,7 @@ public class Flags {
     public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
             new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
-    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
+    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
 
     public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
@@ -146,6 +146,7 @@ public class Flags {
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
+    public static final BooleanFlag MEDIA_NEARBY_DEVICES = new BooleanFlag(903, true);
     public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
 
     // 1000 - dock

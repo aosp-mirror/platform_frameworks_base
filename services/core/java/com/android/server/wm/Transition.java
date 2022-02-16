@@ -550,10 +550,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             throw new IllegalStateException("Too late to abort.");
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Aborting Transition: %d", mSyncId);
-        mController.dispatchLegacyAppTransitionCancelled();
         mState = STATE_ABORT;
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
+        mController.dispatchLegacyAppTransitionCancelled();
     }
 
     void setRemoteTransition(RemoteTransition remoteTransition) {

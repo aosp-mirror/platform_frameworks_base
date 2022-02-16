@@ -826,4 +826,14 @@ public abstract class ActivityManagerInternal {
      * Register the bind service event listener callback.
      */
     public abstract void addBindServiceEventListener(@NonNull BindServiceEventListener listener);
+
+    /**
+     * Restart android.
+     */
+    public abstract void restart();
+
+    /**
+     * Returns some summary statistics of the current PendingIntent queue - sizes and counts.
+     */
+    public abstract List<PendingIntentStats> getPendingIntentStats();
 }

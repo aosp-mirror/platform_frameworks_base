@@ -51,15 +51,15 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  */
 public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
 
-    protected final SyncTransactionQueue mSyncQueue;
-    protected final int mDisplayId;
     protected final int mTaskId;
-
     protected Context mContext;
-    protected Configuration mTaskConfig;
-    protected ShellTaskOrganizer.TaskListener mTaskListener;
-    protected DisplayLayout mDisplayLayout;
-    protected final Rect mStableBounds;
+
+    private final SyncTransactionQueue mSyncQueue;
+    private final int mDisplayId;
+    private Configuration mTaskConfig;
+    private ShellTaskOrganizer.TaskListener mTaskListener;
+    private DisplayLayout mDisplayLayout;
+    private final Rect mStableBounds;
 
     /**
      * Utility class for adding and releasing a View hierarchy for this {@link
@@ -211,7 +211,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         boolean layoutDirectionUpdated =
                 mTaskConfig.getLayoutDirection() != prevTaskConfig.getLayoutDirection();
         if (boundsUpdated || layoutDirectionUpdated) {
-            updateSurface();
+            onParentBoundsChanged();
         }
 
         if (layout != null && layoutDirectionUpdated) {
@@ -248,8 +248,9 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         displayLayout.getStableBounds(curStableBounds);
         mDisplayLayout = displayLayout;
         if (!prevStableBounds.equals(curStableBounds)) {
-            updateSurface();
+            // mStableBounds should be updated before we call onParentBoundsChanged.
             mStableBounds.set(curStableBounds);
+            onParentBoundsChanged();
         }
     }
 
@@ -289,51 +290,39 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     }
 
     /** Re-layouts the view host and updates the surface position. */
-    public void relayout() {
+    void relayout() {
+        relayout(getWindowLayoutParams());
+    }
+
+    protected void relayout(WindowManager.LayoutParams windowLayoutParams) {
         if (mViewHost == null) {
             return;
         }
-        mViewHost.relayout(getWindowLayoutParams());
+        mViewHost.relayout(windowLayoutParams);
         updateSurfacePosition();
     }
 
     /**
-     * Updates the surface following a change in the task bounds, display layout stable bounds,
-     * or the layout direction.
+     * Called following a change in the task bounds, display layout stable bounds, or the layout
+     * direction.
      */
-    protected void updateSurface() {
+    protected void onParentBoundsChanged() {
         updateSurfacePosition();
     }
 
     /**
-     * Updates the position of the surface with respect to the task bounds and display layout
-     * stable bounds.
+     * Updates the position of the surface with respect to the parent bounds.
      */
-    @VisibleForTesting
-    void updateSurfacePosition() {
-        if (mLeash == null) {
-            return;
-        }
-        // Use stable bounds to prevent controls from overlapping with system bars.
-        final Rect taskBounds = mTaskConfig.windowConfiguration.getBounds();
-        final Rect stableBounds = new Rect();
-        mDisplayLayout.getStableBounds(stableBounds);
-        stableBounds.intersect(taskBounds);
-
-        updateSurfacePosition(taskBounds, stableBounds);
-    }
-
-    /**
-     * Updates the position of the surface with respect to the given {@code taskBounds} and {@code
-     * stableBounds}.
-     */
-    protected abstract void updateSurfacePosition(Rect taskBounds, Rect stableBounds);
+    protected abstract void updateSurfacePosition();
 
     /**
      * Updates the position of the surface with respect to the given {@code positionX} and {@code
      * positionY}.
      */
     protected void updateSurfacePosition(int positionX, int positionY) {
+        if (mLeash == null) {
+            return;
+        }
         mSyncQueue.runInSync(t -> {
             if (mLeash == null || !mLeash.isValid()) {
                 Log.w(getTag(), "The leash has been released.");
@@ -345,6 +334,17 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
     protected int getLayoutDirection() {
         return mContext.getResources().getConfiguration().getLayoutDirection();
+    }
+
+    protected Rect getTaskBounds() {
+        return mTaskConfig.windowConfiguration.getBounds();
+    }
+
+    /** Returns the intersection between the task bounds and the display layout stable bounds. */
+    protected Rect getTaskStableBounds() {
+        final Rect result = new Rect(mStableBounds);
+        result.intersect(getTaskBounds());
+        return result;
     }
 
     @VisibleForTesting

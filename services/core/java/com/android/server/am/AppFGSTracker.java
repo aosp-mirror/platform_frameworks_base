@@ -560,20 +560,22 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             int changes = serviceTypes ^ mForegroundServiceTypes;
             for (int serviceType = Integer.highestOneBit(changes); serviceType != 0;) {
                 final int i = foregroundServiceTypeToIndex(serviceType);
-                if ((serviceTypes & serviceType) != 0) {
-                    // Start this type.
-                    if (mEvents[i] == null) {
-                        mEvents[i] = new LinkedList<>();
-                    }
-                    if (!isActive(i)) {
-                        mEvents[i].add(new BaseTimeEvent(now));
-                        notifyListenersOnStateChangeIfNecessary(true, now, serviceType);
-                    }
-                } else {
-                    // Stop this type.
-                    if (mEvents[i] != null && isActive(i)) {
-                        mEvents[i].add(new BaseTimeEvent(now));
-                        notifyListenersOnStateChangeIfNecessary(false, now, serviceType);
+                if (i < mEvents.length) {
+                    if ((serviceTypes & serviceType) != 0) {
+                        // Start this type.
+                        if (mEvents[i] == null) {
+                            mEvents[i] = new LinkedList<>();
+                        }
+                        if (!isActive(i)) {
+                            mEvents[i].add(new BaseTimeEvent(now));
+                            notifyListenersOnStateChangeIfNecessary(true, now, serviceType);
+                        }
+                    } else {
+                        // Stop this type.
+                        if (mEvents[i] != null && isActive(i)) {
+                            mEvents[i].add(new BaseTimeEvent(now));
+                            notifyListenersOnStateChangeIfNecessary(false, now, serviceType);
+                        }
                     }
                 }
                 changes &= ~serviceType;

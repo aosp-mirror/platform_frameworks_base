@@ -89,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ឧបករណ៍​ត្រូវបាន​ចាក់សោ​ដោយអ្នក​គ្រប់គ្រង"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

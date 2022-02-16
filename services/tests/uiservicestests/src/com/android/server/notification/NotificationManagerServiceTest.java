@@ -430,6 +430,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionPolicyInternal.canShowPermissionPromptForTask(
                 any(ActivityManager.RecentTaskInfo.class))).thenReturn(false);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
+        when(mUm.getProfileIds(0, false)).thenReturn(new int[]{0});
 
         ActivityManager.AppTask task = mock(ActivityManager.AppTask.class);
         List<ActivityManager.AppTask> taskList = new ArrayList<>();
@@ -7643,8 +7644,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         // A notification exists for the given record
-        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
-        assertEquals(1, notifsBefore.length);
+        List<StatusBarNotification> notifsBefore =
+                mBinderService.getAppActiveNotifications(PKG, nr.getSbn().getUserId()).getList();
+        assertEquals(1, notifsBefore.size());
 
         reset(mPackageManager);
 
@@ -9130,5 +9132,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testGetAllUsersNotificationPermissions_migrationNotEnabled() {
         // make sure we don't bother if the migration is not enabled
         assertThat(mService.getAllUsersNotificationPermissions()).isNull();
+    }
+
+    @Test
+    public void testGetActiveNotification_filtersUsers() throws Exception {
+        when(mUm.getProfileIds(0, false)).thenReturn(new int[]{0, 10});
+
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr0.getSbn().getId(), nr0.getSbn().getNotification(), nr0.getSbn().getUserId());
+
+        NotificationRecord nr10 =
+                generateNotificationRecord(mTestNotificationChannel, 10);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag10",
+                nr10.getSbn().getId(), nr10.getSbn().getNotification(), nr10.getSbn().getUserId());
+
+        NotificationRecord nr11 =
+                generateNotificationRecord(mTestNotificationChannel, 11);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag11",
+                nr11.getSbn().getId(), nr11.getSbn().getNotification(), nr11.getSbn().getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(2, notifs.length);
+        for (StatusBarNotification sbn : notifs) {
+            if (sbn.getUserId() == 11) {
+                fail("leaked data across users");
+            }
+        }
     }
 }

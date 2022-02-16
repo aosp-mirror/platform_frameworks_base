@@ -17,6 +17,7 @@ package com.android.systemui.qs.tileimpl;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -49,6 +50,7 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
+    @Nullable
     private QSTile.Icon mLastIcon;
 
     public QSIconViewImpl(Context context) {

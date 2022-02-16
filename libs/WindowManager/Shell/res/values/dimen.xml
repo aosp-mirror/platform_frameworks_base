@@ -225,14 +225,17 @@
     <!-- The size of an icon in the letterbox education dialog. -->
     <dimen name="letterbox_education_dialog_icon_size">48dp</dimen>
 
+    <!-- The fixed width of the dialog if there is enough space in the parent. -->
+    <dimen name="letterbox_education_dialog_width">472dp</dimen>
+
+    <!-- The margin between the dialog container and its parent. -->
+    <dimen name="letterbox_education_dialog_margin">16dp</dimen>
+
     <!-- The width of each action container in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_action_width">140dp</dimen>
 
     <!-- The space between two actions in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
-
-    <!-- The maximum width of the title and subtitle in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_max_width">444dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>

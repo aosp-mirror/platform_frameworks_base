@@ -91,6 +91,9 @@ public interface DarkIconDispatcher {
      *         areas, false otherwise
      */
     static boolean isInAreas(ArrayList<Rect> areas, View view) {
+        if (areas.isEmpty()) {
+            return true;
+        }
         for (Rect area : areas) {
             if (isInArea(area, view)) {
                 return true;

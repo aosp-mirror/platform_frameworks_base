@@ -46,14 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ඉඩ දෙන්න"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB නිදොස්කරණය වෙත අවසර නැහැ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
-    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
-    <skip />
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"ඔබට පද්ධති භාෂාව <xliff:g id="LANGUAGE">%1$s</xliff:g> භාෂාවට වෙනස් කිරීමට අවශ්‍යද?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"වෙනත් උපාංගයකින් පද්ධති භාෂාව වෙනස් කිරීම ඉල්ලා ඇත"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"භාෂාව වෙනස් කරන්න"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"වත්මන් භාෂාව තබා ගන්න"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"මෙම ජාලයේ නොරැහැන් නිදොස්කරණය ඉඩ දෙන්නද?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ජාල නම (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi ලිපිනය (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"මෙම ජාලයේ සැමවිට ඉඩ දෙන්න"</string>
@@ -240,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"දීප්තිමත් බව"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"වර්ණ අපවර්තනය"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"තව සැකසීම්"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"පරිශීලක සැකසීම්"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"නිමයි"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"වසන්න"</string>
@@ -464,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ඔබට ඔබේ ඊළඟ එලාමය <xliff:g id="WHEN">%1$s</xliff:g> නොඇසෙනු ඇත"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ට"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> දී"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ඉක්මන් සැකසුම්, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"හොට්ස්පොට්"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"කාර්යාල පැතිකඩ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"සමහරක් දේවල් වලට විනෝදයි, නමුත් සියල්ලටම නොවේ"</string>
@@ -643,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ලෙස පුරන්න"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"පරිශීලක තෝරන්න"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"අන්තර්ජාලය නැත"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"විස්තර විවෘත කරන්න."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> සැකසීම් විවෘත කරන්න."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"සැකසීම්වල අනුපිළිවෙළ සංංස්කරණය කරන්න."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"බල මෙනුව"</string>
@@ -884,13 +877,23 @@
       <item quantity="one">සක්‍රිය යෙදුම් <xliff:g id="COUNT_1">%s</xliff:g></item>
       <item quantity="other">සක්‍රිය යෙදුම් <xliff:g id="COUNT_1">%s</xliff:g></item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"සක්‍රිය යෙදුම්"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"නවත්වන්න"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"නවත්වන ලදි"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"පිටපත් කරන්න"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"පිටපත් කරන ලදි"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> සිට"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Dismiss copy UI"</string>
+    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
+    <skip />
+    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
+    <skip />
+    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
+    <skip />
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

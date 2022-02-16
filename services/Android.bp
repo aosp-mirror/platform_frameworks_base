@@ -24,6 +24,7 @@ java_defaults {
             "-Xep:ArrayHashCode:ERROR",
             "-Xep:SelfAssignment:ERROR",
             "-Xep:ArrayEquals:ERROR",
+            "-Xep:IdentityBinaryExpression:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",
@@ -53,7 +54,9 @@ system_optimized_java_defaults {
         SYSTEM_OPTIMIZE_JAVA: {
             optimize: {
                 enabled: true,
-                optimize: true,
+                // TODO(b/210510433): Enable optimizations after improving
+                // retracing infra.
+                optimize: false,
                 shrink: true,
                 proguard_flags_files: ["proguard.flags"],
             },

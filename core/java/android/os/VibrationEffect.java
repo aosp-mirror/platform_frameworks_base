@@ -48,7 +48,7 @@ import java.util.Objects;
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
  *
- * These effects may be any number of things, from single shot vibrations to complex waveforms.
+ * <p>These effects may be any number of things, from single shot vibrations to complex waveforms.
  */
 public abstract class VibrationEffect implements Parcelable {
     // Stevens' coefficient to scale the perceived vibration intensity.
@@ -110,7 +110,7 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * A texture effect meant to replicate soft ticks.
      *
-     * Unlike normal effects, texture effects are meant to be called repeatedly, generally in
+     * <p>Unlike normal effects, texture effects are meant to be called repeatedly, generally in
      * response to some motion, in order to replicate the feeling of some texture underneath the
      * user's fingers.
      *
@@ -175,7 +175,7 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Create a one shot vibration.
      *
-     * One shot vibrations will vibrate constantly for the specified period of time at the
+     * <p>One shot vibrations will vibrate constantly for the specified period of time at the
      * specified amplitude, and then stop.
      *
      * @param milliseconds The number of milliseconds to vibrate. This must be a positive number.
@@ -269,13 +269,13 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Create a predefined vibration effect.
      *
-     * Predefined effects are a set of common vibration effects that should be identical, regardless
-     * of the app they come from, in order to provide a cohesive experience for users across
-     * the entire device. They also may be custom tailored to the device hardware in order to
+     * <p>Predefined effects are a set of common vibration effects that should be identical,
+     * regardless of the app they come from, in order to provide a cohesive experience for users
+     * across the entire device. They also may be custom tailored to the device hardware in order to
      * provide a better experience than you could otherwise build using the generic building
      * blocks.
      *
-     * This will fallback to a generic pattern if one exists and there does not exist a
+     * <p>This will fallback to a generic pattern if one exists and there does not exist a
      * hardware-specific implementation of the effect.
      *
      * @param effectId The ID of the effect to perform:
@@ -291,13 +291,13 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Get a predefined vibration effect.
      *
-     * Predefined effects are a set of common vibration effects that should be identical, regardless
-     * of the app they come from, in order to provide a cohesive experience for users across
-     * the entire device. They also may be custom tailored to the device hardware in order to
+     * <p>Predefined effects are a set of common vibration effects that should be identical,
+     * regardless of the app they come from, in order to provide a cohesive experience for users
+     * across the entire device. They also may be custom tailored to the device hardware in order to
      * provide a better experience than you could otherwise build using the generic building
      * blocks.
      *
-     * This will fallback to a generic pattern if one exists and there does not exist a
+     * <p>This will fallback to a generic pattern if one exists and there does not exist a
      * hardware-specific implementation of the effect.
      *
      * @param effectId The ID of the effect to perform:
@@ -314,16 +314,16 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Get a predefined vibration effect.
      *
-     * Predefined effects are a set of common vibration effects that should be identical, regardless
-     * of the app they come from, in order to provide a cohesive experience for users across
-     * the entire device. They also may be custom tailored to the device hardware in order to
+     * <p>Predefined effects are a set of common vibration effects that should be identical,
+     * regardless of the app they come from, in order to provide a cohesive experience for users
+     * across the entire device. They also may be custom tailored to the device hardware in order to
      * provide a better experience than you could otherwise build using the generic building
      * blocks.
      *
-     * Some effects you may only want to play if there's a hardware specific implementation because
-     * they may, for example, be too disruptive to the user without tuning. The {@code fallback}
-     * parameter allows you to decide whether you want to fallback to the generic implementation or
-     * only play if there's a tuned, hardware specific one available.
+     * <p>Some effects you may only want to play if there's a hardware specific implementation
+     * because they may, for example, be too disruptive to the user without tuning. The
+     * {@code fallback} parameter allows you to decide whether you want to fallback to the generic
+     * implementation or only play if there's a tuned, hardware specific one available.
      *
      * @param effectId The ID of the effect to perform:
      *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
@@ -344,9 +344,9 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Get a predefined vibration effect associated with a given URI.
      *
-     * Predefined effects are a set of common vibration effects that should be identical, regardless
-     * of the app they come from, in order to provide a cohesive experience for users across
-     * the entire device. They also may be custom tailored to the device hardware in order to
+     * <p>Predefined effects are a set of common vibration effects that should be identical,
+     * regardless of the app they come from, in order to provide a cohesive experience for users
+     * across the entire device. They also may be custom tailored to the device hardware in order to
      * provide a better experience than you could otherwise build using the generic building
      * blocks.
      *
@@ -474,7 +474,7 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Gets the estimated duration of the vibration in milliseconds.
      *
-     * For effects without a defined end (e.g. a Waveform with a non-negative repeat index), this
+     * <p>For effects without a defined end (e.g. a Waveform with a non-negative repeat index), this
      * returns Long.MAX_VALUE. For effects with an unknown duration (e.g. Prebaked effects where
      * the length is device and potentially run-time dependent), this returns -1.
      *
@@ -817,28 +817,26 @@ public abstract class VibrationEffect implements Parcelable {
      * effect that grows in intensity and then dies off, with a longer rising portion for emphasis
      * and an extra tick 100ms after:
      *
-     * <code>
-     * VibrationEffect effect = VibrationEffect.startComposition()
+     * <pre>
+     * {@code VibrationEffect effect = VibrationEffect.startComposition()
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE, 0.5f)
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL, 0.5f)
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f, 100)
-     *     .compose();
-     * </code>
+     *     .compose();}</pre>
      *
      * <p>Composition elements can also be {@link VibrationEffect} instances, including other
      * compositions, and off durations, which are periods of time when the vibrator will be
      * turned off. Here is an example of a composition that "warms up" with a light tap,
      * a stronger double tap, then repeats a vibration pattern indefinitely:
      *
-     * <code>
-     * VibrationEffect repeatingEffect = VibrationEffect.startComposition()
+     * <pre>
+     * {@code VibrationEffect repeatingEffect = VibrationEffect.startComposition()
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
      *     .addOffDuration(Duration.ofMillis(10))
      *     .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
      *     .addOffDuration(Duration.ofMillis(50))
      *     .addEffect(VibrationEffect.createWaveform(pattern, repeatIndex))
-     *     .compose();
-     * </code>
+     *     .compose();}</pre>
      *
      * <p>When choosing to play a composed effect, you should check that individual components are
      * supported by the device by using the appropriate vibrator method:
@@ -932,7 +930,7 @@ public abstract class VibrationEffect implements Parcelable {
 
         /**
          * Adds a time duration to the current composition, during which the vibrator will be
-         * turned off
+         * turned off.
          *
          * @param duration The length of time the vibrator should be off. Value must be non-negative
          *                 and will be truncated to milliseconds.
@@ -1004,7 +1002,7 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Add a haptic primitive to the end of the current composition.
          *
-         * Similar to {@link #addPrimitive(int, float, int)}, but with no delay and a
+         * <p>Similar to {@link #addPrimitive(int, float, int)}, but with no delay and a
          * default scale applied.
          *
          * @param primitiveId The primitive to add
@@ -1021,7 +1019,7 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Add a haptic primitive to the end of the current composition.
          *
-         * Similar to {@link #addPrimitive(int, float, int)}, but with no delay.
+         * <p>Similar to {@link #addPrimitive(int, float, int)}, but with no delay.
          *
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
@@ -1081,9 +1079,9 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Compose all of the added primitives together into a single {@link VibrationEffect}.
          *
-         * The {@link Composition} object is still valid after this call, so you can continue adding
-         * more primitives to it and generating more {@link VibrationEffect}s by calling this method
-         * again.
+         * <p>The {@link Composition} object is still valid after this call, so you can continue
+         * adding more primitives to it and generating more {@link VibrationEffect}s by calling this
+         * method again.
          *
          * @return The {@link VibrationEffect} resulting from the composition of the primitives.
          */
@@ -1099,7 +1097,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
         /**
-         * Convert the primitive ID to a human readable string for debugging
+         * Convert the primitive ID to a human readable string for debugging.
          * @param id The ID to convert
          * @return The ID in a human readable format.
          * @hide
@@ -1139,16 +1137,15 @@ public abstract class VibrationEffect implements Parcelable {
      * <p>The following example ramps a vibrator turned off to full amplitude at 120Hz, over 100ms
      * starting at 60Hz, then holds that state for 200ms and ramps back down again over 100ms:
      *
-     * <code>
-     * import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
+     * <pre>
+     * {@code import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
      * import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
      *
      * VibrationEffect effect = VibrationEffect.startWaveform(targetFrequency(60))
      *     .addTransition(Duration.ofMillis(100), targetAmplitude(1), targetFrequency(120))
      *     .addSustain(Duration.ofMillis(200))
      *     .addTransition(Duration.ofMillis(100), targetAmplitude(0), targetFrequency(60))
-     *     .build();
-     * </code>
+     *     .build();}</pre>
      *
      * <p>The initial state of the waveform can be set via
      * {@link VibrationEffect#startWaveform(VibrationParameter)} or
@@ -1169,8 +1166,8 @@ public abstract class VibrationEffect implements Parcelable {
      * a {@link VibrationEffect.Composition}. The resulting effect will have a tick followed by a
      * repeated beating effect with a rise that stretches out and a sharp finish.
      *
-     * <code>
-     * VibrationEffect patternToBeRepeated = VibrationEffect.startWaveform(targetAmplitude(0.2f))
+     * <pre>
+     * {@code VibrationEffect patternToRepeat = VibrationEffect.startWaveform(targetAmplitude(0.2f))
      *     .addSustain(Duration.ofMillis(10))
      *     .addTransition(Duration.ofMillis(20), targetAmplitude(0.4f))
      *     .addSustain(Duration.ofMillis(30))
@@ -1182,16 +1179,15 @@ public abstract class VibrationEffect implements Parcelable {
      * VibrationEffect effect = VibrationEffect.startComposition()
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
      *     .addOffDuration(Duration.ofMillis(20))
-     *     .repeatEffectIndefinitely(patternToBeRepeated)
-     *     .compose();
-     * </code>
+     *     .repeatEffectIndefinitely(patternToRepeat)
+     *     .compose();}</pre>
      *
      * <p>The amplitude step waveforms that can be created via
      * {@link VibrationEffect#createWaveform(long[], int[], int)} can also be created with
      * {@link WaveformBuilder} by adding zero duration transitions:
      *
-     * <code>
-     * // These two effects are the same
+     * <pre>
+     * {@code // These two effects are the same
      * VibrationEffect waveform = VibrationEffect.createWaveform(
      *     new long[] { 10, 20, 30 },  // timings in milliseconds
      *     new int[] { 51, 102, 204 }, // amplitudes in [0,255]
@@ -1203,8 +1199,7 @@ public abstract class VibrationEffect implements Parcelable {
      *     .addSustain(Duration.ofMillis(20))
      *     .addTransition(Duration.ZERO, targetAmplitude(0.8f))
      *     .addSustain(Duration.ofMillis(30))
-     *     .build();
-     * </code>
+     *     .build();}</pre>
      *
      * @see VibrationEffect#startWaveform
      */
@@ -1307,7 +1302,7 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Build the waveform as a single {@link VibrationEffect}.
          *
-         * The {@link WaveformBuilder} object is still valid after this call, so you can
+         * <p>The {@link WaveformBuilder} object is still valid after this call, so you can
          * continue adding more primitives to it and generating more {@link VibrationEffect}s by
          * calling this method again.
          *

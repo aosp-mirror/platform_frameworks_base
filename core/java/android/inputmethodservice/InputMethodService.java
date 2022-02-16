@@ -346,7 +346,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @AnyThread
     public static boolean canImeRenderGesturalNavButtons() {
-        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, true);
+        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, false);
     }
 
     /**
@@ -988,24 +988,6 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void changeInputMethodSubtype(InputMethodSubtype subtype) {
             dispatchOnCurrentInputMethodSubtypeChanged(subtype);
-        }
-
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @Override
-        public void setCurrentShowInputToken(IBinder showInputToken) {
-            mCurShowInputToken = showInputToken;
-        }
-
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @Override
-        public void setCurrentHideInputToken(IBinder hideInputToken) {
-            mCurHideInputToken = hideInputToken;
         }
     }
 

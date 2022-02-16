@@ -103,7 +103,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.KeyEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -367,8 +366,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Nullable
     private ClientSuggestionsSession mClientSuggestionsSession;
 
-    private final AccessibilityManager mAccessibilityManager;
-
     // TODO(b/216576510): Share one BroadcastReceiver between all Sessions instead of creating a
     // new one per Session.
     private final BroadcastReceiver mDelayedFillBroadcastReceiver =
@@ -518,10 +515,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                // If a11y touch exploration is enabled, then we do not send an inline fill request
-                // to the regular af service, because dropdown UI is easier to use.
-                if (mPendingInlineSuggestionsRequest.isServiceSupported()
-                        && !mAccessibilityManager.isTouchExplorationEnabled()) {
+                if (mPendingInlineSuggestionsRequest.isServiceSupported()) {
                     mPendingFillRequest = new FillRequest(mPendingFillRequest.getId(),
                             mPendingFillRequest.getFillContexts(),
                             mPendingFillRequest.getClientState(),
@@ -1064,7 +1058,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mRemoteFillService = serviceComponentName == null ? null
                 : new RemoteFillService(context, serviceComponentName, userId, this,
                         bindInstantServiceAllowed);
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;

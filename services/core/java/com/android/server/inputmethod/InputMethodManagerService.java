@@ -130,6 +130,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
@@ -286,6 +287,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
     private final InputMethodBindingController mBindingController;
+
+    // TODO(b/219056452): Use AccessibilityManagerInternal instead.
+    private final AccessibilityManager mAccessibilityManager;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -1627,6 +1631,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        mAccessibilityManager = AccessibilityManager.getInstance(context);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
         mPlatformCompat = IPlatformCompat.Stub.asInterface(
@@ -1995,12 +2000,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private void onCreateInlineSuggestionsRequestLocked(@UserIdInt int userId,
-            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback) {
+            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback,
+            boolean touchExplorationEnabled) {
         final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
         try {
             IInputMethodInvoker curMethod = getCurMethodLocked();
-            if (userId == mSettings.getCurrentUserId() && imi != null
-                    && imi.isInlineSuggestionsEnabled() && curMethod != null) {
+            if (userId == mSettings.getCurrentUserId() && curMethod != null
+                    && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
                 final IInlineSuggestionsRequestCallback callbackImpl =
                         new InlineSuggestionsRequestCallbackDecorator(callback,
                                 imi.getPackageName(), mCurTokenDisplayId, getCurTokenLocked(),
@@ -2012,6 +2018,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
         }
+    }
+
+    private static boolean isInlineSuggestionsEnabled(InputMethodInfo imi,
+            boolean touchExplorationEnabled) {
+        return imi.isInlineSuggestionsEnabled()
+                && (!touchExplorationEnabled
+                    || imi.supportsInlineSuggestionsWithTouchExploration());
     }
 
     /**
@@ -5197,8 +5210,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                 InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
+            // Get the device global touch exploration state before lock to avoid deadlock.
+            boolean touchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
+
             synchronized (ImfLock.class) {
-                onCreateInlineSuggestionsRequestLocked(userId, requestInfo, cb);
+                onCreateInlineSuggestionsRequestLocked(userId, requestInfo, cb,
+                        touchExplorationEnabled);
             }
         }
 

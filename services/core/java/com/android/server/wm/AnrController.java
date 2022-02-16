@@ -225,7 +225,7 @@ class AnrController {
     private void dumpAnrStateLocked(ActivityRecord activity, WindowState windowState,
                                     String reason) {
         mService.saveANRStateLocked(activity, windowState, reason);
-        mService.mAtmInternal.saveANRState(reason);
+        mService.mAtmService.saveANRState(reason);
     }
 
     private boolean isWindowAboveSystem(WindowState windowState) {

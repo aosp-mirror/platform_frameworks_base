@@ -54,6 +54,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
+@FlakyTest(bugId = 219750830)
 class ExitPipViaExpandButtonClickTest(
     testSpec: FlickerTestParameter
 ) : ExitPipToAppTransition(testSpec) {

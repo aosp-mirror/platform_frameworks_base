@@ -6967,6 +6967,11 @@ public class TelephonyManager {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
+     * It is strongly recommended that callers of this should firstly create a new TelephonyManager
+     * instance by calling {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so
+     * can result in unpredictable and detrimental behavior like callers can end up talking to the
+     * wrong SIM card.
+     *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
@@ -7060,6 +7065,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
         }
         return false;
     }
@@ -7107,6 +7114,10 @@ public class TelephonyManager {
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     * It is strongly recommended that callers of this API should firstly create
+     * new TelephonyManager instance by calling
+     * {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so can result in
+     * unpredictable and detrimental behavior like callers can end up talking to the wrong SIM card.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
@@ -7115,6 +7126,7 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
+     * @throws IllegalArgumentException if input parameters are wrong. e.g., invalid channel
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public boolean iccCloseLogicalChannel(int channel) {
@@ -7122,8 +7134,6 @@ public class TelephonyManager {
             return iccCloseLogicalChannel(getSubId(), channel);
         } catch (IllegalStateException ex) {
             Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
-        } catch (IllegalArgumentException ex) {
-            Rlog.e(TAG, "iccCloseLogicalChannel IllegalArgumentException", ex);
         }
         return false;
     }
@@ -7154,6 +7164,8 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
         }
         return false;
     }
@@ -7254,6 +7266,11 @@ public class TelephonyManager {
      * Transmit an APDU to the ICC card over a logical channel.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * It is strongly recommended that callers of this API should firstly create a new
+     * TelephonyManager instance by calling
+     * {@link TelephonyManager#createForSubscriptionId(int)}. Failure to do so can result in
+     * unpredictable and detrimental behavior like callers can end up talking to the wrong SIM card.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling

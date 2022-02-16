@@ -43,6 +43,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
+import android.app.UiModeManager.NightModeCustomReturnType;
 import android.app.UiModeManager.NightModeCustomType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -111,6 +112,9 @@ final class UiModeManagerService extends SystemService {
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
     private static final String SYSTEM_PROPERTY_DEVICE_THEME = "persist.sys.theme";
+    @VisibleForTesting
+    public static final Set<Integer> SUPPORTED_NIGHT_MODE_CUSTOM_TYPES = new ArraySet(
+            new Integer[]{MODE_NIGHT_CUSTOM_TYPE_SCHEDULE, MODE_NIGHT_CUSTOM_TYPE_BEDTIME});
 
     private final Injector mInjector;
     private final Object mLock = new Object();
@@ -631,6 +635,8 @@ final class UiModeManagerService extends SystemService {
                         + "permission ENTER_CAR_MODE_PRIORITIZED");
             }
 
+            assertLegit(callingPackage);
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -671,6 +677,9 @@ final class UiModeManagerService extends SystemService {
             // mode flag to be specified; this is so that the user can disable car mode at all
             // priorities using the persistent notification.
             boolean isSystemCaller = mInjector.getCallingUid() == Process.SYSTEM_UID;
+            if (!isSystemCaller) {
+                assertLegit(callingPackage);
+            }
             final int carModeFlags =
                     isSystemCaller ? flags : flags & ~UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES;
 
@@ -728,8 +737,13 @@ final class UiModeManagerService extends SystemService {
                 case UiModeManager.MODE_NIGHT_NO:
                 case UiModeManager.MODE_NIGHT_YES:
                 case MODE_NIGHT_AUTO:
-                case MODE_NIGHT_CUSTOM:
                     break;
+                case MODE_NIGHT_CUSTOM:
+                    if (SUPPORTED_NIGHT_MODE_CUSTOM_TYPES.contains(customModeType)) {
+                        break;
+                    }
+                    throw new IllegalArgumentException(
+                            "Can't set the custom type to " + customModeType);
                 default:
                     throw new IllegalArgumentException("Unknown mode: " + mode);
             }
@@ -783,7 +797,7 @@ final class UiModeManagerService extends SystemService {
         }
 
         @Override
-        public int getNightModeCustomType() {
+        public  @NightModeCustomReturnType int getNightModeCustomType() {
             if (getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
                     != PackageManager.PERMISSION_GRANTED) {

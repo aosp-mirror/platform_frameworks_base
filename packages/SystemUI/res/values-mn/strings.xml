@@ -46,14 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Зөвшөөрөх"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB алдаа засалт хийх боломжгүй"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
-    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
-    <skip />
-    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
-    <skip />
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Та системийн хэлийг <xliff:g id="LANGUAGE">%1$s</xliff:g> хэл болгож өөрчлөхийг хүсэж байна уу?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Өөр төхөөрөмжөөс системийн хэлийг өөрчлөх хүсэлт тавьсан"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Хэл солих"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Одоогийн хэлээр байлгах"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Энэ сүлжээн дээр wireless debugging-г зөвшөөрөх үү?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Сүлжээний нэр (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi хаяг (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Энэ сүлжээн дээр үргэлж зөвшөөрөх"</string>
@@ -240,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Тодрол"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Өнгө урвуулах"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Өнгөний засвар"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Бусад тохиргоо"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Хэрэглэгчийн тохиргоо"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Хаах"</string>
@@ -464,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> цагт"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>-т"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Шуурхай тохиргоо, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Сүлжээний цэг"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ажлын профайл"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
@@ -643,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g>-р нэвтэрсэн"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"хэрэглэгчийг сонгох"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Интернэт алга"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"Дэлгэрэнгүй мэдээллийг нээнэ үү."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Тохиргооны дарааллыг өөрчилнө үү."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Асаах/унтраах цэс"</string>
@@ -884,13 +877,20 @@
       <item quantity="other">Идэвхтэй <xliff:g id="COUNT_1">%s</xliff:g> апп</item>
       <item quantity="one">Идэвхтэй <xliff:g id="COUNT_0">%s</xliff:g> апп</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Идэвхтэй аппууд"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Зогсоох"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Зогсоосон"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Хуулах"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Хууллаа"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>-с"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Хуулах UI-г хаах"</string>
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"Хуулсан текстийг засах"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Хуулсан зургийг засах"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Ойролцоох төхөөрөмж рүү илгээх"</string>
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>

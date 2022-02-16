@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
@@ -233,7 +234,8 @@ public interface StatusBarPhoneModule {
             NotifPipelineFlags notifPipelineFlags,
             InteractionJankMonitor jankMonitor,
             DeviceStateManager deviceStateManager,
-            DreamOverlayStateController dreamOverlayStateController) {
+            DreamOverlayStateController dreamOverlayStateController,
+            WiredChargingRippleController wiredChargingRippleController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -330,7 +332,8 @@ public interface StatusBarPhoneModule {
                 notifPipelineFlags,
                 jankMonitor,
                 deviceStateManager,
-                dreamOverlayStateController
+                dreamOverlayStateController,
+                wiredChargingRippleController
         );
     }
 }

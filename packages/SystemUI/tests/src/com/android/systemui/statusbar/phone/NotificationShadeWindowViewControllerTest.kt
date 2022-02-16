@@ -24,6 +24,7 @@ import com.android.keyguard.LockIconViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.lowlightclock.LowLightClockController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -38,11 +39,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
@@ -79,6 +82,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var mLockIconViewController: LockIconViewController
     @Mock
     private lateinit var mPhoneStatusBarViewController: PhoneStatusBarViewController
+    @Mock
+    private lateinit var mLowLightClockController: LowLightClockController
 
     private lateinit var mInteractionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var mInteractionEventHandler: InteractionEventHandler
@@ -101,7 +106,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             stackScrollLayoutController,
             mStatusBarKeyguardViewManager,
             mStatusBarWindowStateController,
-            mLockIconViewController
+            mLockIconViewController,
+            Optional.of(mLowLightClockController)
         )
         mController.setupExpandedStatusBar()
         mController.setService(mStatusBar, mNotificationShadeWindowController)
@@ -234,6 +240,31 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         verify(mPhoneStatusBarViewController).sendTouchToView(nextEvent)
         assertThat(returnVal).isTrue()
+    }
+
+    @Test
+    fun testLowLightClockAttachedWhenExpandedStatusBarSetup() {
+        verify(mLowLightClockController).attachLowLightClockView(ArgumentMatchers.any())
+    }
+
+    @Test
+    fun testLowLightClockShownWhenDozing() {
+        mController.setDozing(true)
+        verify(mLowLightClockController).showLowLightClock(true)
+    }
+
+    @Test
+    fun testLowLightClockDozeTimeTickCalled() {
+        mController.dozeTimeTick()
+        verify(mLowLightClockController).dozeTimeTick()
+    }
+
+    @Test
+    fun testLowLightClockHiddenWhenNotDozing() {
+        mController.setDozing(true)
+        verify(mLowLightClockController).showLowLightClock(true)
+        mController.setDozing(false)
+        verify(mLowLightClockController).showLowLightClock(false)
     }
 }
 

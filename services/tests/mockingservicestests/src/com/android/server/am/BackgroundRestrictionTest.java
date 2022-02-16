@@ -2648,6 +2648,11 @@ public final class BackgroundRestrictionTest {
         AppPermissionTracker getAppPermissionTracker() {
             return mAppPermissionTracker;
         }
+
+        @Override
+        void scheduleInitTrackers(Handler handler, Runnable initializers) {
+            initializers.run();
+        }
     }
 
     private class TestBaseTrackerInjector<T extends BaseAppStatePolicy>

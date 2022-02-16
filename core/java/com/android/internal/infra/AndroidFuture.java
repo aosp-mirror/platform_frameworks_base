@@ -455,7 +455,14 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             if (mSourceU != null) {
                 // T done
                 mResultT = (T) res;
-                mSourceU.whenComplete(this);
+
+                // Subscribe to the second job completion.
+                mSourceU.whenComplete((r, e) -> {
+                    // Mark the first job completion by setting mSourceU to null, so that next time
+                    // the execution flow goes to the else case below.
+                    mSourceU = null;
+                    accept(r, e);
+                });
             } else {
                 // U done
                 try {

@@ -152,11 +152,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
@@ -283,7 +281,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ClientWindowFrames;
-import android.window.IOnFpsCallbackListener;
+import android.window.ITaskFpsCallback;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
@@ -311,6 +309,8 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -421,7 +421,7 @@ public class WindowManagerService extends IWindowManager.Stub
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -541,10 +541,7 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
-    // TODO: Probably not needed once activities are fully in WM.
-    final IActivityTaskManager mActivityTaskManager;
     final ActivityManagerInternal mAmInternal;
-    final ActivityTaskManagerInternal mAtmInternal;
 
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
@@ -1257,9 +1254,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskSystemBarsListenerController = new TaskSystemBarsListenerController();
 
         mActivityManager = ActivityManager.getService();
-        mActivityTaskManager = ActivityTaskManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
@@ -1328,8 +1323,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
-        mTaskPositioningController = new TaskPositioningController(
-                this, mInputManager, mActivityTaskManager, mH.getLooper());
+        mTaskPositioningController = new TaskPositioningController(this);
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         mHighRefreshRateDenylist = HighRefreshRateDenylist.create(context.getResources());
@@ -3007,6 +3001,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
+    boolean isValidExpandedPictureInPictureAspectRatio(DisplayContent displayContent,
+            float aspectRatio) {
+        return displayContent.getPinnedTaskController().isValidExpandedPictureInPictureAspectRatio(
+                aspectRatio);
+    }
+
     @Override
     public void notifyKeyguardTrustedChanged() {
         synchronized (mGlobalLock) {
@@ -3210,7 +3210,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (mAtmInternal.isDreaming()) {
+        if (mAtmService.isDreaming()) {
             mAtmService.mTaskSupervisor.wakeUp("dismissKeyguard");
         }
         synchronized (mGlobalLock) {
@@ -3244,7 +3244,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void closeSystemDialogs(String reason) {
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
-        if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid, null)) {
+        if (!mAtmService.checkCanCloseSystemDialogs(callingPid, callingUid, null)) {
             return;
         }
         synchronized (mGlobalLock) {
@@ -4929,10 +4929,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     PackageManager.FEATURE_FAKETOUCH);
         }
 
-        try {
-            mActivityTaskManager.updateConfiguration(null);
-        } catch (RemoteException e) {
-        }
+        mAtmService.updateConfiguration(null /* request to compute config */);
     }
 
     public void systemReady() {
@@ -5310,8 +5307,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case RESET_ANR_MESSAGE: {
                     synchronized (mGlobalLock) {
                         mLastANRState = null;
+                        mAtmService.mLastANRState = null;
                     }
-                    mAtmInternal.clearSavedANRState();
                     break;
                 }
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
@@ -6176,7 +6173,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, int displayId,
             InputChannel inputChannel) {
-        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+        if (!mAtmService.isCallerRecents(Binder.getCallingUid())
                 && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
             throw new SecurityException("createInputConsumer requires INPUT_CONSUMER permission");
         }
@@ -6192,7 +6189,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean destroyInputConsumer(String name, int displayId) {
-        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+        if (!mAtmService.isCallerRecents(Binder.getCallingUid())
                 && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
             throw new SecurityException("destroyInputConsumer requires INPUT_CONSUMER permission");
         }
@@ -6622,6 +6619,7 @@ public class WindowManagerService extends IWindowManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
@@ -8875,7 +8873,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
     public void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
-            IOnFpsCallbackListener listener) {
+            ITaskFpsCallback callback) {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
                 != PackageManager.PERMISSION_GRANTED) {
             final int pid = Binder.getCallingPid();
@@ -8887,12 +8885,12 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("no task with taskId: " + taskId);
         }
 
-        mTaskFpsCallbackController.registerCallback(taskId, listener);
+        mTaskFpsCallbackController.registerListener(taskId, callback);
     }
 
     @Override
     @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
-    public void unregisterTaskFpsCallback(IOnFpsCallbackListener listener) {
+    public void unregisterTaskFpsCallback(ITaskFpsCallback callback) {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
                 != PackageManager.PERMISSION_GRANTED) {
             final int pid = Binder.getCallingPid();
@@ -8900,7 +8898,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
         }
 
-        mTaskFpsCallbackController.unregisterCallback(listener);
+        mTaskFpsCallbackController.unregisterListener(callback);
     }
 
     @Override

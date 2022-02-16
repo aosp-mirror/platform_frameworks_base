@@ -263,22 +263,29 @@ public class ScreenshotView extends FrameLayout implements
         inoutInfo.touchableRegion.set(getTouchRegion(true));
     }
 
-    private Region getTouchRegion(boolean includeScrim) {
-        Region touchRegion = new Region();
+    private Region getSwipeRegion() {
+        Region swipeRegion = new Region();
 
         final Rect tmpRect = new Rect();
         mScreenshotPreview.getBoundsOnScreen(tmpRect);
         tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
                 (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
         mActionsContainerBackground.getBoundsOnScreen(tmpRect);
         tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
                 (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
         mDismissButton.getBoundsOnScreen(tmpRect);
-        touchRegion.op(tmpRect, Region.Op.UNION);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
+
+        return swipeRegion;
+    }
+
+    private Region getTouchRegion(boolean includeScrim) {
+        Region touchRegion = getSwipeRegion();
 
         if (includeScrim && mScrollingScrim.getVisibility() == View.VISIBLE) {
+            final Rect tmpRect = new Rect();
             mScrollingScrim.getBoundsOnScreen(tmpRect);
             touchRegion.op(tmpRect, Region.Op.UNION);
         }
@@ -328,7 +335,7 @@ public class ScreenshotView extends FrameLayout implements
     @Override // ViewGroup
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // scrolling scrim should not be swipeable; return early if we're on the scrim
-        if (!getTouchRegion(false).contains((int) ev.getRawX(), (int) ev.getRawY())) {
+        if (!getSwipeRegion().contains((int) ev.getRawX(), (int) ev.getRawY())) {
             return false;
         }
         // always pass through the down event so the swipe handler knows the initial state

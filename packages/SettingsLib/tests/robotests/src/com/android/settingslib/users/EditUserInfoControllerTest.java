@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.android.settingslib.R;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(RobolectricTestRunner.class)
+@Ignore
 public class EditUserInfoControllerTest {
     private static final int MAX_USER_NAME_LENGTH = 100;
 

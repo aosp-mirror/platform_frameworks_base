@@ -324,6 +324,14 @@ public class ActivityClient {
         }
     }
 
+    void setPreferDockBigOverlays(IBinder token, boolean preferDockBigOverlays) {
+        try {
+            getActivityClientController().setPreferDockBigOverlays(token, preferDockBigOverlays);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     void toggleFreeformWindowingMode(IBinder token) {
         try {
             getActivityClientController().toggleFreeformWindowingMode(token);
