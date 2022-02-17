@@ -33,6 +33,7 @@ import android.content.pm.ResolveInfo;
 import android.location.LocationManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PackageTagsList;
 import android.os.Process;
@@ -342,8 +343,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                     + Intent.ACTION_ACTIVITY_RECOGNIZER +  ", ignoring!");
             return;
         }
-        final String tagsList = resolvedService.serviceInfo.metaData.getString(
-                ACTIVITY_RECOGNITION_TAGS);
+        final Bundle metaData = resolvedService.serviceInfo.metaData;
+        if (metaData == null) {
+            return;
+        }
+        final String tagsList = metaData.getString(ACTIVITY_RECOGNITION_TAGS);
         if (!TextUtils.isEmpty(tagsList)) {
             PackageTagsList packageTagsList = new PackageTagsList.Builder(1).add(
                     resolvedService.serviceInfo.packageName,
