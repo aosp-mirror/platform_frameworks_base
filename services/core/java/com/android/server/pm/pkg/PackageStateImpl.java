@@ -71,6 +71,7 @@ public class PackageStateImpl implements PackageState {
                 INSTALL_PERMISSIONS_FIXED,
                 UPDATE_AVAILABLE,
                 UPDATED_SYSTEM_APP,
+                APK_IN_UPDATED_APEX,
         })
         public @interface Flags {
         }
@@ -89,6 +90,7 @@ public class PackageStateImpl implements PackageState {
         private static final int INSTALL_PERMISSIONS_FIXED = 1 << 11;
         private static final int UPDATE_AVAILABLE = 1 << 12;
         private static final int UPDATED_SYSTEM_APP = 1 << 13;
+        private static final int APK_IN_UPDATED_APEX = 1 << 14;
     }
 
     private int mBooleans;
@@ -187,6 +189,7 @@ public class PackageStateImpl implements PackageState {
         setBoolean(Booleans.UPDATE_AVAILABLE, pkgState.isUpdateAvailable());
         mLastPackageUsageTime = pkgState.getLastPackageUsageTime();
         setBoolean(Booleans.UPDATED_SYSTEM_APP, pkgState.isUpdatedSystemApp());
+        setBoolean(Booleans.APK_IN_UPDATED_APEX, pkgState.isApkInUpdatedApex());
         mSigningInfo = pkgState.getSigningInfo();
 
         SparseArray<? extends PackageUserState> userStates = pkgState.getUserStates();
@@ -261,6 +264,11 @@ public class PackageStateImpl implements PackageState {
     @Override
     public boolean isUpdatedSystemApp() {
         return getBoolean(Booleans.UPDATED_SYSTEM_APP);
+    }
+
+    @Override
+    public boolean isApkInUpdatedApex() {
+        return getBoolean(Booleans.APK_IN_UPDATED_APEX);
     }
 
     @Override
