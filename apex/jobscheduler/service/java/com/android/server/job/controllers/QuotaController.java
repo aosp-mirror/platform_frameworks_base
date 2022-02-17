@@ -2169,7 +2169,7 @@ public final class QuotaController extends StateController {
                     }
                     scheduleCutoff();
                 } else if (mRegularJobTimer && priorityLowered) {
-                    scheduleCutoff();
+                    rescheduleCutoff();
                 }
             }
         }
@@ -2205,7 +2205,7 @@ public final class QuotaController extends StateController {
                                 mRunningBgJobs.valueAt(i).getEffectivePriority());
                     }
                     if (mLowestPriority != oldPriority) {
-                        scheduleCutoff();
+                        rescheduleCutoff();
                     }
                 }
             }
@@ -2705,7 +2705,7 @@ public final class QuotaController extends StateController {
                             if (DEBUG) {
                                 Slog.d(TAG, pkg + " had early REACHED_QUOTA message");
                             }
-                            mPkgTimers.get(pkg.userId, pkg.packageName).scheduleCutoff();
+                            mPkgTimers.get(pkg.userId, pkg.packageName).rescheduleCutoff();
                         }
                         break;
                     }
@@ -2727,7 +2727,7 @@ public final class QuotaController extends StateController {
                             if (DEBUG) {
                                 Slog.d(TAG, pkg + " had early REACHED_EJ_QUOTA message");
                             }
-                            mEJPkgTimers.get(pkg.userId, pkg.packageName).scheduleCutoff();
+                            mEJPkgTimers.get(pkg.userId, pkg.packageName).rescheduleCutoff();
                         }
                         break;
                     }
