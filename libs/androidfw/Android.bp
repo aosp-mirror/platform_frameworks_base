@@ -33,6 +33,7 @@ license {
 
 cc_defaults {
     name: "libandroidfw_defaults",
+    cpp_std: "gnu++2b",
     cflags: [
         "-Werror",
         "-Wunreachable-code",

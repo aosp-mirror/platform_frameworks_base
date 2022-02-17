@@ -36,6 +36,7 @@ toolSources = [
 
 cc_defaults {
     name: "aapt2_defaults",
+    cpp_std: "gnu++2b",
     cflags: [
         "-Wall",
         "-Werror",
