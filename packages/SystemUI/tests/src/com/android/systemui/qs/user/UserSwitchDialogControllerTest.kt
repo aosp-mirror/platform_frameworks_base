@@ -21,6 +21,7 @@ import android.content.Intent
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.view.View
+import android.widget.Button
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -62,6 +63,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     private lateinit var userDetailViewAdapter: UserDetailView.Adapter
     @Mock
     private lateinit var launchView: View
+    @Mock
+    private lateinit var neutralButton: Button
     @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Mock
@@ -130,14 +133,17 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
         controller.showDialog(launchView)
 
-        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
+        verify(dialog)
+            .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)
+        `when`(dialog.getButton(DialogInterface.BUTTON_NEUTRAL)).thenReturn(neutralButton)
 
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter)
                 .postStartActivityDismissingKeyguard(
                         argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
-                        eq(0)
+                        eq(0),
+                        eq(null)
                 )
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
     }
@@ -148,7 +154,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
         controller.showDialog(launchView)
 
-        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
+        verify(dialog)
+            .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)
 
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 

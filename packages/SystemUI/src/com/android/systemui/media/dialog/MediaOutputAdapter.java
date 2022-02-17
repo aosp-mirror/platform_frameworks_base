@@ -207,7 +207,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 d.setColorFilter(new PorterDuffColorFilter(
                         Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
-                mContainerLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
+                mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
         }
 
@@ -242,12 +242,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             device.setState(MediaDeviceState.STATE_CONNECTING);
             if (!isAnimating()) {
                 notifyDataSetChanged();
-            }
-        }
-
-        private void onItemClick(int customizedItem) {
-            if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-                mController.launchBluetoothPairing();
             }
         }
     }

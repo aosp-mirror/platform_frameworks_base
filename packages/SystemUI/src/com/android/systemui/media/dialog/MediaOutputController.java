@@ -59,6 +59,7 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
@@ -577,12 +578,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         return false;
     }
 
-    void launchBluetoothPairing() {
-        // Dismissing a dialog into its touch surface and starting an activity at the same time
-        // looks bad, so let's make sure the dialog just fades out quickly.
-        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+    void launchBluetoothPairing(View view) {
+        ActivityLaunchAnimator.Controller controller =
+                mDialogLaunchAnimator.createActivityLaunchController(view);
 
-        mCallback.dismissDialog();
+        if (controller == null) {
+            mCallback.dismissDialog();
+        }
+
         Intent launchIntent =
                 new Intent(ACTION_BLUETOOTH_PAIRING_SETTINGS)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -597,10 +600,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             deepLinkIntent.putExtra(
                     Settings.EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY,
                     PAGE_CONNECTED_DEVICES_KEY);
-            mActivityStarter.startActivity(deepLinkIntent, true);
+            mActivityStarter.startActivity(deepLinkIntent, true, controller);
             return;
         }
-        mActivityStarter.startActivity(launchIntent, true);
+        mActivityStarter.startActivity(launchIntent, true, controller);
     }
 
     void launchMediaOutputGroupDialog(View mediaOutputDialog) {
