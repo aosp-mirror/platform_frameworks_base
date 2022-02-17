@@ -283,9 +283,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (context == null) {
             return;
         }
-        LetterboxEduWindowManager newLayout = new LetterboxEduWindowManager(context, taskInfo,
-                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                this::onLetterboxEduDismissed);
+        LetterboxEduWindowManager newLayout = createLetterboxEduWindowManager(context, taskInfo,
+                taskListener);
         if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
             // The new layout is eligible to be shown, make it the active layout.
             if (mActiveLetterboxEduLayout != null) {
@@ -296,6 +295,14 @@ public class CompatUIController implements OnDisplaysChangedListener,
             }
             mActiveLetterboxEduLayout = newLayout;
         }
+    }
+
+    @VisibleForTesting
+    LetterboxEduWindowManager createLetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new LetterboxEduWindowManager(context, taskInfo,
+                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                this::onLetterboxEduDismissed);
     }
 
     private void onLetterboxEduDismissed() {
