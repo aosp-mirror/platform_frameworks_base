@@ -599,6 +599,9 @@ public class UsageStatsService extends SystemService implements
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     @Override

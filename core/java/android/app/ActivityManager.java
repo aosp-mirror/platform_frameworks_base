@@ -222,6 +222,9 @@ public class ActivityManager {
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     }
 
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
@@ -824,6 +827,9 @@ public class ActivityManager {
 
     /** @hide Flag for registerUidObserver: report uid capability has changed. */
     public static final int UID_OBSERVER_CAPABILITY = 1<<5;
+
+    /** @hide Flag for registerUidObserver: report pid oom adj has changed. */
+    public static final int UID_OBSERVER_PROC_OOM_ADJ = 1 << 6;
 
     /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: normal free-to-run operation. */
     public static final int APP_START_MODE_NORMAL = 0;

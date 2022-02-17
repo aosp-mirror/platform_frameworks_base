@@ -1126,6 +1126,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     private static final class UidStateCallbackInfo {

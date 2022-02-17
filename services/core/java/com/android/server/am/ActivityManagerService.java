@@ -15257,7 +15257,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if ((enqueuedChange & UidRecord.CHANGE_GONE) != 0) {
                 mLocalPowerManager.uidGone(uid);
-            } else {
+            } else if ((enqueuedChange & UidRecord.CHANGE_PROCSTATE) != 0) {
                 mLocalPowerManager.updateUidProcState(uid, procState);
             }
         }
