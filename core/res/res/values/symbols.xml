@@ -408,11 +408,6 @@
   <java-symbol type="array" name="config_localPrivateDisplayPorts" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
-  <java-symbol type="string" name="config_defaultPictureInPictureScreenEdgeInsets" />
-  <java-symbol type="dimen" name="config_pictureInPictureDefaultSizePercent" />
-  <java-symbol type="dimen" name="config_pictureInPictureDefaultAspectRatio" />
-  <java-symbol type="dimen" name="config_pictureInPictureAspectRatioLimitForMinSize" />
-  <java-symbol type="integer" name="config_defaultPictureInPictureGravity" />
   <java-symbol type="dimen" name="config_pictureInPictureMinAspectRatio" />
   <java-symbol type="dimen" name="config_pictureInPictureMaxAspectRatio" />
   <java-symbol type="integer" name="config_pictureInPictureMaxNumberOfActions" />
@@ -2015,8 +2010,6 @@
   <java-symbol type="id" name="replace_message" />
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
-  <java-symbol type="dimen" name="default_minimal_size_pip_resizable_task" />
-  <java-symbol type="dimen" name="overridable_minimal_size_pip_resizable_task" />
   <java-symbol type="dimen" name="task_height_of_minimized_mode" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
