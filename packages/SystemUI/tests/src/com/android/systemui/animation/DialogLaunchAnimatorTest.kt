@@ -23,6 +23,7 @@ import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.After
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -145,7 +146,31 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
     }
 
+    @Test
+    fun testDialogAnimationIsChangedByAnimator() {
+        // Important: the power menu animation relies on this behavior to know when to animate (see
+        // http://ag/16774605).
+        val dialog = runOnMainThreadAndWaitForIdleSync { TestDialog(context) }
+        dialog.window.setWindowAnimations(0)
+        assertEquals(0, dialog.window.attributes.windowAnimations)
+
+        val touchSurface = createTouchSurface()
+        runOnMainThreadAndWaitForIdleSync {
+            dialogLaunchAnimator.showFromView(dialog, touchSurface)
+        }
+        assertNotEquals(0, dialog.window.attributes.windowAnimations)
+    }
+
     private fun createAndShowDialog(): TestDialog {
+        val touchSurface = createTouchSurface()
+        return runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            dialogLaunchAnimator.showFromView(dialog, touchSurface)
+            dialog
+        }
+    }
+
+    private fun createTouchSurface(): View {
         return runOnMainThreadAndWaitForIdleSync {
             val touchSurfaceRoot = LinearLayout(context)
             val touchSurface = View(context)
@@ -156,9 +181,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
             ViewUtils.attachView(touchSurfaceRoot)
             attachedViews.add(touchSurfaceRoot)
 
-            val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromView(dialog, touchSurface)
-            dialog
+            touchSurface
         }
     }
 

@@ -2358,6 +2358,10 @@
   <java-symbol type="string" name="nas_upgrade_notification_learn_more_action" />
   <java-symbol type="string" name="nas_upgrade_notification_learn_more_content" />
   <java-symbol type="bool" name="config_settingsHelpLinksEnabled" />
+  <java-symbol type="integer" name="config_activityDefaultDur" />
+  <java-symbol type="integer" name="config_activityShortDur" />
+  <java-symbol type="dimen" name="popup_enter_animation_from_y_delta" />
+  <java-symbol type="dimen" name="popup_exit_animation_to_y_delta" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />

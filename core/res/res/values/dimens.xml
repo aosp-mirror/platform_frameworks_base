@@ -994,4 +994,8 @@
 
     <!-- Default size for user icons (a.k.a. avatar images) -->
     <dimen name="user_icon_size">190dp</dimen>
+
+    <!-- Dimensions for the translations of the default dialog animation. -->
+    <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
+    <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 </resources>
