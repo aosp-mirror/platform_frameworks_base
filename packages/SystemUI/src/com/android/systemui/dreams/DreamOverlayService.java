@@ -131,6 +131,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController.setOverlayActive(false);
         mPreviewComplication.setDreamLabel(null);
         mStateController.removeComplication(mPreviewComplication);
+        mStateController.setPreviewMode(false);
         super.onDestroy();
     }
 
@@ -139,6 +140,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         setCurrentState(Lifecycle.State.STARTED);
         mExecutor.execute(() -> {
             mStateController.setShouldShowComplications(shouldShowComplications());
+            mStateController.setPreviewMode(isPreviewMode());
             if (isPreviewMode()) {
                 mPreviewComplication.setDreamLabel(getDreamLabel());
                 mStateController.addComplication(mPreviewComplication);
