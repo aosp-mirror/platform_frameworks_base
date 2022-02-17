@@ -48,7 +48,7 @@ public class ShadeControllerImpl implements ShadeController {
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final int mDisplayId;
-    protected final Lazy<StatusBar> mStatusBarLazy;
+    protected final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Optional<Bubbles> mBubblesOptional;
 
@@ -61,7 +61,7 @@ public class ShadeControllerImpl implements ShadeController {
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             WindowManager windowManager,
-            Lazy<StatusBar> statusBarLazy,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             Lazy<AssistManager> assistManagerLazy,
             Optional<Bubbles> bubblesOptional
     ) {
@@ -71,7 +71,7 @@ public class ShadeControllerImpl implements ShadeController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mDisplayId = windowManager.getDefaultDisplay().getDisplayId();
         // TODO: Remove circular reference to StatusBar when possible.
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mAssistManagerLazy = assistManagerLazy;
         mBubblesOptional = bubblesOptional;
     }
@@ -118,21 +118,19 @@ public class ShadeControllerImpl implements ShadeController {
                     + " flags=" + flags);
         }
 
-        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
-            getStatusBar().postHideRecentApps();
-        }
-
         // TODO(b/62444020): remove when this bug is fixed
         Log.v(TAG, "NotificationShadeWindow: " + getNotificationShadeWindowView()
                 + " canPanelBeCollapsed(): "
                 + getNotificationPanelViewController().canPanelBeCollapsed());
         if (getNotificationShadeWindowView() != null
-                && getNotificationPanelViewController().canPanelBeCollapsed()) {
+                && getNotificationPanelViewController().canPanelBeCollapsed()
+                && (flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
             getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
-            getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
+            getNotificationPanelViewController()
+                    .collapsePanel(true /* animate */, delayed, speedUpFactor);
         } else if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().collapseStack();
         }
@@ -148,6 +146,13 @@ public class ShadeControllerImpl implements ShadeController {
             mAssistManagerLazy.get().hideAssist();
         }
         return false;
+    }
+
+    @Override
+    public boolean isShadeOpen() {
+        NotificationPanelViewController controller =
+                getNotificationPanelViewController();
+        return controller.isExpanding() || controller.isFullyExpanded();
     }
 
     @Override
@@ -210,7 +215,7 @@ public class ShadeControllerImpl implements ShadeController {
     }
 
     private StatusBar getStatusBar() {
-        return mStatusBarLazy.get();
+        return mStatusBarOptionalLazy.get().get();
     }
 
     private NotificationPresenter getPresenter() {
@@ -219,10 +224,6 @@ public class ShadeControllerImpl implements ShadeController {
 
     protected NotificationShadeWindowView getNotificationShadeWindowView() {
         return getStatusBar().getNotificationShadeWindowView();
-    }
-
-    protected PhoneStatusBarView getStatusBarView() {
-        return (PhoneStatusBarView) getStatusBar().getStatusBarView();
     }
 
     private NotificationPanelViewController getNotificationPanelViewController() {

@@ -90,6 +90,14 @@ public class AccessibilityShortcutController {
     public static final ComponentName ACCESSIBILITY_BUTTON_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "AccessibilityButton");
 
+    public static final ComponentName COLOR_INVERSION_TILE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "ColorInversionTile");
+    public static final ComponentName DALTONIZER_TILE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "ColorCorrectionTile");
+    public static final ComponentName ONE_HANDED_TILE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "OneHandedModeTile");
+    public static final ComponentName REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "ReduceBrightColorsTile");
 
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

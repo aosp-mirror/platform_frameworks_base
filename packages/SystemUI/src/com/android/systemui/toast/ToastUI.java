@@ -37,7 +37,7 @@ import android.widget.ToastPresenter;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -49,7 +49,7 @@ import javax.inject.Inject;
  * Controls display of text toasts.
  */
 @SysUISingleton
-public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
+public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
     private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
     private static final int TOAST_SHORT_TIME = 2000; // 2 seconds

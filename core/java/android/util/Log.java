@@ -62,6 +62,10 @@ import java.net.UnknownHostException;
  * another buffer allocation and copy, and even more pressure on the gc.
  * That means that if your log message is filtered out, you might be doing
  * significant work and incurring significant overhead.
+ *
+ * <p>When calling the log methods that take a Throwable parameter,
+ * if any of the throwables in the cause chain is an <code>UnknownHostException</code>,
+ * then the stack trace is not logged.
  */
 public final class Log {
     /** @hide */
@@ -341,6 +345,9 @@ public final class Log {
 
     /**
      * Handy function to get a loggable stack trace from a Throwable
+
+     * <p>If any of the throwables in the cause chain is an <code>UnknownHostException</code>,
+     * this returns an empty string.
      * @param tr An exception to log
      */
     @NonNull

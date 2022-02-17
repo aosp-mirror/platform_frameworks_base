@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.contains;
 import static com.google.errorprone.matchers.Matchers.methodInvocation;
@@ -52,6 +53,7 @@ import javax.lang.model.element.Modifier;
 @BugPattern(
     name = "AndroidFrameworkBinderIdentity",
     summary = "Verifies that Binder.clearCallingIdentity() is always restored",
+    linkType = NONE,
     severity = WARNING)
 public final class BinderIdentityChecker extends BugChecker implements MethodInvocationTreeMatcher {
     private static final Matcher<ExpressionTree> CLEAR_CALL = methodInvocation(staticMethod()

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.ArraySet;
 import android.util.Log;
@@ -125,6 +126,23 @@ public class SystemConfigManager {
     public int[] getSystemPermissionUids(@NonNull String permissionName) {
         try {
             return mInterface.getSystemPermissionUids(permissionName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get enabled component for a specific package
+     *
+     * @param packageName The target package.
+     * @return The enabled component
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<ComponentName> getEnabledComponentOverrides(@NonNull String packageName) {
+        try {
+            return mInterface.getEnabledComponentOverrides(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

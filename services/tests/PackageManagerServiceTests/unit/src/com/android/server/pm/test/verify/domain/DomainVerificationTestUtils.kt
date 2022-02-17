@@ -17,7 +17,7 @@
 package com.android.server.pm.test.verify.domain
 
 import com.android.internal.util.FunctionalUtils
-import com.android.server.pm.PackageSetting
+import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.testutils.whenever
 import org.mockito.ArgumentMatchers.any
@@ -27,29 +27,30 @@ import java.util.function.Function
 internal object DomainVerificationTestUtils {
 
     @Suppress("UNCHECKED_CAST")
-    fun DomainVerificationManagerInternal.Connection.mockPackageSettings(
-        block: (String) -> PackageSetting?
+    fun DomainVerificationManagerInternal.Connection.mockPackageStates(
+        block: (String) -> PackageStateInternal?
     ) {
         whenever(withPackageSettingsSnapshot(any())) {
-            (arguments[0] as Consumer<Function<String, PackageSetting?>>).accept { block(it) }
+            (arguments[0] as Consumer<Function<String, PackageStateInternal?>>).accept { block(it) }
         }
-        whenever(withPackageSettingsSnapshotReturning<Any>(any())) {
-            (arguments[0] as FunctionalUtils.ThrowingFunction<Function<String, PackageSetting?>, *>)
+        whenever(withPackageSettingsSnapshotReturning(any())) {
+            (arguments[0] as FunctionalUtils.ThrowingFunction<
+                    Function<String, PackageStateInternal?>, *>)
                 .apply { block(it) }
         }
         whenever(withPackageSettingsSnapshotThrowing<Exception>(any())) {
             (arguments[0] as FunctionalUtils.ThrowingCheckedConsumer<
-                    Function<String, PackageSetting?>, *>)
+                    Function<String, PackageStateInternal?>, *>)
                 .accept { block(it) }
         }
         whenever(withPackageSettingsSnapshotThrowing2<Exception, Exception>(any())) {
             (arguments[0] as FunctionalUtils.ThrowingChecked2Consumer<
-                    Function<String, PackageSetting?>, *, *>)
+                    Function<String, PackageStateInternal?>, *, *>)
                 .accept { block(it) }
         }
         whenever(withPackageSettingsSnapshotReturningThrowing<Any, Exception>(any())) {
             (arguments[0] as FunctionalUtils.ThrowingCheckedFunction<
-                    Function<String, PackageSetting?>, *, *>)
+                    Function<String, PackageStateInternal?>, *, *>)
                 .apply { block(it) }
         }
     }

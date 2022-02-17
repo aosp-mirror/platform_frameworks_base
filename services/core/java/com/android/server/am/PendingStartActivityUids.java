@@ -35,6 +35,8 @@ import android.util.SparseArray;
 final class PendingStartActivityUids {
     static final String TAG = ActivityManagerService.TAG;
 
+    public static final long INVALID_TIME = 0;
+
     // Key is uid, value is Pair of pid and SystemClock.elapsedRealtime() when the
     // uid is added.
     private final SparseArray<Pair<Integer, Long>> mPendingUids = new SparseArray();
@@ -63,13 +65,20 @@ final class PendingStartActivityUids {
         }
     }
 
-    synchronized boolean isPendingTopPid(int uid, int pid) {
+    /**
+     * Return the elapsedRealtime when the uid is added to the mPendingUids map.
+     * @param uid
+     * @param pid
+     * @return elapsedRealtime if the uid is in the mPendingUids map;
+     *         INVALID_TIME if the uid is not in the mPendingUids map.
+     */
+    synchronized long getPendingTopPidTime(int uid, int pid) {
+        long ret = INVALID_TIME;
         final Pair<Integer, Long> pendingPid = mPendingUids.get(uid);
-        if (pendingPid != null) {
-            return pendingPid.first == pid;
-        } else {
-            return false;
+        if (pendingPid != null && pendingPid.first == pid) {
+            ret = pendingPid.second;
         }
+        return ret;
     }
 
     synchronized boolean isPendingTopUid(int uid) {

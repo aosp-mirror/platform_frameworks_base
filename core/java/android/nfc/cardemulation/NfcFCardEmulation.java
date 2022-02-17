@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.nfc.INfcFCardEmulation;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.HashMap;

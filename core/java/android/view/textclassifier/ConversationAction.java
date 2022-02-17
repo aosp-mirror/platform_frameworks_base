@@ -141,7 +141,7 @@ public final class ConversationAction implements Parcelable {
 
     private ConversationAction(Parcel in) {
         mType = in.readString();
-        mAction = in.readParcelable(null);
+        mAction = in.readParcelable(null, android.app.RemoteAction.class);
         mTextReply = in.readCharSequence();
         mScore = in.readFloat();
         mExtras = in.readBundle();

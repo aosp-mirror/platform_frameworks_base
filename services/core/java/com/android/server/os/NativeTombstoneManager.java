@@ -356,7 +356,7 @@ public final class NativeTombstoneManager {
                 return false;
             }
 
-            if (Math.abs(exitInfo.getTimestamp() - mTimestampMs) > 1000) {
+            if (Math.abs(exitInfo.getTimestamp() - mTimestampMs) > 5000) {
                 return false;
             }
 

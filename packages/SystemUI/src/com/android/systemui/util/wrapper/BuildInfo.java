@@ -32,6 +32,8 @@ public class BuildInfo {
 
     /** @see Build#IS_DEBUGGABLE */
     public boolean isDebuggable() {
-        return Build.IS_DEBUGGABLE;
+        // Build.IS_DEBUGGABLE is inlined by the gradle build, causing this to incorrectly
+        // return false when using sysui-studio.
+        return Build.isDebuggable();
     }
 }

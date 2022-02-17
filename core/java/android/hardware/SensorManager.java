@@ -506,6 +506,7 @@ public abstract class SensorManager {
         if (type == Sensor.TYPE_PROXIMITY || type == Sensor.TYPE_SIGNIFICANT_MOTION
                 || type == Sensor.TYPE_TILT_DETECTOR || type == Sensor.TYPE_WAKE_GESTURE
                 || type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE
+                || type == Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT
                 || type == Sensor.TYPE_WRIST_TILT_GESTURE
                 || type == Sensor.TYPE_DYNAMIC_SENSOR_META || type == Sensor.TYPE_HINGE_ANGLE) {
             wakeUpSensor = true;
@@ -638,7 +639,7 @@ public abstract class SensorManager {
     /**
      * Unregisters a listener for the sensors with which it is registered.
      *
-     * <p class="note"></p>
+     * <p class="note">
      * Note: Don't use this method with a one shot trigger sensor such as
      * {@link Sensor#TYPE_SIGNIFICANT_MOTION}.
      * Use {@link #cancelTriggerSensor(TriggerEventListener, Sensor)} instead.
@@ -1449,14 +1450,14 @@ public abstract class SensorManager {
      *                Assuming that the bottom edge of the device faces the
      *                user and that the screen is face-up, tilting the top edge
      *                of the device toward the ground creates a positive pitch
-     *                angle. The range of values is -&pi; to &pi;.</li>
+     *                angle. The range of values is -&pi;/2 to &pi;/2.</li>
      * <li>values[2]: <i>Roll</i>, angle of rotation about the y axis. This
      *                value represents the angle between a plane perpendicular
      *                to the device's screen and a plane perpendicular to the
      *                ground. Assuming that the bottom edge of the device faces
      *                the user and that the screen is face-up, tilting the left
      *                edge of the device toward the ground creates a positive
-     *                roll angle. The range of values is -&pi;/2 to &pi;/2.</li>
+     *                roll angle. The range of values is -&pi; to &pi;.</li>
      * </ul>
      * <p>
      * Applying these three rotations in the azimuth, pitch, roll order

@@ -16,6 +16,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.ColorInt;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -45,11 +46,21 @@ public class UserIcons {
      * Converts a given drawable to a bitmap.
      */
     public static Bitmap convertToBitmap(Drawable icon) {
+        return convertToBitmapAtSize(icon, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+    }
+
+    /**
+     * Converts a given drawable to a bitmap, with width and height equal to the default icon size.
+     */
+    public static Bitmap convertToBitmapAtUserIconSize(Resources res, Drawable icon) {
+        int size = res.getDimensionPixelSize(R.dimen.user_icon_size);
+        return convertToBitmapAtSize(icon, size, size);
+    }
+
+    private static Bitmap convertToBitmapAtSize(Drawable icon, int width, int height) {
         if (icon == null) {
             return null;
         }
-        final int width = icon.getIntrinsicWidth();
-        final int height = icon.getIntrinsicHeight();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         icon.setBounds(0, 0, width, height);
@@ -72,9 +83,30 @@ public class UserIcons {
             // Return colored icon instead
             colorResId = USER_ICON_COLORS[userId % USER_ICON_COLORS.length];
         }
+        return getDefaultUserIconInColor(resources, resources.getColor(colorResId, null));
+    }
+
+    /**
+     * Returns a default user icon in a particular color.
+     *
+     * @param resources resources object to fetch the user icon
+     * @param color the color used for the icon
+     */
+    public static Drawable getDefaultUserIconInColor(Resources resources, @ColorInt int color) {
         Drawable icon = resources.getDrawable(R.drawable.ic_account_circle, null).mutate();
-        icon.setColorFilter(resources.getColor(colorResId, null), Mode.SRC_IN);
+        icon.setColorFilter(color, Mode.SRC_IN);
         icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
         return icon;
+    }
+
+    /**
+     * Returns an array containing colors to be used for default user icons.
+     */
+    public static int[] getUserIconColors(Resources resources) {
+        int[] result = new int[USER_ICON_COLORS.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = resources.getColor(USER_ICON_COLORS[i], null);
+        }
+        return result;
     }
 }

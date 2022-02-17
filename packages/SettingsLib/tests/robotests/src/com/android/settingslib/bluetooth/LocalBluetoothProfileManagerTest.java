@@ -206,7 +206,7 @@ public class LocalBluetoothProfileManagerTest {
         mContext.sendBroadcast(mIntent);
 
         verify(mDeviceManager).onProfileConnectionStateChangedIfProcessed(mCachedBluetoothDevice,
-                BluetoothProfile.STATE_CONNECTED);
+                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
     }
 
     /**

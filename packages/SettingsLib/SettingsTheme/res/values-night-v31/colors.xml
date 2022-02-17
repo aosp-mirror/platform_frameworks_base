@@ -43,4 +43,8 @@
     <color name="settingslib_accent_primary_variant">@android:color/system_accent1_300</color>
 
     <color name="settingslib_text_color_primary_device_default">@android:color/system_neutral1_50</color>
+
+    <color name="settingslib_text_color_secondary_device_default">@android:color/system_neutral2_200</color>
+
+    <color name="settingslib_text_color_preference_category_title">@android:color/system_accent1_100</color>
 </resources>

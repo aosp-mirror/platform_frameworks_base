@@ -613,6 +613,10 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
             mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
             break;
+        case ColorMode::A8:
+            mSurfaceColorType = SkColorType::kAlpha_8_SkColorType;
+            mSurfaceColorSpace = nullptr;
+            break;
     }
 }
 

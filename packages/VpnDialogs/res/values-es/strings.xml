@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Solicitud de conexión"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN para controlar el tráfico de red. Solo debes aceptarla si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece en la parte superior de la pantalla cuando se active la conexión VPN."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN que le permita monitorizar el tráfico de red. Acéptalo solo si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparecerá en la pantalla cuando la VPN esté activa."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN conectada"</string>
     <string name="session" msgid="6470628549473641030">"Sesión:"</string>
     <string name="duration" msgid="3584782459928719435">"Duración:"</string>
