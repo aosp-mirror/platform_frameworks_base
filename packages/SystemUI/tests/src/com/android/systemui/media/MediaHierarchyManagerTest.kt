@@ -22,15 +22,17 @@ import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardViewController
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
+import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
@@ -79,9 +81,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
-    private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    private lateinit var keyguardViewController: KeyguardViewController
     @Mock
     private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var uniqueObjectHostView: UniqueObjectHostView
+    @Mock
+    private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -94,6 +100,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        context.getOrCreateTestableResources().addOverride(
+                R.bool.config_use_split_notification_shade, false)
         mediaFrame = FrameLayout(context)
         `when`(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         mediaHiearchyManager = MediaHierarchyManager(
@@ -105,7 +113,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notificationLockscreenUserManager,
                 configurationController,
                 wakefulnessLifecycle,
-                statusBarKeyguardViewManager)
+                keyguardViewController,
+                dreamOverlayStateController)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)
@@ -124,7 +133,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private fun setupHost(host: MediaHost, location: Int) {
         `when`(host.location).thenReturn(location)
         `when`(host.currentBounds).thenReturn(Rect())
-        `when`(host.hostView).thenReturn(UniqueObjectHostView(context))
+        `when`(host.hostView).thenReturn(uniqueObjectHostView)
         `when`(host.visible).thenReturn(true)
         mediaHiearchyManager.register(host)
     }

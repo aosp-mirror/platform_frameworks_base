@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.content.Context
-import android.service.notification.NotificationListenerService.REASON_APP_CANCEL
-import android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL
 import android.service.notification.NotificationListenerService.REASON_CANCEL
 import android.service.notification.NotificationListenerService.REASON_CANCEL_ALL
 import android.service.notification.NotificationListenerService.REASON_CLICK
@@ -76,7 +74,8 @@ class ForegroundServiceSectionController @Inject constructor(
         Assert.isMainThread()
         val isClearAll = reason == REASON_CANCEL_ALL
         val isUserDismiss = reason == REASON_CANCEL || reason == REASON_CLICK
-        val isAppCancel = reason == REASON_APP_CANCEL || reason == REASON_APP_CANCEL_ALL
+        // REASON_APP_CANCEL and REASON_APP_CANCEL_ALL are ignored, because the
+        // foreground service associated with it is gone.
         val isSummaryCancel = reason == REASON_GROUP_SUMMARY_CANCELED
 
         if (entry == null) return false

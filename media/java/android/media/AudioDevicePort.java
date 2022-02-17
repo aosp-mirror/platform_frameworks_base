@@ -90,7 +90,8 @@ public class AudioDevicePort extends AudioPort {
      * {@link AudioManager#DEVICE_OUT_BLE_HEADSET}, {@link AudioManager#DEVICE_OUT_BLE_SPEAKER})
      * use the MAC address of the bluetooth device in the form "00:11:22:AA:BB:CC" as reported by
      * {@link BluetoothDevice#getAddress()}.
-     * - Deivces that do not have an address will indicate an empty string "".
+     * - Bluetooth LE broadcast group ({@link AudioManager#DEVICE_OUT_BLE_BROADCAST} use the group number.
+     * - Devices that do not have an address will indicate an empty string "".
      */
     public String address() {
         return mAddress;

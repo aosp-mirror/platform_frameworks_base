@@ -17,4 +17,7 @@
  */
 -->
 <resources>
+    <!-- Default for SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER.
+    To be set if the device wants to support out of the box QR code scanning experience -->
+    <string name="def_qr_code_component" translatable="false"></string>
 </resources>

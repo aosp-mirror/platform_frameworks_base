@@ -157,7 +157,8 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller", "testAttributionTag");
+                "testInstallOriginator", "testInstaller", "testAttributionTag",
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,
@@ -187,7 +188,7 @@ public class PackageInstallerSessionTest {
                 /* isFailed */ false,
                 /* isApplied */false,
                 /* stagedSessionErrorCode */
-                PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                PackageInstaller.SessionInfo.SESSION_VERIFICATION_FAILED,
                 /* stagedSessionErrorMessage */ "some error");
     }
 
@@ -306,12 +307,12 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.stageCid, actual.stageCid);
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isStaged(), actual.isStaged());
-        assertEquals(expected.isStagedSessionApplied(), actual.isStagedSessionApplied());
-        assertEquals(expected.isStagedSessionFailed(), actual.isStagedSessionFailed());
-        assertEquals(expected.isStagedSessionReady(), actual.isStagedSessionReady());
-        assertEquals(expected.getStagedSessionErrorCode(), actual.getStagedSessionErrorCode());
-        assertEquals(expected.getStagedSessionErrorMessage(),
-                actual.getStagedSessionErrorMessage());
+        assertEquals(expected.isSessionApplied(), actual.isSessionApplied());
+        assertEquals(expected.isSessionFailed(), actual.isSessionFailed());
+        assertEquals(expected.isSessionReady(), actual.isSessionReady());
+        assertEquals(expected.getSessionErrorCode(), actual.getSessionErrorCode());
+        assertEquals(expected.getSessionErrorMessage(),
+                actual.getSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
         assertEquals(expected.isCommitted(), actual.isCommitted());
         assertEquals(expected.createdMillis, actual.createdMillis);

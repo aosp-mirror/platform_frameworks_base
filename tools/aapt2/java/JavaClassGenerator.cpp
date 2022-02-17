@@ -204,7 +204,7 @@ bool JavaClassGenerator::SkipSymbol(Visibility::Level level) {
 }
 
 // Whether or not to skip writing this symbol.
-bool JavaClassGenerator::SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol) {
+bool JavaClassGenerator::SkipSymbol(const std::optional<SymbolTable::Symbol>& symbol) {
   return !symbol || (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
                      !symbol.value().is_public);
 }
@@ -212,12 +212,12 @@ bool JavaClassGenerator::SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol) {
 struct StyleableAttr {
   const Reference* attr_ref = nullptr;
   std::string field_name;
-  Maybe<SymbolTable::Symbol> symbol;
+  std::optional<SymbolTable::Symbol> symbol;
 };
 
 static bool operator<(const StyleableAttr& lhs, const StyleableAttr& rhs) {
-  const ResourceId lhs_id = lhs.attr_ref->id.value_or_default(ResourceId(0));
-  const ResourceId rhs_id = rhs.attr_ref->id.value_or_default(ResourceId(0));
+  const ResourceId lhs_id = lhs.attr_ref->id.value_or(ResourceId(0));
+  const ResourceId rhs_id = rhs.attr_ref->id.value_or(ResourceId(0));
   if (lhs_id == rhs_id) {
     return lhs.attr_ref->name.value() < rhs.attr_ref->name.value();
   }
@@ -362,7 +362,7 @@ bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
       array_def->AddElement(field_name);
       r_txt_contents = field_name.ref;
     } else {
-      const ResourceId attr_id = attr.attr_ref->id.value_or_default(ResourceId(0));
+      const ResourceId attr_id = attr.attr_ref->id.value_or(ResourceId(0));
       array_def->AddElement(attr_id);
       r_txt_contents = to_string(attr_id);
     }
@@ -504,9 +504,9 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 }
 
-Maybe<std::string> JavaClassGenerator::UnmangleResource(const StringPiece& package_name,
-                                                        const StringPiece& package_name_to_generate,
-                                                        const ResourceEntry& entry) {
+std::optional<std::string> JavaClassGenerator::UnmangleResource(
+    const StringPiece& package_name, const StringPiece& package_name_to_generate,
+    const ResourceEntry& entry) {
   if (SkipSymbol(entry.visibility.level)) {
     return {};
   }
@@ -535,7 +535,7 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
                                      MethodDefinition* out_rewrite_method_def,
                                      Printer* r_txt_printer) {
   for (const auto& entry : type.entries) {
-    const Maybe<std::string> unmangled_name =
+    const std::optional<std::string> unmangled_name =
         UnmangleResource(package.name, package_name_to_generate, *entry);
     if (!unmangled_name) {
       continue;

@@ -23,14 +23,20 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -40,11 +46,14 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -57,10 +66,15 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     private HeadsUpManager mHeadsUpManager;
     private boolean mLivesPastNormalTime;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
+    @Mock private HeadsUpManager.HeadsUpEntry mAlertEntry;
+    @Mock private NotificationEntry mEntry;
+    @Mock private StatusBarNotification mSbn;
+    @Mock private Notification mNotification;
+    @Mock private HeadsUpManagerLogger mLogger;
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
-        TestableHeadsUpManager(Context context) {
-            super(context);
+        TestableHeadsUpManager(Context context, HeadsUpManagerLogger logger) {
+            super(context, logger);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -72,12 +86,27 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
 
     @Before
     public void setUp() {
+        initMocks(this);
         mAccessibilityMgr = mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
-
-        mHeadsUpManager = new TestableHeadsUpManager(mContext);
+        when(mEntry.getSbn()).thenReturn(mSbn);
+        when(mSbn.getNotification()).thenReturn(mNotification);
+        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger);
         super.setUp();
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
         mHeadsUpManager.mHandler = mTestHandler;
+    }
+
+    @After
+    public void tearDown() {
+        mTestHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Test
+    public void testHunRemovedLogging() {
+        mAlertEntry.mEntry = mEntry;
+        mHeadsUpManager.onAlertEntryRemoved(mAlertEntry);
+        verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(mEntry.getKey()));
     }
 
     @Test
@@ -96,6 +125,28 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertFalse("Test timed out", mTimedOut);
         assertTrue("Heads up should live long enough", mLivesPastNormalTime);
         assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
+    }
+
+    @Test
+    public void testCompareTo_withNullEntries() {
+        NotificationEntry alertEntry = new NotificationEntryBuilder().setTag("alert").build();
+        mHeadsUpManager.showNotification(alertEntry);
+
+        assertThat(mHeadsUpManager.compare(alertEntry, null)).isLessThan(0);
+        assertThat(mHeadsUpManager.compare(null, alertEntry)).isGreaterThan(0);
+        assertThat(mHeadsUpManager.compare(null, null)).isEqualTo(0);
+    }
+
+    @Test
+    public void testCompareTo_withNonAlertEntries() {
+        NotificationEntry nonAlertEntry1 = new NotificationEntryBuilder().setTag("nae1").build();
+        NotificationEntry nonAlertEntry2 = new NotificationEntryBuilder().setTag("nae2").build();
+        NotificationEntry alertEntry = new NotificationEntryBuilder().setTag("alert").build();
+        mHeadsUpManager.showNotification(alertEntry);
+
+        assertThat(mHeadsUpManager.compare(alertEntry, nonAlertEntry1)).isLessThan(0);
+        assertThat(mHeadsUpManager.compare(nonAlertEntry1, alertEntry)).isGreaterThan(0);
+        assertThat(mHeadsUpManager.compare(nonAlertEntry1, nonAlertEntry2)).isEqualTo(0);
     }
 
     @Test

@@ -16,7 +16,9 @@
 
 package com.android.internal.policy;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.view.RoundedCorners;
 
 import com.android.internal.R;
 
@@ -29,23 +31,28 @@ public class ScreenDecorationsUtils {
      * Corner radius that should be used on windows in order to cover the display.
      * These values are expressed in pixels because they should not respect display or font
      * scaling, this means that we don't have to reload them on config changes.
+     *
+     * Note that if the context is not an UI context(not associated with Display), it will use
+     * default display.
      */
-    public static float getWindowCornerRadius(Resources resources) {
+    public static float getWindowCornerRadius(Context context) {
+        final Resources resources = context.getResources();
         if (!supportsRoundedCornersOnWindows(resources)) {
             return 0f;
         }
-
+        // Use Context#getDisplayNoVerify() in case the context is not an UI context.
+        final String displayUniqueId = context.getDisplayNoVerify().getUniqueId();
         // Radius that should be used in case top or bottom aren't defined.
-        float defaultRadius = resources.getDimension(R.dimen.rounded_corner_radius)
-                - resources.getDimension(R.dimen.rounded_corner_radius_adjustment);
+        float defaultRadius = RoundedCorners.getRoundedCornerRadius(resources, displayUniqueId)
+                - RoundedCorners.getRoundedCornerRadiusAdjustment(resources, displayUniqueId);
 
-        float topRadius = resources.getDimension(R.dimen.rounded_corner_radius_top)
-                - resources.getDimension(R.dimen.rounded_corner_radius_top_adjustment);
+        float topRadius = RoundedCorners.getRoundedCornerTopRadius(resources, displayUniqueId)
+                - RoundedCorners.getRoundedCornerRadiusTopAdjustment(resources, displayUniqueId);
         if (topRadius == 0f) {
             topRadius = defaultRadius;
         }
-        float bottomRadius = resources.getDimension(R.dimen.rounded_corner_radius_bottom)
-                - resources.getDimension(R.dimen.rounded_corner_radius_bottom_adjustment);
+        float bottomRadius = RoundedCorners.getRoundedCornerBottomRadius(resources, displayUniqueId)
+                - RoundedCorners.getRoundedCornerRadiusBottomAdjustment(resources, displayUniqueId);
         if (bottomRadius == 0f) {
             bottomRadius = defaultRadius;
         }

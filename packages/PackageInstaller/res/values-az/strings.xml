@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bu tətbiqi "<b>"bütün"</b>" istifadəçilər üçün silmək istəyirsiz? Tətbiq və onun datası cihazdakı "<b>"bütün"</b>" istifadəçilər üçün silinəcək."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> adlı istifadəçi üçün bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bu tətbiqi iş profilinizdən silmək istəyirsiniz?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Tətbiq zavod versiyası ilə əvəz olunsun? Bütün data silinəcək."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Tətbiq zavod versiyası ilə əvəz olunsun? Bütün data silinəcək. Bu, iş profilləri daxil olmaqla bu cihazın bütün istifadəçilərinə təsir edir."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Tətbiq datasının <xliff:g id="SIZE">%1$s</xliff:g> hissəsini saxlayın."</string>

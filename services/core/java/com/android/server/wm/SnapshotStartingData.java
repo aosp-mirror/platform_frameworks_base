@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import android.window.TaskSnapshot;
 
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents starting data for snapshot starting windows.

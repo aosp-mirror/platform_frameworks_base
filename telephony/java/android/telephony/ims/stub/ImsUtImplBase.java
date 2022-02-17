@@ -27,10 +27,17 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Base implementation of IMS UT interface, which implements stubs. Override these methods to
@@ -119,96 +126,108 @@ public class ImsUtImplBase {
      */
     public static final int INVALID_RESULT = -1;
 
+    private Executor mExecutor = Runnable::run;
+
     private final IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
         private final Object mLock = new Object();
         private ImsUtListener mUtListener;
 
         @Override
         public void close() throws RemoteException {
-            ImsUtImplBase.this.close();
+            executeMethodAsync(() ->ImsUtImplBase.this.close(), "close");
         }
 
         @Override
         public int queryCallBarring(int cbType) throws RemoteException {
-            return ImsUtImplBase.this.queryCallBarring(cbType);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCallBarring(cbType),
+                    "queryCallBarring");
         }
 
         @Override
         public int queryCallForward(int condition, String number) throws RemoteException {
-            return ImsUtImplBase.this.queryCallForward(condition, number);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCallForward(
+                    condition, number), "queryCallForward");
         }
 
         @Override
         public int queryCallWaiting() throws RemoteException {
-            return ImsUtImplBase.this.queryCallWaiting();
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCallWaiting(),
+                    "queryCallWaiting");
         }
 
         @Override
         public int queryCLIR() throws RemoteException {
-            return ImsUtImplBase.this.queryCLIR();
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCLIR(), "queryCLIR");
         }
 
         @Override
         public int queryCLIP() throws RemoteException {
-            return ImsUtImplBase.this.queryCLIP();
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCLIP(), "queryCLIP");
         }
 
         @Override
         public int queryCOLR() throws RemoteException {
-            return ImsUtImplBase.this.queryCOLR();
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCOLR(), "queryCOLR");
         }
 
         @Override
         public int queryCOLP() throws RemoteException {
-            return ImsUtImplBase.this.queryCOLP();
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.queryCOLP(), "queryCOLP");
         }
 
         @Override
         public int transact(Bundle ssInfo) throws RemoteException {
-            return ImsUtImplBase.this.transact(ssInfo);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.transact(ssInfo),
+                    "transact");
         }
 
         @Override
         public int updateCallBarring(int cbType, int action, String[] barrList) throws
                 RemoteException {
-            return ImsUtImplBase.this.updateCallBarring(cbType, action, barrList);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCallBarring(
+                    cbType, action, barrList), "updateCallBarring");
         }
 
         @Override
         public int updateCallForward(int action, int condition, String number, int serviceClass,
                 int timeSeconds) throws RemoteException {
-            return ImsUtImplBase.this.updateCallForward(action, condition, number, serviceClass,
-                    timeSeconds);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCallForward(
+                    action, condition, number, serviceClass, timeSeconds), "updateCallForward");
         }
 
         @Override
         public int updateCallWaiting(boolean enable, int serviceClass) throws RemoteException {
-            return ImsUtImplBase.this.updateCallWaiting(enable, serviceClass);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCallWaiting(
+                    enable, serviceClass), "updateCallWaiting");
         }
 
         @Override
         public int updateCLIR(int clirMode) throws RemoteException {
-            return ImsUtImplBase.this.updateCLIR(clirMode);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCLIR(clirMode),
+                    "updateCLIR");
         }
 
         @Override
         public int updateCLIP(boolean enable) throws RemoteException {
-            return ImsUtImplBase.this.updateCLIP(enable);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCLIP(enable),
+                    "updateCLIP");
         }
 
         @Override
         public int updateCOLR(int presentation) throws RemoteException {
-            return ImsUtImplBase.this.updateCOLR(presentation);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCOLR(presentation),
+                    "updateCOLR");
         }
 
         @Override
         public int updateCOLP(boolean enable) throws RemoteException {
-            return ImsUtImplBase.this.updateCOLP(enable);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this.updateCOLP(enable),
+                    "updateCOLP");
         }
 
         @Override
         public void setListener(IImsUtListener listener) throws RemoteException {
-            synchronized (mLock) {
+            executeMethodAsync(() -> {
                 if (mUtListener != null
                         && !mUtListener.getListenerInterface().asBinder().isBinderAlive()) {
                     Log.w(TAG, "setListener: discarding dead Binder");
@@ -229,29 +248,59 @@ public class ImsUtImplBase {
                             + "listener");
                     mUtListener = new ImsUtListener(listener);
                 }
-            }
 
-            ImsUtImplBase.this.setListener(mUtListener);
+                ImsUtImplBase.this.setListener(mUtListener);
+            }, "setListener");
         }
 
         @Override
         public int queryCallBarringForServiceClass(int cbType, int serviceClass)
                 throws RemoteException {
-            return ImsUtImplBase.this.queryCallBarringForServiceClass(cbType, serviceClass);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this
+                    .queryCallBarringForServiceClass(cbType, serviceClass),
+                    "queryCallBarringForServiceClass");
         }
 
         @Override
         public int updateCallBarringForServiceClass(int cbType, int action,
                 String[] barrList, int serviceClass) throws RemoteException {
-            return ImsUtImplBase.this.updateCallBarringForServiceClass(
-                    cbType, action, barrList, serviceClass);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this
+                    .updateCallBarringForServiceClass(cbType, action, barrList, serviceClass),
+                    "updateCallBarringForServiceClass");
         }
 
         @Override
         public int updateCallBarringWithPassword(int cbType, int action, String[] barrList,
                 int serviceClass, String password) throws RemoteException {
-            return ImsUtImplBase.this.updateCallBarringWithPassword(
-                    cbType, action, barrList, serviceClass, password);
+            return executeMethodAsyncForResult(() -> ImsUtImplBase.this
+                    .updateCallBarringWithPassword(cbType, action, barrList, serviceClass,
+                    password), "updateCallBarringWithPassword");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(TAG, "ImsUtImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
+        }
+
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
+                String errorLogName) throws RemoteException {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(TAG, "ImsUtImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
         }
     };
 
@@ -469,5 +518,15 @@ public class ImsUtImplBase {
      */
     public IImsUt getInterface() {
         return mServiceImpl;
+    }
+
+    /**
+     * Set default Executor from MmTelFeature.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of ImsUT.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        mExecutor = executor;
     }
 }

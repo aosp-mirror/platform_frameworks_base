@@ -291,7 +291,7 @@ public abstract class PermissionControllerService extends Service {
 
     /**
      * Called when a package is considered inactive based on the criteria given by
-     * {@link PermissionManager#startOneTimePermissionSession(String, long, int, int)}.
+     * {@link PermissionManager#startOneTimePermissionSession(String, long, long, int, int)}.
      * This method is called at the end of a one-time permission session
      *
      * @param packageName The package that has been inactive
@@ -324,6 +324,29 @@ public abstract class PermissionControllerService extends Service {
             @NonNull Consumer<String> callback) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
+
+    /**
+     * Triggers the revocation of one or more permissions for a package. This should only be called
+     * at the request of {@code packageName}.
+     * <p>
+     * Background permissions which have no corresponding foreground permission still granted once
+     * the revocation is effective will also be revoked.
+     * <p>
+     * This revocation happens asynchronously and kills all processes running in the same UID as
+     * {@code packageName}. It will be triggered once it is safe to do so.
+     *
+     * @param packageName The name of the package for which the permissions will be revoked.
+     * @param permissions List of permissions to be revoked.
+     * @param callback Callback waiting for operation to be complete.
+     *
+     * @see PermissionManager#revokeOwnPermissionsOnKill(java.util.Collection)
+     */
+    @BinderThread
+    public void onRevokeOwnPermissionsOnKill(@NonNull String packageName,
+            @NonNull List<String> permissions, @NonNull Runnable callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
     /**
      * Get a user-readable sentence, describing the set of privileges that are to be granted to a
      * companion app managing a device of the given profile.
@@ -337,6 +360,36 @@ public abstract class PermissionControllerService extends Service {
     @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
     @NonNull
     public String getPrivilegesDescriptionStringForProfile(@NonNull String deviceProfileName) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get the count of unused, hibernating apps on the device.
+     *
+     * @param callback callback after count is retrieved
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_APP_HIBERNATION)
+    @NonNull
+    public void onGetUnusedAppCount(@NonNull IntConsumer callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get the hibernation eligibility of the app. See
+     * {@link android.permission.PermissionControllerManager.HibernationEligibilityFlag}.
+     *
+     * @param packageName package to check eligibility
+     * @param callback callback after eligibility is returned
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_APP_HIBERNATION)
+    public void onGetHibernationEligibility(@NonNull String packageName,
+            @NonNull IntConsumer callback) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -614,6 +667,50 @@ public abstract class PermissionControllerService extends Service {
                     Objects.requireNonNull(callback);
                     PermissionControllerService.this.onGetGroupOfPlatformPermission(
                             permissionGroupName, callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getUnusedAppCount(@NonNull AndroidFuture callback) {
+                try {
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_APP_HIBERNATION);
+
+                    PermissionControllerService.this.onGetUnusedAppCount(callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void getHibernationEligibility(@NonNull String packageName,
+                    @NonNull AndroidFuture callback) {
+                try {
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_APP_HIBERNATION);
+
+                    PermissionControllerService.this.onGetHibernationEligibility(packageName,
+                            callback::complete);
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
+            }
+
+            @Override
+            public void revokeOwnPermissionsOnKill(@NonNull String packageName,
+                    @NonNull List<String> permissions, @NonNull AndroidFuture callback) {
+                try {
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
+                    Objects.requireNonNull(callback);
+                    onRevokeOwnPermissionsOnKill(packageName, permissions,
+                            () -> callback.complete(null));
                 } catch (Throwable t) {
                     callback.completeExceptionally(t);
                 }

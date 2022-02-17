@@ -36,12 +36,12 @@ import android.view.WindowManager;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * Handle to a window used to display the augmented autofill UI.
@@ -103,9 +103,9 @@ public final class FillWindow implements AutoCloseable {
             Log.d(TAG, "Updating " + area + " + with " + rootView);
         }
         // TODO(b/123100712): add test case for null
-        Preconditions.checkNotNull(area);
-        Preconditions.checkNotNull(area.proxy);
-        Preconditions.checkNotNull(rootView);
+        Objects.requireNonNull(area);
+        Objects.requireNonNull(area.proxy);
+        Objects.requireNonNull(rootView);
         // TODO(b/123100712): must check the area is a valid object returned by
         // SmartSuggestionParams, throw IAE if not
 

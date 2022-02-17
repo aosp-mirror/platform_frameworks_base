@@ -23,6 +23,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.PluralsMessageFormatter;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -38,8 +39,11 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KeyguardPatternViewController
         extends KeyguardInputViewController<KeyguardPatternView> {
@@ -56,6 +60,9 @@ public class KeyguardPatternViewController
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
     private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
+    private final DevicePostureController mPostureController;
+    private final DevicePostureController.Callback mPostureCallback =
+            posture -> mView.onDevicePostureChanged(posture);
 
     private KeyguardMessageAreaController mMessageAreaController;
     private LockPatternView mLockPatternView;
@@ -192,7 +199,8 @@ public class KeyguardPatternViewController
             LatencyTracker latencyTracker,
             FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
-            KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
+            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
+            DevicePostureController postureController) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -203,6 +211,7 @@ public class KeyguardPatternViewController
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = mMessageAreaControllerFactory.create(kma);
         mLockPatternView = mView.findViewById(R.id.lockPatternView);
+        mPostureController = postureController;
     }
 
     @Override
@@ -218,8 +227,6 @@ public class KeyguardPatternViewController
         mLockPatternView.setSaveEnabled(false);
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
                 KeyguardUpdateMonitor.getCurrentUser()));
-        // vibrate mode will be the same for the life of this screen
-        mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
         mLockPatternView.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mFalsingCollector.avoidGesture();
@@ -235,6 +242,7 @@ public class KeyguardPatternViewController
                 getKeyguardSecurityCallback().onCancelClicked();
             });
         }
+        mPostureController.addCallback(mPostureCallback);
     }
 
     @Override
@@ -247,6 +255,7 @@ public class KeyguardPatternViewController
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(null);
         }
+        mPostureController.removeCallback(mPostureCallback);
     }
 
     @Override
@@ -318,6 +327,9 @@ public class KeyguardPatternViewController
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
                 mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
+            case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
+                mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
             case PROMPT_REASON_NONE:
                 break;
             default:
@@ -360,9 +372,13 @@ public class KeyguardPatternViewController
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
-                mMessageAreaController.setMessage(mView.getResources().getQuantityString(
-                        R.plurals.kg_too_many_failed_attempts_countdown,
-                        secondsRemaining, secondsRemaining));
+                Map<String, Object> arguments = new HashMap<>();
+                arguments.put("count", secondsRemaining);
+
+                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
+                        mView.getResources(),
+                        arguments,
+                        R.string.kg_too_many_failed_attempts_countdown));
             }
 
             @Override

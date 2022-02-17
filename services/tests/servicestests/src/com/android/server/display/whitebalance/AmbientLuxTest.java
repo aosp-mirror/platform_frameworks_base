@@ -21,6 +21,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,9 @@ import android.util.TypedValue;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
 import com.android.server.display.TestUtils;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterStubber;
 
@@ -56,6 +59,8 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 public final class AmbientLuxTest {
+
+    private static final float ALLOWED_ERROR_DELTA = 0.001f;
     private static final int AMBIENT_COLOR_TYPE = 20705;
     private static final String AMBIENT_COLOR_TYPE_STR = "colorSensoryDensoryDoc";
     private static final float LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE = 5432.1f;
@@ -75,6 +80,9 @@ public final class AmbientLuxTest {
     @Mock private TypedArray mHighLightBiases;
     @Mock private TypedArray mAmbientColorTemperatures;
     @Mock private TypedArray mDisplayColorTemperatures;
+    @Mock private TypedArray mStrongAmbientColorTemperatures;
+    @Mock private TypedArray mStrongDisplayColorTemperatures;
+    @Mock private ColorDisplayService.ColorDisplayServiceInternal mColorDisplayServiceInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -106,6 +114,12 @@ public final class AmbientLuxTest {
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceDisplayColorTemperatures))
                 .thenReturn(mDisplayColorTemperatures);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceStrongAmbientColorTemperatures))
+                .thenReturn(mStrongAmbientColorTemperatures);
+        when(mResourcesSpy.obtainTypedArray(
+                R.array.config_displayWhiteBalanceStrongDisplayColorTemperatures))
+                .thenReturn(mStrongDisplayColorTemperatures);
 
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceLowLightAmbientBrightnesses))
@@ -120,6 +134,18 @@ public final class AmbientLuxTest {
                 R.array.config_displayWhiteBalanceHighLightAmbientBiases))
                 .thenReturn(mHighLightBiases);
         mockThrottler();
+        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
+        LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
+                mColorDisplayServiceInternalMock);
+    }
+
+    @Test
+    public void testCalculateAdjustedBrightnessNits() {
+        doReturn(0.9f).when(mColorDisplayServiceInternalMock).getDisplayWhiteBalanceLuminance();
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        final float adjustedNits = controller.calculateAdjustedBrightnessNits(500f);
+        assertEquals(/* expected= */ 550f, adjustedNits, /* delta= */ 0.001);
     }
 
     @Test
@@ -359,6 +385,43 @@ public final class AmbientLuxTest {
     }
 
     @Test
+    public void testStrongMode() {
+        final float lowerBrightness = 10.0f;
+        final float upperBrightness = 50.0f;
+        setBrightnesses(lowerBrightness, upperBrightness);
+        setBiases(0.0f, 1.0f);
+        final int ambientColorTempLow = 6000;
+        final int ambientColorTempHigh = 8000;
+        final int displayColorTempLow = 6400;
+        final int displayColorTempHigh = 7400;
+        setStrongAmbientColorTemperatures(ambientColorTempLow, ambientColorTempHigh);
+        setStrongDisplayColorTemperatures(displayColorTempLow, displayColorTempHigh);
+
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        controller.setStrongModeEnabled(true);
+        controller.mBrightnessFilter = spy(new AmbientFilterStubber());
+
+        for (float ambientTempFraction = 0.0f; ambientTempFraction <= 1.0f;
+                ambientTempFraction += 0.1f) {
+            final float ambientTemp =
+                    (ambientColorTempHigh - ambientColorTempLow) * ambientTempFraction
+                            + ambientColorTempLow;
+            setEstimatedColorTemperature(controller, ambientTemp);
+            for (float brightnessFraction = 0.0f; brightnessFraction <= 1.0f;
+                    brightnessFraction += 0.1f) {
+                setEstimatedBrightnessAndUpdate(controller,
+                        mix(lowerBrightness, upperBrightness, brightnessFraction));
+                assertEquals(controller.mPendingAmbientColorTemperature,
+                        mix(LOW_LIGHT_AMBIENT_COLOR_TEMPERATURE,
+                                mix(displayColorTempLow, displayColorTempHigh, ambientTempFraction),
+                                brightnessFraction),
+                        ALLOWED_ERROR_DELTA);
+            }
+        }
+    }
+
+    @Test
     public void testLowLight_DefaultAmbient() throws Exception {
         final float lowerBrightness = 10.0f;
         final float upperBrightness = 50.0f;
@@ -468,6 +531,14 @@ public final class AmbientLuxTest {
 
     private void setDisplayColorTemperatures(float... vals) {
         setFloatArrayResource(mDisplayColorTemperatures, vals);
+    }
+
+    private void setStrongAmbientColorTemperatures(float... vals) {
+        setFloatArrayResource(mStrongAmbientColorTemperatures, vals);
+    }
+
+    private void setStrongDisplayColorTemperatures(float... vals) {
+        setFloatArrayResource(mStrongDisplayColorTemperatures, vals);
     }
 
     private void setFloatArrayResource(TypedArray array, float[] vals) {

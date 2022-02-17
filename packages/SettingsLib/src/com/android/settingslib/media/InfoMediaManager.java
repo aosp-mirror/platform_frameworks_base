@@ -21,6 +21,7 @@ import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
@@ -116,11 +117,9 @@ public class InfoMediaManager extends MediaManager {
      */
     boolean connectDeviceWithoutPackageName(MediaDevice device) {
         boolean isConnected = false;
-        final List<RoutingSessionInfo> infos = mRouterManager.getActiveSessions();
-        if (infos.size() > 0) {
-            final RoutingSessionInfo info = infos.get(0);
+        final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
+        if (info != null) {
             mRouterManager.transfer(info, device.mRouteInfo);
-
             isConnected = true;
         }
         return isConnected;
@@ -420,7 +419,10 @@ public class InfoMediaManager extends MediaManager {
     }
 
     List<RoutingSessionInfo> getActiveMediaSession() {
-        return mRouterManager.getActiveSessions();
+        List<RoutingSessionInfo> infos = new ArrayList<>();
+        infos.add(mRouterManager.getSystemRoutingSession(null));
+        infos.addAll(mRouterManager.getRemoteSessions());
+        return infos;
     }
 
     private void buildAvailableRoutes() {
@@ -487,6 +489,7 @@ public class InfoMediaManager extends MediaManager {
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
+            case TYPE_BLE_HEADSET:
                 final BluetoothDevice device =
                         BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getAddress());
                 final CachedBluetoothDevice cachedDevice =

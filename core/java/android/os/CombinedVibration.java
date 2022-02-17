@@ -110,6 +110,20 @@ public abstract class CombinedVibration implements Parcelable {
     @TestApi
     public abstract long getDuration();
 
+    /**
+     * Returns true if this effect could represent a touch haptic feedback.
+     *
+     * <p>It is strongly recommended that an instance of {@link VibrationAttributes} is specified
+     * for each vibration, with the correct usage. When a vibration is played with usage UNKNOWN,
+     * then this method will be used to classify the most common use case and make sure they are
+     * covered by the user settings for "Touch feedback".
+     *
+     * @hide
+     */
+    public boolean isHapticFeedbackCandidate() {
+        return false;
+    }
+
     /** @hide */
     public abstract void validate();
 
@@ -314,6 +328,12 @@ public abstract class CombinedVibration implements Parcelable {
 
         /** @hide */
         @Override
+        public boolean isHapticFeedbackCandidate() {
+            return mEffect.isHapticFeedbackCandidate();
+        }
+
+        /** @hide */
+        @Override
         public void validate() {
             mEffect.validate();
         }
@@ -431,6 +451,17 @@ public abstract class CombinedVibration implements Parcelable {
 
         /** @hide */
         @Override
+        public boolean isHapticFeedbackCandidate() {
+            for (int i = 0; i < mEffects.size(); i++) {
+                if (!mEffects.valueAt(i).isHapticFeedbackCandidate()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /** @hide */
+        @Override
         public void validate() {
             Preconditions.checkArgument(mEffects.size() > 0,
                     "There should be at least one effect set for a combined effect");
@@ -513,6 +544,9 @@ public abstract class CombinedVibration implements Parcelable {
      */
     @TestApi
     public static final class Sequential extends CombinedVibration {
+        // If a vibration is playing more than 3 effects, it's probably not haptic feedback
+        private static final long MAX_HAPTIC_FEEDBACK_SEQUENCE_SIZE = 3;
+
         private final List<CombinedVibration> mEffects;
         private final List<Integer> mDelays;
 
@@ -571,6 +605,21 @@ public abstract class CombinedVibration implements Parcelable {
                 delays += mDelays.get(i);
             }
             return durations + delays;
+        }
+
+        /** @hide */
+        @Override
+        public boolean isHapticFeedbackCandidate() {
+            final int effectCount = mEffects.size();
+            if (effectCount > MAX_HAPTIC_FEEDBACK_SEQUENCE_SIZE) {
+                return false;
+            }
+            for (int i = 0; i < effectCount; i++) {
+                if (!mEffects.get(i).isHapticFeedbackCandidate()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /** @hide */
