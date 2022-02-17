@@ -333,6 +333,10 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Bypass() {
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
                 PERMISSION_FINE)).isNull();
         assertThat(mManager.getLastLocation(
@@ -381,6 +385,14 @@ public class LocationProviderManagerTest {
                 new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
                 IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
+
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().build());
+        mProvider.setProviderAllowed(false);
+
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isNull();
     }
 
     @Test
