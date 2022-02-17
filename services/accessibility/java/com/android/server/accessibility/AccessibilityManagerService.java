@@ -4292,7 +4292,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void requestImeLocked(AccessibilityServiceConnection connection) {
+    public void requestImeLocked(AbstractAccessibilityServiceConnection connection) {
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::createSessionForConnection, this, connection));
         mMainHandler.sendMessage(obtainMessage(
@@ -4300,12 +4300,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void unbindImeLocked(AccessibilityServiceConnection connection) {
+    public void unbindImeLocked(AbstractAccessibilityServiceConnection connection) {
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::unbindInputForConnection, this, connection));
     }
 
-    private void createSessionForConnection(AccessibilityServiceConnection connection) {
+    private void createSessionForConnection(AbstractAccessibilityServiceConnection connection) {
         synchronized (mLock) {
             if (mInputSessionRequested) {
                 connection.createImeSessionLocked();
@@ -4313,7 +4313,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void bindAndStartInputForConnection(AccessibilityServiceConnection connection) {
+    private void bindAndStartInputForConnection(AbstractAccessibilityServiceConnection connection) {
         synchronized (mLock) {
             if (mInputBinding != null) {
                 connection.bindInputLocked(mInputBinding);
@@ -4323,7 +4323,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void unbindInputForConnection(AccessibilityServiceConnection connection) {
+    private void unbindInputForConnection(AbstractAccessibilityServiceConnection connection) {
         InputMethodManagerInternal.get().unbindAccessibilityFromCurrentClient(connection.mId);
         synchronized (mLock) {
             connection.unbindInputLocked();
