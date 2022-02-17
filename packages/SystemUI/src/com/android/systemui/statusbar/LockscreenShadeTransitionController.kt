@@ -248,6 +248,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                         // override that
                         forceApplyAmount = true
                         // Reset the behavior. At this point the animation is already started
+                        logger.logDragDownAmountReset()
                         dragDownAmount = 0f
                         forceApplyAmount = false
                     }
@@ -409,6 +410,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         setDragDownAmountAnimated(fullTransitionDistance.toFloat(), delay = delay) {
             // End listener:
             // Reset
+            logger.logDragDownAmountReset()
             dragDownAmount = 0f
             forceApplyAmount = false
         }
