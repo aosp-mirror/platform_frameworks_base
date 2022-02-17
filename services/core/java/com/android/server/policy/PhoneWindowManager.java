@@ -330,6 +330,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
     static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
+    static public final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
     private static final String TALKBACK_LABEL = "TalkBack";
 
