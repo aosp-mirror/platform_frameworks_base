@@ -1237,7 +1237,7 @@ public class BubbleStackView extends FrameLayout
                 b.getExpandedView().updateFontSize();
             }
         }
-        if (mBubbleOverflow != null) {
+        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
             mBubbleOverflow.getExpandedView().updateFontSize();
         }
     }
