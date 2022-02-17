@@ -871,20 +871,26 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public void setUserPreferredDisplayModeLocked(Display.Mode mode) {
             final int oldModeId = getPreferredModeId();
             mUserPreferredMode = mode;
-            if (mode != null && (mode.isRefreshRateSet() ^ mode.isResolutionSet())) {
-                mUserPreferredMode = findMode(mode.getPhysicalWidth(),
+            if (mode != null && (mode.isRefreshRateSet() || mode.isResolutionSet())) {
+                Display.Mode matchingSupportedMode;
+                matchingSupportedMode = findMode(mode.getPhysicalWidth(),
                         mode.getPhysicalHeight(), mode.getRefreshRate());
+                if (matchingSupportedMode != null) {
+                    mUserPreferredMode = matchingSupportedMode;
+                }
             }
-            mUserPreferredModeId = findUserPreferredModeIdLocked(mode);
 
-            if (oldModeId != getPreferredModeId()) {
-                updateDeviceInfoLocked();
+            mUserPreferredModeId = findUserPreferredModeIdLocked(mUserPreferredMode);
+
+            if (oldModeId == getPreferredModeId()) {
+                return;
             }
+            updateDeviceInfoLocked();
 
             if (!mSurfaceControlProxy.getBootDisplayModeSupport()) {
                 return;
             }
-            if (mUserPreferredMode == null) {
+            if (mUserPreferredModeId == INVALID_MODE_ID) {
                 mSurfaceControlProxy.clearBootDisplayMode(getDisplayTokenLocked());
             } else {
                 mSurfaceControlProxy.setBootDisplayMode(getDisplayTokenLocked(),
