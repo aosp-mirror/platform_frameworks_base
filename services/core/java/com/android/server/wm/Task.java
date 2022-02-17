@@ -2824,7 +2824,7 @@ class Task extends TaskFragment {
         TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
         if (spec != null) {
             for (@InsetsState.InternalInsetsType int insetType : spec.animationBoundInsets) {
-                InsetsSourceProvider insetProvider = getDisplayContent()
+                WindowContainerInsetsSourceProvider insetProvider = getDisplayContent()
                         .getInsetsStateController()
                         .getSourceProvider(insetType);
 

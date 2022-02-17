@@ -3326,8 +3326,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         if (mInsetsStateController != null) {
             for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-                final InsetsSourceProvider provider = mInsetsStateController.peekSourceProvider(
-                        type);
+                final WindowContainerInsetsSourceProvider provider = mInsetsStateController
+                        .peekSourceProvider(type);
                 if (provider != null) {
                     provider.dumpDebug(proto, type == ITYPE_IME ? IME_INSETS_SOURCE_PROVIDER :
                             INSETS_SOURCE_PROVIDERS, logLevel);
@@ -4036,7 +4036,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
         // 3. The z-order of IME might have been changed. Update the above insets state.
-        mInsetsStateController.updateAboveInsetsState(mInputMethodWindow,
+        mInsetsStateController.updateAboveInsetsState(
                 mInsetsStateController.getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
@@ -4167,7 +4167,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mImeInputTarget != target) {
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             setImeInputTarget(target);
-            mInsetsStateController.updateAboveInsetsState(mInputMethodWindow, mInsetsStateController
+            mInsetsStateController.updateAboveInsetsState(mInsetsStateController
                     .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
             updateImeControlTarget();
         }
@@ -4807,6 +4807,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             // IME does not participate in orientation.
             return candidate;
+        }
+
+        @Override
+        void updateAboveInsetsState(InsetsState aboveInsetsState,
+                SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+                ArraySet<WindowState> insetsChangedWindows) {
+            if (skipImeWindowsDuringTraversal(mDisplayContent)) {
+                return;
+            }
+            super.updateAboveInsetsState(aboveInsetsState, localInsetsSourceProvidersFromParent,
+                    insetsChangedWindows);
         }
 
         @Override
