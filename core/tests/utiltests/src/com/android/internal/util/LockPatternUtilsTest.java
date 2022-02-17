@@ -21,13 +21,16 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -38,11 +41,15 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
+import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -101,5 +108,85 @@ public class LockPatternUtilsTest {
     public void isLockScreenDisabled_isNotInDemoMode_false() throws Exception {
         configureTest(false, true, 0);
         assertFalse(mLockPatternUtils.isLockScreenDisabled(DEMO_USER_ID));
+    }
+
+    @Test
+    public void testAddWeakEscrowToken() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        byte[] testToken = "test_token".getBytes(StandardCharsets.UTF_8);
+        int testUserId = 10;
+        IWeakEscrowTokenActivatedListener listener = createWeakEscrowTokenListener();
+        mLockPatternUtils.addWeakEscrowToken(testToken, testUserId, listener);
+        verify(ils).addWeakEscrowToken(eq(testToken), eq(testUserId), eq(listener));
+    }
+
+    @Test
+    public void testRegisterWeakEscrowTokenRemovedListener() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        IWeakEscrowTokenRemovedListener testListener = createTestAutoEscrowTokenRemovedListener();
+        mLockPatternUtils.registerWeakEscrowTokenRemovedListener(testListener);
+        verify(ils).registerWeakEscrowTokenRemovedListener(eq(testListener));
+    }
+
+    @Test
+    public void testUnregisterWeakEscrowTokenRemovedListener() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        IWeakEscrowTokenRemovedListener testListener = createTestAutoEscrowTokenRemovedListener();
+        mLockPatternUtils.unregisterWeakEscrowTokenRemovedListener(testListener);
+        verify(ils).unregisterWeakEscrowTokenRemovedListener(eq(testListener));
+    }
+
+    @Test
+    public void testRemoveAutoEscrowToken() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        int testUserId = 10;
+        long testHandle = 100L;
+        mLockPatternUtils.removeWeakEscrowToken(testHandle, testUserId);
+        verify(ils).removeWeakEscrowToken(eq(testHandle), eq(testUserId));
+    }
+
+    @Test
+    public void testIsAutoEscrowTokenActive() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        int testUserId = 10;
+        long testHandle = 100L;
+        mLockPatternUtils.isWeakEscrowTokenActive(testHandle, testUserId);
+        verify(ils).isWeakEscrowTokenActive(eq(testHandle), eq(testUserId));
+    }
+
+    @Test
+    public void testIsAutoEscrowTokenValid() throws RemoteException {
+        ILockSettings ils = createTestLockSettings();
+        int testUserId = 10;
+        byte[] testToken = "test_token".getBytes(StandardCharsets.UTF_8);
+        long testHandle = 100L;
+        mLockPatternUtils.isWeakEscrowTokenValid(testHandle, testToken, testUserId);
+        verify(ils).isWeakEscrowTokenValid(eq(testHandle), eq(testToken), eq(testUserId));
+    }
+
+    private ILockSettings createTestLockSettings() {
+        final Context context = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+        mLockPatternUtils = spy(new LockPatternUtils(context));
+        final ILockSettings ils = Mockito.mock(ILockSettings.class);
+        when(mLockPatternUtils.getLockSettings()).thenReturn(ils);
+        return ils;
+    }
+
+    private IWeakEscrowTokenActivatedListener createWeakEscrowTokenListener() {
+        return new IWeakEscrowTokenActivatedListener.Stub() {
+            @Override
+            public void onWeakEscrowTokenActivated(long handle, int userId) {
+                // Do nothing.
+            }
+        };
+    }
+
+    private IWeakEscrowTokenRemovedListener createTestAutoEscrowTokenRemovedListener() {
+        return new IWeakEscrowTokenRemovedListener.Stub() {
+            @Override
+            public void onWeakEscrowTokenRemoved(long handle, int userId) {
+                // Do nothing.
+            }
+        };
     }
 }

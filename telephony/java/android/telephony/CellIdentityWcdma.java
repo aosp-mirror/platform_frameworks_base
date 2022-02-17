@@ -107,30 +107,6 @@ public final class CellIdentityWcdma extends CellIdentity {
         updateGlobalCellId();
     }
 
-    /** @hide */
-    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_0.CellIdentityWcdma cid) {
-        this(cid.lac, cid.cid, cid.psc, cid.uarfcn, cid.mcc, cid.mnc, "", "",
-                new ArraySet<>(), null);
-    }
-
-    /** @hide */
-    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_2.CellIdentityWcdma cid) {
-        this(cid.base.lac, cid.base.cid, cid.base.psc, cid.base.uarfcn,
-                cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
-                cid.operatorNames.alphaShort, new ArraySet<>(), null);
-    }
-
-    /** @hide */
-    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_5.CellIdentityWcdma cid) {
-        this(cid.base.base.lac, cid.base.base.cid, cid.base.base.psc, cid.base.base.uarfcn,
-                cid.base.base.mcc, cid.base.base.mnc, cid.base.operatorNames.alphaLong,
-                cid.base.operatorNames.alphaShort, cid.additionalPlmns,
-                cid.optionalCsgInfo.getDiscriminator()
-                        == android.hardware.radio.V1_5.OptionalCsgInfo.hidl_discriminator.csgInfo
-                                ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo())
-                                        : null);
-    }
-
     private CellIdentityWcdma(@NonNull CellIdentityWcdma cid) {
         this(cid.mLac, cid.mCid, cid.mPsc, cid.mUarfcn, cid.mMccStr,
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort, cid.mAdditionalPlmns, cid.mCsgInfo);
@@ -337,7 +313,7 @@ public final class CellIdentityWcdma extends CellIdentity {
         mPsc = in.readInt();
         mUarfcn = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-        mCsgInfo = in.readParcelable(null);
+        mCsgInfo = in.readParcelable(null, android.telephony.ClosedSubscriberGroupInfo.class);
 
         updateGlobalCellId();
         if (DBG) log(toString());

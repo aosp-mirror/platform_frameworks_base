@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection.listbuilder;
 
 import android.annotation.IntDef;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 
 import java.lang.annotation.Retention;
@@ -35,6 +37,7 @@ public class PipelineState {
         return state == mState;
     }
 
+    /** Get the current state's integer representation */
     public @StateName int getState() {
         return mState;
     }
@@ -72,6 +75,41 @@ public class PipelineState {
         if (mState >= state) {
             throw new IllegalStateException(
                     "Required state is <" + state + " but actual state is " + mState);
+        }
+    }
+
+    /** Get the current state's string representation */
+    @NonNull
+    public String getStateName() {
+        return getStateName(mState);
+    }
+
+    /** Get the given state's string representation */
+    @NonNull
+    public static String getStateName(@StateName int state) {
+        switch (state) {
+            case STATE_IDLE:
+                return "STATE_IDLE";
+            case STATE_BUILD_STARTED:
+                return "STATE_BUILD_STARTED";
+            case STATE_RESETTING:
+                return "STATE_RESETTING";
+            case STATE_PRE_GROUP_FILTERING:
+                return "STATE_PRE_GROUP_FILTERING";
+            case STATE_GROUPING:
+                return "STATE_GROUPING";
+            case STATE_TRANSFORMING:
+                return "STATE_TRANSFORMING";
+            case STATE_GROUP_STABILIZING:
+                return "STATE_GROUP_STABILIZING";
+            case STATE_SORTING:
+                return "STATE_SORTING";
+            case STATE_FINALIZE_FILTERING:
+                return "STATE_FINALIZE_FILTERING";
+            case STATE_FINALIZING:
+                return "STATE_FINALIZING";
+            default:
+                return "STATE:" + state;
         }
     }
 

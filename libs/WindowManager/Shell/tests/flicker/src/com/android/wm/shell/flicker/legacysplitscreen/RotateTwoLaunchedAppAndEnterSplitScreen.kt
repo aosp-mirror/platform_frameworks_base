@@ -24,20 +24,17 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
-import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -57,11 +54,11 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppAndEnterSplitScreen(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenRotateTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            super.transition(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
-                this.setRotation(testSpec.config.startRotation)
+                this.setRotation(testSpec.startRotation)
                 device.launchSplitScreen(wmHelper)
                 device.reopenAppFromOverview(wmHelper)
             }
@@ -69,42 +66,63 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisible() =
-        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
-            splitScreenApp.defaultWindowName)
+    fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.startRotation,
+            splitScreenApp.component)
 
     @Presubmit
     @Test
-    fun dockedStackSecondaryBoundsIsVisible() =
-        testSpec.dockedStackSecondaryBoundsIsVisible(testSpec.config.startRotation,
-            secondaryApp.defaultWindowName)
-
-    @FlakyTest(bugId = 169271943)
-    @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
-
-    @FlakyTest(bugId = 169271943)
-    @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(
-        testSpec.config.startRotation, testSpec.config.endRotation)
+    fun dockedStackSecondaryBoundsIsVisibleAtEnd() =
+        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.startRotation,
+            secondaryApp.component)
 
     @Presubmit
     @Test
-    fun appWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp.defaultWindowName)
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+
+    @FlakyTest(bugId = 206753786)
+    @Test
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun appWindowBecomesVisible() {
+        testSpec.assertWm {
+            // when the app is launched, first the activity becomes visible, then the
+            // SnapshotStartingWindow appears and then the app window becomes visible.
+            // Because we log WM once per frame, sometimes the activity and the window
+            // become visible in the same entry, sometimes not, thus it is not possible to
+            // assert the visibility of the activity here
+            this.isAppWindowInvisible(secondaryApp.component)
+                    .then()
+                    // during re-parenting, the window may disappear and reappear from the
+                    // trace, this occurs because we log only 1x per frame
+                    .notContains(secondaryApp.component, isOptional = true)
+                    .then()
+                    // if the window reappears after re-parenting it will most likely not
+                    // be visible in the first log entry (because we log only 1x per frame)
+                    .isAppWindowInvisible(secondaryApp.component, isOptional = true)
+                    .then()
+                    .isAppWindowVisible(secondaryApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

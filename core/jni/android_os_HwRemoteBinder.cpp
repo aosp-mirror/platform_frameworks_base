@@ -81,27 +81,37 @@ public:
 
     void binderDied(const wp<hardware::IBinder>& who)
     {
-        if (mObject != NULL) {
-            JNIEnv* env = javavm_to_jnienv(mVM);
+        JNIEnv* env = javavm_to_jnienv(mVM);
 
-            env->CallStaticVoidMethod(gProxyOffsets.proxy_class, gProxyOffsets.sendDeathNotice, mObject, mCookie);
+        // Serialize with our containing HwBinderDeathRecipientList so that we can't
+        // delete the global ref on object while the list is being iterated.
+        sp<HwBinderDeathRecipientList> list = mList.promote();
+        if (list == nullptr) return;
+
+        jobject object;
+        {
+            AutoMutex _l(list->lock());
+
+            // this function now owns the global ref - to the rest of the code, it looks like
+            // this binder already died, but we won't actually delete the reference until
+            // the Java code has processed the death
+            object = mObject;
+
+            // Demote from strong ref to weak for after binderDied() has been delivered,
+            // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
+            mObjectWeak = env->NewWeakGlobalRef(mObject);
+            mObject = nullptr;
+        }
+
+        if (object != nullptr) {
+            env->CallStaticVoidMethod(gProxyOffsets.proxy_class, gProxyOffsets.sendDeathNotice,
+                                      object, mCookie);
             if (env->ExceptionCheck()) {
                 ALOGE("Uncaught exception returned from death notification.");
                 env->ExceptionClear();
             }
 
-            // Serialize with our containing HwBinderDeathRecipientList so that we can't
-            // delete the global ref on mObject while the list is being iterated.
-            sp<HwBinderDeathRecipientList> list = mList.promote();
-            if (list != NULL) {
-                AutoMutex _l(list->lock());
-
-                // Demote from strong ref to weak after binderDied() has been delivered,
-                // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
-                mObjectWeak = env->NewWeakGlobalRef(mObject);
-                env->DeleteGlobalRef(mObject);
-                mObject = NULL;
-            }
+            env->DeleteGlobalRef(object);
         }
     }
 
@@ -115,7 +125,7 @@ public:
         }
     }
 
-    bool matches(jobject obj) {
+    bool matchesLocked(jobject obj) {
         bool result;
         JNIEnv* env = javavm_to_jnienv(mVM);
 
@@ -129,7 +139,7 @@ public:
         return result;
     }
 
-    void warnIfStillLive() {
+    void warnIfStillLiveLocked() {
         if (mObject != NULL) {
             // Okay, something is wrong -- we have a hard reference to a live death
             // recipient on the VM side, but the list is being torn down.
@@ -176,7 +186,7 @@ HwBinderDeathRecipientList::~HwBinderDeathRecipientList() {
     AutoMutex _l(mLock);
 
     for (const sp<HwBinderDeathRecipient>& deathRecipient : mList) {
-        deathRecipient->warnIfStillLive();
+        deathRecipient->warnIfStillLiveLocked();
     }
 }
 
@@ -201,7 +211,7 @@ sp<HwBinderDeathRecipient> HwBinderDeathRecipientList::find(jobject recipient) {
     AutoMutex _l(mLock);
 
     for(auto iter = mList.rbegin(); iter != mList.rend(); iter++) {
-        if ((*iter)->matches(recipient)) {
+        if ((*iter)->matchesLocked(recipient)) {
             return (*iter);
         }
     }

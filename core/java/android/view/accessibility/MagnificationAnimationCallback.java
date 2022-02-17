@@ -21,6 +21,9 @@ package android.view.accessibility;
  * @hide
  */
 public interface MagnificationAnimationCallback {
+    MagnificationAnimationCallback STUB_ANIMATION_CALLBACK = success -> {
+    };
+
     /**
      * Called when the animation is finished or interrupted during animating.
      *

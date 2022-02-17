@@ -20,16 +20,15 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GLFrame;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
-import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
-import android.os.ConditionVariable;
 import android.opengl.Matrix;
-
+import android.os.ConditionVariable;
 import android.util.Log;
 
 /** <p>A filter that converts textures from a SurfaceTexture object into frames for
@@ -57,7 +56,7 @@ public class SurfaceTextureSource extends Filter {
         public void onSurfaceTextureSourceReady(SurfaceTexture source);
     }
     /** A callback to send the internal SurfaceTexture object to, once it is
-     * created. This callback will be called when the the filter graph is
+     * created. This callback will be called when the filter graph is
      * preparing to execute, but before any processing has actually taken
      * place. The SurfaceTexture object passed to this callback is the only way
      * to feed this filter. When the filter graph is shutting down, this

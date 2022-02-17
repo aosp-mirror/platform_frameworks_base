@@ -18,21 +18,27 @@
 
 #include "android_hardware_input_InputWindowHandle.h"
 
+#include <android/graphics/matrix.h>
 #include <android/graphics/region.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <binder/IPCThreadState.h>
 #include <gui/SurfaceControl.h>
+#include <gui/WindowInfo.h>
 #include <nativehelper/JNIHelp.h>
 #include <ui/Region.h>
 #include <utils/threads.h>
 
+#include "SkRegion.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
-#include "input/InputWindow.h"
 #include "jni.h"
 
 namespace android {
+
+using gui::TouchOcclusionMode;
+using gui::WindowInfo;
 
 struct WeakRefHandleField {
     jfieldID ctrl;
@@ -41,6 +47,8 @@ struct WeakRefHandleField {
 };
 
 static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID ptr;
     jfieldID inputApplicationHandle;
     jfieldID token;
@@ -66,10 +74,17 @@ static struct {
     jfieldID packageName;
     jfieldID inputFeatures;
     jfieldID displayId;
-    jfieldID portalToDisplayId;
     jfieldID replaceTouchableRegionWithCrop;
     WeakRefHandleField touchableRegionSurfaceControl;
+    jfieldID transform;
+    jfieldID windowToken;
 } gInputWindowHandleClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+    jfieldID nativeRegion;
+} gRegionClassInfo;
 
 static Mutex gHandleMutex;
 
@@ -115,10 +130,6 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
 
-    mInfo.flags = Flags<InputWindowInfo::Flag>(
-            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
-    mInfo.type = static_cast<InputWindowInfo::Type>(
-            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
     mInfo.dispatchingTimeout = std::chrono::milliseconds(
             env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
     mInfo.frameLeft = env->GetIntField(obj,
@@ -144,14 +155,72 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(regionObj);
     }
 
-    mInfo.visible = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.visible);
-    mInfo.focusable = env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable);
-    mInfo.hasWallpaper = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.hasWallpaper);
-    mInfo.paused = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.paused);
-    mInfo.trustedOverlay = env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay);
+    const auto flags = Flags<WindowInfo::Flag>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
+    const auto type = static_cast<WindowInfo::Type>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
+    mInfo.layoutParamsFlags = flags;
+    mInfo.layoutParamsType = type;
+
+    using InputConfig = gui::WindowInfo::InputConfig;
+    // Determine the value for each of the InputConfig flags. We rely on a switch statement and
+    // -Wswitch-enum to give us a build error if we forget to explicitly handle an InputConfig flag.
+    mInfo.inputConfig = InputConfig::NONE;
+    InputConfig enumerationStart = InputConfig::NONE;
+    switch (enumerationStart) {
+        case InputConfig::NONE:
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_VISIBLE:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.visible) == JNI_FALSE) {
+                mInfo.inputConfig |= InputConfig::NOT_VISIBLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_FOCUSABLE:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable) == JNI_FALSE) {
+                mInfo.inputConfig |= InputConfig::NOT_FOCUSABLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NOT_TOUCHABLE:
+            if (flags.test(WindowInfo::Flag::NOT_TOUCHABLE)) {
+                mInfo.inputConfig |= InputConfig::NOT_TOUCHABLE;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::PREVENT_SPLITTING:
+            if (!flags.test(WindowInfo::Flag::SPLIT_TOUCH)) {
+                mInfo.inputConfig |= InputConfig::PREVENT_SPLITTING;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.hasWallpaper) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::IS_WALLPAPER:
+            if (type == WindowInfo::Type::WALLPAPER) {
+                mInfo.inputConfig |= InputConfig::IS_WALLPAPER;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::PAUSE_DISPATCHING:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.paused) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::PAUSE_DISPATCHING;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::TRUSTED_OVERLAY:
+            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay) == JNI_TRUE) {
+                mInfo.inputConfig |= InputConfig::TRUSTED_OVERLAY;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::WATCH_OUTSIDE_TOUCH:
+            if (flags.test(WindowInfo::Flag::WATCH_OUTSIDE_TOUCH)) {
+                mInfo.inputConfig |= InputConfig::WATCH_OUTSIDE_TOUCH;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::SLIPPERY:
+            if (flags.test(WindowInfo::Flag::SLIPPERY)) {
+                mInfo.inputConfig |= InputConfig::SLIPPERY;
+            }
+    }
+
     mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
     mInfo.ownerPid = env->GetIntField(obj,
@@ -159,12 +228,10 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.ownerUid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerUid);
     mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
-    mInfo.inputFeatures = static_cast<InputWindowInfo::Feature>(
+    mInfo.inputFeatures = static_cast<WindowInfo::Feature>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
-    mInfo.portalToDisplayId = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.portalToDisplayId);
 
     jobject inputApplicationHandleObj = env->GetObjectField(obj,
             gInputWindowHandleClassInfo.inputApplicationHandle);
@@ -204,6 +271,14 @@ bool NativeInputWindowHandle::updateInfo() {
         mInfo.touchableRegionCropHandle.clear();
     }
 
+    jobject windowTokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.windowToken);
+    if (windowTokenObj) {
+        mInfo.windowToken = ibinderForJavaObject(env, windowTokenObj);
+        env->DeleteLocalRef(windowTokenObj);
+    } else {
+        mInfo.windowToken.clear();
+    }
+
     env->DeleteLocalRef(obj);
     return true;
 }
@@ -233,6 +308,89 @@ sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
     return handle;
 }
 
+jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowInfo windowInfo) {
+    ScopedLocalRef<jobject>
+            applicationHandle(env,
+                              android_view_InputApplicationHandle_fromInputApplicationInfo(
+                                      env, windowInfo.applicationInfo));
+
+    jobject inputWindowHandle =
+            env->NewObject(gInputWindowHandleClassInfo.clazz, gInputWindowHandleClassInfo.ctor,
+                           applicationHandle.get(), windowInfo.displayId);
+    if (env->ExceptionCheck()) {
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
+    LOG_ALWAYS_FATAL_IF(inputWindowHandle == nullptr,
+                        "Failed to create new InputWindowHandle object.");
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
+                        javaObjectForIBinder(env, windowInfo.token));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name,
+                        env->NewStringUTF(windowInfo.name.data()));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsFlags,
+                     static_cast<uint32_t>(windowInfo.layoutParamsFlags.get()));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsType,
+                     static_cast<int32_t>(windowInfo.layoutParamsType));
+    env->SetLongField(inputWindowHandle, gInputWindowHandleClassInfo.dispatchingTimeoutMillis,
+                      std::chrono::duration_cast<std::chrono::milliseconds>(
+                              windowInfo.dispatchingTimeout)
+                              .count());
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameLeft,
+                     windowInfo.frameLeft);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameTop, windowInfo.frameTop);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameRight,
+                     windowInfo.frameRight);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameBottom,
+                     windowInfo.frameBottom);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.surfaceInset,
+                     windowInfo.surfaceInset);
+    env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.scaleFactor,
+                       windowInfo.globalScaleFactor);
+
+    SkRegion* region = new SkRegion();
+    for (const auto& r : windowInfo.touchableRegion) {
+        region->op({r.left, r.top, r.right, r.bottom}, SkRegion::kUnion_Op);
+    }
+    ScopedLocalRef<jobject> regionObj(env,
+                                      env->NewObject(gRegionClassInfo.clazz,
+                                                     gRegionClassInfo.ctor));
+    env->SetLongField(regionObj.get(), gRegionClassInfo.nativeRegion,
+                      reinterpret_cast<jlong>(region));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.touchableRegion,
+                        regionObj.get());
+
+    using InputConfig = gui::WindowInfo::InputConfig;
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.visible,
+                         !windowInfo.inputConfig.test(InputConfig::NOT_VISIBLE));
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.focusable,
+                         !windowInfo.inputConfig.test(gui::WindowInfo::InputConfig::NOT_FOCUSABLE));
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.hasWallpaper,
+                         windowInfo.inputConfig.test(InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER));
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.paused,
+                         windowInfo.inputConfig.test(InputConfig::PAUSE_DISPATCHING));
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.trustedOverlay,
+                         windowInfo.inputConfig.test(InputConfig::TRUSTED_OVERLAY));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.touchOcclusionMode,
+                     static_cast<int32_t>(windowInfo.touchOcclusionMode));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerPid, windowInfo.ownerPid);
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerUid, windowInfo.ownerUid);
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.packageName,
+                        env->NewStringUTF(windowInfo.packageName.data()));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.inputFeatures,
+                     static_cast<int32_t>(windowInfo.inputFeatures.get()));
+
+    float transformVals[9];
+    for (int i = 0; i < 9; i++) {
+        transformVals[i] = windowInfo.transform[i % 3][i / 3];
+    }
+    ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformVals));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.transform, matrixObj.get());
+
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
+                        javaObjectForIBinder(env, windowInfo.windowToken));
+
+    return inputWindowHandle;
+}
 
 // --- JNI ---
 
@@ -275,6 +433,10 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     jclass clazz;
     FIND_CLASS(clazz, "android/view/InputWindowHandle");
+    gInputWindowHandleClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+
+    GET_METHOD_ID(gInputWindowHandleClassInfo.ctor, clazz, "<init>",
+                  "(Landroid/view/InputApplicationHandle;I)V");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
             "ptr", "J");
@@ -348,11 +510,14 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.displayId, clazz,
             "displayId", "I");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.portalToDisplayId, clazz,
-            "portalToDisplayId", "I");
-
     GET_FIELD_ID(gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop, clazz,
             "replaceTouchableRegionWithCrop", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.transform, clazz, "transform",
+                 "Landroid/graphics/Matrix;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.windowToken, clazz, "windowToken",
+                 "Landroid/os/IBinder;");
 
     jclass weakRefClazz;
     FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");
@@ -368,6 +533,11 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.mNativeObject,
         surfaceControlClazz, "mNativeObject", "J");
 
+    jclass regionClazz;
+    FIND_CLASS(regionClazz, "android/graphics/Region");
+    gRegionClassInfo.clazz = MakeGlobalRefOrDie(env, regionClazz);
+    GET_METHOD_ID(gRegionClassInfo.ctor, gRegionClassInfo.clazz, "<init>", "()V");
+    GET_FIELD_ID(gRegionClassInfo.nativeRegion, gRegionClassInfo.clazz, "mNativeRegion", "J");
     return 0;
 }
 

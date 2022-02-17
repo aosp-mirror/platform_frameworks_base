@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.bugpatterns.android.TargetSdkChecker.binaryTreeExact;
 import static com.google.errorprone.matchers.Matchers.allOf;
@@ -51,6 +52,7 @@ import com.sun.source.tree.Tree.Kind;
 @BugPattern(
     name = "AndroidFrameworkCompatChange",
     summary = "Verifies that behavior changes use the modern compatibility framework",
+    linkType = NONE,
     severity = WARNING)
 public final class CompatChangeChecker extends BugChecker implements BinaryTreeMatcher {
     private static final Matcher<ExpressionTree> VERSION_CODE =

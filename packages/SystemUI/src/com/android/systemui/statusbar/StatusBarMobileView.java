@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
-import static com.android.systemui.plugins.DarkIconDispatcher.isInArea;
+import static com.android.systemui.plugins.DarkIconDispatcher.isInAreas;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
@@ -39,6 +39,8 @@ import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+
+import java.util.ArrayList;
 
 public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         StatusIconDisplayable {
@@ -222,11 +224,11 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        float intensity = isInArea(area, this) ? darkIntensity : 0;
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        float intensity = isInAreas(areas, this) ? darkIntensity : 0;
         mMobileDrawable.setTintList(
                 ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
-        ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
+        ColorStateList color = ColorStateList.valueOf(getTint(areas, this, tint));
         mIn.setImageTintList(color);
         mOut.setImageTintList(color);
         mMobileType.setImageTintList(color);

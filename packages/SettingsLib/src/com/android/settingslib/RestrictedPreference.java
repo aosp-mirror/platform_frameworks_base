@@ -19,9 +19,9 @@ package com.android.settingslib;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.content.Context;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
-import android.view.View;
 
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
@@ -37,9 +37,14 @@ public class RestrictedPreference extends TwoTargetPreference {
     RestrictedPreferenceHelper mHelper;
 
     public RestrictedPreference(Context context, AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
+            int defStyleAttr, int defStyleRes, String packageName, int uid) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mHelper = new RestrictedPreferenceHelper(context, this, attrs);
+        mHelper = new RestrictedPreferenceHelper(context, this, attrs, packageName, uid);
+    }
+
+    public RestrictedPreference(Context context, AttributeSet attrs,
+            int defStyleAttr, int defStyleRes) {
+        this(context, attrs, defStyleAttr, defStyleRes, null, Process.INVALID_UID);
     }
 
     public RestrictedPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -55,24 +60,15 @@ public class RestrictedPreference extends TwoTargetPreference {
         this(context, null);
     }
 
-    @Override
-    protected int getSecondTargetResId() {
-        return R.layout.restricted_icon;
-    }
-
-    @Override
-    protected boolean shouldHideSecondTarget() {
-        return !isDisabledByAdmin();
+    public RestrictedPreference(Context context, String packageName, int uid) {
+        this(context, null, TypedArrayUtils.getAttr(context, R.attr.preferenceStyle,
+                android.R.attr.preferenceStyle), 0, packageName, uid);
     }
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         mHelper.onBindViewHolder(holder);
-        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
-        if (restrictedIcon != null) {
-            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override
@@ -115,7 +111,21 @@ public class RestrictedPreference extends TwoTargetPreference {
         }
     }
 
+    public void setDisabledByAppOps(boolean disabled) {
+        if (mHelper.setDisabledByAppOps(disabled)) {
+            notifyChanged();
+        }
+    }
+
     public boolean isDisabledByAdmin() {
         return mHelper.isDisabledByAdmin();
+    }
+
+    public int getUid() {
+        return mHelper != null ? mHelper.uid : Process.INVALID_UID;
+    }
+
+    public String getPackageName() {
+        return mHelper != null ? mHelper.packageName : null;
     }
 }

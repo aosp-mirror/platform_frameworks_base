@@ -37,5 +37,6 @@ interface IPersistentDataBlockService {
     boolean getOemUnlockEnabled();
     int getFlashLockState();
     boolean hasFrpCredentialHandle();
+    String getPersistentDataPackageName();
 }
 

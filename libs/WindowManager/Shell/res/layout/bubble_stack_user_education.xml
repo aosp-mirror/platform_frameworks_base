@@ -21,7 +21,6 @@
     android:layout_width="wrap_content"
     android:paddingTop="48dp"
     android:paddingBottom="48dp"
-    android:paddingStart="@dimen/bubble_stack_user_education_side_inset"
     android:paddingEnd="16dp"
     android:layout_marginEnd="24dp"
     android:orientation="vertical"

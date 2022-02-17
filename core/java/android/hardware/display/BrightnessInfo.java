@@ -57,8 +57,28 @@ public final class BrightnessInfo implements Parcelable {
      */
     public static final int HIGH_BRIGHTNESS_MODE_HDR = 2;
 
+    @IntDef(prefix = {"BRIGHTNESS_MAX_REASON_"}, value = {
+            BRIGHTNESS_MAX_REASON_NONE,
+            BRIGHTNESS_MAX_REASON_THERMAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BrightnessMaxReason {}
+
+    /**
+     * Maximum brightness is unrestricted.
+     */
+    public static final int BRIGHTNESS_MAX_REASON_NONE = 0;
+
+    /**
+     * Maximum brightness is restricted due to thermal throttling.
+     */
+    public static final int BRIGHTNESS_MAX_REASON_THERMAL = 1;
+
     /** Brightness */
     public final float brightness;
+
+    /** Brightness after {@link DisplayPowerController} adjustments */
+    public final float adjustedBrightness;
 
     /** Current minimum supported brightness. */
     public final float brightnessMinimum;
@@ -66,18 +86,38 @@ public final class BrightnessInfo implements Parcelable {
     /** Current maximum supported brightness. */
     public final float brightnessMaximum;
 
+    /** Brightness values greater than this point are only used in High Brightness Mode. */
+    public final float highBrightnessTransitionPoint;
+
     /**
      * Current state of high brightness mode.
      * Can be any of HIGH_BRIGHTNESS_MODE_* values.
      */
     public final int highBrightnessMode;
 
+    /**
+     * The current reason for restricting maximum brightness.
+     * Can be any of BRIGHTNESS_MAX_REASON_* values.
+     */
+    public final int brightnessMaxReason;
+
     public BrightnessInfo(float brightness, float brightnessMinimum, float brightnessMaximum,
-            @HighBrightnessMode int highBrightnessMode) {
+            @HighBrightnessMode int highBrightnessMode, float highBrightnessTransitionPoint,
+            @BrightnessMaxReason int brightnessMaxReason) {
+        this(brightness, brightness, brightnessMinimum, brightnessMaximum, highBrightnessMode,
+                highBrightnessTransitionPoint, brightnessMaxReason);
+    }
+
+    public BrightnessInfo(float brightness, float adjustedBrightness, float brightnessMinimum,
+            float brightnessMaximum, @HighBrightnessMode int highBrightnessMode,
+            float highBrightnessTransitionPoint, @BrightnessMaxReason int brightnessMaxReason) {
         this.brightness = brightness;
+        this.adjustedBrightness = adjustedBrightness;
         this.brightnessMinimum = brightnessMinimum;
         this.brightnessMaximum = brightnessMaximum;
         this.highBrightnessMode = highBrightnessMode;
+        this.highBrightnessTransitionPoint = highBrightnessTransitionPoint;
+        this.brightnessMaxReason =  brightnessMaxReason;
     }
 
     /**
@@ -95,6 +135,19 @@ public final class BrightnessInfo implements Parcelable {
         return "invalid";
     }
 
+    /**
+     * @return User-friendly string for specified {@link BrightnessMaxReason} parameter.
+     */
+    public static String briMaxReasonToString(@BrightnessMaxReason int reason) {
+        switch (reason) {
+            case BRIGHTNESS_MAX_REASON_NONE:
+                return "none";
+            case BRIGHTNESS_MAX_REASON_THERMAL:
+                return "thermal";
+        }
+        return "invalid";
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -103,9 +156,12 @@ public final class BrightnessInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloat(brightness);
+        dest.writeFloat(adjustedBrightness);
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeInt(highBrightnessMode);
+        dest.writeFloat(highBrightnessTransitionPoint);
+        dest.writeInt(brightnessMaxReason);
     }
 
     public static final @android.annotation.NonNull Creator<BrightnessInfo> CREATOR =
@@ -123,9 +179,12 @@ public final class BrightnessInfo implements Parcelable {
 
     private BrightnessInfo(Parcel source) {
         brightness = source.readFloat();
+        adjustedBrightness = source.readFloat();
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         highBrightnessMode = source.readInt();
+        highBrightnessTransitionPoint = source.readFloat();
+        brightnessMaxReason = source.readInt();
     }
 
 }

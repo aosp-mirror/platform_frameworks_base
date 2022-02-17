@@ -24,7 +24,6 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.dagger.SysUISingleton;
@@ -73,7 +72,10 @@ public class LockscreenGestureLogger {
         LOCKSCREEN_NOTIFICATION_FALSE_TOUCH(548),
 
         @UiEvent(doc = "Expand the notification panel while unlocked")
-        LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND(549);
+        LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND(549),
+
+        @UiEvent(doc = "Lockscreen > Tap on switch user icon")
+        LOCKSCREEN_SWITCH_USER_TAP(934);
 
         private final int mId;
 
@@ -88,10 +90,11 @@ public class LockscreenGestureLogger {
     }
 
     private ArrayMap<Integer, Integer> mLegacyMap;
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final MetricsLogger mMetricsLogger;
 
     @Inject
-    public LockscreenGestureLogger() {
+    public LockscreenGestureLogger(MetricsLogger metricsLogger) {
+        mMetricsLogger = metricsLogger;
         mLegacyMap = new ArrayMap<>(EventLogConstants.METRICS_GESTURE_TYPE_MAP.length);
         for (int i = 0; i < EventLogConstants.METRICS_GESTURE_TYPE_MAP.length ; i++) {
             mLegacyMap.put(EventLogConstants.METRICS_GESTURE_TYPE_MAP[i], i);

@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -53,7 +53,7 @@ import javax.inject.Inject;
  * respond to app-cancellations (ie: remove the bubble if the app cancels the notification).
  *
  */
-@SysUISingleton
+@CoordinatorScope
 public class BubbleCoordinator implements Coordinator {
     private static final String TAG = "BubbleCoordinator";
 
@@ -78,11 +78,8 @@ public class BubbleCoordinator implements Coordinator {
     public void attach(NotifPipeline pipeline) {
         mNotifPipeline = pipeline;
         mNotifPipeline.addNotificationDismissInterceptor(mDismissInterceptor);
-        mNotifPipeline.addFinalizeFilter(mNotifFilter);
-        if (mBubblesManagerOptional.isPresent()) {
-            mBubblesManagerOptional.get().addNotifCallback(mNotifCallback);
-        }
-
+        mNotifPipeline.addPreGroupFilter(mNotifFilter);
+        mBubblesManagerOptional.ifPresent(manager -> manager.addNotifCallback(mNotifCallback));
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
@@ -130,11 +127,19 @@ public class BubbleCoordinator implements Coordinator {
                 DismissedByUserStats dismissedByUserStats,
                 int reason
         ) {
+            if (!mNotifPipeline.isNewPipelineEnabled()) {
+                // The `entry` will be from whichever pipeline is active, so if the old pipeline is
+                // running, make sure that we use the new pipeline's entry (if it still exists).
+                NotificationEntry newPipelineEntry = mNotifPipeline.getEntry(entry.getKey());
+                if (newPipelineEntry != null) {
+                    entry = newPipelineEntry;
+                }
+            }
             if (isInterceptingDismissal(entry)) {
                 mInterceptedDismissalEntries.remove(entry.getKey());
                 mOnEndDismissInterception.onEndDismissInterception(mDismissInterceptor, entry,
                         dismissedByUserStats);
-            } else if (mNotifPipeline.getAllNotifs().contains(entry)) {
+            } else if (mNotifPipeline.getEntry(entry.getKey()) != null) {
                 // Bubbles are hiding the notifications from the shade, but the bubble was
                 // deleted; therefore, the notification should be cancelled as if it were a user
                 // dismissal (this won't re-enter handleInterceptDimissal because Bubbles

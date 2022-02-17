@@ -120,6 +120,9 @@ public class SettingsButton extends AlphaOptimizedImageButton {
                         setAlpha(1f);
                         setTranslationX(0);
                         cancelLongClick();
+                        // Unset the listener, otherwise this may persist for
+                        // another view property animation
+                        animate().setListener(null);
                     }
 
                     @Override
