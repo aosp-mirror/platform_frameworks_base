@@ -111,6 +111,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private int mColorInactiveItem;
     private int mColorSeekbarProgress;
     private int mColorButtonBackground;
+    private int mColorItemBackground;
 
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
@@ -142,6 +143,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
                 android.R.color.system_accent1_200);
         mColorButtonBackground = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_item_background);
+        mColorItemBackground = Utils.getColorStateListDefaultColor(mContext,
+                android.R.color.system_accent2_50);
     }
 
     void start(@NonNull Callback cb) {
@@ -350,14 +353,16 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
                 isDarkTheme);
         if (isDarkTheme) {
             mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorInactiveItem = mCurrentColorScheme.getAccent1().get(2);
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
+            mColorInactiveItem = mCurrentColorScheme.getNeutral1().get(10);
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(2);
             mColorButtonBackground = mCurrentColorScheme.getAccent1().get(2);
+            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
         } else {
             mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
             mColorInactiveItem = mCurrentColorScheme.getAccent1().get(7);
             mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
-            mColorButtonBackground = mCurrentColorScheme.getAccent2().get(1);
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(3);
+            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
         }
     }
 
@@ -375,6 +380,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
 
     public int getColorButtonBackground() {
         return mColorButtonBackground;
+    }
+
+    public int getColorItemBackground() {
+        return mColorItemBackground;
     }
 
     private void buildMediaDevices(List<MediaDevice> devices) {
