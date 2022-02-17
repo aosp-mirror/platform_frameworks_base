@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.widget.settingsspinner;
+package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-import com.android.settingslib.widget.R;
-
 /**
- * An ArrayAdapter which was used by {@link SettingsSpinner} with settings style.
+ * An ArrayAdapter which was used by Spinner with settings style.
+ * @param <T> the data type to be loaded.
  */
 public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
 
@@ -43,7 +43,7 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
     public SettingsSpinnerAdapter(Context context) {
         super(context, DEFAULT_RESOURCE);
 
-        setDropDownViewResource(DFAULT_DROPDOWN_RESOURCE);
+        setDropDownViewResource(getDropdownResource());
         mDefaultInflater = LayoutInflater.from(context);
     }
 
@@ -59,6 +59,11 @@ public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
      * drop down view.
      */
     public View getDefaultDropDownView(int position, View convertView, ViewGroup parent) {
-        return mDefaultInflater.inflate(DFAULT_DROPDOWN_RESOURCE, parent, false /* attachToRoot */);
+        return mDefaultInflater.inflate(getDropdownResource(), parent, false /* attachToRoot */);
+    }
+
+    private int getDropdownResource() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                ? DFAULT_DROPDOWN_RESOURCE : android.R.layout.simple_spinner_dropdown_item;
     }
 }
