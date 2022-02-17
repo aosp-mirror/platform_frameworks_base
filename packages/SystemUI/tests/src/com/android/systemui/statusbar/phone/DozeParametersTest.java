@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -61,6 +62,7 @@ import java.util.Optional;
 public class DozeParametersTest extends SysuiTestCase {
     private DozeParameters mDozeParameters;
 
+    @Mock Handler mHandler;
     @Mock Resources mResources;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
@@ -102,6 +104,8 @@ public class DozeParametersTest extends SysuiTestCase {
                 .thenReturn(mFoldAodAnimationController);
 
         mDozeParameters = new DozeParameters(
+            mContext,
+            mHandler,
             mResources,
             mAmbientDisplayConfiguration,
             mAlwaysOnDisplayPolicy,
