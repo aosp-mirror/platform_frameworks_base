@@ -533,11 +533,11 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul tablet e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Consente all\'app di visualizzare la configurazione del Bluetooth del dispositivo Android TV, nonché di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul telefono e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento/accopp. dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento e accoppiamento di dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"trasmettere annunci a dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Trasmissione di annunci a dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di trasmettere annunci ai dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Possibilità di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
@@ -670,9 +670,9 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Consente a un\'applicazione di modificare le impostazioni di sincronizzazione per un account. Ad esempio, può servire per attivare la sincronizzazione dell\'applicazione Persone con un account."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"lettura statistiche di sincronizz."</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Consente a un\'applicazione di leggere le statistiche di sincronizzazione per un account, incluse la cronologia degli eventi di sincronizzazione e la quantità di dati sincronizzati."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"lettura dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Lettura dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Consente all\'app di leggere i contenuti del tuo archivio condiviso."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"invio/ricezione di chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>
