@@ -8206,12 +8206,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     } else {
-                        afm.enableFillRequestActivityStarted();
+                        afm.enableFillRequestActivityStarted(this);
                     }
                 } else if (!enter && !isFocused()) {
                     afm.notifyViewExited(this);
                 } else if (enter) {
-                    afm.enableFillRequestActivityStarted();
+                    afm.enableFillRequestActivityStarted(this);
                 }
             }
         }
