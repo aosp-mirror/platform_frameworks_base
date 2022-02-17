@@ -395,12 +395,14 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.os.NativeTombstoneManager;
+import com.android.server.pm.Computer;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1105,10 +1107,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        protected BroadcastFilter newResult(BroadcastFilter filter, int match, int userId) {
+        protected BroadcastFilter newResult(@NonNull Computer computer, BroadcastFilter filter,
+                int match, int userId, long customFlags) {
             if (userId == UserHandle.USER_ALL || filter.owningUserId == UserHandle.USER_ALL
                     || userId == filter.owningUserId) {
-                return super.newResult(filter, match, userId);
+                return super.newResult(computer, filter, match, userId, customFlags);
             }
             return null;
         }
@@ -13039,7 +13042,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (!bf.debugCheck()) {
                     Slog.w(TAG, "==> For Dynamic broadcast");
                 }
-                mReceiverResolver.addFilter(bf);
+                mReceiverResolver.addFilter(getPackageManagerInternal().snapshot(), bf);
             }
 
             // Enqueue broadcasts for all existing stickies that match
@@ -13861,6 +13864,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent, resolvedType, callingUid, users, broadcastAllowList);
         }
         if (intent.getComponent() == null) {
+            final PackageDataSnapshot snapshot = getPackageManagerInternal().snapshot();
             if (userId == UserHandle.USER_ALL && callingUid == SHELL_UID) {
                 // Query one target user at a time, excluding shell-restricted users
                 for (int i = 0; i < users.length; i++) {
@@ -13869,7 +13873,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         continue;
                     }
                     List<BroadcastFilter> registeredReceiversForUser =
-                            mReceiverResolver.queryIntent(intent,
+                            mReceiverResolver.queryIntent(snapshot, intent,
                                     resolvedType, false /*defaultOnly*/, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
@@ -13878,7 +13882,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } else {
-                registeredReceivers = mReceiverResolver.queryIntent(intent,
+                registeredReceivers = mReceiverResolver.queryIntent(snapshot, intent,
                         resolvedType, false /*defaultOnly*/, userId);
             }
         }

@@ -313,6 +313,8 @@ final class PackageHandler extends Handler {
             }
             case INSTANT_APP_RESOLUTION_PHASE_TWO: {
                 InstantAppResolver.doInstantAppResolutionPhaseTwo(mPm.mContext,
+                        mPm.snapshotComputer(),
+                        mPm.mUserManager,
                         mPm.mInstantAppResolverConnection,
                         (InstantAppRequest) msg.obj,
                         mPm.mInstantAppInstallerActivity,

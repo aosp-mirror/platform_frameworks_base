@@ -49,6 +49,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -1297,6 +1298,30 @@ public final class ComputerTracker implements Computer {
     public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
         try (ThreadComputer current = snapshot()) {
             return current.mComputer.getSharedUserPackages(sharedUserAppId);
+        }
+    }
+
+    @NonNull
+    @Override
+    public ComponentResolverApi getComponentResolver() {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getComponentResolver();
+        }
+    }
+
+    @Nullable
+    @Override
+    public PackageStateInternal getDisabledSystemPackage(@NonNull String packageName) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getDisabledSystemPackage(packageName);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ResolveInfo getInstantAppInstallerInfo() {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getInstantAppInstallerInfo();
         }
     }
 }
