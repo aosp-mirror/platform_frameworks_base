@@ -327,7 +327,9 @@ public class KeyguardIndicationController {
     private void updateOrganizedOwnedDevice() {
         // avoid calling this method since it has an IPC
         mOrganizationOwnedDevice = whitelistIpcs(this::isOrganizationOwnedDevice);
-        updatePersistentIndications(false, KeyguardUpdateMonitor.getCurrentUser());
+        if (!mDozing) {
+            updateDisclosure();
+        }
     }
 
     private void updateDisclosure() {
@@ -1185,7 +1187,7 @@ public class KeyguardIndicationController {
                 mTopIndicationView.clearMessages();
                 mRotateTextViewController.clearMessages();
             } else {
-                updatePersistentIndications(false, KeyguardUpdateMonitor.getCurrentUser());
+                updateIndication(false);
             }
         }
     };
