@@ -437,15 +437,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                             + " already exists. Overwriting");
                 }
             }
-            if (insetsSourceProvider == null
-                    || !(insetsSourceProvider instanceof RectInsetsSourceProvider)) {
-                insetsSourceProvider =
-                        new RectInsetsSourceProvider(
-                                new InsetsSource(insetsTypes[i]),
-                                mDisplayContent.getInsetsStateController(),
-                                mDisplayContent);
-                mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
-            }
+            insetsSourceProvider = new RectInsetsSourceProvider(new InsetsSource(insetsTypes[i]),
+                    mDisplayContent.getInsetsStateController(), mDisplayContent);
+            mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
             ((RectInsetsSourceProvider) insetsSourceProvider).setRect(providerFrame);
         }
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
