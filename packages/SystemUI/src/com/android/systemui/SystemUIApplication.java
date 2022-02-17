@@ -192,6 +192,7 @@ public class SystemUIApplication extends Application implements
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));
         sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
         startServicesIfNeeded(
                 sortedStartables, "StartServices", vendorComponent);
     }
