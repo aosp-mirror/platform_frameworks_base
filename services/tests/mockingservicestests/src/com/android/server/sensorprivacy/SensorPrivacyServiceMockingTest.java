@@ -18,8 +18,8 @@ package com.android.server.sensorprivacy;
 
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
-import static android.hardware.SensorPrivacyManager.ToggleTypes.HARDWARE;
-import static android.hardware.SensorPrivacyManager.ToggleTypes.SOFTWARE;
+import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_HARDWARE;
+import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -102,106 +102,106 @@ public class SensorPrivacyServiceMockingTest {
     public void testMigration1() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE1);
 
-        assertTrue(ps.getState(SOFTWARE, 0, MICROPHONE).isEnabled());
-        assertTrue(ps.getState(SOFTWARE, 0, CAMERA).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).isEnabled());
 
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     @Test
     public void testMigration2() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE2);
 
-        assertTrue(ps.getState(SOFTWARE, 0, MICROPHONE).isEnabled());
-        assertTrue(ps.getState(SOFTWARE, 0, CAMERA).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).isEnabled());
 
-        assertTrue(ps.getState(SOFTWARE, 10, MICROPHONE).isEnabled());
-        assertFalse(ps.getState(SOFTWARE, 10, CAMERA).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE).isEnabled());
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA).isEnabled());
 
-        assertNull(ps.getState(SOFTWARE, 11, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 11, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 11, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 11, CAMERA));
 
-        assertTrue(ps.getState(SOFTWARE, 12, MICROPHONE).isEnabled());
-        assertNull(ps.getState(SOFTWARE, 12, CAMERA));
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 12, MICROPHONE).isEnabled());
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 12, CAMERA));
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
-        assertNull(ps.getState(HARDWARE, 11, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 11, CAMERA));
-        assertNull(ps.getState(HARDWARE, 12, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 12, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 11, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 11, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 12, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 12, CAMERA));
     }
 
     @Test
     public void testMigration3() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE3);
 
-        assertFalse(ps.getState(SOFTWARE, 0, MICROPHONE).isEnabled());
-        assertFalse(ps.getState(SOFTWARE, 0, CAMERA).isEnabled());
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).isEnabled());
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).isEnabled());
 
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     @Test
     public void testMigration4() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE4);
 
-        assertTrue(ps.getState(SOFTWARE, 0, MICROPHONE).isEnabled());
-        assertFalse(ps.getState(SOFTWARE, 0, CAMERA).isEnabled());
+        assertTrue(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).isEnabled());
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).isEnabled());
 
-        assertFalse(ps.getState(SOFTWARE, 10, MICROPHONE).isEnabled());
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE).isEnabled());
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     @Test
     public void testMigration5() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE5);
 
-        assertNull(ps.getState(SOFTWARE, 0, MICROPHONE));
-        assertFalse(ps.getState(SOFTWARE, 0, CAMERA).isEnabled());
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE));
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).isEnabled());
 
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertFalse(ps.getState(SOFTWARE, 10, CAMERA).isEnabled());
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertFalse(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA).isEnabled());
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     @Test
     public void testMigration6() throws IOException {
         PersistedState ps = migrateFromFile(PERSISTENCE_FILE6);
 
-        assertNull(ps.getState(SOFTWARE, 0, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA));
 
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     private PersistedState migrateFromFile(String fileName) throws IOException {
@@ -233,32 +233,32 @@ public class SensorPrivacyServiceMockingTest {
     public void testPersistence1Version2() throws IOException {
         PersistedState ps = getPersistedStateV2(PERSISTENCE_FILE7);
 
-        assertEquals(1, ps.getState(SOFTWARE, 0, MICROPHONE).getState());
-        assertEquals(123L, ps.getState(SOFTWARE, 0, MICROPHONE).getLastChange());
-        assertEquals(2, ps.getState(SOFTWARE, 0, CAMERA).getState());
-        assertEquals(123L, ps.getState(SOFTWARE, 0, CAMERA).getLastChange());
+        assertEquals(1, ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).getState());
+        assertEquals(123L, ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE).getLastChange());
+        assertEquals(2, ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).getState());
+        assertEquals(123L, ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA).getLastChange());
 
-        assertNull(ps.getState(HARDWARE, 0, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 0, CAMERA));
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
     }
 
     @Test
     public void testPersistence2Version2() throws IOException {
         PersistedState ps = getPersistedStateV2(PERSISTENCE_FILE8);
 
-        assertEquals(1, ps.getState(HARDWARE, 0, MICROPHONE).getState());
-        assertEquals(1234L, ps.getState(HARDWARE, 0, MICROPHONE).getLastChange());
-        assertEquals(2, ps.getState(HARDWARE, 0, CAMERA).getState());
-        assertEquals(1234L, ps.getState(HARDWARE, 0, CAMERA).getLastChange());
+        assertEquals(1, ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE).getState());
+        assertEquals(1234L, ps.getState(TOGGLE_TYPE_HARDWARE, 0, MICROPHONE).getLastChange());
+        assertEquals(2, ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA).getState());
+        assertEquals(1234L, ps.getState(TOGGLE_TYPE_HARDWARE, 0, CAMERA).getLastChange());
 
-        assertNull(ps.getState(SOFTWARE, 0, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 0, CAMERA));
-        assertNull(ps.getState(SOFTWARE, 10, MICROPHONE));
-        assertNull(ps.getState(SOFTWARE, 10, CAMERA));
-        assertNull(ps.getState(HARDWARE, 10, MICROPHONE));
-        assertNull(ps.getState(HARDWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_SOFTWARE, 10, CAMERA));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, MICROPHONE));
+        assertNull(ps.getState(TOGGLE_TYPE_HARDWARE, 10, CAMERA));
     }
 
     private PersistedState getPersistedStateV2(String version2FilePath) throws IOException {
@@ -296,13 +296,15 @@ public class SensorPrivacyServiceMockingTest {
             SensorPrivacyStateController sensorPrivacyStateController =
                     getSensorPrivacyStateControllerImpl();
 
-            SensorState micState = sensorPrivacyStateController.getState(SOFTWARE, 0, MICROPHONE);
-            SensorState camState = sensorPrivacyStateController.getState(SOFTWARE, 0, CAMERA);
+            SensorState micState = sensorPrivacyStateController.getState(TOGGLE_TYPE_SOFTWARE, 0,
+                    MICROPHONE);
+            SensorState camState = sensorPrivacyStateController.getState(TOGGLE_TYPE_SOFTWARE, 0,
+                    CAMERA);
 
             assertEquals(SensorPrivacyManager.StateTypes.DISABLED, micState.getState());
             assertEquals(SensorPrivacyManager.StateTypes.DISABLED, camState.getState());
-            verify(persistedState, times(1)).getState(SOFTWARE, 0, MICROPHONE);
-            verify(persistedState, times(1)).getState(SOFTWARE, 0, CAMERA);
+            verify(persistedState, times(1)).getState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE);
+            verify(persistedState, times(1)).getState(TOGGLE_TYPE_SOFTWARE, 0, CAMERA);
         } finally {
             mockitoSession.finishMocking();
         }
@@ -319,14 +321,16 @@ public class SensorPrivacyServiceMockingTest {
             PersistedState persistedState = mock(PersistedState.class);
             SensorState sensorState = mock(SensorState.class);
             doReturn(persistedState).when(() -> PersistedState.fromFile(any()));
-            doReturn(sensorState).when(persistedState).getState(SOFTWARE, 0, MICROPHONE);
+            doReturn(sensorState).when(persistedState).getState(TOGGLE_TYPE_SOFTWARE, 0,
+                    MICROPHONE);
             doReturn(SensorPrivacyManager.StateTypes.ENABLED).when(sensorState).getState();
             doReturn(0L).when(sensorState).getLastChange();
 
             SensorPrivacyStateController sensorPrivacyStateController =
                     getSensorPrivacyStateControllerImpl();
 
-            SensorState micState = sensorPrivacyStateController.getState(SOFTWARE, 0, MICROPHONE);
+            SensorState micState = sensorPrivacyStateController.getState(TOGGLE_TYPE_SOFTWARE, 0,
+                    MICROPHONE);
 
             assertEquals(SensorPrivacyManager.StateTypes.ENABLED, micState.getState());
             assertEquals(0L, micState.getLastChange());
@@ -349,13 +353,13 @@ public class SensorPrivacyServiceMockingTest {
             SensorPrivacyStateController sensorPrivacyStateController =
                     getSensorPrivacyStateControllerImpl();
 
-            sensorPrivacyStateController.setState(SOFTWARE, 0, MICROPHONE, true,
+            sensorPrivacyStateController.setState(TOGGLE_TYPE_SOFTWARE, 0, MICROPHONE, true,
                     mock(Handler.class), changed -> {});
 
             ArgumentCaptor<SensorState> captor = ArgumentCaptor.forClass(SensorState.class);
 
-            verify(persistedState, times(1)).setState(eq(SOFTWARE), eq(0), eq(MICROPHONE),
-                    captor.capture());
+            verify(persistedState, times(1)).setState(eq(TOGGLE_TYPE_SOFTWARE), eq(0),
+                    eq(MICROPHONE), captor.capture());
             assertEquals(SensorPrivacyManager.StateTypes.ENABLED, captor.getValue().getState());
         } finally {
             mockitoSession.finishMocking();
