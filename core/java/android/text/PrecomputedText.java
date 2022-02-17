@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.MeasuredText;
@@ -694,6 +695,38 @@ public class PrecomputedText implements Spannable {
                 + "request: (" + start + ", " + end + ")");
         }
         getMeasuredParagraph(paraIndex).getBounds(start - paraStart, end - paraStart, bounds);
+    }
+
+    /**
+     * Retrieves the text font metrics for the given range.
+     * Both {@code start} and {@code end} offset need to be in the same paragraph, otherwise
+     * IllegalArgumentException will be thrown.
+     *
+     * @param start the inclusive start offset in the text
+     * @param end the exclusive end offset in the text
+     * @param outMetrics the output font metrics
+     * @throws IllegalArgumentException if start and end offset are in the different paragraph.
+     */
+    public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Paint.FontMetricsInt outMetrics) {
+        Preconditions.checkArgument(0 <= start && start <= mText.length(), "invalid start offset");
+        Preconditions.checkArgument(0 <= end && end <= mText.length(), "invalid end offset");
+        Preconditions.checkArgument(start <= end, "start offset can not be larger than end offset");
+        Objects.requireNonNull(outMetrics);
+        if (start == end) {
+            mParams.getTextPaint().getFontMetricsInt(outMetrics);
+            return;
+        }
+        final int paraIndex = findParaIndex(start);
+        final int paraStart = getParagraphStart(paraIndex);
+        final int paraEnd = getParagraphEnd(paraIndex);
+        if (start < paraStart || paraEnd < end) {
+            throw new IllegalArgumentException("Cannot measured across the paragraph:"
+                    + "para: (" + paraStart + ", " + paraEnd + "), "
+                    + "request: (" + start + ", " + end + ")");
+        }
+        getMeasuredParagraph(paraIndex).getFontMetricsInt(start - paraStart,
+                end - paraStart, outMetrics);
     }
 
     /**

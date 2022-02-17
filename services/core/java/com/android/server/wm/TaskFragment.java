@@ -31,6 +31,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -82,6 +83,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -530,6 +532,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * certificate.</li>
      */
     private boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
+        if (UserHandle.getAppId(mTaskFragmentOrganizerUid) == SYSTEM_UID) {
+            // The system is trusted to embed other apps securely and for all users.
+            return true;
+        }
+
         if (mTaskFragmentOrganizerUid == a.getUid()) {
             // Activities from the same UID can be embedded freely by the host.
             return true;
@@ -1701,7 +1708,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (isAddingActivity && task != null) {
 
             // TODO(b/207481538): temporary per-activity screenshoting
-            if (r != null && BackNavigationController.isEnabled()) {
+            if (r != null && BackNavigationController.isScreenshotEnabled()) {
                 ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
                         r.mActivityComponent.flattenToString());
                 Rect outBounds = r.getBounds();
@@ -2304,7 +2311,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
         super.removeChild(child);
-        if (BackNavigationController.isEnabled()) {
+        if (BackNavigationController.isScreenshotEnabled()) {
             //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
             // implemented
             ActivityRecord r = child.asActivityRecord();

@@ -1656,8 +1656,8 @@ package android.app.cloudsearch {
     method @NonNull public android.os.Bundle getSearchConstraints();
     method @NonNull public String getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
-    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "android.app.cloudsearch.IS_PRESUBMIT_SUGGESTION";
+    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "android.app.cloudsearch.SEARCH_PROVIDER_FILTER";
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchRequest> CREATOR;
   }
 
@@ -1699,23 +1699,23 @@ package android.app.cloudsearch {
     method @NonNull public String getTitle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResult> CREATOR;
-    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
-    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "ACTION_BUTTON_TEXT";
-    field public static final String EXTRAINFO_APP_BADGES = "APP_BADGES";
-    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "APP_CONTAINS_ADS_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "APP_CONTAINS_IAP_DISCLAIMER";
-    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
-    field public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
-    field public static final String EXTRAINFO_APP_IARC = "APP_IARC";
-    field public static final String EXTRAINFO_APP_ICON = "APP_ICON";
-    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "APP_REVIEW_COUNT";
-    field public static final String EXTRAINFO_APP_SIZE_BYTES = "APP_SIZE_BYTES";
-    field public static final String EXTRAINFO_APP_STAR_RATING = "APP_STAR_RATING";
-    field public static final String EXTRAINFO_LONG_DESCRIPTION = "LONG_DESCRIPTION";
-    field public static final String EXTRAINFO_SCREENSHOTS = "SCREENSHOTS";
-    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "SHORT_DESCRIPTION";
-    field public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
-    field public static final String EXTRAINFO_WEB_URL = "WEB_URL";
+    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_IMAGE";
+    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "android.app.cloudsearch.ACTION_BUTTON_TEXT";
+    field public static final String EXTRAINFO_APP_BADGES = "android.app.cloudsearch.APP_BADGES";
+    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_ADS_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "android.app.cloudsearch.APP_CONTAINS_IAP_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "android.app.cloudsearch.APP_DEVELOPER_NAME";
+    field public static final String EXTRAINFO_APP_DOMAIN_URL = "android.app.cloudsearch.APP_DOMAIN_URL";
+    field public static final String EXTRAINFO_APP_IARC = "android.app.cloudsearch.APP_IARC";
+    field public static final String EXTRAINFO_APP_ICON = "android.app.cloudsearch.APP_ICON";
+    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "android.app.cloudsearch.APP_REVIEW_COUNT";
+    field public static final String EXTRAINFO_APP_SIZE_BYTES = "android.app.cloudsearch.APP_SIZE_BYTES";
+    field public static final String EXTRAINFO_APP_STAR_RATING = "android.app.cloudsearch.APP_STAR_RATING";
+    field public static final String EXTRAINFO_LONG_DESCRIPTION = "android.app.cloudsearch.LONG_DESCRIPTION";
+    field public static final String EXTRAINFO_SCREENSHOTS = "android.app.cloudsearch.SCREENSHOTS";
+    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "android.app.cloudsearch.SHORT_DESCRIPTION";
+    field public static final String EXTRAINFO_WEB_ICON = "android.app.cloudsearch.WEB_ICON";
+    field public static final String EXTRAINFO_WEB_URL = "android.app.cloudsearch.WEB_URL";
   }
 
   public static final class SearchResult.Builder {
@@ -2507,9 +2507,10 @@ package android.app.time {
 package android.app.usage {
 
   public final class BroadcastResponseStats implements android.os.Parcelable {
-    ctor public BroadcastResponseStats(@NonNull String);
+    ctor public BroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
     method public int describeContents();
     method @IntRange(from=0) public int getBroadcastsDispatchedCount();
+    method @IntRange(from=1) public long getId();
     method @IntRange(from=0) public int getNotificationsCancelledCount();
     method @IntRange(from=0) public int getNotificationsPostedCount();
     method @IntRange(from=0) public int getNotificationsUpdatedCount();
@@ -2566,13 +2567,13 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void clearBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long getLastTimeAnyComponentUsed(@NonNull String);
     method public int getUsageSource();
     method @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES) public void onCarrierPrivilegedAppsChanged();
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public android.app.usage.BroadcastResponseStats queryBroadcastResponseStats(@NonNull String, @IntRange(from=1) long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.List<android.app.usage.BroadcastResponseStats> queryBroadcastResponseStats(@Nullable String, @IntRange(from=0) long);
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
@@ -6075,7 +6076,7 @@ package android.media {
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
-    method public static boolean isUltrasoundSupported();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_ULTRASOUND) public boolean isUltrasoundSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void muteAwaitConnection(@NonNull int[], @NonNull android.media.AudioDeviceAttributes, long, @NonNull java.util.concurrent.TimeUnit) throws java.lang.IllegalStateException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void registerMuteAwaitConnectionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.MuteAwaitConnectionCallback);
@@ -15621,7 +15622,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public android.graphics.Region getCurrentImeTouchRegion();
-    method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull android.window.TaskFpsCallback);
+    method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback);
     method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
   }
 
@@ -16213,12 +16214,9 @@ package android.webkit {
 
 package android.window {
 
-  public final class TaskFpsCallback {
-    ctor public TaskFpsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback.OnFpsCallbackListener);
-  }
-
-  public static interface TaskFpsCallback.OnFpsCallbackListener {
-    method public void onFpsReported(float);
+  public abstract class TaskFpsCallback {
+    ctor public TaskFpsCallback();
+    method public abstract void onFpsReported(float);
   }
 
 }

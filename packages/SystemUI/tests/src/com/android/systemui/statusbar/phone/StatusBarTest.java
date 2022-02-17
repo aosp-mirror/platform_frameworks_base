@@ -116,6 +116,7 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.charging.WiredChargingRippleController;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
@@ -288,6 +289,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private DreamOverlayStateController mDreamOverlayStateController;
+    @Mock private WiredChargingRippleController mWiredChargingRippleController;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -479,7 +481,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotifPipelineFlags,
                 mJankMonitor,
                 mDeviceStateManager,
-                mDreamOverlayStateController);
+                mDreamOverlayStateController,
+                mWiredChargingRippleController);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),

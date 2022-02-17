@@ -631,6 +631,7 @@ package android {
     field public static final int elevation = 16843840; // 0x1010440
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
+    field public static final int enableOnBackInvokedCallback;
     field public static final int enableVrMode = 16844069; // 0x1010525
     field public static final int enabled = 16842766; // 0x101000e
     field public static final int end = 16843996; // 0x10104dc
@@ -1452,6 +1453,7 @@ package android {
     field public static final int supportsAssist = 16844016; // 0x10104f0
     field public static final int supportsBatteryGameMode;
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
+    field public static final int supportsInlineSuggestionsWithTouchExploration;
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
     field public static final int supportsLocalInteraction = 16844047; // 0x101050f
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
@@ -4274,6 +4276,7 @@ package android.app {
     method public void setLocusContext(@Nullable android.content.LocusId, @Nullable android.os.Bundle);
     method public final void setMediaController(android.media.session.MediaController);
     method public void setPictureInPictureParams(@NonNull android.app.PictureInPictureParams);
+    method public void setPreferDockBigOverlays(boolean);
     method @Deprecated public final void setProgress(int);
     method @Deprecated public final void setProgressBarIndeterminate(boolean);
     method @Deprecated public final void setProgressBarIndeterminateVisibility(boolean);
@@ -4547,6 +4550,7 @@ package android.app {
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int);
+    method @NonNull public static android.app.ActivityOptions makeLaunchIntoPip(@NonNull android.app.PictureInPictureParams);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, String);
     method @java.lang.SafeVarargs public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View,java.lang.String>...);
@@ -6632,13 +6636,17 @@ package android.app {
 
   public static class PictureInPictureParams.Builder {
     ctor public PictureInPictureParams.Builder();
+    ctor public PictureInPictureParams.Builder(@NonNull android.app.PictureInPictureParams);
     method public android.app.PictureInPictureParams build();
     method public android.app.PictureInPictureParams.Builder setActions(java.util.List<android.app.RemoteAction>);
     method public android.app.PictureInPictureParams.Builder setAspectRatio(android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setAutoEnterEnabled(boolean);
+    method @NonNull public android.app.PictureInPictureParams.Builder setCloseAction(@Nullable android.app.RemoteAction);
     method @NonNull public android.app.PictureInPictureParams.Builder setExpandedAspectRatio(@Nullable android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);
+    method @NonNull public android.app.PictureInPictureParams.Builder setSubtitle(@Nullable CharSequence);
+    method @NonNull public android.app.PictureInPictureParams.Builder setTitle(@Nullable CharSequence);
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
@@ -16445,6 +16453,7 @@ package android.graphics.text {
   public class MeasuredText {
     method public void getBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Rect);
     method @FloatRange(from=0.0f) @Px public float getCharWidthAt(@IntRange(from=0) int);
+    method public void getFontMetricsInt(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Paint.FontMetricsInt);
     method @FloatRange(from=0.0) @Px public float getWidth(@IntRange(from=0) int, @IntRange(from=0) int);
   }
 
@@ -45007,6 +45016,7 @@ package android.text {
     method public char charAt(int);
     method public static android.text.PrecomputedText create(@NonNull CharSequence, @NonNull android.text.PrecomputedText.Params);
     method public void getBounds(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Rect);
+    method public void getFontMetricsInt(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull android.graphics.Paint.FontMetricsInt);
     method @IntRange(from=0) public int getParagraphCount();
     method @IntRange(from=0) public int getParagraphEnd(@IntRange(from=0) int);
     method @IntRange(from=0) public int getParagraphStart(@IntRange(from=0) int);
@@ -47676,15 +47686,11 @@ package android.view {
 
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
-    method public void postExtendedFrameCallback(@NonNull android.view.Choreographer.ExtendedFrameCallback);
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
     method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
-    method public void removeExtendedFrameCallback(@Nullable android.view.Choreographer.ExtendedFrameCallback);
+    method public void postVsyncCallback(@NonNull android.view.Choreographer.VsyncCallback);
     method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
-  }
-
-  public static interface Choreographer.ExtendedFrameCallback {
-    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
+    method public void removeVsyncCallback(@Nullable android.view.Choreographer.VsyncCallback);
   }
 
   public static interface Choreographer.FrameCallback {
@@ -47699,8 +47705,12 @@ package android.view {
 
   public static class Choreographer.FrameTimeline {
     method public long getDeadlineNanos();
-    method public long getExpectedPresentTimeNanos();
+    method public long getExpectedPresentationTimeNanos();
     method public long getVsyncId();
+  }
+
+  public static interface Choreographer.VsyncCallback {
+    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
   }
 
   public interface CollapsibleActionView {
@@ -49254,6 +49264,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction reparent(@NonNull android.view.SurfaceControl, @Nullable android.view.SurfaceControl);
     method @NonNull public android.view.SurfaceControl.Transaction setAlpha(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0, to=1.0) float);
     method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer);
+    method @NonNull public android.view.SurfaceControl.Transaction setBuffer(@NonNull android.view.SurfaceControl, @Nullable android.hardware.HardwareBuffer, @Nullable android.hardware.SyncFence);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferSize(@NonNull android.view.SurfaceControl, @IntRange(from=0) int, @IntRange(from=0) int);
     method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);

@@ -63,6 +63,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
                 commandRegistry, batteryController, configurationController,
                 featureFlags, context, windowManager, systemClock, uiEventLogger)
         controller.rippleView = rippleView // Replace the real ripple view with a mock instance
+        controller.registerCallbacks()
     }
 
     @Test

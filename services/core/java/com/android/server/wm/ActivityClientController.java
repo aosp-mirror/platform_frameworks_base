@@ -756,6 +756,19 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    @Override
+    public void setPreferDockBigOverlays(IBinder token, boolean preferDockBigOverlays) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                r.setPreferDockBigOverlays(preferDockBigOverlays);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     /**
      * Splash screen view is attached to activity.
      */

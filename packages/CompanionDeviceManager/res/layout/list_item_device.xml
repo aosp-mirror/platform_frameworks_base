@@ -19,7 +19,8 @@
               android:layout_height="wrap_content"
               android:orientation="horizontal"
               android:gravity="center_vertical"
-              android:padding="12dp">
+              android:padding="12dp"
+              android:background="@color/selector">
 
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 

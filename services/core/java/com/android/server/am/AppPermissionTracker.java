@@ -64,6 +64,8 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
     @GuardedBy("mLock")
     private SparseArray<ArraySet<String>> mUidGrantedPermissionsInMonitor = new SparseArray<>();
 
+    private volatile boolean mLockedBootCompleted = false;
+
     AppPermissionTracker(Context context, AppRestrictionController controller) {
         this(context, controller, null, null);
     }
@@ -85,20 +87,20 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
         final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
         final PermissionManagerServiceInternal pm = mInjector.getPermissionManagerServiceInternal();
         final String[] permissions = mInjector.getPolicy().getBgPermissionsInMonitor();
+        final SparseArray<ArraySet<String>> uidPerms = mUidGrantedPermissionsInMonitor;
         for (int userId : allUsers) {
             final List<ApplicationInfo> apps = pmi.getInstalledApplications(0, userId, SYSTEM_UID);
             if (apps == null) {
                 continue;
             }
-            synchronized (mLock) {
-                final SparseArray<ArraySet<String>> uidPerms = mUidGrantedPermissionsInMonitor;
-                final long now = SystemClock.elapsedRealtime();
-                for (int i = 0, size = apps.size(); i < size; i++) {
-                    final ApplicationInfo ai = apps.get(i);
-                    for (String permission : permissions) {
-                        if (pm.checkUidPermission(ai.uid, permission) != PERMISSION_GRANTED) {
-                            continue;
-                        }
+            final long now = SystemClock.elapsedRealtime();
+            for (int i = 0, size = apps.size(); i < size; i++) {
+                final ApplicationInfo ai = apps.get(i);
+                for (String permission : permissions) {
+                    if (pm.checkUidPermission(ai.uid, permission) != PERMISSION_GRANTED) {
+                        continue;
+                    }
+                    synchronized (mLock) {
                         ArraySet<String> grantedPermissions = uidPerms.get(ai.uid);
                         if (grantedPermissions == null) {
                             grantedPermissions = new ArraySet<String>();
@@ -132,25 +134,30 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
     private void handlePermissionsChanged(int uid) {
         final String[] permissions = mInjector.getPolicy().getBgPermissionsInMonitor();
         if (permissions != null && permissions.length > 0) {
+            final PermissionManagerServiceInternal pm =
+                    mInjector.getPermissionManagerServiceInternal();
+            final boolean[] states = new boolean[permissions.length];
+            for (int i = 0; i < permissions.length; i++) {
+                states[i] = pm.checkUidPermission(uid, permissions[i]) == PERMISSION_GRANTED;
+                if (DEBUG_PERMISSION_TRACKER) {
+                    Slog.i(TAG, UserHandle.formatUid(uid) + " " + permissions[i] + "=" + states[i]);
+                }
+            }
             synchronized (mLock) {
-                handlePermissionsChangedLocked(uid);
+                handlePermissionsChangedLocked(uid, permissions, states);
             }
         }
     }
 
     @GuardedBy("mLock")
-    private void handlePermissionsChangedLocked(int uid) {
-        final PermissionManagerServiceInternal pm = mInjector.getPermissionManagerServiceInternal();
+    private void handlePermissionsChangedLocked(int uid, String[] permissions, boolean[] states) {
         final int index = mUidGrantedPermissionsInMonitor.indexOfKey(uid);
         ArraySet<String> grantedPermissions = index >= 0
                 ? mUidGrantedPermissionsInMonitor.valueAt(index) : null;
-        final String[] permissions = mInjector.getPolicy().getBgPermissionsInMonitor();
         final long now = SystemClock.elapsedRealtime();
-        for (String permission: permissions) {
-            boolean granted = pm.checkUidPermission(uid, permission) == PERMISSION_GRANTED;
-            if (DEBUG_PERMISSION_TRACKER) {
-                Slog.i(TAG, UserHandle.formatUid(uid) + " " + permission + "=" + granted);
-            }
+        for (int i = 0; i < permissions.length; i++) {
+            final String permission = permissions[i];
+            final boolean granted = states[i];
             boolean changed = false;
             if (granted) {
                 if (grantedPermissions == null) {
@@ -200,6 +207,10 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
     }
 
     private void onPermissionTrackerEnabled(boolean enabled) {
+        if (!mLockedBootCompleted) {
+            // Not ready, bail out.
+            return;
+        }
         final PermissionManager pm = mInjector.getPermissionManager();
         if (enabled) {
             pm.addOnPermissionsChangeListener(this);
@@ -208,6 +219,12 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
             pm.removeOnPermissionsChangeListener(this);
             mHandler.obtainMessage(MyHandler.MSG_PERMISSIONS_DESTROY).sendToTarget();
         }
+    }
+
+    @Override
+    void onLockedBootCompleted() {
+        mLockedBootCompleted = true;
+        onPermissionTrackerEnabled(mInjector.getPolicy().isEnabled());
     }
 
     @Override

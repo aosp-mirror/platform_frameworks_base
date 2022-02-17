@@ -2653,6 +2653,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "664667685": {
+      "message": "Activity %s: enableOnBackInvokedCallback=false. Returning null BackNavigationInfo.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "665256544": {
       "message": "All windows drawn!",
       "level": "DEBUG",

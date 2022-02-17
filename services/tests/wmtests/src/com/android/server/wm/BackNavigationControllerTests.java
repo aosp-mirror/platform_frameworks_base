@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.window.BackNavigationInfo.typeToString;
 
@@ -117,6 +118,9 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private Task createTopTaskWithActivity() {
         Task task = createTask(mDefaultDisplay);
         ActivityRecord record = createActivityRecord(task);
+        // enable OnBackInvokedCallbacks
+        record.info.applicationInfo.privateFlagsExt |=
+                PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
         createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
         when(record.mSurfaceControl.isValid()).thenReturn(true);
         mAtm.setFocusedTask(task.mTaskId, record);

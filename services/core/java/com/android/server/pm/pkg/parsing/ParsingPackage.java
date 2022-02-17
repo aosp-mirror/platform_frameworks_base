@@ -387,6 +387,8 @@ public interface ParsingPackage extends ParsingPackageRead {
      */
     ParsingPackage setKnownActivityEmbeddingCerts(Set<String> knownActivityEmbeddingCerts);
 
+    ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
     @CallSuper

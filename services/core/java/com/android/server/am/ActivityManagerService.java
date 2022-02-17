@@ -415,6 +415,7 @@ import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
 
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
@@ -5615,21 +5616,42 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (mProcLock) {
             synchronized (mPidsSelfLocked) {
+                int newestTimeIndex = -1;
+                long newestTime = Long.MIN_VALUE;
                 for (int i = 0; i < pids.length; i++) {
                     ProcessRecord pr = mPidsSelfLocked.get(pids[i]);
                     if (pr != null) {
-                        final boolean isPendingTop =
-                                mPendingStartActivityUids.isPendingTopPid(pr.uid, pids[i]);
-                        states[i] = isPendingTop ? PROCESS_STATE_TOP : pr.mState.getCurProcState();
-                        if (scores != null) {
-                            scores[i] = isPendingTop
-                                    ? (ProcessList.FOREGROUND_APP_ADJ - 1) : pr.mState.getCurAdj();
+                        final long pendingTopTime =
+                                mPendingStartActivityUids.getPendingTopPidTime(pr.uid, pids[i]);
+                        if (pendingTopTime != PendingStartActivityUids.INVALID_TIME) {
+                            // The uid in mPendingStartActivityUids gets the TOP process state.
+                            states[i] = PROCESS_STATE_TOP;
+                            if (scores != null) {
+                                // The uid in mPendingStartActivityUids gets a better score.
+                                scores[i] = ProcessList.FOREGROUND_APP_ADJ - 1;
+                            }
+                            if (pendingTopTime > newestTime) {
+                                newestTimeIndex = i;
+                                newestTime = pendingTopTime;
+                            }
+                        } else {
+                            states[i] = pr.mState.getCurProcState();
+                            if (scores != null) {
+                                scores[i] = pr.mState.getCurAdj();
+                            }
                         }
                     } else {
                         states[i] = PROCESS_STATE_NONEXISTENT;
                         if (scores != null) {
                             scores[i] = ProcessList.INVALID_ADJ;
                         }
+                    }
+                }
+                // The uid with the newest timestamp in mPendingStartActivityUids gets the best
+                // score.
+                if (newestTimeIndex != -1) {
+                    if (scores != null) {
+                        scores[newestTimeIndex] = ProcessList.FOREGROUND_APP_ADJ - 2;
                     }
                 }
             }
@@ -6659,6 +6681,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 reportCurWakefulnessUsageEvent();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
                 mOomAdjProfiler.onWakefulnessChanged(wakefulness);
+                mOomAdjuster.onWakefulnessChanged(wakefulness);
             }
             updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
         }
@@ -9154,6 +9177,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Wrapper function to print out debug data filtered by specified arguments.
     */
+    @NeverCompile // Avoid size overhead of debugging code.
     private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
@@ -9688,6 +9712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return needSep;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @GuardedBy({"this", "mProcLock"})
     void dumpOtherProcessesInfoLSP(FileDescriptor fd, PrintWriter pw,
             boolean dumpAll, String dumpPackage, int dumpAppId, int numPers, boolean needSep) {
@@ -10809,6 +10834,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpProto;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
             String[] args, boolean brief, PrintWriter categoryPw, boolean asProto) {
         MemoryUsageDumpOptions opts = new MemoryUsageDumpOptions();
@@ -10891,6 +10917,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
             MemoryUsageDumpOptions opts, final String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
@@ -11540,6 +11567,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private final void dumpApplicationMemoryUsage(FileDescriptor fd,
             MemoryUsageDumpOptions opts, final String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs) {

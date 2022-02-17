@@ -22,6 +22,7 @@ import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -39,6 +40,8 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 class BroadcastResponseStatsTracker {
     private static final String TAG = "ResponseStatsTracker";
@@ -172,28 +175,27 @@ class BroadcastResponseStatsTracker {
         }
     }
 
-    @NonNull BroadcastResponseStats queryBroadcastResponseStats(int callingUid,
-            @NonNull String packageName, long id, @UserIdInt int userId) {
-        final BroadcastResponseStats aggregatedResponseStats =
-                new BroadcastResponseStats(packageName);
+    @NonNull List<BroadcastResponseStats> queryBroadcastResponseStats(int callingUid,
+            @Nullable String packageName, @IntRange(from = 0) long id, @UserIdInt int userId) {
+        final List<BroadcastResponseStats> broadcastResponseStatsList = new ArrayList<>();
         synchronized (mLock) {
             final SparseArray<UserBroadcastResponseStats> responseStatsForCaller =
                     mUserResponseStats.get(callingUid);
             if (responseStatsForCaller == null) {
-                return aggregatedResponseStats;
+                return broadcastResponseStatsList;
             }
             final UserBroadcastResponseStats responseStatsForUser =
                     responseStatsForCaller.get(userId);
             if (responseStatsForUser == null) {
-                return aggregatedResponseStats;
+                return broadcastResponseStatsList;
             }
-            responseStatsForUser.aggregateBroadcastResponseStats(aggregatedResponseStats,
-                    packageName, id);
+            responseStatsForUser.populateAllBroadcastResponseStats(
+                    broadcastResponseStatsList, packageName, id);
         }
-        return aggregatedResponseStats;
+        return broadcastResponseStatsList;
     }
 
-    void clearBroadcastResponseStats(int callingUid, @NonNull String packageName, long id,
+    void clearBroadcastResponseStats(int callingUid, @Nullable String packageName, long id,
             @UserIdInt int userId) {
         synchronized (mLock) {
             final SparseArray<UserBroadcastResponseStats> responseStatsForCaller =
@@ -207,6 +209,16 @@ class BroadcastResponseStatsTracker {
                 return;
             }
             responseStatsForUser.clearBroadcastResponseStats(packageName, id);
+        }
+    }
+
+    void clearBroadcastEvents(int callingUid, @UserIdInt int userId) {
+        synchronized (mLock) {
+            final UserBroadcastEvents userBroadcastEvents = mUserBroadcastEvents.get(userId);
+            if (userBroadcastEvents == null) {
+                return;
+            }
+            userBroadcastEvents.clear(callingUid);
         }
     }
 

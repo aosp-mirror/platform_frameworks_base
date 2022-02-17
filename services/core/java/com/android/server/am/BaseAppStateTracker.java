@@ -204,6 +204,12 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     }
 
     /**
+     * Called when the system sends LOCKED_BOOT_COMPLETED.
+     */
+    void onLockedBootCompleted() {
+    }
+
+    /**
      * Called when a device config property in the activity manager namespace
      * has changed.
      */

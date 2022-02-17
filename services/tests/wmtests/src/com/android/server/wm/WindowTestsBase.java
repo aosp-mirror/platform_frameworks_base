@@ -941,6 +941,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
+        private ActivityOptions mLaunchIntoPipOpts;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1076,6 +1077,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setLaunchIntoPipActivityOptions(ActivityOptions opts) {
+            mLaunchIntoPipOpts = opts;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -1132,7 +1138,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             ActivityOptions options = null;
-            if (mLaunchTaskBehind) {
+            if (mLaunchIntoPipOpts != null) {
+                options = mLaunchIntoPipOpts;
+            } else if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
             final ActivityRecord activity = new ActivityRecord.Builder(mService)

@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package android.window;
+package android.app.usage;
 
-/**
- * @hide
- */
-oneway interface IOnFpsCallbackListener {
-
-    /**
-     * Reports the fps from the registered task
-     * @param fps The frame rate per second of the task that has the registered task id
-     *            and its children.
-     */
-    void onFpsReported(in float fps);
-}
+/** {@hide} */
+parcelable BroadcastResponseStatsList;

@@ -48,6 +48,7 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable {
@@ -78,7 +79,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    protected QSTileHost mHost;
+    @Nullable protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
 
@@ -92,14 +93,18 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     @Nullable
     private ViewGroup mHeaderContainer;
+    @Nullable
     private PageIndicator mFooterPageIndicator;
     private int mContentMarginStart;
     private int mContentMarginEnd;
     private boolean mUsingHorizontalLayout;
 
+    @Nullable
     private LinearLayout mHorizontalLinearLayout;
+    @Nullable
     protected LinearLayout mHorizontalContentContainer;
 
+    @Nullable
     protected QSTileLayout mTileLayout;
     private float mSquishinessFraction = 1f;
     private final ArrayMap<View, Integer> mChildrenLayoutTop = new ArrayMap<>();
@@ -284,7 +289,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             if (move) {
-                int top = mChildrenLayoutTop.get(child);
+                int top = Objects.requireNonNull(mChildrenLayoutTop.get(child));
                 child.setLeftTopRightBottom(child.getLeft(), top + tileHeightOffset,
                         child.getRight(), top + tileHeightOffset + child.getHeight());
             }
@@ -337,6 +342,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
+    @Nullable
     public QSTileHost getHost() {
         return mHost;
     }
@@ -501,7 +507,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mListening = listening;
     }
 
-
     protected void drawTile(QSPanelControllerBase.TileRecord r, QSTile.State state) {
         r.tileView.onStateChanged(state);
     }
@@ -548,6 +553,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         return getMeasuredHeight();
     }
 
+    @Nullable
     QSTileLayout getTileLayout() {
         return mTileLayout;
     }
