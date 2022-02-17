@@ -17,6 +17,7 @@ package com.android.systemui.qs.tileimpl;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -49,6 +50,7 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
+    @Nullable
     private QSTile.Icon mLastIcon;
 
     public QSIconViewImpl(Context context) {
@@ -116,6 +118,9 @@ public class QSIconViewImpl extends QSIconView {
                     : icon.getInvisibleDrawable(mContext) : null;
             int padding = icon != null ? icon.getPadding() : 0;
             if (d != null) {
+                if (d.getConstantState() != null) {
+                    d = d.getConstantState().newDrawable();
+                }
                 d.setAutoMirrored(false);
                 d.setLayoutDirection(getLayoutDirection());
             }
@@ -250,7 +255,7 @@ public class QSIconViewImpl extends QSIconView {
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
             case Tile.STATE_ACTIVE:
                 return Utils.getColorAttrDefaultColor(context,
-                        android.R.attr.textColorPrimaryInverse);
+                        com.android.internal.R.attr.textColorOnAccent);
             default:
                 Log.e("QSIconView", "Invalid state " + state);
                 return 0;

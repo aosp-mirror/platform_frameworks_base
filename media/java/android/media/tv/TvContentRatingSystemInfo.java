@@ -94,8 +94,8 @@ public final class TvContentRatingSystemInfo implements Parcelable {
     };
 
     private TvContentRatingSystemInfo(Parcel in) {
-        mXmlUri = in.readParcelable(null);
-        mApplicationInfo = in.readParcelable(null);
+        mXmlUri = in.readParcelable(null, android.net.Uri.class);
+        mApplicationInfo = in.readParcelable(null, android.content.pm.ApplicationInfo.class);
     }
 
     @Override

@@ -29,7 +29,7 @@
         <option name="push-file" key="trace_config_multi_user.textproto" value="/data/misc/perfetto-traces/trace_config.textproto" />
         <!--Install the content provider automatically when we push some file in sdcard folder.-->
         <!--Needed to avoid the installation during the test suite.-->
-        <option name="push-file" key="trace_config_detailed.textproto" value="/sdcard/sample.textproto" />
+        <option name="push-file" key="trace_config_multi_user.textproto" value="/sdcard/sample.textproto" />
     </target_preparer>
 
     <!-- Needed for pulling the collected trace config on to the host -->
@@ -43,6 +43,9 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.perftests.multiuser" />
         <option name="hidden-api-checks" value="false"/>
+
+        <!-- Timeout individual tests only after 25m (rather than 10m default) for slow devices. -->
+        <option name="test-timeout" value="1500000" />
 
         <!-- Listener related args for collecting the traces and waiting for the device to stabilize. -->
         <option name="device-listeners" value="android.device.collectors.ProcLoadListener,android.device.collectors.PerfettoListener" />

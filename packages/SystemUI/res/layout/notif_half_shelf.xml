@@ -78,12 +78,6 @@
                     android:layout_gravity="center_vertical"
                     android:padding="8dp" />
             </com.android.systemui.statusbar.notification.row.AppControlView>
-            <!-- divider view -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@*android:color/background_device_default_light"
-            />
 
             <!-- ChannelRows get added dynamically -->
 

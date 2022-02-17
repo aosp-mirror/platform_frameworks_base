@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.annotation.MainThread
 import android.view.View
 import com.android.systemui.util.kotlin.transform
+import com.android.systemui.util.traceSection
 
 /**
  * Given a "spec" that describes a "tree" of views, adds and removes views from the
@@ -47,7 +48,7 @@ class ShadeViewDiffer(
      * provided [spec]. The root node of the spec must match the root controller passed to the
      * differ's constructor.
      */
-    fun applySpec(spec: NodeSpec) {
+    fun applySpec(spec: NodeSpec) = traceSection("ShadeViewDiffer.applySpec") {
         val specMap = treeToMap(spec)
 
         if (spec.controller != rootNode.controller) {
@@ -103,19 +104,14 @@ class ShadeViewDiffer(
                 views.remove(childNode.controller.view)
             }
 
-            if (childCompletelyRemoved && parentSpec == null) {
-                // If both the child and the parent are being removed at the same time, then
-                // keep the child attached to the parent for animation purposes
-                logger.logSkippingDetach(childNode.label, parentNode.label)
-            } else {
-                logger.logDetachingChild(
-                        childNode.label,
-                        !childCompletelyRemoved,
-                        parentNode.label,
-                        newParentNode?.label)
-                parentNode.removeChild(childNode, !childCompletelyRemoved)
-                childNode.parent = null
-            }
+            logger.logDetachingChild(
+                key = childNode.label,
+                isTransfer = !childCompletelyRemoved,
+                isParentRemoved = parentSpec == null,
+                oldParent = parentNode.label,
+                newParent = newParentNode?.label)
+            parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
+            childNode.parent = null
         }
     }
 
@@ -214,13 +210,16 @@ private class ShadeNode(
 
     fun addChildAt(child: ShadeNode, index: Int) {
         controller.addChildAt(child.controller, index)
+        child.controller.onViewAdded()
     }
 
     fun moveChildTo(child: ShadeNode, index: Int) {
         controller.moveChildTo(child.controller, index)
+        child.controller.onViewMoved()
     }
 
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
         controller.removeChild(child.controller, isTransfer)
+        child.controller.onViewRemoved()
     }
 }

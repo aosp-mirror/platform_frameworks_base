@@ -21,6 +21,7 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilities;
@@ -28,6 +29,10 @@ import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 import android.os.UserHandle;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Objects;
 
 /**
@@ -37,23 +42,42 @@ import java.util.Objects;
  */
 public final class ConfigurationInternal {
 
+    @IntDef(prefix = "DETECTION_MODE_",
+            value = { DETECTION_MODE_UNKNOWN, DETECTION_MODE_MANUAL, DETECTION_MODE_GEO,
+                    DETECTION_MODE_TELEPHONY }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
+    @interface DetectionMode {};
+
+    public static final @DetectionMode int DETECTION_MODE_UNKNOWN = 0;
+    public static final @DetectionMode int DETECTION_MODE_MANUAL = 1;
+    public static final @DetectionMode int DETECTION_MODE_GEO = 2;
+    public static final @DetectionMode int DETECTION_MODE_TELEPHONY = 3;
+
     private final boolean mTelephonyDetectionSupported;
     private final boolean mGeoDetectionSupported;
-    private final boolean mAutoDetectionEnabled;
+    private final boolean mTelephonyFallbackSupported;
+    private final boolean mGeoDetectionRunInBackgroundEnabled;
+    private final boolean mEnhancedMetricsCollectionEnabled;
+    private final boolean mAutoDetectionEnabledSetting;
     private final @UserIdInt int mUserId;
     private final boolean mUserConfigAllowed;
-    private final boolean mLocationEnabled;
-    private final boolean mGeoDetectionEnabled;
+    private final boolean mLocationEnabledSetting;
+    private final boolean mGeoDetectionEnabledSetting;
 
     private ConfigurationInternal(Builder builder) {
         mTelephonyDetectionSupported = builder.mTelephonyDetectionSupported;
         mGeoDetectionSupported = builder.mGeoDetectionSupported;
-        mAutoDetectionEnabled = builder.mAutoDetectionEnabled;
+        mTelephonyFallbackSupported = builder.mTelephonyFallbackSupported;
+        mGeoDetectionRunInBackgroundEnabled = builder.mGeoDetectionRunInBackgroundEnabled;
+        mEnhancedMetricsCollectionEnabled = builder.mEnhancedMetricsCollectionEnabled;
+        mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
         mUserId = builder.mUserId;
         mUserConfigAllowed = builder.mUserConfigAllowed;
-        mLocationEnabled = builder.mLocationEnabled;
-        mGeoDetectionEnabled = builder.mGeoDetectionEnabled;
+        mLocationEnabledSetting = builder.mLocationEnabledSetting;
+        mGeoDetectionEnabledSetting = builder.mGeoDetectionEnabledSetting;
     }
 
     /** Returns true if the device supports any form of auto time zone detection. */
@@ -71,9 +95,36 @@ public final class ConfigurationInternal {
         return mGeoDetectionSupported;
     }
 
+    /**
+     * Returns true if the device supports time zone detection falling back to telephony detection
+     * under certain circumstances.
+     */
+    public boolean isTelephonyFallbackSupported() {
+        return mTelephonyFallbackSupported;
+    }
+
+    /**
+     * Returns {@code true} if location time zone detection should run all the time on supported
+     * devices, even when the user has not enabled it explicitly in settings. Enabled for internal
+     * testing only. See {@link #isGeoDetectionExecutionEnabled()} and {@link #getDetectionMode()}
+     * for details.
+     */
+    boolean getGeoDetectionRunInBackgroundEnabled() {
+        return mGeoDetectionRunInBackgroundEnabled;
+    }
+
+    /**
+     * Returns {@code true} if the device can collect / report extra metrics information for QA
+     * / testers. These metrics might involve logging more expensive or more revealing data that
+     * would not be collected from the set of public users.
+     */
+    public boolean isEnhancedMetricsCollectionEnabled() {
+        return mEnhancedMetricsCollectionEnabled;
+    }
+
     /** Returns the value of the auto time zone detection enabled setting. */
     public boolean getAutoDetectionEnabledSetting() {
-        return mAutoDetectionEnabled;
+        return mAutoDetectionEnabledSetting;
     }
 
     /**
@@ -81,7 +132,7 @@ public final class ConfigurationInternal {
      * from the raw setting value.
      */
     public boolean getAutoDetectionEnabledBehavior() {
-        return isAutoDetectionSupported() && mAutoDetectionEnabled;
+        return isAutoDetectionSupported() && mAutoDetectionEnabledSetting;
     }
 
     /** Returns the ID of the user this configuration is associated with. */
@@ -101,24 +152,41 @@ public final class ConfigurationInternal {
     }
 
     /** Returns true if user's location can be used generally. */
-    public boolean isLocationEnabled() {
-        return mLocationEnabled;
+    public boolean getLocationEnabledSetting() {
+        return mLocationEnabledSetting;
     }
 
     /** Returns the value of the geolocation time zone detection enabled setting. */
     public boolean getGeoDetectionEnabledSetting() {
-        return mGeoDetectionEnabled;
+        return mGeoDetectionEnabledSetting;
     }
 
     /**
-     * Returns true if geolocation time zone detection behavior is actually enabled, which can be
-     * distinct from the raw setting value.
+     * Returns the detection mode to use, i.e. which suggestions to use to determine the device's
+     * time zone.
      */
-    public boolean getGeoDetectionEnabledBehavior() {
-        return getAutoDetectionEnabledBehavior()
-                && isGeoDetectionSupported()
-                && isLocationEnabled()
-                && getGeoDetectionEnabledSetting();
+    public @DetectionMode int getDetectionMode() {
+        if (!getAutoDetectionEnabledBehavior()) {
+            return DETECTION_MODE_MANUAL;
+        } else if (isGeoDetectionSupported() && getLocationEnabledSetting()
+                && getGeoDetectionEnabledSetting()) {
+            return DETECTION_MODE_GEO;
+        } else {
+            return DETECTION_MODE_TELEPHONY;
+        }
+    }
+
+    /**
+     * Returns true if geolocation time zone detection behavior can execute. Typically, this will
+     * agree with {@link #getDetectionMode()}, but under rare circumstances the geolocation detector
+     * may be run in the background if the user's settings allow. See also {@link
+     * #getGeoDetectionRunInBackgroundEnabled()}.
+     */
+    public boolean isGeoDetectionExecutionEnabled() {
+        return isGeoDetectionSupported()
+                && getLocationEnabledSetting()
+                && ((mAutoDetectionEnabledSetting && getGeoDetectionEnabledSetting())
+                || getGeoDetectionRunInBackgroundEnabled());
     }
 
     /** Creates a {@link TimeZoneCapabilitiesAndConfig} object using the configuration values. */
@@ -154,7 +222,7 @@ public final class ConfigurationInternal {
         final int configureGeolocationDetectionEnabledCapability;
         if (!deviceHasLocationTimeZoneDetection) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
-        } else if (!mAutoDetectionEnabled || !isLocationEnabled()) {
+        } else if (!mAutoDetectionEnabledSetting || !getLocationEnabledSetting()) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_APPLICABLE;
         } else {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_POSSESSED;
@@ -195,10 +263,10 @@ public final class ConfigurationInternal {
     public ConfigurationInternal merge(TimeZoneConfiguration newConfiguration) {
         Builder builder = new Builder(this);
         if (newConfiguration.hasIsAutoDetectionEnabled()) {
-            builder.setAutoDetectionEnabled(newConfiguration.isAutoDetectionEnabled());
+            builder.setAutoDetectionEnabledSetting(newConfiguration.isAutoDetectionEnabled());
         }
         if (newConfiguration.hasIsGeoDetectionEnabled()) {
-            builder.setGeoDetectionEnabled(newConfiguration.isGeoDetectionEnabled());
+            builder.setGeoDetectionEnabledSetting(newConfiguration.isGeoDetectionEnabled());
         }
         return builder.build();
     }
@@ -216,16 +284,20 @@ public final class ConfigurationInternal {
                 && mUserConfigAllowed == that.mUserConfigAllowed
                 && mTelephonyDetectionSupported == that.mTelephonyDetectionSupported
                 && mGeoDetectionSupported == that.mGeoDetectionSupported
-                && mAutoDetectionEnabled == that.mAutoDetectionEnabled
-                && mLocationEnabled == that.mLocationEnabled
-                && mGeoDetectionEnabled == that.mGeoDetectionEnabled;
+                && mTelephonyFallbackSupported == that.mTelephonyFallbackSupported
+                && mGeoDetectionRunInBackgroundEnabled == that.mGeoDetectionRunInBackgroundEnabled
+                && mEnhancedMetricsCollectionEnabled == that.mEnhancedMetricsCollectionEnabled
+                && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
+                && mLocationEnabledSetting == that.mLocationEnabledSetting
+                && mGeoDetectionEnabledSetting == that.mGeoDetectionEnabledSetting;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mUserId, mUserConfigAllowed, mTelephonyDetectionSupported,
-                mGeoDetectionSupported, mAutoDetectionEnabled, mLocationEnabled,
-                mGeoDetectionEnabled);
+                mGeoDetectionSupported, mTelephonyFallbackSupported,
+                mGeoDetectionRunInBackgroundEnabled, mEnhancedMetricsCollectionEnabled,
+                mAutoDetectionEnabledSetting, mLocationEnabledSetting, mGeoDetectionEnabledSetting);
     }
 
     @Override
@@ -235,9 +307,12 @@ public final class ConfigurationInternal {
                 + ", mUserConfigAllowed=" + mUserConfigAllowed
                 + ", mTelephonyDetectionSupported=" + mTelephonyDetectionSupported
                 + ", mGeoDetectionSupported=" + mGeoDetectionSupported
-                + ", mAutoDetectionEnabled=" + mAutoDetectionEnabled
-                + ", mLocationEnabled=" + mLocationEnabled
-                + ", mGeoDetectionEnabled=" + mGeoDetectionEnabled
+                + ", mTelephonyFallbackSupported=" + mTelephonyFallbackSupported
+                + ", mGeoDetectionRunInBackgroundEnabled=" + mGeoDetectionRunInBackgroundEnabled
+                + ", mEnhancedMetricsCollectionEnabled=" + mEnhancedMetricsCollectionEnabled
+                + ", mAutoDetectionEnabledSetting=" + mAutoDetectionEnabledSetting
+                + ", mLocationEnabledSetting=" + mLocationEnabledSetting
+                + ", mGeoDetectionEnabledSetting=" + mGeoDetectionEnabledSetting
                 + '}';
     }
 
@@ -251,9 +326,12 @@ public final class ConfigurationInternal {
         private boolean mUserConfigAllowed;
         private boolean mTelephonyDetectionSupported;
         private boolean mGeoDetectionSupported;
-        private boolean mAutoDetectionEnabled;
-        private boolean mLocationEnabled;
-        private boolean mGeoDetectionEnabled;
+        private boolean mTelephonyFallbackSupported;
+        private boolean mGeoDetectionRunInBackgroundEnabled;
+        private boolean mEnhancedMetricsCollectionEnabled;
+        private boolean mAutoDetectionEnabledSetting;
+        private boolean mLocationEnabledSetting;
+        private boolean mGeoDetectionEnabledSetting;
 
         /**
          * Creates a new Builder with only the userId set.
@@ -269,10 +347,13 @@ public final class ConfigurationInternal {
             this.mUserId = toCopy.mUserId;
             this.mUserConfigAllowed = toCopy.mUserConfigAllowed;
             this.mTelephonyDetectionSupported = toCopy.mTelephonyDetectionSupported;
+            this.mTelephonyFallbackSupported = toCopy.mTelephonyFallbackSupported;
             this.mGeoDetectionSupported = toCopy.mGeoDetectionSupported;
-            this.mAutoDetectionEnabled = toCopy.mAutoDetectionEnabled;
-            this.mLocationEnabled = toCopy.mLocationEnabled;
-            this.mGeoDetectionEnabled = toCopy.mGeoDetectionEnabled;
+            this.mGeoDetectionRunInBackgroundEnabled = toCopy.mGeoDetectionRunInBackgroundEnabled;
+            this.mEnhancedMetricsCollectionEnabled = toCopy.mEnhancedMetricsCollectionEnabled;
+            this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
+            this.mLocationEnabledSetting = toCopy.mLocationEnabledSetting;
+            this.mGeoDetectionEnabledSetting = toCopy.mGeoDetectionEnabledSetting;
         }
 
         /**
@@ -300,26 +381,53 @@ public final class ConfigurationInternal {
         }
 
         /**
+         * Sets whether time zone detection supports falling back to telephony detection under
+         * certain circumstances.
+         */
+        public Builder setTelephonyFallbackSupported(boolean supported) {
+            mTelephonyFallbackSupported = supported;
+            return this;
+        }
+
+        /**
+         * Sets whether location time zone detection should run all the time on supported devices,
+         * even when the user has not enabled it explicitly in settings. Enabled for internal
+         * testing only.
+         */
+        public Builder setGeoDetectionRunInBackgroundEnabled(boolean enabled) {
+            mGeoDetectionRunInBackgroundEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets the value for enhanced metrics collection.
+         */
+        public Builder setEnhancedMetricsCollectionEnabled(boolean enabled) {
+            mEnhancedMetricsCollectionEnabled = enabled;
+            return this;
+        }
+
+        /**
          * Sets the value of the automatic time zone detection enabled setting for this device.
          */
-        public Builder setAutoDetectionEnabled(boolean enabled) {
-            mAutoDetectionEnabled = enabled;
+        public Builder setAutoDetectionEnabledSetting(boolean enabled) {
+            mAutoDetectionEnabledSetting = enabled;
             return this;
         }
 
         /**
          * Sets the value of the location mode setting for this user.
          */
-        public Builder setLocationEnabled(boolean enabled) {
-            mLocationEnabled = enabled;
+        public Builder setLocationEnabledSetting(boolean enabled) {
+            mLocationEnabledSetting = enabled;
             return this;
         }
 
         /**
          * Sets the value of the geolocation time zone detection setting for this user.
          */
-        public Builder setGeoDetectionEnabled(boolean enabled) {
-            mGeoDetectionEnabled = enabled;
+        public Builder setGeoDetectionEnabledSetting(boolean enabled) {
+            mGeoDetectionEnabledSetting = enabled;
             return this;
         }
 

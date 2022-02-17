@@ -75,7 +75,7 @@ public class AudioServiceTest {
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
             mAudioService.setMicrophoneMute(muted, mContext.getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
             Assert.assertEquals("mic mute reporting wrong value",
                     muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
@@ -100,7 +100,7 @@ public class AudioServiceTest {
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
             mAudioService.setMicrophoneMute(muted, mContext.getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
             Assert.assertEquals("mic mute reporting wrong value",
                     !muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired

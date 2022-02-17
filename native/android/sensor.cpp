@@ -83,6 +83,16 @@ int ASensorManager_getSensorList(ASensorManager* manager, ASensorList* list) {
     return c;
 }
 
+ssize_t ASensorManager_getDynamicSensorList(ASensorManager* manager, ASensorList* list) {
+    RETURN_IF_MANAGER_IS_NULL(android::BAD_VALUE);
+    Sensor const* const* l;
+    ssize_t c = static_cast<SensorManager*>(manager)->getDynamicSensorList(&l);
+    if (list) {
+        *list = reinterpret_cast<ASensorList>(l);
+    }
+    return c;
+}
+
 ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type) {
     RETURN_IF_MANAGER_IS_NULL(nullptr);
     return static_cast<SensorManager*>(manager)->getDefaultSensor(type);

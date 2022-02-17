@@ -38,6 +38,10 @@ import java.util.concurrent.TimeUnit;
  */
 class GnssPsdsDownloader {
 
+    // how often to request PSDS download, in milliseconds
+    // current setting 24 hours
+    static final long PSDS_INTERVAL = 24 * 60 * 60 * 1000;
+
     private static final String TAG = "GnssPsdsDownloader";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.

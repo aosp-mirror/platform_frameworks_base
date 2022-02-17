@@ -61,4 +61,9 @@ oneway interface IPinnedTaskListener {
      * Called by the window manager when the aspect ratio is reset.
      */
     void onAspectRatioChanged(float aspectRatio);
+
+    /**
+      * Called by the window manager when the expanded aspect ratio is reset.
+    */
+    void onExpandedAspectRatioChanged(float aspectRatio);
 }

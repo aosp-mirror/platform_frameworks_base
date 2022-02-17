@@ -24,17 +24,21 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
+import com.android.systemui.util.mockito.withArgCaptor
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -47,12 +51,15 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     // captured listeners and pluggables:
     private lateinit var promoter: NotifPromoter
     private lateinit var peopleSectioner: NotifSectioner
+    private lateinit var peopleComparator: NotifComparator
 
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
     @Mock private lateinit var channel: NotificationChannel
     @Mock private lateinit var headerController: NodeController
     private lateinit var entry: NotificationEntry
+    private lateinit var entryA: NotificationEntry
+    private lateinit var entryB: NotificationEntry
 
     private lateinit var coordinator: ConversationCoordinator
 
@@ -65,13 +72,20 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         coordinator.attach(pipeline)
 
         // capture arguments:
-        val notifPromoterCaptor = ArgumentCaptor.forClass(NotifPromoter::class.java)
-        verify(pipeline).addPromoter(notifPromoterCaptor.capture())
-        promoter = notifPromoterCaptor.value
+        promoter = withArgCaptor {
+            verify(pipeline).addPromoter(capture())
+        }
 
         peopleSectioner = coordinator.sectioner
+        peopleComparator = peopleSectioner.comparator!!
 
         entry = NotificationEntryBuilder().setChannel(channel).build()
+
+        val section = NotifSection(peopleSectioner, 0)
+        entryA = NotificationEntryBuilder().setChannel(channel)
+            .setSection(section).setTag("A").build()
+        entryB = NotificationEntryBuilder().setChannel(channel)
+            .setSection(section).setTag("B").build()
     }
 
     @Test
@@ -89,5 +103,27 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         // only put people notifications in this section
         assertTrue(peopleSectioner.isInSection(entry))
         assertFalse(peopleSectioner.isInSection(NotificationEntryBuilder().build()))
+    }
+
+    @Test
+    fun testComparatorPutsImportantPeopleFirst() {
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
+            .thenReturn(TYPE_IMPORTANT_PERSON)
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryB))
+            .thenReturn(TYPE_PERSON)
+
+        // only put people notifications in this section
+        assertThat(peopleComparator.compare(entryA, entryB)).isEqualTo(-1)
+    }
+
+    @Test
+    fun testComparatorEquatesPeopleWithSameType() {
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryA))
+            .thenReturn(TYPE_PERSON)
+        whenever(peopleNotificationIdentifier.getPeopleNotificationType(entryB))
+            .thenReturn(TYPE_PERSON)
+
+        // only put people notifications in this section
+        assertThat(peopleComparator.compare(entryA, entryB)).isEqualTo(0)
     }
 }

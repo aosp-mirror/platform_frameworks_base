@@ -164,7 +164,19 @@ class RefreshRatePolicy {
             return 0;
         }
 
-        return w.mAttrs.preferredMinDisplayRefreshRate;
+        if (w.mAttrs.preferredMinDisplayRefreshRate > 0) {
+            return w.mAttrs.preferredMinDisplayRefreshRate;
+        }
+
+        String packageName = w.getOwningPackage();
+        // If app is using Camera, we set both the min and max refresh rate to the camera's
+        // preferred refresh rate to make sure we don't end up with a refresh rate lower
+        // than the camera capture rate, which will lead to dropping camera frames.
+        if (mNonHighRefreshRatePackages.contains(packageName)) {
+            return mLowRefreshRateMode.getRefreshRate();
+        }
+
+        return 0;
     }
 
     float getPreferredMaxRefreshRate(WindowState w) {

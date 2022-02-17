@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
@@ -47,8 +48,11 @@ import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -65,6 +69,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Provider for a single instance of the {@link IFace} HAL.
@@ -83,7 +88,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull private final UsageStats mUsageStats;
     @NonNull private final ActivityTaskManager mActivityTaskManager;
     @NonNull private final BiometricTaskStackListener mTaskStackListener;
-
+    // for requests that do not use biometric prompt
+    @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
+    @NonNull private final BiometricContext mBiometricContext;
     @Nullable private IFace mDaemon;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
@@ -110,8 +117,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                 && !client.isAlreadyDone()) {
                             Slog.e(getTag(), "Stopping background authentication, top: "
                                     + topPackage + " currentClient: " + client);
-                            mSensors.valueAt(i).getScheduler()
-                                    .cancelAuthenticationOrDetection(client.getToken());
+                            mSensors.valueAt(i).getScheduler().cancelAuthenticationOrDetection(
+                                    client.getToken(), client.getRequestId());
                         }
                     }
                 }
@@ -121,7 +128,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     public FaceProvider(@NonNull Context context, @NonNull SensorProps[] props,
             @NonNull String halInstanceName,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
         mContext = context;
         mHalInstanceName = halInstanceName;
         mSensors = new SparseArray<>();
@@ -130,6 +138,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
+        mBiometricContext = biometricContext;
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
@@ -149,7 +158,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     prop.supportsDetectInteraction, prop.halControlsPreview,
                     false /* resetLockoutRequiresChallenge */);
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
-                    internalProp, lockoutResetDispatcher);
+                    internalProp, lockoutResetDispatcher, mBiometricContext);
 
             mSensors.put(sensorId, sensor);
             Slog.d(getTag(), "Added: " + internalProp);
@@ -214,7 +223,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor client,
-            BaseClientMonitor.Callback callback) {
+            ClientMonitorCallback callback) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -233,6 +242,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceGetAuthenticatorIdClient client = new FaceGetAuthenticatorIdClient(
                     mContext, mSensors.get(sensorId).getLazySession(), userId,
                     mContext.getOpPackageName(), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext,
                     mSensors.get(sensorId).getAuthenticatorIds());
 
             scheduleForSensor(sensorId, client);
@@ -243,6 +255,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final InvalidationRequesterClient<Face> client =
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
+                            BiometricLogger.ofUnknown(mContext),
+                            mBiometricContext,
                             FaceUtils.getInstance(sensorId));
             scheduleForSensor(sensorId, client);
         });
@@ -281,6 +295,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceInvalidationClient client = new FaceInvalidationClient(mContext,
                     mSensors.get(sensorId).getLazySession(), userId, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext,
                     mSensors.get(sensorId).getAuthenticatorIds(), callback);
             scheduleForSensor(sensorId, client);
         });
@@ -307,7 +324,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
-                    new ClientMonitorCallbackConverter(receiver), userId, opPackageName, sensorId);
+                    new ClientMonitorCallbackConverter(receiver), userId, opPackageName, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -318,26 +338,31 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token, userId, opPackageName, sensorId,
-                    challenge);
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext, challenge);
             scheduleForSensor(sensorId, client);
         });
     }
 
     @Override
-    public void scheduleEnroll(int sensorId, @NonNull IBinder token,
+    public long scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
             @Nullable Surface previewSurface, boolean debugConsent) {
+        final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             final int maxTemplatesPerUser = mSensors.get(
                     sensorId).getSensorProperties().maxEnrollmentsPerUser;
             final FaceEnrollClient client = new FaceEnrollClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, FaceUtils.getInstance(sensorId), disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser,
-                    debugConsent);
-            scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
+                    opPackageName, id, FaceUtils.getInstance(sensorId), disabledFeatures,
+                    ENROLL_TIMEOUT_SEC, previewSurface, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_ENROLL,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext, maxTemplatesPerUser, debugConsent);
+            scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
@@ -348,43 +373,53 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                 }
             });
         });
+        return id;
     }
 
     @Override
-    public void cancelEnrollment(int sensorId, @NonNull IBinder token) {
-        mHandler.post(() -> mSensors.get(sensorId).getScheduler().cancelEnrollment(token));
+    public void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId) {
+        mHandler.post(() ->
+                mSensors.get(sensorId).getScheduler().cancelEnrollment(token, requestId));
     }
 
     @Override
-    public void scheduleFaceDetect(int sensorId, @NonNull IBinder token,
+    public long scheduleFaceDetect(int sensorId, @NonNull IBinder token,
             int userId, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, int statsClient) {
+        final long id = mRequestCounter.incrementAndGet();
+
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceDetectClient client = new FaceDetectClient(mContext,
-                    mSensors.get(sensorId).getLazySession(), token, callback, userId, opPackageName,
-                    sensorId, isStrongBiometric, statsClient);
+                    mSensors.get(sensorId).getLazySession(),
+                    token, id, callback, userId, opPackageName, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    mBiometricContext, isStrongBiometric);
             scheduleForSensor(sensorId, client);
         });
+
+        return id;
     }
 
     @Override
-    public void cancelFaceDetect(int sensorId, @NonNull IBinder token) {
+    public void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId) {
         mHandler.post(() -> mSensors.get(sensorId).getScheduler()
-                .cancelAuthenticationOrDetection(token));
+                .cancelAuthenticationOrDetection(token, requestId));
     }
 
     @Override
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(
-                    mContext, mSensors.get(sensorId).getLazySession(), token, callback, userId,
-                    operationId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
+                    mContext, mSensors.get(sensorId).getLazySession(), token, requestId, callback,
+                    userId, operationId, restricted, opPackageName, cookie,
+                    false /* requireConfirmation */, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    mBiometricContext, isStrongBiometric,
                     mUsageStats, mSensors.get(sensorId).getLockoutCache(),
                     allowBackgroundAuthentication, isKeyguardBypassEnabled);
             scheduleForSensor(sensorId, client);
@@ -392,9 +427,23 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void cancelAuthentication(int sensorId, @NonNull IBinder token) {
+    public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+            int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
+        final long id = mRequestCounter.incrementAndGet();
+
+        scheduleAuthenticate(sensorId, token, operationId, userId, cookie, callback,
+                opPackageName, id, restricted, statsClient,
+                allowBackgroundAuthentication, isKeyguardBypassEnabled);
+
+        return id;
+    }
+
+    @Override
+    public void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId) {
         mHandler.post(() -> mSensors.get(sensorId).getScheduler()
-                .cancelAuthenticationOrDetection(token));
+                .cancelAuthenticationOrDetection(token, requestId));
     }
 
     @Override
@@ -424,6 +473,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), faceIds, userId,
                     opPackageName, FaceUtils.getInstance(sensorId), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_REMOVE,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext,
                     mSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client);
         });
@@ -434,7 +486,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceResetLockoutClient client = new FaceResetLockoutClient(
                     mContext, mSensors.get(sensorId).getLazySession(), userId,
-                    mContext.getOpPackageName(), sensorId, hardwareAuthToken,
+                    mContext.getOpPackageName(), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    mBiometricContext, hardwareAuthToken,
                     mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
 
             scheduleForSensor(sensorId, client);
@@ -455,7 +510,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId,
-                    mContext.getOpPackageName(), sensorId, feature, enabled, hardwareAuthToken);
+                    mContext.getOpPackageName(), sensorId,
+                    BiometricLogger.ofUnknown(mContext), mBiometricContext,
+                    feature, enabled, hardwareAuthToken);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -472,7 +529,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             }
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token, callback, userId,
-                    mContext.getOpPackageName(), sensorId);
+                    mContext.getOpPackageName(), sensorId, BiometricLogger.ofUnknown(mContext),
+                    mBiometricContext);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -486,17 +544,25 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         mHandler.post(() -> {
             final List<Face> enrolledList = getEnrolledFaces(sensorId, userId);
             final FaceInternalCleanupClient client =
                     new FaceInternalCleanupClient(mContext,
                             mSensors.get(sensorId).getLazySession(), userId,
-                            mContext.getOpPackageName(), sensorId, enrolledList,
+                            mContext.getOpPackageName(), sensorId,
+                            createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            mBiometricContext, enrolledList,
                             FaceUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client, callback);
         });
+    }
+
+    private BiometricLogger createLogger(int statsAction, int statsClient) {
+        return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FACE,
+                statsAction, statsClient);
     }
 
     @Override

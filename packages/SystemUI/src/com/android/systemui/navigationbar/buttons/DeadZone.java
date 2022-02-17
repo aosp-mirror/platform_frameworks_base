@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.SystemClock;
+import android.util.FloatProperty;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -44,6 +45,20 @@ public class DeadZone {
     public static final int VERTICAL = 1;  // Consume taps along the left edge.
 
     private static final boolean CHATTY = true; // print to logcat when we eat a click
+
+    private static final FloatProperty<DeadZone> FLASH_PROPERTY =
+            new FloatProperty<DeadZone>("DeadZoneFlash") {
+        @Override
+        public void setValue(DeadZone object, float value) {
+            object.setFlash(value);
+        }
+
+        @Override
+        public Float get(DeadZone object) {
+            return object.getFlash();
+        }
+    };
+
     private final NavigationBarController mNavBarController;
     private final NavigationBarView mNavigationBarView;
 
@@ -63,7 +78,7 @@ public class DeadZone {
     private final Runnable mDebugFlash = new Runnable() {
         @Override
         public void run() {
-            ObjectAnimator.ofFloat(DeadZone.this, "flash", 1f, 0f).setDuration(150).start();
+            ObjectAnimator.ofFloat(DeadZone.this, FLASH_PROPERTY, 1f, 0f).setDuration(150).start();
         }
     };
 

@@ -83,11 +83,11 @@ import java.util.Objects;
  *     &lt;/intent-filter>
  *     &lt;meta-data
  *               android:name="android.service.notification.default_filter_types"
- *               android:value="conversations,alerting">
+ *               android:value="conversations|alerting">
  *           &lt;/meta-data>
  *     &lt;meta-data
  *               android:name="android.service.notification.disabled_filter_types"
- *               android:value="ongoing,silent">
+ *               android:value="ongoing|silent">
  *           &lt;/meta-data>
  * &lt;/service></pre>
  *
@@ -112,8 +112,9 @@ public abstract class NotificationListenerService extends Service {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * The name of the {@code meta-data} tag containing a comma separated list of default
-     * integer notification types that should be provided to this listener. See
+     * The name of the {@code meta-data} tag containing a pipe separated list of default
+     * integer notification types or "ongoing", "conversations", "alerting", or "silent"
+     * that should be provided to this listener. See
      * {@link #FLAG_FILTER_TYPE_ONGOING},
      * {@link #FLAG_FILTER_TYPE_CONVERSATIONS}, {@link #FLAG_FILTER_TYPE_ALERTING),
      * and {@link #FLAG_FILTER_TYPE_SILENT}.
@@ -255,6 +256,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CHANNEL_REMOVED = 20;
     /** Notification was canceled due to the app's storage being cleared */
     public static final int REASON_CLEAR_DATA = 21;
+    /** Notification was canceled due to an assistant adjustment update. */
+    public static final int REASON_ASSISTANT_CANCEL = 22;
 
     /**
      * @hide
@@ -278,7 +281,10 @@ public abstract class NotificationListenerService extends Service {
             REASON_UNAUTOBUNDLED,
             REASON_CHANNEL_BANNED,
             REASON_SNOOZED,
-            REASON_TIMEOUT
+            REASON_TIMEOUT,
+            REASON_CHANNEL_REMOVED,
+            REASON_CLEAR_DATA,
+            REASON_ASSISTANT_CANCEL,
     })
     public @interface NotificationCancelReason{};
 
@@ -1698,7 +1704,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
         private boolean mCanBubble;
-        private boolean mVisuallyInterruptive;
+        private boolean mIsTextChanged;
         private boolean mIsConversation;
         private ShortcutInfo mShortcutInfo;
         private @RankingAdjustment int mRankingAdjustment;
@@ -1735,7 +1741,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeTypedList(mSmartActions, flags);
             out.writeCharSequenceList(mSmartReplies);
             out.writeBoolean(mCanBubble);
-            out.writeBoolean(mVisuallyInterruptive);
+            out.writeBoolean(mIsTextChanged);
             out.writeBoolean(mIsConversation);
             out.writeParcelable(mShortcutInfo, flags);
             out.writeInt(mRankingAdjustment);
@@ -1762,7 +1768,7 @@ public abstract class NotificationListenerService extends Service {
             mImportanceExplanation = in.readCharSequence(); // may be null
             mRankingScore = in.readFloat();
             mOverrideGroupKey = in.readString(); // may be null
-            mChannel = in.readParcelable(cl); // may be null
+            mChannel = in.readParcelable(cl, android.app.NotificationChannel.class); // may be null
             mOverridePeople = in.createStringArrayList();
             mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
             mShowBadge = in.readBoolean();
@@ -1773,9 +1779,9 @@ public abstract class NotificationListenerService extends Service {
             mSmartActions = in.createTypedArrayList(Notification.Action.CREATOR);
             mSmartReplies = in.readCharSequenceList();
             mCanBubble = in.readBoolean();
-            mVisuallyInterruptive = in.readBoolean();
+            mIsTextChanged = in.readBoolean();
             mIsConversation = in.readBoolean();
-            mShortcutInfo = in.readParcelable(cl);
+            mShortcutInfo = in.readParcelable(cl, android.content.pm.ShortcutInfo.class);
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
         }
@@ -1976,8 +1982,8 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /** @hide */
-        public boolean visuallyInterruptive() {
-            return mVisuallyInterruptive;
+        public boolean isTextChanged() {
+            return mIsTextChanged;
         }
 
         /** @hide */
@@ -2032,7 +2038,7 @@ public abstract class NotificationListenerService extends Service {
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
-                boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo,
+                boolean isTextChanged, boolean isConversation, ShortcutInfo shortcutInfo,
                 int rankingAdjustment, boolean isBubble) {
             mKey = key;
             mRank = rank;
@@ -2054,7 +2060,7 @@ public abstract class NotificationListenerService extends Service {
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
             mCanBubble = canBubble;
-            mVisuallyInterruptive = visuallyInterruptive;
+            mIsTextChanged = isTextChanged;
             mIsConversation = isConversation;
             mShortcutInfo = shortcutInfo;
             mRankingAdjustment = rankingAdjustment;
@@ -2095,7 +2101,7 @@ public abstract class NotificationListenerService extends Service {
                     other.mSmartActions,
                     other.mSmartReplies,
                     other.mCanBubble,
-                    other.mVisuallyInterruptive,
+                    other.mIsTextChanged,
                     other.mIsConversation,
                     other.mShortcutInfo,
                     other.mRankingAdjustment,
@@ -2152,7 +2158,7 @@ public abstract class NotificationListenerService extends Service {
                         == (other.mSmartActions == null ? 0 : other.mSmartActions.size()))
                     && Objects.equals(mSmartReplies, other.mSmartReplies)
                     && Objects.equals(mCanBubble, other.mCanBubble)
-                    && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive)
+                    && Objects.equals(mIsTextChanged, other.mIsTextChanged)
                     && Objects.equals(mIsConversation, other.mIsConversation)
                     // Shortcutinfo doesn't have equals either; use id
                     &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),

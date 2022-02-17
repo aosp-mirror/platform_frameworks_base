@@ -118,6 +118,7 @@ class ControlViewHolder(
     private var nextStatusText: CharSequence = ""
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
+    val chevronIcon: ImageView = layout.requireViewById(R.id.chevron_icon)
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
     lateinit var cws: ControlWithState
@@ -163,6 +164,7 @@ class ControlViewHolder(
             cws.control?.let {
                 title.setText(it.title)
                 subtitle.setText(it.subtitle)
+                chevronIcon.visibility = if (usePanel()) View.VISIBLE else View.INVISIBLE
             }
         }
 
@@ -469,6 +471,7 @@ class ControlViewHolder(
         updateContentDescription()
 
         status.setTextColor(color)
+        chevronIcon.imageTintList = color
 
         control?.getCustomIcon()?.let {
             icon.setImageIcon(it)

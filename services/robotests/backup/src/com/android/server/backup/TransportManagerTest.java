@@ -55,8 +55,8 @@ import android.platform.test.annotations.Presubmit;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
-import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.transport.TransportClientManager;
+import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportConnectionManager;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 
@@ -85,7 +85,7 @@ public class TransportManagerTest {
     private static final String PACKAGE_B = "some.package.b";
 
     @Mock private OnTransportRegisteredListener mListener;
-    @Mock private TransportClientManager mTransportClientManager;
+    @Mock private TransportConnectionManager mTransportConnectionManager;
     private TransportData mTransportA1;
     private TransportData mTransportA2;
     private TransportData mTransportB1;
@@ -206,7 +206,7 @@ public class TransportManagerTest {
 
         transportManager.registerTransports();
 
-        verify(mTransportClientManager)
+        verify(mTransportConnectionManager)
                 .getTransportClient(
                         eq(mTransportA1.getTransportComponent()),
                         argThat(
@@ -433,10 +433,10 @@ public class TransportManagerTest {
         TransportManager transportManager =
                 createTransportManagerWithRegisteredTransports(mTransportA1, mTransportA2);
 
-        TransportClient transportClient =
+        TransportConnection transportConnection =
                 transportManager.getTransportClient(mTransportA1.transportName, "caller");
 
-        assertThat(transportClient.getTransportComponent())
+        assertThat(transportConnection.getTransportComponent())
                 .isEqualTo(mTransportA1.getTransportComponent());
     }
 
@@ -453,10 +453,10 @@ public class TransportManagerTest {
                 null,
                 null);
 
-        TransportClient transportClient =
+        TransportConnection transportConnection =
                 transportManager.getTransportClient(mTransportA1.transportName, "caller");
 
-        assertThat(transportClient).isNull();
+        assertThat(transportConnection).isNull();
     }
 
     @Test
@@ -471,9 +471,10 @@ public class TransportManagerTest {
                 null,
                 null);
 
-        TransportClient transportClient = transportManager.getTransportClient("newName", "caller");
+        TransportConnection transportConnection = transportManager.getTransportClient(
+                "newName", "caller");
 
-        assertThat(transportClient.getTransportComponent())
+        assertThat(transportConnection.getTransportComponent())
                 .isEqualTo(mTransportA1.getTransportComponent());
     }
 
@@ -482,9 +483,10 @@ public class TransportManagerTest {
         TransportManager transportManager =
                 createTransportManagerWithRegisteredTransports(mTransportA1, mTransportA2);
 
-        TransportClient transportClient = transportManager.getCurrentTransportClient("caller");
+        TransportConnection transportConnection = transportManager.getCurrentTransportClient(
+                "caller");
 
-        assertThat(transportClient.getTransportComponent())
+        assertThat(transportConnection.getTransportComponent())
                 .isEqualTo(mTransportA1.getTransportComponent());
     }
 
@@ -660,12 +662,12 @@ public class TransportManagerTest {
         List<TransportMock> transportMocks = new ArrayList<>(transports.length);
         for (TransportData transport : transports) {
             TransportMock transportMock = mockTransport(transport);
-            when(mTransportClientManager.getTransportClient(
+            when(mTransportConnectionManager.getTransportClient(
                             eq(transport.getTransportComponent()), any()))
-                    .thenReturn(transportMock.transportClient);
-            when(mTransportClientManager.getTransportClient(
+                    .thenReturn(transportMock.mTransportConnection);
+            when(mTransportConnectionManager.getTransportClient(
                             eq(transport.getTransportComponent()), any(), any()))
-                    .thenReturn(transportMock.transportClient);
+                    .thenReturn(transportMock.mTransportConnection);
             transportMocks.add(transportMock);
         }
         return transportMocks;
@@ -706,7 +708,7 @@ public class TransportManagerTest {
                                 .map(TransportData::getTransportComponent)
                                 .collect(toSet()),
                         selectedTransport != null ? selectedTransport.transportName : null,
-                        mTransportClientManager);
+                        mTransportConnectionManager);
         transportManager.setOnTransportRegisteredListener(mListener);
         return transportManager;
     }

@@ -61,7 +61,7 @@ class MediaHost constructor(
             oldKey: String?,
             data: MediaData,
             immediately: Boolean,
-            isSsReactivated: Boolean
+            receivedSmartspaceCardLatency: Int
         ) {
             if (immediately) {
                 updateViewVisibility()
@@ -71,7 +71,8 @@ class MediaHost constructor(
         override fun onSmartspaceMediaDataLoaded(
             key: String,
             data: SmartspaceMediaData,
-            shouldPrioritize: Boolean
+            shouldPrioritize: Boolean,
+            isSsReactivated: Boolean
         ) {
             updateViewVisibility()
         }

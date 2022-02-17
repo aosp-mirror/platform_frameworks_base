@@ -109,9 +109,8 @@ public interface StatusBarStateController {
          * Callback to be notified when the fullscreen or immersive state changes.
          *
          * @param isFullscreen if any of the system bar is hidden by the focused window.
-         * @param isImmersive if the navigation bar can stay hidden when the display gets tapped.
          */
-        default void onFullscreenStateChanged(boolean isFullscreen, boolean isImmersive) {}
+        default void onFullscreenStateChanged(boolean isFullscreen) {}
 
         /**
          * Callback to be notified when the pulsing state changes

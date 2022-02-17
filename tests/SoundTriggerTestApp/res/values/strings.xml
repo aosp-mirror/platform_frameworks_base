@@ -22,6 +22,7 @@
     <string name="start_recog">Start</string>
     <string name="stop_recog">Stop</string>
     <string name="play_trigger">Play Trigger Audio</string>
+    <string name="get_model_state">Get State</string>
     <string name="capture">Capture Audio</string>
     <string name="stop_capture">Stop Capturing Audio</string>
     <string name="play_capture">Play Captured Audio</string>

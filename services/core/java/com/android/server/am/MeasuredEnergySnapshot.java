@@ -49,6 +49,9 @@ public class MeasuredEnergySnapshot {
     /** Number of ordinals for {@link EnergyConsumerType#CPU_CLUSTER}. */
     private final int mNumCpuClusterOrdinals;
 
+    /** Number of ordinals for {@link EnergyConsumerType#DISPLAY}. */
+    private final int mNumDisplayOrdinals;
+
     /** Number of ordinals for {@link EnergyConsumerType#OTHER}. */
     private final int mNumOtherOrdinals;
 
@@ -95,6 +98,7 @@ public class MeasuredEnergySnapshot {
 
         mNumCpuClusterOrdinals = calculateNumOrdinals(EnergyConsumerType.CPU_CLUSTER,
                 idToConsumerMap);
+        mNumDisplayOrdinals = calculateNumOrdinals(EnergyConsumerType.DISPLAY, idToConsumerMap);
         mNumOtherOrdinals = calculateNumOrdinals(EnergyConsumerType.OTHER, idToConsumerMap);
         mAttributionSnapshots = new SparseArray<>(mNumOtherOrdinals);
     }
@@ -108,7 +112,7 @@ public class MeasuredEnergySnapshot {
         public long[] cpuClusterChargeUC = null;
 
         /** The chargeUC for {@link EnergyConsumerType#DISPLAY}. */
-        public long displayChargeUC = UNAVAILABLE;
+        public long[] displayChargeUC = null;
 
         /** The chargeUC for {@link EnergyConsumerType#GNSS}. */
         public long gnssChargeUC = UNAVAILABLE;
@@ -212,7 +216,10 @@ public class MeasuredEnergySnapshot {
                     break;
 
                 case EnergyConsumerType.DISPLAY:
-                    output.displayChargeUC = deltaChargeUC;
+                    if (output.displayChargeUC == null) {
+                        output.displayChargeUC = new long[mNumDisplayOrdinals];
+                    }
+                    output.displayChargeUC[ordinal]  = deltaChargeUC;
                     break;
 
                 case EnergyConsumerType.GNSS:

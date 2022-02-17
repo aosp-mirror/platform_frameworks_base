@@ -19,6 +19,4 @@
   <color name="bubbleHourHandColor">#C97343</color>
   <!-- Default color for minute hand of Bubble clock. -->
   <color name="bubbleMinuteHandColor">#F5C983</color>
-  <!-- Accent color for Typographic clock. -->
-  <color name="typeClockAccentColor">#F5C983</color>
 </resources>
