@@ -32,8 +32,7 @@ import java.util.concurrent.Executor;
  * DeviceStateRequest.Callback)}.
  * <p>
  * By default, the request is kept active until a call to
- * {@link DeviceStateManager#cancelRequest(DeviceStateRequest)} or until one of the following
- * occurs:
+ * {@link DeviceStateManager#cancelStateRequest} or until one of the following occurs:
  * <ul>
  *     <li>Another processes submits a request succeeding this request in which case the request
  *     will be suspended until the interrupting request is canceled.

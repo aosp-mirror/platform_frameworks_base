@@ -21,6 +21,7 @@ import android.provider.DeviceConfig
 
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
@@ -37,6 +38,7 @@ private var sUsePeopleFiltering: Boolean? = null
 /**
  * Feature controller for the NOTIFICATIONS_USE_PEOPLE_FILTERING config.
  */
+@SysUISingleton
 class NotificationSectionsFeatureManager @Inject constructor(
     val proxy: DeviceConfigProxy,
     val context: Context

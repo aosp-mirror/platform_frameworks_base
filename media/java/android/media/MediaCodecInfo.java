@@ -28,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.sysprop.MediaProperties;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -181,10 +182,15 @@ public final class MediaCodecInfo {
         public String mName;
         public int mValue;
         public boolean mDefault;
+        public boolean mInternal;
         public Feature(String name, int value, boolean def) {
+            this(name, value, def, false /* internal */);
+        }
+        public Feature(String name, int value, boolean def, boolean internal) {
             mName = name;
             mValue = value;
             mDefault = def;
+            mInternal = internal;
         }
     }
 
@@ -196,12 +202,19 @@ public final class MediaCodecInfo {
     private static final Range<Rational> POSITIVE_RATIONALS =
             Range.create(new Rational(1, Integer.MAX_VALUE),
                          new Rational(Integer.MAX_VALUE, 1));
-    private static final Range<Integer> SIZE_RANGE =
-            Process.is64Bit() ? Range.create(1, 32768) : Range.create(1, 4096);
     private static final Range<Integer> FRAME_RATE_RANGE = Range.create(0, 960);
     private static final Range<Integer> BITRATE_RANGE = Range.create(0, 500000000);
     private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
     private static final int MAX_SUPPORTED_INSTANCES_LIMIT = 256;
+
+    private static final class LazyHolder {
+        private static final Range<Integer> SIZE_RANGE = Process.is64Bit()
+                ? Range.create(1, 32768)
+                : Range.create(1, MediaProperties.resolution_limit_32bit().orElse(4096));
+    }
+    private static Range<Integer> getSizeRange() {
+        return LazyHolder.SIZE_RANGE;
+    }
 
     // found stuff that is not supported by framework (=> this should not happen)
     private static final int ERROR_UNRECOGNIZED   = (1 << 0);
@@ -413,11 +426,56 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
+        /**
+         * P010 is 10-bit-per component 4:2:0 YCbCr semiplanar format.
+         * <p>
+         * This format uses 24 allocated bits per pixel with 15 bits of
+         * data per pixel. Chroma planes are subsampled by 2 both
+         * horizontally and vertically. Each chroma and luma component
+         * has 16 allocated bits in little-endian configuration with 10
+         * MSB of actual data.
+         *
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     UNUSED      |      Y/Cb/Cr                |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0               5 6   7 0                    7
+         * bit
+         * </pre>
+         *
+         * Use this format with {@link Image}. This format corresponds
+         * to {@link android.graphics.ImageFormat#YCBCR_P010}.
+         * <p>
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_FormatYUVP010                 = 54;
+
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
         // Note: in OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
+
+        /**
+         * 64 bits per pixel RGBA color format, with 16-bit signed
+         * floating point red, green, blue, and alpha components.
+         * <p>
+         *
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <-- i -->|<- i+1 ->|<- i+2 ->|<- i+3 ->|<- i+4 ->|<- i+5 ->|<- i+6 ->|<- i+7 ->
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         * |        RED        |       GREEN       |       BLUE        |       ALPHA       |
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         *  0       7 0       7 0       7 0       7 0       7 0       7 0       7 0       7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_F16}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format64bitABGRFloat            = 0x7F000F16;
 
         /**
          * 32 bits per pixel RGBA color format, with 8-bit red, green, blue, and alpha components.
@@ -435,6 +493,26 @@ public final class MediaCodecInfo {
          * This corresponds to {@link android.graphics.PixelFormat#RGBA_8888}.
          */
         public static final int COLOR_Format32bitABGR8888             = 0x7F00A000;
+
+        /**
+         * 32 bits per pixel RGBA color format, with 10-bit red, green,
+         * blue, and 2-bit alpha components.
+         * <p>
+         * Using 32-bit little-endian representation, colors stored as
+         * Red 9:0, Green 19:10, Blue 29:20, and Alpha 31:30.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         * |       RED           |      GREEN          |       BLUE          |ALPHA|
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         *  0               7 0 1 2           7 0     3 4       7 0         5 6   7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_1010102}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format32bitABGR2101010          = 0x7F00AAA2;
 
         /**
          * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
@@ -571,12 +649,47 @@ public final class MediaCodecInfo {
         public static final String FEATURE_LowLatency = "low-latency";
 
         /**
+         * Do not include in REGULAR_CODECS list in MediaCodecList.
+         */
+        private static final String FEATURE_SpecialCodec = "special-codec";
+
+        /**
          * <b>video encoder only</b>: codec supports quantization parameter bounds.
          * @see MediaFormat#KEY_VIDEO_QP_MAX
          * @see MediaFormat#KEY_VIDEO_QP_MIN
          */
         @SuppressLint("AllUpper")
         public static final String FEATURE_QpBounds = "qp-bounds";
+
+        /**
+         * <b>video encoder only</b>: codec supports exporting encoding statistics.
+         * Encoders with this feature can provide the App clients with the encoding statistics
+         * information about the frame.
+         * The scope of encoding statistics is controlled by
+         * {@link MediaFormat#KEY_VIDEO_ENCODING_STATISTICS_LEVEL}.
+         *
+         * @see MediaFormat#KEY_VIDEO_ENCODING_STATISTICS_LEVEL
+         */
+        @SuppressLint("AllUpper") // for consistency with other FEATURE_* constants
+        public static final String FEATURE_EncodingStatistics = "encoding-statistics";
+
+        /**
+         * <b>video encoder only</b>: codec supports HDR editing.
+         * <p>
+         * HDR editing support means that the codec accepts 10-bit HDR
+         * input surface, and it is capable of generating any HDR
+         * metadata required from both YUV and RGB input when the
+         * metadata is not present. This feature is only meaningful when
+         * using an HDR capable profile (and 10-bit HDR input).
+         * <p>
+         * This feature implies that the codec is capable of encoding at
+         * least one HDR format, and that it supports RGBA_1010102 as
+         * well as P010, and optionally RGBA_FP16 input formats, and
+         * that the encoder can generate HDR metadata for all supported
+         * HDR input formats.
+         */
+        @SuppressLint("AllUpper")
+        public static final String FEATURE_HdrEditing = "hdr-editing";
 
         /**
          * Query codec feature capabilities.
@@ -608,6 +721,8 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
             new Feature(FEATURE_LowLatency,       (1 << 7), true),
+            // feature to exclude codec from REGULAR codec list
+            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };
 
         private static final Feature[] encoderFeatures = {
@@ -615,6 +730,10 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_MultipleFrames, (1 << 1), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
             new Feature(FEATURE_QpBounds, (1 << 3), false),
+            new Feature(FEATURE_EncodingStatistics, (1 << 4), false),
+            new Feature(FEATURE_HdrEditing, (1 << 5), false),
+            // feature to exclude codec from REGULAR codec list
+            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };
 
         /** @hide */
@@ -622,7 +741,9 @@ public final class MediaCodecInfo {
             Feature[] features = getValidFeatures();
             String[] res = new String[features.length];
             for (int i = 0; i < res.length; i++) {
-                res[i] = features[i].mName;
+                if (!features[i].mInternal) {
+                    res[i] = features[i].mName;
+                }
             }
             return res;
         }
@@ -770,6 +891,10 @@ public final class MediaCodecInfo {
 
             // check feature support
             for (Feature feat: getValidFeatures()) {
+                if (feat.mInternal) {
+                    continue;
+                }
+
                 Integer yesNo = (Integer)map.get(MediaFormat.KEY_FEATURE_ + feat.mName);
                 if (yesNo == null) {
                     continue;
@@ -1083,7 +1208,9 @@ public final class MediaCodecInfo {
                     mFlagsRequired |= feat.mValue;
                 }
                 mFlagsSupported |= feat.mValue;
-                mDefaultFormat.setInteger(key, 1);
+                if (!feat.mInternal) {
+                    mDefaultFormat.setInteger(key, 1);
+                }
                 // TODO restrict features by mFlagsVerified once all codecs reliably verify them
             }
         }
@@ -2234,12 +2361,12 @@ public final class MediaCodecInfo {
         private void initWithPlatformLimits() {
             mBitrateRange = BITRATE_RANGE;
 
-            mWidthRange  = SIZE_RANGE;
-            mHeightRange = SIZE_RANGE;
+            mWidthRange  = getSizeRange();
+            mHeightRange = getSizeRange();
             mFrameRateRange = FRAME_RATE_RANGE;
 
-            mHorizontalBlockRange = SIZE_RANGE;
-            mVerticalBlockRange   = SIZE_RANGE;
+            mHorizontalBlockRange = getSizeRange();
+            mVerticalBlockRange   = getSizeRange();
 
             // full positive ranges are supported as these get calculated
             mBlockCountRange      = POSITIVE_INTEGERS;
@@ -2253,7 +2380,7 @@ public final class MediaCodecInfo {
             mHeightAlignment = 2;
             mBlockWidth = 2;
             mBlockHeight = 2;
-            mSmallerDimensionUpperLimit = SIZE_RANGE.getUpper();
+            mSmallerDimensionUpperLimit = getSizeRange().getUpper();
         }
 
         private @Nullable List<PerformancePoint> getPerformancePoints(Map<String, Object> map) {
@@ -2280,12 +2407,6 @@ public final class MediaCodecInfo {
                 Size size = Utils.parseSize(sizeStr, null);
                 if (size == null || size.getWidth() * size.getHeight() <= 0) {
                     continue;
-                }
-                if (size.getWidth() > SIZE_RANGE.getUpper()
-                        || size.getHeight() > SIZE_RANGE.getUpper()) {
-                    size = new Size(
-                            Math.min(size.getWidth(), SIZE_RANGE.getUpper()),
-                            Math.min(size.getHeight(), SIZE_RANGE.getUpper()));
                 }
                 Range<Long> range = Utils.parseLongRange(map.get(key), null);
                 if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
@@ -2500,10 +2621,10 @@ public final class MediaCodecInfo {
                 // codec supports profiles that we don't know.
                 // Use supplied values clipped to platform limits
                 if (widths != null) {
-                    mWidthRange = SIZE_RANGE.intersect(widths);
+                    mWidthRange = getSizeRange().intersect(widths);
                 }
                 if (heights != null) {
-                    mHeightRange = SIZE_RANGE.intersect(heights);
+                    mHeightRange = getSizeRange().intersect(heights);
                 }
                 if (counts != null) {
                     mBlockCountRange = POSITIVE_INTEGERS.intersect(
@@ -3923,6 +4044,12 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionLevelUhd30   = 0x40;
         public static final int DolbyVisionLevelUhd48   = 0x80;
         public static final int DolbyVisionLevelUhd60   = 0x100;
+        @SuppressLint("AllUpper")
+        public static final int DolbyVisionLevelUhd120  = 0x200;
+        @SuppressLint("AllUpper")
+        public static final int DolbyVisionLevel8k30    = 0x400;
+        @SuppressLint("AllUpper")
+        public static final int DolbyVisionLevel8k60    = 0x800;
 
         // Profiles and levels for AV1 Codec, corresponding to the definitions in
         // "AV1 Bitstream & Decoding Process Specification", Annex A

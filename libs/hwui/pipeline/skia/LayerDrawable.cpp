@@ -15,12 +15,20 @@
  */
 
 #include "LayerDrawable.h"
+
+#include <shaders/shaders.h>
+#include <utils/Color.h>
 #include <utils/MathUtils.h>
 
+#include "DeviceInfo.h"
 #include "GrBackendSurface.h"
 #include "SkColorFilter.h"
+#include "SkRuntimeEffect.h"
 #include "SkSurface.h"
 #include "gl/GrGLTypes.h"
+#include "math/mat4.h"
+#include "system/graphics-base-v1.0.h"
+#include "system/window.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,7 +37,8 @@ namespace skiapipeline {
 void LayerDrawable::onDraw(SkCanvas* canvas) {
     Layer* layer = mLayerUpdater->backingLayer();
     if (layer) {
-        DrawLayer(canvas->recordingContext(), canvas, layer, nullptr, nullptr, true);
+        SkRect srcRect = layer->getCurrentCropRect();
+        DrawLayer(canvas->recordingContext(), canvas, layer, &srcRect, nullptr, true);
     }
 }
 
@@ -67,6 +76,37 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
              isIntegerAligned(dstDevRect.y()));
 }
 
+static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
+                                                const shaders::LinearEffect& linearEffect,
+                                                float maxDisplayLuminance,
+                                                float currentDisplayLuminanceNits,
+                                                float maxLuminance) {
+    auto shaderString = SkString(shaders::buildLinearEffectSkSL(linearEffect));
+    auto [runtimeEffect, error] = SkRuntimeEffect::MakeForShader(std::move(shaderString));
+    if (!runtimeEffect) {
+        LOG_ALWAYS_FATAL("LinearColorFilter construction error: %s", error.c_str());
+    }
+
+    SkRuntimeShaderBuilder effectBuilder(std::move(runtimeEffect));
+
+    effectBuilder.child("child") = std::move(shader);
+
+    const auto uniforms = shaders::buildLinearEffectUniforms(
+            linearEffect, mat4(), maxDisplayLuminance, currentDisplayLuminanceNits, maxLuminance);
+
+    for (const auto& uniform : uniforms) {
+        effectBuilder.uniform(uniform.name.c_str()).set(uniform.value.data(), uniform.value.size());
+    }
+
+    return effectBuilder.makeShader();
+}
+
+static bool isHdrDataspace(ui::Dataspace dataspace) {
+    const auto transfer = dataspace & HAL_DATASPACE_TRANSFER_MASK;
+
+    return transfer == HAL_DATASPACE_TRANSFER_ST2084 || transfer == HAL_DATASPACE_TRANSFER_HLG;
+}
+
 // TODO: Context arg probably doesn't belong here – do debug check at callsite instead.
 bool LayerDrawable::DrawLayer(GrRecordingContext* context,
                               SkCanvas* canvas,
@@ -75,89 +115,108 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
                               const SkRect* dstRect,
                               bool useLayerTransform) {
     if (context == nullptr) {
-        SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
+        ALOGD("Attempting to draw LayerDrawable into an unsupported surface");
         return false;
     }
     // transform the matrix based on the layer
-    SkMatrix layerTransform = layer->getTransform();
+    // SkMatrix layerTransform = layer->getTransform();
+    const uint32_t windowTransform = layer->getWindowTransform();
     sk_sp<SkImage> layerImage = layer->getImage();
     const int layerWidth = layer->getWidth();
     const int layerHeight = layer->getHeight();
 
     if (layerImage) {
-        SkMatrix textureMatrixInv;
-        textureMatrixInv = layer->getTexTransform();
-        // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
-        // use bottom left origin and remove flipV and invert transformations.
-        SkMatrix flipV;
-        flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
-        textureMatrixInv.preConcat(flipV);
-        textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrixInv.postScale(layerImage->width(), layerImage->height());
-        SkMatrix textureMatrix;
-        if (!textureMatrixInv.invert(&textureMatrix)) {
-            textureMatrix = textureMatrixInv;
-        }
+        const int imageWidth = layerImage->width();
+        const int imageHeight = layerImage->height();
 
-        SkMatrix matrix;
         if (useLayerTransform) {
-            matrix = SkMatrix::Concat(layerTransform, textureMatrix);
-        } else {
-            matrix = textureMatrix;
+            canvas->save();
+            canvas->concat(layer->getTransform());
         }
 
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(layer->getColorFilter());
-        const bool nonIdentityMatrix = !matrix.isIdentity();
-        if (nonIdentityMatrix) {
-            canvas->save();
-            canvas->concat(matrix);
-        }
         const SkMatrix& totalMatrix = canvas->getTotalMatrix();
-        if (dstRect || srcRect) {
-            SkMatrix matrixInv;
-            if (!matrix.invert(&matrixInv)) {
-                matrixInv = matrix;
-            }
-            SkRect skiaSrcRect;
-            if (srcRect) {
-                skiaSrcRect = *srcRect;
-            } else {
-                skiaSrcRect = SkRect::MakeIWH(layerWidth, layerHeight);
-            }
-            matrixInv.mapRect(&skiaSrcRect);
-            SkRect skiaDestRect;
-            if (dstRect) {
-                skiaDestRect = *dstRect;
-            } else {
-                skiaDestRect = SkRect::MakeIWH(layerWidth, layerHeight);
-            }
-            matrixInv.mapRect(&skiaDestRect);
-            // If (matrix is a rect-to-rect transform)
-            // and (src/dst buffers size match in screen coordinates)
-            // and (src/dst corners align fractionally),
-            // then use nearest neighbor, otherwise use bilerp sampling.
-            // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
-            // only for SrcOver blending and without color filter (readback uses Src blending).
-            SkSamplingOptions sampling(SkFilterMode::kNearest);
-            if (layer->getForceFilter() ||
-                shouldFilterRect(totalMatrix, skiaSrcRect, skiaDestRect)) {
-                sampling = SkSamplingOptions(SkFilterMode::kLinear);
-            }
-            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
-                                  SkCanvas::kFast_SrcRectConstraint);
+        SkRect skiaSrcRect;
+        if (srcRect && !srcRect->isEmpty()) {
+            skiaSrcRect = *srcRect;
         } else {
-            SkRect imageRect = SkRect::MakeIWH(layerImage->width(), layerImage->height());
-            SkSamplingOptions sampling(SkFilterMode::kNearest);
-            if (layer->getForceFilter() || shouldFilterRect(totalMatrix, imageRect, imageRect)) {
-                sampling = SkSamplingOptions(SkFilterMode::kLinear);
-            }
-            canvas->drawImage(layerImage.get(), 0, 0, sampling, &paint);
+            skiaSrcRect = SkRect::MakeIWH(imageWidth, imageHeight);
         }
+        SkRect skiaDestRect;
+        if (dstRect && !dstRect->isEmpty()) {
+            skiaDestRect = (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
+                                   ? SkRect::MakeIWH(dstRect->height(), dstRect->width())
+                                   : SkRect::MakeIWH(dstRect->width(), dstRect->height());
+        } else {
+            skiaDestRect = (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90)
+                                   ? SkRect::MakeIWH(layerHeight, layerWidth)
+                                   : SkRect::MakeIWH(layerWidth, layerHeight);
+        }
+
+        const float px = skiaDestRect.centerX();
+        const float py = skiaDestRect.centerY();
+        SkMatrix m;
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_H) {
+            m.postScale(-1.f, 1.f, px, py);
+        }
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_FLIP_V) {
+            m.postScale(1.f, -1.f, px, py);
+        }
+        if (windowTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+            m.postRotate(90, 0, 0);
+            m.postTranslate(skiaDestRect.height(), 0);
+        }
+        auto constraint = SkCanvas::kFast_SrcRectConstraint;
+        if (srcRect && !srcRect->isEmpty()) {
+            constraint = SkCanvas::kStrict_SrcRectConstraint;
+        }
+
+        canvas->save();
+        canvas->concat(m);
+
+        // If (matrix is a rect-to-rect transform)
+        // and (src/dst buffers size match in screen coordinates)
+        // and (src/dst corners align fractionally),
+        // then use nearest neighbor, otherwise use bilerp sampling.
+        // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
+        // only for SrcOver blending and without color filter (readback uses Src blending).
+        SkSamplingOptions sampling(SkFilterMode::kNearest);
+        if (layer->getForceFilter() || shouldFilterRect(totalMatrix, skiaSrcRect, skiaDestRect)) {
+            sampling = SkSamplingOptions(SkFilterMode::kLinear);
+        }
+
+        const auto sourceDataspace = static_cast<ui::Dataspace>(
+                ColorSpaceToADataSpace(layerImage->colorSpace(), layerImage->colorType()));
+        const SkImageInfo& imageInfo = canvas->imageInfo();
+        const auto destinationDataspace = static_cast<ui::Dataspace>(
+                ColorSpaceToADataSpace(imageInfo.colorSpace(), imageInfo.colorType()));
+
+        if (isHdrDataspace(sourceDataspace) || isHdrDataspace(destinationDataspace)) {
+            const auto effect = shaders::LinearEffect{
+                    .inputDataspace = sourceDataspace,
+                    .outputDataspace = destinationDataspace,
+                    .undoPremultipliedAlpha = layerImage->alphaType() == kPremul_SkAlphaType,
+                    .fakeInputDataspace = destinationDataspace};
+            auto shader = layerImage->makeShader(sampling,
+                                                 SkMatrix::RectToRect(skiaSrcRect, skiaDestRect));
+            constexpr float kMaxDisplayBrightess = 1000.f;
+            constexpr float kCurrentDisplayBrightness = 500.f;
+            shader = createLinearEffectShader(std::move(shader), effect, kMaxDisplayBrightess,
+                                              kCurrentDisplayBrightness,
+                                              layer->getMaxLuminanceNits());
+            paint.setShader(shader);
+            canvas->drawRect(skiaDestRect, paint);
+        } else {
+            canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, sampling, &paint,
+                                  constraint);
+        }
+
+        canvas->restore();
         // restore the original matrix
-        if (nonIdentityMatrix) {
+        if (useLayerTransform) {
             canvas->restore();
         }
     }

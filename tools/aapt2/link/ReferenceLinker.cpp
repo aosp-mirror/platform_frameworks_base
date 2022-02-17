@@ -190,7 +190,8 @@ class EmptyDeclStack : public xml::IPackageDeclStack {
  public:
   EmptyDeclStack() = default;
 
-  Maybe<xml::ExtractedPackage> TransformPackageAlias(const StringPiece& alias) const override {
+  std::optional<xml::ExtractedPackage> TransformPackageAlias(
+      const StringPiece& alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }
@@ -206,7 +207,8 @@ struct MacroDeclStack : public xml::IPackageDeclStack {
       : alias_namespaces_(std::move(namespaces)) {
   }
 
-  Maybe<xml::ExtractedPackage> TransformPackageAlias(const StringPiece& alias) const override {
+  std::optional<xml::ExtractedPackage> TransformPackageAlias(
+      const StringPiece& alias) const override {
     if (alias.empty()) {
       return xml::ExtractedPackage{{}, true /*private*/};
     }
@@ -322,11 +324,11 @@ const SymbolTable::Symbol* ReferenceLinker::ResolveAttributeCheckVisibility(
   return symbol;
 }
 
-Maybe<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
-                                                               const CallSite& callsite,
-                                                               IAaptContext* context,
-                                                               SymbolTable* symbols,
-                                                               std::string* out_error) {
+std::optional<xml::AaptAttribute> ReferenceLinker::CompileXmlAttribute(const Reference& reference,
+                                                                       const CallSite& callsite,
+                                                                       IAaptContext* context,
+                                                                       SymbolTable* symbols,
+                                                                       std::string* out_error) {
   const SymbolTable::Symbol* symbol =
       ResolveAttributeCheckVisibility(reference, callsite, context, symbols, out_error);
   if (!symbol) {

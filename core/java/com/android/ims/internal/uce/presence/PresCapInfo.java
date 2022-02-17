@@ -105,6 +105,6 @@ public class PresCapInfo implements Parcelable {
     /** @hide */
     public void readFromParcel(Parcel source) {
         mContactUri = source.readString();
-        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader());
+        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader(), com.android.ims.internal.uce.common.CapInfo.class);
     }
 }

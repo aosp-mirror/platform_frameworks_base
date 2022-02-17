@@ -21,15 +21,16 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.app.NotificationChannel;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Looper;
+import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.View;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -43,7 +44,6 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -160,14 +160,6 @@ public interface Bubbles {
     /** Set the proxy to commnuicate with SysUi side components. */
     void setSysuiProxy(SysuiProxy proxy);
 
-    /**
-     * Set the scrim view for bubbles.
-     *
-     * @param callback The callback made with the executor and the executor's looper that the view
-     *                 will be running on.
-     **/
-    void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback);
-
     /** Set a listener to be notified of bubble expand events. */
     void setExpandListener(BubbleExpandListener listener);
 
@@ -202,8 +194,24 @@ public interface Bubbles {
      * @param entryDataByKey a map of ranking key to bubble entry and whether the entry should
      *                       bubble up
      */
-    void onRankingUpdated(RankingMap rankingMap,
+    void onRankingUpdated(
+            RankingMap rankingMap,
             HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey);
+
+    /**
+     * Called when a notification channel is modified, in response to
+     * {@link NotificationListenerService#onNotificationChannelModified}.
+     *
+     * @param pkg the package the notification channel belongs to.
+     * @param user the user the notification channel belongs to.
+     * @param channel the channel being modified.
+     * @param modificationType the type of modification that occurred to the channel.
+     */
+    void onNotificationChannelModified(
+            String pkg,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType);
 
     /**
      * Called when the status bar has become visible or invisible (either permanently or
@@ -294,6 +302,8 @@ public interface Bubbles {
         void updateNotificationSuppression(String key);
 
         void onStackExpandChanged(boolean shouldExpand);
+
+        void onManageMenuExpandChanged(boolean menuExpanded);
 
         void onUnbubbleConversation(String key);
     }

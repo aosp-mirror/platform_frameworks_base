@@ -16,7 +16,7 @@
 
 package com.android.server.job;
 
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.util.proto.ProtoOutputStream;
@@ -47,9 +47,9 @@ public interface JobSchedulerInternal {
     void removeBackingUpUid(int uid);
     void clearAllBackingUpUids();
 
-    /** Returns the package responsible for backing up media on the device. */
-    @NonNull
-    String getMediaBackupPackage();
+    /** Returns the package responsible for providing media from the cloud to the device. */
+    @Nullable
+    String getCloudMediaProviderPackage(int userId);
 
     /**
      * The user has started interacting with the app.  Take any appropriate action.

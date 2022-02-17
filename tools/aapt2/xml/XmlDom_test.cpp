@@ -98,7 +98,7 @@ TEST(XmlDomTest, BinaryInflate) {
   // the Attribute accepts (eg: string|reference).
   ASSERT_TRUE(new_doc->root->attributes[0].compiled_attribute);
   EXPECT_THAT(new_doc->root->attributes[0].compiled_attribute.value().id,
-              Eq(make_value(ResourceId(0x01010001u))));
+              Eq(ResourceId(0x01010001u)));
 
   EXPECT_THAT(new_doc->root->attributes[0].value, StrEq("@string/foo"));
   EXPECT_THAT(new_doc->root->attributes[0].compiled_value,
@@ -139,27 +139,38 @@ TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
   EXPECT_THAT(attr->value, Eq("\""));
 }
 
+TEST(XmlDomTest, XmlEscapeSingleQuotes) {
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
+    <foo><![CDATA[oh no' (line=1001)
+E: this-is-not-an-element (line=88)
+    T: 'blah]]></foo>)");
+
+  Element* el = doc->root.get();
+  Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
+  ASSERT_THAT(text, NotNull());
+  EXPECT_THAT(text->text,
+              Eq("oh no' (line=1001)\nE: this-is-not-an-element (line=88)\n    T: 'blah"));
+}
+
 class TestVisitor : public PackageAwareVisitor {
  public:
   using PackageAwareVisitor::Visit;
 
   void Visit(Element* el) override {
     if (el->name == "View1") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
     } else if (el->name == "View2") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
     } else if (el->name == "View3") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
-      EXPECT_THAT(TransformPackageAlias("three"),
-                  Eq(make_value(ExtractedPackage{"com.three", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
+      EXPECT_THAT(TransformPackageAlias("three"), Eq(ExtractedPackage{"com.three", false}));
     } else if (el->name == "View4") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
-      EXPECT_THAT(TransformPackageAlias("three"),
-                  Eq(make_value(ExtractedPackage{"com.three", false})));
-      EXPECT_THAT(TransformPackageAlias("four"), Eq(make_value(ExtractedPackage{"", true})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
+      EXPECT_THAT(TransformPackageAlias("three"), Eq(ExtractedPackage{"com.three", false}));
+      EXPECT_THAT(TransformPackageAlias("four"), Eq(ExtractedPackage{"", true}));
     }
   }
 };

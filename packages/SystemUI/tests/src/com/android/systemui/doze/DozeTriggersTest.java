@@ -45,13 +45,17 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
 import com.android.systemui.util.sensors.FakeThresholdSensor;
-import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.sensors.ProximityCheck;
+import com.android.systemui.util.sensors.ThresholdSensorEvent;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -78,11 +82,17 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private DockManager mDockManager;
     @Mock
-    private ProximitySensor.ProximityCheck mProximityCheck;
+    private ProximityCheck mProximityCheck;
     @Mock
     private AuthController mAuthController;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private DevicePostureController mDevicePostureController;
+    @Mock
+    private BatteryController mBatteryController;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -114,7 +124,8 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor, mUiEventLogger);
+                mAuthController, mExecutor, mUiEventLogger, mKeyguardStateController,
+                mDevicePostureController, mBatteryController);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
@@ -129,14 +140,14 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 1));
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(false, 2));
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(false, 2));
         mProximitySensor.alertListeners();
         waitForSensorManager();
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
@@ -196,7 +207,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testProximitySensorNotAvailablel() {
         mProximitySensor.setSensorAvailable(false);
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100,
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_REACH, 100, 100,
                 new float[]{1});
         mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
     }
@@ -214,6 +225,50 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         // THEN a log is taken that quick pick up was triggered
         verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
+    }
+
+    @Test
+    public void testPickupGesture() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN the pick up gesture is triggered and keyguard isn't occluded
+        // and device isn't on a wireless charger
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mBatteryController.isPluggedInWireless()).thenReturn(false);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
+
+        // THEN wakeup
+        verify(mMachine).wakeUp();
+    }
+
+    @Test
+    public void testPickupGestureDroppedKeyguardOccluded() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN the pick up gesture is triggered and keyguard IS occluded
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        when(mBatteryController.isPluggedInWireless()).thenReturn(false);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
+
+        // THEN never wakeup
+        verify(mMachine, never()).wakeUp();
+    }
+
+    @Test
+    public void testPickupGestureWirelessCharger() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN the pick up gesture is triggered
+        // and device IS on a wireless charger
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mBatteryController.isPluggedInWireless()).thenReturn(true);
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
+
+        // THEN never wakeup
+        verify(mMachine, never()).wakeUp();
     }
 
     @Test
@@ -242,6 +297,12 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         // THEN send interrupt
         verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY), eq(major), eq(minor));
+    }
+
+    @Test
+    public void testDestroy() {
+        mTriggers.destroy();
+        verify(mProximityCheck).destroy();
     }
 
     private void waitForSensorManager() {

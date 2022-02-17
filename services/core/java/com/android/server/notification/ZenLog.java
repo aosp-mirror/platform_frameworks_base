@@ -65,6 +65,7 @@ public class ZenLog {
     private static final int TYPE_LISTENER_HINTS_CHANGED = 15;
     private static final int TYPE_SET_NOTIFICATION_POLICY = 16;
     private static final int TYPE_SET_CONSOLIDATED_ZEN_POLICY = 17;
+    private static final int TYPE_MATCHES_CALL_FILTER = 18;
 
     private static int sNext;
     private static int sSize;
@@ -166,6 +167,13 @@ public class ZenLog {
             + hintsToString(newHints) + ",listeners=" + listenerCount);
     }
 
+    /*
+     * Trace calls to matchesCallFilter with the result of the call and the reason for the result.
+     */
+    public static void traceMatchesCallFilter(boolean result, String reason) {
+        append(TYPE_MATCHES_CALL_FILTER, "result=" + result + ", reason=" + reason);
+    }
+
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
         return provider == null ? "no provider" : e != null ? e.getMessage() : "ok";
     }
@@ -189,6 +197,7 @@ public class ZenLog {
             case TYPE_LISTENER_HINTS_CHANGED: return "listener_hints_changed";
             case TYPE_SET_NOTIFICATION_POLICY: return "set_notification_policy";
             case TYPE_SET_CONSOLIDATED_ZEN_POLICY: return "set_consolidated_policy";
+            case TYPE_MATCHES_CALL_FILTER: return "matches_call_filter";
             default: return "unknown";
         }
     }

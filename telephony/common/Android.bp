@@ -19,6 +19,17 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-mms-shared-srcs",
+    visibility: [
+        "//packages/apps/Bluetooth",
+	"//packages/modules/Bluetooth/android/app",
+    ],
+    srcs: [
+        "com/google/android/mms/**/*.java",
+    ],
+}
+
 genrule {
     name: "statslog-telephony-common-java-gen",
     tools: ["stats-log-api-gen"],

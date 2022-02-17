@@ -26,6 +26,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class ScreenLifecycleTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mScreen = new ScreenLifecycle();
+        mScreen = new ScreenLifecycle(mock(DumpManager.class));
         mScreenObserverMock = mock(ScreenLifecycle.Observer.class);
         mScreen.addObserver(mScreenObserverMock);
     }
@@ -56,15 +57,16 @@ public class ScreenLifecycleTest extends SysuiTestCase {
 
     @Test
     public void screenTurningOn() throws Exception {
-        mScreen.dispatchScreenTurningOn();
+        Runnable onDrawn = () -> {};
+        mScreen.dispatchScreenTurningOn(onDrawn);
 
         assertEquals(ScreenLifecycle.SCREEN_TURNING_ON, mScreen.getScreenState());
-        verify(mScreenObserverMock).onScreenTurningOn();
+        verify(mScreenObserverMock).onScreenTurningOn(onDrawn);
     }
 
     @Test
     public void screenTurnedOn() throws Exception {
-        mScreen.dispatchScreenTurningOn();
+        mScreen.dispatchScreenTurningOn(null);
         mScreen.dispatchScreenTurnedOn();
 
         assertEquals(ScreenLifecycle.SCREEN_ON, mScreen.getScreenState());
@@ -73,7 +75,7 @@ public class ScreenLifecycleTest extends SysuiTestCase {
 
     @Test
     public void screenTurningOff() throws Exception {
-        mScreen.dispatchScreenTurningOn();
+        mScreen.dispatchScreenTurningOn(null);
         mScreen.dispatchScreenTurnedOn();
         mScreen.dispatchScreenTurningOff();
 
@@ -83,7 +85,7 @@ public class ScreenLifecycleTest extends SysuiTestCase {
 
     @Test
     public void screenTurnedOff() throws Exception {
-        mScreen.dispatchScreenTurningOn();
+        mScreen.dispatchScreenTurningOn(null);
         mScreen.dispatchScreenTurnedOn();
         mScreen.dispatchScreenTurningOff();
         mScreen.dispatchScreenTurnedOff();

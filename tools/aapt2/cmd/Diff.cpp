@@ -87,8 +87,8 @@ static bool IsSymbolVisibilityDifferent(const Visibility& vis_a, const Visibilit
 }
 
 template <typename Id>
-static bool IsIdDiff(const Visibility::Level& level_a, const Maybe<Id>& id_a,
-                     const Visibility::Level& level_b, const Maybe<Id>& id_b) {
+static bool IsIdDiff(const Visibility::Level& level_a, const std::optional<Id>& id_a,
+                     const Visibility::Level& level_b, const std::optional<Id>& id_b) {
   if (level_a == Visibility::Level::kPublic || level_b == Visibility::Level::kPublic) {
     return id_a != id_b;
   }

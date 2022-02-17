@@ -57,7 +57,8 @@ public:
     }
 
     FrameInfo* startFrame() { return &mFrames.next(); }
-    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter);
+    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter,
+                     int64_t frameNumber, int32_t surfaceId);
 
     // Calculates the 'legacy' jank information, i.e. with outdated refresh rate information and
     // without GPU completion or deadlined information.

@@ -29,6 +29,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
@@ -54,6 +55,7 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotifStackController mStackController;
     @Mock private NotificationListContainer mListContainer;
     @Mock
     private NotificationEntryListener mEntryListener;
@@ -95,7 +97,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
         remoteInputManager.setUpWithCallback(mRemoteInputManagerCallback,
                 mDelegate);
         lockscreenUserManager.setUpWithPresenter(mPresenter);
-        viewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
+        viewHierarchyManager.setUpWithPresenter(mPresenter, mStackController, mListContainer);
 
         TestableLooper.get(this).processAllMessages();
         assertFalse(mDependency.hasInstantiatedDependency(NotificationShadeWindowController.class));
