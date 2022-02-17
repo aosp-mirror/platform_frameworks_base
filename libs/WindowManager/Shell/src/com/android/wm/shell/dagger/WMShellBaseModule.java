@@ -168,8 +168,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DragAndDrop provideDragAndDrop(DragAndDropController dragAndDropController) {
-        return dragAndDropController.asDragAndDrop();
+    static Optional<DragAndDrop> provideDragAndDrop(DragAndDropController dragAndDropController) {
+        return Optional.of(dragAndDropController.asDragAndDrop());
     }
 
     @WMSingleton
@@ -184,8 +184,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static CompatUI provideCompatUI(CompatUIController compatUIController) {
-        return compatUIController.asCompatUI();
+    static Optional<CompatUI> provideCompatUI(CompatUIController compatUIController) {
+        return Optional.of(compatUIController.asCompatUI());
     }
 
     @WMSingleton
