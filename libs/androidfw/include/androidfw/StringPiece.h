@@ -288,12 +288,12 @@ inline ::std::basic_string<TChar>& operator+=(::std::basic_string<TChar>& lhs,
 
 template <typename TChar>
 inline bool operator==(const ::std::basic_string<TChar>& lhs, const BasicStringPiece<TChar>& rhs) {
-  return rhs == lhs;
+  return BasicStringPiece<TChar>(lhs) == rhs;
 }
 
 template <typename TChar>
 inline bool operator!=(const ::std::basic_string<TChar>& lhs, const BasicStringPiece<TChar>& rhs) {
-  return rhs != lhs;
+  return BasicStringPiece<TChar>(lhs) != rhs;
 }
 
 }  // namespace android
