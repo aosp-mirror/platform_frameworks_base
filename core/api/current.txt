@@ -16997,6 +16997,7 @@ package android.hardware {
 
   public class SensorEvent {
     field public int accuracy;
+    field public boolean firstEventAfterDiscontinuity;
     field public android.hardware.Sensor sensor;
     field public long timestamp;
     field public final float[] values;
@@ -17008,7 +17009,6 @@ package android.hardware {
     method public void onFlushCompleted(android.hardware.Sensor);
     method public void onSensorAdditionalInfo(android.hardware.SensorAdditionalInfo);
     method public void onSensorChanged(android.hardware.SensorEvent);
-    method public void onSensorDiscontinuity(@NonNull android.hardware.Sensor);
   }
 
   public interface SensorEventListener {
