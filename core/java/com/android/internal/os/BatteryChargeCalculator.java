@@ -16,18 +16,21 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates the battery discharge amounts.
  */
 public class BatteryChargeCalculator extends PowerCalculator {
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        // Always apply this power calculator, no matter what power components were requested
+        return true;
+    }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
@@ -51,7 +54,8 @@ public class BatteryChargeCalculator extends PowerCalculator {
         builder.setDischargePercentage(
                 batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED))
                 .setDischargedPowerRange(dischargedPowerLowerBoundMah,
-                        dischargedPowerUpperBoundMah);
+                        dischargedPowerUpperBoundMah)
+                .setDischargeDurationMs(batteryStats.getBatteryRealtime(rawRealtimeUs) / 1000);
 
         final long batteryTimeRemainingMs = batteryStats.computeBatteryTimeRemaining(rawRealtimeUs);
         if (batteryTimeRemainingMs != -1) {
@@ -72,11 +76,5 @@ public class BatteryChargeCalculator extends PowerCalculator {
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setConsumedPower(dischargeMah);
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        // Not implemented. The computation is done by BatteryStatsHelper
     }
 }

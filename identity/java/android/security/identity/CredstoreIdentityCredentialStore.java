@@ -126,7 +126,8 @@ class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
             ICredential credstoreCredential;
             credstoreCredential = mStore.getCredentialByName(credentialName, cipherSuite);
             return new CredstoreIdentityCredential(mContext, credentialName, cipherSuite,
-                    credstoreCredential);
+                    credstoreCredential,
+                    null);
         } catch (android.os.RemoteException e) {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {
@@ -162,4 +163,23 @@ class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
                     + e.errorCode, e);
         }
     }
+
+    @Override
+    public @NonNull PresentationSession createPresentationSession(@Ciphersuite int cipherSuite)
+            throws CipherSuiteNotSupportedException {
+        try {
+            ISession credstoreSession = mStore.createPresentationSession(cipherSuite);
+            return new CredstorePresentationSession(mContext, cipherSuite, this, credstoreSession);
+        } catch (android.os.RemoteException e) {
+            throw new RuntimeException("Unexpected RemoteException ", e);
+        } catch (android.os.ServiceSpecificException e) {
+            if (e.errorCode == ICredentialStore.ERROR_CIPHER_SUITE_NOT_SUPPORTED) {
+                throw new CipherSuiteNotSupportedException(e.getMessage(), e);
+            } else {
+                throw new RuntimeException("Unexpected ServiceSpecificException with code "
+                        + e.errorCode, e);
+            }
+        }
+    }
+
 }

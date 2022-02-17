@@ -25,6 +25,7 @@ import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private final Map<Integer, Boolean> mPortConnectionStatus = new HashMap<>();
     private final HashMap<Integer, Integer> mMessageSendResult = new HashMap<>();
     private int mMyPhysicalAddress = 0;
+    private int mVendorId = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
     private HdmiCecController.HdmiCecCallback mCallback = null;
     private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
@@ -76,7 +78,8 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
-            HdmiCecMessage message = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+            HdmiCecMessage message = HdmiCecMessage.build(srcAddress, dstAddress, body[0],
+                    Arrays.copyOfRange(body, 1, body.length));
             mResultMessages.add(message);
             return mMessageSendResult.getOrDefault(message.getOpcode(), SendMessageResult.SUCCESS);
         }
@@ -102,7 +105,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetVendorId() {
-        return 0;
+        return mVendorId;
     }
 
     @Override
@@ -178,6 +181,11 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setMessageSendResult(int opcode, int result) {
         mMessageSendResult.put(opcode, result);
+    }
+
+    @VisibleForTesting
+    protected void setVendorId(int vendorId) {
+        mVendorId = vendorId;
     }
 
     @VisibleForTesting

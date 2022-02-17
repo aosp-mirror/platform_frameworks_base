@@ -72,7 +72,7 @@ import com.android.internal.R;
  * {@link #setSwitchTextAppearance(android.content.Context, int) switchTextAppearance} and
  * the related setSwitchTypeface() methods control that of the thumb.
  *
- * <p>{@link android.support.v7.widget.SwitchCompat} is a version of
+ * <p>{@link androidx.recyclerview.widget.RecyclerView} is a version of
  * the Switch widget which runs on devices back to API 7.</p>
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">Toggle Buttons</a>

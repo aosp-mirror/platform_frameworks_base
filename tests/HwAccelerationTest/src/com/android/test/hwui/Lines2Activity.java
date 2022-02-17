@@ -42,7 +42,7 @@ public class Lines2Activity extends Activity {
         swView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         frame.addView(swView);
         final LinesView hwBothView = new LinesView(this, 850, Color.GREEN);
-        // Don't actually need to render to a hw layer, but it's a good sanity-check that
+        // Don't actually need to render to a hw layer, but it's a good check that
         // we're rendering to/from layers correctly
         hwBothView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         frame.addView(hwBothView);

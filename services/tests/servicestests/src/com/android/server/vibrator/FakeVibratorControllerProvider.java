@@ -51,7 +51,9 @@ final class FakeVibratorControllerProvider {
     private final FakeNativeWrapper mNativeWrapper;
 
     private boolean mIsAvailable = true;
+    private boolean mIsInfoLoadSuccessful = true;
     private long mLatency;
+    private int mOffCount;
 
     private int mCapabilities;
     private int[] mSupportedEffects;
@@ -85,7 +87,7 @@ final class FakeVibratorControllerProvider {
         @Override
         public long on(long milliseconds, long vibrationId) {
             mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
-                    /* frequency= */ 0, (int) milliseconds));
+                    /* frequencyHz= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
             return milliseconds;
@@ -93,6 +95,7 @@ final class FakeVibratorControllerProvider {
 
         @Override
         public void off() {
+            mOffCount++;
         }
 
         @Override
@@ -155,7 +158,7 @@ final class FakeVibratorControllerProvider {
         }
 
         @Override
-        public boolean getInfo(float suggestedFrequencyRange, VibratorInfo.Builder infoBuilder) {
+        public boolean getInfo(VibratorInfo.Builder infoBuilder) {
             infoBuilder.setCapabilities(mCapabilities);
             infoBuilder.setSupportedBraking(mSupportedBraking);
             infoBuilder.setPwleSizeMax(mPwleSizeMax);
@@ -167,10 +170,9 @@ final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(mMinFrequency,
-                    mResonantFrequency, mFrequencyResolution, suggestedFrequencyRange,
-                    mMaxAmplitudes));
-            return true;
+            infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+                    mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            return mIsInfoLoadSuccessful;
         }
 
         private void applyLatency() {
@@ -208,6 +210,14 @@ final class FakeVibratorControllerProvider {
      */
     public void disableVibrators() {
         mIsAvailable = false;
+    }
+
+    /**
+     * Sets the result for the method that loads the {@link VibratorInfo}, for faking a vibrator
+     * that fails to load some of the hardware data.
+     */
+    public void setVibratorInfoLoadSuccessful(boolean successful) {
+        mIsInfoLoadSuccessful = successful;
     }
 
     /**
@@ -306,6 +316,11 @@ final class FakeVibratorControllerProvider {
     /** Return list of states set for external control to the fake vibrator hardware. */
     public List<Boolean> getExternalControlStates() {
         return mExternalControlStates;
+    }
+
+    /** Returns the number of times the vibrator was turned off. */
+    public int getOffCount() {
+        return mOffCount;
     }
 
     /**

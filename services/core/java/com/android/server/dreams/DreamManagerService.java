@@ -95,6 +95,8 @@ public final class DreamManagerService extends SystemService {
     private int mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
     private int mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
+    private ComponentName mDreamOverlayServiceName;
+
     private AmbientDisplayConfiguration mDozeConfig;
 
     @VisibleForTesting
@@ -414,14 +416,16 @@ public final class DreamManagerService extends SystemService {
         mCurrentDreamCanDoze = canDoze;
         mCurrentDreamUserId = userId;
 
+        if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
+            mUiEventLogger.log(DreamManagerEvent.DREAM_START);
+        }
+
         PowerManager.WakeLock wakeLock = mPowerManager
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
         mHandler.post(wakeLock.wrap(() -> {
             mAtmInternal.notifyDreamStateChanged(true);
-            if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
-                mUiEventLogger.log(DreamManagerEvent.DREAM_START);
-            }
-            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock);
+            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock,
+                    mDreamOverlayServiceName);
         }));
     }
 
@@ -481,14 +485,15 @@ public final class DreamManagerService extends SystemService {
     }
 
     private static String componentsToString(ComponentName[] componentNames) {
+        if (componentNames == null) {
+            return null;
+        }
         StringBuilder names = new StringBuilder();
-        if (componentNames != null) {
-            for (ComponentName componentName : componentNames) {
-                if (names.length() > 0) {
-                    names.append(',');
-                }
-                names.append(componentName.flattenToString());
+        for (ComponentName componentName : componentNames) {
+            if (names.length() > 0) {
+                names.append(',');
             }
+            names.append(componentName.flattenToString());
         }
         return names.toString();
     }
@@ -589,6 +594,15 @@ public final class DreamManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override // Binder call
+        public void registerDreamOverlayService(ComponentName overlayComponent) {
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
+            // Store the overlay service component so that it can be passed to the dream when it is
+            // invoked.
+            mDreamOverlayServiceName = overlayComponent;
         }
 
         @Override // Binder call

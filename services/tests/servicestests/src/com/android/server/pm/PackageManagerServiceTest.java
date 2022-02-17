@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
@@ -27,11 +29,18 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.content.IIntentReceiver;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.platform.test.annotations.Postsubmit;
 import android.util.SparseArray;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
@@ -42,6 +51,7 @@ import com.google.android.collect.Lists;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,10 +70,21 @@ import java.util.regex.Pattern;
 // atest PackageManagerServiceTest
 // runtest -c com.android.server.pm.PackageManagerServiceTest frameworks-services
 // bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
+@Postsubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerServiceTest {
+
+    private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
+
+    private static final String TEST_DATA_PATH = "/data/local/tmp/servicestests/";
+    private static final String TEST_APP_APK = "StubTestApp.apk";
+    private static final String TEST_PKG_NAME = "com.android.servicestests.apps.stubapp";
+
+    private IPackageManager mIPackageManager;
+
     @Before
     public void setUp() throws Exception {
+        mIPackageManager = AppGlobals.getPackageManager();
     }
 
     @After
@@ -71,7 +92,7 @@ public class PackageManagerServiceTest {
     }
 
     @Test
-    public void testPackageRemoval() throws Exception {
+    public void testPackageRemoval() {
         class PackageSenderImpl implements PackageSender {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
@@ -101,16 +122,15 @@ public class PackageManagerServiceTest {
 
         PackageSenderImpl sender = new PackageSenderImpl();
         PackageSetting setting = null;
-        PackageManagerService.PackageRemovedInfo pri =
-                new PackageManagerService.PackageRemovedInfo(sender);
+        PackageRemovedInfo pri = new PackageRemovedInfo(sender);
 
         // Initial conditions: nothing there
-        Assert.assertNull(pri.removedUsers);
-        Assert.assertNull(pri.broadcastUsers);
+        Assert.assertNull(pri.mRemovedUsers);
+        Assert.assertNull(pri.mBroadcastUsers);
 
         // populateUsers with nothing leaves nothing
         pri.populateUsers(null, setting);
-        Assert.assertNull(pri.broadcastUsers);
+        Assert.assertNull(pri.mBroadcastUsers);
 
         // Create a real (non-null) PackageSetting and confirm that the removed
         // users are copied properly
@@ -126,33 +146,33 @@ public class PackageManagerServiceTest {
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5
         }, setting);
-        Assert.assertNotNull(pri.broadcastUsers);
-        Assert.assertEquals(5, pri.broadcastUsers.length);
-        Assert.assertNotNull(pri.instantUserIds);
-        Assert.assertEquals(0, pri.instantUserIds.length);
+        Assert.assertNotNull(pri.mBroadcastUsers);
+        Assert.assertEquals(5, pri.mBroadcastUsers.length);
+        Assert.assertNotNull(pri.mInstantUserIds);
+        Assert.assertEquals(0, pri.mInstantUserIds.length);
 
         // Exclude a user
-        pri.broadcastUsers = null;
+        pri.mBroadcastUsers = null;
         final int EXCLUDED_USER_ID = 4;
         setting.setInstantApp(true, EXCLUDED_USER_ID);
         pri.populateUsers(new int[] {
                 1, 2, 3, EXCLUDED_USER_ID, 5
         }, setting);
-        Assert.assertNotNull(pri.broadcastUsers);
-        Assert.assertEquals(4, pri.broadcastUsers.length);
-        Assert.assertNotNull(pri.instantUserIds);
-        Assert.assertEquals(1, pri.instantUserIds.length);
+        Assert.assertNotNull(pri.mBroadcastUsers);
+        Assert.assertEquals(4, pri.mBroadcastUsers.length);
+        Assert.assertNotNull(pri.mInstantUserIds);
+        Assert.assertEquals(1, pri.mInstantUserIds.length);
 
         // TODO: test that sendApplicationHiddenForUser() actually fills in
         // broadcastUsers
     }
 
     @Test
-    public void testPartitions() throws Exception {
+    public void testPartitions() {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
-            final PackageManagerService.ScanPartition scanPartition =
+            final ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
                 File path = new File(String.format("%s/%s/A.apk", partitions[i], appdir[j]));
@@ -441,15 +461,15 @@ public class PackageManagerServiceTest {
     // known constants.
     private Boolean getOverride(Method m) {
         final String name = "Computer." + displayName(m);
-        final PackageManagerService.Computer.LiveImplementation annotation =
-                m.getAnnotation(PackageManagerService.Computer.LiveImplementation.class);
+        final Computer.LiveImplementation annotation =
+                m.getAnnotation(Computer.LiveImplementation.class);
         if (annotation == null) {
             return null;
         }
         final int override = annotation.override();
-        if (override == PackageManagerService.Computer.LiveImplementation.MANDATORY) {
+        if (override == Computer.LiveImplementation.MANDATORY) {
             return true;
-        } else if (override == PackageManagerService.Computer.LiveImplementation.NOT_ALLOWED) {
+        } else if (override == Computer.LiveImplementation.NOT_ALLOWED) {
             return false;
         } else {
             flag(name, "invalid Live value: " + override);
@@ -462,7 +482,7 @@ public class PackageManagerServiceTest {
         // Verify that Copmuter methods are properly annotated and that ComputerLocked is
         // properly populated per annotations.
         // Call PackageManagerService.validateComputer();
-        Class base = PackageManagerService.Computer.class;
+        Class base = Computer.class;
 
         HashMap<Method, Boolean> methodType = new HashMap<>();
 
@@ -477,7 +497,7 @@ public class PackageManagerServiceTest {
             methodType.put(m, override);
         }
 
-        Class coreClass = PackageManagerService.ComputerEngine.class;
+        Class coreClass = ComputerEngine.class;
         final Method[] coreMethods = coreClass.getDeclaredMethods();
 
         // Examine every method in the core.  If it inherits from a base method it must be
@@ -510,6 +530,11 @@ public class PackageManagerServiceTest {
         for (Method m : coreMethods) {
             if (m != null) {
                 final String name = "ComputerEngine." + displayName(m);
+                if (name.contains(".lambda$static")) {
+                    // skip static lambda function
+                    continue;
+                }
+
                 final int modifiers = m.getModifiers();
                 if (isPrivate(modifiers)) {
                     // Okay
@@ -521,7 +546,7 @@ public class PackageManagerServiceTest {
             }
         }
 
-        Class liveClass = PackageManagerService.ComputerLocked.class;
+        Class liveClass = ComputerLocked.class;
         final Method[] liveMethods = liveClass.getDeclaredMethods();
 
         // Examine every method in the live list.  Every method must be final and must
@@ -598,5 +623,143 @@ public class PackageManagerServiceTest {
         }
         Collections.sort(knownPackageIds);
         return knownPackageIds;
+    }
+
+    @Test
+    public void testInstallReason_afterUpdate_keepUnchanged() throws Exception {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        try {
+            // Try to install test APK with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
+            assertWithMessage("The install reason of test APK is incorrect.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
+
+            // Try to update test APK with different reason INSTALL_REASON_USER
+            runShellCommand("pm install --install-reason 4 " + testApk);
+            assertWithMessage("The install reason should keep unchanged after update.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+        }
+    }
+
+    @Test
+    public void testInstallReason_userRemainsUninstalled_keepUnknown() throws Exception {
+        Assume.assumeTrue(UserManager.supportsMultipleUsers());
+        final UserManager um = UserManager.get(
+                InstrumentationRegistry.getInstrumentation().getContext());
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        int userId = UserHandle.USER_NULL;
+        try {
+            // Try to install test APK with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
+            assertWithMessage("The install reason of test APK is incorrect.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
+
+            // Create and start the 2nd user.
+            userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
+            runShellCommand("am start-user -w " + userId);
+            // Since the test APK isn't installed on the 2nd user, the reason should be unknown.
+            assertWithMessage("The install reason in 2nd user should be unknown.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    PackageManager.INSTALL_REASON_UNKNOWN);
+
+            // Try to update test APK with different reason INSTALL_REASON_USER
+            runShellCommand("pm install --install-reason 4 " + testApk);
+            assertWithMessage("The install reason in 2nd user should keep unknown.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    PackageManager.INSTALL_REASON_UNKNOWN);
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+            if (userId != UserHandle.USER_NULL) {
+                um.removeUser(userId);
+            }
+        }
+    }
+
+    @Test
+    public void testInstallReason_installForAllUsers_sameReason() throws Exception {
+        Assume.assumeTrue(UserManager.supportsMultipleUsers());
+        final UserManager um = UserManager.get(
+                InstrumentationRegistry.getInstrumentation().getContext());
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        int userId = UserHandle.USER_NULL;
+        try {
+            // Create and start the 2nd user.
+            userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
+            runShellCommand("am start-user -w " + userId);
+
+            // Try to install test APK to all users with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --install-reason 3 " + testApk);
+            assertWithMessage("The install reason is inconsistent across users.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId));
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+            if (userId != UserHandle.USER_NULL) {
+                um.removeUser(userId);
+            }
+        }
+    }
+
+    @Test
+    public void testInstallReason_installSeparately_withSeparatedReason() throws Exception {
+        Assume.assumeTrue(UserManager.supportsMultipleUsers());
+        final UserManager um = UserManager.get(
+                InstrumentationRegistry.getInstrumentation().getContext());
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        int userId = UserHandle.USER_NULL;
+        try {
+            // Create and start the 2nd user.
+            userId = um.createUser("Test User", 0 /* flags */).getUserHandle().getIdentifier();
+            runShellCommand("am start-user -w " + userId);
+
+            // Try to install test APK on the current user with reason INSTALL_REASON_DEVICE_SETUP
+            runShellCommand("pm install --user cur --install-reason 3 " + testApk);
+            assertWithMessage("The install reason on the current user is incorrect.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME,
+                            UserHandle.myUserId())).isEqualTo(
+                    PackageManager.INSTALL_REASON_DEVICE_SETUP);
+
+            // Try to install test APK on the 2nd user with reason INSTALL_REASON_USER
+            runShellCommand("pm install --user " + userId + " --install-reason 4 " + testApk);
+            assertWithMessage("The install reason on the 2nd user is incorrect.").that(
+                    mIPackageManager.getInstallReason(TEST_PKG_NAME, userId)).isEqualTo(
+                    PackageManager.INSTALL_REASON_USER);
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+            if (userId != UserHandle.USER_NULL) {
+                um.removeUser(userId);
+            }
+        }
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_samePackage_succeeds() throws Exception {
+        mIPackageManager.setSplashScreenTheme(PACKAGE_NAME, null /* themeName */,
+                UserHandle.myUserId());
+        // Invoking setSplashScreenTheme on the same package shouldn't get any exception.
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_differentPackage_fails() throws Exception {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        try {
+            runShellCommand("pm install " + testApk);
+            mIPackageManager.setSplashScreenTheme(TEST_PKG_NAME, null /* themeName */,
+                    UserHandle.myUserId());
+            fail("setSplashScreenTheme did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+        }
     }
 }

@@ -21,18 +21,24 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
@@ -63,8 +69,10 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
     private final NotificationGroupTestHelper mGroupTestHelper =
             new NotificationGroupTestHelper(mContext);
 
-    @Mock PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    @Mock HeadsUpManager mHeadsUpManager;
+    @Mock
+    PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock
+    HeadsUpManager mHeadsUpManager;
 
     @Before
     public void setup() {
@@ -76,7 +84,8 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         mGroupManager = new NotificationGroupManagerLegacy(
                 mock(StatusBarStateController.class),
                 () -> mPeopleNotificationIdentifier,
-                Optional.of(mock(Bubbles.class)));
+                Optional.of(mock(Bubbles.class)),
+                mock(DumpManager.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
@@ -175,21 +184,83 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         helpTestAlertOverrideWithSiblings(2);
     }
 
+    @Test
+    public void testAlertOverrideWithSiblings_3() {
+        helpTestAlertOverrideWithSiblings(3);
+    }
+
+    @Test
+    public void testAlertOverrideWithSiblings_9() {
+        helpTestAlertOverrideWithSiblings(9);
+    }
+
+    /**
+     * Helper for testing various sibling counts
+     */
+    private void helpTestAlertOverrideWithSiblings(int numSiblings) {
+        helpTestAlertOverride(
+                /* numSiblings */ numSiblings,
+                /* summaryGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* priorityGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ true);
+    }
+
+    @Test
+    public void testAlertOverrideWithParentAlertAll() {
+        // tests that summary can have GROUP_ALERT_ALL and this still works
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryGroupAlert */ Notification.GROUP_ALERT_ALL,
+                /* priorityGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ true);
+    }
+
+    @Test
+    public void testAlertOverrideWithParentAlertChild() {
+        // Tests that if the summary alerts CHILDREN, there's no alertOverride
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryGroupAlert */ Notification.GROUP_ALERT_CHILDREN,
+                /* priorityGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* siblingGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* expectAlertOverride */ false);
+    }
+
+    @Test
+    public void testAlertOverrideWithChildrenAlertAll() {
+        // Tests that if the children alert ALL, there's no alertOverride
+        helpTestAlertOverride(
+                /* numSiblings */ 1,
+                /* summaryGroupAlert */ Notification.GROUP_ALERT_SUMMARY,
+                /* priorityGroupAlert */ Notification.GROUP_ALERT_ALL,
+                /* siblingGroupAlert */ Notification.GROUP_ALERT_ALL,
+                /* expectAlertOverride */ false);
+    }
+
     /**
      * This tests, for a group with a priority entry and the given number of siblings, that:
      * 1) the priority entry is identified as the alertOverride for the group
      * 2) the onAlertOverrideChanged method is called at that time
      * 3) when the priority entry is removed, these are reversed
      */
-    private void helpTestAlertOverrideWithSiblings(int numSiblings) {
-        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+    private void helpTestAlertOverride(int numSiblings,
+            @Notification.GroupAlertBehavior int summaryGroupAlert,
+            @Notification.GroupAlertBehavior int priorityGroupAlert,
+            @Notification.GroupAlertBehavior int siblingGroupAlert,
+            boolean expectAlertOverride) {
+        long when = 10000;
         // Create entries in an order so that the priority entry can be deemed the newest child.
         NotificationEntry[] siblings = new NotificationEntry[numSiblings];
         for (int i = 0; i < numSiblings; i++) {
-            siblings[i] = mGroupTestHelper.createChildNotification(groupAlert);
+            siblings[i] = mGroupTestHelper
+                    .createChildNotification(siblingGroupAlert, i, "sibling", ++when);
         }
-        NotificationEntry priorityEntry = mGroupTestHelper.createChildNotification(groupAlert);
-        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification(groupAlert);
+        NotificationEntry priorityEntry =
+                mGroupTestHelper.createChildNotification(priorityGroupAlert, 0, "priority", ++when);
+        NotificationEntry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(summaryGroupAlert, 0, "summary", ++when);
 
         // The priority entry is an important conversation.
         when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
@@ -206,10 +277,27 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
         }
         mGroupManager.onEntryAdded(priorityEntry);
 
+        if (!expectAlertOverride) {
+            // Test expectation is that there will NOT be an alert, so verify that!
+            NotificationGroup summaryGroup =
+                    mGroupManager.getGroupForSummary(summaryEntry.getSbn());
+            assertNull(summaryGroup.alertOverride);
+            return;
+        }
+        int max2Siblings = Math.min(2, numSiblings);
+
         // Verify that the summary group has the priority child as its alertOverride
         NotificationGroup summaryGroup = mGroupManager.getGroupForSummary(summaryEntry.getSbn());
         assertEquals(priorityEntry, summaryGroup.alertOverride);
         verify(groupChangeListener).onGroupAlertOverrideChanged(summaryGroup, null, priorityEntry);
+        verify(groupChangeListener).onGroupSuppressionChanged(summaryGroup, true);
+        if (numSiblings > 1) {
+            verify(groupChangeListener).onGroupSuppressionChanged(summaryGroup, false);
+        }
+        verify(groupChangeListener).onGroupCreated(any(), eq(priorityEntry.getKey()));
+        verify(groupChangeListener).onGroupCreated(any(), eq(summaryEntry.getSbn().getGroupKey()));
+        verify(groupChangeListener, times(max2Siblings + 1)).onGroupsChanged();
+        verifyNoMoreInteractions(groupChangeListener);
 
         // Verify that only the priority notification is isolated from the group
         assertEquals(priorityEntry, mGroupManager.getGroupSummary(priorityEntry));
@@ -225,6 +313,94 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
 
         // verify that the alertOverride is removed when the priority notification is
         assertNull(summaryGroup.alertOverride);
+        verify(groupChangeListener).onGroupAlertOverrideChanged(summaryGroup, priorityEntry, null);
+        verify(groupChangeListener).onGroupRemoved(any(), eq(priorityEntry.getKey()));
+        verify(groupChangeListener, times(max2Siblings + 2)).onGroupsChanged();
+        if (numSiblings == 0) {
+            verify(groupChangeListener).onGroupSuppressionChanged(summaryGroup, false);
+        }
+        verifyNoMoreInteractions(groupChangeListener);
+    }
+
+    @Test
+    public void testAlertOverrideWhenUpdatingSummaryAtEnd() {
+        long when = 10000;
+        int numSiblings = 2;
+        int groupAlert = Notification.GROUP_ALERT_SUMMARY;
+        // Create entries in an order so that the priority entry can be deemed the newest child.
+        NotificationEntry[] siblings = new NotificationEntry[numSiblings];
+        for (int i = 0; i < numSiblings; i++) {
+            siblings[i] =
+                    mGroupTestHelper.createChildNotification(groupAlert, i, "sibling", ++when);
+        }
+        NotificationEntry priorityEntry =
+                mGroupTestHelper.createChildNotification(groupAlert, 0, "priority", ++when);
+        NotificationEntry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(groupAlert, 0, "summary", ++when);
+
+        // The priority entry is an important conversation.
+        when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
+                .thenReturn(PeopleNotificationIdentifier.TYPE_IMPORTANT_PERSON);
+
+        // Register a listener so we can verify that the event is sent.
+        OnGroupChangeListener groupChangeListener = mock(OnGroupChangeListener.class);
+        mGroupManager.registerGroupChangeListener(groupChangeListener);
+
+        // Add all the entries.  The order here shouldn't matter.
+        mGroupManager.onEntryAdded(summaryEntry);
+        for (int i = 0; i < numSiblings; i++) {
+            mGroupManager.onEntryAdded(siblings[i]);
+        }
+        mGroupManager.onEntryAdded(priorityEntry);
+
+        int max2Siblings = Math.min(2, numSiblings);
+
+        // Verify that the summary group has the priority child as its alertOverride
+        NotificationGroup summaryGroup = mGroupManager.getGroupForSummary(summaryEntry.getSbn());
+        assertEquals(priorityEntry, summaryGroup.alertOverride);
         verify(groupChangeListener).onGroupAlertOverrideChanged(summaryGroup, null, priorityEntry);
+        verify(groupChangeListener).onGroupSuppressionChanged(summaryGroup, true);
+        if (numSiblings > 1) {
+            verify(groupChangeListener).onGroupSuppressionChanged(summaryGroup, false);
+        }
+        verify(groupChangeListener).onGroupCreated(any(), eq(priorityEntry.getKey()));
+        verify(groupChangeListener).onGroupCreated(any(), eq(summaryEntry.getSbn().getGroupKey()));
+        verify(groupChangeListener, times(max2Siblings + 1)).onGroupsChanged();
+        verifyNoMoreInteractions(groupChangeListener);
+
+        // Verify that only the priority notification is isolated from the group
+        assertEquals(priorityEntry, mGroupManager.getGroupSummary(priorityEntry));
+        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(priorityEntry));
+        // Verify that the siblings are NOT isolated from the group
+        for (int i = 0; i < numSiblings; i++) {
+            assertEquals(summaryEntry, mGroupManager.getGroupSummary(siblings[i]));
+            assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(siblings[i]));
+        }
+
+        Log.d("NotificationGroupManagerLegacyTest",
+                "testAlertOverrideWhenUpdatingSummaryAtEnd: About to update summary");
+
+        StatusBarNotification oldSummarySbn = mGroupTestHelper.incrementPost(summaryEntry, 10000);
+        mGroupManager.onEntryUpdated(summaryEntry, oldSummarySbn);
+
+        verify(groupChangeListener, times(max2Siblings + 2)).onGroupsChanged();
+        verify(groupChangeListener).onGroupAlertOverrideChanged(summaryGroup, priorityEntry, null);
+        verifyNoMoreInteractions(groupChangeListener);
+
+        Log.d("NotificationGroupManagerLegacyTest",
+                "testAlertOverrideWhenUpdatingSummaryAtEnd: About to update priority child");
+
+        StatusBarNotification oldPrioritySbn = mGroupTestHelper.incrementPost(priorityEntry, 10000);
+        mGroupManager.onEntryUpdated(priorityEntry, oldPrioritySbn);
+
+        verify(groupChangeListener).onGroupRemoved(any(), eq(priorityEntry.getKey()));
+        verify(groupChangeListener, times(2)).onGroupCreated(any(), eq(priorityEntry.getKey()));
+        verify(groupChangeListener, times(2))
+                .onGroupAlertOverrideChanged(summaryGroup, null, priorityEntry);
+        verify(groupChangeListener, times(max2Siblings + 3)).onGroupsChanged();
+        verifyNoMoreInteractions(groupChangeListener);
+
+        Log.d("NotificationGroupManagerLegacyTest",
+                "testAlertOverrideWhenUpdatingSummaryAtEnd: Done");
     }
 }

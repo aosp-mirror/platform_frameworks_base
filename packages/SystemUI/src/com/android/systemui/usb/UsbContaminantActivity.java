@@ -70,6 +70,10 @@ public class UsbContaminantActivity extends Activity implements View.OnClickList
         mEnableUsb.setText(getString(R.string.usb_disable_contaminant_detection));
         mGotIt.setText(getString(R.string.got_it));
         mLearnMore.setText(getString(R.string.learn_more));
+        if (getResources().getBoolean(
+                com.android.internal.R.bool.config_settingsHelpLinksEnabled)) {
+            mLearnMore.setVisibility(View.VISIBLE);
+        }
 
         mEnableUsb.setOnClickListener(this);
         mGotIt.setOnClickListener(this);

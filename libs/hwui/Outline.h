@@ -88,14 +88,10 @@ public:
 
     bool getShouldClip() const { return mShouldClip; }
 
-    bool willClip() const {
-        // only round rect outlines can be used for clipping
-        return mShouldClip && (mType == Type::RoundRect);
-    }
+    bool willClip() const { return mShouldClip; }
 
-    bool willRoundRectClip() const {
-        // only round rect outlines can be used for clipping
-        return willClip() && MathUtils::isPositive(mRadius);
+    bool willComplexClip() const {
+        return mShouldClip && (mType != Type::RoundRect || MathUtils::isPositive(mRadius));
     }
 
     bool getAsRoundRect(Rect* outRect, float* outRadius) const {

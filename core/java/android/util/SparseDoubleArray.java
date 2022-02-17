@@ -81,9 +81,17 @@ public class SparseDoubleArray implements Cloneable {
      * if no such mapping has been made.
      */
     public double get(int key) {
+        return get(key, 0);
+    }
+
+    /**
+     * Gets the double mapped from the specified key, or the specified value
+     * if no such mapping has been made.
+     */
+    public double get(int key, double valueIfKeyNotFound) {
         final int index = mValues.indexOfKey(key);
         if (index < 0) {
-            return 0.0d;
+            return valueIfKeyNotFound;
         }
         return valueAt(index);
     }
@@ -105,7 +113,7 @@ public class SparseDoubleArray implements Cloneable {
      * <p>This differs from {@link #put} because instead of replacing any previous value, it adds
      * (in the numerical sense) to it.
      */
-    public void add(int key, double summand) {
+    public void incrementValue(int key, double summand) {
         final double oldValue = get(key);
         put(key, oldValue + summand);
     }
@@ -113,6 +121,15 @@ public class SparseDoubleArray implements Cloneable {
     /** Returns the number of key-value mappings that this SparseDoubleArray currently stores. */
     public int size() {
         return mValues.size();
+    }
+
+    /**
+     * Returns the index for which {@link #keyAt} would return the
+     * specified key, or a negative number if the specified
+     * key is not mapped.
+     */
+    public int indexOfKey(int key) {
+        return mValues.indexOfKey(key);
     }
 
     /**
@@ -135,6 +152,41 @@ public class SparseDoubleArray implements Cloneable {
      */
     public double valueAt(int index) {
         return Double.longBitsToDouble(mValues.valueAt(index));
+    }
+
+    /**
+     * Given an index in the range <code>0...size()-1</code>, sets a new
+     * value for the <code>index</code>th key-value mapping that this
+     * SparseDoubleArray stores.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     */
+    public void setValueAt(int index, double value) {
+        mValues.setValueAt(index, Double.doubleToRawLongBits(value));
+    }
+
+    /**
+     * Removes the mapping at the given index.
+     */
+    public void removeAt(int index) {
+        mValues.removeAt(index);
+    }
+
+    /**
+     * Removes the mapping from the specified key, if there was any.
+     */
+    public void delete(int key) {
+        mValues.delete(key);
+    }
+
+    /**
+     * Removes all key-value mappings from this SparseDoubleArray.
+     */
+    public void clear() {
+        mValues.clear();
     }
 
     /**

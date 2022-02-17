@@ -28,8 +28,8 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
@@ -101,7 +101,7 @@ class DomainVerificationSettings {
      */
     public void readSettings(@NonNull TypedXmlPullParser parser,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction)
+            @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
             throws IOException, XmlPullParserException {
         DomainVerificationPersistence.ReadResult result =
                 DomainVerificationPersistence.readFromXml(parser);
@@ -139,7 +139,7 @@ class DomainVerificationSettings {
      */
     public void restoreSettings(@NonNull TypedXmlPullParser parser,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> liveState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction)
+            @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
             throws IOException, XmlPullParserException {
         // TODO(b/170746586): Restoration assumes user IDs match, which is probably not the case on
         //  a new device.
@@ -217,8 +217,8 @@ class DomainVerificationSettings {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public void mergePkgState(@NonNull DomainVerificationPkgState oldState,
             @NonNull DomainVerificationPkgState newState,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
-        PackageSetting pkgSetting = pkgSettingFunction.apply(oldState.getPackageName());
+            @NonNull Function<String, PackageStateInternal> pkgSettingFunction) {
+        PackageStateInternal pkgSetting = pkgSettingFunction.apply(oldState.getPackageName());
         AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
         Set<String> validDomains = pkg == null
                 ? Collections.emptySet() : mCollector.collectValidAutoVerifyDomains(pkg);

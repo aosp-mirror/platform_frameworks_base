@@ -20,16 +20,23 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Access
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.ParcelableSpan;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 
+import libcore.util.EmptyArray;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +46,25 @@ import java.util.Set;
  * Collection of utilities for accessibility service.
  */
 public final class AccessibilityUtils {
-    private AccessibilityUtils() {}
+    private AccessibilityUtils() {
+    }
+
+    /** @hide */
+    @IntDef(value = {
+            NONE,
+            TEXT,
+            PARCELABLE_SPAN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface A11yTextChangeType {
+    }
+
+    /** Specifies no content has been changed for accessibility. */
+    public static final int NONE = 0;
+    /** Specifies some readable sequence has been changed. */
+    public static final int TEXT = 1;
+    /** Specifies some parcelable spans has been changed. */
+    public static final int PARCELABLE_SPAN = 2;
 
     /**
      * Returns the set of enabled accessibility services for userId. If there are no
@@ -167,5 +192,56 @@ public final class AccessibilityUtils {
         return Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, /* def= */ 0, UserHandle.USER_CURRENT)
                 != /* false */ 0;
+    }
+
+    /**
+     * Returns the text change type for accessibility. It only cares about readable sequence changes
+     * or {@link ParcelableSpan} changes which are able to pass via IPC.
+     *
+     * @param before The CharSequence before changing
+     * @param after  The CharSequence after changing
+     * @return Returns {@code TEXT} for readable sequence changes or {@code PARCELABLE_SPAN} for
+     * ParcelableSpan changes. Otherwise, returns {@code NONE}.
+     */
+    @A11yTextChangeType
+    public static int textOrSpanChanged(CharSequence before, CharSequence after) {
+        if (!TextUtils.equals(before, after)) {
+            return TEXT;
+        }
+        if (before instanceof Spanned || after instanceof Spanned) {
+            if (!parcelableSpansEquals(before, after)) {
+                return PARCELABLE_SPAN;
+            }
+        }
+        return NONE;
+    }
+
+    private static boolean parcelableSpansEquals(CharSequence before, CharSequence after) {
+        Object[] spansA = EmptyArray.OBJECT;
+        Object[] spansB = EmptyArray.OBJECT;
+        Spanned a = null;
+        Spanned b = null;
+        if (before instanceof Spanned) {
+            a = (Spanned) before;
+            spansA = a.getSpans(0, a.length(), ParcelableSpan.class);
+        }
+        if (after instanceof Spanned) {
+            b = (Spanned) after;
+            spansB = b.getSpans(0, b.length(), ParcelableSpan.class);
+        }
+        if (spansA.length != spansB.length) {
+            return false;
+        }
+        for (int i = 0; i < spansA.length; ++i) {
+            final Object thisSpan = spansA[i];
+            final Object otherSpan = spansB[i];
+            if ((thisSpan.getClass() != otherSpan.getClass())
+                    || (a.getSpanStart(thisSpan) != b.getSpanStart(otherSpan))
+                    || (a.getSpanEnd(thisSpan) != b.getSpanEnd(otherSpan))
+                    || (a.getSpanFlags(thisSpan) != b.getSpanFlags(otherSpan))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

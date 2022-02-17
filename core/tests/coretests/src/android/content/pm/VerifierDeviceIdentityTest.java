@@ -17,11 +17,15 @@
 package android.content.pm;
 
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.LargeTest;
 
+import org.junit.Ignore;
+
 import java.util.Random;
 
+@Presubmit
 @LargeTest
 public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
     private static final long TEST_1 = 0x7A5F00FF5A55AAA5L;
@@ -151,6 +155,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
         }
     }
 
+    @Ignore("b/208373220")
     public void testVerifierDeviceIdentity_Generate_MinValue() {
         VerifierDeviceIdentity id1 = new VerifierDeviceIdentity(TEST_MINVALUE);
 
@@ -162,6 +167,7 @@ public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
                 + " should be the same", id1, id2);
     }
 
+    @Ignore("b/208373220")
     public void testVerifierDeviceIdentity_Generate_Random() {
         VerifierDeviceIdentity id1 = new VerifierDeviceIdentity(TEST_1);
 

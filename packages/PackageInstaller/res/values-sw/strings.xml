@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Ungependa kuondoa programu hii?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Je, ungependa kuondoa programu hii kwa watumiaji "<b>"wote"</b>"? Programu na data yake zitaondolewa kutoka kwa watumiaji "<b>"wote"</b>" kwenye kifaa."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Je, ungependa kuondoa programu hii kwa mtumiaji <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Ungependa kuondoa programu hii kwenye wasifu wako wa kazini?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Ungependa kubadilisha programu hii na toleo la kiwandani? Data yote itaondolewa."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Ungependa kubadilisha programu hii na toleo la kiwandani? Data yote itaondolewa. Hatua hii itaathiri watumiaji wote wa kifaa hiki, ikiwa ni pamoja na wale walio na wasifu za kazini."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Dumisha <xliff:g id="SIZE">%1$s</xliff:g> ya data ya programu."</string>

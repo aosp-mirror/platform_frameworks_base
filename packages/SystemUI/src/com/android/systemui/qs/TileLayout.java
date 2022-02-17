@@ -9,10 +9,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
+import com.android.systemui.qs.tileimpl.HeightOverrideable;
 
 import java.util.ArrayList;
 
@@ -41,12 +44,14 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
     protected int mResourceColumns;
+    private float mSquishinessFraction = 1f;
+    private int mLastTileBottom;
 
     public TileLayout(Context context) {
         this(context, null);
     }
 
-    public TileLayout(Context context, AttributeSet attrs) {
+    public TileLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setFocusableInTouchMode(true);
         mLessRows = ((Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0)
@@ -64,7 +69,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     @Override
-    public void setListening(boolean listening, UiEventLogger uiEventLogger) {
+    public void setListening(boolean listening, @Nullable UiEventLogger uiEventLogger) {
         if (mListening == listening) return;
         mListening = listening;
         for (TileRecord record : mRecords) {
@@ -210,10 +215,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return mMaxCellHeight;
     }
 
-    protected void layoutTileRecords(int numRecords) {
+    private void layoutTileRecords(int numRecords, boolean forLayout) {
         final boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int row = 0;
         int column = 0;
+        mLastTileBottom = 0;
 
         // Layout each QS tile.
         final int tilesToLayout = Math.min(numRecords, mRows * mColumns);
@@ -228,17 +234,23 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             final int top = getRowTop(row);
             final int left = getColumnStart(isRtl ? mColumns - column - 1 : column);
             final int right = left + mCellWidth;
-            record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
+            final int bottom = top + record.tileView.getMeasuredHeight();
+            if (forLayout) {
+                record.tileView.layout(left, top, right, bottom);
+            } else {
+                record.tileView.setLeftTopRightBottom(left, top, right, bottom);
+            }
+            mLastTileBottom = bottom;
         }
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        layoutTileRecords(mRecords.size());
+        layoutTileRecords(mRecords.size(), true /* forLayout */);
     }
 
     protected int getRowTop(int row) {
-        return row * (mCellHeight + mCellMarginVertical);
+        return (int) (row * (mCellHeight * mSquishinessFraction + mCellMarginVertical));
     }
 
     protected int getColumnStart(int column) {
@@ -263,5 +275,25 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         // show even 1 or there are no tiles, it probably means we are in the middle of setting
         // up.
         return Math.max(mColumns * mRows, 1);
+    }
+
+    @Override
+    public int getTilesHeight() {
+        return mLastTileBottom + getPaddingBottom();
+    }
+
+    @Override
+    public void setSquishinessFraction(float squishinessFraction) {
+        if (Float.compare(mSquishinessFraction, squishinessFraction) == 0) {
+            return;
+        }
+        mSquishinessFraction = squishinessFraction;
+        layoutTileRecords(mRecords.size(), false /* forLayout */);
+
+        for (TileRecord record : mRecords) {
+            if (record.tileView instanceof HeightOverrideable) {
+                ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
+            }
+        }
     }
 }

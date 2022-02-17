@@ -18,6 +18,7 @@
 #define AAPT_COMMAND_H
 
 #include <functional>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <unordered_set>
@@ -25,19 +26,20 @@
 
 #include "androidfw/StringPiece.h"
 
-#include "util/Maybe.h"
-
 namespace aapt {
 
 class Command {
  public:
-  explicit Command(const android::StringPiece& name) : name_(name.to_string()),
-                                                       short_name_(""),
-                                                       full_subcommand_name_(name.to_string()) {}
+  explicit Command(const android::StringPiece& name)
+      : name_(name.to_string()), full_subcommand_name_(name.to_string()){};
 
   explicit Command(const android::StringPiece& name, const android::StringPiece& short_name)
-      : name_(name.to_string()), short_name_(short_name.to_string()),
-        full_subcommand_name_(name.to_string()) {}
+      : name_(name.to_string()),
+        short_name_(short_name.to_string()),
+        full_subcommand_name_(name.to_string()){};
+
+  Command(Command&&) = default;
+  Command& operator=(Command&&) = default;
 
   virtual ~Command() = default;
 
@@ -58,7 +60,7 @@ class Command {
                            uint32_t flags = 0);
 
   void AddOptionalFlag(const android::StringPiece& name, const android::StringPiece& description,
-                       Maybe<std::string>* value, uint32_t flags = 0);
+                       std::optional<std::string>* value, uint32_t flags = 0);
 
   void AddOptionalFlagList(const android::StringPiece& name,
                            const android::StringPiece& description, std::vector<std::string>* value,
@@ -87,8 +89,6 @@ class Command {
   virtual int Action(const std::vector<std::string>& args) = 0;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(Command);
-
   struct Flag {
     explicit Flag(const android::StringPiece& name, const android::StringPiece& description,
                   const bool is_required, const size_t num_args,
@@ -104,8 +104,8 @@ class Command {
     bool found = false;
   };
 
-  const std::string name_;
-  const std::string short_name_;
+  std::string name_;
+  std::string short_name_;
   std::string description_ = "";
   std::string full_subcommand_name_;
 

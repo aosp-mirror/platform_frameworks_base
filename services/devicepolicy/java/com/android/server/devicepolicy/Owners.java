@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManagerInternal;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
@@ -476,17 +475,16 @@ class Owners {
         }
     }
 
-    List<OwnerDto> listAllOwners() {
-        List<OwnerDto> owners = new ArrayList<>();
+    List<OwnerShellData> listAllOwners() {
+        List<OwnerShellData> owners = new ArrayList<>();
         synchronized (mLock) {
             if (mDeviceOwner != null) {
-                owners.add(new OwnerDto(mDeviceOwnerUserId, mDeviceOwner.admin,
-                        /* isDeviceOwner= */ true));
+                owners.add(OwnerShellData.forDeviceOwner(mDeviceOwnerUserId, mDeviceOwner.admin));
             }
             for (int i = 0; i < mProfileOwners.size(); i++) {
                 int userId = mProfileOwners.keyAt(i);
                 OwnerInfo info = mProfileOwners.valueAt(i);
-                owners.add(new OwnerDto(userId, info.admin, /* isDeviceOwner= */ false));
+                owners.add(OwnerShellData.forUserProfileOwner(userId, info.admin));
             }
         }
         return owners;
@@ -639,13 +637,15 @@ class Owners {
         }
     }
 
-    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType) {
+    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType,
+            boolean isAdminTestOnly) {
         synchronized (mLock) {
             if (!hasDeviceOwner()) {
                 Slog.e(TAG, "Attempting to set a device owner type when there is no device owner");
                 return;
-            } else if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
-                Slog.e(TAG, "Device owner type for " + packageName + " has already been set");
+            } else if (!isAdminTestOnly && isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                Slog.e(TAG, "Setting the device owner type more than once is only allowed"
+                        + " for test only admins");
                 return;
             }
 
@@ -1233,24 +1233,6 @@ class Owners {
             pw.println("name=" + name);
             pw.println("package=" + packageName);
             pw.println("isOrganizationOwnedDevice=" + isOrganizationOwnedDevice);
-        }
-    }
-
-    /**
-     * Data-transfer object used by {@link DevicePolicyManagerServiceShellCommand}.
-     */
-    static final class OwnerDto {
-        public final @UserIdInt int userId;
-        public final ComponentName admin;
-        public final boolean isDeviceOwner;
-        public final boolean isProfileOwner;
-        public boolean isAffiliated;
-
-        private OwnerDto(@UserIdInt int userId, ComponentName admin, boolean isDeviceOwner) {
-            this.userId = userId;
-            this.admin = Objects.requireNonNull(admin, "admin must not be null");
-            this.isDeviceOwner = isDeviceOwner;
-            this.isProfileOwner = !isDeviceOwner;
         }
     }
 

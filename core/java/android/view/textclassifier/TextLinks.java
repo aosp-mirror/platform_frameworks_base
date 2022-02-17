@@ -558,13 +558,13 @@ public final class TextLinks implements Parcelable {
 
         private static Request readFromParcel(Parcel in) {
             final String text = in.readString();
-            final LocaleList defaultLocales = in.readParcelable(null);
-            final EntityConfig entityConfig = in.readParcelable(null);
+            final LocaleList defaultLocales = in.readParcelable(null, android.os.LocaleList.class);
+            final EntityConfig entityConfig = in.readParcelable(null, android.view.textclassifier.TextClassifier.EntityConfig.class);
             final Bundle extras = in.readBundle();
             final String referenceTimeString = in.readString();
             final ZonedDateTime referenceTime = referenceTimeString == null
                     ? null : ZonedDateTime.parse(referenceTimeString);
-            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
 
             final Request request = new Request(text, defaultLocales, entityConfig,
                     /* legacyFallback= */ true, referenceTime, extras);
