@@ -25,15 +25,20 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager.ResetOption;
+import android.util.Log;
 
 import com.android.internal.telephony.euicc.IEuiccController;
 
@@ -57,6 +62,7 @@ import java.util.stream.Collectors;
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
 public class EuiccManager {
+    private static final String TAG = "EuiccManager";
 
     /**
      * Intent action to launch the embedded SIM (eUICC) management settings screen.
@@ -811,6 +817,14 @@ public class EuiccManager {
      */
     public static final int ERROR_INVALID_PORT = 10017;
 
+    /**
+     * Apps targeting on Android T and beyond will get exception whenever switchToSubscription
+     * without portIndex is called for disable subscription.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long SWITCH_WITHOUT_PORT_INDEX_EXCEPTION_ON_DISABLE = 218393363L;
 
     private final Context mContext;
     private int mCardId;
@@ -1127,7 +1141,7 @@ public class EuiccManager {
      * intent to prompt the user to accept the download. The caller should also be authorized to
      * manage the subscription to be enabled.
      *
-     * <p> From Android T, devices might support MEP(Multiple Enabled Profile), the subscription
+     * <p> From Android T, devices might support MEP(Multiple Enabled Profiles), the subscription
      * can be installed on different port from the eUICC. Calling apps with carrier privilege
      * (see {@link TelephonyManager#hasCarrierPrivileges}) over the currently active subscriptions
      * can use {@link #switchToSubscription(int, int, PendingIntent)} to specify which port to
@@ -1138,10 +1152,12 @@ public class EuiccManager {
      *
      * @param subscriptionId the ID of the subscription to enable. May be
      *     {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID} to deactivate the
-     *     current profile without activating another profile to replace it. If it's a disable
-     *     operation, requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS}
-     *     permission, or the calling app must be authorized to manage the active subscription on
-     *     the target eUICC.
+     *     current profile without activating another profile to replace it. Calling apps targeting
+     *     on android T must use {@link #switchToSubscription(int, int, PendingIntent)} API for
+     *     disable profile, port index can be found from {@link SubscriptionInfo#getPortIndex()}.
+     *     If it's a disable operation, requires the
+     *     {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or the
+     *     calling app must be authorized to manage the active subscription on the target eUICC.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
@@ -1151,6 +1167,18 @@ public class EuiccManager {
             return;
         }
         try {
+            // TODO: Uncomment below compat change code once callers are ported to use
+            //  switchToSubscription with portIndex for disable operation.
+            // if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
+            //        && getIEuiccController().isCompatChangeEnabled(mContext.getOpPackageName(),
+            //        SWITCH_WITHOUT_PORT_INDEX_EXCEPTION_ON_DISABLE)) {
+            //    // Apps targeting on Android T and beyond will get exception whenever
+            //    // switchToSubscription without portIndex is called with INVALID_SUBSCRIPTION_ID.
+            //    Log.e(TAG, "switchToSubscription without portIndex is not allowed for"
+            //            + " disable operation");
+            //    throw new IllegalArgumentException("Must use switchToSubscription with portIndex"
+            //            + " API for disable operation");
+            // }
             getIEuiccController().switchToSubscription(mCardId,
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
@@ -1180,7 +1208,10 @@ public class EuiccManager {
      *     current profile without activating another profile to replace it. If it's a disable
      *     operation, requires the {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS}
      *     permission, or the calling app must be authorized to manage the active subscription on
-     *     the target eUICC.
+     *     the target eUICC. From Android T, multiple enabled profiles is supported. Calling apps
+     *     targeting on android T must use {@link #switchToSubscription(int, int, PendingIntent)}
+     *     API for disable profile, port index can be found from
+     *     {@link SubscriptionInfo#getPortIndex()}.
      * @param portIndex the index of the port to target for the enabled subscription
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
@@ -1192,6 +1223,17 @@ public class EuiccManager {
             return;
         }
         try {
+            boolean canWriteEmbeddedSubscriptions = mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+            // If the caller is not privileged caller and does not have the carrier privilege over
+            // any active subscription, do not continue.
+            if (!canWriteEmbeddedSubscriptions && !getIEuiccController()
+                    .hasCarrierPrivilegesForPackageOnAnyPhone(mContext.getOpPackageName())) {
+                Log.e(TAG, "Not permitted to use switchToSubscription with portIndex");
+                throw new SecurityException(
+                        "Must have carrier privileges to use switchToSubscription with portIndex");
+            }
             getIEuiccController().switchToSubscriptionWithPort(mCardId,
                     subscriptionId, portIndex, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {

@@ -456,7 +456,8 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected void onStart() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
-        if (mContext != null && !WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+        if (mContext != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             // Add onBackPressed as default back behavior.
             mDefaultBackCallback = new OnBackInvokedCallback() {
                 @Override
@@ -703,7 +704,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking()
                 && !event.isCanceled()
-                && WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                && !WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             onBackPressed();
             return true;
         }

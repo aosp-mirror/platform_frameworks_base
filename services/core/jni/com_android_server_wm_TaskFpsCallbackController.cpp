@@ -99,7 +99,7 @@ void nativeUnregister(JNIEnv* env, jclass clazz, jlong ptr) {
 
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
-        {"nativeRegister", "(Landroid/window/IOnFpsCallbackListener;I)J", (void*)nativeRegister},
+        {"nativeRegister", "(Landroid/window/ITaskFpsCallback;I)J", (void*)nativeRegister},
         {"nativeUnregister", "(J)V", (void*)nativeUnregister}};
 
 } // namespace
@@ -113,7 +113,7 @@ int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env) {
     gCallbackClassInfo.mClass = MakeGlobalRefOrDie(env, clazz);
     gCallbackClassInfo.mDispatchOnFpsReported =
             env->GetStaticMethodID(clazz, "dispatchOnFpsReported",
-                                   "(Landroid/window/IOnFpsCallbackListener;F)V");
+                                   "(Landroid/window/ITaskFpsCallback;F)V");
     return 0;
 }
 

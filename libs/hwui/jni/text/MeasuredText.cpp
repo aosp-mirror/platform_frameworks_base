@@ -134,6 +134,21 @@ static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jin
     GraphicsJNI::irect_to_jrect(ir, env, bounds);
 }
 
+// Regular JNI
+static jlong nGetExtent(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jint start,
+                        jint end) {
+    ScopedCharArrayRO text(env, javaText);
+    const minikin::U16StringPiece textBuffer(text.get(), text.size());
+    const minikin::Range range(start, end);
+
+    minikin::MinikinExtent extent = toMeasuredParagraph(ptr)->getExtent(textBuffer, range);
+
+    int32_t ascent = SkScalarRoundToInt(extent.ascent);
+    int32_t descent = SkScalarRoundToInt(extent.descent);
+
+    return (((jlong)(ascent)) << 32) | ((jlong)descent);
+}
+
 // CriticalNative
 static jlong nGetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return toJLong(&releaseMeasuredParagraph);
@@ -153,12 +168,13 @@ static const JNINativeMethod gMTBuilderMethods[] = {
 };
 
 static const JNINativeMethod gMTMethods[] = {
-    // MeasuredParagraph native functions.
-    {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
-    {"nGetBounds", "(J[CIILandroid/graphics/Rect;)V", (void*) nGetBounds},  // Regular JNI
-    {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
-    {"nGetMemoryUsage", "(J)I", (void*) nGetMemoryUsage},  // Critical Native
-    {"nGetCharWidthAt", "(JI)F", (void*) nGetCharWidthAt},  // Critical Native
+        // MeasuredParagraph native functions.
+        {"nGetWidth", "(JII)F", (void*)nGetWidth},                             // Critical Natives
+        {"nGetBounds", "(J[CIILandroid/graphics/Rect;)V", (void*)nGetBounds},  // Regular JNI
+        {"nGetExtent", "(J[CII)J", (void*)nGetExtent},                         // Regular JNI
+        {"nGetReleaseFunc", "()J", (void*)nGetReleaseFunc},                    // Critical Natives
+        {"nGetMemoryUsage", "(J)I", (void*)nGetMemoryUsage},                   // Critical Native
+        {"nGetCharWidthAt", "(JI)F", (void*)nGetCharWidthAt},                  // Critical Native
 };
 
 int register_android_graphics_text_MeasuredText(JNIEnv* env) {

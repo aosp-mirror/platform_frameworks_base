@@ -1896,6 +1896,14 @@ class ActivityStarter {
         mSupervisor.handleNonResizableTaskIfNeeded(startedTask,
                 mPreferredWindowingMode, mPreferredTaskDisplayArea, mTargetRootTask);
 
+        // If Activity's launching into PiP, move the mStartActivity immediately to pinned mode.
+        // Note that mStartActivity and source should be in the same Task at this point.
+        if (mOptions != null && mOptions.isLaunchIntoPip()
+                && sourceRecord != null && sourceRecord.getTask() == mStartActivity.getTask()) {
+            mRootWindowContainer.moveActivityToPinnedRootTask(mStartActivity,
+                    sourceRecord, "launch-into-pip");
+        }
+
         return START_SUCCESS;
     }
 

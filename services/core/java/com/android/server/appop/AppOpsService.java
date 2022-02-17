@@ -179,6 +179,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import libcore.util.EmptyArray;
 
 import org.json.JSONException;
@@ -5902,6 +5904,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;

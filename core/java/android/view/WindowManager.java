@@ -4865,21 +4865,24 @@ public interface WindowManager extends ViewManager {
      * Registers the frame rate per second count callback for one given task ID.
      * Each callback can only register for receiving FPS callback for one task id until unregister
      * is called. If there's no task associated with the given task id,
-     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
-     * registered, the registered callback will not be unregistered until
-     * {@link #unregisterTaskFpsCallback(TaskFpsCallback))} is called
+     * {@link IllegalArgumentException} will be thrown. Registered callbacks should always be
+     * unregistered via {@link #unregisterTaskFpsCallback(TaskFpsCallback)}
+     * even when the task id has been destroyed.
+     *
      * @param taskId task id of the task.
+     * @param executor Executor to execute the callback.
      * @param callback callback to be registered.
      *
      * @hide
      */
     @SystemApi
     default void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            @NonNull Executor executor,
             @NonNull TaskFpsCallback callback) {}
 
     /**
      * Unregisters the frame rate per second count callback which was registered with
-     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
+     * {@link #registerTaskFpsCallback(Executor, int, TaskFpsCallback)}.
      *
      * @param callback callback to be unregistered.
      *

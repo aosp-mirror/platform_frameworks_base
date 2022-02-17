@@ -16,8 +16,14 @@
 
 package com.android.settingslib.activityembedding;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
+import android.text.TextUtils;
+
+import androidx.core.os.BuildCompat;
+import androidx.window.embedding.SplitController;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
@@ -40,6 +46,33 @@ public class ActivityEmbeddingUtils {
                     intent.resolveActivity(context.getPackageManager()) != null;
 
             return isEmbeddingActivityEnabled;
+        }
+        return false;
+    }
+
+    /**
+     * Whether current activity is embedded in the Settings app or not.
+     */
+    public static boolean isActivityEmbedded(Activity activity) {
+        return SplitController.getInstance().isActivityEmbedded(activity);
+    }
+
+    /**
+     * Whether current activity is suggested to show back button or not.
+     */
+    public static boolean shouldHideBackButton(Activity activity, boolean isSecondaryLayerPage) {
+        if (!BuildCompat.isAtLeastT()) {
+            return false;
+        }
+        if (!isSecondaryLayerPage) {
+            return false;
+        }
+        final String shouldHideBackButton = Settings.Global.getString(activity.getContentResolver(),
+                "settings_hide_secondary_page_back_button_in_two_pane");
+
+        if (TextUtils.isEmpty(shouldHideBackButton)
+                || TextUtils.equals("true", shouldHideBackButton)) {
+            return isActivityEmbedded(activity);
         }
         return false;
     }

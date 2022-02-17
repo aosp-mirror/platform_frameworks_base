@@ -272,7 +272,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
 
         boolean highPowerOp = areActiveHighPowerLocationRequests();
-        mAreActiveLocationRequests = highPowerOp || shouldDisplay;
+        mAreActiveLocationRequests = shouldDisplay;
         if (mAreActiveLocationRequests != hadActiveLocationRequests) {
             mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
         }

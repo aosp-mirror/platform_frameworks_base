@@ -272,9 +272,12 @@ package android.app {
   }
 
   public class DreamManager {
+    method public boolean areDreamsSupported();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isDreaming();
+    method public boolean isScreensaverEnabled();
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setScreensaverEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
@@ -354,8 +357,11 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
+    method @Nullable public android.app.RemoteAction getCloseAction();
     method public float getExpandedAspectRatio();
     method public android.graphics.Rect getSourceRectHint();
+    method @Nullable public CharSequence getSubtitle();
+    method @Nullable public CharSequence getTitle();
     method public boolean isSeamlessResizeEnabled();
   }
 
@@ -413,6 +419,7 @@ package android.app {
     method @NonNull public android.content.res.Configuration getConfiguration();
     method public int getParentTaskId();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
+    method public boolean getPreferDockBigOverlays();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public boolean hasParentTask();
   }

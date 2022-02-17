@@ -357,6 +357,20 @@ public class Installer extends SystemService {
         }
     }
 
+    /**
+     * Remove all invalid dirs under app data folder.
+     * All dirs are supposed to be valid file and package names.
+     */
+    public void cleanupInvalidPackageDirs(String uuid, int userId, int flags)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.cleanupInvalidPackageDirs(uuid, userId, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
             int appId, String seInfo, int targetSdkVersion,
             String fromCodePath) throws InstallerException {

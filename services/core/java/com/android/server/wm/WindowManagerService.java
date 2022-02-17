@@ -281,7 +281,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ClientWindowFrames;
-import android.window.IOnFpsCallbackListener;
+import android.window.ITaskFpsCallback;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
@@ -309,6 +309,8 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -419,7 +421,7 @@ public class WindowManagerService extends IWindowManager.Stub
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -6617,6 +6619,7 @@ public class WindowManagerService extends IWindowManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
         boolean dumpAll = false;
@@ -8870,7 +8873,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
     public void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
-            IOnFpsCallbackListener listener) {
+            ITaskFpsCallback callback) {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
                 != PackageManager.PERMISSION_GRANTED) {
             final int pid = Binder.getCallingPid();
@@ -8882,12 +8885,12 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("no task with taskId: " + taskId);
         }
 
-        mTaskFpsCallbackController.registerCallback(taskId, listener);
+        mTaskFpsCallbackController.registerListener(taskId, callback);
     }
 
     @Override
     @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
-    public void unregisterTaskFpsCallback(IOnFpsCallbackListener listener) {
+    public void unregisterTaskFpsCallback(ITaskFpsCallback callback) {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
                 != PackageManager.PERMISSION_GRANTED) {
             final int pid = Binder.getCallingPid();
@@ -8895,7 +8898,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
         }
 
-        mTaskFpsCallbackController.unregisterCallback(listener);
+        mTaskFpsCallbackController.unregisterListener(callback);
     }
 
     @Override

@@ -65,7 +65,7 @@ import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
-import android.window.IOnFpsCallbackListener;
+import android.window.ITaskFpsCallback;
 
 /**
  * System private interface to the window manager.
@@ -926,21 +926,21 @@ interface IWindowManager
      * registered, the registered callback will not be unregistered until
      * {@link unregisterTaskFpsCallback()} is called
      * @param taskId task id of the task.
-     * @param listener listener to be registered.
+     * @param callback callback to be registered.
      *
      * @hide
      */
-    void registerTaskFpsCallback(in int taskId, in IOnFpsCallbackListener listener);
+    void registerTaskFpsCallback(in int taskId, in ITaskFpsCallback callback);
 
     /**
      * Unregisters the frame rate per second count callback which was registered with
      * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
      *
-     * @param listener listener to be unregistered.
+     * @param callback callback to be unregistered.
      *
      * @hide
      */
-    void unregisterTaskFpsCallback(in IOnFpsCallbackListener listener);
+    void unregisterTaskFpsCallback(in ITaskFpsCallback listener);
 
     /**
      * Take a snapshot using the same path that's used for Recents. This is used for Testing only.

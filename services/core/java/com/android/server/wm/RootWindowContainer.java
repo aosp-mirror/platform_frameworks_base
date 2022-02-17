@@ -1979,7 +1979,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 onTop);
     }
 
-    void moveActivityToPinnedRootTask(ActivityRecord r, String reason) {
+    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
+            @Nullable ActivityRecord launchIntoPipHostActivity, String reason) {
         mService.deferWindowLayout();
 
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
@@ -2030,7 +2031,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         .setHasBeenVisible(true)
                         .build();
                 // Establish bi-directional link between the original and pinned task.
-                r.setLastParentBeforePip();
+                r.setLastParentBeforePip(launchIntoPipHostActivity);
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
@@ -2091,6 +2092,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.setWindowingMode(intermediateWindowingMode);
             r.mWaitForEnteringPinnedMode = true;
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
+            // Set the launch bounds for launch-into-pip Activity on the root task.
+            if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
+                rootTask.setBounds(r.getOptions().getLaunchBounds());
+            }
             rootTask.setDeferTaskAppear(false);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it

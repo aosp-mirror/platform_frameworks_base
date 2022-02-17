@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.sysprop.ApexProperties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
@@ -608,18 +609,21 @@ public abstract class ApexManager {
                             continue;
                         }
 
-                        String name = service.getName();
-                        for (ApexSystemServiceInfo info : mApexSystemServices) {
-                            if (info.getName().equals(name)) {
-                                throw new IllegalStateException(String.format(
-                                        "Duplicate apex-system-service %s from %s, %s",
-                                        name, info.mJarPath, service.getJarPath()));
+                        if (ai.isActive) {
+                            String name = service.getName();
+                            for (int j = 0; j < mApexSystemServices.size(); j++) {
+                                ApexSystemServiceInfo info = mApexSystemServices.get(j);
+                                if (info.getName().equals(name)) {
+                                    throw new IllegalStateException(TextUtils.formatSimple(
+                                            "Duplicate apex-system-service %s from %s, %s", name,
+                                            info.mJarPath, service.getJarPath()));
+                                }
                             }
+                            ApexSystemServiceInfo info = new ApexSystemServiceInfo(
+                                    service.getName(), service.getJarPath(),
+                                    service.getInitOrder());
+                            mApexSystemServices.add(info);
                         }
-
-                        ApexSystemServiceInfo info = new ApexSystemServiceInfo(
-                                service.getName(), service.getJarPath(), service.getInitOrder());
-                        mApexSystemServices.add(info);
                     }
                     Collections.sort(mApexSystemServices);
                     mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);

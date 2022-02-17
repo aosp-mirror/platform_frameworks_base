@@ -132,6 +132,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
         setCurrentState(Lifecycle.State.STARTED);
         mExecutor.execute(() -> {
+            mStateController.setShouldShowComplications(shouldShowComplications());
             addOverlayWindowLocked(layoutParams);
             setCurrentState(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);

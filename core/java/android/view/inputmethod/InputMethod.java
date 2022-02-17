@@ -391,22 +391,6 @@ public interface InputMethod {
     public void changeInputMethodSubtype(InputMethodSubtype subtype);
 
     /**
-     * Update token of the client window requesting {@link #showSoftInput(int, ResultReceiver)}
-     * @param showInputToken placeholder app window token for window requesting
-     *        {@link InputMethodManager#showSoftInput(View, int)}
-     * @hide
-     */
-    public void setCurrentShowInputToken(IBinder showInputToken);
-
-    /**
-     * Update token of the client window requesting {@link #hideSoftInput(int, ResultReceiver)}
-     * @param hideInputToken placeholder app window token for window requesting
-     *        {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}
-     * @hide
-     */
-    public void setCurrentHideInputToken(IBinder hideInputToken);
-
-    /**
      * Checks if IME is ready to start stylus handwriting session.
      * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
      * @param requestId

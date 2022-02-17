@@ -469,16 +469,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Nullable
     final StagedSession mStagedSession;
 
+    /**
+     * The callback to run when pre-reboot verification has ended. Used by {@link #abandon()}
+     * to delay session clean-up until it is safe to do so.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private Runnable mPendingAbandonCallback;
+
     @VisibleForTesting
     public class StagedSession implements StagingManager.StagedSession {
-        /**
-         * The callback to run when pre-reboot verification has ended. Used by {@link #abandon()}
-         * to delay session clean-up until it is safe to do so.
-         */
-        @GuardedBy("mLock")
-        @Nullable
-        private Runnable mPendingAbandonCallback;
-
         @Override
         public List<StagingManager.StagedSession> getChildSessions() {
             if (!params.isMultiPackage) {
@@ -575,9 +575,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         @Override
         public boolean isInTerminalState() {
-            synchronized (mLock) {
-                return mSessionApplied || mSessionFailed;
-            }
+            return PackageInstallerSession.this.isInTerminalState();
         }
 
         @Override
@@ -612,48 +610,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         @Override
         public void abandon() {
-            final Runnable r;
-            synchronized (mLock) {
-                assertNotChild("StagedSession#abandon");
-                assertCallerIsOwnerOrRootOrSystem();
-                if (isInTerminalState()) {
-                    // We keep the session in the database if it's in a finalized state. It will be
-                    // removed by PackageInstallerService when the last update time is old enough.
-                    // Also, in such cases cleanStageDir() has already been executed so no need to
-                    // do it now.
-                    return;
-                }
-                mDestroyed = true;
-                r = () -> {
-                    assertNotLocked("abandonStaged");
-                    if (mCommitted.get()) {
-                        mStagingManager.abortCommittedSession(this);
-                    }
-                    destroy();
-                    dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
-                    maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
-                            "Session was abandoned because the parent session is abandoned");
-                };
-                if (mStageDirInUse) {
-                    // Pre-reboot verification is ongoing, not safe to clean up the session yet.
-                    mPendingAbandonCallback = r;
-                    mCallback.onSessionChanged(PackageInstallerSession.this);
-                    return;
-                }
-            }
-            r.run();
-        }
-
-        /**
-         * Called when pre-reboot verification has ended.
-         * Now it is safe to clean up the session if {@link #abandon()} has been called previously.
-         */
-        private void notifyEndPreRebootVerification() {
-            synchronized (mLock) {
-                Preconditions.checkState(mStageDirInUse);
-                mStageDirInUse = false;
-            }
-            dispatchPendingAbandonCallback();
+            PackageInstallerSession.this.abandon();
         }
 
         /**
@@ -668,17 +625,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             Preconditions.checkArgument(isCommitted());
             Preconditions.checkArgument(!isInTerminalState());
             verify();
-        }
-
-        private void dispatchPendingAbandonCallback() {
-            final Runnable callback;
-            synchronized (mLock) {
-                callback = mPendingAbandonCallback;
-                mPendingAbandonCallback = null;
-            }
-            if (callback != null) {
-                callback.run();
-            }
         }
     }
 
@@ -1138,9 +1084,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private boolean isInTerminalState() {
+        synchronized (mLock) {
+            return mSessionApplied || mSessionFailed;
+        }
+    }
+
     /** Returns true if a staged session has reached a final state and can be forgotten about  */
     public boolean isStagedAndInTerminalState() {
-        return params.isStaged && mStagedSession.isInTerminalState();
+        return params.isStaged && isInTerminalState();
     }
 
     private void assertNotLocked(String cookie) {
@@ -1968,9 +1920,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void onSessionVerificationFailure(int error, String msg) {
         Slog.e(TAG, "Failed to verify session " + sessionId);
-        if (isStaged()) {
-            mStagedSession.notifyEndPreRebootVerification();
-        }
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, msg, null);
         maybeFinishChildSessions(error, msg);
@@ -2279,6 +2228,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @GuardedBy("mLock")
+    private void markStageDirInUseLocked() throws PackageManagerException {
+        if (mDestroyed) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Session destroyed");
+        }
+        // Set this flag to prevent abandon() from deleting staging files when verification or
+        // installation is about to start.
+        mStageDirInUse = true;
+    }
+
     private void parseApkAndExtractNativeLibraries() throws PackageManagerException {
         synchronized (mLock) {
             if (mStageDirInUse) {
@@ -2324,19 +2284,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void verifyNonStaged()
             throws PackageManagerException {
         synchronized (mLock) {
-            if (mDestroyed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session destroyed");
-            }
-            // Set this flag to prevent abandon() from deleting staging files while verification is
-            // in progress. For staged sessions, we will reset this flag when verification is done
-            // so abandon() can take effect. For non-staged sessions, the staging files will be
-            // deleted when install is completed (no matter success or not). No need to reset
-            // the flag.
-            mStageDirInUse = true;
+            markStageDirInUseLocked();
         }
         mSessionProvider.getSessionVerifier().verify(this, (error, msg) -> {
             mHandler.post(() -> {
+                if (dispatchPendingAbandonCallback()) {
+                    // No need to continue if abandoned
+                    return;
+                }
                 if (error == INSTALL_SUCCEEDED) {
                     onVerificationComplete();
                 } else {
@@ -2426,7 +2381,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @WorkerThread
     private void onVerificationComplete() {
         if (isStaged()) {
-            mStagedSession.notifyEndPreRebootVerification();
             mStagingManager.commitSession(mStagedSession);
             sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
             return;
@@ -2444,14 +2398,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private InstallParams makeInstallParams(CompletableFuture<Void> future)
             throws PackageManagerException {
         synchronized (mLock) {
-            if (mDestroyed) {
-                throw new PackageManagerException(
-                        INSTALL_FAILED_INTERNAL_ERROR, "Session destroyed");
-            }
             if (!mSealed) {
                 throw new PackageManagerException(
                         INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
             }
+            markStageDirInUseLocked();
         }
 
         if (isMultiPackage()) {
@@ -3523,22 +3474,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void abandonNonStaged() {
-        synchronized (mLock) {
-            assertNotChild("abandonNonStaged");
-            assertCallerIsOwnerOrRootOrSystem();
-            if (mStageDirInUse) {
-                if (LOGD) Slog.d(TAG, "Ignoring abandon for staging files are in use");
-                return;
-            }
-            mDestroyed = true;
-        }
-        destroy();
-        dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
-        maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
-                "Session was abandoned because the parent session is abandoned");
-    }
-
     private void assertNotChild(String cookie) {
         if (hasParentSessionId()) {
             throw new IllegalStateException(cookie + " can't be called on a child session, id="
@@ -3546,13 +3481,56 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * Called when verification has completed. Now it is safe to clean up the session
+     * if {@link #abandon()} has been called previously.
+     *
+     * @return True if this session has been abandoned.
+     */
+    private boolean dispatchPendingAbandonCallback() {
+        final Runnable callback;
+        synchronized (mLock) {
+            Preconditions.checkState(mStageDirInUse);
+            mStageDirInUse = false;
+            callback = mPendingAbandonCallback;
+            mPendingAbandonCallback = null;
+        }
+        if (callback != null) {
+            callback.run();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void abandon() {
-        if (params.isStaged) {
-            mStagedSession.abandon();
-        } else {
-            abandonNonStaged();
+        final Runnable r;
+        synchronized (mLock) {
+            assertNotChild("abandon");
+            assertCallerIsOwnerOrRootOrSystem();
+            if (isInTerminalState()) {
+                // Finalized sessions have been properly cleaned up. No need to abandon them.
+                return;
+            }
+            mDestroyed = true;
+            r = () -> {
+                assertNotLocked("abandonStaged");
+                if (isStaged() && mCommitted.get()) {
+                    mStagingManager.abortCommittedSession(mStagedSession);
+                }
+                destroy();
+                dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+                maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
+                        "Session was abandoned because the parent session is abandoned");
+            };
+            if (mStageDirInUse) {
+                // Verification is ongoing, not safe to clean up the session yet.
+                mPendingAbandonCallback = r;
+                mCallback.onSessionChanged(this);
+                return;
+            }
         }
+        r.run();
     }
 
     @Override

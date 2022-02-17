@@ -377,6 +377,12 @@ final class AppDataHelper {
                 + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
         List<String> result = onlyCoreApps ? new ArrayList<>() : null;
 
+        try {
+            mInstaller.cleanupInvalidPackageDirs(volumeUuid, userId, flags);
+        } catch (Installer.InstallerException e) {
+            logCriticalInfo(Log.WARN, "Failed to cleanup deleted dirs: " + e);
+        }
+
         final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
         final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -15,6 +16,13 @@
   ~ limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@android:color/white"/>
-</shape>
+<input-method
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.android.inputmethod.latin.settings.SettingsActivity"
+    android:supportsInlineSuggestionsWithTouchExploration="true"
+>
+    <subtype
+        android:label="subtype1"
+        android:imeSubtypeLocale="en_US"
+        android:imeSubtypeMode="keyboard" />
+</input-method>

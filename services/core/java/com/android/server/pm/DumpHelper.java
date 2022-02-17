@@ -37,6 +37,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.BiConsumer;
@@ -51,6 +53,7 @@ final class DumpHelper {
         mPm = pm;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     public void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
         DumpState dumpState = new DumpState();
         ArraySet<String> permissionNames = null;
