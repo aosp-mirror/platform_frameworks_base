@@ -81,8 +81,10 @@ import android.util.Pair;
 import android.util.Pools;
 import android.util.RotationUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.InsetsSource;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -127,7 +129,8 @@ import java.util.function.Predicate;
  * changes are made to this class.
  */
 class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<E>
-        implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable {
+        implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable,
+        InsetsControlTarget {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
 
@@ -144,6 +147,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // Set to true when we are performing a reparenting operation so we only send one
     // onParentChanged() notification.
     boolean mReparenting;
+
+    protected @Nullable InsetsSourceProvider mControllableInsetProvider;
+
+    /**
+     * The insets sources provided by this windowContainer.
+     */
+    private SparseArray<InsetsSource> mProvidedInsetsSources = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -328,6 +338,25 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
         mSurfaceFreezer = new SurfaceFreezer(this, wms);
     }
+
+    /**
+     * Set's an {@link InsetsSourceProvider} to be associated with this window, but only if the
+     * provider itself is controllable, as one window can be the provider of more than one inset
+     * type (i.e. gesture insets). If this window is controllable, all its animations must be
+     * controlled by its control target, and the visibility of this window should be taken account
+     * into the state of the control target.
+     *
+     * @param insetProvider the provider which should not be visible to the client.
+     * @see #getInsetsState()
+     */
+    void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
+        mControllableInsetProvider = insetProvider;
+    }
+
+    InsetsSourceProvider getControllableInsetProvider() {
+        return mControllableInsetProvider;
+    }
+
 
     @Override
     final protected WindowContainer getParent() {
@@ -856,6 +885,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onDisplayChanged(dc);
         }
+    }
+
+    public SparseArray<InsetsSource> getProvidedInsetsSources() {
+        if (mProvidedInsetsSources == null) {
+            mProvidedInsetsSources = new SparseArray<>();
+        }
+        return mProvidedInsetsSources;
     }
 
     DisplayContent getDisplayContent() {
@@ -2960,6 +2996,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void commitPendingTransaction() {
         scheduleAnimation();
+    }
+
+    void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
+        outPoint.set(left, top);
+        final WindowContainer parentWindowContainer = getParent();
+        if (parentWindowContainer == null) {
+            return;
+        }
+        final Rect parentBounds = parentWindowContainer.getBounds();
+        outPoint.offset(-parentBounds.left, -parentBounds.top);
     }
 
     void reassignLayer(Transaction t) {

@@ -167,7 +167,7 @@ class InsetsStateController {
         final InsetsState aboveInsetsState = new InsetsState();
         aboveInsetsState.set(mState,
                 displayCutout() | systemGestures() | mandatorySystemGestures());
-        final SparseArray<InsetsSource> winProvidedSources = win.mProvidedInsetsSources;
+        final SparseArray<InsetsSource> winProvidedSources = win.getProvidedInsetsSources();
         final ArrayList<WindowState> insetsChangedWindows = new ArrayList<>();
         mDisplayContent.forAllWindows(w -> {
             if (aboveWin[0]) {
@@ -179,7 +179,7 @@ class InsetsStateController {
                     }
                     return winProvidedSources.size() == 0;
                 } else {
-                    final SparseArray<InsetsSource> providedSources = w.mProvidedInsetsSources;
+                    final SparseArray<InsetsSource> providedSources = w.getProvidedInsetsSources();
                     for (int i = providedSources.size() - 1; i >= 0; i--) {
                         aboveInsetsState.addSource(providedSources.valueAt(i));
                     }
@@ -246,7 +246,7 @@ class InsetsStateController {
         final InsetsState state = displayFrames.mInsetsState;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
-            if (provider.mWin == win) {
+            if (provider.mWindowContainer == win) {
                 state.addSource(provider.createSimulatedSource(displayFrames, winFrame));
             }
         }

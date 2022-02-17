@@ -1362,8 +1362,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayRotation;
     }
 
-    void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider){
+    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider) {
         setInsetProvider(type, win, frameProvider, null /* imeFrameProvider */);
     }
 
@@ -1377,10 +1377,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param imeFrameProvider Function to compute the frame when dispatching insets to the IME, or
      *                         {@code null} if the normal frame should be taken.
      */
-    void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider) {
-        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider,
+    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider) {
+        mInsetsStateController.getSourceProvider(type).setWindowContainer(win, frameProvider,
                 imeFrameProvider);
     }
 
@@ -3822,7 +3822,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final int imePid = mInputMethodWindow.mSession.mPid;
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
-        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
+        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null /* imeFrameProvider */);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();

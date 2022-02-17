@@ -105,7 +105,7 @@ import java.util.List;
  * Tests for the {@link WindowState} class.
  *
  * Build/Install/Run:
- *  atest WmTests:WindowStateTests
+ * atest WmTests:WindowStateTests
  */
 @SmallTest
 @Presubmit
@@ -411,7 +411,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY, W_STATUS_BAR })
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
     @Test
     public void testVisibleWithInsetsProvider() {
         final WindowState statusBar = mStatusBarWindow;
@@ -419,7 +419,8 @@ public class WindowStateTests extends WindowTestsBase {
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
-                .setWindow(statusBar, null /* frameProvider */, null /* imeFrameProvider */);
+                .setWindowContainer(statusBar, null /* frameProvider */,
+                        null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
         final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
@@ -623,7 +624,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(w.getWindowConfiguration().getBounds(), unscaledClientBounds);
     }
 
-    @UseTestDisplay(addWindows = { W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE })
+    @UseTestDisplay(addWindows = {W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE})
     @Test
     public void testRequestDrawIfNeeded() {
         final WindowState startingApp = createWindow(null /* parent */,
@@ -831,7 +832,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
     @Test
     public void testNeedsRelativeLayeringToIme_startingWindow() {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
@@ -864,7 +865,7 @@ public class WindowStateTests extends WindowTestsBase {
         verify(app).notifyInsetsChanged();
     }
 
-    @UseTestDisplay(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD, W_ACTIVITY})
     @Test
     public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
         final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
@@ -890,7 +891,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.mInputMethodWindow = imeWindow;
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.getImeSourceProvider().setWindow(imeWindow, null, null);
+        controller.getImeSourceProvider().setWindowContainer(imeWindow, null, null);
 
         // Simulate app requests IME with updating all windows Insets State when IME is above app.
         mDisplayContent.setImeLayeringTarget(app);
@@ -914,7 +915,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY })
+    @UseTestDisplay(addWindows = {W_ACTIVITY})
     @Test
     public void testUpdateImeControlTargetWhenLeavingMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
@@ -940,7 +941,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
     }
 
-    @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE })
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE})
     @Test
     public void testNotificationShadeHasImeInsetsWhenMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
@@ -954,7 +955,7 @@ public class WindowStateTests extends WindowTestsBase {
         mNotificationShadeWindow.setHasSurface(true);
         mNotificationShadeWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         assertTrue(mNotificationShadeWindow.canBeImeTarget());
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
                 mImeWindow, null, null);
 
         mDisplayContent.computeImeTarget(true);
