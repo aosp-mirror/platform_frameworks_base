@@ -43,6 +43,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,8 +78,7 @@ public class CompatUILayoutTest extends ShellTestCase {
         mWindowManager = new CompatUIWindowManager(mContext,
                 createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN),
                 mSyncTransactionQueue, mCallback, mTaskListener,
-                new DisplayLayout(), /* hasShownSizeCompatHint= */ false,
-                /* hasShownCameraCompatHint= */ false);
+                new DisplayLayout(), new CompatUIHintsState());
 
         mLayout = (CompatUILayout)
                 LayoutInflater.from(mContext).inflate(R.layout.compat_ui_layout, null);
