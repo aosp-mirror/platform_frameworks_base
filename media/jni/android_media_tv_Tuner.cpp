@@ -1839,7 +1839,7 @@ jobject JTuner::getAvSyncTime(jint id) {
     if (mDemuxClient == nullptr) {
         return nullptr;
     }
-    long time = mDemuxClient->getAvSyncTime((int)id);
+    int64_t time = mDemuxClient->getAvSyncTime((int)id);
     if (time >= 0) {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         jclass longClazz = env->FindClass("java/lang/Long");
