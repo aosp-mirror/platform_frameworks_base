@@ -3538,8 +3538,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                 final float expandedAspectRatio = r.pictureInPictureArgs.getExpandedAspectRatio();
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                mRootWindowContainer.moveActivityToPinnedRootTask(
-                        r, "enterPictureInPictureMode");
+                mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
                 final Task task = r.getTask();
                 task.setPictureInPictureAspectRatio(aspectRatio, expandedAspectRatio);
                 task.setPictureInPictureActions(actions);
@@ -3922,11 +3922,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void onPictureInPictureStateChanged(PictureInPictureUiState pipState) {
         enforceTaskPermission("onPictureInPictureStateChanged");
-        final Task rootPinnedStask = mRootWindowContainer.getDefaultTaskDisplayArea()
+        final Task rootPinnedTask = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getRootPinnedTask();
-        if (rootPinnedStask != null && rootPinnedStask.getTopMostActivity() != null) {
+        if (rootPinnedTask != null && rootPinnedTask.getTopMostActivity() != null) {
             mWindowManager.mAtmService.mActivityClientController.onPictureInPictureStateChanged(
-                    rootPinnedStask.getTopMostActivity(), pipState);
+                    rootPinnedTask.getTopMostActivity(), pipState);
         }
     }
 

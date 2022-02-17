@@ -106,12 +106,6 @@ class BackNavigationController {
         synchronized (task.mWmService.mGlobalLock) {
             activityRecord = task.topRunningActivity();
 
-            if(!activityRecord.info.applicationInfo.isOnBackInvokedCallbackEnabled()) {
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Activity %s: enableOnBackInvokedCallback=false."
-                        + " Returning null BackNavigationInfo.", activityRecord.getName());
-                return null;
-            }
-
             removedWindowContainer = activityRecord;
             taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
             WindowState window = task.getWindow(WindowState::isFocused);

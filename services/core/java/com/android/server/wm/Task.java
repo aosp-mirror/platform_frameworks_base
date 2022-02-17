@@ -3397,6 +3397,13 @@ class Task extends TaskFragment {
         info.positionInParent = getRelativePosition();
 
         info.pictureInPictureParams = getPictureInPictureParams(top);
+        info.preferDockBigOverlays = getPreferDockBigOverlays();
+        if (info.pictureInPictureParams != null
+                && info.pictureInPictureParams.isLaunchIntoPip()
+                && top.getTopMostActivity().getLastParentBeforePip() != null) {
+            info.launchIntoPipHostTaskId =
+                    top.getTopMostActivity().getLastParentBeforePip().mTaskId;
+        }
         info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
@@ -3441,6 +3448,11 @@ class Task extends TaskFragment {
         final ActivityRecord topMostActivity = top.getTopMostActivity();
         return (topMostActivity == null || topMostActivity.pictureInPictureArgs.empty())
                 ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
+    }
+
+    private boolean getPreferDockBigOverlays() {
+        final ActivityRecord topMostActivity = getTopMostActivity();
+        return topMostActivity != null && topMostActivity.preferDockBigOverlays;
     }
 
     Rect getDisplayCutoutInsets() {
@@ -4334,6 +4346,10 @@ class Task extends TaskFragment {
         if (inPinnedWindowingMode()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
+    }
+
+    void onPreferDockBigOverlaysChanged() {
+        dispatchTaskInfoChangedIfNeeded(true /* force */);
     }
 
     /** Called when the top activity in the Root Task enters or exits size compat mode. */

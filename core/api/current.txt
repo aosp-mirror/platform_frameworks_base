@@ -1453,6 +1453,7 @@ package android {
     field public static final int supportsAssist = 16844016; // 0x10104f0
     field public static final int supportsBatteryGameMode;
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
+    field public static final int supportsInlineSuggestionsWithTouchExploration;
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
     field public static final int supportsLocalInteraction = 16844047; // 0x101050f
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
@@ -4275,6 +4276,7 @@ package android.app {
     method public void setLocusContext(@Nullable android.content.LocusId, @Nullable android.os.Bundle);
     method public final void setMediaController(android.media.session.MediaController);
     method public void setPictureInPictureParams(@NonNull android.app.PictureInPictureParams);
+    method public void setPreferDockBigOverlays(boolean);
     method @Deprecated public final void setProgress(int);
     method @Deprecated public final void setProgressBarIndeterminate(boolean);
     method @Deprecated public final void setProgressBarIndeterminateVisibility(boolean);
@@ -4548,6 +4550,7 @@ package android.app {
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int);
+    method @NonNull public static android.app.ActivityOptions makeLaunchIntoPip(@NonNull android.app.PictureInPictureParams);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, String);
     method @java.lang.SafeVarargs public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View,java.lang.String>...);
@@ -6633,10 +6636,12 @@ package android.app {
 
   public static class PictureInPictureParams.Builder {
     ctor public PictureInPictureParams.Builder();
+    ctor public PictureInPictureParams.Builder(@NonNull android.app.PictureInPictureParams);
     method public android.app.PictureInPictureParams build();
     method public android.app.PictureInPictureParams.Builder setActions(java.util.List<android.app.RemoteAction>);
     method public android.app.PictureInPictureParams.Builder setAspectRatio(android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setAutoEnterEnabled(boolean);
+    method @NonNull public android.app.PictureInPictureParams.Builder setCloseAction(@Nullable android.app.RemoteAction);
     method @NonNull public android.app.PictureInPictureParams.Builder setExpandedAspectRatio(@Nullable android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);

@@ -532,6 +532,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // activity can enter picture in picture while pausing (only when switching to another task)
     PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
         // The PiP params used when deferring the entering of picture-in-picture.
+    boolean preferDockBigOverlays;
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
@@ -626,6 +627,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // due to picture-in-picture. This gets cleared whenever this activity or the Task
     // it references to gets removed. This should also be cleared when we move out of pip.
     private Task mLastParentBeforePip;
+
+    // Only set if this instance is a launch-into-pip Activity, points to the
+    // host Activity the launch-into-pip Activity is originated from.
+    private ActivityRecord mLaunchIntoPipHostActivity;
 
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
@@ -1224,6 +1229,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLastParentBeforePip != null) {
             pw.println(prefix + "lastParentTaskIdBeforePip=" + mLastParentBeforePip.mTaskId);
         }
+        if (mLaunchIntoPipHostActivity != null) {
+            pw.println(prefix + "launchIntoPipHostActivity=" + mLaunchIntoPipHostActivity);
+        }
 
         mLetterboxUiController.dump(pw, prefix);
 
@@ -1558,10 +1566,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Sets {@link #mLastParentBeforePip} to the current parent Task, it's caller's job to ensure
      * {@link #getTask()} is set before this is called.
+     *
+     * @param launchIntoPipHostActivity {@link ActivityRecord} as the host Activity for the
+     *        launch-int-pip Activity see also {@link #mLaunchIntoPipHostActivity}.
      */
-    void setLastParentBeforePip() {
-        mLastParentBeforePip = getTask();
+    void setLastParentBeforePip(@Nullable ActivityRecord launchIntoPipHostActivity) {
+        mLastParentBeforePip = (launchIntoPipHostActivity == null)
+                ? getTask()
+                : launchIntoPipHostActivity.getTask();
         mLastParentBeforePip.mChildPipActivity = this;
+        mLaunchIntoPipHostActivity = launchIntoPipHostActivity;
     }
 
     private void clearLastParentBeforePip() {
@@ -1569,10 +1583,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastParentBeforePip.mChildPipActivity = null;
             mLastParentBeforePip = null;
         }
+        mLaunchIntoPipHostActivity = null;
     }
 
     @Nullable Task getLastParentBeforePip() {
         return mLastParentBeforePip;
+    }
+
+    @Nullable ActivityRecord getLaunchIntoPipHostActivity() {
+        return mLaunchIntoPipHostActivity;
     }
 
     private void updateColorTransform() {
@@ -1855,6 +1874,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mRotationAnimationHint = rotationAnimation;
             }
 
+            if (options.getLaunchIntoPipParams() != null) {
+                pictureInPictureArgs = options.getLaunchIntoPipParams();
+            }
+
             mOverrideTaskTransition = options.getOverrideTaskTransition();
         }
 
@@ -1959,6 +1982,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mCameraCompatControlEnabled = mWmService.mContext.getResources()
                 .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
+        preferDockBigOverlays = mWmService.mContext.getResources()
+                .getBoolean(R.bool.config_dockBigOverlayWindows);
 
         if (_createTime > 0) {
             createTime = _createTime;
@@ -9431,6 +9456,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setPictureInPictureParams(PictureInPictureParams p) {
         pictureInPictureArgs.copyOnlySet(p);
         getTask().getRootTask().onPictureInPictureParamsChanged();
+    }
+
+    void setPreferDockBigOverlays(boolean preferDockBigOverlays) {
+        this.preferDockBigOverlays = preferDockBigOverlays;
+        getTask().getRootTask().onPreferDockBigOverlaysChanged();
     }
 
     @Override

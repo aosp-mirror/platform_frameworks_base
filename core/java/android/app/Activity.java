@@ -2965,6 +2965,27 @@ public class Activity extends ContextThemeWrapper
         return false;
     }
 
+    /**
+     * Specifies a preference to dock big overlays like the expanded picture-in-picture on TV
+     * (see {@link PictureInPictureParams.Builder#setExpandedAspectRatio}). Docking puts the
+     * big overlay side-by-side next to this activity, so that both windows are fully visible to
+     * the user.
+     *
+     * <p> If unspecified, whether the overlay window will be docked or not, will be defined
+     * by the system.
+     *
+     * <p> If specified, the system will try to respect the preference, but it may be
+     * overridden by a user preference.
+     *
+     * @param preferDockBigOverlays indicates that the activity prefers big overlays to be
+     *                              docked next to it instead of overlaying its content
+     *
+     * @see PictureInPictureParams.Builder#setExpandedAspectRatio
+     */
+    public void setPreferDockBigOverlays(boolean preferDockBigOverlays) {
+        ActivityClient.getInstance().setPreferDockBigOverlays(mToken, preferDockBigOverlays);
+    }
+
     void dispatchMovedToDisplay(int displayId, Configuration config) {
         updateDisplay(displayId);
         onMovedToDisplay(displayId, config);

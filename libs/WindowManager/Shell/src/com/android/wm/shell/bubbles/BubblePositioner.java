@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
@@ -110,10 +111,6 @@ public class BubblePositioner {
         mContext = context;
         mWindowManager = windowManager;
         update();
-    }
-
-    public void setRotation(int rotation) {
-        mRotation = rotation;
     }
 
     /**
@@ -273,7 +270,8 @@ public class BubblePositioner {
 
     /** @return whether the device is in landscape orientation. */
     public boolean isLandscape() {
-        return mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270;
+        return mContext.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     /** @return whether the screen is considered large. */

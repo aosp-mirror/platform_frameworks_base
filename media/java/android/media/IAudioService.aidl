@@ -138,6 +138,8 @@ interface IAudioService {
 
     boolean isMicrophoneMuted();
 
+    boolean isUltrasoundSupported();
+
     void setMicrophoneMute(boolean on, String callingPackage, int userId, in String attributionTag);
 
     oneway void setMicrophoneMuteFromSwitch(boolean on);

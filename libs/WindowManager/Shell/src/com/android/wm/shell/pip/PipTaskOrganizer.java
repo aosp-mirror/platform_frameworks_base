@@ -310,6 +310,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return mPipTransitionState.isInPip();
     }
 
+    private boolean isLaunchIntoPipTask() {
+        return mPictureInPictureParams != null && mPictureInPictureParams.isLaunchIntoPip();
+    }
+
     /**
      * Returns whether the entry animation is waiting to be started.
      */
@@ -397,6 +401,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (isLaunchIntoPipTask()) {
+            exitLaunchIntoPipTask(wct);
+            return;
+        }
 
         if (ENABLE_SHELL_TRANSITIONS) {
             if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
@@ -466,6 +474,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 animator.applySurfaceControlTransaction(mLeash, t, FRACTION_START);
             }
         });
+    }
+
+    private void exitLaunchIntoPipTask(WindowContainerTransaction wct) {
+        wct.startTask(mTaskInfo.launchIntoPipHostTaskId, null /* ActivityOptions */);
+        mTaskOrganizer.applyTransaction(wct);
+
+        // Remove the PiP with fade-out animation right after the host Task is brought to front.
+        removePip();
     }
 
     private void applyWindowingModeChangeOnExit(WindowContainerTransaction wct, int direction) {
@@ -729,7 +745,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
-     * Note that dismissing PiP is now originated from SystemUI, see {@link #exitPip(int)}.
+     * Note that dismissing PiP is now originated from SystemUI, see {@link #exitPip(int, boolean)}.
      * Meanwhile this callback is invoked whenever the task is removed. For instance:
      *   - as a result of removeRootTasksInWindowingModes from WM
      *   - activity itself is died
