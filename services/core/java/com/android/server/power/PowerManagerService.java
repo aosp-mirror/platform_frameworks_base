@@ -1998,7 +1998,7 @@ public final class PowerManagerService extends SystemService
     private boolean dozePowerGroupLocked(final PowerGroup powerGroup, long eventTime,
             int reason, int uid) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "sleepDisplayGroupNoUpdateLocked: eventTime=" + eventTime
+            Slog.d(TAG, "dozePowerGroup: eventTime=" + eventTime
                     + ", groupId=" + powerGroup.getGroupId() + ", reason=" + reason
                     + ", uid=" + uid);
         }
@@ -3127,7 +3127,7 @@ public final class PowerManagerService extends SystemService
                     Message msg = mHandler.obtainMessage(MSG_SANDMAN);
                     msg.arg1 = powerGroup.getGroupId();
                     msg.setAsynchronous(true);
-                    mHandler.sendMessage(msg);
+                    mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
                 }
             }
         }
