@@ -17207,6 +17207,12 @@ public final class Settings {
             public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
 
             /**
+             * Whether touch and hold to edit WF is enabled
+             * @hide
+             */
+            public static final String TOUCH_AND_HOLD_WATCH_FACE = "touch_and_hold_watchface";
+
+            /**
              * Whether the current watchface is decomposable.
              * @hide
              */
