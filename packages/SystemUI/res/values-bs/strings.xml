@@ -692,7 +692,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi-ja."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> da prikazuje isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -812,6 +812,10 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(veza je prekinuta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije moguće prebaciti. Dodirnite da pokušate ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
+    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
+    <skip />
+    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u međumemoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
@@ -884,8 +888,7 @@
       <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacija</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
@@ -896,8 +899,6 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Uredi kopirani tekst"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Uredi kopiranu sliku"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Pošalji na uređaj u blizini"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"Dodaj"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Upravljajte korisnicima"</string>
 </resources>

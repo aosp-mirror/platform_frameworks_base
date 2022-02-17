@@ -806,6 +806,10 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(डिस्कनेक्ट गरिएको छ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"बदल्न सकिएन। फेरि प्रयास गर्न ट्याप गर्नुहोस्।"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नयाँ डिभाइस कनेक्ट गर्नुहोस्"</string>
+    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
+    <skip />
+    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
@@ -877,8 +881,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> वटा सक्रिय एप</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> सक्रिय एप</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"नयाँ जानकारी"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"सक्रिय एपहरू"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"रोक्नुहोस्"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"रोकिएको छ"</string>
@@ -889,8 +892,6 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"कपी गरिएको टेक्स्ट सम्पादन गर्नुहोस्"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कपी गरिएको फोटो सम्पादन गर्नुहोस्"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"नजिकैको डिभाइसमा पठाउनुहोस्"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"हाल्नुहोस्"</string>
+    <string name="manage_users" msgid="1823875311934643849">"प्रयोगकर्ताहरूको व्यवस्थापन गर्नुहोस्"</string>
 </resources>
