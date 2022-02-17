@@ -103,6 +103,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
+            mContainerLayout.setOnClickListener(null);
             mTitleText.setTextColor(mController.getColorInactiveItem());
             mSeekBar.getProgressDrawable().setColorFilter(
                     new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
@@ -151,6 +152,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -169,6 +171,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     initSeekbar(device);
                     mCurrentActivePosition = position;
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(false);
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
