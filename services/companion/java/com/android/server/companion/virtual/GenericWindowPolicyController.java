@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.window.DisplayWindowPolicyController;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.BlockedAppStreamingActivity;
 
 import java.util.List;
@@ -75,9 +76,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final ArraySet<ComponentName> mAllowedActivities;
     @Nullable
     private final ArraySet<ComponentName> mBlockedActivities;
+    private final Object mGenericWindowPolicyControllerLock = new Object();
     private Consumer<ActivityInfo> mActivityBlockedCallback;
 
     @NonNull
+    @GuardedBy("mGenericWindowPolicyControllerLock")
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -149,11 +152,13 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
-        mRunningUids.clear();
-        mRunningUids.addAll(runningUids);
-        if (mActivityListener != null && mRunningUids.isEmpty()) {
-            // Post callback on the main thread so it doesn't block activity launching
-            mHandler.post(() -> mActivityListener.onDisplayEmpty(Display.INVALID_DISPLAY));
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mRunningUids.clear();
+            mRunningUids.addAll(runningUids);
+            if (mActivityListener != null && mRunningUids.isEmpty()) {
+                // Post callback on the main thread so it doesn't block activity launching
+                mHandler.post(() -> mActivityListener.onDisplayEmpty(Display.INVALID_DISPLAY));
+            }
         }
         if (mRunningAppsChangedListener != null) {
             mRunningAppsChangedListener.onRunningAppsChanged(runningUids);
@@ -165,7 +170,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * this controller.
      */
     boolean containsUid(int uid) {
-        return mRunningUids.contains(uid);
+        synchronized (mGenericWindowPolicyControllerLock) {
+            return mRunningUids.contains(uid);
+        }
     }
 
     private boolean canContainActivity(ActivityInfo activityInfo, int windowFlags,
