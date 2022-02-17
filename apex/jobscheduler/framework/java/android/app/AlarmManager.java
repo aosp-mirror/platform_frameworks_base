@@ -1408,6 +1408,7 @@ public class AlarmManager {
          * Use the {@link #CREATOR}
          * @hide
          */
+        @SuppressWarnings("UnsafeParcelApi")
         AlarmClockInfo(Parcel in) {
             mTriggerTime = in.readLong();
             mShowIntent = in.readParcelable(PendingIntent.class.getClassLoader());

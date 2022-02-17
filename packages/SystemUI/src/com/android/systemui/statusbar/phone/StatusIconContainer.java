@@ -217,8 +217,10 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * frameworks/base/core/res/res/values/config.xml
      */
     public void addIgnoredSlot(String slotName) {
-        addIgnoredSlotInternal(slotName);
-        requestLayout();
+        boolean added = addIgnoredSlotInternal(slotName);
+        if (added) {
+            requestLayout();
+        }
     }
 
     /**
@@ -226,17 +228,27 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * @param slots names of the icons to ignore
      */
     public void addIgnoredSlots(List<String> slots) {
+        boolean willAddAny = false;
         for (String slot : slots) {
-            addIgnoredSlotInternal(slot);
+            willAddAny |= addIgnoredSlotInternal(slot);
         }
 
-        requestLayout();
+        if (willAddAny) {
+            requestLayout();
+        }
     }
 
-    private void addIgnoredSlotInternal(String slotName) {
-        if (!mIgnoredSlots.contains(slotName)) {
-            mIgnoredSlots.add(slotName);
+    /**
+     *
+     * @param slotName
+     * @return
+     */
+    private boolean addIgnoredSlotInternal(String slotName) {
+        if (mIgnoredSlots.contains(slotName)) {
+            return false;
         }
+        mIgnoredSlots.add(slotName);
+        return true;
     }
 
     /**
@@ -245,9 +257,10 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * @param slotName name of the icon slot to remove from the ignored list
      */
     public void removeIgnoredSlot(String slotName) {
-        mIgnoredSlots.remove(slotName);
-
-        requestLayout();
+        boolean removed = mIgnoredSlots.remove(slotName);
+        if (removed) {
+            requestLayout();
+        }
     }
 
     /**
@@ -256,11 +269,14 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * @param slots name of the icon slots to remove from the ignored list
      */
     public void removeIgnoredSlots(List<String> slots) {
+        boolean removedAny = false;
         for (String slot : slots) {
-            mIgnoredSlots.remove(slot);
+            removedAny |= mIgnoredSlots.remove(slot);
         }
 
-        requestLayout();
+        if (removedAny) {
+            requestLayout();
+        }
     }
 
     /**

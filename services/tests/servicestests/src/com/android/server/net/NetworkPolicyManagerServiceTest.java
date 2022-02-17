@@ -23,11 +23,13 @@ import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRI
 import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
 import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -38,8 +40,10 @@ import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_FOREGROUND;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_TOP;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
@@ -49,15 +53,11 @@ import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
-import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
-import static android.net.NetworkStats.SET_ALL;
-import static android.net.NetworkStats.TAG_ALL;
-import static android.net.NetworkStats.TAG_NONE;
-import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
-import static android.net.NetworkTemplate.buildTemplateWifi;
-import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.net.NetworkTemplate.MATCH_CARRIER;
+import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -98,6 +98,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +109,8 @@ import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -125,10 +128,9 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
 import android.net.NetworkStateSnapshot;
-import android.net.NetworkStats;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.wifi.WifiInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -137,7 +139,6 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.SimpleClock;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -203,10 +204,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -226,15 +229,17 @@ public class NetworkPolicyManagerServiceTest {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
-    private static final String TEST_SSID = "AndroidAP";
+    private static final String TEST_WIFI_NETWORK_KEY = "TestWifiNetworkKey";
     private static final String TEST_IMSI = "310210";
     private static final int TEST_SUB_ID = 42;
     private static final Network TEST_NETWORK = mock(Network.class, CALLS_REAL_METHODS);
 
-
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
+    private static NetworkTemplate sTemplateWifi = new NetworkTemplate.Builder(MATCH_WIFI)
+            .setWifiNetworkKeys(Set.of(TEST_WIFI_NETWORK_KEY)).build();
     private static NetworkTemplate sTemplateCarrierMetered =
-            buildTemplateCarrierMetered(TEST_IMSI);
+            new NetworkTemplate.Builder(MATCH_CARRIER)
+                    .setSubscriberIds(Set.of(TEST_IMSI))
+                    .setMeteredness(METERED_YES).build();
 
     /**
      * Path on assets where files used by {@link NetPolicyXml} are located.
@@ -262,12 +267,13 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock CarrierConfigManager mCarrierConfigManager;
     private @Mock TelephonyManager mTelephonyManager;
     private @Mock UserManager mUserManager;
+    private @Mock NetworkStatsManager mStatsManager;
+    private TestDependencies mDeps;
 
     private ArgumentCaptor<ConnectivityManager.NetworkCallback> mNetworkCallbackCaptor =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
 
     private ActivityManagerInternal mActivityManagerInternal;
-    private NetworkStatsManagerInternal mStatsService;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -334,8 +340,47 @@ public class NetworkPolicyManagerServiceTest {
                 .setBatterySaverEnabled(false).build();
         final PowerManagerInternal pmInternal = addLocalServiceMock(PowerManagerInternal.class);
         when(pmInternal.getLowPowerState(anyInt())).thenReturn(state);
+    }
 
-        mStatsService = addLocalServiceMock(NetworkStatsManagerInternal.class);
+    private class TestDependencies extends NetworkPolicyManagerService.Dependencies {
+        private final SparseArray<NetworkStats.Bucket> mMockedStats = new SparseArray<>();
+
+        TestDependencies(Context context) {
+            super(context);
+        }
+
+        @Override
+        long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+            int total = 0;
+            for (int i = 0; i < mMockedStats.size(); i++) {
+                NetworkStats.Bucket bucket = mMockedStats.valueAt(i);
+                total += bucket.getRxBytes() + bucket.getTxBytes();
+            }
+            return total;
+        }
+
+        @Override
+        List<NetworkStats.Bucket> getNetworkUidBytes(NetworkTemplate template, long start,
+                long end) {
+            final List<NetworkStats.Bucket> ret = new ArrayList<>();
+            for (int i = 0; i < mMockedStats.size(); i++) {
+                ret.add(mMockedStats.valueAt(i));
+            }
+            return ret;
+        }
+
+        private void setMockedTotalBytes(int uid, long rxBytes, long txBytes) {
+            final NetworkStats.Bucket bucket = mock(NetworkStats.Bucket.class);
+            when(bucket.getUid()).thenReturn(uid);
+            when(bucket.getRxBytes()).thenReturn(rxBytes);
+            when(bucket.getTxBytes()).thenReturn(txBytes);
+            mMockedStats.set(uid, bucket);
+        }
+
+        private void increaseMockedTotalBytes(int uid, long rxBytes, long txBytes) {
+            final NetworkStats.Bucket bucket = mMockedStats.get(uid);
+            setMockedTotalBytes(uid, bucket.getRxBytes() + rxBytes, bucket.getTxBytes() + txBytes);
+        }
     }
 
     @Before
@@ -375,6 +420,8 @@ public class NetworkPolicyManagerServiceTest {
                         return mConnManager;
                     case Context.USER_SERVICE:
                         return mUserManager;
+                    case Context.NETWORK_STATS_SERVICE:
+                        return mStatsManager;
                     default:
                         return super.getSystemService(name);
                 }
@@ -399,8 +446,9 @@ public class NetworkPolicyManagerServiceTest {
         }).when(mActivityManager).registerUidObserver(any(), anyInt(), anyInt(), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
+        mDeps = new TestDependencies(mServiceContext);
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
-                mNetworkManager, mIpm, mClock, mPolicyDir, true);
+                mNetworkManager, mIpm, mClock, mPolicyDir, true, mDeps);
         mService.bindConnectivityManager();
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
 
@@ -455,6 +503,16 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
+        // Catch UsageCallback during systemReady(). Simulate NetworkStatsService triggered
+        // stats updated callback to signal its readiness.
+        final ArgumentCaptor<NetworkStatsManager.UsageCallback> usageObserver =
+                ArgumentCaptor.forClass(NetworkStatsManager.UsageCallback.class);
+        verify(mStatsManager, times(2))
+                .registerUsageCallback(any(), anyLong(), any(), usageObserver.capture());
+        // It doesn't matter which of the observers is returned here.
+        usageObserver.getValue().onThresholdReached(
+                new NetworkTemplate.Builder(MATCH_MOBILE).build());
+
         NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
         mDefaultLimitBytes = defaultPolicy.limitBytes;
@@ -478,7 +536,6 @@ public class NetworkPolicyManagerServiceTest {
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(AppStandbyInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
-        LocalServices.removeServiceForTest(NetworkStatsManagerInternal.class);
     }
 
     @After
@@ -1107,42 +1164,20 @@ public class NetworkPolicyManagerServiceTest {
         when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
 
         // pretend that 512 bytes total have happened
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 256L, 2L, 256L, 2L);
-        when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START, CYCLE_END))
-                .thenReturn(stats.getTotalBytes());
+        mDeps.setMockedTotalBytes(UID_A, 256L, 256L);
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
+                sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, DataUnit.MEBIBYTES.toBytes(1),
+                DataUnit.MEBIBYTES.toBytes(2), false));
         mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
 
         verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
-                (2 * MB_IN_BYTES) - 512);
+                DataUnit.MEBIBYTES.toBytes(2) - 512);
     }
 
     @Test
     public void testNotificationWarningLimitSnooze() throws Exception {
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        final NetworkStatsHistory.Entry entry = history.getValues(
-                                invocation.getArgument(1), invocation.getArgument(2), null);
-                        return entry.rxBytes + entry.txBytes;
-                    }
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<NetworkStats>() {
-                    @Override
-                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
-                        return stats;
-                    }
-                });
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1160,9 +1195,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Normal usage means no notification
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1177,9 +1210,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over warning
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1799), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1195,9 +1226,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over warning, but with a config that isn't from an identified carrier
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1799), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1214,9 +1243,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Push over limit
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1810), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(1810), 0);
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
@@ -1234,7 +1261,7 @@ public class NetworkPolicyManagerServiceTest {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
 
-            mService.snoozeLimit(NetworkTemplate.buildTemplateCarrierMetered(TEST_IMSI));
+            mService.snoozeLimit(sTemplateCarrierMetered);
             mService.updateNetworks();
 
             verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
@@ -1247,26 +1274,6 @@ public class NetworkPolicyManagerServiceTest {
 
     @Test
     public void testNotificationRapid() throws Exception {
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        final NetworkStatsHistory.Entry entry = history.getValues(
-                                invocation.getArgument(1), invocation.getArgument(2), null);
-                        return entry.rxBytes + entry.txBytes;
-                    }
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<NetworkStats>() {
-                    @Override
-                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
-                        return stats;
-                    }
-                });
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1284,9 +1291,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // Using 20% data in 20% time is normal
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1296,16 +1301,9 @@ public class NetworkPolicyManagerServiceTest {
         // Using 80% data in 20% time is alarming; but spread equally among
         // three UIDs means we get generic alert
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
-            stats.clear();
-            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_B, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_C, DataUnit.MEGABYTES.toBytes(480), 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1324,14 +1322,9 @@ public class NetworkPolicyManagerServiceTest {
         // Using 80% data in 20% time is alarming; but mostly done by one UID
         // means we get specific alert
         {
-            history.clear();
-            history.recordData(start, end,
-                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
-            stats.clear();
-            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
-                    DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
+            mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(960), 0);
+            mDeps.setMockedTotalBytes(UID_B, DataUnit.MEGABYTES.toBytes(480), 0);
+            mDeps.setMockedTotalBytes(UID_C, 0, 0);
 
             reset(mNotifManager);
             mService.updateNetworks();
@@ -1361,13 +1354,10 @@ public class NetworkPolicyManagerServiceTest {
 
         // bring up wifi network with metered policy
         snapshots = List.of(buildWifi());
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
+        mDeps.setMockedTotalBytes(UID_A, 0L, 0L);
 
         {
             when(mConnManager.getAllNetworkStateSnapshots()).thenReturn(snapshots);
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15,
-                    currentTimeMillis())).thenReturn(stats.getTotalBytes());
 
             mPolicyListener.expect().onMeteredIfacesChanged(any());
             setNetworkPolicies(new NetworkPolicy(
@@ -1646,18 +1636,6 @@ public class NetworkPolicyManagerServiceTest {
         final NetworkPolicyManagerInternal internal = LocalServices
                 .getService(NetworkPolicyManagerInternal.class);
 
-        // Create a place to store fake usage
-        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(invocation -> {
-                    final NetworkStatsHistory.Entry entry = history.getValues(
-                            invocation.getArgument(1), invocation.getArgument(2), null);
-                    return entry.rxBytes + entry.txBytes;
-                });
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
-
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
@@ -1668,9 +1646,7 @@ public class NetworkPolicyManagerServiceTest {
         setCurrentTimeMillis(end);
 
         // Get some data usage in place
-        history.clear();
-        history.recordData(start, end,
-                new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+        mDeps.setMockedTotalBytes(UID_A, DataUnit.MEGABYTES.toBytes(360), 0);
 
         // No data plan
         {
@@ -1785,22 +1761,11 @@ public class NetworkPolicyManagerServiceTest {
                 true);
     }
 
-    private void increaseMockedTotalBytes(NetworkStats stats, long rxBytes, long txBytes) {
-        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
-                rxBytes, 1, txBytes, 1, 0);
-        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats.getTotalBytes());
-        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenReturn(stats);
-    }
-
     private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
-        npmi.onStatsProviderWarningOrLimitReached("TEST");
+        mService.notifyStatsProviderWarningOrLimitReached();
         // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
         postMsgAndWaitForCompletion();
-        verify(mStatsService).forceUpdate();
+        verify(mStatsManager).forceUpdate();
         // Wait for processing of MSG_*_INTERFACE_QUOTAS.
         postMsgAndWaitForCompletion();
     }
@@ -1813,13 +1778,12 @@ public class NetworkPolicyManagerServiceTest {
     public void testStatsProviderWarningAndLimitReached() throws Exception {
         final int CYCLE_DAY = 15;
 
-        final NetworkStats stats = new NetworkStats(0L, 1);
-        increaseMockedTotalBytes(stats, 2999, 2000);
+        mDeps.setMockedTotalBytes(UID_A, 2999, 2000);
 
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE,
                 Long.MAX_VALUE);
 
         // Set warning to 7KB and limit to 10KB.
@@ -1829,32 +1793,32 @@ public class NetworkPolicyManagerServiceTest {
         postMsgAndWaitForCompletion();
 
         // Verifies that remaining quotas are set to providers.
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2001L, 5001L);
+        reset(mStatsManager);
 
         // Increase the usage and simulates that limit reached fires earlier by provider,
         // but actually the quota is not yet reached. Verifies that the limit reached leads to
         // a force update and new quotas should be set.
-        increaseMockedTotalBytes(stats, 1000, 999);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000, 999);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, 2L, 3002L);
+        reset(mStatsManager);
 
         // Increase the usage and simulate warning reached, the new warning should be unlimited
         // since service will disable warning quota to stop lower layer from keep triggering
         // warning reached event.
-        increaseMockedTotalBytes(stats, 1000L, 1000);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(
                 TEST_IFACE, Long.MAX_VALUE, 1002L);
-        reset(mStatsService);
+        reset(mStatsManager);
 
         // Increase the usage that over the warning and limit, the new limit should set to 1 to
         // block the network traffic.
-        increaseMockedTotalBytes(stats, 1000L, 1000);
+        mDeps.increaseMockedTotalBytes(UID_A, 1000L, 1000);
         triggerOnStatsProviderWarningOrLimitReached();
-        verify(mStatsService).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
-        reset(mStatsService);
+        verify(mStatsManager).setStatsProviderWarningAndLimitAsync(TEST_IFACE, Long.MAX_VALUE, 1L);
+        reset(mStatsManager);
     }
 
     private void enableRestrictedMode(boolean enable) throws Exception {
@@ -1918,55 +1882,99 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
+    public void testLowPowerStandbyAllowlist() throws Exception {
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, 0);
+        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+        callOnUidStateChanged(UID_C, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+        expectHasInternetPermission(UID_A, true);
+        expectHasInternetPermission(UID_B, true);
+        expectHasInternetPermission(UID_C, true);
+
+        final NetworkPolicyManagerInternal internal = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+
+        Map<Integer, Integer> firewallUidRules = new ArrayMap<>();
+        doAnswer(arg -> {
+            int[] uids = arg.getArgument(1);
+            int[] rules = arg.getArgument(2);
+            assertTrue(uids.length == rules.length);
+
+            for (int i = 0; i < uids.length; ++i) {
+                firewallUidRules.put(uids[i], rules[i]);
+            }
+            return null;
+        }).when(mNetworkManager).setFirewallUidRules(eq(FIREWALL_CHAIN_LOW_POWER_STANDBY),
+                any(int[].class), any(int[].class));
+
+        internal.setLowPowerStandbyAllowlist(new int[] { UID_B });
+        internal.setLowPowerStandbyActive(true);
+        assertEquals(FIREWALL_RULE_ALLOW, firewallUidRules.get(UID_A).intValue());
+        assertEquals(FIREWALL_RULE_ALLOW, firewallUidRules.get(UID_B).intValue());
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+        assertFalse(mService.isUidNetworkingBlocked(UID_B, false));
+        assertTrue(mService.isUidNetworkingBlocked(UID_C, false));
+
+        internal.setLowPowerStandbyActive(false);
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+        assertFalse(mService.isUidNetworkingBlocked(UID_B, false));
+        assertFalse(mService.isUidNetworkingBlocked(UID_C, false));
+    }
+
+    @Test
     public void testUpdateEffectiveBlockedReasons() {
-        final SparseArray<Pair<Integer, Integer>> effectiveBlockedReasons = new SparseArray<>();
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_REASON_NONE, ALLOWED_REASON_NONE));
+        final Map<Pair<Integer, Integer>, Integer> effectiveBlockedReasons = new HashMap<>();
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_NONE, ALLOWED_REASON_NONE),
+                BLOCKED_REASON_NONE);
 
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_SYSTEM));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
-                        ALLOWED_REASON_SYSTEM));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER,
-                        ALLOWED_METERED_REASON_SYSTEM));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
-                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
-                        ALLOWED_METERED_REASON_SYSTEM));
+        effectiveBlockedReasons.put(
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_SYSTEM),
+                BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                ALLOWED_REASON_SYSTEM), BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER, ALLOWED_METERED_REASON_SYSTEM),
+                BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                ALLOWED_METERED_REASON_SYSTEM), BLOCKED_REASON_NONE);
 
-        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+        effectiveBlockedReasons.put(
                 Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
-                        ALLOWED_REASON_SYSTEM));
-        effectiveBlockedReasons.put(BLOCKED_REASON_APP_STANDBY,
+                        ALLOWED_REASON_SYSTEM), BLOCKED_METERED_REASON_DATA_SAVER);
+        effectiveBlockedReasons.put(
                 Pair.create(BLOCKED_REASON_APP_STANDBY | BLOCKED_METERED_REASON_USER_RESTRICTED,
-                        ALLOWED_METERED_REASON_SYSTEM));
+                        ALLOWED_METERED_REASON_SYSTEM), BLOCKED_REASON_APP_STANDBY);
 
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_FOREGROUND));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
-                        ALLOWED_REASON_FOREGROUND));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER, ALLOWED_METERED_REASON_FOREGROUND));
-        effectiveBlockedReasons.put(BLOCKED_REASON_NONE,
-                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
-                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
-                        ALLOWED_METERED_REASON_FOREGROUND));
-        effectiveBlockedReasons.put(BLOCKED_METERED_REASON_DATA_SAVER,
+        effectiveBlockedReasons.put(
+                Pair.create(BLOCKED_REASON_BATTERY_SAVER, ALLOWED_REASON_FOREGROUND),
+                BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_REASON_DOZE,
+                ALLOWED_REASON_FOREGROUND), BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(
+                Pair.create(BLOCKED_METERED_REASON_DATA_SAVER, ALLOWED_METERED_REASON_FOREGROUND),
+                BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_METERED_REASON_DATA_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                ALLOWED_METERED_REASON_FOREGROUND), BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(
                 Pair.create(BLOCKED_REASON_BATTERY_SAVER | BLOCKED_METERED_REASON_DATA_SAVER,
-                        ALLOWED_REASON_FOREGROUND));
-        effectiveBlockedReasons.put(BLOCKED_REASON_BATTERY_SAVER,
-                Pair.create(BLOCKED_REASON_BATTERY_SAVER
-                                | BLOCKED_METERED_REASON_USER_RESTRICTED,
-                        ALLOWED_METERED_REASON_FOREGROUND));
+                        ALLOWED_REASON_FOREGROUND), BLOCKED_METERED_REASON_DATA_SAVER);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_BATTERY_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED,
+                ALLOWED_METERED_REASON_FOREGROUND), BLOCKED_REASON_BATTERY_SAVER);
+
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_LOW_POWER_STANDBY,
+                ALLOWED_REASON_FOREGROUND), BLOCKED_REASON_LOW_POWER_STANDBY);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_LOW_POWER_STANDBY,
+                ALLOWED_REASON_TOP), BLOCKED_REASON_NONE);
+        effectiveBlockedReasons.put(Pair.create(BLOCKED_REASON_LOW_POWER_STANDBY,
+                ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST), BLOCKED_REASON_NONE);
         // TODO: test more combinations of blocked reasons.
 
-        for (int i = 0; i < effectiveBlockedReasons.size(); ++i) {
-            final int expectedEffectiveBlockedReasons = effectiveBlockedReasons.keyAt(i);
-            final int blockedReasons = effectiveBlockedReasons.valueAt(i).first;
-            final int allowedReasons = effectiveBlockedReasons.valueAt(i).second;
+        for (Map.Entry<Pair<Integer, Integer>, Integer> test : effectiveBlockedReasons.entrySet()) {
+            final int expectedEffectiveBlockedReasons = test.getValue();
+            final int blockedReasons = test.getKey().first;
+            final int allowedReasons = test.getKey().second;
             final String errorMsg = "Expected="
                     + blockedReasonsToString(expectedEffectiveBlockedReasons)
                     + "; blockedReasons=" + blockedReasonsToString(blockedReasons)
@@ -1986,9 +1994,8 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals("Unexpected template match rule in network policies",
                 NetworkTemplate.MATCH_CARRIER,
                 actualPolicy.template.getMatchRule());
-        assertEquals("Unexpected subscriberId match rule in network policies",
-                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT,
-                actualPolicy.template.getSubscriberIdMatchRule());
+        assertTrue("Unexpected subscriberIds size in network policies",
+                actualPolicy.template.getSubscriberIds().size() > 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_YES, actualPolicy.template.getMeteredness());
     }
@@ -2001,11 +2008,10 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals("Unexpected number of network policies", 1, policies.length);
         NetworkPolicy actualPolicy = policies[0];
         assertEquals("Unexpected template match rule in network policies",
-                NetworkTemplate.MATCH_WIFI,
+                MATCH_WIFI,
                 actualPolicy.template.getMatchRule());
-        assertEquals("Unexpected subscriberId match rule in network policies",
-                NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_ALL,
-                actualPolicy.template.getSubscriberIdMatchRule());
+        assertEquals("Unexpected subscriberIds size in network policies",
+                actualPolicy.template.getSubscriberIds().size(), 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_NO, actualPolicy.template.getMeteredness());
     }
@@ -2073,7 +2079,10 @@ public class NetworkPolicyManagerServiceTest {
 
     private static NetworkPolicy buildFakeCarrierPolicy(int cycleDay, long warningBytes,
             long limitBytes, boolean inferred) {
-        final NetworkTemplate template = buildTemplateCarrierMetered(FAKE_SUBSCRIBER_ID);
+        // TODO: Refactor this to use sTemplateCarrierMetered.
+        final NetworkTemplate template = new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(FAKE_SUBSCRIBER_ID))
+                .setMeteredness(METERED_YES).build();
         return new NetworkPolicy(template, cycleDay, TimeZone.getDefault().getID(), warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
     }
@@ -2098,10 +2107,13 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static NetworkStateSnapshot buildWifi() {
+        WifiInfo mockWifiInfo = mock(WifiInfo.class);
+        when(mockWifiInfo.makeCopy(anyLong())).thenReturn(mockWifiInfo);
+        when(mockWifiInfo.getNetworkKey()).thenReturn(TEST_WIFI_NETWORK_KEY);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
-                .addTransportType(TRANSPORT_WIFI).setSsid(TEST_SSID).build();
+                .addTransportType(TRANSPORT_WIFI).setTransportInfo(mockWifiInfo).build();
         return new NetworkStateSnapshot(TEST_NETWORK, networkCapabilities, prop,
                 null /*subscriberId*/, TYPE_WIFI);
     }
@@ -2143,7 +2155,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
-        verify(mStatsService).advisePersistThreshold(anyLong());
+        verify(mStatsManager).setDefaultGlobalAlert(anyLong());
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {
@@ -2275,7 +2287,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage)
             throws InterruptedException {
-        mService.setSubscriptionPlans(subId, plans, callingPackage);
+        mService.setSubscriptionPlans(subId, plans, 0, callingPackage);
         // setSubscriptionPlans() triggers async events, wait for those to be completed before
         // moving forward as they could interfere with the tests later.
         postMsgAndWaitForCompletion();

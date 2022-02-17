@@ -172,6 +172,14 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                 };
 
         mWindowManager = new DividerWindowManager(mSystemWindows);
+
+        // No need to listen to display window container or create root tasks if the device is not
+        // using legacy split screen.
+        if (!context.getResources().getBoolean(com.android.internal.R.bool.config_useLegacySplit)) {
+            return;
+        }
+
+
         mDisplayController.addDisplayWindowListener(this);
         // Don't initialize the divider or anything until we get the default display.
 

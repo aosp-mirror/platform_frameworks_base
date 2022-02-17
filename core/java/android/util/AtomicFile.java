@@ -330,6 +330,11 @@ public class AtomicFile {
         }
     }
 
+    @Override
+    public String toString() {
+        return "AtomicFile[" + mBaseName + "]";
+    }
+
     private static void rename(File source, File target) {
         // We used to delete the target file before rename, but that isn't atomic, and the rename()
         // syscall should atomically replace the target file. However in the case where the target

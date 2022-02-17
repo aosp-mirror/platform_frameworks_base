@@ -493,6 +493,8 @@ public class WifiNl80211Manager {
                     return SoftApInfo.CHANNEL_WIDTH_80MHZ_PLUS_MHZ;
                 case IApInterfaceEventCallback.BANDWIDTH_160:
                     return SoftApInfo.CHANNEL_WIDTH_160MHZ;
+                case IApInterfaceEventCallback.BANDWIDTH_320:
+                    return SoftApInfo.CHANNEL_WIDTH_320MHZ;
                 default:
                     return SoftApInfo.CHANNEL_WIDTH_INVALID;
             }
@@ -1259,6 +1261,27 @@ public class WifiNl80211Manager {
     public void unregisterCountryCodeChangedListener(@NonNull CountryCodeChangedListener listener) {
         Log.d(TAG, "unregisterCountryCodeEventListener called");
         mWificondEventHandler.unregisterCountryCodeChangedListener(listener);
+    }
+
+    /**
+     * Notifies the wificond daemon that the WiFi framework has successfully updated the Country
+     * Code of the driver. The wificond daemon needs this notification if the device does not
+     * support the NL80211_CMD_REG_CHANGED (otherwise it will find out on its own). The wificond
+     * updates in internal state in response to this Country Code update.
+     *
+     * @param newCountryCode new country code. An ISO-3166-alpha2 country code which is 2-Character
+     *                       alphanumeric.
+     */
+    public void notifyCountryCodeChanged(@Nullable String newCountryCode) {
+        if (mWificond == null) {
+            new RemoteException("Wificond service doesn't exist!").rethrowFromSystemServer();
+        }
+        try {
+            mWificond.notifyCountryCodeChanged();
+            Log.i(TAG, "Receive country code change to " + newCountryCode);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
     }
 
     /**

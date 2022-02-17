@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="@dimen/letterbox_education_dialog_icon_size"
+        android:height="@dimen/letterbox_education_dialog_icon_size"
+        android:viewportWidth="48"
+        android:viewportHeight="48">
+    <path
+        android:fillColor="@color/letterbox_education_text_secondary"
+        android:fillType="evenOdd"
+        android:pathData="M2 8C0.895431 8 0 8.89543 0 10V38C0 39.1046 0.895431 40 2 40H46C47.1046 40 48 39.1046 48 38V10C48 8.89543 47.1046 8 46 8H2ZM44 12H4V36H44V12Z" />
+    <path
+        android:fillColor="@color/letterbox_education_text_secondary"
+        android:pathData="M6 16C6 14.8954 6.89543 14 8 14H21C22.1046 14 23 14.8954 23 16V32C23 33.1046 22.1046 34 21 34H8C6.89543 34 6 33.1046 6 32V16Z" />
+    <path
+        android:fillColor="@color/letterbox_education_text_secondary"
+        android:pathData="M25 16C25 14.8954 25.8954 14 27 14H40C41.1046 14 42 14.8954 42 16V32C42 33.1046 41.1046 34 40 34H27C25.8954 34 25 33.1046 25 32V16Z" />
+</vector>

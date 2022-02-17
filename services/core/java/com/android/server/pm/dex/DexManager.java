@@ -1043,10 +1043,12 @@ public class DexManager {
     public long deleteOptimizedFiles(ArtPackageInfo packageInfo) {
         long freedBytes = 0;
         boolean hadErrors = false;
+        final String packageName = packageInfo.getPackageName();
         for (String codePath : packageInfo.getCodePaths()) {
             for (String isa : packageInfo.getInstructionSets()) {
                 try {
-                    freedBytes += mInstaller.deleteOdex(codePath, isa, packageInfo.getOatDir());
+                    freedBytes += mInstaller.deleteOdex(packageName, codePath, isa,
+                            packageInfo.getOatDir());
                 } catch (InstallerException e) {
                     Log.e(TAG, "Failed deleting oat files for " + codePath, e);
                     hadErrors = true;

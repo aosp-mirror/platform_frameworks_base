@@ -19,8 +19,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +34,7 @@ import android.app.Person;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserManager;
@@ -43,6 +49,8 @@ import com.android.server.UiServiceTestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,6 +246,118 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
                 /* selectionArgs= */ isNull(),
                 /* sortOrder= */ isNull());
         assertFalse(ContentProvider.uriHasUserId(queryUri.getValue()));
+    }
+
+    @Test
+    public void testMergePhoneNumbers_noPhoneNumber() {
+        // If merge phone number is called but the contacts lookup turned up no available
+        // phone number (HAS_PHONE_NUMBER is false), then no query should happen.
+
+        // setup of various bits required for querying
+        final Context mockContext = mock(Context.class);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        final int contactId = 12345;
+        final Uri lookupUri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_LOOKUP_URI, String.valueOf(contactId));
+
+        // when the contact is looked up, we return a cursor that has one entry whose info is:
+        //  _ID: 1
+        //  LOOKUP_KEY: "testlookupkey"
+        //  STARRED: 0
+        //  HAS_PHONE_NUMBER: 0
+        Cursor cursor = makeMockCursor(1, "testlookupkey", 0, 0);
+        when(mockContentResolver.query(any(), any(), any(), any(), any())).thenReturn(cursor);
+
+        // call searchContacts and then mergePhoneNumbers, make sure we never actually
+        // query the content resolver for a phone number
+        new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
+        verify(mockContentResolver, never()).query(
+                eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
+                contains(ContactsContract.Contacts.LOOKUP_KEY),
+                any(),  // selection args
+                isNull());  // sort order
+    }
+
+    @Test
+    public void testMergePhoneNumbers_hasNumber() {
+        // If merge phone number is called and the contact lookup has a phone number,
+        // make sure there's then a subsequent query for the phone number.
+
+        // setup of various bits required for querying
+        final Context mockContext = mock(Context.class);
+        final ContentResolver mockContentResolver = mock(ContentResolver.class);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+        final int contactId = 12345;
+        final Uri lookupUri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_LOOKUP_URI, String.valueOf(contactId));
+
+        // when the contact is looked up, we return a cursor that has one entry whose info is:
+        //  _ID: 1
+        //  LOOKUP_KEY: "testlookupkey"
+        //  STARRED: 0
+        //  HAS_PHONE_NUMBER: 1
+        Cursor cursor = makeMockCursor(1, "testlookupkey", 0, 1);
+
+        // make sure to add some specifics so this cursor is only returned for the
+        // contacts database lookup.
+        when(mockContentResolver.query(eq(lookupUri), any(),
+                isNull(), isNull(), isNull())).thenReturn(cursor);
+
+        // in the case of a phone lookup, return null cursor; that's not an error case
+        // and we're not checking the actual storing of the phone data here.
+        when(mockContentResolver.query(eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
+                contains(ContactsContract.Contacts.LOOKUP_KEY),
+                any(), isNull())).thenReturn(null);
+
+        // call searchContacts and then mergePhoneNumbers, and check that we query
+        // once for the
+        new ValidateNotificationPeople().searchContactsAndLookupNumbers(mockContext, lookupUri);
+        verify(mockContentResolver, times(1)).query(
+                eq(ContactsContract.CommonDataKinds.Phone.CONTENT_URI),
+                eq(ValidateNotificationPeople.PHONE_LOOKUP_PROJECTION),
+                contains(ContactsContract.Contacts.LOOKUP_KEY),
+                eq(new String[] { "testlookupkey" }),  // selection args
+                isNull());  // sort order
+    }
+
+    // Creates a cursor that points to one item of Contacts data with the specified
+    // columns.
+    private Cursor makeMockCursor(int id, String lookupKey, int starred, int hasPhone) {
+        Cursor mockCursor = mock(Cursor.class);
+        when(mockCursor.moveToFirst()).thenReturn(true);
+        doAnswer(new Answer<Boolean>() {
+            boolean mAccessed = false;
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                if (!mAccessed) {
+                    mAccessed = true;
+                    return true;
+                }
+                return false;
+            }
+
+        }).when(mockCursor).moveToNext();
+
+        // id
+        when(mockCursor.getColumnIndex(ContactsContract.Contacts._ID)).thenReturn(0);
+        when(mockCursor.getInt(0)).thenReturn(id);
+
+        // lookup key
+        when(mockCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY)).thenReturn(1);
+        when(mockCursor.getString(1)).thenReturn(lookupKey);
+
+        // starred
+        when(mockCursor.getColumnIndex(ContactsContract.Contacts.STARRED)).thenReturn(2);
+        when(mockCursor.getInt(2)).thenReturn(starred);
+
+        // has phone number
+        when(mockCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)).thenReturn(3);
+        when(mockCursor.getInt(3)).thenReturn(hasPhone);
+
+        return mockCursor;
     }
 
     private void assertStringArrayEquals(String message, String[] expected, String[] result) {

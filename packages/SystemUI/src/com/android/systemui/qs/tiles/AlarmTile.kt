@@ -54,7 +54,7 @@ class AlarmTile @Inject constructor(
     private var lastAlarmInfo: AlarmManager.AlarmClockInfo? = null
     private val icon = ResourceIcon.get(R.drawable.ic_alarm)
     @VisibleForTesting
-    internal val defaultIntent = Intent(AlarmClock.ACTION_SET_ALARM)
+    internal val defaultIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
     private val callback = NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
         lastAlarmInfo = nextAlarm
         refreshState()

@@ -71,7 +71,8 @@ public class GnssConfiguration {
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
     public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
-
+    public static final String CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD =
+            "ENABLE_PSDS_PERIODIC_DOWNLOAD";
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
 
@@ -191,6 +192,13 @@ public class GnssConfiguration {
         }
 
         return Arrays.asList(proxyAppsArray);
+    }
+
+    /**
+     * Returns true if PSDS periodic download is enabled, false otherwise.
+     */
+    boolean isPsdsPeriodicDownloadEnabled() {
+        return getBooleanConfig(CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD, false);
     }
 
     /**
@@ -372,6 +380,14 @@ public class GnssConfiguration {
                     + valueString + ". Using default value: " + defaultValue);
             return defaultValue;
         }
+    }
+
+    private boolean getBooleanConfig(String configParameter, boolean defaultValue) {
+        String valueString = mProperties.getProperty(configParameter);
+        if (TextUtils.isEmpty(valueString)) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(valueString);
     }
 
     private static boolean isConfigEsExtensionSecSupported(

@@ -16,23 +16,45 @@
 
 package com.android.systemui.media.dagger;
 
+import android.content.Context;
+import android.os.Handler;
+import android.view.WindowManager;
+
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
+import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
+import com.android.systemui.media.taptotransfer.MediaTttFlags;
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
+
+import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
 /** Dagger module for the media package. */
-@Module
+@Module(subcomponents = {
+        MediaComplicationComponent.class,
+})
 public interface MediaModule {
     String QS_PANEL = "media_qs_panel";
     String QUICK_QS_PANEL = "media_quick_qs_panel";
     String KEYGUARD = "media_keyguard";
+    String DREAM = "dream";
 
     /** */
     @Provides
@@ -62,5 +84,87 @@ public interface MediaModule {
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
             MediaHostStatesManager statesManager) {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(DREAM)
+    static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
+            MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
+            MediaHostStatesManager statesManager) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
+            MediaTttFlags mediaTttFlags,
+            CommandQueue commandQueue,
+            Context context,
+            WindowManager windowManager) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaTttChipControllerSender(commandQueue, context, windowManager));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaTttChipControllerReceiver> providesMediaTttChipControllerReceiver(
+            MediaTttFlags mediaTttFlags,
+            CommandQueue commandQueue,
+            Context context,
+            WindowManager windowManager,
+            @Main Handler mainHandler) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new MediaTttChipControllerReceiver(
+                        commandQueue, context, windowManager, mainHandler));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
+            MediaTttFlags mediaTttFlags,
+            CommandRegistry commandRegistry,
+            Context context,
+            @Main Executor mainExecutor) {
+        if (!mediaTttFlags.isMediaTttEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new MediaTttCommandLineHelper(commandRegistry, context, mainExecutor));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaMuteAwaitConnectionCli> providesMediaMuteAwaitConnectionCli(
+            MediaFlags mediaFlags,
+            CommandRegistry commandRegistry,
+            Context context
+    ) {
+        if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaMuteAwaitConnectionCli(commandRegistry, context));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<NearbyMediaDevicesManager> providesNearbyMediaDevicesManager(
+            MediaFlags mediaFlags,
+            Lazy<NearbyMediaDevicesManager> nearbyMediaDevicesManagerLazy) {
+        if (!mediaFlags.areNearbyMediaDevicesEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(nearbyMediaDevicesManagerLazy.get());
     }
 }

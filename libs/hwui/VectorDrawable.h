@@ -648,7 +648,7 @@ public:
      */
     void draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& paint);
 
-    void getPaintFor(SkPaint* outPaint, const TreeProperties &props) const;
+    void getPaintFor(Paint* outPaint, const TreeProperties &props) const;
     BitmapPalette computePalette();
 
     void setAntiAlias(bool aa) { mRootNode->setAntiAlias(aa); }

@@ -69,10 +69,12 @@ interface INetworkPolicyManager {
 
     int getMultipathPreference(in Network network);
 
+    SubscriptionPlan getSubscriptionPlan(in NetworkTemplate template);
+    void notifyStatsProviderWarningOrLimitReached();
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
-    void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
+    void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, long expirationDurationMillis, String callingPackage);
     String getSubscriptionPlansOwner(int subId);
-    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, in int[] networkTypes, long timeoutMillis, String callingPackage);
+    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, in int[] networkTypes, long expirationDurationMillis, String callingPackage);
 
     void factoryReset(String subscriber);
 

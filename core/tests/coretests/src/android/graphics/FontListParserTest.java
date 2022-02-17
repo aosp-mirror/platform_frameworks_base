@@ -27,6 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.fail;
 
+import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontStyle;
 import android.os.LocaleList;
 import android.text.FontConfig;
@@ -46,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -316,6 +318,52 @@ public final class FontListParserTest {
         } catch (IOException | XmlPullParserException e) {
             // pass
         }
+    }
+
+    @Test
+    public void alias() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font>test.ttf</font>"
+                + "  </family>"
+                + "  <family name='custom-family'>"
+                + "    <font>missing.ttf</font>"
+                + "  </family>"
+                + "  <alias name='custom-alias' to='sans-serif'/>"
+                + "</familyset>";
+        FontConfig config = readFamilies(xml, true /* include non-existing font files */);
+        List<FontConfig.Alias> aliases = config.getAliases();
+        assertThat(aliases.size()).isEqualTo(1);
+        assertThat(aliases.get(0).getName()).isEqualTo("custom-alias");
+        assertThat(aliases.get(0).getOriginal()).isEqualTo("sans-serif");
+    }
+
+    @Test
+    public void dropped_FamilyAlias() throws Exception {
+        String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font>test.ttf</font>"
+                + "  </family>"
+                + "  <family name='custom-family'>"
+                + "    <font>missing.ttf</font>"
+                + "  </family>"
+                + "  <alias name='custom-alias' to='custom-family'/>"
+                + "</familyset>";
+        FontConfig config = readFamilies(xml, false /* exclude not existing file */);
+        assertThat(config.getAliases()).isEmpty();
+    }
+
+    private FontConfig readFamilies(String xml, boolean allowNonExisting)
+            throws IOException, XmlPullParserException {
+        ByteArrayInputStream buffer = new ByteArrayInputStream(
+                xml.getBytes(StandardCharsets.UTF_8));
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(buffer, "UTF-8");
+        parser.nextTag();
+        return FontListParser.readFamilies(parser, "", new FontCustomizationParser.Result(), null,
+                0L /* last modified date */, 0 /* config version */, allowNonExisting);
     }
 
     private FontConfig.FontFamily readFamily(String xml)
