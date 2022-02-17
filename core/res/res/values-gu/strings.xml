@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ફાઇલો અને દસ્તાવેજો"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"તમારા ડિવાઇસ પર ફાઇલો અને દસ્તાવેજો ઍક્સેસ કરો"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"મ્યુઝિક અને અન્ય ઑડિયો"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"તમારા ડિવાઇસ પર ઑડિયો ફાઇલો ઍક્સેસ કરવા માટે"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ફોટા અને વીડિયો"</string>
@@ -588,12 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"આગળ વધવા માટે તમારું સ્ક્રીન લૉક દાખલ કરો"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"આંશિક ફિંગરપ્રિન્ટ મળી"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ફિંગરપ્રિન્ટ સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"આંગળી બહુ જ ધીમેથી ખસેડી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"અન્ય ફિંગરપ્રિન્ટ અજમાવી જુઓ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"અતિશય પ્રકાશિત"</string>
@@ -601,10 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"દરેક વખતે સ્કૅનર પર તમારી આંગળીની સ્થિતિ સહેજ બદલતા રહો"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"છોડો"</string>
     <string name="no_matches" msgid="6472699895759164599">"કોઈ મેળ નથી"</string>
     <string name="find_on_page" msgid="5400537367077438198">"પૃષ્ઠ પર શોધો"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# મૅચ}one{{total}માંથી #}other{{total}માંથી #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"થઈ ગયું"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"શેર કરેલ સ્ટોરેજ ભૂસી રહ્યાં છીએ…"</string>
     <string name="share" msgid="4157615043345227321">"શેર કરો"</string>
@@ -2263,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> બૅકગ્રાઉન્ડમાં ચાલી રહી છે અને અતિશય બૅટરી વાપરી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> લાંબા સમયથી બૅકગ્રાઉન્ડમાં ચાલી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"આ ડિવાઇસમાંથી કૅમેરા ઍક્સેસ કરી શકાતો નથી"</string>
 </resources>

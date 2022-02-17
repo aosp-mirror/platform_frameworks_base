@@ -1502,8 +1502,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omiteți"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nicio potrivire"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Găsiți pe pagină"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# potrivire}few{# din {total}}other{# din {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Terminat"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Se șterge spațiul de stocare distribuit..."</string>
     <string name="share" msgid="4157615043345227321">"Distribuiți"</string>
@@ -2257,6 +2256,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal și consumă bateria. Atingeți pentru a examina."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal mult timp. Atingeți pentru a examina."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nu se poate accesa camera foto de pe acest dispozitiv"</string>
 </resources>

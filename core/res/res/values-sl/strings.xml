@@ -547,7 +547,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oddajanje napravam Bluetooth v bližini."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"določanje relativne oddaljenosti med napravami UWB v bližini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacijo z napravami Wi‑Fi v bližini"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacija z napravami Wi‑Fi v bližini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Aplikaciji dovoljuje objavljanje in določanje relativnega položaja naprav Wi‑Fi v bližini ter povezovanje z njimi."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikaciji omogoča pridobivanje podatkov o prednostni storitvi za plačevanje prek povezave NFC, kot so registrirani pripomočki in cilj preusmeritve."</string>
@@ -1503,8 +1503,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Preskoči"</string>
     <string name="no_matches" msgid="6472699895759164599">"Ni ujemanj"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Najdi na strani"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# ujemanje}one{# od {total}}two{# od {total}}few{# od {total}}other{# od {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Končano"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Brisanje skupne shrambe …"</string>
     <string name="share" msgid="4157615043345227321">"Deli"</string>
@@ -2258,6 +2257,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> se izvaja v ozadju in porablja energijo baterije. Dotaknite se za pregled."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> se dolgo časa izvaja v ozadju. Dotaknite se za pregled."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Preverite aktivne aplikacije"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"V tej napravi ni mogoče dostopati do fotoaparata."</string>
 </resources>

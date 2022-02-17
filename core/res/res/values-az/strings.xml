@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"təqvimə daxil olun"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"göndərin və SMS mesajlarına baxın"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fayllar &amp; sənədlər"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızda fayllara və sənədlərə giriş"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiqi və digər audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"cihazınızdakı audio fayllarına giriş"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto və videolar"</string>
@@ -588,12 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Davam etmək üçün ekran kilidinizi daxil edin"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Barmaq izinin bir hissəsi aşkarlanıb"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Barmaq izi sensorunu silib yenidən cəhd edin"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensoru silib yenidən cəhd edin"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sensora basıb saxlayın"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Barmağınızı çox yavaş hərəkət etdirdiniz. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başqa bir barmaq izini sınayın"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çox işıqlıdır"</string>
@@ -601,10 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Hər dəfə barmağınızın yerini bir az dəyişdirin"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Barmaq izi tanınmır"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Sensora basıb saxlayın"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Barmaq izi doğrulandı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Üz doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Üz təsdiq edildi, təsdiq düyməsinə basın"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Keç"</string>
     <string name="no_matches" msgid="6472699895759164599">"Uyğunluq yoxdur"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Səhifədə tap"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# uyğunluq}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Hazırdır"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Paylaşılan yaddaş silinir…"</string>
     <string name="share" msgid="4157615043345227321">"Paylaşın"</string>
@@ -2263,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> arxa fonda işləyir və enerjini tükədir. Nəzərdən keçirmək üçün toxunun."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> uzun müddət arxa fonda işləyir. Nəzərdən keçirmək üçün toxunun."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktiv tətbiqləri yoxlayın"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Bu cihazdan kameraya giriş mümkün deyil"</string>
 </resources>
