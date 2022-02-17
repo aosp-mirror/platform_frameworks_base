@@ -16,10 +16,15 @@
 
 package com.android.internal.os;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.annotation.NonNull;
+import android.app.usage.NetworkStatsManager;
 import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.SparseIntArray;
 
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
@@ -27,6 +32,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.power.MeasuredEnergyStats;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
@@ -36,34 +42,41 @@ import java.util.concurrent.Future;
  * Mocks a BatteryStatsImpl object.
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
-    public BatteryStatsImpl.Clocks clocks;
     public boolean mForceOnBattery;
+    // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
+    private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
 
-    MockBatteryStatsImpl(Clocks clocks) {
-        super(clocks);
-        this.clocks = mClocks;
+    MockBatteryStatsImpl() {
+        this(new MockClock());
+    }
+
+    MockBatteryStatsImpl(Clock clock) {
+        this(clock, null);
+    }
+
+    MockBatteryStatsImpl(Clock clock, File historyDirectory) {
+        super(clock, historyDirectory);
         initTimersAndCounters();
 
-        setExternalStatsSyncLocked(new DummyExternalStatsSync());
+        setExternalStatsSyncLocked(mExternalStatsSync);
         informThatAllExternalStatsAreFlushed();
 
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {
         };
+
+        mCpuUidFreqTimeReader = mock(KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader.class);
+        when(mCpuUidFreqTimeReader.readFreqs(any())).thenReturn(new long[]{100, 200});
     }
 
-    MockBatteryStatsImpl() {
-        this(new MockClocks());
-    }
-
-    public void initMeasuredEnergyStats() {
+    public void initMeasuredEnergyStats(String[] customBucketNames) {
         final boolean[] supportedStandardBuckets =
                 new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
         Arrays.fill(supportedStandardBuckets, true);
-        final String[] customBucketNames = {"FOO", "BAR"};
-        mGlobalMeasuredEnergyStats =
-                new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
+        mMeasuredEnergyStatsConfig = new MeasuredEnergyStats.Config(supportedStandardBuckets,
+                customBucketNames, new int[0], new String[]{""});
+        mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(mMeasuredEnergyStatsConfig);
     }
 
     public TimeBase getOnBatteryTimeBase() {
@@ -106,10 +119,16 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
     }
 
+    @Override
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return mNetworkStats;
+    }
     public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
         return this;
@@ -174,18 +193,22 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
-    public MockBatteryStatsImpl setTrackingCpuByProcStateEnabled(boolean enabled) {
-        mConstants.TRACK_CPU_TIMES_BY_PROC_STATE = enabled;
-        return this;
-    }
-
-    public SparseIntArray getPendingUids() {
-        return mPendingUids;
+    public int getAndClearExternalStatsSyncFlags() {
+        final int flags = mExternalStatsSync.flags;
+        mExternalStatsSync.flags = 0;
+        return flags;
     }
 
     private class DummyExternalStatsSync implements ExternalStatsSync {
+        public int flags = 0;
+
         @Override
         public Future<?> scheduleSync(String reason, int flags) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
             return null;
         }
 
@@ -200,20 +223,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleReadProcStateCpuTimes(boolean onBattery,
-                boolean onBatteryScreenOff, long delayMillis) {
-            return null;
-        }
-
-        @Override
-        public Future<?> scheduleCopyFromAllUidsCpuTimes(
-                boolean onBattery, boolean onBatteryScreenOff) {
-            return null;
-        }
-
-        @Override
-        public Future<?> scheduleSyncDueToScreenStateChange(
-                int flag, boolean onBattery, boolean onBatteryScreenOff, int screenState) {
+        public Future<?> scheduleSyncDueToScreenStateChange(int flag, boolean onBattery,
+                boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates) {
+            flags |= flag;
             return null;
         }
 
@@ -228,6 +240,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
         @Override
         public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
             return null;
         }
     }

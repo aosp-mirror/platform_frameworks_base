@@ -1507,6 +1507,20 @@ public final class AppExitInfoTracker {
             }
         }
 
+        void removeIsolatedUid(int isolatedUid, int uid) {
+            synchronized (mLock) {
+                final int index = mUidToIsolatedUidMap.indexOfKey(uid);
+                if (index >= 0) {
+                    final ArraySet<Integer> set = mUidToIsolatedUidMap.valueAt(index);
+                    set.remove(isolatedUid);
+                    if (set.isEmpty()) {
+                        mUidToIsolatedUidMap.removeAt(index);
+                    }
+                }
+                mIsolatedUidToUidMap.remove(isolatedUid);
+            }
+        }
+
         @GuardedBy("mLock")
         Integer getUidByIsolatedUid(int isolatedUid) {
             if (UserHandle.isIsolated(isolatedUid)) {

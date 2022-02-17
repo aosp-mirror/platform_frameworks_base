@@ -17,13 +17,13 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
-#include "BlurDrawLooper.h"
 #include "Typeface.h"
 
 #include <cutils/compiler.h>
 
 #include <SkFont.h>
 #include <SkPaint.h>
+#include <SkSamplingOptions.h>
 #include <string>
 
 #include <minikin/FontFamily.h>
@@ -31,6 +31,8 @@
 #include <minikin/Hyphenator.h>
 
 namespace android {
+
+class BlurDrawLooper;
 
 class Paint : public SkPaint {
 public:
@@ -60,7 +62,7 @@ public:
     const SkFont& getSkFont() const { return mFont; }
 
     BlurDrawLooper* getLooper() const { return mLooper.get(); }
-    void setLooper(sk_sp<BlurDrawLooper> looper) { mLooper = std::move(looper); }
+    void setLooper(sk_sp<BlurDrawLooper> looper);
 
     // These shadow the methods on SkPaint, but we need to so we can keep related
     // attributes in-sync.
@@ -138,7 +140,15 @@ public:
     void setDevKern(bool d) { mDevKern = d; }
 
     // Deprecated -- bitmapshaders will be taking this flag explicitly
-    bool isFilterBitmap() const { return this->getFilterQuality() != kNone_SkFilterQuality; }
+    bool isFilterBitmap() const { return mFilterBitmap; }
+    void setFilterBitmap(bool filter) { mFilterBitmap = filter; }
+
+    SkFilterMode filterMode() const {
+        return mFilterBitmap ? SkFilterMode::kLinear : SkFilterMode::kNearest;
+    }
+    SkSamplingOptions sampling() const {
+        return SkSamplingOptions(this->filterMode());
+    }
 
     // The Java flags (Paint.java) no longer fit into the native apis directly.
     // These methods handle converting to and from them and the native representations
@@ -169,6 +179,7 @@ private:
     // nullptr is valid: it means the default typeface.
     const Typeface* mTypeface = nullptr;
     Align mAlign = kLeft_Align;
+    bool mFilterBitmap = false;
     bool mStrikeThru = false;
     bool mUnderline = false;
     bool mDevKern = false;

@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.isSubtypeOf;
 
@@ -43,6 +44,7 @@ import java.util.List;
 @BugPattern(
     name = "AndroidFrameworkEfficientCollections",
     summary = "Verifies efficient collections best-practices",
+    linkType = NONE,
     severity = WARNING)
 public final class EfficientCollectionsChecker extends BugChecker implements NewClassTreeMatcher {
     private static final Matcher<Tree> IS_LIST = isSubtypeOf("java.util.List");

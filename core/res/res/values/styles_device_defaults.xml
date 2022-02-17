@@ -397,7 +397,7 @@ easier.
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Headline" parent="TextAppearance.Material.Headline">
-        <item name="fontFamily">@string/config_bodyFontFamily</item>
+        <item name="fontFamily">@string/config_headlineFontFamily</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Display1" parent="TextAppearance.Material.Display1">
         <item name="fontFamily">@string/config_bodyFontFamily</item>

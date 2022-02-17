@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Trace;
 
@@ -83,7 +84,8 @@ public class StartActivityItem extends ActivityLifecycleItem {
 
     /** Read from Parcel. */
     private StartActivityItem(Parcel in) {
-        mActivityOptions = ActivityOptions.fromBundle(in.readBundle());
+        Bundle bundle = in.readBundle();
+        mActivityOptions = bundle != null ? ActivityOptions.fromBundle(bundle) : null;
     }
 
     public static final @NonNull Creator<StartActivityItem> CREATOR =

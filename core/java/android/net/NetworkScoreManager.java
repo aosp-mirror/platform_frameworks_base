@@ -51,9 +51,13 @@ import java.util.concurrent.Executor;
  *     permission.
  * </ul>
  *
+ * @deprecated No longer functional on {@link android.os.Build.VERSION_CODES#TIRAMISU} and above.
+ * See <a href="{@docRoot}guide/topics/connectivity/wifi-suggest">Wi-Fi Suggestion API</a> for
+ * alternative APIs to suggest/configure Wi-Fi networks.
  * @hide
  */
 @SystemApi
+@Deprecated
 @SystemService(Context.NETWORK_SCORE_SERVICE)
 public class NetworkScoreManager {
     private static final String TAG = "NetworkScoreManager";
@@ -245,7 +249,7 @@ public class NetworkScoreManager {
      *                           or {@link permission#REQUEST_NETWORK_SCORES} permissions.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
-                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
+            android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public String getActiveScorerPackage() {
         try {
             return mService.getActiveScorerPackage();
@@ -322,7 +326,7 @@ public class NetworkScoreManager {
      *                           hold the {@link permission#REQUEST_NETWORK_SCORES} permission.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
-                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
+            android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public boolean clearScores() throws SecurityException {
         try {
             return mService.clearScores();
@@ -344,7 +348,7 @@ public class NetworkScoreManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
-                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
+            android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public boolean setActiveScorer(String packageName) throws SecurityException {
         try {
             return mService.setActiveScorer(packageName);
@@ -362,7 +366,7 @@ public class NetworkScoreManager {
      *                           hold the {@link permission#REQUEST_NETWORK_SCORES} permission.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.SCORE_NETWORKS,
-                                 android.Manifest.permission.REQUEST_NETWORK_SCORES})
+            android.Manifest.permission.REQUEST_NETWORK_SCORES})
     public void disableScoring() throws SecurityException {
         try {
             mService.disableScoring();

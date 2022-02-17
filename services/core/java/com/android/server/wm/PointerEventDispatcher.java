@@ -16,15 +16,11 @@
 
 package com.android.server.wm;
 
-import static com.android.server.input.InputManagerService.ENABLE_PER_WINDOW_INPUT_ROTATION;
-
-import android.graphics.Point;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.UiThread;
@@ -35,12 +31,8 @@ public class PointerEventDispatcher extends InputEventReceiver {
     private final ArrayList<PointerEventListener> mListeners = new ArrayList<>();
     private PointerEventListener[] mListenersArray = new PointerEventListener[0];
 
-    private final DisplayContent mDisplayContent;
-    private final Point mTmpSize = new Point();
-
-    public PointerEventDispatcher(InputChannel inputChannel, DisplayContent dc) {
+    public PointerEventDispatcher(InputChannel inputChannel) {
         super(inputChannel, UiThread.getHandler().getLooper());
-        mDisplayContent = dc;
     }
 
     @Override
@@ -49,15 +41,6 @@ public class PointerEventDispatcher extends InputEventReceiver {
             if (event instanceof MotionEvent
                     && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                 MotionEvent motionEvent = (MotionEvent) event;
-                if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-                    final int rotation = mDisplayContent.getRotation();
-                    if (rotation != Surface.ROTATION_0) {
-                        mDisplayContent.getDisplay().getRealSize(mTmpSize);
-                        motionEvent = MotionEvent.obtain(motionEvent);
-                        motionEvent.transform(MotionEvent.createRotateMatrix(
-                                rotation, mTmpSize.x, mTmpSize.y));
-                    }
-                }
                 PointerEventListener[] listeners;
                 synchronized (mListeners) {
                     if (mListenersArray == null) {

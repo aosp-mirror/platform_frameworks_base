@@ -50,10 +50,10 @@ public final class LocationTimeZoneManager {
     public static final String SHELL_COMMAND_STOP = "stop";
 
     /**
-     * A shell command that tells the service to record state information during tests. The next
-     * argument value is "true" or "false".
+     * A shell command that clears recorded provider state information during tests.
      */
-    public static final String SHELL_COMMAND_RECORD_PROVIDER_STATES = "record_provider_states";
+    public static final String SHELL_COMMAND_CLEAR_RECORDED_PROVIDER_STATES =
+            "clear_recorded_provider_states";
 
     /**
      * A shell command that tells the service to dump its current state.
@@ -65,44 +65,15 @@ public final class LocationTimeZoneManager {
      */
     public static final String DUMP_STATE_OPTION_PROTO = "--proto";
 
-    /**
-     * A shell command that sends test commands to a provider
-     */
-    public static final String SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND =
-            "send_provider_test_command";
+    /** A shell command that starts the location_time_zone_manager with named test providers. */
+    public static final String SHELL_COMMAND_START_WITH_TEST_PROVIDERS =
+            "start_with_test_providers";
 
     /**
-     * Simulated provider test command that simulates the bind succeeding.
+     * The token that can be passed to {@link #SHELL_COMMAND_START_WITH_TEST_PROVIDERS} to indicate
+     * there is no provider.
      */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_ON_BIND = "on_bind";
-
-    /**
-     * Simulated provider test command that simulates the provider unbinding.
-     */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_ON_UNBIND = "on_unbind";
-
-    /**
-     * Simulated provider test command that simulates the provider entering the "permanent failure"
-     * state.
-     */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_PERM_FAILURE = "perm_fail";
-
-    /**
-     * Simulated provider test command that simulates the provider entering the "success" (time
-     * zone(s) detected) state.
-     */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS = "success";
-
-    /**
-     * Argument for {@link #SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS} to specify TZDB time zone IDs.
-     */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS_ARG_KEY_TZ = "tz";
-
-    /**
-     * Simulated provider test command that simulates the provider entering the "uncertain"
-     * state.
-     */
-    public static final String SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN = "uncertain";
+    public static final String NULL_PACKAGE_NAME_TOKEN = "@null";
 
     private LocationTimeZoneManager() {
         // No need to instantiate.

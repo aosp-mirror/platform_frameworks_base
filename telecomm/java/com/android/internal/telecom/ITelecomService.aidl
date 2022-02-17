@@ -306,12 +306,14 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isIncomingCallPermitted
      */
-    boolean isIncomingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
+    boolean isIncomingCallPermitted(in PhoneAccountHandle phoneAccountHandle,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isOutgoingCallPermitted
      */
-    boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
+    boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#waitOnHandler
@@ -339,6 +341,8 @@ interface ITelecomService {
     void handleCallIntent(in Intent intent, in String callingPackageProxy);
 
     void cleanupStuckCalls();
+
+    int cleanupOrphanPhoneAccounts();
 
     void resetCarMode();
 

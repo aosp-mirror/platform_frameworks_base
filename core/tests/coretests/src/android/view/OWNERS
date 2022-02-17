@@ -16,3 +16,6 @@ per-file *Window*  = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Scroll Capture
 per-file *ScrollCapture*.java = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS
+
+# Stylus
+per-file stylus/* = file:/core/java/android/text/OWNERS

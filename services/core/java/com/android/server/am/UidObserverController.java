@@ -129,6 +129,10 @@ public class UidObserverController {
         return mValidateUids;
     }
 
+    Runnable getDispatchRunnableForTest() {
+        return mDispatchRunnable;
+    }
+
     @VisibleForTesting
     static int mergeWithPendingChange(int currentChange, int pendingChange) {
         // If there is no change in idle or active state, then keep whatever was pending.

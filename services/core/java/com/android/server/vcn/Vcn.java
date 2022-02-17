@@ -39,10 +39,13 @@ import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.provider.Settings;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -57,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -148,6 +152,10 @@ public class Vcn extends Handler {
     @NonNull private final VcnContentResolver mContentResolver;
     @NonNull private final ContentObserver mMobileDataSettingsObserver;
 
+    @NonNull
+    private final Map<Integer, VcnUserMobileDataStateListener> mMobileDataStateListeners =
+            new ArrayMap<>();
+
     /**
      * Map containing all VcnGatewayConnections and their VcnGatewayConnectionConfigs.
      *
@@ -220,6 +228,9 @@ public class Vcn extends Handler {
 
         // Update mIsMobileDataEnabled before starting handling of NetworkRequests.
         mIsMobileDataEnabled = getMobileDataStatus();
+
+        // Register mobile data state listeners.
+        updateMobileDataStateListeners();
 
         // Register to receive cached and future NetworkRequests
         mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
@@ -348,11 +359,17 @@ public class Vcn extends Handler {
             gatewayConnection.teardownAsynchronously();
         }
 
+        // Unregister MobileDataStateListeners
+        for (VcnUserMobileDataStateListener listener : mMobileDataStateListeners.values()) {
+            getTelephonyManager().unregisterTelephonyCallback(listener);
+        }
+        mMobileDataStateListeners.clear();
+
         mCurrentStatus = VCN_STATUS_CODE_INACTIVE;
     }
 
     private void handleSafeModeStatusChanged() {
-        logDbg("VcnGatewayConnection safe mode status changed");
+        logVdbg("VcnGatewayConnection safe mode status changed");
         boolean hasSafeModeGatewayConnection = false;
 
         // If any VcnGatewayConnection is in safe mode, mark the entire VCN as being in safe mode
@@ -368,7 +385,7 @@ public class Vcn extends Handler {
                 hasSafeModeGatewayConnection ? VCN_STATUS_CODE_SAFE_MODE : VCN_STATUS_CODE_ACTIVE;
         if (oldStatus != mCurrentStatus) {
             mVcnCallback.onSafeModeStatusChanged(hasSafeModeGatewayConnection);
-            logDbg(
+            logInfo(
                     "Safe mode "
                             + (mCurrentStatus == VCN_STATUS_CODE_SAFE_MODE ? "entered" : "exited"));
         }
@@ -454,9 +471,38 @@ public class Vcn extends Handler {
             gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
         }
 
+        updateMobileDataStateListeners();
+
         // Update the mobile data state after updating the subscription snapshot as a change in
         // subIds for a subGroup may affect the mobile data state.
         handleMobileDataToggled();
+    }
+
+    private void updateMobileDataStateListeners() {
+        final Set<Integer> subIdsInGroup = mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup);
+        final HandlerExecutor executor = new HandlerExecutor(this);
+
+        // Register new callbacks
+        for (int subId : subIdsInGroup) {
+            if (!mMobileDataStateListeners.containsKey(subId)) {
+                final VcnUserMobileDataStateListener listener =
+                        new VcnUserMobileDataStateListener();
+
+                getTelephonyManagerForSubid(subId).registerTelephonyCallback(executor, listener);
+                mMobileDataStateListeners.put(subId, listener);
+            }
+        }
+
+        // Unregister old callbacks
+        Iterator<Entry<Integer, VcnUserMobileDataStateListener>> iterator =
+                mMobileDataStateListeners.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Entry<Integer, VcnUserMobileDataStateListener> entry = iterator.next();
+            if (!subIdsInGroup.contains(entry.getKey())) {
+                getTelephonyManager().unregisterTelephonyCallback(entry.getValue());
+                iterator.remove();
+            }
+        }
     }
 
     private void handleMobileDataToggled() {
@@ -493,11 +539,8 @@ public class Vcn extends Handler {
     }
 
     private boolean getMobileDataStatus() {
-        final TelephonyManager genericTelMan =
-                mVcnContext.getContext().getSystemService(TelephonyManager.class);
-
         for (int subId : mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup)) {
-            if (genericTelMan.createForSubscriptionId(subId).isDataEnabled()) {
+            if (getTelephonyManagerForSubid(subId).isDataEnabled()) {
                 return true;
             }
         }
@@ -515,6 +558,14 @@ public class Vcn extends Handler {
         }
 
         return request.canBeSatisfiedBy(builder.build());
+    }
+
+    private TelephonyManager getTelephonyManager() {
+        return mVcnContext.getContext().getSystemService(TelephonyManager.class);
+    }
+
+    private TelephonyManager getTelephonyManagerForSubid(int subid) {
+        return getTelephonyManager().createForSubscriptionId(subid);
     }
 
     private String getLogPrefix() {
@@ -537,6 +588,16 @@ public class Vcn extends Handler {
 
     private void logDbg(String msg, Throwable tr) {
         Slog.d(TAG, getLogPrefix() + msg, tr);
+    }
+
+    private void logInfo(String msg) {
+        Slog.i(TAG, getLogPrefix() + msg);
+        LOCAL_LOG.log(getLogPrefix() + "INFO: " + msg);
+    }
+
+    private void logInfo(String msg, Throwable tr) {
+        Slog.i(TAG, getLogPrefix() + msg, tr);
+        LOCAL_LOG.log(getLogPrefix() + "INFO: " + msg + tr);
     }
 
     private void logErr(String msg) {
@@ -656,6 +717,16 @@ public class Vcn extends Handler {
 
         @Override
         public void onChange(boolean selfChange) {
+            sendMessage(obtainMessage(MSG_EVENT_MOBILE_DATA_TOGGLED));
+        }
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    class VcnUserMobileDataStateListener extends TelephonyCallback
+            implements TelephonyCallback.UserMobileDataStateListener {
+
+        @Override
+        public void onUserMobileDataStateChanged(boolean enabled) {
             sendMessage(obtainMessage(MSG_EVENT_MOBILE_DATA_TOGGLED));
         }
     }

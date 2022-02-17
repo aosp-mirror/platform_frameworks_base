@@ -134,6 +134,7 @@
         android:background="@drawable/qs_media_light_source"
         android:forceHasOverlappingRendering="false">
         <LinearLayout
+            android:id="@+id/media_seamless_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="@dimen/qs_seamless_height"
@@ -162,18 +163,6 @@
                 android:lineHeight="16sp" />
         </LinearLayout>
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/media_seamless_fallback"
-        android:layout_width="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_height="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        android:layout_marginStart="@dimen/qs_center_guideline_padding"
-        android:layout_marginEnd="@dimen/qs_seamless_fallback_margin"
-        android:tint="?android:attr/textColor"
-        android:src="@drawable/ic_cast_connected"
-        android:forceHasOverlappingRendering="false" />
 
     <!-- Seek Bar -->
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
@@ -275,6 +264,7 @@
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
+            android:id="@+id/cancel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
@@ -299,6 +289,7 @@
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
+            android:id="@+id/dismiss_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"

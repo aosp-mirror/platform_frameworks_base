@@ -99,7 +99,7 @@ public final class SubscriptionPlan implements Parcelable {
     }
 
     private SubscriptionPlan(Parcel source) {
-        cycleRule = source.readParcelable(null);
+        cycleRule = source.readParcelable(null, android.util.RecurrenceRule.class);
         title = source.readCharSequence();
         summary = source.readCharSequence();
         dataLimitBytes = source.readLong();

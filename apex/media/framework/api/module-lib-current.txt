@@ -2,6 +2,7 @@
 package android.media {
 
   public class MediaCommunicationManager {
+    method public void dispatchMediaKeyEvent(@NonNull android.view.KeyEvent, boolean);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void registerSessionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaCommunicationManager.SessionCallback);
     method public void unregisterSessionCallback(@NonNull android.media.MediaCommunicationManager.SessionCallback);
   }

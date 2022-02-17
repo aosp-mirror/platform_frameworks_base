@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -58,6 +57,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import dagger.Lazy;
@@ -80,27 +80,23 @@ public class PowerUITest extends SysuiTestCase {
     private static final int OLD_BATTERY_LEVEL_10 = 10;
     private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
     public static final int BATTERY_LEVEL_10 = 10;
-    private WarningsUI mMockWarnings;
+    @Mock private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
-    private EnhancedEstimates mEnhancedEstimates;
+    @Mock private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
     @Mock private IThermalService mThermalServiceMock;
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Lazy<StatusBar> mStatusBarLazy;
+    @Mock private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     @Mock private StatusBar mStatusBar;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
-        mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
 
-        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
-
-        mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
+        when(mStatusBarOptionalLazy.get()).thenReturn(Optional.of(mStatusBar));
 
         createPowerUi();
         mSkinThermalEventListener = mPowerUI.new SkinThermalEventListener();
@@ -688,7 +684,9 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarLazy);
+        mPowerUI = new PowerUI(
+                mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarOptionalLazy,
+                mMockWarnings, mEnhancedEstimates, mPowerManager);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

@@ -3,9 +3,10 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
@@ -14,7 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
@@ -581,7 +581,7 @@ public class CrossProfileAppsServiceImplTest {
     private void mockAppsInstalled(String packageName, int user, boolean installed) {
         when(mPackageManagerInternal.getPackageInfo(
                 eq(packageName),
-                anyInt(),
+                anyLong(),
                 anyInt(),
                 eq(user)))
                 .thenReturn(installed ? createInstalledPackageInfo() : null);
@@ -604,7 +604,7 @@ public class CrossProfileAppsServiceImplTest {
         mActivityInfo = activityInfo;
 
         when(mPackageManagerInternal.queryIntentActivities(
-                any(Intent.class), nullable(String.class), anyInt(), anyInt(), anyInt()))
+                any(Intent.class), nullable(String.class), anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(resolveInfo));
     }
 

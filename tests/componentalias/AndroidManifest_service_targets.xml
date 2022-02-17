@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.content.componentalias.tests" >
+    <application>
+        <service android:name=".s.Target00" android:exported="true" android:enabled="true" >
+        </service>
+        <service android:name=".s.Target01" android:exported="true" android:enabled="true" >
+        </service>
+        <service android:name=".s.Target02" android:exported="true" android:enabled="true" >
+        </service>
+        <service android:name=".s.Target03" android:exported="true" android:enabled="true" >
+        </service>
+        <service android:name=".s.Target04" android:exported="true" android:enabled="true" >
+        </service>
+
+        <!--
+            Due to http://go/intents-match-intent-filters-guide, the target intent has to have
+            an intent filter that matches the original intent. (modulo the package name)
+            This restriction shouldn't exist in the final version.
+        -->
+        <receiver android:name=".b.Target00" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_00" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Target01" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_01" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Target02" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_02" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Target03" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_03" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+        <receiver android:name=".b.Target04" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_04" /></intent-filter>
+            <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>

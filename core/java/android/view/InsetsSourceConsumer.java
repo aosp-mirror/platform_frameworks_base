@@ -36,13 +36,13 @@ import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.Log;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -180,10 +180,7 @@ public class InsetsSourceConsumer {
 
                 // If we have a new leash, make sure visibility is up-to-date, even though we
                 // didn't want to run an animation above.
-                SurfaceControl newLeash = mSourceControl.getLeash();
-                if (oldLeash == null || newLeash == null || !oldLeash.isSameSurface(newLeash)) {
-                    applyHiddenToControl();
-                }
+                applyRequestedVisibilityToControl();
 
                 // Remove the surface that owned by last control when it lost.
                 if (!requestedVisible && !mIsAnimationPending && lastControl == null) {
@@ -388,18 +385,20 @@ public class InsetsSourceConsumer {
         }
     }
 
-    private void applyHiddenToControl() {
+    private void applyRequestedVisibilityToControl() {
         if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
 
         final Transaction t = mTransactionSupplier.get();
-        if (DEBUG) Log.d(TAG, "applyHiddenToControl: " + mRequestedVisible);
+        if (DEBUG) Log.d(TAG, "applyRequestedVisibilityToControl: " + mRequestedVisible);
         if (mRequestedVisible) {
             t.show(mSourceControl.getLeash());
         } else {
             t.hide(mSourceControl.getLeash());
         }
+        // Ensure the alpha value is aligned with the actual requested visibility.
+        t.setAlpha(mSourceControl.getLeash(), mRequestedVisible ? 1 : 0);
         t.apply();
         onPerceptible(mRequestedVisible);
     }

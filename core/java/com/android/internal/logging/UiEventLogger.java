@@ -32,6 +32,22 @@ public interface UiEventLogger {
      * OEMs should use event IDs above 100000 and below 1000000 (1 million).
      */
     interface UiEventEnum {
+
+        /**
+         * Tag used to request new UI Event IDs via presubmit analysis.
+         *
+         * <p>Use RESERVE_NEW_UI_EVENT_ID as the constructor parameter for a new {@link EventEnum}
+         * to signal the presubmit analyzer to reserve a new ID for the event. The new ID will be
+         * returned as a Gerrit presubmit finding.  Do not submit {@code RESERVE_NEW_UI_EVENT_ID} as
+         * the constructor parameter for any event.
+         *
+         * <pre>
+         * &#064;UiEvent(doc = "Briefly describe the interaction when this event will be logged")
+         * UNIQUE_EVENT_NAME(RESERVE_NEW_UI_EVENT_ID);
+         * </pre>
+         */
+        int RESERVE_NEW_UI_EVENT_ID = Integer.MIN_VALUE; // Negative IDs are ignored by the logger.
+
         int getId();
     }
 
@@ -40,6 +56,14 @@ public interface UiEventLogger {
      * @param event an enum implementing UiEventEnum interface.
      */
     void log(@NonNull UiEventEnum event);
+
+    /**
+     * Log a simple event with an instance id, without package information.
+     * Does nothing if event.getId() <= 0.
+     * @param event an enum implementing UiEventEnum interface.
+     * @param instance An identifier obtained from an InstanceIdSequence. If null, reduces to log().
+     */
+    void log(@NonNull UiEventEnum event, @Nullable InstanceId instance);
 
     /**
      * Log an event with package information. Does nothing if event.getId() <= 0.

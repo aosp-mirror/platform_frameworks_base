@@ -73,13 +73,13 @@ static jobjectArray createIdmap(JNIEnv* env, jclass /*clazz*/, jstring targetPat
   }
 
   if (result->status != 0) {
-    LOG(ERROR) << "idmap2: " << result->stderr;
-    return nullptr;
+      LOG(ERROR) << "idmap2: " << result->stderr_str;
+      return nullptr;
   }
 
   // Return the paths of the idmaps created or updated during the idmap invocation.
   std::vector<std::string> idmap_paths;
-  std::istringstream input(result->stdout);
+  std::istringstream input(result->stdout_str);
   std::string path;
   while (std::getline(input, path)) {
     idmap_paths.push_back(path);

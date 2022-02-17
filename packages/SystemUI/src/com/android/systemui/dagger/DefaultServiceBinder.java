@@ -21,10 +21,11 @@ import android.app.Service;
 import com.android.systemui.ImageWallpaper;
 import com.android.systemui.SystemUIService;
 import com.android.systemui.doze.DozeService;
+import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
 import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.screenrecord.RecordingService;
-import com.android.systemui.screenshot.TakeScreenshotService;
+import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import dagger.Binds;
 import dagger.Module;
@@ -53,6 +54,19 @@ public abstract class DefaultServiceBinder {
     @IntoMap
     @ClassKey(KeyguardService.class)
     public abstract Service bindKeyguardService(KeyguardService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamOverlayService.class)
+    public abstract Service bindDreamOverlayService(DreamOverlayService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationListenerWithPlugins.class)
+    public abstract Service bindNotificationListenerWithPlugins(
+            NotificationListenerWithPlugins service);
 
     /** */
     @Binds

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.Activity;
@@ -405,7 +406,7 @@ public class ViewConfiguration {
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
-    private ViewConfiguration(@UiContext Context context) {
+    private ViewConfiguration(@NonNull @UiContext Context context) {
         mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
@@ -433,9 +434,8 @@ public class ViewConfiguration {
         mAmbiguousGestureMultiplier = Math.max(1.0f, multiplierValue.getFloat());
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final WindowManager windowManager = context.getSystemService(WindowManager.class);
-        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
-        mMaximumDrawingCacheSize = 4 * maxWindowBounds.width() * maxWindowBounds.height();
+        final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+        mMaximumDrawingCacheSize = 4 * maxBounds.width() * maxBounds.height();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
@@ -518,7 +518,7 @@ public class ViewConfiguration {
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
     // TODO(b/182007470): Use @ConfigurationContext instead
-    public static ViewConfiguration get(@UiContext Context context) {
+    public static ViewConfiguration get(@NonNull @UiContext Context context) {
         StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -600,6 +600,8 @@ public class ViewConfiguration {
     }
 
     /**
+     * Used for both key and motion events.
+     *
      * @return the duration in milliseconds before a press turns into
      * a long press
      */
