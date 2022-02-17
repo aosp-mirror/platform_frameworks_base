@@ -15,6 +15,6 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@android:color/system_neutral1_800" />
+    <solid android:color="@color/material_dynamic_neutral20" />
     <corners android:radius="@dimen/ongoing_call_chip_corner_radius" />
 </shape>

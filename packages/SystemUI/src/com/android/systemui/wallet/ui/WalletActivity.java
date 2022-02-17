@@ -278,7 +278,7 @@ public class WalletActivity extends LifecycleActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(com.android.internal.R.color.system_neutral1_300));
+        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
         return drawable;
     }
 }

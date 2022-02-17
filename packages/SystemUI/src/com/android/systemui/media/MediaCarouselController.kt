@@ -540,14 +540,14 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun getBackgroundColor(): Int {
-        return context.getColor(android.R.color.system_accent2_50)
+        return context.getColor(R.color.material_dynamic_secondary95)
     }
 
     private fun getForegroundColor(): Int {
         return if (mediaFlags.useMediaSessionLayout()) {
-            context.getColor(android.R.color.system_neutral2_200)
+            context.getColor(R.color.material_dynamic_neutral_variant80)
         } else {
-            context.getColor(android.R.color.system_accent2_900)
+            context.getColor(R.color.material_dynamic_secondary10)
         }
     }
 
