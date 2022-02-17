@@ -359,7 +359,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mDeviceStateToLayoutMap.dumpLocked(ipw);
     }
 
-    void setDeviceStateLocked(int state) {
+    void setDeviceStateLocked(int state, boolean isOverrideActive) {
         Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
                 + ", interactive=" + mInteractive);
         // As part of a state transition, we may need to turn off some displays temporarily so that
@@ -370,12 +370,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             resetLayoutLocked(mDeviceState, state, LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION);
         }
         mPendingDeviceState = state;
-        final boolean wakeDevice = mDeviceStatesOnWhichToWakeUp.get(mPendingDeviceState)
-                && !mDeviceStatesOnWhichToWakeUp.get(mDeviceState)
-                && !mInteractive && mBootCompleted;
-        final boolean sleepDevice = mDeviceStatesOnWhichToSleep.get(mPendingDeviceState)
-                && !mDeviceStatesOnWhichToSleep.get(mDeviceState)
-                && mInteractive && mBootCompleted;
+        final boolean wakeDevice = shouldDeviceBeWoken(mPendingDeviceState, mDeviceState,
+                mInteractive, mBootCompleted);
+        final boolean sleepDevice = shouldDeviceBePutToSleep(mPendingDeviceState, mDeviceState,
+                isOverrideActive, mInteractive, mBootCompleted);
 
         // If all displays are off already, we can just transition here, unless we are trying to
         // wake or sleep the device as part of this transition. In that case defer the final
@@ -427,6 +425,53 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 finishStateTransitionLocked(false /*force*/);
             }
         }
+    }
+
+    /**
+     * Returns if the device should be woken up or not. Called to check if the device state we are
+     * moving to is one that should awake the device, as well as if we are moving from a device
+     * state that shouldn't have been already woken from.
+     *
+     * @param pendingState device state we are moving to
+     * @param currentState device state we are currently in
+     * @param isInteractive if the device is in an interactive state
+     * @param isBootCompleted is the device fully booted
+     *
+     * @see #shouldDeviceBePutToSleep
+     * @see #setDeviceStateLocked
+     */
+    @VisibleForTesting
+    boolean shouldDeviceBeWoken(int pendingState, int currentState, boolean isInteractive,
+            boolean isBootCompleted) {
+        return mDeviceStatesOnWhichToWakeUp.get(pendingState)
+                && !mDeviceStatesOnWhichToWakeUp.get(currentState)
+                && !isInteractive && isBootCompleted;
+    }
+
+    /**
+     * Returns if the device should be put to sleep or not.
+     *
+     * Includes a check to verify that the device state that we are moving to, {@code pendingState},
+     * is the same as the physical state of the device, {@code baseState}. Different values for
+     * these parameters indicate a device state override is active, and we shouldn't put the device
+     * to sleep to provide a better user experience.
+     *
+     * @param pendingState device state we are moving to
+     * @param currentState device state we are currently in
+     * @param isOverrideActive if a device state override is currently active or not
+     * @param isInteractive if the device is in an interactive state
+     * @param isBootCompleted is the device fully booted
+     *
+     * @see #shouldDeviceBeWoken
+     * @see #setDeviceStateLocked
+     */
+    @VisibleForTesting
+    boolean shouldDeviceBePutToSleep(int pendingState, int currentState, boolean isOverrideActive,
+            boolean isInteractive, boolean isBootCompleted) {
+        return mDeviceStatesOnWhichToSleep.get(pendingState)
+                && !mDeviceStatesOnWhichToSleep.get(currentState)
+                && !isOverrideActive
+                && isInteractive && isBootCompleted;
     }
 
     private boolean areAllTransitioningDisplaysOffLocked() {
