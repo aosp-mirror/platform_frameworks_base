@@ -22,4 +22,8 @@
     <string name="pip_close" msgid="9135220303720555525">"PIP sluiten"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Volledig scherm"</string>
     <string name="pip_move" msgid="1544227837964635439">"SIS verplaatsen"</string>
+    <!-- no translation found for pip_expand (7605396312689038178) -->
+    <skip />
+    <!-- no translation found for pip_collapse (5732233773786896094) -->
+    <skip />
 </resources>
