@@ -16,30 +16,20 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.systemGestures;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
-import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -49,8 +39,6 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams.WindowType;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -103,134 +91,6 @@ class InsetsStateController {
         mDisplayContent = displayContent;
     }
 
-    /**
-     * Gets the insets state from the perspective of the target. When performing layout of the
-     * target or dispatching insets to the target, we need to exclude sources which should not be
-     * visible to the target. e.g., the source which represents the target window itself, and the
-     * IME source when the target is above IME. We also need to exclude certain types of insets
-     * source for client within specific windowing modes.
-     * This is to get the insets for a window layout on the screen. If the window is not there, use
-     * the {@link #getInsetsForWindowMetrics} to get insets instead.
-     *
-     * @param target The window associate with the perspective.
-     * @return The state stripped of the necessary information.
-     */
-    InsetsState getInsetsForWindow(@NonNull WindowState target) {
-        final InsetsState rotatedState = target.mToken.getFixedRotationTransformInsetsState();
-        if (rotatedState != null) {
-            return rotatedState;
-        }
-        final InsetsSourceProvider provider = target.getControllableInsetProvider();
-        final @InternalInsetsType int type = provider != null
-                ? provider.getSource().getType() : ITYPE_INVALID;
-        return getInsetsForTarget(type, target.getWindowingMode(), target.isAlwaysOnTop(),
-                target.getFrozenInsetsState() != null ? target.getFrozenInsetsState() :
-                        (target.mAttrs.receiveInsetsIgnoringZOrder ? mState :
-                         target.mAboveInsetsState));
-    }
-
-    InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
-        final @InternalInsetsType int type = getInsetsTypeForLayoutParams(attrs);
-        final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
-        if (token != null) {
-            final InsetsState rotatedState = token.getFixedRotationTransformInsetsState();
-            if (rotatedState != null) {
-                return rotatedState;
-            }
-        }
-        final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        // Always use windowing mode fullscreen when get insets for window metrics to make sure it
-        // contains all insets types.
-        return getInsetsForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop, mState);
-    }
-
-    private static @InternalInsetsType
-            int getInsetsTypeForLayoutParams(WindowManager.LayoutParams attrs) {
-        @WindowType int type = attrs.type;
-        switch (type) {
-            case TYPE_STATUS_BAR:
-                return ITYPE_STATUS_BAR;
-            case TYPE_NAVIGATION_BAR:
-                return ITYPE_NAVIGATION_BAR;
-            case TYPE_INPUT_METHOD:
-                return ITYPE_IME;
-        }
-
-        // If not one of the types above, check whether an internal inset mapping is specified.
-        if (attrs.providesInsetsTypes != null) {
-            for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
-                switch (insetsType) {
-                    case ITYPE_STATUS_BAR:
-                    case ITYPE_NAVIGATION_BAR:
-                    case ITYPE_CLIMATE_BAR:
-                    case ITYPE_EXTRA_NAVIGATION_BAR:
-                        return insetsType;
-                }
-            }
-        }
-
-        return ITYPE_INVALID;
-    }
-
-    /**
-     * @see #getInsetsForWindow
-     * @see #getInsetsForWindowMetrics
-     */
-    private InsetsState getInsetsForTarget(@InternalInsetsType int type,
-            @WindowingMode int windowingMode, boolean isAlwaysOnTop, InsetsState state) {
-        boolean stateCopied = false;
-
-        if (type != ITYPE_INVALID) {
-            state = new InsetsState(state);
-            stateCopied = true;
-            state.removeSource(type);
-
-            // Navigation bar doesn't get influenced by anything else
-            if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
-                state.removeSource(ITYPE_STATUS_BAR);
-                state.removeSource(ITYPE_CLIMATE_BAR);
-                state.removeSource(ITYPE_CAPTION_BAR);
-                state.removeSource(ITYPE_NAVIGATION_BAR);
-                state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
-            }
-
-            // Status bar doesn't get influenced by caption bar
-            if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
-                state.removeSource(ITYPE_CAPTION_BAR);
-            }
-
-            // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
-            if (type == ITYPE_IME) {
-                for (int i = mProviders.size() - 1; i >= 0; i--) {
-                    InsetsSourceProvider otherProvider = mProviders.valueAt(i);
-                    if (otherProvider.overridesImeFrame()) {
-                        InsetsSource override =
-                                new InsetsSource(
-                                        state.getSource(otherProvider.getSource().getType()));
-                        override.setFrame(otherProvider.getImeOverrideFrame());
-                        state.addSource(override);
-                    }
-                }
-            }
-        }
-
-        if (WindowConfiguration.isFloating(windowingMode)
-                || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
-            if (!stateCopied) {
-                state = new InsetsState(state);
-                stateCopied = true;
-            }
-            state.removeSource(ITYPE_STATUS_BAR);
-            state.removeSource(ITYPE_NAVIGATION_BAR);
-            state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
-            if (windowingMode == WINDOWING_MODE_PINNED) {
-                state.removeSource(ITYPE_IME);
-            }
-        }
-
-        return state;
-    }
-
     InsetsState getRawInsetsState() {
         return mState;
     }
@@ -246,6 +106,10 @@ class InsetsStateController {
             result[i] = mProviders.get(controlled.get(i)).getControl(target);
         }
         return result;
+    }
+
+    ArrayMap<Integer, InsetsSourceProvider> getSourceProviders() {
+        return mProviders;
     }
 
     /**

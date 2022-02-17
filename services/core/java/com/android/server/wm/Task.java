@@ -6582,8 +6582,7 @@ class Task extends TaskFragment {
             return;
         }
         if (mOverlayHost != null) {
-            final InsetsState s = getDisplayContent().getInsetsPolicy()
-                .getInsetsForWindow(originalChange, true);
+            final InsetsState s = originalChange.getInsetsState(true);
             getBounds(mTmpRect);
             mOverlayHost.dispatchInsetsChanged(s, mTmpRect);
         }

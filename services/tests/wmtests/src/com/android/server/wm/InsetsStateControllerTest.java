@@ -71,8 +71,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
-        assertNull(getController().getInsetsForWindow(navBar).peekSource(ITYPE_IME));
-        assertNull(getController().getInsetsForWindow(navBar).peekSource(ITYPE_STATUS_BAR));
+
+        assertNull(navBar.getInsetsState().peekSource(ITYPE_IME));
+        assertNull(navBar.getInsetsState().peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
@@ -85,9 +86,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         app.setWindowingMode(WINDOWING_MODE_PINNED);
 
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_STATUS_BAR));
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_IME));
+        assertNull(app.getInsetsState().peekSource(ITYPE_STATUS_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_IME));
     }
 
     @Test
@@ -100,8 +101,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         app.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_STATUS_BAR));
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_STATUS_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
     @Test
@@ -115,8 +116,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         app.setAlwaysOnTop(true);
 
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_STATUS_BAR));
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_STATUS_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -130,9 +131,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app1.mAboveInsetsState.addSource(getController().getRawInsetsState().getSource(ITYPE_IME));
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(getController().getInsetsForWindow(app2).getSource(ITYPE_IME)
+        assertFalse(app2.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
-        assertTrue(getController().getInsetsForWindow(app1).getSource(ITYPE_IME)
+        assertTrue(app1.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
     }
 
@@ -146,7 +147,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -157,7 +158,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME)
+        assertFalse(app.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
     }
 
@@ -195,7 +196,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         // app won't get visible IME insets while above IME even when IME is visible.
         assertTrue(getController().getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
-        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME)
+        assertFalse(app.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
 
         // Reset invocation counter.
@@ -212,7 +213,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         verify(app, atLeastOnce()).notifyInsetsChanged();
 
         // app will get visible IME insets while below IME.
-        assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -231,8 +232,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
-        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME)
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(child.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
     }
 
@@ -252,8 +253,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
-        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME)
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(child.getInsetsState().getSource(ITYPE_IME)
                 .isVisible());
     }
 
@@ -274,7 +275,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         statusBarProvider.onPostLayout();
 
-        final InsetsState state = getController().getInsetsForWindow(ime);
+        final InsetsState state = ime.getInsetsState();
         assertEquals(new Rect(0, 1, 2, 3), state.getSource(ITYPE_STATUS_BAR).getFrame());
     }
 
@@ -422,9 +423,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
         app.mAttrs.receiveInsetsIgnoringZOrder = true;
-        assertNotNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
     private WindowState createTestWindow(String name) {

@@ -30,6 +30,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
@@ -1647,11 +1648,39 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Returns the insets state for the window. Its sources may be the copies with visibility
-     * modification according to the state of transient bars.
+     * See {@link WindowState#getInsetsState(boolean)}
      */
     InsetsState getInsetsState() {
-        return getDisplayContent().getInsetsPolicy().getInsetsForWindow(this);
+        return getInsetsState(false);
+    }
+
+    /**
+     * Returns the insets state for the window. Its sources may be the copies with visibility
+     * modification according to the state of transient bars.
+     * This is to get the insets for a window layout on the screen. If the window is not there, use
+     * the {@link InsetsPolicy#getInsetsForWindowMetrics} to get insets instead.
+     * @param includeTransient whether or not the transient types should be included in the
+     *                         insets state.
+     */
+    InsetsState getInsetsState(boolean includeTransient) {
+        final InsetsState rotatedState = mToken.getFixedRotationTransformInsetsState();
+        final InsetsPolicy insetsPolicy = getDisplayContent().getInsetsPolicy();
+        if (rotatedState != null) {
+            return insetsPolicy.adjustInsetsForWindow(this, rotatedState);
+        }
+        final InsetsSourceProvider provider = getControllableInsetProvider();
+        final InsetsStateController insetsStateController = getDisplayContent()
+                .getInsetsStateController();
+        final @InternalInsetsType int insetTypeProvidedByWindow = provider != null
+                ? provider.getSource().getType() : ITYPE_INVALID;
+        final InsetsState rawInsetsState = getFrozenInsetsState() != null
+                ? getFrozenInsetsState() : (mAttrs.receiveInsetsIgnoringZOrder
+                ? insetsStateController.getRawInsetsState() : mAboveInsetsState);
+        final InsetsState insetsStateForWindow = insetsPolicy
+                .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
+                        getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
+        return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
+                includeTransient);
     }
 
     /**
@@ -5666,7 +5695,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * into the state of the control target.
      *
      * @param insetProvider the provider which should not be visible to the client.
-     * @see InsetsStateController#getInsetsForWindow(WindowState)
+     * @see #getInsetsState()
      */
     void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
         mControllableInsetProvider = insetProvider;
