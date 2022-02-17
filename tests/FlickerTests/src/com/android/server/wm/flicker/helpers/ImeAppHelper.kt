@@ -64,7 +64,6 @@ open class ImeAppHelper @JvmOverloads constructor(
             device.waitForIdle()
         } else {
             wmHelper.waitImeShown()
-            wmHelper.waitForAppTransitionIdle()
         }
     }
 

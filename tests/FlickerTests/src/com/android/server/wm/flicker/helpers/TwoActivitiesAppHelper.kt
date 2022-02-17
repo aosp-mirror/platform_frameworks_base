@@ -53,8 +53,8 @@ class TwoActivitiesAppHelper @JvmOverloads constructor(
         button.click()
 
         device.wait(Until.gone(launchActivityButton), FIND_TIMEOUT)
-        wmHelper.waitForFullScreenApp(secondActivityComponent)
         wmHelper.waitFor(
+            WindowManagerStateHelper.isAppFullScreen(secondActivityComponent),
             WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
             WindowManagerConditionsFactory.hasLayersAnimating().negate()
         )
