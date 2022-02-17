@@ -62,18 +62,30 @@ public final class SubListTemplateData extends BaseTemplateData {
             @Nullable Text titleText,
             @Nullable Icon titleIcon,
             @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
+            @Nullable Icon subtitleIcon,
             @Nullable TapAction primaryTapAction,
+            @Nullable SubItemLoggingInfo primaryLoggingInfo,
             @Nullable Text supplementalSubtitleText,
             @Nullable Icon supplementalSubtitleIcon,
             @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
+            @Nullable Text supplementalText,
+            @Nullable Icon supplementalIcon,
+            @Nullable TapAction supplementalTapAction,
+            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
             @Nullable Text supplementalAlarmText,
+            int layoutWeight,
             @Nullable Icon subListIcon,
             @NonNull List<Text> subListTexts,
             @Nullable TapAction subListAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
+                primaryTapAction, primaryLoggingInfo,
+                supplementalSubtitleText, supplementalSubtitleIcon,
+                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
+                supplementalText, supplementalIcon,
+                supplementalTapAction, supplementalLoggingInfo,
+                supplementalAlarmText, layoutWeight);
+
         mSubListIcon = subListIcon;
         mSubListTexts = subListTexts;
         mSubListAction = subListAction;
@@ -196,9 +208,14 @@ public final class SubListTemplateData extends BaseTemplateData {
         @NonNull
         public SubListTemplateData build() {
             return new SubListTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
+                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubListIcon,
+                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
+                    getSupplementalText(), getSupplementalIcon(),
+                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
+                    getSupplementalAlarmText(), getLayoutWeight(),
+                    mSubListIcon,
                     mSubListTexts,
                     mSubListAction);
         }
