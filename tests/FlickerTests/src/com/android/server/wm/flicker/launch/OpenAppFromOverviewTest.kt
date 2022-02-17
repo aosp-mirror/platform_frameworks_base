@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.launch
 
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Display
-import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -31,7 +31,6 @@ import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -139,37 +138,6 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     @FlakyTest(bugId = 218624176)
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() {
-        assumeFalse(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
-
-    @FlakyTest(bugId = 216266712)
-    @Test
-    fun appWindowReplacesLauncherAsTopWindow_shellTransit() {
-        assumeTrue(isShellTransitionsEnabled)
-        super.appWindowReplacesLauncherAsTopWindow()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        assumeFalse(isShellTransitionsEnabled)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 218470989)
-    @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry_shellTransit() {
-        assumeTrue(isShellTransitionsEnabled)
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
 
     companion object {
         /**
