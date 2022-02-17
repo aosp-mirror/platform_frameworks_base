@@ -1137,9 +1137,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
 
         // Verify internal calls.
-        verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         verify(getServices().userManager, times(1)).setUserRestriction(
                 eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
                 eq(true), eq(UserHandle.SYSTEM));
@@ -1205,9 +1202,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isEqualTo(admin1);
 
         // Verify internal calls.
-        verify(getServices().iactivityManager).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
@@ -1392,11 +1386,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
-
-        // Verify internal calls.
-        verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isEqualTo(admin1);
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
@@ -1501,11 +1490,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
         assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
-
-        // Verify internal calls.
-        verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
-                eq(admin1.getPackageName()));
-
         assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isEqualTo(admin1);
 
         // Now call clear from the secondary user, which should throw.
