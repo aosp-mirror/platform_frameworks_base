@@ -118,13 +118,13 @@ public final class Outline {
     /**
      * Returns whether the outline can be used to clip a View.
      * <p>
-     * Currently, only Outlines that can be represented as a rectangle, circle,
-     * or round rect support clipping.
+     * As of API 33, all Outline shapes support clipping. Prior to API 33, only Outlines that
+     * could be represented as a rectangle, circle, or round rect supported clipping.
      *
      * @see android.view.View#setClipToOutline(boolean)
      */
     public boolean canClip() {
-        return mMode != MODE_PATH;
+        return true;
     }
 
     /**
@@ -169,8 +169,7 @@ public final class Outline {
     }
 
     /**
-     * Sets the Outline to the rounded rect defined by the input rect, and
-     * corner radius.
+     * Sets the Outline to the rect defined by the input coordinates.
      */
     public void setRect(int left, int top, int right, int bottom) {
         setRoundRect(left, top, right, bottom, 0.0f);
@@ -184,7 +183,7 @@ public final class Outline {
     }
 
     /**
-     * Sets the Outline to the rounded rect defined by the input rect, and corner radius.
+     * Sets the Outline to the rounded rect defined by the input coordinates and corner radius.
      * <p>
      * Passing a zero radius is equivalent to calling {@link #setRect(int, int, int, int)}
      */
@@ -312,7 +311,10 @@ public final class Outline {
     }
 
     /**
-     * Offsets the Outline by (dx,dy)
+     * Offsets the Outline by (dx,dy). Offsetting is cumulative, so additional calls to
+     * offset() will add to previous offset values. Offset only applies to the current
+     * geometry (setRect(), setPath(), etc.); setting new geometry resets any existing
+     * offset.
      */
     public void offset(int dx, int dy) {
         if (mMode == MODE_ROUND_RECT) {

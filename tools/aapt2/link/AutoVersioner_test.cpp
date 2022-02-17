@@ -87,25 +87,27 @@ TEST(AutoVersionerTest, VersionStylesForTable) {
   Style* style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo", test::ParseConfigOrDie("v4"));
   ASSERT_THAT(style, NotNull());
   ASSERT_EQ(style->entries.size(), 1u);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/onClick")), style->entries.front().key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/onClick"), style->entries.front().key.name);
 
   style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo", test::ParseConfigOrDie("v13"));
   ASSERT_THAT(style, NotNull());
   ASSERT_EQ(style->entries.size(), 2u);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/onClick")),style->entries[0].key.name);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/requiresSmallestWidthDp")), style->entries[1].key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/onClick"), style->entries[0].key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/requiresSmallestWidthDp"),
+            style->entries[1].key.name);
 
   style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo", test::ParseConfigOrDie("v17"));
   ASSERT_THAT(style, NotNull());
   ASSERT_EQ(style->entries.size(), 3u);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/onClick")), style->entries[0].key.name);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/requiresSmallestWidthDp")), style->entries[1].key.name);
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/paddingStart")), style->entries[2].key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/onClick"), style->entries[0].key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/requiresSmallestWidthDp"),
+            style->entries[1].key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/paddingStart"), style->entries[2].key.name);
 
   style = test::GetValueForConfig<Style>(table.get(), "app:style/Foo", test::ParseConfigOrDie("v21"));
   ASSERT_THAT(style, NotNull());
   ASSERT_EQ(1u, style->entries.size());
-  EXPECT_EQ(make_value(test::ParseNameOrDie("android:attr/paddingEnd")), style->entries.front().key.name);
+  EXPECT_EQ(test::ParseNameOrDie("android:attr/paddingEnd"), style->entries.front().key.name);
 }
 
 }  // namespace aapt

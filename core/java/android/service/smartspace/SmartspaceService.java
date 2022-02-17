@@ -245,7 +245,9 @@ public abstract class SmartspaceService extends Service {
     public abstract void onDestroySmartspaceSession(@NonNull SmartspaceSessionId sessionId);
 
     private void doDestroy(@NonNull SmartspaceSessionId sessionId) {
-        Log.d(TAG, "doDestroy mSessionCallbacks: " + mSessionCallbacks);
+        if (DEBUG) {
+            Log.d(TAG, "doDestroy mSessionCallbacks: " + mSessionCallbacks);
+        }
         super.onDestroy();
         mSessionCallbacks.remove(sessionId);
         onDestroySmartspaceSession(sessionId);

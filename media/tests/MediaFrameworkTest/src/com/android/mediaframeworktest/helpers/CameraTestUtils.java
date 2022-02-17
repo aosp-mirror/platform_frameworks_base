@@ -1810,7 +1810,7 @@ public class CameraTestUtils extends Assert {
     /**
      * Simple validation of JPEG image size and format.
      * <p>
-     * Only validate the image object sanity. It is fast, but doesn't actually
+     * Only validate the image object consistency. It is fast, but doesn't actually
      * check the buffer data. Assert is used here as it make no sense to
      * continue the test if the jpeg image captured has some serious failures.
      * </p>

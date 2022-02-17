@@ -261,8 +261,12 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         sprintf(proc_path, "/proc/%d/cmdline", pid);
         fd = open(proc_path, O_RDONLY | O_CLOEXEC);
         if (fd >= 0) {
-            int rc = read(fd, cmdline, sizeof(cmdline)-1);
-            cmdline[rc] = 0;
+            ssize_t rc = read(fd, cmdline, sizeof(cmdline) - 1);
+            if (rc < 0) {
+                ALOGE("read /proc/%d/cmdline (%s)", pid, strerror(errno));
+            } else {
+                cmdline[rc] = 0;
+            }
             close(fd);
         }
 
@@ -1342,7 +1346,7 @@ static const JNINativeMethod methods[] = {
         {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
         {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
-        {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
+        {"setArgV0Native", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
         {"setUid", "(I)I", (void*)android_os_Process_setUid},
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
         {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},

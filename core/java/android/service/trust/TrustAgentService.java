@@ -114,14 +114,42 @@ public class TrustAgentService extends Service {
      */
     public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 1 << 1;
 
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating the platform should
+     * automatically remove trust after some conditions are met (detailed below) with the option for
+     * the agent to renew the trust again later.
+     *
+     * <p>After this is called, the agent will grant trust until the platform thinks an active
+     * user is no longer using that trust. This can happen for any reason as determined by the
+     * platform. For example, if the user dismisses keyguard, the platform will remove trust;
+     * since this does not automatically lock the device, this results in the device locking the
+     * next time the screen turns off.
+     *
+     * <p>When the platform internally removes the agent's trust in this manner, an agent can
+     * re-grant it (via a call to grantTrust) without the user having to unlock the device through
+     * another method (e.g. PIN). This renewable state only persists for a limited time.
+     */
+    public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 1 << 2;
+
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating that the message should
+     * be displayed to the user.
+     *
+     * Without this flag, the message passed to {@code grantTrust} is only used for debugging
+     * purposes. With the flag, it may be displayed to the user as the reason why the device is
+     * unlocked.
+     */
+    public static final int FLAG_GRANT_TRUST_DISPLAY_MESSAGE = 1 << 3;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "FLAG_GRANT_TRUST_" }, value = {
             FLAG_GRANT_TRUST_INITIATED_BY_USER,
             FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+            FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE,
+            FLAG_GRANT_TRUST_DISPLAY_MESSAGE,
     })
     public @interface GrantTrustFlags {}
-
 
     /**
      * Int enum indicating that escrow token is active.
@@ -154,6 +182,7 @@ public class TrustAgentService extends Service {
     private static final int MSG_ESCROW_TOKEN_ADDED = 7;
     private static final int MSG_ESCROW_TOKEN_STATE_RECEIVED = 8;
     private static final int MSG_ESCROW_TOKEN_REMOVED = 9;
+    private static final int MSG_USER_REQUESTED_UNLOCK = 10;
 
     private static final String EXTRA_TOKEN = "token";
     private static final String EXTRA_TOKEN_HANDLE = "token_handle";
@@ -186,6 +215,9 @@ public class TrustAgentService extends Service {
             switch (msg.what) {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
+                    break;
+                case MSG_USER_REQUESTED_UNLOCK:
+                    onUserRequestedUnlock();
                     break;
                 case MSG_UNLOCK_LOCKOUT:
                     onDeviceUnlockLockout(msg.arg1);
@@ -262,6 +294,19 @@ public class TrustAgentService extends Service {
      * @param successful true if the user successfully completed the challenge.
      */
     public void onUnlockAttempt(boolean successful) {
+    }
+
+    /**
+     * Called when the user has interacted with the locked device such that they likely want it
+     * to be unlocked. This approximates the timing when, for example, the platform would check for
+     * face authentication to unlock the device.
+     *
+     * To attempt to unlock the device, the agent needs to call
+     * {@link #grantTrust(CharSequence, long, int)}.
+     *
+     * @see #FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
+     */
+    public void onUserRequestedUnlock() {
     }
 
     /**
@@ -564,6 +609,26 @@ public class TrustAgentService extends Service {
     }
 
     /**
+     * Locks the user.
+     *
+     * This revokes any trust granted by this agent and shows keyguard for the user if it is not
+     * currently shown for them. Other users are not affected. Note that this is in contrast to
+     * {@link #revokeTrust()} which does not show keyguard if it is not already shown.
+     *
+     * If the user has no auth method specified, then keyguard will still be shown but can be
+     * dismissed normally.
+     */
+    public final void lockUser() {
+        if (mCallback != null) {
+            try {
+                mCallback.lockUser();
+            } catch (RemoteException e) {
+                onError("calling lockUser");
+            }
+        }
+    }
+
+    /**
      * Request showing a transient error message on the keyguard.
      * The message will be visible on the lock screen or always on display if possible but can be
      * overridden by other keyguard events of higher priority - eg. fingerprint auth error.
@@ -598,6 +663,11 @@ public class TrustAgentService extends Service {
         @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
             mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUserRequestedUnlock() {
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK).sendToTarget();
         }
 
         @Override

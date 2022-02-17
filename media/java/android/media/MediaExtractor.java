@@ -250,15 +250,17 @@ public final class MediaExtractor {
             @NonNull FileDescriptor fd, long offset, long length) throws IOException;
 
     /**
-     * Sets the MediaCas instance to use. This should be called after a
-     * successful setDataSource() if at least one track reports mime type
-     * of {@link android.media.MediaFormat#MIMETYPE_AUDIO_SCRAMBLED}
-     * or {@link android.media.MediaFormat#MIMETYPE_VIDEO_SCRAMBLED}.
-     * Stream parsing will not proceed until a valid MediaCas object
-     * is provided.
+     * Sets the MediaCas instance to use. This should be called after a successful setDataSource()
+     * if at least one track reports mime type of
+     * {@link android.media.MediaFormat#MIMETYPE_AUDIO_SCRAMBLED} or
+     * {@link android.media.MediaFormat#MIMETYPE_VIDEO_SCRAMBLED}. Stream parsing will not proceed
+     * until a valid MediaCas object is provided.
      *
      * @param mediaCas the MediaCas object to use.
+     * @deprecated Use the {@code Descrambler} system API instead, or DRM public APIs like
+     *             {@link MediaDrm}.
      */
+    @Deprecated
     public final void setMediaCas(@NonNull MediaCas mediaCas) {
         mMediaCas = mediaCas;
         nativeSetMediaCas(mediaCas.getBinder());

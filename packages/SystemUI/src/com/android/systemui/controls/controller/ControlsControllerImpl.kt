@@ -244,7 +244,8 @@ class ControlsControllerImpl @Inject constructor (
             restoreFinishedReceiver,
             IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
             PERMISSION_SELF,
-            null
+            null,
+            Context.RECEIVER_NOT_EXPORTED
         )
         listingController.addCallback(listingCallback)
     }

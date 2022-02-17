@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
@@ -100,6 +101,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // State guarded by mLock.
     private final Object mLock = new Object();
+
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
     private int mCurrentUserId = -1;
@@ -116,12 +118,17 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     //TODO: remove this when it's finished
     private final MediaRouter2ServiceImpl mService2;
+    private final String mDefaultAudioRouteId;
+    private final String mBluetoothA2dpRouteId;
 
     public MediaRouterService(Context context) {
         mService2 = new MediaRouter2ServiceImpl(context);
-
         mContext = context;
         Watchdog.getInstance().addMonitor(this);
+        Resources res = context.getResources();
+        mDefaultAudioRouteId = res.getString(com.android.internal.R.string.default_audio_route_id);
+        mBluetoothA2dpRouteId =
+                res.getString(com.android.internal.R.string.bluetooth_a2dp_audio_route_id);
 
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
@@ -338,6 +345,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void setBluetoothA2dpOn(IMediaRouterClient client, boolean on) {
+        if (client == null) {
+            throw new IllegalArgumentException("client must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mAudioService.setBluetoothA2dpOn(on);
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn. on=" + on);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Binder call
+    @Override
     public void setDiscoveryRequest(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
         if (client == null) {
@@ -451,7 +475,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public RoutingSessionInfo getSystemSessionInfo() {
-        return mService2.getSystemSessionInfo();
+        return mService2.getSystemSessionInfo(
+                null /* packageName */, false /* setDeviceRouteSelected */);
     }
 
     // Binder call
@@ -528,8 +553,29 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
-        return mService2.getActiveSessions(manager);
+    public List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager) {
+        return mService2.getRemoteSessions(manager);
+    }
+
+    // Binder call
+    @Override
+    public RoutingSessionInfo getSystemSessionInfoForPackage(IMediaRouter2Manager manager,
+            String packageName) {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+        boolean setDeviceRouteSelected = false;
+        synchronized (mLock) {
+            UserRecord userRecord = mUserRecords.get(userId);
+            for (ClientRecord clientRecord : userRecord.mClientRecords) {
+                if (TextUtils.equals(clientRecord.mPackageName, packageName)) {
+                    if (mDefaultAudioRouteId.equals(clientRecord.mSelectedRouteId)) {
+                        setDeviceRouteSelected = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return mService2.getSystemSessionInfo(packageName, setDeviceRouteSelected);
     }
 
     // Binder call
@@ -783,7 +829,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             String routeId, boolean explicit) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
-            final String oldRouteId = clientRecord.mSelectedRouteId;
+            // In order not to handle system routes as a global route,
+            // set the IDs null if system routes.
+            final String oldRouteId = (mDefaultAudioRouteId.equals(clientRecord.mSelectedRouteId)
+                    || mBluetoothA2dpRouteId.equals(clientRecord.mSelectedRouteId))
+                    ? null : clientRecord.mSelectedRouteId;
+            clientRecord.mSelectedRouteId = routeId;
+            if (mDefaultAudioRouteId.equals(routeId) || mBluetoothA2dpRouteId.equals(routeId)) {
+                routeId = null;
+            }
             if (!Objects.equals(routeId, oldRouteId)) {
                 if (DEBUG) {
                     Slog.d(TAG, clientRecord + ": Set selected route, routeId=" + routeId
@@ -791,7 +845,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                             + ", explicit=" + explicit);
                 }
 
-                clientRecord.mSelectedRouteId = routeId;
                 // Only let the system connect to new global routes for now.
                 // A similar check exists in the display manager for wifi display.
                 if (explicit && clientRecord.mTrusted) {
@@ -903,26 +956,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 synchronized (mLock) {
-                    boolean wasA2dpOn = mGlobalBluetoothA2dpOn;
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
-                    if (wasA2dpOn != mGlobalBluetoothA2dpOn) {
-                        Slog.d(TAG, "GlobalBluetoothA2dpOn is changed to '"
-                                + mGlobalBluetoothA2dpOn + "'");
-                        UserRecord userRecord = mUserRecords.get(mCurrentUserId);
-                        if (userRecord != null) {
-                            for (ClientRecord cr : userRecord.mClientRecords) {
-                                // mSelectedRouteId will be null for BT and phone speaker.
-                                if (cr.mSelectedRouteId == null) {
-                                    try {
-                                        cr.mClient.onGlobalA2dpChanged(mGlobalBluetoothA2dpOn);
-                                    } catch (RemoteException e) {
-                                        // Ignore exception
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }

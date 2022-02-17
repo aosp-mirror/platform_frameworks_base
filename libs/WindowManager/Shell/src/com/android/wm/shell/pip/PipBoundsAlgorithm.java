@@ -56,7 +56,7 @@ public class PipBoundsAlgorithm {
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
     private int mOverridableMinSize;
-    private Point mScreenEdgeInsets;
+    protected Point mScreenEdgeInsets;
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
@@ -73,7 +73,7 @@ public class PipBoundsAlgorithm {
     /**
      * TODO: move the resources to SysUI package.
      */
-    private void reloadResources(Context context) {
+    protected void reloadResources(Context context) {
         final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);

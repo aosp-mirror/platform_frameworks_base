@@ -29,10 +29,12 @@ public:
 
 #ifdef __ANDROID__
     static bool hasFP16Support();
+    static bool has1010102Support();
 #else
     static bool hasFP16Support() {
         return true;
     }
+    static bool has1010102Support() { return true; }
 #endif
 };
 

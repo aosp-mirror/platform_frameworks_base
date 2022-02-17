@@ -16,9 +16,6 @@
 
 package com.android.settingslib.net;
 
-import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
-import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
-import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
@@ -27,13 +24,9 @@ import android.app.usage.NetworkStats.Bucket;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.INetworkStatsService;
-import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
@@ -52,25 +45,21 @@ public class DataUsageController {
 
     private static final String TAG = "DataUsageController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
     private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
             PERIOD_BUILDER, Locale.getDefault());
+    private static final long MB_IN_BYTES = 1024 * 1024;
 
     private final Context mContext;
-    private final INetworkStatsService mStatsService;
     private final NetworkPolicyManager mPolicyManager;
     private final NetworkStatsManager mNetworkStatsManager;
 
-    private INetworkStatsSession mSession;
     private Callback mCallback;
     private NetworkNameProvider mNetworkController;
     private int mSubscriptionId;
 
     public DataUsageController(Context context) {
         mContext = context;
-        mStatsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
         mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
         mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -113,8 +102,7 @@ public class DataUsageController {
     }
 
     public DataUsageInfo getWifiDataUsageInfo() {
-        NetworkTemplate template = NetworkTemplate.buildTemplateWifi(
-                NetworkTemplate.WIFI_NETWORKID_ALL, null);
+        NetworkTemplate template = new NetworkTemplate.Builder(NetworkTemplate.MATCH_WIFI).build();
         return getDataUsageInfo(template);
     }
 
@@ -172,7 +160,7 @@ public class DataUsageController {
                 return bucket.getRxBytes() + bucket.getTxBytes();
             }
             Log.w(TAG, "Failed to get data usage, no entry data");
-        } catch (RemoteException e) {
+        } catch (RuntimeException e) {
             Log.w(TAG, "Failed to get data usage, remote call failed");
         }
         return -1L;
@@ -249,10 +237,8 @@ public class DataUsageController {
         final int matchRule = networkTemplate.getMatchRule();
         switch (matchRule) {
             case NetworkTemplate.MATCH_MOBILE:
-            case NetworkTemplate.MATCH_MOBILE_WILDCARD:
                 return ConnectivityManager.TYPE_MOBILE;
             case NetworkTemplate.MATCH_WIFI:
-            case NetworkTemplate.MATCH_WIFI_WILDCARD:
                 return  ConnectivityManager.TYPE_WIFI;
             case NetworkTemplate.MATCH_ETHERNET:
                 return  ConnectivityManager.TYPE_ETHERNET;

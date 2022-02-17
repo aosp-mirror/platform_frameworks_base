@@ -24,8 +24,10 @@ import static android.view.Surface.ROTATION_90;
 import android.annotation.Dimension;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Surface.Rotation;
+import android.view.SurfaceControl;
 
 /**
  * A class containing utility methods related to rotation.
@@ -121,10 +123,61 @@ public class RotationUtils {
 
     /** @return the rotation needed to rotate from oldRotation to newRotation. */
     @Rotation
-    public static int deltaRotation(int oldRotation, int newRotation) {
+    public static int deltaRotation(@Rotation int oldRotation, @Rotation int newRotation) {
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
         return delta;
+    }
+
+    /**
+     * Rotates a surface CCW around the origin (eg. a 90-degree rotation will result in the
+     * bottom-left being at the origin). Use {@link #rotatePoint} to transform the top-left
+     * corner appropriately.
+     */
+    public static void rotateSurface(SurfaceControl.Transaction t, SurfaceControl sc,
+            @Rotation int rotation) {
+        // Note: the matrix values look inverted, but they aren't because our coordinate-space
+        // is actually left-handed.
+        // Note: setMatrix expects values in column-major order.
+        switch (rotation) {
+            case ROTATION_0:
+                t.setMatrix(sc, 1.f, 0.f, 0.f, 1.f);
+                break;
+            case ROTATION_90:
+                t.setMatrix(sc, 0.f, -1.f, 1.f, 0.f);
+                break;
+            case ROTATION_180:
+                t.setMatrix(sc, -1.f, 0.f, 0.f, -1.f);
+                break;
+            case ROTATION_270:
+                t.setMatrix(sc, 0.f, 1.f, -1.f, 0.f);
+                break;
+        }
+    }
+
+    /**
+     * Rotates a point CCW within a rectangle of size parentW x parentH with top/left at the
+     * origin as if the point is stuck to the rectangle. The rectangle is transformed such that
+     * it's top/left remains at the origin after the rotation.
+     */
+    public static void rotatePoint(Point inOutPoint, @Rotation int rotation,
+            int parentW, int parentH) {
+        int origX = inOutPoint.x;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutPoint.x = inOutPoint.y;
+                inOutPoint.y = parentW - origX;
+                return;
+            case ROTATION_180:
+                inOutPoint.x = parentW - inOutPoint.x;
+                inOutPoint.y = parentH - inOutPoint.y;
+                return;
+            case ROTATION_270:
+                inOutPoint.x = parentH - inOutPoint.y;
+                inOutPoint.y = origX;
+        }
     }
 
     /**

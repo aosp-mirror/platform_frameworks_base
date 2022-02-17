@@ -1,7 +1,3 @@
 include platform/frameworks/base:/core/java/android/permission/OWNERS
 
-per-file DefaultPermissionGrantPolicy.java = hackbod@android.com
-per-file DefaultPermissionGrantPolicy.java = jsharkey@android.com
-per-file DefaultPermissionGrantPolicy.java = toddke@google.com
-per-file DefaultPermissionGrantPolicy.java = yamasani@google.com
-per-file DefaultPermissionGrantPolicy.java = patb@google.com
+per-file DefaultPermissionGrantPolicy.java = file:platform/frameworks/base:/core/java/android/permission/DEFAULT_PERMISSION_GRANT_POLICY_OWNERS

@@ -390,6 +390,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
 
+    /**
+     * This flag makes the AccessibilityService an input method editor with a subset of input
+     * method editor capabilities: get the {@link android.view.inputmethod.InputConnection} and get
+     * text selection change notifications.
+     *
+     * @see AccessibilityService#getInputMethod()
+     */
+    public static final int FLAG_INPUT_METHOD_EDITOR = 0x0008000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -497,6 +506,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
      * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
      * @see #FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK
+     * @see #FLAG_INPUT_METHOD_EDITOR
      */
     public int flags;
 
@@ -537,6 +547,13 @@ public class AccessibilityServiceInfo implements Parcelable {
     private String mSettingsActivityName;
 
     /**
+     * The class name of {@link android.service.quicksettings.TileService} is associated with this
+     * accessibility service for one to one mapping. It is used by system settings to remind users
+     * this accessibility service has a {@link android.service.quicksettings.TileService}.
+     */
+    private String mTileServiceClassName;
+
+    /**
      * Bit mask with capabilities of this service.
      */
     private int mCapabilities;
@@ -550,6 +567,11 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Non-localized summary of the accessibility service.
      */
     private String mNonLocalizedSummary;
+
+    /**
+     * Resource id of the intro of the accessibility service.
+     */
+    private int mIntroResId;
 
     /**
      * Resource id of the description of the accessibility service.
@@ -718,6 +740,13 @@ public class AccessibilityServiceInfo implements Parcelable {
             }
             mIsAccessibilityTool = asAttributes.getBoolean(
                     R.styleable.AccessibilityService_isAccessibilityTool, false);
+            mTileServiceClassName = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityService_tileService);
+            peekedValue = asAttributes.peekValue(
+                    com.android.internal.R.styleable.AccessibilityService_intro);
+            if (peekedValue != null) {
+                mIntroResId = peekedValue.resourceId;
+            }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -818,6 +847,17 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public String getSettingsActivityName() {
         return mSettingsActivityName;
+    }
+
+    /**
+     * Gets the class name of {@link android.service.quicksettings.TileService} is associated with
+     * this accessibility service.
+     *
+     * @return The class names of {@link android.service.quicksettings.TileService}.
+     */
+    @Nullable
+    public String getTileServiceClassName() {
+        return mTileServiceClassName;
     }
 
     /**
@@ -922,6 +962,29 @@ public class AccessibilityServiceInfo implements Parcelable {
                 mSummaryResId, serviceInfo.applicationInfo);
         if (summary != null) {
             return summary.toString().trim();
+        }
+        return null;
+    }
+
+    /**
+     * The localized intro of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The localized intro if available, and {@code null} if a intro
+     * has not been provided.
+     */
+    @Nullable
+    public CharSequence loadIntro(@NonNull PackageManager packageManager) {
+        if (mIntroResId == /* invalid */ 0) {
+            return null;
+        }
+        ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
+        CharSequence intro = packageManager.getText(serviceInfo.packageName,
+                mIntroResId, serviceInfo.applicationInfo);
+        if (intro != null) {
+            return intro.toString().trim();
         }
         return null;
     }
@@ -1083,6 +1146,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
         parcel.writeBoolean(mIsAccessibilityTool);
+        parcel.writeString(mTileServiceClassName);
+        parcel.writeInt(mIntroResId);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1094,8 +1159,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mInteractiveUiTimeout = parcel.readInt();
         flags = parcel.readInt();
         crashed = parcel.readInt() != 0;
-        mComponentName = parcel.readParcelable(this.getClass().getClassLoader());
-        mResolveInfo = parcel.readParcelable(null);
+        mComponentName = parcel.readParcelable(this.getClass().getClassLoader(), android.content.ComponentName.class);
+        mResolveInfo = parcel.readParcelable(null, android.content.pm.ResolveInfo.class);
         mSettingsActivityName = parcel.readString();
         mCapabilities = parcel.readInt();
         mSummaryResId = parcel.readInt();
@@ -1105,6 +1170,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
         mIsAccessibilityTool = parcel.readBoolean();
+        mTileServiceClassName = parcel.readString();
+        mIntroResId = parcel.readInt();
     }
 
     @Override
@@ -1156,6 +1223,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("resolveInfo: ").append(mResolveInfo);
         stringBuilder.append(", ");
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
+        stringBuilder.append(", ");
+        stringBuilder.append("tileServiceClassName: ").append(mTileServiceClassName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
         stringBuilder.append(", ");
@@ -1332,6 +1401,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_FINGERPRINT_GESTURES";
             case FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK:
                 return "FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK";
+            case FLAG_INPUT_METHOD_EDITOR:
+                return "FLAG_INPUT_METHOD_EDITOR";
             default:
                 return null;
         }

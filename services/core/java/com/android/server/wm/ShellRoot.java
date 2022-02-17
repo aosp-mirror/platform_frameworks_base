@@ -141,8 +141,7 @@ public class ShellRoot {
                 && mShellRootLayer != SHELL_ROOT_LAYER_PIP) {
             return null;
         }
-        if (mShellRootLayer == SHELL_ROOT_LAYER_DIVIDER
-                && !mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
+        if (mShellRootLayer == SHELL_ROOT_LAYER_DIVIDER) {
             return null;
         }
         if (mShellRootLayer == SHELL_ROOT_LAYER_PIP
@@ -197,7 +196,7 @@ public class ShellRoot {
                 mAccessibilityWindow = null;
             }
         }
-        if (mDisplayContent.mWmService.mAccessibilityController != null) {
+        if (mDisplayContent.mWmService.mAccessibilityController.hasCallbacks()) {
             mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(
                     mDisplayContent.getDisplayId());
         }

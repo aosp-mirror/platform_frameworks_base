@@ -236,7 +236,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 root.flags |= Root.FLAG_REMOVABLE_USB;
             }
 
-            if (volume.getType() != VolumeInfo.TYPE_EMULATED) {
+            if (volume.getType() != VolumeInfo.TYPE_EMULATED
+                    && volume.getType() != VolumeInfo.TYPE_STUB) {
                 root.flags |= Root.FLAG_SUPPORTS_EJECT;
             }
 
@@ -251,7 +252,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
             if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
                 root.flags |= Root.FLAG_HAS_SETTINGS;
             }
-            if (volume.isVisibleForRead(userId)) {
+            if (volume.isVisibleForUser(userId)) {
                 root.visiblePath = volume.getPathForUser(userId);
             } else {
                 root.visiblePath = null;

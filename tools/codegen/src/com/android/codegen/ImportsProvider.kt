@@ -53,10 +53,25 @@ interface ImportsProvider {
      * Optionally shortens a class reference if there's a corresponding import present
      */
     fun classRef(fullName: String): String {
-
         val pkg = fullName.substringBeforeLast(".")
         val simpleName = fullName.substringAfterLast(".")
-        if (fileAst.imports.any { imprt ->
+        val imports = fileAst.imports
+
+        // If an import of the same class name is available,
+        // use it instead of the internal Android package variants.
+        if (fullName.startsWith("com.android.internal.util.")
+            && imports.any {
+                it.nameAsString.endsWith(fullName.removePrefix("com.android.internal.util."))
+            }
+        ) {
+            return fullName.removePrefix("com.android.internal.util.")
+        } else if (fullName.startsWith("android.annotation")
+            && imports.any { it.nameAsString.endsWith(simpleName) }
+        ) {
+            return simpleName
+        }
+
+        if (imports.any { imprt ->
                     imprt.nameAsString == fullName
                             || (imprt.isAsterisk && imprt.nameAsString == pkg)
                 }) {

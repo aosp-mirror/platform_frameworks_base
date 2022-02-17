@@ -66,6 +66,7 @@ public final class AutoFillUI {
 
     private @Nullable FillUi mFillUi;
     private @Nullable SaveUi mSaveUi;
+    private @Nullable DialogFillUi mFillDialog;
 
     private @Nullable AutoFillUiCallback mCallback;
 
@@ -90,6 +91,7 @@ public final class AutoFillUI {
         void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
         void cancelSession();
+        void requestShowSoftInput(AutofillId id);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -154,6 +156,12 @@ public final class AutoFillUI {
         mHandler.post(() -> hideFillUiUiThread(callback, true));
     }
 
+    /**
+     * Hides the fill UI.
+     */
+    public void hideFillDialog(@NonNull AutoFillUiCallback callback) {
+        mHandler.post(() -> hideFillDialogUiThread(callback));
+    }
     /**
      * Filters the options in the fill UI.
      *
@@ -369,6 +377,62 @@ public final class AutoFillUI {
     }
 
     /**
+     * Shows the UI asking the user to choose for autofill.
+     */
+    public void showFillDialog(@NonNull AutofillId focusedId, @NonNull FillResponse response,
+            @Nullable String filterText, @Nullable String servicePackageName,
+            @NonNull ComponentName componentName, @Nullable Drawable serviceIcon,
+            @NonNull AutoFillUiCallback callback) {
+        if (sVerbose) {
+            Slog.v(TAG, "showFillDialog for "
+                    + componentName.toShortString() + ": " + response);
+        }
+
+        // TODO: enable LogMaker
+
+        mHandler.post(() -> {
+            if (callback != mCallback) {
+                return;
+            }
+            hideAllUiThread(callback);
+            mFillDialog = new DialogFillUi(mContext, response, focusedId, filterText,
+                    serviceIcon, servicePackageName, componentName, mOverlayControl,
+                    mUiModeMgr.isNightMode(), new DialogFillUi.UiCallback() {
+                        @Override
+                        public void onResponsePicked(FillResponse response) {
+                            hideFillDialogUiThread(callback);
+                            if (mCallback != null) {
+                                mCallback.authenticate(response.getRequestId(),
+                                        AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
+                                        response.getAuthentication(), response.getClientState(),
+                                        /* authenticateInline= */ false);
+                            }
+                        }
+
+                        @Override
+                        public void onDatasetPicked(Dataset dataset) {
+                            hideFillDialogUiThread(callback);
+                            if (mCallback != null) {
+                                final int datasetIndex = response.getDatasets().indexOf(dataset);
+                                mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                            }
+                        }
+
+                        @Override
+                        public void onCanceled() {
+                            hideFillDialogUiThread(callback);
+                            callback.requestShowSoftInput(focusedId);
+                        }
+
+                        @Override
+                        public void startIntentSender(IntentSender intentSender) {
+                            mCallback.startIntentSenderAndFinishSession(intentSender);
+                        }
+                    });
+        });
+    }
+
+    /**
      * Executes an operation in the pending save UI, if any.
      */
     public void onPendingSaveUi(int operation, @NonNull IBinder token) {
@@ -400,6 +464,10 @@ public final class AutoFillUI {
         return mSaveUi == null ? false : mSaveUi.isShowing();
     }
 
+    public boolean isFillDialogShowing() {
+        return mFillDialog == null ? false : mFillDialog.isShowing();
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("Autofill UI");
         final String prefix = "  ";
@@ -416,6 +484,12 @@ public final class AutoFillUI {
             mSaveUi.dump(pw, prefix2);
         } else {
             pw.print(prefix); pw.println("showsSaveUi: false");
+        }
+        if (mFillDialog != null) {
+            pw.print(prefix); pw.println("showsFillDialog: true");
+            mFillDialog.dump(pw, prefix2);
+        } else {
+            pw.print(prefix); pw.println("showsFillDialog: false");
         }
     }
 
@@ -439,6 +513,14 @@ public final class AutoFillUI {
             return mSaveUi.hide();
         }
         return null;
+    }
+
+    @android.annotation.UiThread
+    private void hideFillDialogUiThread(@Nullable AutoFillUiCallback callback) {
+        if (mFillDialog != null && (callback == null || callback == mCallback)) {
+            mFillDialog.destroy();
+            mFillDialog = null;
+        }
     }
 
     @android.annotation.UiThread
@@ -475,12 +557,14 @@ public final class AutoFillUI {
     private void destroyAllUiThread(@Nullable PendingUi pendingSaveUi,
             @Nullable AutoFillUiCallback callback, boolean notifyClient) {
         hideFillUiUiThread(callback, notifyClient);
+        hideFillDialogUiThread(callback);
         destroySaveUiUiThread(pendingSaveUi, notifyClient);
     }
 
     @android.annotation.UiThread
     private void hideAllUiThread(@Nullable AutoFillUiCallback callback) {
         hideFillUiUiThread(callback, true);
+        hideFillDialogUiThread(callback);
         final PendingUi pendingSaveUi = hideSaveUiUiThread(callback);
         if (pendingSaveUi != null && pendingSaveUi.getState() == PendingUi.STATE_FINISHED) {
             if (sDebug) {

@@ -22,6 +22,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <attestation/HmacKeyManager.h>
+#include <gui/constants.h>
 #include <input/Input.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <utils/Log.h>
@@ -56,6 +57,8 @@ static struct {
     jfieldID toolMajor;
     jfieldID toolMinor;
     jfieldID orientation;
+    jfieldID relativeX;
+    jfieldID relativeY;
 } gPointerCoordsClassInfo;
 
 static struct {
@@ -212,6 +215,12 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMinor));
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X,
+                                      env->GetFloatField(pointerCoordsObj,
+                                                         gPointerCoordsClassInfo.relativeX));
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
+                                      env->GetFloatField(pointerCoordsObj,
+                                                         gPointerCoordsClassInfo.relativeY));
 
     BitSet64 bits =
             BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
@@ -256,39 +265,9 @@ static jfloatArray obtainPackedAxisValuesArray(JNIEnv* env, uint32_t minSize,
 }
 
 static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointerCoords,
-                                    ui::Transform transform, jobject outPointerCoordsObj) {
-    float rawX = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X);
-    float rawY = rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y);
-    vec2 transformed = transform.transform(rawX, rawY);
-
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x, transformed.x);
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y, transformed.y);
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.pressure,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.size,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_SIZE));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.touchMajor,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.touchMinor,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.toolMajor,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.toolMinor,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR));
-    env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.orientation,
-            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
-
+                                    const BitSet64& axesBitsToCopy, jobject outPointerCoordsObj) {
+    BitSet64 bits = axesBitsToCopy;
     uint64_t outBits = 0;
-    BitSet64 bits = BitSet64(rawPointerCoords->bits);
-    bits.clearBit(AMOTION_EVENT_AXIS_X);
-    bits.clearBit(AMOTION_EVENT_AXIS_Y);
-    bits.clearBit(AMOTION_EVENT_AXIS_PRESSURE);
-    bits.clearBit(AMOTION_EVENT_AXIS_SIZE);
-    bits.clearBit(AMOTION_EVENT_AXIS_TOUCH_MAJOR);
-    bits.clearBit(AMOTION_EVENT_AXIS_TOUCH_MINOR);
-    bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MAJOR);
-    bits.clearBit(AMOTION_EVENT_AXIS_TOOL_MINOR);
-    bits.clearBit(AMOTION_EVENT_AXIS_ORIENTATION);
     if (!bits.isEmpty()) {
         uint32_t packedAxesCount = bits.count();
         jfloatArray outValuesArray = obtainPackedAxisValuesArray(env, packedAxesCount,
@@ -374,13 +353,13 @@ static jlong android_view_MotionEvent_nativeInitialize(
 
     ui::Transform transform;
     transform.set(xOffset, yOffset);
+    ui::Transform identityTransform;
     event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
                       flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_DISPLAY_SIZE,
-                      AMOTION_EVENT_INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos,
-                      pointerCount, pointerProperties, rawPointerCoords);
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, identityTransform, downTimeNanos,
+                      eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
 }
@@ -425,18 +404,42 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
             || !validatePointerCoords(env, outPointerCoordsObj)) {
         return;
     }
-
-    const PointerCoords* rawPointerCoords;
-    if (historyPos == HISTORY_CURRENT) {
-        rawPointerCoords = event->getRawPointerCoords(pointerIndex);
-    } else {
-        size_t historySize = event->getHistorySize();
-        if (!validateHistoryPos(env, historyPos, historySize)) {
-            return;
-        }
-        rawPointerCoords = event->getHistoricalRawPointerCoords(pointerIndex, historyPos);
+    if (historyPos != HISTORY_CURRENT &&
+        !validateHistoryPos(env, historyPos, event->getHistorySize())) {
+        return;
     }
-    pointerCoordsFromNative(env, rawPointerCoords, event->getTransform(), outPointerCoordsObj);
+
+    // Obtain the following axis values directly from the MotionEvent instead of from the raw
+    // PointerCoords.
+    const static std::array<std::pair<int32_t /*axis*/, jfieldID>, 11> kAxesFromMotionEvent = {{
+            {AMOTION_EVENT_AXIS_X, gPointerCoordsClassInfo.x},
+            {AMOTION_EVENT_AXIS_Y, gPointerCoordsClassInfo.y},
+            {AMOTION_EVENT_AXIS_PRESSURE, gPointerCoordsClassInfo.pressure},
+            {AMOTION_EVENT_AXIS_SIZE, gPointerCoordsClassInfo.size},
+            {AMOTION_EVENT_AXIS_TOUCH_MAJOR, gPointerCoordsClassInfo.touchMajor},
+            {AMOTION_EVENT_AXIS_TOUCH_MINOR, gPointerCoordsClassInfo.touchMinor},
+            {AMOTION_EVENT_AXIS_TOOL_MAJOR, gPointerCoordsClassInfo.toolMajor},
+            {AMOTION_EVENT_AXIS_TOOL_MINOR, gPointerCoordsClassInfo.toolMinor},
+            {AMOTION_EVENT_AXIS_ORIENTATION, gPointerCoordsClassInfo.orientation},
+            {AMOTION_EVENT_AXIS_RELATIVE_X, gPointerCoordsClassInfo.relativeX},
+            {AMOTION_EVENT_AXIS_RELATIVE_Y, gPointerCoordsClassInfo.relativeY},
+    }};
+    for (const auto& [axis, fieldId] : kAxesFromMotionEvent) {
+        const float value = historyPos == HISTORY_CURRENT
+                ? event->getAxisValue(axis, pointerIndex)
+                : event->getHistoricalAxisValue(axis, pointerIndex, historyPos);
+        env->SetFloatField(outPointerCoordsObj, fieldId, value);
+    }
+
+    const PointerCoords* rawPointerCoords = historyPos == HISTORY_CURRENT
+            ? event->getRawPointerCoords(pointerIndex)
+            : event->getHistoricalRawPointerCoords(pointerIndex, historyPos);
+
+    BitSet64 bits = BitSet64(rawPointerCoords->bits);
+    for (const auto [axis, _] : kAxesFromMotionEvent) {
+        bits.clearBit(axis);
+    }
+    pointerCoordsFromNative(env, rawPointerCoords, bits, outPointerCoordsObj);
 }
 
 static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
@@ -766,6 +769,11 @@ static void android_view_MotionEvent_nativeScale(jlong nativePtr, jfloat scale) 
     event->scale(scale);
 }
 
+static jint android_view_MotionEvent_nativeGetSurfaceRotation(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return jint(event->getSurfaceRotation());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMotionEventMethods[] = {
@@ -842,6 +850,8 @@ static const JNINativeMethod gMotionEventMethods[] = {
         {"nativeFindPointerIndex", "(JI)I", (void*)android_view_MotionEvent_nativeFindPointerIndex},
         {"nativeGetHistorySize", "(J)I", (void*)android_view_MotionEvent_nativeGetHistorySize},
         {"nativeScale", "(JF)V", (void*)android_view_MotionEvent_nativeScale},
+        {"nativeGetSurfaceRotation", "(J)I",
+         (void*)android_view_MotionEvent_nativeGetSurfaceRotation},
 };
 
 int register_android_view_MotionEvent(JNIEnv* env) {
@@ -872,6 +882,8 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     gPointerCoordsClassInfo.toolMajor = GetFieldIDOrDie(env, clazz, "toolMajor", "F");
     gPointerCoordsClassInfo.toolMinor = GetFieldIDOrDie(env, clazz, "toolMinor", "F");
     gPointerCoordsClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "F");
+    gPointerCoordsClassInfo.relativeX = GetFieldIDOrDie(env, clazz, "relativeX", "F");
+    gPointerCoordsClassInfo.relativeY = GetFieldIDOrDie(env, clazz, "relativeY", "F");
 
     clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerProperties");
 

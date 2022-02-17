@@ -28,6 +28,9 @@ namespace android {
 
 extern jint createAudioDeviceAttributesFromNative(JNIEnv *env, jobject *jAudioDeviceAttributes,
                                         const AudioDeviceTypeAddr *devTypeAddr);
+
+extern jint createAudioDeviceTypeAddrFromJava(JNIEnv *env, AudioDeviceTypeAddr *devTypeAddr,
+                                        const jobject jAudioDeviceAttributes);
 } // namespace android
 
 #endif
