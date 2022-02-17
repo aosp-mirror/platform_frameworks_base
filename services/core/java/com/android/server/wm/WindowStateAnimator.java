@@ -41,7 +41,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
@@ -71,7 +70,6 @@ import java.io.PrintWriter;
  **/
 class WindowStateAnimator {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowStateAnimator" : TAG_WM;
-    static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
     static final int PRESERVED_SURFACE_LAYER = 1;
 
     /**
@@ -82,16 +80,10 @@ class WindowStateAnimator {
     static final int ROOT_TASK_CLIP_AFTER_ANIM = 0;
 
     /**
-     * Mode how the window gets clipped by the root task bounds: The clipping should be applied
-     * before applying the animation transformation, i.e. the root task bounds move with the window.
-     */
-    static final int ROOT_TASK_CLIP_BEFORE_ANIM = 1;
-
-    /**
      * Mode how window gets clipped by the root task bounds during an animation: Don't clip the
      * window by the root task bounds.
      */
-    static final int ROOT_TASK_CLIP_NONE = 2;
+    static final int ROOT_TASK_CLIP_NONE = 1;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;
@@ -126,9 +118,6 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
-    /** The pixel format of the underlying SurfaceControl */
-    int mSurfaceFormat;
-
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
     /** This is set after the Surface has been created but before the window has been drawn. During
@@ -160,8 +149,6 @@ class WindowStateAnimator {
     boolean mLastHidden;
 
     int mAttrType;
-
-    private final Rect mTmpSize = new Rect();
 
     /**
      * Handles surface changes synchronized to after the client has drawn the surface. This
@@ -230,7 +217,8 @@ class WindowStateAnimator {
         }
     }
 
-    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction,
+            boolean forceApplyNow) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
         if (startingWindow) {
@@ -255,12 +243,12 @@ class WindowStateAnimator {
             // If there is no surface, the last draw was for the previous surface. We don't want to
             // wait until the new surface is shown and instead just apply the transaction right
             // away.
-            if (mLastHidden && mDrawState != NO_SURFACE) {
+            if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
                 mPostDrawTransaction.merge(postDrawTransaction);
-                layoutNeeded = true;
             } else {
-                postDrawTransaction.apply();
+                mWin.getSyncTransaction().merge(postDrawTransaction);
             }
+            layoutNeeded = true;
         }
 
         return layoutNeeded;
@@ -301,7 +289,7 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked(int windowType) {
+    WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
 
         if (mSurfaceController != null) {
@@ -329,16 +317,9 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
-        w.calculateSurfaceBounds(attrs, mTmpSize);
-
-        final int width = mTmpSize.width();
-        final int height = mTmpSize.height();
-
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG, "Creating surface in session "
                     + mSession.mSurfaceSession + " window " + this
-                    + " w=" + width + " h=" + height
-                    + " x=" + mTmpSize.left + " y=" + mTmpSize.top
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -349,12 +330,10 @@ class WindowStateAnimator {
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
 
-            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
-                    height, format, flags, this, windowType);
+            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
+                    flags, this, attrs.type);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
-
-            mSurfaceFormat = format;
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -384,8 +363,7 @@ class WindowStateAnimator {
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.getFrame().left + "," + w.getFrame().top + ") ("
-                    + width + "x" + height + ")" + " HIDE", false);
+                    + w.getFrame().left + "," + w.getFrame().top + ") HIDE", false);
         }
 
         mLastHidden = true;
@@ -521,8 +499,6 @@ class WindowStateAnimator {
             return;
         }
 
-        boolean displayed = false;
-
         computeShownFrameLocked();
 
         setSurfaceBoundariesLocked(t);
@@ -542,7 +518,6 @@ class WindowStateAnimator {
             }
         } else if (mLastAlpha != mShownAlpha
                 || mLastHidden) {
-            displayed = true;
             mLastAlpha = mShownAlpha;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
                     "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
@@ -573,19 +548,15 @@ class WindowStateAnimator {
                     }
                 }
             }
-            if (hasSurface()) {
-                w.mToken.hasVisible = true;
-            }
         } else {
             if (DEBUG_ANIM && mWin.isAnimating(TRANSITION | PARENTS)) {
                 Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
-            displayed = true;
         }
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                if (w.mDisplayContent.waitForUnfreeze(w)) {
+                if (w.mDisplayContent.shouldSyncRotationChange(w)) {
                     w.mWmService.mRoot.mOrientationChangeComplete = false;
                     mAnimator.mLastWindowFreezeSource = w;
                 }
@@ -596,31 +567,6 @@ class WindowStateAnimator {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
         }
-
-        if (displayed) {
-            w.mToken.hasVisible = true;
-        }
-    }
-
-    /**
-     * Try to change the pixel format without recreating the surface. This
-     * will be common in the case of changing from PixelFormat.OPAQUE to
-     * PixelFormat.TRANSLUCENT in the hardware-accelerated case as both
-     * requested formats resolve to the same underlying SurfaceControl format
-     * @return True if format was succesfully changed, false otherwise
-     */
-    boolean tryChangeFormatInPlaceLocked() {
-        if (mSurfaceController == null) {
-            return false;
-        }
-        final LayoutParams attrs = mWin.getAttrs();
-        final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
-        final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-        if (format == mSurfaceFormat) {
-            setOpaqueLocked(!PixelFormat.formatHasAlpha(attrs.format));
-            return true;
-        }
-        return false;
     }
 
     void setOpaqueLocked(boolean isOpaque) {
@@ -684,7 +630,7 @@ class WindowStateAnimator {
             applyAnimationLocked(transit, true);
         }
 
-        if (mService.mAccessibilityController != null) {
+        if (mService.mAccessibilityController.hasCallbacks()) {
             mService.mAccessibilityController.onWindowTransition(mWin, transit);
         }
     }

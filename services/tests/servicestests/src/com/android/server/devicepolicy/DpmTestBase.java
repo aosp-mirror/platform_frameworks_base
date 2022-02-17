@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -221,7 +220,7 @@ public abstract class DpmTestBase {
 
         doReturn(ai).when(mServices.ipackageManager).getApplicationInfo(
                 eq(admin.getPackageName()),
-                anyInt(),
+                anyLong(),
                 eq(UserHandle.getUserId(packageUid)));
 
         // Set up queryBroadcastReceivers().
@@ -248,7 +247,7 @@ public abstract class DpmTestBase {
 
         doReturn(aci).when(mServices.ipackageManager).getReceiverInfo(
                 eq(admin),
-                anyInt(),
+                anyLong(),
                 eq(UserHandle.getUserId(packageUid)));
 
         doReturn(new String[] {admin.getPackageName()}).when(mServices.ipackageManager)

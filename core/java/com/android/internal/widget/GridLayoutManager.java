@@ -29,7 +29,7 @@ import java.util.Arrays;
 
 /**
  * Note: This GridLayoutManager widget may lack of latest fix because it is ported from
- * oc-dr1-release version of android.support.v7.widget.GridLayoutManager due to compatibility
+ * oc-dr1-release version of androidx.gridlayout.widget.GridLayoutManager due to compatibility
  * concern with other internal widgets, like {@link RecyclerView} and {@link LinearLayoutManager},
  * and is merely used for {@link com.android.internal.app.ChooserActivity}.
  *

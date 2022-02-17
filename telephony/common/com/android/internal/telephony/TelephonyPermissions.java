@@ -107,6 +107,26 @@ public final class TelephonyPermissions {
         }
     }
 
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) has non dangerous
+     * read phone state permission.
+     * @param context app context
+     * @param message detail message
+     * @return true if permission is granted, else false
+     */
+    public static boolean checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(
+            Context context, String message) {
+        try {
+            context.enforcePermission(
+                    Manifest.permission.READ_BASIC_PHONE_STATE,
+                    Binder.getCallingPid(), Binder.getCallingUid(), message);
+            return true;
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
+
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
@@ -308,6 +328,12 @@ public final class TelephonyPermissions {
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
                 context, subId, callingPackage, callingFeatureId, message, false, reportFailure);
     }
+
+    private static void throwSecurityExceptionAsUidDoesNotHaveAccess(String message, int uid) {
+        throw new SecurityException(message + ": The uid " + uid
+                + " does not meet the requirements to access device identifiers.");
+    }
+
     /**
      * Checks whether the app with the given pid/uid can read device identifiers.
      *
@@ -343,9 +369,14 @@ public final class TelephonyPermissions {
 
         LegacyPermissionManager permissionManager = (LegacyPermissionManager)
                 context.getSystemService(Context.LEGACY_PERMISSION_SERVICE);
-        if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
-                pid, uid) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+        try {
+            if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message,
+                    callingFeatureId,
+                    pid, uid) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        } catch (SecurityException se) {
+            throwSecurityExceptionAsUidDoesNotHaveAccess(message, uid);
         }
 
         if (reportFailure) {
@@ -410,8 +441,8 @@ public final class TelephonyPermissions {
                 return false;
             }
         }
-        throw new SecurityException(message + ": The user " + uid
-                + " does not meet the requirements to access device identifiers.");
+        throwSecurityExceptionAsUidDoesNotHaveAccess(message, uid);
+        return true;
     }
 
     /**
@@ -545,6 +576,17 @@ public final class TelephonyPermissions {
     }
 
     /**
+     * Check if the caller (or self, if not processing an IPC) has ACCESS_LAST_KNOWN_CELL_ID
+     * permission
+     *
+     * @return true if caller has ACCESS_LAST_KNOWN_CELL_ID permission else false.
+     */
+    public static boolean checkLastKnownCellIdAccessPermission(Context context) {
+        return context.checkCallingOrSelfPermission("android.permission.ACCESS_LAST_KNOWN_CELL_ID")
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
      * Ensure the caller (or self, if not processing an IPC) has
      * {@link android.Manifest.permission#READ_PHONE_STATE} or carrier privileges.
      *
@@ -639,7 +681,13 @@ public final class TelephonyPermissions {
     private static boolean checkCarrierPrivilegeForAnySubId(Context context, int uid) {
         SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int[] activeSubIds = sm.getCompleteActiveSubscriptionIdList();
+        int[] activeSubIds;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            activeSubIds = sm.getCompleteActiveSubscriptionIdList();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int activeSubId : activeSubIds) {
             if (getCarrierPrivilegeStatus(context, activeSubId, uid)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {

@@ -29,8 +29,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.media.MediaRecorder;
@@ -187,77 +187,63 @@ public class ScreenMediaRecorder {
      * @param refreshRate Desired refresh rate
      * @return array with supported width, height, and refresh rate
      */
-    private int[] getSupportedSize(final int screenWidth, final int screenHeight, int refreshRate) {
-        double maxScale = 0;
+    private int[] getSupportedSize(final int screenWidth, final int screenHeight, int refreshRate)
+            throws IOException {
+        String videoType = MediaFormat.MIMETYPE_VIDEO_AVC;
 
-        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-        MediaCodecInfo.VideoCapabilities maxInfo = null;
-        for (MediaCodecInfo codec : codecList.getCodecInfos()) {
-            String videoType = MediaFormat.MIMETYPE_VIDEO_AVC;
-            String[] types = codec.getSupportedTypes();
-            for (String t : types) {
-                if (!t.equalsIgnoreCase(videoType)) {
-                    continue;
-                }
-                MediaCodecInfo.CodecCapabilities capabilities =
-                        codec.getCapabilitiesForType(videoType);
-                if (capabilities != null && capabilities.getVideoCapabilities() != null) {
-                    MediaCodecInfo.VideoCapabilities vc = capabilities.getVideoCapabilities();
+        // Get max size from the decoder, to ensure recordings will be playable on device
+        MediaCodec decoder = MediaCodec.createDecoderByType(videoType);
+        MediaCodecInfo.VideoCapabilities vc = decoder.getCodecInfo()
+                .getCapabilitiesForType(videoType).getVideoCapabilities();
+        decoder.release();
 
-                    int width = vc.getSupportedWidths().getUpper();
-                    int height = vc.getSupportedHeights().getUpper();
+        // Check if we can support screen size as-is
+        int width = vc.getSupportedWidths().getUpper();
+        int height = vc.getSupportedHeights().getUpper();
 
-                    int screenWidthAligned = screenWidth;
-                    if (screenWidthAligned % vc.getWidthAlignment() != 0) {
-                        screenWidthAligned -= (screenWidthAligned % vc.getWidthAlignment());
-                    }
-                    int screenHeightAligned = screenHeight;
-                    if (screenHeightAligned % vc.getHeightAlignment() != 0) {
-                        screenHeightAligned -= (screenHeightAligned % vc.getHeightAlignment());
-                    }
+        int screenWidthAligned = screenWidth;
+        if (screenWidthAligned % vc.getWidthAlignment() != 0) {
+            screenWidthAligned -= (screenWidthAligned % vc.getWidthAlignment());
+        }
+        int screenHeightAligned = screenHeight;
+        if (screenHeightAligned % vc.getHeightAlignment() != 0) {
+            screenHeightAligned -= (screenHeightAligned % vc.getHeightAlignment());
+        }
 
-                    if (width >= screenWidthAligned && height >= screenHeightAligned
-                            && vc.isSizeSupported(screenWidthAligned, screenHeightAligned)) {
-                        // Desired size is supported, now get the rate
-                        int maxRate = vc.getSupportedFrameRatesFor(screenWidthAligned,
-                                screenHeightAligned).getUpper().intValue();
+        if (width >= screenWidthAligned && height >= screenHeightAligned
+                && vc.isSizeSupported(screenWidthAligned, screenHeightAligned)) {
+            // Desired size is supported, now get the rate
+            int maxRate = vc.getSupportedFrameRatesFor(screenWidthAligned,
+                    screenHeightAligned).getUpper().intValue();
 
-                        if (maxRate < refreshRate) {
-                            refreshRate = maxRate;
-                        }
-                        Log.d(TAG, "Screen size supported at rate " + refreshRate);
-                        return new int[]{screenWidthAligned, screenHeightAligned, refreshRate};
-                    }
-
-                    // Otherwise, continue searching
-                    double scale = Math.min(((double) width / screenWidth),
-                            ((double) height / screenHeight));
-                    if (scale > maxScale) {
-                        maxScale = Math.min(1, scale);
-                        maxInfo = vc;
-                    }
-                }
+            if (maxRate < refreshRate) {
+                refreshRate = maxRate;
             }
+            Log.d(TAG, "Screen size supported at rate " + refreshRate);
+            return new int[]{screenWidthAligned, screenHeightAligned, refreshRate};
         }
 
-        // Resize for max supported size
-        int scaledWidth = (int) (screenWidth * maxScale);
-        int scaledHeight = (int) (screenHeight * maxScale);
-        if (scaledWidth % maxInfo.getWidthAlignment() != 0) {
-            scaledWidth -= (scaledWidth % maxInfo.getWidthAlignment());
+        // Otherwise, resize for max supported size
+        double scale = Math.min(((double) width / screenWidth),
+                ((double) height / screenHeight));
+
+        int scaledWidth = (int) (screenWidth * scale);
+        int scaledHeight = (int) (screenHeight * scale);
+        if (scaledWidth % vc.getWidthAlignment() != 0) {
+            scaledWidth -= (scaledWidth % vc.getWidthAlignment());
         }
-        if (scaledHeight % maxInfo.getHeightAlignment() != 0) {
-            scaledHeight -= (scaledHeight % maxInfo.getHeightAlignment());
+        if (scaledHeight % vc.getHeightAlignment() != 0) {
+            scaledHeight -= (scaledHeight % vc.getHeightAlignment());
         }
 
         // Find max supported rate for size
-        int maxRate = maxInfo.getSupportedFrameRatesFor(scaledWidth, scaledHeight)
+        int maxRate = vc.getSupportedFrameRatesFor(scaledWidth, scaledHeight)
                 .getUpper().intValue();
         if (maxRate < refreshRate) {
             refreshRate = maxRate;
         }
 
-        Log.d(TAG, "Resized by " + maxScale + ": " + scaledWidth + ", " + scaledHeight
+        Log.d(TAG, "Resized by " + scale + ": " + scaledWidth + ", " + scaledHeight
                 + ", " + refreshRate);
         return new int[]{scaledWidth, scaledHeight, refreshRate};
     }

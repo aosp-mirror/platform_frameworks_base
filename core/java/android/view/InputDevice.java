@@ -572,6 +572,8 @@ public final class InputDevice implements Parcelable {
      * @return The identifier object for this device
      * @hide
      */
+    @TestApi
+    @NonNull
     public InputDeviceIdentifier getIdentifier() {
         return mIdentifier;
     }
@@ -732,6 +734,21 @@ public final class InputDevice implements Parcelable {
      */
     public boolean[] hasKeys(int... keys) {
         return InputManager.getInstance().deviceHasKeys(mId, keys);
+    }
+
+    /**
+     * Gets the key code produced by the specified location on a US keyboard layout.
+     * Key code as defined in {@link android.view.KeyEvent}.
+     * This API is only functional for devices with {@link InputDevice#SOURCE_KEYBOARD} available
+     * which can alter their key mapping using country specific keyboard layouts.
+     *
+     * @param locationKeyCode The location of a key on a US keyboard layout.
+     * @return The key code produced when pressing the key at the specified location, given the
+     *         active keyboard layout. Returns {@link KeyEvent#KEYCODE_UNKNOWN} if the requested
+     *         mapping could not be determined, or if an error occurred.
+     */
+    public int getKeyCodeForKeyLocation(int locationKeyCode) {
+        return InputManager.getInstance().getKeyCodeForKeyLocation(mId, locationKeyCode);
     }
 
     /**

@@ -120,7 +120,7 @@ class DomainVerificationValidIntentTest {
     @Test
     fun verify() {
         val flags = if (params.matchDefaultOnly) PackageManager.MATCH_DEFAULT_ONLY else 0
-        assertThat(DomainVerificationUtils.isDomainVerificationIntent(params.intent, flags))
-            .isEqualTo(params.expected)
+        assertThat(DomainVerificationUtils.isDomainVerificationIntent(params.intent,
+            flags.toLong())).isEqualTo(params.expected)
     }
 }

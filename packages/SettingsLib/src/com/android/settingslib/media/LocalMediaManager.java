@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
 import android.text.TextUtils;
@@ -38,6 +39,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
+import com.android.settingslib.bluetooth.LeAudioProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -171,8 +173,8 @@ public class LocalMediaManager implements BluetoothCallback {
             }
         }
 
-        if (device == mCurrentConnectedDevice) {
-            Log.d(TAG, "connectDevice() this device all ready connected! : " + device.getName());
+        if (device.equals(mCurrentConnectedDevice)) {
+            Log.d(TAG, "connectDevice() this device is already connected! : " + device.getName());
             return false;
         }
 
@@ -222,6 +224,18 @@ public class LocalMediaManager implements BluetoothCallback {
     void dispatchOnRequestFailed(int reason) {
         for (DeviceCallback callback : getCallbacks()) {
             callback.onRequestFailed(reason);
+        }
+    }
+
+    /**
+     * Dispatch a change in the about-to-connect device. See
+     * {@link DeviceCallback#onAboutToConnectDeviceChanged} for more information.
+     */
+    public void dispatchAboutToConnectDeviceChanged(
+            @Nullable String deviceName,
+            @Nullable Drawable deviceIcon) {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onAboutToConnectDeviceChanged(deviceName, deviceIcon);
         }
     }
 
@@ -440,6 +454,7 @@ public class LocalMediaManager implements BluetoothCallback {
     private boolean isActiveDevice(CachedBluetoothDevice device) {
         boolean isActiveDeviceA2dp = false;
         boolean isActiveDeviceHearingAid = false;
+        boolean isActiveLeAudio = false;
         final A2dpProfile a2dpProfile = mLocalBluetoothManager.getProfileManager().getA2dpProfile();
         if (a2dpProfile != null) {
             isActiveDeviceA2dp = device.getDevice().equals(a2dpProfile.getActiveDevice());
@@ -453,7 +468,15 @@ public class LocalMediaManager implements BluetoothCallback {
             }
         }
 
-        return isActiveDeviceA2dp || isActiveDeviceHearingAid;
+        if (!isActiveDeviceA2dp && !isActiveDeviceHearingAid) {
+            final LeAudioProfile leAudioProfile = mLocalBluetoothManager.getProfileManager()
+                    .getLeAudioProfile();
+            if (leAudioProfile != null) {
+                isActiveLeAudio = leAudioProfile.getActiveDevices().contains(device.getDevice());
+            }
+        }
+
+        return isActiveDeviceA2dp || isActiveDeviceHearingAid || isActiveLeAudio;
     }
 
     private Collection<DeviceCallback> getCallbacks() {
@@ -479,9 +502,9 @@ public class LocalMediaManager implements BluetoothCallback {
         @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
+                Collections.sort(devices, COMPARATOR);
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
-                Collections.sort(devices, COMPARATOR);
                 // Add disconnected bluetooth devices only when phone output device is available.
                 for (MediaDevice device : devices) {
                     final int type = device.getDeviceType();
@@ -526,7 +549,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 if (cachedDevice != null) {
                     if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                             && !cachedDevice.isConnected()
-                            && isA2dpOrHearingAidDevice(cachedDevice)) {
+                            && isMediaDevice(cachedDevice)) {
                         deviceCount++;
                         cachedBluetoothDeviceList.add(cachedDevice);
                         if (deviceCount >= MAX_DISCONNECTED_DEVICE_NUM) {
@@ -550,9 +573,10 @@ public class LocalMediaManager implements BluetoothCallback {
             return new ArrayList<>(mDisconnectedMediaDevices);
         }
 
-        private boolean isA2dpOrHearingAidDevice(CachedBluetoothDevice device) {
+        private boolean isMediaDevice(CachedBluetoothDevice device) {
             for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
-                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile) {
+                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile ||
+                        profile instanceof LeAudioProfile) {
                     return true;
                 }
             }
@@ -663,6 +687,21 @@ public class LocalMediaManager implements BluetoothCallback {
          * {@link android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
          */
         default void onRequestFailed(int reason){};
+
+        /**
+         * Callback for notifying that we have a new about-to-connect device.
+         *
+         * An about-to-connect device is a device that is not yet connected but is expected to
+         * connect imminently and should be displayed as the current device in the media player.
+         * See [AudioManager.muteAwaitConnection] for more details.
+         *
+         * @param deviceName the name of the device (displayed to the user).
+         * @param deviceIcon the icon that should be used with the device.
+         */
+        default void onAboutToConnectDeviceChanged(
+                @Nullable String deviceName,
+                @Nullable Drawable deviceIcon
+        ) {}
     }
 
     /**

@@ -26,9 +26,8 @@ import android.util.Pair;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Object used to interact with the autofill system.
@@ -52,7 +51,7 @@ public final class FillController {
      * automatically {@link FillWindow#destroy() destroyed}.
      */
     public void autofill(@NonNull List<Pair<AutofillId, AutofillValue>> values) {
-        Preconditions.checkNotNull(values);
+        Objects.requireNonNull(values);
 
         if (sDebug) {
             Log.d(TAG, "autofill() with " + values.size() + " values");

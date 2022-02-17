@@ -46,6 +46,12 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
+    /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}.
+     *
+     * <p>For users affiliated with the device, they inherit the policy from {@code DO} so
+     * it will map to the {@code DO}'s policy. Otherwise it will map to the admin of the requesting
+     * user.
+     */
     @GuardedBy("mLock")
     private final SparseBooleanArray mCanGrantSensorsPermissions = new SparseBooleanArray();
 
@@ -102,17 +108,16 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle) {
+    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            return mCanGrantSensorsPermissions.get(userHandle, false);
+            return mCanGrantSensorsPermissions.get(userId, false);
         }
     }
 
     /** Sets ahmin control over permission grants for user. */
-    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userHandle,
-            boolean canGrant) {
+    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userId, boolean canGrant) {
         synchronized (mLock) {
-            mCanGrantSensorsPermissions.put(userHandle, canGrant);
+            mCanGrantSensorsPermissions.put(userId, canGrant);
         }
     }
 

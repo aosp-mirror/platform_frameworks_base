@@ -42,9 +42,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.Dependency;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
@@ -54,6 +53,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -61,7 +61,7 @@ import javax.inject.Inject;
 import dagger.Lazy;
 
 @SysUISingleton
-public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
+public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -79,13 +79,13 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
     @VisibleForTesting
     final Receiver mReceiver = new Receiver();
 
-    private PowerManager mPowerManager;
-    private WarningsUI mWarnings;
+    private final PowerManager mPowerManager;
+    private final WarningsUI mWarnings;
     private InattentiveSleepWarningView mOverlayView;
     private final Configuration mLastConfiguration = new Configuration();
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
-    private EnhancedEstimates mEnhancedEstimates;
+    private final EnhancedEstimates mEnhancedEstimates;
     private Future mLastShowWarningTask;
     private boolean mEnableSkinTemperatureWarning;
     private boolean mEnableUsbTemperatureAlarm;
@@ -108,22 +108,24 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<StatusBar> mStatusBarLazy;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
 
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<StatusBar> statusBarLazy) {
+            CommandQueue commandQueue, Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
+            PowerManager powerManager) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mStatusBarLazy = statusBarLazy;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mWarnings = warningsUI;
+        mEnhancedEstimates = enhancedEstimates;
+        mPowerManager = powerManager;
     }
 
     public void start() {
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
-        mWarnings = Dependency.get(WarningsUI.class);
-        mEnhancedEstimates = Dependency.get(EnhancedEstimates.class);
         mLastConfiguration.setTo(mContext.getResources().getConfiguration());
 
         ContentObserver obs = new ContentObserver(mHandler) {
@@ -710,7 +712,8 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                if (!mStatusBarLazy.get().isDeviceInVrMode()) {
+                final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
+                if (!statusBarOptional.map(StatusBar::isDeviceInVrMode).orElse(false)) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

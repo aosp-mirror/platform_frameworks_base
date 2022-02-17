@@ -36,13 +36,14 @@ interface IBiometricService {
     // Retrieve static sensor properties for all biometric sensors
     List<SensorPropertiesInternal> getSensorProperties(String opPackageName);
 
-    // Requests authentication. The service choose the appropriate biometric to use, and show
-    // the corresponding BiometricDialog.
-    void authenticate(IBinder token, long operationId, int userId,
+    // Requests authentication. The service chooses the appropriate biometric to use, and shows
+    // the corresponding BiometricDialog. A requestId is returned that can be used to cancel
+    // this operation.
+    long authenticate(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo);
 
-    // Cancel authentication for the given session.
-    void cancelAuthentication(IBinder token, String opPackageName);
+    // Cancel authentication for the given requestId.
+    void cancelAuthentication(IBinder token, String opPackageName, long requestId);
 
     // Checks if biometrics can be used.
     int canAuthenticate(String opPackageName, int userId, int callingUserId, int authenticators);

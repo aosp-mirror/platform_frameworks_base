@@ -255,4 +255,36 @@ TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
     ensureDisplayViewportIsSet();
 }
 
+class PointerControllerWindowInfoListenerTest : public Test {};
+
+class TestPointerController : public PointerController {
+public:
+    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
+                          const sp<Looper>& looper)
+          : PointerController(
+                    new MockPointerControllerPolicyInterface(), looper,
+                    new NiceMock<MockSpriteController>(looper),
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Register listener
+                        registeredListener = listener;
+                    },
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Unregister listener
+                        if (registeredListener == listener) registeredListener = nullptr;
+                    }) {}
+};
+
+TEST_F(PointerControllerWindowInfoListenerTest,
+       doesNotCrashIfListenerCalledAfterPointerControllerDestroyed) {
+    sp<android::gui::WindowInfosListener> registeredListener;
+    sp<android::gui::WindowInfosListener> localListenerCopy;
+    {
+        TestPointerController pointerController(registeredListener, new Looper(false));
+        ASSERT_NE(nullptr, registeredListener) << "WindowInfosListener was not registered";
+        localListenerCopy = registeredListener;
+    }
+    EXPECT_EQ(nullptr, registeredListener) << "WindowInfosListener was not unregistered";
+    localListenerCopy->onWindowInfosChanged({}, {});
+}
+
 }  // namespace android

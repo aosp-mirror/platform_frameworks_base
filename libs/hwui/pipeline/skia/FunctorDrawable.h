@@ -34,6 +34,8 @@ namespace skiapipeline {
  */
 class FunctorDrawable : public SkDrawable {
 public:
+    constexpr static const char* const TYPE_NAME = "FunctorDrawable";
+
     FunctorDrawable(int functor, SkCanvas* canvas)
             : mBounds(canvas->getLocalClipBounds())
             , mWebViewHandle(WebViewFunctorManager::instance().handleFor(functor)) {}
@@ -47,6 +49,8 @@ public:
     virtual void onRemovedFromTree() {
         mWebViewHandle->onRemovedFromTree();
     }
+
+    const char* getTypeName() const override { return TYPE_NAME; }
 
 protected:
     virtual SkRect onGetBounds() override { return mBounds; }

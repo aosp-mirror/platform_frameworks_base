@@ -16,26 +16,32 @@
 
 package com.android.wm.shell.pip.tv;
 
-import static android.animation.AnimatorInflater.loadAnimator;
 import static android.view.KeyEvent.ACTION_UP;
 import static android.view.KeyEvent.KEYCODE_BACK;
+import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
+import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
+import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
+import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
+import static android.view.KeyEvent.KEYCODE_DPAD_UP;
+import static android.view.KeyEvent.KEYCODE_ENTER;
 
-import android.animation.Animator;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -47,22 +53,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A View that represents Pip Menu on TV. It's responsible for displaying 2 ever-present Pip Menu
- * actions: Fullscreen and Close, but could also display "additional" actions, that may be set via
- * a {@link #setAdditionalActions(List, Handler)} call.
+ * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
+ * actions: Fullscreen, Move and Close, but could also display "additional" actions, that may be set
+ * via a {@link #setAdditionalActions(List, Handler)} call.
  */
 public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
     private static final boolean DEBUG = TvPipController.DEBUG;
 
-    private static final float DISABLED_ACTION_ALPHA = 0.54f;
-
-    private final Animator mFadeInAnimation;
-    private final Animator mFadeOutAnimation;
-    @Nullable private Listener mListener;
+    @Nullable
+    private Listener mListener;
 
     private final LinearLayout mActionButtonsContainer;
+    private final View mMenuFrameView;
     private final List<TvPipMenuActionButton> mAdditionalButtons = new ArrayList<>();
+
+    private final ImageView mArrowUp;
+    private final ImageView mArrowRight;
+    private final ImageView mArrowDown;
+    private final ImageView mArrowLeft;
+    private IBinder mFocusGrantToken = null;
+
+    private final ViewGroup mScrollView;
+    private final ViewGroup mHorizontalScrollView;
+
+    private Rect mCurrentBounds;
+
+    private final TvPipMenuActionButton mExpandButton;
 
     public TvPipMenuView(@NonNull Context context) {
         this(context, null);
@@ -87,36 +104,117 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 .setOnClickListener(this);
         mActionButtonsContainer.findViewById(R.id.tv_pip_menu_close_button)
                 .setOnClickListener(this);
+        mActionButtonsContainer.findViewById(R.id.tv_pip_menu_move_button)
+                .setOnClickListener(this);
+        mExpandButton = findViewById(R.id.tv_pip_menu_expand_button);
+        mExpandButton.setOnClickListener(this);
 
-        mFadeInAnimation = loadAnimator(mContext, R.anim.tv_pip_menu_fade_in_animation);
-        mFadeInAnimation.setTarget(mActionButtonsContainer);
+        mScrollView = findViewById(R.id.tv_pip_menu_scroll);
+        mHorizontalScrollView = findViewById(R.id.tv_pip_menu_horizontal_scroll);
 
-        mFadeOutAnimation = loadAnimator(mContext, R.anim.tv_pip_menu_fade_out_animation);
-        mFadeOutAnimation.setTarget(mActionButtonsContainer);
+        mMenuFrameView = findViewById(R.id.tv_pip_menu_frame);
+
+        mArrowUp = findViewById(R.id.tv_pip_menu_arrow_up);
+        mArrowRight = findViewById(R.id.tv_pip_menu_arrow_right);
+        mArrowDown = findViewById(R.id.tv_pip_menu_arrow_down);
+        mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
+    }
+
+    void updateLayout(Rect updatedBounds) {
+        Log.d(TAG, "update menu layout: " + updatedBounds.toShortString());
+        boolean previouslyVertical =
+                mCurrentBounds != null && mCurrentBounds.height() > mCurrentBounds.width();
+        boolean vertical = updatedBounds.height() > updatedBounds.width();
+
+        mCurrentBounds = updatedBounds;
+        if (previouslyVertical == vertical) {
+            if (DEBUG) Log.d(TAG, "no update for menu layout");
+            return;
+        } else {
+            if (DEBUG) Log.d(TAG, "change menu layout to vertical: " + vertical);
+        }
+
+        if (vertical) {
+            mHorizontalScrollView.removeView(mActionButtonsContainer);
+            mScrollView.addView(mActionButtonsContainer);
+        } else {
+            mScrollView.removeView(mActionButtonsContainer);
+            mHorizontalScrollView.addView(mActionButtonsContainer);
+        }
+        mActionButtonsContainer.setOrientation(vertical ? LinearLayout.VERTICAL
+                : LinearLayout.HORIZONTAL);
+
+        mScrollView.setVisibility(vertical ? VISIBLE : GONE);
+        mHorizontalScrollView.setVisibility(vertical ? GONE : VISIBLE);
     }
 
     void setListener(@Nullable Listener listener) {
         mListener = listener;
     }
 
-    void show() {
-        if (DEBUG) Log.d(TAG, "show()");
-
-        mFadeInAnimation.start();
-        setAlpha(1.0f);
-        grantWindowFocus(true);
+    void setFocusGrantToken(IBinder token) {
+        mFocusGrantToken = token;
     }
 
-    void hide() {
-        if (DEBUG) Log.d(TAG, "hide()");
+    void setExpandedModeEnabled(boolean enabled) {
+        mExpandButton.setVisibility(enabled ? VISIBLE : GONE);
+    }
 
-        mFadeOutAnimation.start();
-        setAlpha(0.0f);
-        grantWindowFocus(false);
+    void setIsExpanded(boolean expanded) {
+        if (DEBUG) Log.d(TAG, "setIsExpanded, expanded: " + expanded);
+        mExpandButton.setImageResource(
+                expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
+        mExpandButton.setTextAndDescription(
+                expanded ? R.string.pip_collapse : R.string.pip_expand);
+    }
+
+    void show(boolean inMoveMode, int gravity) {
+        if (DEBUG) Log.d(TAG, "show(), inMoveMode: " + inMoveMode);
+        grantWindowFocus(true);
+
+        if (inMoveMode) {
+            showMovementHints(gravity);
+        } else {
+            animateAlphaTo(1, mActionButtonsContainer);
+        }
+        animateAlphaTo(1, mMenuFrameView);
+    }
+
+    void hide(boolean isInMoveMode) {
+        if (DEBUG) Log.d(TAG, "hide()");
+        animateAlphaTo(0, mActionButtonsContainer);
+        animateAlphaTo(0, mMenuFrameView);
+        hideMovementHints();
+
+        if (!isInMoveMode) {
+            grantWindowFocus(false);
+        }
+    }
+
+    private void animateAlphaTo(float alpha, View view) {
+        view.animate()
+                .alpha(alpha)
+                .setInterpolator(alpha == 0f ? TvPipInterpolators.EXIT : TvPipInterpolators.ENTER)
+                .setDuration(500)
+                .withStartAction(() -> {
+                    if (alpha != 0) {
+                        view.setVisibility(VISIBLE);
+                    }
+                })
+                .withEndAction(() -> {
+                    if (alpha == 0) {
+                        view.setVisibility(GONE);
+                    }
+                });
     }
 
     boolean isVisible() {
-        return getAlpha() == 1.0f;
+        return mMenuFrameView.getAlpha() != 0f
+                || mActionButtonsContainer.getAlpha() != 0f
+                || mArrowUp.getAlpha() != 0f
+                || mArrowRight.getAlpha() != 0f
+                || mArrowDown.getAlpha() != 0f
+                || mArrowLeft.getAlpha() != 0f;
     }
 
     private void grantWindowFocus(boolean grantFocus) {
@@ -124,7 +222,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
         try {
             WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                    getViewRootImpl().getInputToken(), grantFocus);
+                    mFocusGrantToken, grantFocus);
         } catch (Exception e) {
             Log.e(TAG, "Unable to update focus", e);
         }
@@ -137,15 +235,13 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         final int actionsNumber = actions.size();
         int buttonsNumber = mAdditionalButtons.size();
         if (actionsNumber > buttonsNumber) {
-            final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
             // Add buttons until we have enough to display all of the actions.
             while (actionsNumber > buttonsNumber) {
-                final TvPipMenuActionButton button = (TvPipMenuActionButton) layoutInflater.inflate(
-                        R.layout.tv_pip_menu_additional_action_button, mActionButtonsContainer,
-                        false);
+                TvPipMenuActionButton button = new TvPipMenuActionButton(mContext);
                 button.setOnClickListener(this);
 
-                mActionButtonsContainer.addView(button);
+                mActionButtonsContainer.addView(button,
+                        mActionButtonsContainer.getChildCount() - 1);
                 mAdditionalButtons.add(button);
 
                 buttonsNumber++;
@@ -168,13 +264,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             button.setVisibility(View.VISIBLE); // Ensure the button is visible.
             button.setTextAndDescription(action.getContentDescription());
             button.setEnabled(action.isEnabled());
-            button.setAlpha(action.isEnabled() ? 1f : DISABLED_ACTION_ALPHA);
             button.setTag(action);
-
-            action.getIcon().loadDrawableAsync(mContext, drawable -> {
-                drawable.setTint(Color.WHITE);
-                button.setImageDrawable(drawable);
-            }, mainHandler);
+            action.getIcon().loadDrawableAsync(mContext, button::setImageDrawable, mainHandler);
         }
     }
 
@@ -198,8 +289,12 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         final int id = v.getId();
         if (id == R.id.tv_pip_menu_fullscreen_button) {
             mListener.onFullscreenButtonClick();
+        } else if (id == R.id.tv_pip_menu_move_button) {
+            mListener.onEnterMoveMode();
         } else if (id == R.id.tv_pip_menu_close_button) {
             mListener.onCloseButtonClick();
+        } else if (id == R.id.tv_pip_menu_expand_button) {
+            mListener.onToggleExpandedMode();
         } else {
             // This should be an "additional action"
             final RemoteAction action = (RemoteAction) v.getTag();
@@ -217,17 +312,86 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == ACTION_UP && event.getKeyCode() == KEYCODE_BACK
-                && mListener != null) {
-            mListener.onBackPress();
-            return true;
+        if (DEBUG) {
+            Log.d(TAG, "dispatchKeyEvent, action: " + event.getAction()
+                    + ", keycode: " + event.getKeyCode());
+        }
+        if (mListener != null && event.getAction() == ACTION_UP) {
+            switch (event.getKeyCode()) {
+                case KEYCODE_BACK:
+                    mListener.onBackPress();
+                    return true;
+                case KEYCODE_DPAD_UP:
+                case KEYCODE_DPAD_DOWN:
+                case KEYCODE_DPAD_LEFT:
+                case KEYCODE_DPAD_RIGHT:
+                    return mListener.onPipMovement(event.getKeyCode()) || super.dispatchKeyEvent(
+                            event);
+                case KEYCODE_ENTER:
+                case KEYCODE_DPAD_CENTER:
+                    return mListener.onExitMoveMode() || super.dispatchKeyEvent(event);
+                default:
+                    break;
+            }
         }
         return super.dispatchKeyEvent(event);
     }
 
+    /**
+     * Shows user hints for moving the PiP, e.g. arrows.
+     */
+    public void showMovementHints(int gravity) {
+        if (DEBUG) Log.d(TAG, "showMovementHints(), position: " + Gravity.toString(gravity));
+
+        animateAlphaTo(checkGravity(gravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
+        animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
+        animateAlphaTo(checkGravity(gravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
+        animateAlphaTo(checkGravity(gravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
+    }
+
+    private boolean checkGravity(int gravity, int feature) {
+        return (gravity & feature) == feature;
+    }
+
+    /**
+     * Hides user hints for moving the PiP, e.g. arrows.
+     */
+    public void hideMovementHints() {
+        if (DEBUG) Log.d(TAG, "hideMovementHints()");
+        animateAlphaTo(0, mArrowUp);
+        animateAlphaTo(0, mArrowRight);
+        animateAlphaTo(0, mArrowDown);
+        animateAlphaTo(0, mArrowLeft);
+    }
+
+    /**
+     * Show or hide the pip user actions.
+     */
+    public void showMenuButtons(boolean show) {
+        if (DEBUG) Log.d(TAG, "showMenuButtons: " + show);
+        animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
+    }
+
     interface Listener {
+
         void onBackPress();
+
+        void onEnterMoveMode();
+
+        /**
+         * @return whether move mode was exited
+         */
+        boolean onExitMoveMode();
+
+        /**
+         * @return whether pip movement was handled.
+         */
+        boolean onPipMovement(int keycode);
+
         void onCloseButtonClick();
+
         void onFullscreenButtonClick();
+
+        void onToggleExpandedMode();
     }
 }

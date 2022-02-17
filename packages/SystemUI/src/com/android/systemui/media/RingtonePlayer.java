@@ -37,18 +37,22 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.SysUISingleton;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import javax.inject.Inject;
+
 /**
  * Service that offers to play ringtones by {@link Uri}, since our process has
  * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
  */
-public class RingtonePlayer extends SystemUI {
+@SysUISingleton
+public class RingtonePlayer extends CoreStartable {
     private static final String TAG = "RingtonePlayer";
     private static final boolean LOGD = false;
 
@@ -59,6 +63,7 @@ public class RingtonePlayer extends SystemUI {
     private final NotificationPlayer mAsyncPlayer = new NotificationPlayer(TAG);
     private final HashMap<IBinder, Client> mClients = new HashMap<IBinder, Client>();
 
+    @Inject
     public RingtonePlayer(Context context) {
         super(context);
     }

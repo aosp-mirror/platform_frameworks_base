@@ -19,28 +19,32 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.IInvalidationCallback;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.InvalidationClient;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
-public class FaceInvalidationClient extends InvalidationClient<Face, ISession> {
+public class FaceInvalidationClient extends InvalidationClient<Face, AidlSession> {
     private static final String TAG = "FaceInvalidationClient";
 
     public FaceInvalidationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, int sensorId,
+            @NonNull Supplier<AidlSession> lazyDaemon, int userId, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull Map<Integer, Long> authenticatorIds, @NonNull IInvalidationCallback callback) {
-        super(context, lazyDaemon, userId, sensorId, authenticatorIds, callback);
+        super(context, lazyDaemon, userId, sensorId, logger, biometricContext,
+                authenticatorIds, callback);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().invalidateAuthenticatorId();
+            getFreshDaemon().getSession().invalidateAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             mCallback.onClientFinished(this, false /* success */);

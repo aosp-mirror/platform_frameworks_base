@@ -56,7 +56,7 @@ public class SoftApConfToXmlMigrationUtilTest {
                     + "<int name=\"MaxNumberOfClients\" value=\"0\" />\n"
                     + "<boolean name=\"ClientControlByUser\" value=\"false\" />\n"
                     + "<boolean name=\"AutoShutdownEnabled\" value=\"true\" />\n"
-                    + "<long name=\"ShutdownTimeoutMillis\" value=\"0\" />\n"
+                    + "<long name=\"ShutdownTimeoutMillis\" value=\"-1\" />\n"
                     + "<BlockedClientList />\n"
                     + "<AllowedClientList />\n"
                     + "</SoftAp>\n"

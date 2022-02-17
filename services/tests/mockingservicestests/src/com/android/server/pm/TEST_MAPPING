@@ -1,0 +1,18 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksMockingServicesTests",
+      "options": [
+        {
+            "include-filter": "com.android.server.pm"
+        },
+        {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ]
+}

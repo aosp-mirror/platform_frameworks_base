@@ -38,6 +38,7 @@ import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,7 @@ import java.util.Optional;
  */
 class SampleSidecarImpl extends StubSidecar {
     private static final String TAG = "SampleSidecar";
+    private static final boolean DEBUG = false;
 
     private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
     private final DataProducer<Integer> mDevicePostureProducer;
@@ -88,8 +90,28 @@ class SampleSidecarImpl extends StubSidecar {
         Optional<Integer> posture = mDevicePostureProducer.getData();
 
         SidecarDeviceState deviceState = new SidecarDeviceState();
-        deviceState.posture = posture.orElse(SidecarDeviceState.POSTURE_UNKNOWN);
+        deviceState.posture = posture.orElse(deviceStateFromFeature());
         return deviceState;
+    }
+
+    private int deviceStateFromFeature() {
+        List<DisplayFeature> storedFeatures = mDisplayFeatureProducer.getData()
+                .orElse(Collections.emptyList());
+        for (int i = 0; i < storedFeatures.size(); i++) {
+            DisplayFeature feature = storedFeatures.get(i);
+            final int state = feature.getState() == null ? -1 : feature.getState();
+            if (DEBUG && feature.getState() == null) {
+                Log.d(TAG, "feature#getState was null for DisplayFeature: " + feature);
+            }
+
+            switch (state) {
+                case DisplayFeature.COMMON_STATE_FLAT:
+                    return SidecarDeviceState.POSTURE_OPENED;
+                case DisplayFeature.COMMON_STATE_HALF_OPENED:
+                    return SidecarDeviceState.POSTURE_HALF_OPENED;
+            }
+        }
+        return SidecarDeviceState.POSTURE_UNKNOWN;
     }
 
     @NonNull

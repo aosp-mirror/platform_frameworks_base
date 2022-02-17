@@ -24,11 +24,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 
 /**
@@ -51,6 +54,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public abstract class AttentionService extends Service {
+    private static final String LOG_TAG = "AttentionService";
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
      * service must also require the {@link android.Manifest.permission#BIND_ATTENTION_SERVICE}
@@ -79,6 +83,9 @@ public abstract class AttentionService extends Service {
 
     /** Camera permission is not granted. */
     public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6;
+
+    /** Users’ proximity is unknown (proximity sensing was inconclusive and is unsupported). */
+    public static final double PROXIMITY_UNKNOWN = -1;
 
     /**
      * Result codes for when attention check was successful.
@@ -118,6 +125,20 @@ public abstract class AttentionService extends Service {
             Preconditions.checkNotNull(callback);
             AttentionService.this.onCancelAttentionCheck(new AttentionCallback(callback));
         }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onStartProximityUpdates(IProximityCallback callback) {
+            Objects.requireNonNull(callback);
+            AttentionService.this.onStartProximityUpdates(new ProximityCallback(callback));
+
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onStopProximityUpdates() {
+            AttentionService.this.onStopProximityUpdates();
+        }
     };
 
     @Nullable
@@ -142,6 +163,23 @@ public abstract class AttentionService extends Service {
      * Implementation must call back with a failure code of {@link #ATTENTION_FAILURE_CANCELLED}.
      */
     public abstract void onCancelAttentionCheck(@NonNull AttentionCallback callback);
+
+    /**
+     * Requests the continuous updates of proximity signal via the provided callback,
+     * until the given callback is unregistered.
+     *
+     * @param callback the callback to return the result to
+     */
+    public void onStartProximityUpdates(@NonNull ProximityCallback callback) {
+        Slog.w(LOG_TAG, "Override this method.");
+    }
+
+    /**
+     * Requests to stop providing continuous updates until the callback is registered.
+     */
+    public void onStopProximityUpdates() {
+        Slog.w(LOG_TAG, "Override this method.");
+    }
 
     /** Callbacks for AttentionService results. */
     public static final class AttentionCallback {
@@ -169,6 +207,28 @@ public abstract class AttentionService extends Service {
         public void onFailure(@AttentionFailureCodes int error) {
             try {
                 mCallback.onFailure(error);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /** Callbacks for ProximityCallback results. */
+    public static final class ProximityCallback {
+        @NonNull private final WeakReference<IProximityCallback> mCallback;
+
+        private ProximityCallback(@NonNull IProximityCallback callback) {
+            mCallback = new WeakReference<>(callback);
+        }
+
+        /**
+         * @param distance the estimated distance of the user (in meter)
+         * The distance will be PROXIMITY_UNKNOWN if the proximity sensing was inconclusive.
+         *
+         */
+        public void onProximityUpdate(double distance) {
+            try {
+                mCallback.get().onProximityUpdate(distance);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

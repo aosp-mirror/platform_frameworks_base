@@ -73,6 +73,9 @@
         android:accessibilityLiveRegion="polite"
         android:singleLine="true"
         android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:fadingEdge="horizontal"
         android:textColor="@color/biometric_dialog_gray"/>
 
     <LinearLayout

@@ -709,8 +709,8 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     /**
-     * Queries the framework about whether any physical keys exist on the
-     * any keyboard attached to the device that are capable of producing the given key code.
+     * Queries the framework about whether any physical keys exist on any currently attached input
+     * devices that are capable of producing the given key code.
      *
      * @param keyCode The key code to query.
      * @return True if at least one attached keyboard supports the specified key code.
@@ -720,9 +720,8 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     /**
-     * Queries the framework about whether any physical keys exist on the
-     * any keyboard attached to the device that are capable of producing the given
-     * array of key codes.
+     * Queries the framework about whether any physical keys exist on any currently attached input
+     * devices that are capable of producing the given array of key codes.
      *
      * @param keyCodes The array of key codes to query.
      * @return A new array of the same size as the key codes array whose elements

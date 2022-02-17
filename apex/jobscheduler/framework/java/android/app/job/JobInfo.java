@@ -29,6 +29,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -62,6 +65,36 @@ import java.util.Objects;
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
+
+    /**
+     * Disallow setting a deadline (via {@link Builder#setOverrideDeadline(long)}) for prefetch
+     * jobs ({@link Builder#setPrefetch(boolean)}. Prefetch jobs are meant to run close to the next
+     * app launch, so there's no good reason to allow them to have deadlines.
+     *
+     * We don't drop or cancel any previously scheduled prefetch jobs with a deadline.
+     * There's no way for an app to keep a perpetually scheduled prefetch job with a deadline.
+     * Prefetch jobs with a deadline will run and apps under this restriction won't be able to
+     * schedule new prefetch jobs with a deadline. If a job is rescheduled (by providing
+     * {@code true} via {@link JobService#jobFinished(JobParameters, boolean)} or
+     * {@link JobService#onStopJob(JobParameters)}'s return value),the deadline is dropped.
+     * Periodic jobs require all constraints to be met, so there's no issue with their deadlines.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long DISALLOW_DEADLINES_FOR_PREFETCH_JOBS = 194532703L;
+
+    /**
+     * Whether to throw an exception when an app provides an invalid priority value via
+     * {@link Builder#setPriority(int)}. Legacy apps may be incorrectly using the API and
+     * so the call will silently fail for them if they continue using the API.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long THROW_ON_INVALID_PRIORITY_VALUE = 140852299L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -185,62 +218,126 @@ public class JobInfo implements Parcelable {
     public static final int DEFAULT_BACKOFF_POLICY = BACKOFF_POLICY_EXPONENTIAL;
 
     /**
-     * Default of {@link #getPriority}.
-     * @hide
+     * Job has minimal value to the user. The user has absolutely no expectation
+     * or knowledge of this task and it has no bearing on the user's perception of
+     * the app whatsoever. JobScheduler <i>may</i> decide to defer these tasks while
+     * there are higher priority tasks in order to ensure there is sufficient quota
+     * available for the higher priority tasks.
+     * A sample task of min priority: uploading analytics
      */
-    public static final int PRIORITY_DEFAULT = 0;
+    public static final int PRIORITY_MIN = 100;
 
     /**
-     * Value of {@link #getPriority} for expedited syncs.
-     * @hide
+     * Low priority. The task provides some benefit to users, but is not critical
+     * and is more of a nice-to-have. This is more important than minimum priority
+     * jobs and will be prioritized ahead of them, but may still be deferred in lieu
+     * of higher priority jobs. JobScheduler <i>may</i> decide to defer these tasks
+     * while there are higher priority tasks in order to ensure there is sufficient
+     * quota available for the higher priority tasks.
+     * A sample task of low priority: prefetching data the user hasn't requested
      */
-    public static final int PRIORITY_SYNC_EXPEDITED = 10;
+    public static final int PRIORITY_LOW = 200;
 
     /**
-     * Value of {@link #getPriority} for first time initialization syncs.
-     * @hide
+     * Default value for all regular jobs. As noted in {@link JobScheduler},
+     * these jobs have a general maximum execution time of 10 minutes.
+     * Receives the standard job management policy.
      */
-    public static final int PRIORITY_SYNC_INITIALIZATION = 20;
+    public static final int PRIORITY_DEFAULT = 300;
 
     /**
-     * Value of {@link #getPriority} for a BFGS app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * This task should be ordered ahead of most other tasks. It may be
+     * deferred a little, but if it doesn't run at some point, the user may think
+     * something is wrong. Assuming all constraints remain satisfied
+     * (including ideal system load conditions), these jobs will have a maximum
+     * execution time of at least 4 minutes. Setting all of your jobs to high
+     * priority will not be beneficial to your app and in fact may hurt its
+     * performance in the long run.
+     */
+    public static final int PRIORITY_HIGH = 400;
+
+    /**
+     * This task should be run ahead of all other tasks. Only Expedited Jobs
+     * {@link Builder#setExpedited(boolean)} can have this priority and as such,
+     * are subject to the same maximum execution time details noted in
+     * {@link Builder#setExpedited(boolean)}.
+     * A sample task of max priority: receiving a text message and processing it to
+     * show a notification
+     */
+    public static final int PRIORITY_MAX = 500;
+
+    /** @hide */
+    @IntDef(prefix = {"PRIORITY_"}, value = {
+            PRIORITY_MIN,
+            PRIORITY_LOW,
+            PRIORITY_DEFAULT,
+            PRIORITY_HIGH,
+            PRIORITY_MAX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Priority {
+    }
+
+    /**
+     * Default of {@link #getBias}.
      * @hide
      */
-    public static final int PRIORITY_BOUND_FOREGROUND_SERVICE = 30;
+    public static final int BIAS_DEFAULT = 0;
+
+    /**
+     * Value of {@link #getBias} for expedited syncs.
+     * @hide
+     */
+    public static final int BIAS_SYNC_EXPEDITED = 10;
+
+    /**
+     * Value of {@link #getBias} for first time initialization syncs.
+     * @hide
+     */
+    public static final int BIAS_SYNC_INITIALIZATION = 20;
+
+    /**
+     * Value of {@link #getBias} for a BFGS app (overrides the supplied
+     * JobInfo bias if it is smaller).
+     * @hide
+     */
+    public static final int BIAS_BOUND_FOREGROUND_SERVICE = 30;
 
     /** @hide For backward compatibility. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int PRIORITY_FOREGROUND_APP = PRIORITY_BOUND_FOREGROUND_SERVICE;
+    public static final int PRIORITY_FOREGROUND_APP = BIAS_BOUND_FOREGROUND_SERVICE;
 
     /**
-     * Value of {@link #getPriority} for a FG service app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * Value of {@link #getBias} for a FG service app (overrides the supplied
+     * JobInfo bias if it is smaller).
      * @hide
      */
+    public static final int BIAS_FOREGROUND_SERVICE = 35;
+
+    /** @hide For backward compatibility. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int PRIORITY_FOREGROUND_SERVICE = 35;
+    public static final int PRIORITY_FOREGROUND_SERVICE = BIAS_FOREGROUND_SERVICE;
 
     /**
-     * Value of {@link #getPriority} for the current top app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * Value of {@link #getBias} for the current top app (overrides the supplied
+     * JobInfo bias if it is smaller).
      * @hide
      */
-    public static final int PRIORITY_TOP_APP = 40;
+    public static final int BIAS_TOP_APP = 40;
 
     /**
-     * Adjustment of {@link #getPriority} if the app has often (50% or more of the time)
+     * Adjustment of {@link #getBias} if the app has often (50% or more of the time)
      * been running jobs.
      * @hide
      */
-    public static final int PRIORITY_ADJ_OFTEN_RUNNING = -40;
+    public static final int BIAS_ADJ_OFTEN_RUNNING = -40;
 
     /**
-     * Adjustment of {@link #getPriority} if the app has always (90% or more of the time)
+     * Adjustment of {@link #getBias} if the app has always (90% or more of the time)
      * been running jobs.
      * @hide
      */
-    public static final int PRIORITY_ADJ_ALWAYS_RUNNING = -80;
+    public static final int BIAS_ADJ_ALWAYS_RUNNING = -80;
 
     /**
      * Indicates that the implementation of this job will be using
@@ -324,6 +421,7 @@ public class JobInfo implements Parcelable {
     private final NetworkRequest networkRequest;
     private final long networkDownloadBytes;
     private final long networkUploadBytes;
+    private final long minimumNetworkChunkBytes;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -332,7 +430,9 @@ public class JobInfo implements Parcelable {
     private final long flexMillis;
     private final long initialBackoffMillis;
     private final int backoffPolicy;
-    private final int priority;
+    private final int mBias;
+    @Priority
+    private final int mPriority;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
 
@@ -380,8 +480,16 @@ public class JobInfo implements Parcelable {
     }
 
     /** @hide */
+    public int getBias() {
+        return mBias;
+    }
+
+    /**
+     * @see JobInfo.Builder#setPriority(int)
+     */
+    @Priority
     public int getPriority() {
-        return priority;
+        return mPriority;
     }
 
     /** @hide */
@@ -512,6 +620,17 @@ public class JobInfo implements Parcelable {
      */
     public @BytesLong long getEstimatedNetworkUploadBytes() {
         return networkUploadBytes;
+    }
+
+    /**
+     * Return the smallest piece of data that cannot be easily paused and resumed, in bytes.
+     *
+     * @return Smallest piece of data that cannot be easily paused and resumed, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setMinimumNetworkChunkBytes(long)
+     */
+    public @BytesLong long getMinimumNetworkChunkBytes() {
+        return minimumNetworkChunkBytes;
     }
 
     /**
@@ -679,6 +798,9 @@ public class JobInfo implements Parcelable {
         if (networkUploadBytes != j.networkUploadBytes) {
             return false;
         }
+        if (minimumNetworkChunkBytes != j.minimumNetworkChunkBytes) {
+            return false;
+        }
         if (minLatencyMillis != j.minLatencyMillis) {
             return false;
         }
@@ -703,7 +825,10 @@ public class JobInfo implements Parcelable {
         if (backoffPolicy != j.backoffPolicy) {
             return false;
         }
-        if (priority != j.priority) {
+        if (mBias != j.mBias) {
+            return false;
+        }
+        if (mPriority != j.mPriority) {
             return false;
         }
         if (flags != j.flags) {
@@ -741,6 +866,7 @@ public class JobInfo implements Parcelable {
         }
         hashCode = 31 * hashCode + Long.hashCode(networkDownloadBytes);
         hashCode = 31 * hashCode + Long.hashCode(networkUploadBytes);
+        hashCode = 31 * hashCode + Long.hashCode(minimumNetworkChunkBytes);
         hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
         hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
         hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
@@ -749,11 +875,13 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + Long.hashCode(flexMillis);
         hashCode = 31 * hashCode + Long.hashCode(initialBackoffMillis);
         hashCode = 31 * hashCode + backoffPolicy;
-        hashCode = 31 * hashCode + priority;
+        hashCode = 31 * hashCode + mBias;
+        hashCode = 31 * hashCode + mPriority;
         hashCode = 31 * hashCode + flags;
         return hashCode;
     }
 
+    @SuppressWarnings("UnsafeParcelApi")
     private JobInfo(Parcel in) {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
@@ -777,6 +905,7 @@ public class JobInfo implements Parcelable {
         }
         networkDownloadBytes = in.readLong();
         networkUploadBytes = in.readLong();
+        minimumNetworkChunkBytes = in.readLong();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -787,7 +916,8 @@ public class JobInfo implements Parcelable {
         backoffPolicy = in.readInt();
         hasEarlyConstraint = in.readInt() == 1;
         hasLateConstraint = in.readInt() == 1;
-        priority = in.readInt();
+        mBias = in.readInt();
+        mPriority = in.readInt();
         flags = in.readInt();
     }
 
@@ -807,6 +937,7 @@ public class JobInfo implements Parcelable {
         networkRequest = b.mNetworkRequest;
         networkDownloadBytes = b.mNetworkDownloadBytes;
         networkUploadBytes = b.mNetworkUploadBytes;
+        minimumNetworkChunkBytes = b.mMinimumNetworkChunkBytes;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -817,7 +948,8 @@ public class JobInfo implements Parcelable {
         backoffPolicy = b.mBackoffPolicy;
         hasEarlyConstraint = b.mHasEarlyConstraint;
         hasLateConstraint = b.mHasLateConstraint;
-        priority = b.mPriority;
+        mBias = b.mBias;
+        mPriority = b.mPriority;
         flags = b.mFlags;
     }
 
@@ -851,6 +983,7 @@ public class JobInfo implements Parcelable {
         }
         out.writeLong(networkDownloadBytes);
         out.writeLong(networkUploadBytes);
+        out.writeLong(minimumNetworkChunkBytes);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -861,7 +994,8 @@ public class JobInfo implements Parcelable {
         out.writeInt(backoffPolicy);
         out.writeInt(hasEarlyConstraint ? 1 : 0);
         out.writeInt(hasLateConstraint ? 1 : 0);
-        out.writeInt(priority);
+        out.writeInt(mBias);
+        out.writeInt(mPriority);
         out.writeInt(this.flags);
     }
 
@@ -979,6 +1113,8 @@ public class JobInfo implements Parcelable {
         private Bundle mTransientExtras = Bundle.EMPTY;
         private ClipData mClipData;
         private int mClipGrantFlags;
+        private int mBias = BIAS_DEFAULT;
+        @Priority
         private int mPriority = PRIORITY_DEFAULT;
         private int mFlags;
         // Requirements.
@@ -986,6 +1122,7 @@ public class JobInfo implements Parcelable {
         private NetworkRequest mNetworkRequest;
         private long mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
         private long mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
+        private long mMinimumNetworkChunkBytes = NETWORK_BYTES_UNKNOWN;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
         private long mTriggerContentMaxDelay = -1;
@@ -1032,12 +1169,13 @@ public class JobInfo implements Parcelable {
             mTransientExtras = job.getTransientExtras();
             mClipData = job.getClipData();
             mClipGrantFlags = job.getClipGrantFlags();
-            mPriority = job.getPriority();
+            mBias = job.getBias();
             mFlags = job.getFlags();
             mConstraintFlags = job.getConstraintFlags();
             mNetworkRequest = job.getRequiredNetwork();
             mNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
             mNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mMinimumNetworkChunkBytes = job.getMinimumNetworkChunkBytes();
             mTriggerContentUris = job.getTriggerContentUris() != null
                     ? new ArrayList<>(Arrays.asList(job.getTriggerContentUris())) : null;
             mTriggerContentUpdateDelay = job.getTriggerContentUpdateDelay();
@@ -1054,11 +1192,45 @@ public class JobInfo implements Parcelable {
             // mBackoffPolicySet isn't set but it's fine since this is copying from an already valid
             // job.
             mBackoffPolicy = job.getBackoffPolicy();
+            mPriority = job.getPriority();
         }
 
         /** @hide */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public Builder setPriority(int priority) {
+        @NonNull
+        public Builder setBias(int bias) {
+            mBias = bias;
+            return this;
+        }
+
+        /**
+         * Indicate the priority for this job. The priority set here will be used to sort jobs
+         * for the calling app and apply slightly different policies based on the priority.
+         * The priority will <b>NOT</b> be used as a global sorting value to sort between
+         * different app's jobs. Use this to inform the system about which jobs it should try
+         * to run before other jobs. Giving the same priority to all of your jobs will result
+         * in them all being treated the same. The priorities each have slightly different
+         * behaviors, as noted in their relevant javadoc.
+         *
+         * <b>NOTE:</b> Setting all of your jobs to high priority will not be
+         * beneficial to your app and in fact may hurt its performance in the
+         * long run.
+         *
+         * In order to prevent starvation, repeatedly retried jobs (because of failures) will slowly
+         * have their priorities lowered.
+         *
+         * @see JobInfo#getPriority()
+         */
+        @NonNull
+        public Builder setPriority(@Priority int priority) {
+            if (priority > PRIORITY_MAX || priority < PRIORITY_MIN) {
+                if (Compatibility.isChangeEnabled(THROW_ON_INVALID_PRIORITY_VALUE)) {
+                    throw new IllegalArgumentException("Invalid priority value");
+                }
+                // No-op for invalid calls of apps that are targeting S-. This was an unsupported
+                // API before Tiramisu, so anyone calling this that isn't targeting T isn't
+                // guaranteed a behavior change.
+                return this;
+            }
             mPriority = priority;
             return this;
         }
@@ -1256,6 +1428,39 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Set the minimum size of non-resumable network traffic this job requires, in bytes. When
+         * the upload or download can be easily paused and resumed, use this to set the smallest
+         * size that must be transmitted between start and stop events to be considered successful.
+         * If the transfer cannot be paused and resumed, then this should be the sum of the values
+         * provided to {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long)}.
+         *
+         * <p>
+         * Apps are encouraged to provide values that are as accurate as possible since JobScheduler
+         * will try to run the job at a time when at least the minimum chunk can be transmitted to
+         * reduce the amount of repetitive data that's transferred. Jobs that cannot provide
+         * reasonable estimates should use the sentinel value {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
+         *
+         * <p>
+         * The values provided here only reflect the minimum non-resumable traffic that will be
+         * performed by the base job; if you're using {@link JobWorkItem} then
+         * you also need to define the network traffic used by each work item
+         * when constructing them.
+         *
+         * @param chunkSizeBytes The smallest piece of data that cannot be easily paused and
+         *                       resumed, in bytes.
+         * @see JobInfo#getMinimumNetworkChunkBytes()
+         * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long, long)
+         */
+        @NonNull
+        public Builder setMinimumNetworkChunkBytes(@BytesLong long chunkSizeBytes) {
+            if (chunkSizeBytes != NETWORK_BYTES_UNKNOWN && chunkSizeBytes <= 0) {
+                throw new IllegalArgumentException("Minimum chunk size must be positive");
+            }
+            mMinimumNetworkChunkBytes = chunkSizeBytes;
+            return this;
+        }
+
+        /**
          * Specify that to run this job, the device must be charging (or be a
          * non-battery-powered device connected to permanent power, such as Android TV
          * devices). This defaults to {@code false}.
@@ -1338,11 +1543,25 @@ public class JobInfo implements Parcelable {
          *
          * <p>Note that trigger URIs can not be used in combination with
          * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
-         * for content changes, you need to schedule a new JobInfo observing the same URIs
-         * before you finish execution of the JobService handling the most recent changes.
+         * for content changes, you need to schedule a new JobInfo using the same job ID and
+         * observing the same URIs in place of calling
+         * {@link JobService#jobFinished(JobParameters, boolean)}. Remember that
+         * {@link JobScheduler#schedule(JobInfo)} stops a running job if it uses the same job ID,
+         * so only call it after you've finished processing the most recent changes (in other words,
+         * call {@link JobScheduler#schedule(JobInfo)} where you would have normally called
+         * {@link JobService#jobFinished(JobParameters, boolean)}.
          * Following this pattern will ensure you do not lose any content changes: while your
          * job is running, the system will continue monitoring for content changes, and propagate
-         * any it sees over to the next job you schedule.</p>
+         * any changes it sees over to the next job you schedule, so you do not have to worry
+         * about missing new changes. <b>Scheduling the new job
+         * before or during processing will cause the current job to be stopped (as described in
+         * {@link JobScheduler#schedule(JobInfo)}), meaning the wakelock will be released for the
+         * current job and your app process may be killed since it will no longer be in a valid
+         * component lifecycle.</b>
+         * Since {@link JobScheduler#schedule(JobInfo)} stops the current job, you do not
+         * need to call {@link JobService#jobFinished(JobParameters, boolean)} if you call
+         * {@link JobScheduler#schedule(JobInfo)} using the same job ID as the
+         * currently running job.</p>
          *
          * <p>Because setting this property is not compatible with periodic or
          * persisted jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
@@ -1391,7 +1610,9 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that this job should recur with the provided interval, not more than once per
          * period. You have no control over when within this interval this job will be executed,
-         * only the guarantee that it will be executed at most once within this interval.
+         * only the guarantee that it will be executed at most once within this interval, as long
+         * as the constraints are satisfied. If the constraints are not satisfied within this
+         * interval, the job will wait until the constraints are satisfied.
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
          * @param intervalMillis Millisecond interval for which this job will repeat.
@@ -1548,7 +1769,17 @@ public class JobInfo implements Parcelable {
         public Builder setExpedited(boolean expedited) {
             if (expedited) {
                 mFlags |= FLAG_EXPEDITED;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for EJs is MAX, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_MAX;
+                }
             } else {
+                if (mPriority == PRIORITY_MAX && (mFlags & FLAG_EXPEDITED) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
                 mFlags &= (~FLAG_EXPEDITED);
             }
             return this;
@@ -1575,7 +1806,18 @@ public class JobInfo implements Parcelable {
         public Builder setImportantWhileForeground(boolean importantWhileForeground) {
             if (importantWhileForeground) {
                 mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for important-while-foreground is HIGH, but only change
+                    // this if .setPriority() hasn't been called yet.
+                    mPriority = PRIORITY_HIGH;
+                }
             } else {
+                if (mPriority == PRIORITY_HIGH
+                        && (mFlags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
                 mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
             }
             return this;
@@ -1586,6 +1828,9 @@ public class JobInfo implements Parcelable {
          * content that will make a material improvement to the experience of
          * the specific user of this device. For example, fetching top headlines
          * of interest to the current user.
+         * <p>
+         * Starting with Android version {@link Build.VERSION_CODES#TIRAMISU}, prefetch jobs are
+         * not allowed to have deadlines (set via {@link #setOverrideDeadline(long)}.
          * <p>
          * The system may use this signal to relax the network constraints you
          * originally requested, such as allowing a
@@ -1621,6 +1866,11 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
+            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS));
+        }
+
+        /** @hide */
+        public JobInfo build(boolean disallowPrefetchDeadlines) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -1629,7 +1879,7 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo jobInfo = new JobInfo(this);
-            jobInfo.enforceValidity();
+            jobInfo.enforceValidity(disallowPrefetchDeadlines);
             return jobInfo;
         }
 
@@ -1647,16 +1897,34 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public void enforceValidity() {
-        // Check that network estimates require network type
-        if ((networkDownloadBytes > 0 || networkUploadBytes > 0) && networkRequest == null) {
+    public final void enforceValidity(boolean disallowPrefetchDeadlines) {
+        // Check that network estimates require network type and are reasonable values.
+        if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
+                && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
         }
+        final long estimatedTransfer;
+        if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            estimatedTransfer = networkDownloadBytes;
+        } else {
+            estimatedTransfer = networkUploadBytes
+                    + (networkDownloadBytes == NETWORK_BYTES_UNKNOWN ? 0 : networkDownloadBytes);
+        }
+        if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN
+                && estimatedTransfer != NETWORK_BYTES_UNKNOWN
+                && minimumNetworkChunkBytes > estimatedTransfer) {
+            throw new IllegalArgumentException(
+                    "Minimum chunk size can't be greater than estimated network usage");
+        }
+        if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN && minimumNetworkChunkBytes <= 0) {
+            throw new IllegalArgumentException("Minimum chunk size must be positive");
+        }
 
+        final boolean hasDeadline = maxExecutionDelayMillis != 0L;
         // Check that a deadline was not set on a periodic job.
         if (isPeriodic) {
-            if (maxExecutionDelayMillis != 0L) {
+            if (hasDeadline) {
                 throw new IllegalArgumentException(
                         "Can't call setOverrideDeadline() on a periodic job.");
             }
@@ -1668,6 +1936,12 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on a periodic job");
             }
+        }
+
+        // Prefetch jobs should not have deadlines
+        if (disallowPrefetchDeadlines && hasDeadline && (flags & FLAG_PREFETCH) != 0) {
+            throw new IllegalArgumentException(
+                    "Can't call setOverrideDeadline() on a prefetch job.");
         }
 
         if (isPersisted) {
@@ -1691,12 +1965,42 @@ public class JobInfo implements Parcelable {
             }
         }
 
-        if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && hasEarlyConstraint) {
-            throw new IllegalArgumentException(
-                    "An important while foreground job cannot have a time delay");
+        if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException(
+                        "An important while foreground job cannot have a time delay");
+            }
+            if (mPriority != PRIORITY_HIGH && mPriority != PRIORITY_DEFAULT) {
+                throw new IllegalArgumentException(
+                        "An important while foreground job must be high or default priority."
+                                + " Don't mark unimportant tasks as important while foreground.");
+            }
         }
 
-        if ((flags & FLAG_EXPEDITED) != 0) {
+        final boolean isExpedited = (flags & FLAG_EXPEDITED) != 0;
+        switch (mPriority) {
+            case PRIORITY_MAX:
+                if (!isExpedited) {
+                    throw new IllegalArgumentException("Only expedited jobs can have max priority");
+                }
+                break;
+            case PRIORITY_HIGH:
+                if ((flags & FLAG_PREFETCH) != 0) {
+                    throw new IllegalArgumentException("Prefetch jobs cannot be high priority");
+                }
+                if (isPeriodic) {
+                    throw new IllegalArgumentException("Periodic jobs cannot be high priority");
+                }
+                break;
+            case PRIORITY_DEFAULT:
+            case PRIORITY_LOW:
+            case PRIORITY_MIN:
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid priority level provided: " + mPriority);
+        }
+
+        if (isExpedited) {
             if (hasEarlyConstraint) {
                 throw new IllegalArgumentException("An expedited job cannot have a time delay");
             }
@@ -1705,6 +2009,11 @@ public class JobInfo implements Parcelable {
             }
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
+            }
+            if (mPriority != PRIORITY_MAX && mPriority != PRIORITY_HIGH) {
+                throw new IllegalArgumentException(
+                        "An expedited job must be high or max priority. Don't use expedited jobs"
+                                + " for unimportant tasks.");
             }
             if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
                     || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
@@ -1719,26 +2028,46 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * Convert a bias integer into a human readable string for debugging.
+     * @hide
+     */
+    public static String getBiasString(int bias) {
+        switch (bias) {
+            case BIAS_DEFAULT:
+                return BIAS_DEFAULT + " [DEFAULT]";
+            case BIAS_SYNC_EXPEDITED:
+                return BIAS_SYNC_EXPEDITED + " [SYNC_EXPEDITED]";
+            case BIAS_SYNC_INITIALIZATION:
+                return BIAS_SYNC_INITIALIZATION + " [SYNC_INITIALIZATION]";
+            case BIAS_BOUND_FOREGROUND_SERVICE:
+                return BIAS_BOUND_FOREGROUND_SERVICE + " [BFGS_APP]";
+            case BIAS_FOREGROUND_SERVICE:
+                return BIAS_FOREGROUND_SERVICE + " [FGS_APP]";
+            case BIAS_TOP_APP:
+                return BIAS_TOP_APP + " [TOP_APP]";
+
+                // BIAS_ADJ_* are adjustments and not used as real priorities.
+                // No need to convert to strings.
+        }
+        return bias + " [UNKNOWN]";
+    }
+
+    /**
      * Convert a priority integer into a human readable string for debugging.
      * @hide
      */
-    public static String getPriorityString(int priority) {
+    public static String getPriorityString(@Priority int priority) {
         switch (priority) {
+            case PRIORITY_MIN:
+                return priority + " [MIN]";
+            case PRIORITY_LOW:
+                return priority + " [LOW]";
             case PRIORITY_DEFAULT:
-                return PRIORITY_DEFAULT + " [DEFAULT]";
-            case PRIORITY_SYNC_EXPEDITED:
-                return PRIORITY_SYNC_EXPEDITED + " [SYNC_EXPEDITED]";
-            case PRIORITY_SYNC_INITIALIZATION:
-                return PRIORITY_SYNC_INITIALIZATION + " [SYNC_INITIALIZATION]";
-            case PRIORITY_BOUND_FOREGROUND_SERVICE:
-                return PRIORITY_BOUND_FOREGROUND_SERVICE + " [BFGS_APP]";
-            case PRIORITY_FOREGROUND_SERVICE:
-                return PRIORITY_FOREGROUND_SERVICE + " [FGS_APP]";
-            case PRIORITY_TOP_APP:
-                return PRIORITY_TOP_APP + " [TOP_APP]";
-
-                // PRIORITY_ADJ_* are adjustments and not used as real priorities.
-                // No need to convert to strings.
+                return priority + " [DEFAULT]";
+            case PRIORITY_HIGH:
+                return priority + " [HIGH]";
+            case PRIORITY_MAX:
+                return priority + " [MAX]";
         }
         return priority + " [UNKNOWN]";
     }

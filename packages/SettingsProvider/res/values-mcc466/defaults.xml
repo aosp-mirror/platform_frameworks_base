@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Whether to enable mute when off body by default. -->
+    <bool name="def_wearable_muteWhenOffBodyEnabled">false</bool>
+</resources>

@@ -25,24 +25,7 @@ import android.annotation.NonNull;
  * <p>The methods on this class can be called from any thread.
  * @hide
  */
-public interface TimeZoneDetectorInternal extends Dumpable.Container {
-
-    /** Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed. */
-    void addConfigurationListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Removes a listener previously added via {@link
-     * #addConfigurationListener(ConfigurationChangeListener)}.
-     */
-    void removeConfigurationListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
-     * snapshot so callers must use {@link #addConfigurationListener(ConfigurationChangeListener)}
-     * to be notified when it changes.
-     */
-    @NonNull
-    ConfigurationInternal getCurrentUserConfigurationInternal();
+public interface TimeZoneDetectorInternal {
 
     /**
      * Suggests the current time zone, determined using geolocation, to the detector. The

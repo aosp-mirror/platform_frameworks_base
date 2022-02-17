@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -49,10 +48,6 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void locationInParentDisplayChanged(Point offset) throws RemoteException {
-    }
-
-    @Override
     public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {
     }
 
@@ -71,10 +66,6 @@ public class TestIWindow extends IWindow.Stub {
 
     @Override
     public void dispatchGetNewSurface() throws RemoteException {
-    }
-
-    @Override
-    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) throws RemoteException {
     }
 
     @Override

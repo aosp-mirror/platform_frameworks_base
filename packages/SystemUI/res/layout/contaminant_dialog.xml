@@ -63,7 +63,8 @@
 
         <TextView
             android:id="@+id/learnMore"
-            style="@style/USBContaminant.UserAction" />
+            style="@style/USBContaminant.UserAction"
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"

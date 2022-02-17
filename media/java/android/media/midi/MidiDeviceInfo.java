@@ -16,10 +16,14 @@
 
 package android.media.midi;
 
+import android.annotation.IntDef;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class contains information to describe a MIDI device.
@@ -52,6 +56,110 @@ public final class MidiDeviceInfo implements Parcelable {
      * Constant representing Bluetooth MIDI devices for {@link #getType}
      */
     public static final int TYPE_BLUETOOTH = 3;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use UMP to negotiate with the device with MIDI-CI.
+     * MIDI-CI is defined in "MIDI Capability Inquiry (MIDI-CI)" spec.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_USE_MIDI_CI = 0;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 64 bits.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS = 1;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 64 bits and jitter reduction timestamps.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS = 2;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 128 bits.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS = 3;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 128 bits and jitter reduction timestamps.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS = 4;
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 2.0 through UMP.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_2_0 = 17;
+
+     /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 2.0 through UMP and jitter reduction timestamps.
+     * Call {@link MidiManager#getDevicesForTransport} with parameter
+     * {@link MidiManager#TRANSPORT_UNIVERSAL_MIDI_PACKETS} to get devices with this transport.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UMP_MIDI_2_0_AND_JRTS = 18;
+
+    /**
+     * Constant representing a device with an unknown default protocol.
+     * If Universal MIDI Packets (UMP) are needed, use MIDI-CI through MIDI 1.0.
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * MIDI-CI is defined in "MIDI Capability Inquiry (MIDI-CI)" spec.
+     * @see MidiDeviceInfo#getDefaultProtocol
+     */
+    public static final int PROTOCOL_UNKNOWN = -1;
+
+    /**
+     * @see MidiDeviceInfo#getDefaultProtocol
+     * @hide
+     */
+    @IntDef(prefix = { "PROTOCOL_" }, value = {
+            PROTOCOL_UMP_USE_MIDI_CI,
+            PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS,
+            PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS,
+            PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS,
+            PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS,
+            PROTOCOL_UMP_MIDI_2_0,
+            PROTOCOL_UMP_MIDI_2_0_AND_JRTS,
+            PROTOCOL_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Protocol {}
 
     /**
      * Bundle key for the device's user visible name property.
@@ -196,6 +304,7 @@ public final class MidiDeviceInfo implements Parcelable {
     private final String[] mOutputPortNames;
     private final Bundle mProperties;
     private final boolean mIsPrivate;
+    private final int mDefaultProtocol;
 
     /**
      * MidiDeviceInfo should only be instantiated by MidiService implementation
@@ -203,7 +312,7 @@ public final class MidiDeviceInfo implements Parcelable {
      */
     public MidiDeviceInfo(int type, int id, int numInputPorts, int numOutputPorts,
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
-            boolean isPrivate) {
+            boolean isPrivate, int defaultProtocol) {
         // Check num ports for out-of-range values. Typical values will be
         // between zero and three. More than 16 would be very unlikely
         // because the port index field in the USB packet is only 4 bits.
@@ -234,6 +343,7 @@ public final class MidiDeviceInfo implements Parcelable {
         }
         mProperties = properties;
         mIsPrivate = isPrivate;
+        mDefaultProtocol = defaultProtocol;
     }
 
     /**
@@ -312,6 +422,18 @@ public final class MidiDeviceInfo implements Parcelable {
         return mIsPrivate;
     }
 
+    /**
+     * Returns the default protocol. For most devices, this will be {@link #PROTOCOL_UNKNOWN}.
+     * Returning {@link #PROTOCOL_UNKNOWN} is not an error; the device just doesn't support
+     * Universal MIDI Packets by default.
+     *
+     * @return the device's default protocol.
+     */
+    @Protocol
+    public int getDefaultProtocol() {
+        return mDefaultProtocol;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof MidiDeviceInfo) {
@@ -331,11 +453,12 @@ public final class MidiDeviceInfo implements Parcelable {
         // This is a hack to force the mProperties Bundle to unparcel so we can
         // print all the names and values.
         mProperties.getString(PROPERTY_NAME);
-        return ("MidiDeviceInfo[mType=" + mType +
-                ",mInputPortCount=" + mInputPortCount +
-                ",mOutputPortCount=" + mOutputPortCount +
-                ",mProperties=" + mProperties +
-                ",mIsPrivate=" + mIsPrivate);
+        return ("MidiDeviceInfo[mType=" + mType
+                + ",mInputPortCount=" + mInputPortCount
+                + ",mOutputPortCount=" + mOutputPortCount
+                + ",mProperties=" + mProperties
+                + ",mIsPrivate=" + mIsPrivate
+                + ",mDefaultProtocol=" + mDefaultProtocol);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<MidiDeviceInfo> CREATOR =
@@ -349,10 +472,12 @@ public final class MidiDeviceInfo implements Parcelable {
             String[] inputPortNames = in.createStringArray();
             String[] outputPortNames = in.createStringArray();
             boolean isPrivate = (in.readInt() == 1);
+            int defaultProtocol = in.readInt();
             Bundle basicPropertiesIgnored = in.readBundle();
             Bundle properties = in.readBundle();
             return new MidiDeviceInfo(type, id, inputPortCount, outputPortCount,
-                    inputPortNames, outputPortNames, properties, isPrivate);
+                    inputPortNames, outputPortNames, properties, isPrivate,
+                    defaultProtocol);
         }
 
         public MidiDeviceInfo[] newArray(int size) {
@@ -390,6 +515,7 @@ public final class MidiDeviceInfo implements Parcelable {
         parcel.writeStringArray(mInputPortNames);
         parcel.writeStringArray(mOutputPortNames);
         parcel.writeInt(mIsPrivate ? 1 : 0);
+        parcel.writeInt(mDefaultProtocol);
         // "Basic" properties only contain properties of primitive types
         // and thus can be read back by native code. "Extra" properties is
         // a superset that contains all properties.
