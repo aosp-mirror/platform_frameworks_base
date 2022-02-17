@@ -658,6 +658,9 @@
     <!-- Permission required for CTS test - CaptioningManagerTest -->
     <uses-permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION" />
 
+    <!-- Permission required for CTS test - CtsTelephonyTestCases -->
+    <uses-permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
