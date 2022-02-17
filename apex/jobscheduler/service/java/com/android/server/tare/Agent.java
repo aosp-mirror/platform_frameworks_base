@@ -55,8 +55,6 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.utils.AlarmQueue;
 
-import libcore.util.EmptyArray;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -152,6 +150,11 @@ class Agent {
             balance += mTotalDeltaCalculator.mTotal;
         }
         return balance;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isAffordableLocked(long balance, long price) {
+        return balance >= price;
     }
 
     @GuardedBy("mLock")
@@ -257,52 +260,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onPricingChangedLocked() {
-        final long now = getCurrentTimeMillis();
-        final long nowElapsed = SystemClock.elapsedRealtime();
-        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
-
-        mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
-            final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
-                    mActionAffordabilityNotes.get(userId, pkgName);
-            final boolean[] wasAffordable;
-            if (actionAffordabilityNotes != null) {
-                final int size = actionAffordabilityNotes.size();
-                wasAffordable = new boolean[size];
-                for (int i = 0; i < size; ++i) {
-                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    final long originalBalance =
-                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                    wasAffordable[i] = originalBalance >= note.getCachedModifiedPrice();
-                }
-            } else {
-                wasAffordable = EmptyArray.BOOLEAN;
-            }
-            ongoingEvents.forEach((ongoingEvent) -> {
-                // Disable balance check & affordability notifications here because we're in the
-                // middle of updating ongoing action costs/prices and sending out notifications
-                // or rescheduling the balance check alarm would be a waste since we'll have to
-                // redo them again after all of our internal state is updated.
-                stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                        ongoingEvent.tag, nowElapsed, now, false, false);
-                noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
-                        nowElapsed, false);
-            });
-            if (actionAffordabilityNotes != null) {
-                final int size = actionAffordabilityNotes.size();
-                for (int i = 0; i < size; ++i) {
-                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
-                    final long newBalance =
-                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
-                    if (wasAffordable[i] != isAffordable) {
-                        note.setNewAffordability(isAffordable);
-                        mIrs.postAffordabilityChanged(userId, pkgName, note);
-                    }
-                }
-            }
-            scheduleBalanceCheckLocked(userId, pkgName);
-        });
+        onAnythingChangedLocked(true);
     }
 
     @GuardedBy("mLock")
@@ -316,40 +274,21 @@ class Agent {
             SparseArrayMap<String, OngoingEvent> ongoingEvents =
                     mCurrentOngoingEvents.get(userId, pkgName);
             if (ongoingEvents != null) {
+                mOngoingEventUpdater.reset(userId, pkgName, now, nowElapsed);
+                ongoingEvents.forEach(mOngoingEventUpdater);
                 final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                         mActionAffordabilityNotes.get(userId, pkgName);
-                final boolean[] wasAffordable;
                 if (actionAffordabilityNotes != null) {
                     final int size = actionAffordabilityNotes.size();
-                    wasAffordable = new boolean[size];
+                    final long newBalance =
+                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
-                        final long originalBalance =
-                                mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                        wasAffordable[n] = originalBalance >= note.getCachedModifiedPrice();
-                    }
-                } else {
-                    wasAffordable = EmptyArray.BOOLEAN;
-                }
-                ongoingEvents.forEach((ongoingEvent) -> {
-                    // Disable balance check & affordability notifications here because we're in the
-                    // middle of updating ongoing action costs/prices and sending out notifications
-                    // or rescheduling the balance check alarm would be a waste since we'll have to
-                    // redo them again after all of our internal state is updated.
-                    stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                            ongoingEvent.tag, nowElapsed, now, false, false);
-                    noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
-                            nowElapsed, false);
-                });
-                if (actionAffordabilityNotes != null) {
-                    final int size = actionAffordabilityNotes.size();
-                    for (int n = 0; n < size; ++n) {
-                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
-                        note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
-                        final long newBalance =
-                                mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                        final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
-                        if (wasAffordable[n] != isAffordable) {
+                        note.recalculateCosts(economicPolicy, userId, pkgName);
+                        final boolean isAffordable =
+                                isAffordableLocked(newBalance,
+                                        note.getCachedModifiedPrice());
+                        if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
                             mIrs.postAffordabilityChanged(userId, pkgName, note);
                         }
@@ -361,15 +300,68 @@ class Agent {
     }
 
     @GuardedBy("mLock")
+    private void onAnythingChangedLocked(final boolean updateOngoingEvents) {
+        final long now = getCurrentTimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
+
+        for (int uIdx = mCurrentOngoingEvents.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = mCurrentOngoingEvents.keyAt(uIdx);
+
+            for (int pIdx = mCurrentOngoingEvents.numElementsForKey(userId) - 1; pIdx >= 0;
+                    --pIdx) {
+                final String pkgName = mCurrentOngoingEvents.keyAt(uIdx, pIdx);
+
+                SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                        mCurrentOngoingEvents.valueAt(uIdx, pIdx);
+                if (ongoingEvents != null) {
+                    if (updateOngoingEvents) {
+                        mOngoingEventUpdater.reset(userId, pkgName, now, nowElapsed);
+                        ongoingEvents.forEach(mOngoingEventUpdater);
+                    }
+                    scheduleBalanceCheckLocked(userId, pkgName);
+                }
+            }
+        }
+        for (int uIdx = mActionAffordabilityNotes.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = mActionAffordabilityNotes.keyAt(uIdx);
+
+            for (int pIdx = mActionAffordabilityNotes.numElementsForKey(userId) - 1; pIdx >= 0;
+                    --pIdx) {
+                final String pkgName = mActionAffordabilityNotes.keyAt(uIdx, pIdx);
+
+                final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                        mActionAffordabilityNotes.valueAt(uIdx, pIdx);
+
+                if (actionAffordabilityNotes != null) {
+                    final int size = actionAffordabilityNotes.size();
+                    final long newBalance = getBalanceLocked(userId, pkgName);
+                    for (int n = 0; n < size; ++n) {
+                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
+                        note.recalculateCosts(economicPolicy, userId, pkgName);
+                        final boolean isAffordable =
+                                isAffordableLocked(newBalance,
+                                        note.getCachedModifiedPrice());
+                        if (note.isCurrentlyAffordable() != isAffordable) {
+                            note.setNewAffordability(isAffordable);
+                            mIrs.postAffordabilityChanged(userId, pkgName, note);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
     void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
             @Nullable String tag, final long nowElapsed, final long now) {
         stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now, true, true);
     }
 
     /**
-     * @param updateBalanceCheck          Whether or not to reschedule the affordability/balance
+     * @param updateBalanceCheck          Whether to reschedule the affordability/balance
      *                                    check alarm.
-     * @param notifyOnAffordabilityChange Whether or not to evaluate the app's ability to afford
+     * @param notifyOnAffordabilityChange Whether to evaluate the app's ability to afford
      *                                    registered bills and notify listeners about any changes.
      */
     @GuardedBy("mLock")
@@ -486,7 +478,9 @@ class Agent {
                 final long newBalance = ledger.getCurrentBalance();
                 for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
+                    final boolean isAffordable =
+                            isAffordableLocked(newBalance,
+                                    note.getCachedModifiedPrice());
                     if (note.isCurrentlyAffordable() != isAffordable) {
                         note.setNewAffordability(isAffordable);
                         mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -893,6 +887,36 @@ class Agent {
         }
     }
 
+    private class OngoingEventUpdater implements Consumer<OngoingEvent> {
+        private int mUserId;
+        private String mPkgName;
+        private long mNow;
+        private long mNowElapsed;
+
+        private void reset(int userId, String pkgName, long now, long nowElapsed) {
+            mUserId = userId;
+            mPkgName = pkgName;
+            mNow = now;
+            mNowElapsed = nowElapsed;
+        }
+
+        @Override
+        public void accept(OngoingEvent ongoingEvent) {
+            // Disable balance check & affordability notifications here because
+            // we're in the middle of updating ongoing action costs/prices and
+            // sending out notifications or rescheduling the balance check alarm
+            // would be a waste since we'll have to redo them again after all of
+            // our internal state is updated.
+            final boolean updateBalanceCheck = false;
+            stopOngoingActionLocked(mUserId, mPkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                    mNowElapsed, mNow, updateBalanceCheck, /* notifyOnAffordabilityChange */ false);
+            noteOngoingEventLocked(mUserId, mPkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                    mNowElapsed, updateBalanceCheck);
+        }
+    }
+
+    private final OngoingEventUpdater mOngoingEventUpdater = new OngoingEventUpdater();
+
     private static final class Package {
         public final String packageName;
         public final int userId;
@@ -971,9 +995,10 @@ class Agent {
                 note.setNewAffordability(true);
                 return;
             }
-            note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
+            note.recalculateCosts(economicPolicy, userId, pkgName);
             note.setNewAffordability(
-                    getBalanceLocked(userId, pkgName) >= note.getCachedModifiedPrice());
+                    isAffordableLocked(getBalanceLocked(userId, pkgName),
+                            note.getCachedModifiedPrice()));
             mIrs.postAffordabilityChanged(userId, pkgName, note);
             // Update ongoing alarm
             scheduleBalanceCheckLocked(userId, pkgName);
@@ -1035,7 +1060,7 @@ class Agent {
         }
 
         @VisibleForTesting
-        long recalculateModifiedPrice(@NonNull EconomicPolicy economicPolicy,
+        long recalculateCosts(@NonNull EconomicPolicy economicPolicy,
                 int userId, @NonNull String pkgName) {
             long modifiedPrice = 0;
             final List<EconomyManagerInternal.AnticipatedAction> anticipatedActions =
@@ -1099,8 +1124,8 @@ class Agent {
                             for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                                 final ActionAffordabilityNote note =
                                         actionAffordabilityNotes.valueAt(i);
-                                final boolean isAffordable =
-                                        newBalance >= note.getCachedModifiedPrice();
+                                final boolean isAffordable = isAffordableLocked(
+                                        newBalance, note.getCachedModifiedPrice());
                                 if (note.isCurrentlyAffordable() != isAffordable) {
                                     note.setNewAffordability(isAffordable);
                                     mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -1155,7 +1180,7 @@ class Agent {
                         pw.print(" runtime=");
                         TimeUtils.formatDuration(nowElapsed - ongoingEvent.startTimeElapsed, pw);
                         pw.print(" delta/sec=");
-                        pw.print(ongoingEvent.deltaPerSec);
+                        pw.print(narcToString(ongoingEvent.deltaPerSec));
                         pw.print(" refCount=");
                         pw.print(ongoingEvent.refCount);
                         pw.println();
