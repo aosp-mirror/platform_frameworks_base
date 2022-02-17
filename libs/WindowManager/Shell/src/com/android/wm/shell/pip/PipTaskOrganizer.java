@@ -579,6 +579,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Log.d(TAG, "Alpha animation is expired. Use bounds animation.");
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         }
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            // For Shell transition, we will animate the window in PipTransition#startAnimation
+            // instead of #onTaskAppeared.
+            return;
+        }
+
         if (mWaitForFixedRotation) {
             onTaskAppearedWithFixedRotation();
             return;
@@ -587,15 +594,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
-
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-                mPipMenuController.attach(mLeash);
-            } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-                mOneShotAnimationType = ANIM_TYPE_BOUNDS;
-            }
-            return;
-        }
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             mPipMenuController.attach(mLeash);
@@ -829,6 +827,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mNextRotation = newRotation;
         mWaitForFixedRotation = true;
 
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            // The fixed rotation will also be included in the transition info. However, if it is
+            // not a PIP transition (such as open another app to different orientation),
+            // PIP transition handler may not be aware of the fixed rotation start.
+            // Notify the PIP transition handler so that it can fade out the PIP window early for
+            // fixed transition of other windows.
+            mPipTransitionController.onFixedRotationStarted();
+            return;
+        }
+
         if (mPipTransitionState.isInPip()) {
             // Fade out the existing PiP to avoid jump cut during seamless rotation.
             fadeExistingPip(false /* show */);
@@ -838,6 +846,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Override
     public void onFixedRotationFinished(int displayId) {
         if (!mWaitForFixedRotation) {
+            return;
+        }
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            clearWaitForFixedRotation();
             return;
         }
         if (mPipTransitionState.getTransitionState() == PipTransitionState.TASK_APPEARED) {
