@@ -1,0 +1,2 @@
+per-file *Notification* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *ContrastColor* = file:/services/core/java/com/android/server/notification/OWNERS

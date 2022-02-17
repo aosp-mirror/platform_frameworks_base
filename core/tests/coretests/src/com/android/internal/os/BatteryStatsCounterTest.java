@@ -30,7 +30,7 @@ public class BatteryStatsCounterTest extends TestCase {
 
     @SmallTest
     public void testCounter() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
 
@@ -70,7 +70,7 @@ public class BatteryStatsCounterTest extends TestCase {
 
     @SmallTest
     public void testParceling() throws Exception {
-        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();
         timeBase.init(clocks.uptimeMillis(), clocks.elapsedRealtime());
 

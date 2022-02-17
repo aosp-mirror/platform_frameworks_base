@@ -17,9 +17,13 @@
 package com.android.server.wm;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.IntArray;
 import android.view.IDisplayWindowListener;
+
+import java.util.List;
 
 /**
  * Manages dispatch of relevant hierarchy changes to interested listeners. Listeners are assumed
@@ -28,23 +32,20 @@ import android.view.IDisplayWindowListener;
 class DisplayWindowListenerController {
     RemoteCallbackList<IDisplayWindowListener> mDisplayListeners = new RemoteCallbackList<>();
 
-//    private final ArrayList<DisplayContainerListener> mDisplayListeners = new ArrayList<>();
     private final WindowManagerService mService;
 
     DisplayWindowListenerController(WindowManagerService service) {
         mService = service;
     }
 
-    void registerListener(IDisplayWindowListener listener) {
+    int[] registerListener(IDisplayWindowListener listener) {
         synchronized (mService.mGlobalLock) {
             mDisplayListeners.register(listener);
-            try {
-                for (int i = 0; i < mService.mAtmService.mRootWindowContainer.getChildCount();
-                        ++i) {
-                    DisplayContent d = mService.mAtmService.mRootWindowContainer.getChildAt(i);
-                    listener.onDisplayAdded(d.mDisplayId);
-                }
-            } catch (RemoteException e) { }
+            final IntArray displayIds = new IntArray();
+            mService.mAtmService.mRootWindowContainer.forAllDisplays((displayContent) -> {
+                displayIds.add(displayContent.mDisplayId);
+            });
+            return displayIds.toArray();
         }
     }
 
@@ -113,6 +114,19 @@ class DisplayWindowListenerController {
         for (int i = 0; i < count; ++i) {
             try {
                 mDisplayListeners.getBroadcastItem(i).onFixedRotationFinished(display.mDisplayId);
+            } catch (RemoteException e) {
+            }
+        }
+        mDisplayListeners.finishBroadcast();
+    }
+
+    void dispatchKeepClearAreasChanged(DisplayContent display, List<Rect> restricted,
+            List<Rect> unrestricted) {
+        int count = mDisplayListeners.beginBroadcast();
+        for (int i = 0; i < count; ++i) {
+            try {
+                mDisplayListeners.getBroadcastItem(i).onKeepClearAreasChanged(
+                        display.mDisplayId, restricted, unrestricted);
             } catch (RemoteException e) {
             }
         }

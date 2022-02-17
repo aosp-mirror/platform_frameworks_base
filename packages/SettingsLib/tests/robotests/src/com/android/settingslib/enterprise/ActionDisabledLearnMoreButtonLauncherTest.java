@@ -80,7 +80,7 @@ public final class ActionDisabledLearnMoreButtonLauncherTest {
     @Before
     public void setUp() {
         when(mContext.getUserId()).thenReturn(CONTEXT_USER_ID);
-        when(mUserManager.getUserHandle()).thenReturn(CONTEXT_USER_ID);
+        when(mUserManager.getProcessUserId()).thenReturn(CONTEXT_USER_ID);
         when(mContext.getSystemService(DevicePolicyManager.class)).thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
     }

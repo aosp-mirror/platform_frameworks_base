@@ -23,7 +23,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.window.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
@@ -31,6 +30,7 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -380,6 +380,10 @@ class TaskSnapshotPersister {
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
+            proto.letterboxInsetLeft = mSnapshot.getLetterboxInsets().left;
+            proto.letterboxInsetTop = mSnapshot.getLetterboxInsets().top;
+            proto.letterboxInsetRight = mSnapshot.getLetterboxInsets().right;
+            proto.letterboxInsetBottom = mSnapshot.getLetterboxInsets().bottom;
             proto.isRealSnapshot = mSnapshot.isRealSnapshot();
             proto.windowingMode = mSnapshot.getWindowingMode();
             proto.appearance = mSnapshot.getAppearance();

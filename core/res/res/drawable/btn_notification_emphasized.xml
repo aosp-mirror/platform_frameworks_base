@@ -24,9 +24,9 @@
             android:insetBottom="@dimen/button_inset_vertical_material">
             <shape android:shape="rectangle">
                 <corners android:radius="@dimen/notification_action_button_radius" />
-                <padding android:left="12dp"
+                <padding android:left="16dp"
                          android:top="@dimen/button_padding_vertical_material"
-                         android:right="12dp"
+                         android:right="16dp"
                          android:bottom="@dimen/button_padding_vertical_material" />
                 <solid android:color="@color/white" />
             </shape>

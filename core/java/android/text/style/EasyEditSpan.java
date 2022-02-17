@@ -82,7 +82,7 @@ public class EasyEditSpan implements ParcelableSpan {
      * Constructor called from {@link TextUtils} to restore the span.
      */
     public EasyEditSpan(@NonNull Parcel source) {
-        mPendingIntent = source.readParcelable(null);
+        mPendingIntent = source.readParcelable(null, android.app.PendingIntent.class);
         mDeleteEnabled = (source.readByte() == 1);
     }
 

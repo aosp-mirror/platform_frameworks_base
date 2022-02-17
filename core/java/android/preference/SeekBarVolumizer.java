@@ -214,7 +214,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
         return AudioManager.getAudioProductStrategies().stream()
                 .map(strategy -> strategy.getVolumeGroupIdForAudioAttributes(
-                        AudioProductStrategy.sDefaultAttributes))
+                        AudioProductStrategy.getDefaultAttributes()))
                 .filter(volumeGroupId -> volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP)
                 .findFirst()
                 .orElse(AudioVolumeGroup.DEFAULT_VOLUME_GROUP);

@@ -20,12 +20,17 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCR
 
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.transition.Transitions;
@@ -38,42 +43,55 @@ import java.util.Optional;
 public class ShellInitImpl {
     private static final String TAG = ShellInitImpl.class.getSimpleName();
 
+    private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<BubbleController> mBubblesOptional;
-    private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
+    private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
+    private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
     private final StartingWindowController mStartingWindow;
+    private final Optional<RecentTasksController> mRecentTasks;
 
     private final InitImpl mImpl = new InitImpl();
 
-    public ShellInitImpl(DisplayImeController displayImeController,
+    public ShellInitImpl(
+            DisplayController displayController,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
-            Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
+            Optional<FreeformTaskListener> freeformTaskListenerOptional,
+            Optional<RecentTasksController> recentTasks,
             Transitions transitions,
             StartingWindowController startingWindow,
             ShellExecutor mainExecutor) {
+        mDisplayController = displayController;
         mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mBubblesOptional = bubblesOptional;
-        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
+        mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
+        mFreeformTaskListenerOptional = freeformTaskListenerOptional;
+        mRecentTasks = recentTasks;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingWindow = startingWindow;
@@ -84,7 +102,9 @@ public class ShellInitImpl {
     }
 
     private void init() {
-        // Start listening for display changes
+        // Start listening for display and insets changes
+        mDisplayController.initialize();
+        mDisplayInsetsController.initialize();
         mDisplayImeController.startMonitorDisplays();
 
         // Setup the shell organizer
@@ -108,6 +128,14 @@ public class ShellInitImpl {
         // controller instead of the feature interface, can just initialize the touch handler if
         // needed
         mPipTouchHandlerOptional.ifPresent((handler) -> handler.init());
+
+        // Initialize optional freeform
+        mFreeformTaskListenerOptional.ifPresent(f ->
+                mShellTaskOrganizer.addListenerForType(
+                        f, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
+
+        mFullscreenUnfoldController.ifPresent(FullscreenUnfoldController::init);
+        mRecentTasks.ifPresent(RecentTasksController::init);
     }
 
     @ExternalThread

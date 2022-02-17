@@ -30,6 +30,8 @@ import static org.testng.Assert.assertThrows;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageDynamicCodeLoadingTests {

@@ -55,6 +55,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -109,7 +110,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             Context context,
             @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher,
-            @Background Executor bgExecutor
+            @Background Executor bgExecutor,
+            DumpManager dumpManager
     ) {
         super(broadcastDispatcher);
         mContext = context;
@@ -121,6 +123,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mBgExecutor = bgExecutor;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);

@@ -1,7 +1,5 @@
 svetoslavganov@google.com
-toddke@google.com
-patb@google.com
-suprabh@google.com
+include /PACKAGE_MANAGER_OWNERS
 
 # For automotive related changes
 rogerxue@google.com

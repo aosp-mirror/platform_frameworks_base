@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
+import android.app.NotificationChannel
+import android.os.UserHandle
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.notification.collection.NotifCollection
@@ -64,10 +66,11 @@ data class EntryAddedEvent(
 }
 
 data class EntryUpdatedEvent(
-    val entry: NotificationEntry
+    val entry: NotificationEntry,
+    val fromSystem: Boolean
 ) : NotifEvent() {
     override fun dispatchToListener(listener: NotifCollectionListener) {
-        listener.onEntryUpdated(entry)
+        listener.onEntryUpdated(entry, fromSystem)
     }
 }
 
@@ -99,5 +102,16 @@ data class RankingUpdatedEvent(
 class RankingAppliedEvent() : NotifEvent() {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onRankingApplied()
+    }
+}
+
+data class ChannelChangedEvent(
+    val pkgName: String,
+    val user: UserHandle,
+    val channel: NotificationChannel,
+    val modificationType: Int
+) : NotifEvent() {
+    override fun dispatchToListener(listener: NotifCollectionListener) {
+        listener.onNotificationChannelModified(pkgName, user, channel, modificationType)
     }
 }

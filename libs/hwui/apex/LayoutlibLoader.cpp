@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-#include "graphics_jni_helpers.h"
-
 #include <GraphicsJNI.h>
 #include <SkGraphics.h>
 
-#include <sstream>
-#include <iostream>
-#include <unicode/putil.h>
 #include <unordered_map>
 #include <vector>
 
+#include "Properties.h"
+#include "android/graphics/jni_runtime.h"
+#include "graphics_jni_helpers.h"
+
 using namespace std;
-
-/*
- * This is responsible for setting up the JNI environment for communication between
- * the Java and native parts of layoutlib, including registering native methods.
- * This is mostly achieved by copying the way it is done in the platform
- * (see AndroidRuntime.cpp).
- */
-
-static JavaVM* javaVM;
 
 extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
+extern int register_android_graphics_Camera(JNIEnv* env);
 extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_ImageDecoder(JNIEnv*);
@@ -49,10 +40,12 @@ extern int register_android_graphics_PathEffect(JNIEnv* env);
 extern int register_android_graphics_Shader(JNIEnv* env);
 extern int register_android_graphics_RenderEffect(JNIEnv* env);
 extern int register_android_graphics_Typeface(JNIEnv* env);
+extern int register_android_graphics_YuvImage(JNIEnv* env);
 
 namespace android {
 
 extern int register_android_graphics_Canvas(JNIEnv* env);
+extern int register_android_graphics_CanvasProperty(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
@@ -62,7 +55,7 @@ extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv* env);
-//extern int register_android_graphics_Region(JNIEnv* env);
+extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env);
 extern int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
@@ -71,9 +64,11 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
+extern int register_android_graphics_text_TextShaper(JNIEnv* env);
+
 extern int register_android_util_PathParser(JNIEnv* env);
-extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
+extern int register_android_view_RenderNode(JNIEnv* env);
 
 #define REG_JNI(name)      { name }
 struct RegJNIRec {
@@ -87,8 +82,9 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
         {"android.graphics.ByteBufferStreamAdaptor",
          REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
+        {"android.graphics.Camera", REG_JNI(register_android_graphics_Camera)},
         {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
-        {"android.graphics.RenderNode", REG_JNI(register_android_view_RenderNode)},
+        {"android.graphics.CanvasProperty", REG_JNI(register_android_graphics_CanvasProperty)},
         {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
         {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
         {"android.graphics.CreateJavaOutputStreamAdaptor",
@@ -107,10 +103,12 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
         {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
         {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},
-//        {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
+        {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
+        {"android.graphics.RenderNode", REG_JNI(register_android_view_RenderNode)},
         {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
         {"android.graphics.RenderEffect", REG_JNI(register_android_graphics_RenderEffect)},
         {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
+        {"android.graphics.YuvImage", REG_JNI(register_android_graphics_YuvImage)},
         {"android.graphics.animation.NativeInterpolatorFactory",
          REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory)},
         {"android.graphics.animation.RenderNodeAnimator",
@@ -124,6 +122,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
         {"android.graphics.text.MeasuredText",
          REG_JNI(register_android_graphics_text_MeasuredText)},
+        {"android.graphics.text.TextRunShaper", REG_JNI(register_android_graphics_text_TextShaper)},
         {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
 };
 
@@ -177,10 +176,9 @@ int register_android_graphics_classes(JNIEnv *env) {
                                                          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
     // Get the names of classes that need to register their native methods
-    auto nativesClassesJString =
-            (jstring) env->CallStaticObjectMethod(system,
-                                                  getPropertyMethod, env->NewStringUTF("native_classes"),
-                                                  env->NewStringUTF(""));
+    auto nativesClassesJString = (jstring)env->CallStaticObjectMethod(
+            system, getPropertyMethod, env->NewStringUTF("graphics_native_classes"),
+            env->NewStringUTF(""));
     vector<string> classesToRegister = parseCsv(env, nativesClassesJString);
 
     if (register_jni_procs(gRegJNIMap, classesToRegister, env) < 0) {

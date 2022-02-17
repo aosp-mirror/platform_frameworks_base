@@ -32,6 +32,9 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
+import android.view.KeyEvent;
+
+import androidx.annotation.RequiresApi;
 
 import androidx.annotation.RequiresApi;
 
@@ -66,7 +69,8 @@ public class MediaCommunicationManager {
     private static final int CURRENT_VERSION = VERSION_1;
 
     private final Context mContext;
-    private final IMediaCommunicationService mService;
+    // Do not access directly use getService().
+    private IMediaCommunicationService mService;
 
     private final Object mLock = new Object();
     private final CopyOnWriteArrayList<SessionCallbackRecord> mTokenCallbackRecords =
@@ -74,6 +78,9 @@ public class MediaCommunicationManager {
 
     @GuardedBy("mLock")
     private MediaCommunicationServiceCallbackStub mCallbackStub;
+
+    // TODO: remove this when MCS implements dispatchMediaKeyEvent.
+    private MediaSessionManager mMediaSessionManager;
 
     /**
      * @hide
@@ -83,10 +90,6 @@ public class MediaCommunicationManager {
             throw new UnsupportedOperationException("Android version must be S or greater.");
         }
         mContext = context;
-        mService = IMediaCommunicationService.Stub.asInterface(
-                MediaFrameworkInitializer.getMediaServiceManager()
-                        .getMediaCommunicationServiceRegisterer()
-                        .get());
     }
 
     /**
@@ -108,7 +111,7 @@ public class MediaCommunicationManager {
             throw new IllegalArgumentException("token's type should be TYPE_SESSION");
         }
         try {
-            mService.notifySession2Created(token);
+            getService().notifySession2Created(token);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -133,7 +136,7 @@ public class MediaCommunicationManager {
             return false;
         }
         try {
-            return mService.isTrusted(
+            return getService().isTrusted(
                     userInfo.getPackageName(), userInfo.getPid(), userInfo.getUid());
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot communicate with the service.", e);
@@ -185,7 +188,7 @@ public class MediaCommunicationManager {
                 MediaCommunicationServiceCallbackStub callbackStub =
                         new MediaCommunicationServiceCallbackStub();
                 try {
-                    mService.registerCallback(callbackStub, mContext.getPackageName());
+                    getService().registerCallback(callbackStub, mContext.getPackageName());
                     mCallbackStub = callbackStub;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Failed to register callback.", ex);
@@ -208,7 +211,7 @@ public class MediaCommunicationManager {
         synchronized (mLock) {
             if (mCallbackStub != null && mTokenCallbackRecords.isEmpty()) {
                 try {
-                    mService.unregisterCallback(mCallbackStub);
+                    getService().unregisterCallback(mCallbackStub);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Failed to unregister callback.", ex);
                 }
@@ -217,14 +220,59 @@ public class MediaCommunicationManager {
         }
     }
 
+    private IMediaCommunicationService getService() {
+        if (mService == null) {
+            mService = IMediaCommunicationService.Stub.asInterface(
+                    MediaFrameworkInitializer.getMediaServiceManager()
+                            .getMediaCommunicationServiceRegisterer()
+                            .get());
+        }
+        return mService;
+    }
+
+    // TODO: remove this when MCS implements dispatchMediaKeyEvent.
+    private MediaSessionManager getMediaSessionManager() {
+        if (mMediaSessionManager == null) {
+            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+        }
+        return mMediaSessionManager;
+    }
+
     private List<Session2Token> getSession2Tokens(int userId) {
         try {
-            MediaParceledListSlice slice = mService.getSession2Tokens(userId);
+            MediaParceledListSlice slice = getService().getSession2Tokens(userId);
             return slice == null ? Collections.emptyList() : slice.getList();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get session tokens", e);
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Sends a media key event. The receiver will be selected automatically.
+     *
+     * @param keyEvent the key event to send
+     * @param asSystemService if {@code true}, the event sent to the session as if it was come from
+     *                        the system service instead of the app process.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean asSystemService) {
+        Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
+
+        // When MCS handles this, caller is changed.
+        // TODO: remove this when MCS implementation is done.
+        if (!asSystemService) {
+            getMediaSessionManager().dispatchMediaKeyEvent(keyEvent, false);
+            return;
+        }
+
+        try {
+            getService().dispatchMediaKeyEvent(mContext.getPackageName(),
+                    keyEvent, asSystemService);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to send key event.", e);
+        }
     }
 
     /**

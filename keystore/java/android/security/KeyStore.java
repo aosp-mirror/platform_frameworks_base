@@ -20,7 +20,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.UserHandle;
 import android.security.maintenance.UserState;
-import android.system.keystore2.Domain;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -118,15 +117,6 @@ public class KeyStore {
     public boolean isEmpty() {
         return true;
     }
-
-    /**
-     * Forwards the request to clear a UID to Keystore 2.0.
-     * @hide
-     */
-    public boolean clearUid(int uid) {
-        return AndroidKeyStoreMaintenance.clearNamespace(Domain.APP, uid) == 0;
-    }
-
 
     /**
      * Add an authentication record to the keystore authorization table.

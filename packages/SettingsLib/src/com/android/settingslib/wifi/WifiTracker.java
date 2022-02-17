@@ -342,7 +342,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         resumeScanning();
         if (!mRegistered) {
-            mContext.registerReceiver(mReceiver, mFilter, null /* permission */, mWorkHandler);
+            mContext.registerReceiver(mReceiver, mFilter, null /* permission */, mWorkHandler,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
             // NetworkCallback objects cannot be reused. http://b/20701525 .
             mNetworkCallback = new WifiTrackerNetworkCallback();
             mConnectivityManager.registerNetworkCallback(

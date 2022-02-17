@@ -23,8 +23,11 @@ import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPH
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
 
+import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -42,12 +45,12 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
@@ -129,12 +132,13 @@ final class HotwordDetectionConnection {
     private @NonNull ServiceConnection mRemoteHotwordDetectionService;
     private IBinder mAudioFlinger;
     private boolean mDebugHotwordLogging = false;
+    private final int mDetectorType;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
             boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            @NonNull IHotwordRecognitionStatusCallback callback) {
+            @NonNull IHotwordRecognitionStatusCallback callback, int detectorType) {
         if (callback == null) {
             Slog.w(TAG, "Callback is null while creating connection");
             throw new IllegalArgumentException("Callback is null while creating connection");
@@ -146,6 +150,7 @@ final class HotwordDetectionConnection {
         mDetectionComponentName = serviceName;
         mUser = userId;
         mCallback = callback;
+        mDetectorType = detectorType;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
         initAudioFlingerLocked();
@@ -269,13 +274,13 @@ final class HotwordDetectionConnection {
         Slog.v(TAG, "cancelLocked");
         clearDebugHotwordLoggingTimeoutLocked();
         mDebugHotwordLogging = false;
-        if (mRemoteHotwordDetectionService.isBound()) {
-            mRemoteHotwordDetectionService.unbind();
-            LocalServices.getService(PermissionManagerServiceInternal.class)
-                    .setHotwordDetectionServiceProvider(null);
-            mIdentity = null;
-            updateServiceUidForAudioPolicy(Process.INVALID_UID);
+        mRemoteHotwordDetectionService.unbind();
+        LocalServices.getService(PermissionManagerServiceInternal.class)
+                .setHotwordDetectionServiceProvider(null);
+        if (mIdentity != null) {
+            removeServiceUidForAudioPolicy(mIdentity.getIsolatedUid());
         }
+        mIdentity = null;
         mCancellationTaskFuture.cancel(/* may interrupt */ true);
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);
@@ -656,7 +661,8 @@ final class HotwordDetectionConnection {
         pw.print(", mValidatingDspTrigger=" + mValidatingDspTrigger);
         pw.print(", mPerformingSoftwareHotwordDetection=" + mPerformingSoftwareHotwordDetection);
         pw.print(", mRestartCount=" + mServiceConnectionFactory.mRestartCount);
-        pw.println(", mLastRestartInstant=" + mLastRestartInstant);
+        pw.print(", mLastRestartInstant=" + mLastRestartInstant);
+        pw.println(", mDetectorType=" + HotwordDetector.detectorTypeToString(mDetectorType));
     }
 
     private void handleExternalSourceHotwordDetection(
@@ -840,7 +846,7 @@ final class HotwordDetectionConnection {
             try {
                 return mContext.bindIsolatedService(
                         mIntent,
-                        Context.BIND_AUTO_CREATE | mBindingFlags,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE | mBindingFlags,
                         "hotword_detector_" + mInstanceNumber,
                         mExecutor,
                         serviceConnection);
@@ -904,17 +910,27 @@ final class HotwordDetectionConnection {
                 LocalServices.getService(PermissionManagerServiceInternal.class)
                         .setHotwordDetectionServiceProvider(() -> uid);
                 mIdentity = new HotwordDetectionServiceIdentity(uid, mVoiceInteractionServiceUid);
-                updateServiceUidForAudioPolicy(uid);
+                addServiceUidForAudioPolicy(uid);
             }
         }));
     }
 
-    private void updateServiceUidForAudioPolicy(int uid) {
+    private void addServiceUidForAudioPolicy(int uid) {
         mScheduledExecutorService.execute(() -> {
-            final AudioManagerInternal audioManager =
+            AudioManagerInternal audioManager =
                     LocalServices.getService(AudioManagerInternal.class);
             if (audioManager != null) {
-                audioManager.setHotwordDetectionServiceUid(uid);
+                audioManager.addAssistantServiceUid(uid);
+            }
+        });
+    }
+
+    private void removeServiceUidForAudioPolicy(int uid) {
+        mScheduledExecutorService.execute(() -> {
+            AudioManagerInternal audioManager =
+                    LocalServices.getService(AudioManagerInternal.class);
+            if (audioManager != null) {
+                audioManager.removeAssistantServiceUid(uid);
             }
         });
     }
@@ -932,12 +948,11 @@ final class HotwordDetectionConnection {
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
     private void enforcePermissionsForDataDelivery() {
         Binder.withCleanCallingIdentity(() -> {
-            // Hack to make sure we show the mic privacy-indicator since the Trusted Hotword
-            // requirement isn't being enforced for now. Normally, we would note the HOTWORD op here
-            // instead.
-            enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
-                    RECORD_AUDIO, OP_MESSAGE);
-
+            enforcePermissionForPreflight(mContext, mVoiceInteractorIdentity, RECORD_AUDIO);
+            int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
+            mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp,
+                    mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                    mVoiceInteractorIdentity.attributionTag, OP_MESSAGE);
             enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                     CAPTURE_AUDIO_HOTWORD, OP_MESSAGE);
         });

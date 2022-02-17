@@ -262,7 +262,7 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Returns whehther the playback is active (i.e. playing something)
+     * Returns whether the playback is active (i.e. playing something)
      *
      * @return {@code true} if the playback active, {@code false} otherwise.
      */
@@ -302,8 +302,9 @@ public class MediaSession2 implements AutoCloseable {
             parcel.setDataPosition(0);
             Bundle out = parcel.readBundle(null);
 
-            // Calling Bundle#size() will trigger Bundle#unparcel().
-            out.size();
+            for (String key : out.keySet()) {
+                out.get(key);
+            }
         } catch (BadParcelableException e) {
             Log.d(TAG, "Custom parcelable in bundle.", e);
             return true;

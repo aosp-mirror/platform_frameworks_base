@@ -57,6 +57,9 @@ public class TranslateAnimation extends Animation {
     /** @hide */
     protected float mToYDelta;
 
+    private int mWidth;
+    private int mParentWidth;
+
     /**
      * Constructor used when a TranslateAnimation is loaded from a resource.
      *
@@ -70,22 +73,22 @@ public class TranslateAnimation extends Animation {
                 com.android.internal.R.styleable.TranslateAnimation);
 
         Description d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_fromXDelta));
+                com.android.internal.R.styleable.TranslateAnimation_fromXDelta), context);
         mFromXType = d.type;
         mFromXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.TranslateAnimation_toXDelta));
+                com.android.internal.R.styleable.TranslateAnimation_toXDelta), context);
         mToXType = d.type;
         mToXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_fromYDelta));
+                com.android.internal.R.styleable.TranslateAnimation_fromYDelta), context);
         mFromYType = d.type;
         mFromYValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_toYDelta));
+                com.android.internal.R.styleable.TranslateAnimation_toYDelta), context);
         mToYType = d.type;
         mToYValue = d.value;
 
@@ -179,5 +182,60 @@ public class TranslateAnimation extends Animation {
         mToXDelta = resolveSize(mToXType, mToXValue, width, parentWidth);
         mFromYDelta = resolveSize(mFromYType, mFromYValue, height, parentHeight);
         mToYDelta = resolveSize(mToYType, mToYValue, height, parentHeight);
+
+        mWidth = width;
+        mParentWidth = parentWidth;
+    }
+
+    /**
+     * Checks whether or not the translation is exclusively an x axis translation.
+     *
+     * @hide
+     */
+    public boolean isXAxisTransition() {
+        return mFromXDelta - mToXDelta != 0 && mFromYDelta - mToYDelta == 0;
+    }
+
+    /**
+     * Checks whether or not the translation is a full width x axis slide in or out translation.
+     *
+     * @hide
+     */
+    public boolean isFullWidthTranslate() {
+        boolean isXAxisSlideTransition =
+                isSlideInLeft() || isSlideOutRight() || isSlideInRight() || isSlideOutLeft();
+        return mWidth == mParentWidth && isXAxisSlideTransition;
+    }
+
+    private boolean isSlideInLeft() {
+        boolean startsOutOfParentOnLeft = mFromXDelta <= -mWidth;
+        return startsOutOfParentOnLeft && endsXEnclosedWithinParent();
+    }
+
+    private boolean isSlideOutRight() {
+        boolean endOutOfParentOnRight = mToXDelta >= mParentWidth;
+        return startsXEnclosedWithinParent() && endOutOfParentOnRight;
+    }
+
+    private boolean isSlideInRight() {
+        boolean startsOutOfParentOnRight = mFromXDelta >= mParentWidth;
+        return startsOutOfParentOnRight && endsXEnclosedWithinParent();
+    }
+
+    private boolean isSlideOutLeft() {
+        boolean endOutOfParentOnLeft = mToXDelta <= -mWidth;
+        return startsXEnclosedWithinParent() && endOutOfParentOnLeft;
+    }
+
+    private boolean endsXEnclosedWithinParent() {
+        return mWidth <= mParentWidth
+                && mToXDelta + mWidth <= mParentWidth
+                && mToXDelta >= 0;
+    }
+
+    private boolean startsXEnclosedWithinParent() {
+        return mWidth <= mParentWidth
+                && mFromXDelta + mWidth <= mParentWidth
+                && mFromXDelta >= 0;
     }
 }

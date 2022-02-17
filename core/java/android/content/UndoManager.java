@@ -777,7 +777,7 @@ public class UndoManager {
             final int N = p.readInt();
             for (int i=0; i<N; i++) {
                 UndoOwner owner = mManager.restoreOwner(p);
-                UndoOperation op = (UndoOperation)p.readParcelable(loader);
+                UndoOperation op = (UndoOperation)p.readParcelable(loader, android.content.UndoOperation.class);
                 op.mOwner = owner;
                 mOperations.add(op);
             }

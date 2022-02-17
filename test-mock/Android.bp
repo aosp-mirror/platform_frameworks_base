@@ -27,12 +27,13 @@ package {
 
 java_sdk_library {
     name: "android.test.mock",
-
-    srcs: [
-        ":android-test-mock-sources",
+    srcs: [":android-test-mock-sources"],
+    api_srcs: [
         // Note: Below are NOT APIs of this library. We only take APIs under
         // the android.test.mock package. They however provide private APIs that
-        // android.test.mock APIs references to.
+        // android.test.mock APIs references to. We need to have the classes in
+        // source code form to have access to the @hide comment which disappears
+        // when the classes are compiled into a Jar library.
         ":framework-core-sources-for-test-mock",
         ":framework_native_aidl",
     ],
@@ -42,8 +43,10 @@ java_sdk_library {
         "app-compat-annotations",
         "unsupportedappusage",
     ],
-
     api_packages: [
+        "android.test.mock",
+    ],
+    permitted_packages: [
         "android.test.mock",
     ],
     compile_dex: true,

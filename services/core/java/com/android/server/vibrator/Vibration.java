@@ -33,6 +33,7 @@ import android.util.proto.ProtoOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /** Represents a vibration request to the vibrator service. */
@@ -44,20 +45,23 @@ final class Vibration {
     enum Status {
         RUNNING,
         FINISHED,
+        FINISHED_UNEXPECTED,  // Didn't terminate in the usual way.
         FORWARDED_TO_INPUT_DEVICES,
         CANCELLED,
         IGNORED_ERROR_APP_OPS,
+        IGNORED_ERROR_TOKEN,
         IGNORED,
         IGNORED_APP_OPS,
         IGNORED_BACKGROUND,
-        IGNORED_RINGTONE,
         IGNORED_UNKNOWN_VIBRATION,
         IGNORED_UNSUPPORTED,
         IGNORED_FOR_ALARM,
         IGNORED_FOR_EXTERNAL,
         IGNORED_FOR_ONGOING,
         IGNORED_FOR_POWER,
+        IGNORED_FOR_RINGER_MODE,
         IGNORED_FOR_SETTINGS,
+        IGNORED_SUPERSEDED,
     }
 
     /** Start time in CLOCK_BOOTTIME base. */
@@ -90,6 +94,9 @@ final class Vibration {
     private long mEndTimeDebug;
     private Status mStatus;
 
+    /** A {@link CountDownLatch} to enable waiting for completion. */
+    private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
+
     Vibration(IBinder token, int id, CombinedVibration effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
@@ -118,6 +125,12 @@ final class Vibration {
         }
         mStatus = status;
         mEndTimeDebug = System.currentTimeMillis();
+        mCompletionLatch.countDown();
+    }
+
+    /** Waits indefinitely until another thread calls {@link #end(Status)} on this vibration. */
+    public void waitForEnd() throws InterruptedException {
+        mCompletionLatch.await();
     }
 
     /**
@@ -360,7 +373,7 @@ final class Vibration {
             final long token = proto.start(fieldId);
             proto.write(StepSegmentProto.DURATION, segment.getDuration());
             proto.write(StepSegmentProto.AMPLITUDE, segment.getAmplitude());
-            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequency());
+            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequencyHz());
             proto.end(token);
         }
 
@@ -369,8 +382,8 @@ final class Vibration {
             proto.write(RampSegmentProto.DURATION, segment.getDuration());
             proto.write(RampSegmentProto.START_AMPLITUDE, segment.getStartAmplitude());
             proto.write(RampSegmentProto.END_AMPLITUDE, segment.getEndAmplitude());
-            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequency());
-            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequency());
+            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequencyHz());
+            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequencyHz());
             proto.end(token);
         }
 

@@ -44,6 +44,11 @@ public class BenchmarkRunner {
 
     private Throwable mFirstFailure = null;
 
+    /**
+     * Starts a new run. Also responsible for finalising the calculations from the previous run,
+     * if there was one; therefore, any previous run must not be {@link #pauseTiming() paused} when
+     * this is called.
+     */
     public boolean keepRunning() {
         switch (mState) {
             case NOT_STARTED:
@@ -88,7 +93,31 @@ public class BenchmarkRunner {
         mState = PAUSED;
     }
 
+    /**
+     * Resumes the timing after a previous {@link #pauseTiming()}.
+     * First waits for the system to be idle prior to resuming.
+     *
+     * If this is called at the end of the run (so that no further timing is actually desired before
+     * {@link #keepRunning()} is called anyway), use {@link #resumeTimingForNextIteration()} instead
+     * to avoid unnecessary waiting.
+     */
     public void resumeTiming() {
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        resumeTimer();
+    }
+
+    /**
+     * Resume timing in preparation for a possible next run (rather than to continue timing the
+     * current run).
+     *
+     * It is equivalent to {@link #resumeTiming()} except that it skips steps that
+     * are unnecessary at the end of a trial (namely, waiting for the system to idle).
+     */
+    public void resumeTimingForNextIteration() {
+        resumeTimer();
+    }
+
+    private void resumeTimer() {
         if (mState != PAUSED) {
             throw new IllegalStateException("Unable to resume the runner: already running");
         }

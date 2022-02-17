@@ -31,12 +31,10 @@ public abstract class ListEntry {
     private final String mKey;
     private final long mCreationTime;
 
-    int mFirstAddedIteration = -1;
-
     private final ListAttachState mPreviousAttachState = ListAttachState.create();
     private final ListAttachState mAttachState = ListAttachState.create();
 
-    ListEntry(String key, long creationTime) {
+    protected ListEntry(String key, long creationTime) {
         mKey = key;
         mCreationTime = creationTime;
     }
@@ -92,14 +90,6 @@ public abstract class ListEntry {
 
     ListAttachState getPreviousAttachState() {
         return mPreviousAttachState;
-    }
-
-    /**
-     * True if this entry has been attached to the shade at least once in its lifetime (it may not
-     * currently be attached).
-     */
-    public boolean hasBeenAttachedBefore() {
-        return mFirstAddedIteration != -1;
     }
 
     /**
