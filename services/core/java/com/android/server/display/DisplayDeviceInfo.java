@@ -142,6 +142,15 @@ final class DisplayDeviceInfo {
     public static final int FLAG_OWN_DISPLAY_GROUP = 1 << 14;
 
     /**
+     * Flag: Indicates that the display should always be unlocked. Only valid on virtual displays
+     * that aren't in the default display group.
+     * @see #FLAG_OWN_DISPLAY_GROUP
+     * @hide
+     */
+    public static final int FLAG_ALWAYS_UNLOCKED = 1 << 15;
+
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -349,6 +358,12 @@ final class DisplayDeviceInfo {
     public float brightnessMaximum;
     public float brightnessDefault;
 
+    /**
+     * Install orientation of display panel relative to its natural orientation.
+     */
+    @Surface.Rotation
+    public int installOrientation = Surface.ROTATION_0;
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -403,12 +418,13 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
-                || !Objects.equals(frameRateOverrides, other.frameRateOverrides)
+                || !Arrays.equals(frameRateOverrides, other.frameRateOverrides)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
                 other.brightnessDefault)
-                || !Objects.equals(roundedCorners, other.roundedCorners)) {
+                || !Objects.equals(roundedCorners, other.roundedCorners)
+                || installOrientation != other.installOrientation) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -452,6 +468,7 @@ final class DisplayDeviceInfo {
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
+        installOrientation = other.installOrientation;
     }
 
     // For debugging purposes
@@ -499,6 +516,7 @@ final class DisplayDeviceInfo {
             sb.append(", roundedCorners ").append(roundedCorners);
         }
         sb.append(flagsToString(flags));
+        sb.append(", installOrientation ").append(installOrientation);
         sb.append("}");
         return sb.toString();
     }

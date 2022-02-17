@@ -142,10 +142,10 @@ public class MediaDescription implements Parcelable {
         mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mIcon = in.readParcelable(null);
-        mIconUri = in.readParcelable(null);
+        mIcon = in.readParcelable(null, android.graphics.Bitmap.class);
+        mIconUri = in.readParcelable(null, android.net.Uri.class);
         mExtras = in.readBundle();
-        mMediaUri = in.readParcelable(null);
+        mMediaUri = in.readParcelable(null, android.net.Uri.class);
     }
 
     /**

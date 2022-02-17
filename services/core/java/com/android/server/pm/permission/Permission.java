@@ -23,7 +23,7 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermission;
 import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
@@ -304,10 +304,6 @@ public final class Permission {
                 & PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER) != 0;
     }
 
-    public boolean isDocumenter() {
-        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_DOCUMENTER) != 0;
-    }
-
     public boolean isConfigurator() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_CONFIGURATOR) != 0;
     }
@@ -435,6 +431,8 @@ public final class Permission {
                 }
             }
         }
+        boolean wasNonInternal = permission != null && permission.mType != TYPE_CONFIG
+                && !permission.isInternal();
         boolean wasNonRuntime = permission != null && permission.mType != TYPE_CONFIG
                 && !permission.isRuntime();
         if (permission == null) {
@@ -480,10 +478,10 @@ public final class Permission {
             r.append("DUP:");
             r.append(permissionInfo.name);
         }
-        if ((permission.isInternal() && ownerChanged)
+        if ((permission.isInternal() && (ownerChanged || wasNonInternal))
                 || (permission.isRuntime() && (ownerChanged || wasNonRuntime))) {
             // If this is an internal/runtime permission and the owner has changed, or this wasn't a
-            // runtime permission, then permission state should be cleaned up.
+            // internal/runtime permission, then permission state should be cleaned up.
             permission.mDefinitionChanged = true;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
@@ -502,13 +500,10 @@ public final class Permission {
                 if (permissionTree.getUid() == UserHandle.getAppId(callingUid)) {
                     return permissionTree;
                 }
-                throw new SecurityException("Calling uid " + callingUid
-                        + " is not allowed to add to permission tree "
-                        + permissionTree.getName() + " owned by uid "
-                        + permissionTree.getUid());
             }
         }
-        throw new SecurityException("No permission tree found for " + permissionName);
+        throw new SecurityException("Calling uid " + callingUid
+            + " is not allowed to add to or remove from the permission tree");
     }
 
     @Nullable

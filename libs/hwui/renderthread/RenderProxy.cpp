@@ -257,10 +257,15 @@ uint32_t RenderProxy::frameTimePercentile(int percentile) {
     });
 }
 
-void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData) {
+void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool resetProfile) {
     if (RenderThread::hasInstance()) {
         auto& thread = RenderThread::getInstance();
-        thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd, includeProfileData); });
+        thread.queue().runSync([&]() {
+            thread.dumpGraphicsMemory(fd, includeProfileData);
+            if (resetProfile) {
+                thread.globalProfileData()->reset();
+            }
+        });
     }
 }
 
@@ -322,11 +327,16 @@ void RenderProxy::setPrepareSurfaceControlForWebviewCallback(
             [this, cb = callback]() { mContext->setPrepareSurfaceControlForWebviewCallback(cb); });
 }
 
-void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCallback(
+        std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
-void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCommitCallback(std::function<void(bool)>&& callback) {
+    mDrawFrameTask.setFrameCommitCallback(std::move(callback));
+}
+
+void RenderProxy::setFrameCompleteCallback(std::function<void()>&& callback) {
     mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
 }
 

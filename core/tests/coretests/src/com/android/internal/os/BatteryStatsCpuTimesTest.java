@@ -96,7 +96,7 @@ public class BatteryStatsCpuTimesTest {
     @Mock
     PowerProfile mPowerProfile;
 
-    private MockClocks mClocks;
+    private MockClock mClocks;
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
 
@@ -104,7 +104,7 @@ public class BatteryStatsCpuTimesTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mClocks = new MockClocks();
+        mClocks = new MockClock();
         mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks)
                 .setKernelCpuUidUserSysTimeReader(mCpuUidUserSysTimeReader)
                 .setKernelCpuUidFreqTimeReader(mCpuUidFreqTimeReader)
@@ -156,7 +156,7 @@ public class BatteryStatsCpuTimesTest {
         verify(mCpuUidFreqTimeReader, times(2)).perClusterTimesAvailable();
         verify(mCpuUidFreqTimeReader).readDelta(anyBoolean(),
                 any(KernelCpuUidFreqTimeReader.Callback.class));
-        verify(mCpuUidActiveTimeReader).readDelta(anyBoolean(),
+        verify(mCpuUidActiveTimeReader).readAbsolute(
                 any(KernelCpuUidActiveTimeReader.Callback.class));
         verify(mCpuUidClusterTimeReader).readDelta(anyBoolean(),
                 any(KernelCpuUidClusterTimeReader.Callback.class));
@@ -1039,6 +1039,8 @@ public class BatteryStatsCpuTimesTest {
 
     @Test
     public void testReadKernelUidCpuActiveTimesLocked() {
+        mClocks.realtime = 1000;
+
         // PRECONDITIONS
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
@@ -1049,15 +1051,15 @@ public class BatteryStatsCpuTimesTest {
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
         });
-        final long[] uidTimesMs = {8000, 25000, 3000, 0, 42000};
+        final long[] initialTimesMs = {8000, 25000, 3000, 0, 42000};
         doAnswer(invocation -> {
             final KernelCpuUidActiveTimeReader.Callback<Long> callback =
-                    invocation.getArgument(1);
+                    invocation.getArgument(0);
             for (int i = 0; i < testUids.length; ++i) {
-                callback.onUidCpuTime(testUids[i], uidTimesMs[i]);
+                callback.onUidCpuTime(testUids[i], initialTimesMs[i]);
             }
             return null;
-        }).when(mCpuUidActiveTimeReader).readDelta(anyBoolean(),
+        }).when(mCpuUidActiveTimeReader).readAbsolute(
                 any(KernelCpuUidActiveTimeReader.Callback.class));
 
         // RUN
@@ -1067,23 +1069,23 @@ public class BatteryStatsCpuTimesTest {
         for (int i = 0; i < testUids.length; ++i) {
             final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
             assertNotNull("No entry for uid=" + testUids[i], u);
-            assertEquals("Unexpected cpu active time for uid=" + testUids[i], uidTimesMs[i],
+            assertEquals("Unexpected cpu active time for uid=" + testUids[i], 0,
                     u.getCpuActiveTime());
         }
 
-        // Repeat the test when the screen is off.
+        // Some time passes
+        mClocks.realtime = 2000;
 
         // PRECONDITIONS
-        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
-        final long[] deltasMs = {43000, 3345000, 2143000, 123000, 4554000};
+        final long[] cpuTimesAt2000 = {43000, 3345000, 2143000, 123000, 4554000};
         doAnswer(invocation -> {
             final KernelCpuUidActiveTimeReader.Callback<Long> callback =
-                    invocation.getArgument(1);
+                    invocation.getArgument(0);
             for (int i = 0; i < testUids.length; ++i) {
-                callback.onUidCpuTime(testUids[i], deltasMs[i]);
+                callback.onUidCpuTime(testUids[i], cpuTimesAt2000[i]);
             }
             return null;
-        }).when(mCpuUidActiveTimeReader).readDelta(anyBoolean(),
+        }).when(mCpuUidActiveTimeReader).readAbsolute(
                 any(KernelCpuUidActiveTimeReader.Callback.class));
 
         // RUN
@@ -1094,12 +1096,43 @@ public class BatteryStatsCpuTimesTest {
             final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
             assertNotNull("No entry for uid=" + testUids[i], u);
             assertEquals("Unexpected cpu active time for uid=" + testUids[i],
-                    uidTimesMs[i] + deltasMs[i], u.getCpuActiveTime());
+                    cpuTimesAt2000[i] - initialTimesMs[i], u.getCpuActiveTime());
+        }
+
+        // Give it another second
+        mClocks.realtime = 3000;
+
+        // Repeat the test when the screen is off.
+
+        // PRECONDITIONS
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        final long[] cpuTimesAt3000 = {63000, 7345000, 8143000, 923000, 5554000};
+        doAnswer(invocation -> {
+            final KernelCpuUidActiveTimeReader.Callback<Long> callback =
+                    invocation.getArgument(0);
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuTime(testUids[i], cpuTimesAt3000[i]);
+            }
+            return null;
+        }).when(mCpuUidActiveTimeReader).readAbsolute(
+                any(KernelCpuUidActiveTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuActiveTimesLocked(true);
+
+        // VERIFY
+        for (int i = 0; i < testUids.length; ++i) {
+            final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
+            assertNotNull("No entry for uid=" + testUids[i], u);
+            assertEquals("Unexpected cpu active time for uid=" + testUids[i],
+                    cpuTimesAt3000[i] - initialTimesMs[i], u.getCpuActiveTime());
         }
     }
 
     @Test
     public void testReadKernelUidCpuActiveTimesLocked_invalidUid() {
+        mClocks.realtime = 1000;
+
         // PRECONDITIONS
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
@@ -1113,17 +1146,37 @@ public class BatteryStatsCpuTimesTest {
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
         });
-        final long[] uidTimesMs = {8000, 25000, 3000, 0, 42000};
+        final long[] cpuTimesAt1000 = {8000, 25000, 3000, 0, 42000};
         doAnswer(invocation -> {
             final KernelCpuUidActiveTimeReader.Callback<Long> callback =
-                    invocation.getArgument(1);
+                    invocation.getArgument(0);
             for (int i = 0; i < testUids.length; ++i) {
-                callback.onUidCpuTime(testUids[i], uidTimesMs[i]);
+                callback.onUidCpuTime(testUids[i], cpuTimesAt1000[i]);
             }
             // And one for the invalid uid
             callback.onUidCpuTime(invalidUid, 1200L);
             return null;
-        }).when(mCpuUidActiveTimeReader).readDelta(anyBoolean(),
+        }).when(mCpuUidActiveTimeReader).readAbsolute(
+                any(KernelCpuUidActiveTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuActiveTimesLocked(true);
+
+        // Some time passes
+        mClocks.realtime = 2000;
+
+        // Run again to compute the delta
+        final long[] cpuTimesAt2000 = {18000, 225000, 33000, 40, 542000};
+        doAnswer(invocation -> {
+            final KernelCpuUidActiveTimeReader.Callback<Long> callback =
+                    invocation.getArgument(0);
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuTime(testUids[i], cpuTimesAt2000[i]);
+            }
+            // And one for the invalid uid
+            callback.onUidCpuTime(invalidUid, 1200L);
+            return null;
+        }).when(mCpuUidActiveTimeReader).readAbsolute(
                 any(KernelCpuUidActiveTimeReader.Callback.class));
 
         // RUN
@@ -1133,8 +1186,8 @@ public class BatteryStatsCpuTimesTest {
         for (int i = 0; i < testUids.length; ++i) {
             final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
             assertNotNull("No entry for uid=" + testUids[i], u);
-            assertEquals("Unexpected cpu active time for uid=" + testUids[i], uidTimesMs[i],
-                    u.getCpuActiveTime());
+            assertEquals("Unexpected cpu active time for uid=" + testUids[i],
+                    cpuTimesAt2000[i] - cpuTimesAt1000[i], u.getCpuActiveTime());
         }
         assertNull("There shouldn't be an entry for invalid uid=" + invalidUid,
                 mBatteryStatsImpl.getUidStats().get(invalidUid));
@@ -1263,21 +1316,21 @@ public class BatteryStatsCpuTimesTest {
                 mBatteryStatsImpl.new UidToRemove(1, mClocks.elapsedRealtime()));
         mBatteryStatsImpl.getPendingRemovedUids().add(
                 mBatteryStatsImpl.new UidToRemove(5, 10, mClocks.elapsedRealtime()));
-        mBatteryStatsImpl.clearPendingRemovedUids();
+        mBatteryStatsImpl.clearPendingRemovedUidsLocked();
         assertEquals(2, mBatteryStatsImpl.getPendingRemovedUids().size());
 
         mClocks.realtime = mClocks.uptime = 100_000;
-        mBatteryStatsImpl.clearPendingRemovedUids();
+        mBatteryStatsImpl.clearPendingRemovedUidsLocked();
         assertEquals(2, mBatteryStatsImpl.getPendingRemovedUids().size());
 
         mClocks.realtime = mClocks.uptime = 200_000;
         mBatteryStatsImpl.getPendingRemovedUids().add(
                 mBatteryStatsImpl.new UidToRemove(100, mClocks.elapsedRealtime()));
-        mBatteryStatsImpl.clearPendingRemovedUids();
+        mBatteryStatsImpl.clearPendingRemovedUidsLocked();
         assertEquals(3, mBatteryStatsImpl.getPendingRemovedUids().size());
 
         mClocks.realtime = mClocks.uptime = 400_000;
-        mBatteryStatsImpl.clearPendingRemovedUids();
+        mBatteryStatsImpl.clearPendingRemovedUidsLocked();
         assertEquals(1, mBatteryStatsImpl.getPendingRemovedUids().size());
         verify(mCpuUidActiveTimeReader).removeUid(1);
         verify(mCpuUidActiveTimeReader).removeUidsInRange(5, 10);
@@ -1289,7 +1342,7 @@ public class BatteryStatsCpuTimesTest {
         verify(mCpuUidUserSysTimeReader).removeUidsInRange(5, 10);
 
         mClocks.realtime = mClocks.uptime = 800_000;
-        mBatteryStatsImpl.clearPendingRemovedUids();
+        mBatteryStatsImpl.clearPendingRemovedUidsLocked();
         assertEquals(0, mBatteryStatsImpl.getPendingRemovedUids().size());
         verify(mCpuUidActiveTimeReader).removeUid(100);
         verify(mCpuUidClusterTimeReader).removeUid(100);

@@ -50,19 +50,23 @@ import org.junit.runner.RunWith;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorServiceTest {
 
     private static final int ARBITRARY_USER_ID = 9999;
+    private static final List<String> ARBITRARY_TIME_ZONE_IDS = Arrays.asList("TestZoneId");
+    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
 
     private Context mMockContext;
-    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
     private TimeZoneDetectorService mTimeZoneDetectorService;
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessor;
+    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
 
 
     @Before
@@ -78,10 +82,11 @@ public class TimeZoneDetectorServiceTest {
         mTestCallerIdentityInjector.initializeCallingUserId(ARBITRARY_USER_ID);
 
         mFakeTimeZoneDetectorStrategy = new FakeTimeZoneDetectorStrategy();
+        mFakeServiceConfigAccessor = new FakeServiceConfigAccessor();
 
         mTimeZoneDetectorService = new TimeZoneDetectorService(
                 mMockContext, mTestHandler, mTestCallerIdentityInjector,
-                mFakeTimeZoneDetectorStrategy);
+                mFakeServiceConfigAccessor, mFakeTimeZoneDetectorStrategy);
     }
 
     @After
@@ -97,7 +102,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.getCapabilitiesAndConfig();
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
@@ -111,7 +116,7 @@ public class TimeZoneDetectorServiceTest {
 
         ConfigurationInternal configuration =
                 createConfigurationInternal(true /* autoDetectionEnabled*/);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(configuration);
+        mFakeServiceConfigAccessor.initializeConfiguration(configuration);
 
         assertEquals(configuration.createCapabilitiesAndConfig(),
                 mTimeZoneDetectorService.getCapabilitiesAndConfig());
@@ -129,7 +134,7 @@ public class TimeZoneDetectorServiceTest {
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
         try {
             mTimeZoneDetectorService.addListener(mockListener);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
@@ -157,7 +162,7 @@ public class TimeZoneDetectorServiceTest {
     public void testListenerRegistrationAndCallbacks() throws Exception {
         ConfigurationInternal initialConfiguration =
                 createConfigurationInternal(false /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(initialConfiguration);
+        mFakeServiceConfigAccessor.initializeConfiguration(initialConfiguration);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
@@ -184,6 +189,9 @@ public class TimeZoneDetectorServiceTest {
             TimeZoneConfiguration autoDetectEnabledConfiguration =
                     createTimeZoneConfiguration(true /* autoDetectionEnabled */);
             mTimeZoneDetectorService.updateConfiguration(autoDetectEnabledConfiguration);
+
+            // The configuration update notification is asynchronous.
+            mTestHandler.waitForMessagesToBeProcessed();
 
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
@@ -235,7 +243,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestGeolocationTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
                     eq(android.Manifest.permission.SET_TIME_ZONE),
@@ -268,7 +276,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
                     eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
@@ -301,7 +309,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
@@ -317,7 +325,7 @@ public class TimeZoneDetectorServiceTest {
 
         try {
             mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
-            fail();
+            fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
@@ -346,11 +354,15 @@ public class TimeZoneDetectorServiceTest {
         when(mMockContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
+        Dumpable dumpable = mock(Dumpable.class);
+        mTimeZoneDetectorService.addDumpable(dumpable);
+
         PrintWriter pw = new PrintWriter(new StringWriter());
         mTimeZoneDetectorService.dump(null, pw, null);
 
         verify(mMockContext).checkCallingOrSelfPermission(eq(android.Manifest.permission.DUMP));
         mFakeTimeZoneDetectorStrategy.verifyDumpCalled();
+        verify(dumpable).dump(any(), any());
     }
 
     private static TimeZoneConfiguration createTimeZoneConfiguration(boolean autoDetectionEnabled) {
@@ -366,15 +378,19 @@ public class TimeZoneDetectorServiceTest {
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
+                .setTelephonyFallbackSupported(false)
+                .setGeoDetectionRunInBackgroundEnabled(false)
+                .setEnhancedMetricsCollectionEnabled(false)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionEnabled(autoDetectionEnabled)
-                .setLocationEnabled(geoDetectionEnabled)
-                .setGeoDetectionEnabled(geoDetectionEnabled)
+                .setAutoDetectionEnabledSetting(autoDetectionEnabled)
+                .setLocationEnabledSetting(geoDetectionEnabled)
+                .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                 .build();
     }
 
     private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {
-        return new GeolocationTimeZoneSuggestion(Arrays.asList("TestZoneId"));
+        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, ARBITRARY_TIME_ZONE_IDS);
     }
 
     private static ManualTimeZoneSuggestion createManualTimeZoneSuggestion() {

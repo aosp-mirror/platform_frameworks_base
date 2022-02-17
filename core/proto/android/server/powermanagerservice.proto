@@ -127,7 +127,7 @@ message PowerManagerServiceDumpProto {
     optional bool is_light_device_idle_mode = 25;
     // True if we are currently in device idle mode.
     optional bool is_device_idle_mode = 26;
-    // Set of app ids that we will always respect the wake locks for.
+    // Set of app ids that we will respect the wake locks for while in device idle mode.
     repeated int32 device_idle_whitelist = 27;
     // Set of app ids that are temporarily allowed to acquire wakelocks due to
     // high-pri message
@@ -187,6 +187,8 @@ message PowerManagerServiceDumpProto {
     // Whether or not the current enhanced discharge prediction is personalized based on device
     // usage or not.
     optional bool is_enhanced_discharge_prediction_personalized = 54;
+    optional bool is_low_power_standby_active = 55;
+    optional LowPowerStandbyControllerDumpProto low_power_standby_controller = 56;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
@@ -209,6 +211,8 @@ message WakeLockProto {
         // When this wake lock is released, poke the user activity timer
         // so the screen stays on for a little longer.
         optional bool is_on_after_release = 2;
+        // The wakelock is held by the system server on request by another app.
+        optional bool system_wakelock = 3;
     }
 
     optional .android.os.WakeLockLevelEnum lock_level = 1;
@@ -427,4 +431,40 @@ message BatterySaverStateMachineProto {
     optional bool dynamic_battery_saver_enabled = 22;
 
     // Next tag: 23
+}
+
+message LowPowerStandbyControllerDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // True if Low Power Standby is active
+    optional bool is_active = 1;
+
+    // True if Low Power Standby is enabled
+    optional bool is_enabled = 2;
+
+    // True if Low Power Standby is supported
+    optional bool is_supported_config = 3;
+
+    // True if Low Power Standby is enabled by default
+    optional bool is_enabled_by_default_config = 4;
+
+    // True if the device is currently interactive
+    optional bool is_interactive = 5;
+
+    // Time (in elapsedRealtime) when the device was last interactive
+    optional int64 last_interactive_time = 6;
+
+    // Timeout (in milliseconds) after becoming non-interactive that Low Power Standby can activate
+    optional int32 standby_timeout_config = 7;
+
+    // True if the device has entered idle mode since becoming non-interactive
+    optional bool idle_since_non_interactive = 8;
+
+    // True if the device is currently in idle mode
+    optional bool is_device_idle = 9;
+
+    // Set of app ids that are exempt form low power standby
+    repeated int32 allowlist = 10;
+
+    // Next tag: 11
 }

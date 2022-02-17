@@ -55,8 +55,25 @@ using android::base::unique_fd;
 
 #define SYNC_RECEIVED_WHILE_FROZEN (1)
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
+#define TXNS_PENDING_WHILE_FROZEN (4)
+
+#define MAX_RW_COUNT (INT_MAX & PAGE_MASK)
+
+// Defines the maximum amount of VMAs we can send per process_madvise syscall.
+// Currently this is set to UIO_MAXIOV which is the maximum segments allowed by
+// iovec implementation used by process_madvise syscall
+#define MAX_VMAS_PER_COMPACTION UIO_MAXIOV
+
+// Maximum bytes that we can send per process_madvise syscall once this limit
+// is reached we split the remaining VMAs into another syscall. The MAX_RW_COUNT
+// limit is imposed by iovec implementation. However, if you want to use a smaller
+// limit, it has to be a page aligned value, otherwise, compaction would fail.
+#define MAX_BYTES_PER_COMPACTION MAX_RW_COUNT
 
 namespace android {
+
+static bool cancelRunningCompaction;
+static bool compactionInProgress;
 
 // Legacy method for compacting processes, any new code should
 // use compactProcess instead.
@@ -66,12 +83,12 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
 }
 
 // Compacts a set of VMAs for pid using an madviseType accepted by process_madvise syscall
-// On success returns the total bytes that where compacted. On failure it returns
-// a negative error code from the standard linux error codes.
+// Returns the total bytes that where madvised.
+//
+// If any VMA fails compaction due to -EINVAL it will be skipped and continue.
+// However, if it fails for any other reason, it will bail out and forward the error
 static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
-    // UIO_MAXIOV is currently a small value and we might have more addresses
-    // we do multiple syscalls if we exceed its maximum
-    static struct iovec vmasToKernel[UIO_MAXIOV];
+    static struct iovec vmasToKernel[MAX_VMAS_PER_COMPACTION];
 
     if (vmas.empty()) {
         return 0;
@@ -82,25 +99,75 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
         // Skip compaction if failed to open pidfd with any error
         return -errno;
     }
+    compactionInProgress = true;
+    cancelRunningCompaction = false;
 
-    int64_t totalBytesCompacted = 0;
-    for (int iBase = 0; iBase < vmas.size(); iBase += UIO_MAXIOV) {
-        int totalVmasToKernel = std::min(UIO_MAXIOV, (int)(vmas.size() - iBase));
-        for (int iVec = 0, iVma = iBase; iVec < totalVmasToKernel; ++iVec, ++iVma) {
-            vmasToKernel[iVec].iov_base = (void*)vmas[iVma].start;
-            vmasToKernel[iVec].iov_len = vmas[iVma].end - vmas[iVma].start;
+    int64_t totalBytesProcessed = 0;
+
+    int64_t vmaOffset = 0;
+    for (int iVma = 0; iVma < vmas.size();) {
+        uint64_t bytesSentToCompact = 0;
+        int iVec = 0;
+        while (iVec < MAX_VMAS_PER_COMPACTION && iVma < vmas.size()) {
+            if (CC_UNLIKELY(cancelRunningCompaction)) {
+                // There could be a significant delay between when a compaction
+                // is requested and when it is handled during this time our
+                // OOM adjust could have improved.
+                LOG(DEBUG) << "Cancelled running compaction for " << pid;
+                break;
+            }
+
+            uint64_t vmaStart = vmas[iVma].start + vmaOffset;
+            uint64_t vmaSize = vmas[iVma].end - vmaStart;
+            if (vmaSize == 0) {
+                goto next_vma;
+            }
+            vmasToKernel[iVec].iov_base = (void*)vmaStart;
+            if (vmaSize > MAX_BYTES_PER_COMPACTION - bytesSentToCompact) {
+                // Exceeded the max bytes that could be sent, so clamp
+                // the end to avoid exceeding limit and issue compaction
+                vmaSize = MAX_BYTES_PER_COMPACTION - bytesSentToCompact;
+            }
+
+            vmasToKernel[iVec].iov_len = vmaSize;
+            bytesSentToCompact += vmaSize;
+            ++iVec;
+            if (bytesSentToCompact >= MAX_BYTES_PER_COMPACTION) {
+                // Ran out of bytes within iovec, dispatch compaction.
+                vmaOffset += vmaSize;
+                break;
+            }
+
+        next_vma:
+            // Finished current VMA, and have more bytes remaining
+            vmaOffset = 0;
+            ++iVma;
         }
 
-        auto bytesCompacted =
-                process_madvise(pidfd, vmasToKernel, totalVmasToKernel, madviseType, 0);
-        if (CC_UNLIKELY(bytesCompacted == -1)) {
-            return -errno;
+        if (cancelRunningCompaction) {
+            cancelRunningCompaction = false;
+            break;
         }
 
-        totalBytesCompacted += bytesCompacted;
+        auto bytesProcessed = process_madvise(pidfd, vmasToKernel, iVec, madviseType, 0);
+
+        if (CC_UNLIKELY(bytesProcessed == -1)) {
+            if (errno == EINVAL) {
+                // This error is somewhat common due to an unevictable VMA if this is
+                // the case silently skip the bad VMA and continue compacting the rest.
+                continue;
+            } else {
+                // Forward irrecoverable errors and bail out compaction
+                compactionInProgress = false;
+                return -errno;
+            }
+        }
+
+        totalBytesProcessed += bytesProcessed;
     }
+    compactionInProgress = false;
 
-    return totalBytesCompacted;
+    return totalBytesProcessed;
 }
 
 static int getFilePageAdvice(const Vma& vma) {
@@ -123,7 +190,12 @@ static int getAnyPageAdvice(const Vma& vma) {
 }
 
 // Perform a full process compaction using process_madvise syscall
-// reading all filtering VMAs and filtering pages as specified by pageFilter
+// using the madvise behavior defined by vmaToAdviseFunc per VMA.
+//
+// Currently supported behaviors are MADV_COLD and MADV_PAGEOUT.
+//
+// Returns the total number of bytes compacted or forwards an
+// process_madvise error.
 static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     ProcMemInfo meminfo(pid);
     std::vector<Vma> pageoutVmas, coldVmas;
@@ -227,22 +299,31 @@ static void com_android_server_am_CachedAppOptimizer_compactSystem(JNIEnv *, job
     }
 }
 
+static void com_android_server_am_CachedAppOptimizer_cancelCompaction(JNIEnv*, jobject) {
+    if (compactionInProgress) {
+        cancelRunningCompaction = true;
+    }
+}
+
 static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, jobject, jint pid,
                                                                     jint compactionFlags) {
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static void com_android_server_am_CachedAppOptimizer_freezeBinder(
+static jint com_android_server_am_CachedAppOptimizer_freezeBinder(
         JNIEnv *env, jobject clazz, jint pid, jboolean freeze) {
 
-    if (IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */) != 0) {
+    jint retVal = IPCThreadState::freeze(pid, freeze, 100 /* timeout [ms] */);
+    if (retVal != 0 && retVal != -EAGAIN) {
         jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
     }
+
+    return retVal;
 }
 
 static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
         jobject clazz, jint pid) {
-    bool syncReceived = false, asyncReceived = false;
+    uint32_t syncReceived = 0, asyncReceived = 0;
 
     int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
 
@@ -252,13 +333,12 @@ static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv 
 
     jint retVal = 0;
 
-    if(syncReceived) {
-        retVal |= SYNC_RECEIVED_WHILE_FROZEN;;
-    }
-
-    if(asyncReceived) {
-        retVal |= ASYNC_RECEIVED_WHILE_FROZEN;
-    }
+    // bit 0 of sync_recv goes to bit 0 of retVal
+    retVal |= syncReceived & SYNC_RECEIVED_WHILE_FROZEN;
+    // bit 0 of async_recv goes to bit 1 of retVal
+    retVal |= (asyncReceived << 1) & ASYNC_RECEIVED_WHILE_FROZEN;
+    // bit 1 of sync_recv goes to bit 2 of retVal
+    retVal |= (syncReceived << 1) & TXNS_PENDING_WHILE_FROZEN;
 
     return retVal;
 }
@@ -276,9 +356,11 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
 
 static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
+        {"cancelCompaction", "()V",
+         (void*)com_android_server_am_CachedAppOptimizer_cancelCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZ)V", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
+        {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",

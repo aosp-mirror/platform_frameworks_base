@@ -20,7 +20,10 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGRO
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
+import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
+import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -31,6 +34,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerExemptionManager;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -39,6 +43,10 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+
+import com.android.internal.annotations.GuardedBy;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -52,7 +60,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String TAG = "ActivityManagerConstants";
 
     // Key names stored in the settings value.
-    private static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+    static final String KEY_BACKGROUND_SETTLE_TIME = "background_settle_time";
+
     private static final String KEY_FGSERVICE_MIN_SHOWN_TIME
             = "fgservice_min_shown_time";
     private static final String KEY_FGSERVICE_MIN_REPORT_TIME
@@ -111,9 +120,17 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE = "fgs_start_allowed_log_sample_rate";
     static final String KEY_FGS_START_DENIED_LOG_SAMPLE_RATE = "fgs_start_denied_log_sample_rate";
     static final String KEY_FGS_ALLOW_OPT_OUT = "fgs_allow_opt_out";
+    static final String KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE =
+            "extra_delay_svc_restart_mem_pressure";
+    static final String KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE =
+            "enable_extra_delay_svc_restart_mem_pressure";
+    static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
+    static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
+            "kill_bg_restricted_cached_idle_settle_time";
+    static final String KEY_ENABLE_COMPONENT_ALIAS = "enable_experimental_component_alias";
+    static final String KEY_COMPONENT_ALIAS_OVERRIDES = "component_alias_overrides";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
-    private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -156,12 +173,43 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
     private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
     private static final float DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE = 1; // 100%
+    private static final long DEFAULT_PROCESS_KILL_TIMEOUT_MS = 10 * 1000;
+
+    static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
+    static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
+    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
     private static final int
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
     private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
+
+    /**
+     * The extra delays we're putting to service restarts, based on current memory pressure.
+     */
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_NORMAL_MEM = 0; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MODERATE_MEM = 10000; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_LOW_MEM = 20000; // ms
+    private static final long DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_CRITICAL_MEM = 30000; // ms
+    private static final long[] DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE  = {
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_NORMAL_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MODERATE_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_LOW_MEM,
+        DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_CRITICAL_MEM,
+    };
+
+    /**
+     * Whether or not to enable the extra delays to service restarts on memory pressure.
+     */
+    private static final boolean DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE = true;
+    private static final boolean DEFAULT_ENABLE_COMPONENT_ALIAS = false;
+    private static final String DEFAULT_COMPONENT_ALIAS_OVERRIDES = "";
+
+    private static final int DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST =
+            DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY
+            | DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
     // Flag stored in the DeviceConfig API.
     /**
@@ -246,6 +294,14 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR =
             "push_messaging_over_quota_behavior";
+
+    /**
+     * Time in milliseconds; the allowed duration from a process is killed until it's really gone.
+     */
+    private static final String KEY_PROCESS_KILL_TIMEOUT = "process_kill_timeout";
+
+    private static final String KEY_DEFER_BOOT_COMPLETED_BROADCAST =
+            "defer_boot_completed_broadcast";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -514,10 +570,63 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile float mFgsStartDeniedLogSampleRate = DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE;
 
     /**
+     * Whether or not to kill apps in background restricted mode and it's cached, its UID state is
+     * idle.
+     */
+    volatile boolean mKillBgRestrictedAndCachedIdle = DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE;
+
+    /**
+     * The amount of time we allow an app in background restricted mode to settle after it goes
+     * into the cached &amp; UID idle, before we decide to kill it.
+     */
+    volatile long mKillBgRestrictedAndCachedIdleSettleTimeMs =
+            DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS;
+
+    /**
+     * The allowed duration from a process is killed until it's really gone.
+     */
+    volatile long mProcessKillTimeoutMs = DEFAULT_PROCESS_KILL_TIMEOUT_MS;
+
+    /**
      * Whether to allow "opt-out" from the foreground service restrictions.
      * (https://developer.android.com/about/versions/12/foreground-services)
      */
     volatile boolean mFgsAllowOptOut = DEFAULT_FGS_ALLOW_OPT_OUT;
+
+    /*
+     * The extra delays we're putting to service restarts, based on current memory pressure.
+     */
+    @GuardedBy("mService")
+    long[] mExtraServiceRestartDelayOnMemPressure =
+            DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
+
+    /**
+     * Whether or not to enable the extra delays to service restarts on memory pressure.
+     */
+    @GuardedBy("mService")
+    boolean mEnableExtraServiceRestartDelayOnMemPressure =
+            DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
+
+    /**
+     * Whether to enable "component alias" experimental feature. This can only be enabled
+     * on userdebug or eng builds.
+     */
+    volatile boolean mEnableComponentAlias = DEFAULT_ENABLE_COMPONENT_ALIAS;
+
+    /**
+     * Where or not to defer LOCKED_BOOT_COMPLETED and BOOT_COMPLETED broadcasts until the first
+     * time the process of the UID is started.
+     * Defined in {@link BroadcastConstants#DeferBootCompletedBroadcastType}
+     */
+    @GuardedBy("mService")
+    volatile @BroadcastConstants.DeferBootCompletedBroadcastType int mDeferBootCompletedBroadcast =
+            DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST;
+
+    /**
+     * Defines component aliases. Format
+     * ComponentName ":" ComponentName ( "," ComponentName ":" ComponentName )*
+     */
+    volatile String mComponentAliasOverrides = DEFAULT_COMPONENT_ALIAS_OVERRIDES;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -735,8 +844,30 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_FGS_START_DENIED_LOG_SAMPLE_RATE:
                                 updateFgsStartDeniedLogSamplePercent();
                                 break;
+                            case KEY_KILL_BG_RESTRICTED_CACHED_IDLE:
+                                updateKillBgRestrictedCachedIdle();
+                                break;
+                            case KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME:
+                                updateKillBgRestrictedCachedIdleSettleTime();
+                                break;
                             case KEY_FGS_ALLOW_OPT_OUT:
                                 updateFgsAllowOptOut();
+                                break;
+                            case KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
+                                updateExtraServiceRestartDelayOnMemPressure();
+                                break;
+                            case KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
+                                updateEnableExtraServiceRestartDelayOnMemPressure();
+                                break;
+                            case KEY_ENABLE_COMPONENT_ALIAS:
+                            case KEY_COMPONENT_ALIAS_OVERRIDES:
+                                updateComponentAliases();
+                                break;
+                            case KEY_PROCESS_KILL_TIMEOUT:
+                                updateProcessKillTimeout();
+                                break;
+                            case KEY_DEFER_BOOT_COMPLETED_BROADCAST:
+                                updateDeferBootCompletedBroadcast();
                                 break;
                             default:
                                 break;
@@ -1095,11 +1226,104 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FGS_START_DENIED_LOG_SAMPLE_RATE);
     }
 
+    private void updateKillBgRestrictedCachedIdle() {
+        mKillBgRestrictedAndCachedIdle = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_BG_RESTRICTED_CACHED_IDLE,
+                DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE);
+    }
+
+    private void updateKillBgRestrictedCachedIdleSettleTime() {
+        final long currentSettleTime = mKillBgRestrictedAndCachedIdleSettleTimeMs;
+        mKillBgRestrictedAndCachedIdleSettleTimeMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME,
+                DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS);
+        if (mKillBgRestrictedAndCachedIdleSettleTimeMs != currentSettleTime) {
+            mService.mHandler.removeMessages(
+                    ActivityManagerService.IDLE_UIDS_MSG);
+            mService.mHandler.sendEmptyMessageDelayed(
+                    ActivityManagerService.IDLE_UIDS_MSG,
+                    mKillBgRestrictedAndCachedIdleSettleTimeMs);
+        }
+    }
+
     private void updateFgsAllowOptOut() {
         mFgsAllowOptOut = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FGS_ALLOW_OPT_OUT,
                 DEFAULT_FGS_ALLOW_OPT_OUT);
+    }
+
+    private void updateExtraServiceRestartDelayOnMemPressure() {
+        synchronized (mService) {
+            final int memFactor = mService.mAppProfiler.getLastMemoryLevelLocked();
+            final long[] prevDelays = mExtraServiceRestartDelayOnMemPressure;
+            mExtraServiceRestartDelayOnMemPressure = parseLongArray(
+                    KEY_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                    DEFAULT_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE);
+            mService.mServices.performRescheduleServiceRestartOnMemoryPressureLocked(
+                    mExtraServiceRestartDelayOnMemPressure[memFactor],
+                    prevDelays[memFactor], "config", SystemClock.uptimeMillis());
+        }
+    }
+
+    private void updateEnableExtraServiceRestartDelayOnMemPressure() {
+        synchronized (mService) {
+            final boolean prevEnabled = mEnableExtraServiceRestartDelayOnMemPressure;
+            mEnableExtraServiceRestartDelayOnMemPressure = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE,
+                    DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE);
+            mService.mServices.rescheduleServiceRestartOnMemoryPressureIfNeededLocked(
+                    prevEnabled, mEnableExtraServiceRestartDelayOnMemPressure,
+                    SystemClock.uptimeMillis());
+        }
+    }
+
+    private void updateDeferBootCompletedBroadcast() {
+        mDeferBootCompletedBroadcast = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFER_BOOT_COMPLETED_BROADCAST,
+                DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST);
+    }
+
+    private long[] parseLongArray(@NonNull String key, @NonNull long[] def) {
+        final String val = DeviceConfig.getString(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                key, null);
+        if (!TextUtils.isEmpty(val)) {
+            final String[] ss = val.split(",");
+            if (ss.length == def.length) {
+                final long[] tmp = new long[ss.length];
+                try {
+                    for (int i = 0; i < ss.length; i++) {
+                        tmp[i] = Long.parseLong(ss[i]);
+                    }
+                    return tmp;
+                } catch (NumberFormatException e) {
+                }
+            }
+        }
+        return def;
+    }
+
+    private void updateComponentAliases() {
+        mEnableComponentAlias = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENABLE_COMPONENT_ALIAS,
+                DEFAULT_ENABLE_COMPONENT_ALIAS);
+        mComponentAliasOverrides = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPONENT_ALIAS_OVERRIDES,
+                DEFAULT_COMPONENT_ALIAS_OVERRIDES);
+        mService.mComponentAliasResolver.update(mEnableComponentAlias, mComponentAliasOverrides);
+    }
+
+    private void updateProcessKillTimeout() {
+        mProcessKillTimeoutMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROCESS_KILL_TIMEOUT,
+                DEFAULT_PROCESS_KILL_TIMEOUT_MS);
     }
 
     private void updateImperceptibleKillExemptions() {
@@ -1208,6 +1432,7 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");
@@ -1331,6 +1556,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
         pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
         pw.print("="); pw.println(mFgsAllowOptOut);
+        pw.print("  "); pw.print(KEY_ENABLE_COMPONENT_ALIAS);
+        pw.print("="); pw.println(mEnableComponentAlias);
+        pw.print("  "); pw.print(KEY_COMPONENT_ALIAS_OVERRIDES);
+        pw.print("="); pw.println(mComponentAliasOverrides);
+        pw.print("  "); pw.print(KEY_DEFER_BOOT_COMPLETED_BROADCAST);
+        pw.print("="); pw.println(mDeferBootCompletedBroadcast);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

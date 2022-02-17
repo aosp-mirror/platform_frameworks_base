@@ -13,11 +13,7 @@
 // limitations under the License.
 package {
     // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
+    default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 filegroup {
@@ -39,6 +35,7 @@ java_sdk_library {
         ":service-media-s-sources",
     ],
     libs: [
+        "androidx.annotation_annotation",
         "updatable-media",
         "modules-annotation-minsdk",
         "modules-utils-build",
@@ -46,6 +43,9 @@ java_sdk_library {
     jarjar_rules: "jarjar_rules.txt",
     sdk_version: "system_server_current",
     min_sdk_version: "29", // TODO: We may need to bump this at some point.
+    lint: {
+        strict_updatability_linting: true,
+    },
     apex_available: [
         "com.android.media",
     ],

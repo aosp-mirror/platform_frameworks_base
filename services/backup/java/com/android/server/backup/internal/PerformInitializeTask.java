@@ -28,11 +28,11 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,26 +109,27 @@ public class PerformInitializeTask implements Runnable {
     public void run() {
         // mWakelock is *acquired* when execution begins here
         String callerLogString = "PerformInitializeTask.run()";
-        List<TransportClient> transportClientsToDisposeOf = new ArrayList<>(mQueue.length);
+        List<TransportConnection> transportClientsToDisposeOf = new ArrayList<>(mQueue.length);
         int result = BackupTransport.TRANSPORT_OK;
         try {
             for (String transportName : mQueue) {
-                TransportClient transportClient =
+                TransportConnection transportConnection =
                         mTransportManager.getTransportClient(transportName, callerLogString);
-                if (transportClient == null) {
+                if (transportConnection == null) {
                     Slog.e(TAG, "Requested init for " + transportName + " but not found");
                     continue;
                 }
-                transportClientsToDisposeOf.add(transportClient);
+                transportClientsToDisposeOf.add(transportConnection);
 
                 Slog.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
                 String transportDirName =
                         mTransportManager.getTransportDirName(
-                                transportClient.getTransportComponent());
+                                transportConnection.getTransportComponent());
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transportDirName);
                 long startRealtime = SystemClock.elapsedRealtime();
 
-                IBackupTransport transport = transportClient.connectOrThrow(callerLogString);
+                BackupTransportClient transport = transportConnection.connectOrThrow(
+                        callerLogString);
                 int status = transport.initializeDevice();
                 if (status != BackupTransport.TRANSPORT_OK) {
                     Slog.e(TAG, "Transport error in initializeDevice()");
@@ -170,8 +171,8 @@ public class PerformInitializeTask implements Runnable {
             Slog.e(TAG, "Unexpected error performing init", e);
             result = BackupTransport.TRANSPORT_ERROR;
         } finally {
-            for (TransportClient transportClient : transportClientsToDisposeOf) {
-                mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+            for (TransportConnection transportConnection : transportClientsToDisposeOf) {
+                mTransportManager.disposeOfTransportClient(transportConnection, callerLogString);
             }
             notifyFinished(result);
             mListener.onFinished(callerLogString);

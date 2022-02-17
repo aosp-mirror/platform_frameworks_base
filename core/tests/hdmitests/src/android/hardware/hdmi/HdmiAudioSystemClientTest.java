@@ -288,9 +288,8 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
-        public void addVendorCommandListener(final IHdmiVendorCommandListener listener,
-                final int deviceType) {
-        }
+        public void addVendorCommandListener(
+                final IHdmiVendorCommandListener listener, final int vendorId) {}
 
         @Override
         public void sendVendorCommand(final int deviceType, final int targetAddress,
@@ -374,6 +373,17 @@ public class HdmiAudioSystemClientTest {
         public void removeHdmiCecVolumeControlFeatureListener(
                 IHdmiCecVolumeControlFeatureListener listener) {
         }
+
+        @Override
+        public int getMessageHistorySize() {
+            return 0;
+        }
+
+        @Override
+        public boolean setMessageHistorySize(int newSize) {
+            return true;
+        }
+
 
         @Override
         public List<String> getUserCecSettings() {

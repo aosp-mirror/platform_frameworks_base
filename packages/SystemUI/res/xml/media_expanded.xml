@@ -45,22 +45,6 @@
         android:layout_marginBottom="4dp" />
 
     <Constraint
-        android:id="@+id/media_seamless_fallback"
-        android:layout_width="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_height="@dimen/qs_seamless_fallback_icon_size"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="@dimen/qs_center_guideline_padding"
-        android:layout_marginEnd="@dimen/qs_seamless_fallback_margin"
-        android:alpha="0.5"
-        android:visibility="gone"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/center_vertical_guideline"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-
-    <Constraint
         android:id="@+id/album_art"
         android:layout_width="@dimen/qs_media_album_size"
         android:layout_height="@dimen/qs_media_album_size"

@@ -50,7 +50,7 @@ import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
 import com.android.internal.view.FloatingActionMode;
-import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 import com.android.systemui.R;
 
 /**

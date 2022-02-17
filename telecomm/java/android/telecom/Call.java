@@ -564,8 +564,14 @@ public final class Call {
          */
         public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x08000000;
 
+        /**
+         * Indicates whether the remote party supports RTT or not to the UI.
+         */
+
+        public static final int CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT = 0x10000000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x10000000
+        // Next CAPABILITY value: 0x20000000
         //******************************************************************************************
 
         /**
@@ -695,8 +701,15 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
+        /**
+         * Connection is a tethered external call.
+         * Indicates that the {@link Connection} is fixed on this device but the audio streams are
+         * re-routed to another device.
+         */
+        public static final int PROPERTY_TETHERED_CALL = 0x00008000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00004000
+        // Next PROPERTY value: 0x00010000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -817,6 +830,9 @@ public final class Call {
             if (can(capabilities, CAPABILITY_TRANSFER_CONSULTATIVE)) {
                 builder.append(" CAPABILITY_TRANSFER_CONSULTATIVE");
             }
+            if (can(capabilities, CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT)) {
+                builder.append(" CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT");
+            }
             builder.append("]");
             return builder.toString();
         }
@@ -889,6 +905,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
+            }
+            if (hasProperty(properties, PROPERTY_TETHERED_CALL)) {
+                builder.append(" PROPERTY_TETHERED_CALL");
             }
             builder.append("]");
             return builder.toString();

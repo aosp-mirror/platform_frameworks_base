@@ -38,8 +38,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginEnablerImpl;
+import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
-import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginPrefs;
 
@@ -102,12 +102,12 @@ public class PluginFragment extends PreferenceFragment {
         }
 
         List<PackageInfo> apps = pm.getPackagesHoldingPermissions(new String[]{
-                PluginInstanceManager.PLUGIN_PERMISSION},
+                PluginActionManager.PLUGIN_PERMISSION},
                 PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
         apps.forEach(app -> {
             if (!plugins.containsKey(app.packageName)) return;
-            if (ArrayUtils.contains(manager.getWhitelistedPlugins(), app.packageName)) {
-                // Don't manage whitelisted plugins, they are part of the OS.
+            if (ArrayUtils.contains(manager.getPrivilegedPlugins(), app.packageName)) {
+                // Don't manage privileged plugins, they are part of the OS.
                 return;
             }
             SwitchPreference pref = new PluginPreference(prefContext, app, mPluginEnabler);

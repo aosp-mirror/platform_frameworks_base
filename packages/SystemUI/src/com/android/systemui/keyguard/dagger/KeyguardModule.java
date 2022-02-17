@@ -20,11 +20,9 @@ import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.hardware.face.FaceManager;
-import android.os.Handler;
 import android.os.PowerManager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -33,15 +31,16 @@ import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
+import com.android.keyguard.mediator.ScreenOnCoordinator;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -51,16 +50,13 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.AsyncSensorManager;
-import com.android.systemui.util.settings.GlobalSettings;
-import com.android.systemui.util.settings.SystemSettings;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import dagger.Lazy;
@@ -102,8 +98,13 @@ public class KeyguardModule {
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
+            ScreenOffAnimationController screenOffAnimationController,
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
+            ScreenOnCoordinator screenOnCoordinator,
+            InteractionJankMonitor interactionJankMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
+            Lazy<NotificationShadeWindowController> notificationShadeWindowController,
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -124,9 +125,13 @@ public class KeyguardModule {
                 statusBarStateController,
                 keyguardStateController,
                 keyguardUnlockAnimationController,
-                unlockedScreenOffAnimationController,
-                notificationShadeDepthController
-        );
+                screenOffAnimationController,
+                notificationShadeDepthController,
+                screenOnCoordinator,
+                interactionJankMonitor,
+                dreamOverlayStateController,
+                notificationShadeWindowController,
+                activityLaunchAnimator);
     }
 
     @SysUISingleton
@@ -143,36 +148,5 @@ public class KeyguardModule {
         }
         return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
                 keyguardUpdateMonitor, dumpManager);
-    }
-
-    @SysUISingleton
-    @Provides
-    static Optional<FaceAuthScreenBrightnessController> provideFaceAuthScreenBrightnessController(
-            Context context,
-            NotificationShadeWindowController notificationShadeWindowController,
-            @Main Resources resources,
-            Handler handler,
-            @Nullable FaceManager faceManager,
-            PackageManager packageManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            GlobalSettings globalSetting,
-            SystemSettings systemSettings,
-            DumpManager dumpManager) {
-        if (faceManager == null || !packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-            return Optional.empty();
-        }
-
-        // Cameras that support "self illumination," via IR for example, don't need low light
-        // environment mitigation.
-        boolean needsLowLightMitigation = faceManager.getSensorPropertiesInternal().stream()
-                .anyMatch((properties) -> !properties.supportsSelfIllumination);
-        if (!needsLowLightMitigation) {
-            return Optional.empty();
-        }
-
-        // currently disabled (doesn't ramp up brightness or use scrim) see b/175918367
-        return Optional.of(new FaceAuthScreenBrightnessController(
-                notificationShadeWindowController, keyguardUpdateMonitor, resources,
-                globalSetting, systemSettings, handler, dumpManager, false));
     }
 }

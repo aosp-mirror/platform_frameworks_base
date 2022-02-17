@@ -21,10 +21,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -37,7 +35,6 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public class WindowContextController {
-    private final IWindowManager mWms;
     /**
      * {@code true} to indicate that the {@code mToken} is associated with a
      * {@link com.android.server.wm.DisplayArea}. Note that {@code mToken} is able to attach a
@@ -46,7 +43,7 @@ public class WindowContextController {
     @VisibleForTesting
     public boolean mAttachedToDisplayArea;
     @NonNull
-    private final IBinder mToken;
+    private final WindowTokenClient mToken;
 
     /**
      * Window Context Controller constructor
@@ -54,16 +51,8 @@ public class WindowContextController {
      * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
-    public WindowContextController(@NonNull IBinder token) {
+    public WindowContextController(@NonNull WindowTokenClient token) {
         mToken = token;
-        mWms = WindowManagerGlobal.getWindowManagerService();
-    }
-
-    /** Used for test only. DO NOT USE it in production code. */
-    @VisibleForTesting
-    public WindowContextController(@NonNull IBinder token, IWindowManager mockWms) {
-        mToken = token;
-        mWms = mockWms;
     }
 
     /**
@@ -80,12 +69,7 @@ public class WindowContextController {
             throw new IllegalStateException("A Window Context can be only attached to "
                     + "a DisplayArea once.");
         }
-        try {
-            mAttachedToDisplayArea = mWms.attachWindowContextToDisplayArea(mToken, type, displayId,
-                    options);
-        }  catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mAttachedToDisplayArea = mToken.attachToDisplayArea(type, displayId, options);
     }
 
     /**
@@ -113,22 +97,14 @@ public class WindowContextController {
             throw new IllegalStateException("The Window Context should have been attached"
                     + " to a DisplayArea.");
         }
-        try {
-            mWms.attachWindowContextToWindowToken(mToken, windowToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mToken.attachToWindowToken(windowToken);
     }
 
     /** Detaches the window context from the node it's currently associated with. */
     public void detachIfNeeded() {
         if (mAttachedToDisplayArea) {
-            try {
-                mWms.detachWindowContextFromWindowContainer(mToken);
-                mAttachedToDisplayArea = false;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            mToken.detachFromWindowContainerIfNeeded();
+            mAttachedToDisplayArea = false;
         }
     }
 }

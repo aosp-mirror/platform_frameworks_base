@@ -24,8 +24,6 @@ import android.os.FileUtils;
 import android.util.AtomicFile;
 import android.util.Log;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -72,7 +70,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, PackageSetting>> {
                     continue;
                 }
                 sb.setLength(0);
-                sb.append(pkgSetting.name);
+                sb.append(pkgSetting.getPackageName());
                 for (long usageTimeInMillis : pkgSetting.getPkgState()
                         .getLastPackageUsageTimeInMills()) {
                     sb.append(' ');
