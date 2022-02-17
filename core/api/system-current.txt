@@ -10848,7 +10848,7 @@ package android.service.attention {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelAttentionCheck(@NonNull android.service.attention.AttentionService.AttentionCallback);
     method public abstract void onCheckAttention(@NonNull android.service.attention.AttentionService.AttentionCallback);
-    method public void onStartProximityUpdates(@NonNull android.service.attention.AttentionService.ProximityCallback);
+    method public void onStartProximityUpdates(@NonNull android.service.attention.AttentionService.ProximityUpdateCallback);
     method public void onStopProximityUpdates();
     field public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6; // 0x6
     field public static final int ATTENTION_FAILURE_CANCELLED = 3; // 0x3
@@ -10866,7 +10866,7 @@ package android.service.attention {
     method public void onSuccess(int, long);
   }
 
-  public static final class AttentionService.ProximityCallback {
+  public static final class AttentionService.ProximityUpdateCallback {
     method public void onProximityUpdate(double);
   }
 

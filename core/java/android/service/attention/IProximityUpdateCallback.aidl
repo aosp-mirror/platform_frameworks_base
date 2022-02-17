@@ -5,6 +5,6 @@ package android.service.attention;
  *
  * @hide
  */
-oneway interface IProximityCallback {
+oneway interface IProximityUpdateCallback {
     void onProximityUpdate(double distance);
 }
