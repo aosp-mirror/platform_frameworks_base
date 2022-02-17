@@ -1999,9 +1999,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
-
-            // TODO PO may not have a class name either due to b/17652534.  Address that too.
-            updateDeviceOwnerLocked();
         }
     }
 
@@ -3135,23 +3132,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         long ident = mInjector.binderClearCallingIdentity();
         try {
             mInjector.getIActivityTaskManager().updateLockTaskFeatures(userId, flags);
-        } catch (RemoteException e) {
-            // Not gonna happen.
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
-    }
-
-    private void updateDeviceOwnerLocked() {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            // TODO This is to prevent DO from getting "clear data"ed, but it should also check the
-            // user id and also protect all other DAs too.
-            final ComponentName deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
-            if (deviceOwnerComponent != null) {
-                mInjector.getIActivityManager()
-                        .updateDeviceOwner(deviceOwnerComponent.getPackageName());
-            }
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -8586,7 +8566,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
-            updateDeviceOwnerLocked();
             setDeviceOwnershipSystemPropertyLocked();
 
             //TODO(b/180371154): when provisionFullyManagedDevice is used in tests, remove this
@@ -8947,7 +8926,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
-        updateDeviceOwnerLocked();
 
         clearDeviceOwnerUserRestriction(UserHandle.of(userId));
         mInjector.securityLogSetLoggingEnabledProperty(false);
