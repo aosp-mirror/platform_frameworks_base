@@ -111,7 +111,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mBottomDivider.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.GONE);
-            if (currentlyConnected && mController.isActiveRemoteDevice(device)) {
+            if (currentlyConnected && mController.isActiveRemoteDevice(device)
+                    && mController.getSelectableMediaDevice().size() > 0) {
                 // Init active device layout
                 mAddIcon.setVisibility(View.VISIBLE);
                 mAddIcon.setTransitionAlpha(1);
