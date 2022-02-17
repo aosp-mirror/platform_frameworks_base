@@ -425,23 +425,12 @@ public final class VirtualDeviceManager {
          * Adds an activity listener to listen for events such as top activity change or virtual
          * display task stack became empty.
          *
+         * @param executor The executor where the listener is executed on.
          * @param listener The listener to add.
-         * @see #removeActivityListener(ActivityListener)
-         */
-        public void addActivityListener(@NonNull ActivityListener listener) {
-            addActivityListener(listener, mContext.getMainExecutor());
-        }
-
-        /**
-         * Adds an activity listener to listen for events such as top activity change or virtual
-         * display task stack became empty.
-         *
-         * @param listener The listener to add.
-         * @param executor The executor where the callback is executed on.
          * @see #removeActivityListener(ActivityListener)
          */
         public void addActivityListener(
-                @NonNull ActivityListener listener, @NonNull Executor executor) {
+                @CallbackExecutor @NonNull Executor executor, @NonNull ActivityListener listener) {
             mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
         }
 
