@@ -32,6 +32,7 @@ import android.os.Trace;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.InsetsFlags;
 import android.view.InsetsVisibilities;
 import android.view.View;
@@ -44,6 +45,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
@@ -352,8 +354,17 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void beginInteractionJankMonitor() {
+        final boolean shouldPost =
+                (mIsDozing && mDozeAmount == 0) || (!mIsDozing && mDozeAmount == 1);
         if (mInteractionJankMonitor != null && mView != null && mView.isAttachedToWindow()) {
-            mInteractionJankMonitor.begin(mView, getCujType());
+            if (shouldPost) {
+                Choreographer.getInstance().postCallback(
+                        Choreographer.CALLBACK_ANIMATION, this::beginInteractionJankMonitor, null);
+            } else {
+                Configuration.Builder builder = Configuration.Builder.withView(getCujType(), mView)
+                        .setDeferMonitorForAnimationStart(false);
+                mInteractionJankMonitor.begin(builder);
+            }
         }
     }
 
