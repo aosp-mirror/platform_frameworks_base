@@ -449,21 +449,28 @@ java_library {
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
-metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--hide-package com.android.server " +
-    "--hide-package android.audio.policy.configuration.V7_0 " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide CallbackInterface " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--error NoSettingsProvider " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+metalava_framework_docs_args = "" +
     "--api-lint-ignore-prefix android.icu. " +
     "--api-lint-ignore-prefix java. " +
     "--api-lint-ignore-prefix junit. " +
-    "--api-lint-ignore-prefix org. "
+    "--api-lint-ignore-prefix org. " +
+    "--error NoSettingsProvider " +
+    "--error UnhiddenSystemApi " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+    "--hide BroadcastBehavior " +
+    "--hide CallbackInterface " +
+    "--hide DeprecationMismatch " +
+    "--hide HiddenSuperclass " +
+    "--hide HiddenTypeParameter " +
+    "--hide MissingPermission " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
+    "--hide-package com.android.server " +
+    "--hide RequiresPermission " +
+    "--hide SdkConstant " +
+    "--hide Todo " +
+    "--hide Typo " +
+    "--hide UnavailableSymbol " +
+    "--manifest $(location core/res/AndroidManifest.xml) "
 
 packages_to_document = [
     "android",
