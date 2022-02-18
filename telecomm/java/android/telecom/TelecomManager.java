@@ -1179,7 +1179,7 @@ public class TelecomManager {
         if (service != null) {
             try {
                 return service.getSimCallManager(
-                        SubscriptionManager.getDefaultSubscriptionId());
+                        SubscriptionManager.getDefaultSubscriptionId(), mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
             }
@@ -1201,7 +1201,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSimCallManager(subscriptionId);
+                return service.getSimCallManager(subscriptionId, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
             }
@@ -1225,7 +1225,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSimCallManagerForUser(userId);
+                return service.getSimCallManagerForUser(userId, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManagerForUser");
             }
@@ -1481,7 +1481,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.registerPhoneAccount(account);
+                service.registerPhoneAccount(account, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#registerPhoneAccount", e);
             }
@@ -1497,7 +1497,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.unregisterPhoneAccount(accountHandle);
+                service.unregisterPhoneAccount(accountHandle, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#unregisterPhoneAccount", e);
             }
@@ -1578,7 +1578,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getDefaultDialerPackage();
+                return service.getDefaultDialerPackage(mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
             }
@@ -1652,7 +1652,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSystemDialerPackage();
+                return service.getSystemDialerPackage(mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException attempting to get the system dialer package name.", e);
             }
@@ -2057,7 +2057,8 @@ public class TelecomManager {
                             "acceptHandover for API > O-MR1");
                     return;
                 }
-                service.addNewIncomingCall(phoneAccount, extras == null ? new Bundle() : extras);
+                service.addNewIncomingCall(phoneAccount, extras == null ? new Bundle() : extras,
+                        mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
             }
@@ -2099,7 +2100,8 @@ public class TelecomManager {
         if (service != null) {
             try {
                 service.addNewIncomingConference(
-                        phoneAccount, extras == null ? new Bundle() : extras);
+                        phoneAccount, extras == null ? new Bundle() : extras,
+                        mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException adding a new incoming conference: " + phoneAccount, e);
             }
@@ -2395,7 +2397,7 @@ public class TelecomManager {
         Intent result = null;
         if (service != null) {
             try {
-                result = service.createManageBlockedNumbersIntent();
+                result = service.createManageBlockedNumbersIntent(mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#createManageBlockedNumbersIntent", e);
             }
@@ -2552,7 +2554,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.acceptHandover(srcAddr, videoState, destAcct);
+                service.acceptHandover(srcAddr, videoState, destAcct, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException acceptHandover: " + e);
             }
