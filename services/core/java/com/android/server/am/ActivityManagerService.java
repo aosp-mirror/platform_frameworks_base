@@ -694,12 +694,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
     }
 
-    /**
-     * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
-     * <p>Not actually used</p>
-     */
-    private volatile String mDeviceOwnerName;
-
     private volatile int mDeviceOwnerUid = INVALID_UID;
 
     /**
@@ -6235,17 +6229,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         return ActivityClient.getInstance().getTaskForActivity(token, onlyRoot);
-    }
-
-    @Override
-    public void updateDeviceOwner(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != SYSTEM_UID) {
-            throw new SecurityException("updateDeviceOwner called from non-system process");
-        }
-        synchronized (this) {
-            mDeviceOwnerName = packageName;
-        }
     }
 
     @Override
