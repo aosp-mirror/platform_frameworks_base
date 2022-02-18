@@ -374,6 +374,64 @@ java_library {
     },
 }
 
+////////////////////////////////////////////////////////////////////////
+// api-versions.xml generation, for public and system. This API database
+// also contains the android.test.* APIs.
+////////////////////////////////////////////////////////////////////////
+
+java_library {
+    name: "android_stubs_current_with_test_libs",
+    static_libs: [
+        "android_stubs_current",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+        "android.test.runner.stubs",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+java_library {
+    name: "android_system_stubs_current_with_test_libs",
+    static_libs: [
+        "android_system_stubs_current",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+droidstubs {
+    name: "api_versions_public",
+    srcs: [":android_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+}
+
+droidstubs {
+    name: "api_versions_system",
+    srcs: [":android_system_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system",
+}
+
 /////////////////////////////////////////////////////////////////////
 // hwbinder.stubs provides APIs required for building HIDL Java
 // libraries.
