@@ -115,7 +115,7 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         trendCalculator.reset(1234, affordabilityNotes);
@@ -174,7 +174,7 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_RUNNING, 0, 1000))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is already above threshold and events are all positive delta.
@@ -222,7 +222,7 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is below threshold and events are all positive delta.
@@ -278,7 +278,7 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is below threshold and events are all positive delta.
@@ -320,7 +320,7 @@ public class AgentTrendCalculatorTest {
                 new AnticipatedAction(AlarmManagerEconomicPolicy.ACTION_ALARM_CLOCK, 1, 0))),
                 mock(AffordabilityChangeListener.class), mEconomicPolicy));
         for (ActionAffordabilityNote note : affordabilityNotes) {
-            note.recalculateModifiedPrice(mEconomicPolicy, 0, "com.test.app");
+            note.recalculateCosts(mEconomicPolicy, 0, "com.test.app");
         }
 
         // Balance is between both thresholds and events are mixed positive/negative delta.
