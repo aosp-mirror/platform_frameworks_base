@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.os.Handler;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -56,8 +57,14 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     // The interval in milliseconds between burn-in protection updates.
     private final long mBurnInProtectionUpdateInterval;
 
+    // Amount of time in milliseconds to linear interpolate toward the final jitter offset. Once
+    // this time is achieved, the normal jitter algorithm applies in full.
+    private final long mMillisUntilFullJitter;
+
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
+
+    private long mJitterStartTimeMillis;
 
     @Inject
     public DreamOverlayContainerViewController(
@@ -68,7 +75,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Main Handler handler,
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
-                    burnInProtectionUpdateInterval) {
+                    burnInProtectionUpdateInterval,
+            @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
@@ -86,6 +94,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mHandler = handler;
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
+        mMillisUntilFullJitter = millisUntilFullJitter;
     }
 
     @Override
@@ -96,6 +105,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     @Override
     protected void onViewAttached() {
+        mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
     }
 
@@ -114,13 +124,24 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     }
 
     private void updateBurnInOffsets() {
+        int burnInOffset = mMaxBurnInOffset;
+
+        // Make sure the offset starts at zero, to avoid a big jump in the overlay when it first
+        // appears.
+        long millisSinceStart = System.currentTimeMillis() - mJitterStartTimeMillis;
+        if (millisSinceStart < mMillisUntilFullJitter) {
+            float lerpAmount = (float) millisSinceStart / (float) mMillisUntilFullJitter;
+            burnInOffset = Math.round(MathUtils.lerp(0f, burnInOffset, lerpAmount));
+        }
+
         // These translation values change slowly, and the set translation methods are idempotent,
         // so no translation occurs when the values don't change.
-        mView.setTranslationX(getBurnInOffset(mMaxBurnInOffset * 2, true)
-                - mMaxBurnInOffset);
-
-        mView.setTranslationY(getBurnInOffset(mMaxBurnInOffset * 2, false)
-                - mMaxBurnInOffset);
+        int burnInOffsetX = getBurnInOffset(burnInOffset * 2, true)
+                - burnInOffset;
+        int burnInOffsetY = getBurnInOffset(burnInOffset * 2, false)
+                - burnInOffset;
+        mView.setTranslationX(burnInOffsetX);
+        mView.setTranslationY(burnInOffsetY);
 
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
     }
