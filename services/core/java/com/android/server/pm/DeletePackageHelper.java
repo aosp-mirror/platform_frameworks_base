@@ -453,7 +453,8 @@ final class DeletePackageHelper {
         }
         for (final int affectedUserId : affectedUserIds) {
             if (hadSuspendAppsPermission.get(affectedUserId)) {
-                mPm.unsuspendForSuspendingPackage(packageName, affectedUserId);
+                mPm.unsuspendForSuspendingPackage(mPm.snapshotComputer(), packageName,
+                        affectedUserId);
                 mPm.removeAllDistractingPackageRestrictions(affectedUserId);
             }
         }

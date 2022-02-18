@@ -26,16 +26,11 @@ import android.os.Binder;
 import android.os.Message;
 import android.os.UserHandle;
 
-import com.android.internal.util.FunctionalUtils;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public final class DomainVerificationConnection implements DomainVerificationService.Connection,
         DomainVerificationProxyV1.Connection, DomainVerificationProxyV2.Connection {
@@ -111,42 +106,8 @@ public final class DomainVerificationConnection implements DomainVerificationSer
         return mUmInternal.exists(userId);
     }
 
-    @Override
-    public void withPackageSettingsSnapshot(
-            @NonNull Consumer<Function<String, PackageStateInternal>> block) {
-        mPmInternal.withPackageSettingsSnapshot(block);
-    }
-
-    @Override
-    public <Output> Output withPackageSettingsSnapshotReturning(
-            @NonNull FunctionalUtils.ThrowingFunction<Function<String, PackageStateInternal>,
-                    Output> block) {
-        return mPmInternal.withPackageSettingsSnapshotReturning(block);
-    }
-
-    @Override
-    public <ExceptionType extends Exception> void withPackageSettingsSnapshotThrowing(
-            @NonNull FunctionalUtils.ThrowingCheckedConsumer<Function<String, PackageStateInternal>,
-                    ExceptionType> block) throws ExceptionType {
-        mPmInternal.withPackageSettingsSnapshotThrowing(block);
-    }
-
-    @Override
-    public <ExceptionOne extends Exception, ExceptionTwo extends Exception> void
-            withPackageSettingsSnapshotThrowing2(
-                    @NonNull FunctionalUtils.ThrowingChecked2Consumer<
-                            Function<String, PackageStateInternal>, ExceptionOne,
-                            ExceptionTwo> block)
-            throws ExceptionOne, ExceptionTwo {
-        mPmInternal.withPackageSettingsSnapshotThrowing2(block);
-    }
-
-    @Override
-    public <Output, ExceptionType extends Exception> Output
-            withPackageSettingsSnapshotReturningThrowing(
-            @NonNull FunctionalUtils.ThrowingCheckedFunction<
-                    Function<String, PackageStateInternal>, Output, ExceptionType> block)
-            throws ExceptionType {
-        return mPmInternal.withPackageSettingsSnapshotReturningThrowing(block);
+    @NonNull
+    public Computer snapshot() {
+        return (Computer) mPmInternal.snapshot();
     }
 }

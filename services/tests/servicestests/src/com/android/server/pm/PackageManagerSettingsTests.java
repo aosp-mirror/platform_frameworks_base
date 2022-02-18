@@ -35,6 +35,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -109,6 +110,8 @@ public class PackageManagerSettingsTests {
     LegacyPermissionDataProvider mPermissionDataProvider;
     @Mock
     DomainVerificationManagerInternal mDomainVerificationManager;
+    @Mock
+    Computer computer;
 
     final ArrayMap<String, Long> mOrigFirstInstallTimes = new ArrayMap<>();
 
@@ -132,7 +135,7 @@ public class PackageManagerSettingsTests {
         /* write out files and read */
         writeOldFiles();
         Settings settings = makeSettings();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
 
@@ -143,11 +146,11 @@ public class PackageManagerSettingsTests {
         // write out files and read
         writeOldFiles();
         Settings settings = makeSettings();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
 
         // write out, read back in and verify the same
-        settings.writeLPr();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        settings.writeLPr(computer);
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
 
@@ -156,7 +159,7 @@ public class PackageManagerSettingsTests {
         // Write delegateshellthe package files and make sure they're parsed properly the first time
         writeOldFiles();
         Settings settings = makeSettings();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
 
@@ -175,12 +178,12 @@ public class PackageManagerSettingsTests {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
         Settings settings = makeSettings();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
-        settings.writeLPr();
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        settings.writeLPr(computer);
 
         // Create Settings again to make it read from the new files
         settings = makeSettings();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
 
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
@@ -469,12 +472,12 @@ public class PackageManagerSettingsTests {
         ps2.setUsesStaticLibrariesVersions(new long[] { 34 });
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        settingsUnderTest.writeLPr();
+        settingsUnderTest.writeLPr(computer);
 
         settingsUnderTest.mPackages.clear();
         settingsUnderTest.mDisabledSysPackages.clear();
 
-        assertThat(settingsUnderTest.readLPw(createFakeUsers()), is(true));
+        assertThat(settingsUnderTest.readLPw(computer, createFakeUsers()), is(true));
 
         PackageSetting readPs1 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_1);
         PackageSetting readPs2 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_2);
@@ -534,12 +537,12 @@ public class PackageManagerSettingsTests {
         ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        settingsUnderTest.writeLPr();
+        settingsUnderTest.writeLPr(computer);
 
         settingsUnderTest.mPackages.clear();
         settingsUnderTest.mDisabledSysPackages.clear();
 
-        assertThat(settingsUnderTest.readLPw(createFakeUsers()), is(true));
+        assertThat(settingsUnderTest.readLPw(computer, createFakeUsers()), is(true));
 
         PackageSetting readPs1 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_1);
         PackageSetting readPs2 = settingsUnderTest.getPackageLPr(PACKAGE_NAME_2);
@@ -587,7 +590,7 @@ public class PackageManagerSettingsTests {
         Settings settings = makeSettings();
         final WatchableTester watcher = new WatchableTester(settings, "testEnableDisable");
         watcher.register();
-        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         watcher.verifyChangeReported("readLPw");
 
         // Enable/Disable a package
