@@ -3134,8 +3134,8 @@ public class ComputerEngine implements Computer {
                 writer.println("Domain verification status:");
                 writer.increaseIndent();
                 try {
-                    mDomainVerificationManager.printState(writer, packageName,
-                            UserHandle.USER_ALL, mSettings::getPackage);
+                    mDomainVerificationManager.printState(this, writer, packageName,
+                            UserHandle.USER_ALL);
                 } catch (Exception e) {
                     pw.println("Failure printing domain verification information");
                     Slog.e(TAG, "Failure printing domain verification information", e);
