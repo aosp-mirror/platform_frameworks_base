@@ -237,7 +237,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
             String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/png");
+            sharingIntent.setDataAndType(uri, "image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             // Include URI in ClipData also, so that grantPermission picks it up.
             // We don't use setData here because some apps interpret this as "to:".
