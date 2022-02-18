@@ -114,6 +114,13 @@ class DismissView(context: Context) : FrameLayout(context) {
             .start()
     }
 
+    /**
+     * Cancels the animator for the dismiss target.
+     */
+    fun cancelAnimators() {
+        animator.cancel()
+    }
+
     fun updateResources() {
         updatePadding()
         layoutParams.height = resources.getDimensionPixelSize(
