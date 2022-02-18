@@ -2031,14 +2031,20 @@ public final class InputMethodManager {
      * @param inputConnection the connection to be invalidated.
      * @param textSnapshot {@link TextSnapshot} to be used to update {@link EditorInfo}.
      * @param sessionId the session ID to be sent.
+     * @return {@code true} if the operation is done. {@code false} if the caller needs to fall back
+     *         to {@link InputMethodManager#restartInput(View)}.
      * @hide
      */
-    public void doInvalidateInput(@NonNull RemoteInputConnectionImpl inputConnection,
+    public boolean doInvalidateInput(@NonNull RemoteInputConnectionImpl inputConnection,
             @NonNull TextSnapshot textSnapshot, int sessionId) {
         synchronized (mH) {
             if (mServedInputConnection != inputConnection || mCurrentTextBoxAttribute == null) {
                 // OK to ignore because the calling InputConnection is already abandoned.
-                return;
+                return true;
+            }
+            if (mCurrentInputMethodSession == null) {
+                // IME is not yet bound to the client.  Need to fall back to the restartInput().
+                return false;
             }
             final EditorInfo editorInfo = mCurrentTextBoxAttribute.createCopyInternal();
             editorInfo.initialSelStart = mCursorSelStart = textSnapshot.getSelectionStart();
@@ -2051,6 +2057,7 @@ public final class InputMethodManager {
                     sessionId);
             forAccessibilitySessions(wrapper -> wrapper.invalidateInput(editorInfo,
                     mServedInputConnection, sessionId));
+            return true;
         }
     }
 
