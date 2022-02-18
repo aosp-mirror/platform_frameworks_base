@@ -39,7 +39,6 @@ import com.android.internal.policy.TransitionAnimation;
 /**
  * Controls the enter/exit animations of the letterbox education.
  */
-// TODO(b/215316431): Add tests
 class LetterboxEduAnimationController {
     private static final String TAG = "LetterboxEduAnimation";
 
@@ -99,14 +98,9 @@ class LetterboxEduAnimationController {
     /**
      * Starts both the background dim fade-out animation and the dialog exit animation.
      */
-    void startExitAnimation(@Nullable LetterboxEduDialogLayout layout, Runnable endCallback) {
+    void startExitAnimation(@NonNull LetterboxEduDialogLayout layout, Runnable endCallback) {
         // Cancel any previous animation if it's still running.
         cancelAnimation();
-
-        if (layout == null) {
-            endCallback.run();
-            return;
-        }
 
         final View dialogContainer = layout.getDialogContainer();
         mDialogAnimation = loadAnimation(WindowAnimation_windowExitAnimation);

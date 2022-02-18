@@ -235,6 +235,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 });
                 mPerDisplayWakelocks.clear();
             }
+            if (mVirtualAudioController != null) {
+                mVirtualAudioController.stopListening();
+                mVirtualAudioController = null;
+            }
         }
         mListener.onClose(mAssociationInfo.getId());
         mAppToken.unlinkToDeath(this, 0);

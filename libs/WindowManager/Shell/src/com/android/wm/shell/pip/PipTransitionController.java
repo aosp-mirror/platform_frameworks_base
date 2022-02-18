@@ -123,6 +123,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void forceFinishTransition() {
     }
 
+    /** Called when the fixed rotation started. */
+    public void onFixedRotationStarted() {
+    }
+
     public PipTransitionController(PipBoundsState pipBoundsState,
             PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController, Transitions transitions,

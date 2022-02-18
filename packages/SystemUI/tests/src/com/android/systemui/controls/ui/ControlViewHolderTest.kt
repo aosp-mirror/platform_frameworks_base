@@ -23,22 +23,24 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
+import android.service.controls.templates.ControlTemplate
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
-import com.android.systemui.controls.controller.ControlsController
-import com.android.systemui.util.time.FakeSystemClock
-import org.junit.runner.RunWith
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
 @SmallTest
@@ -49,11 +51,12 @@ class ControlViewHolderTest : SysuiTestCase() {
     private val clock = FakeSystemClock()
 
     private lateinit var cvh: ControlViewHolder
+    private lateinit var baseLayout: ViewGroup
 
     @Before
     fun setUp() {
         TestableLooper.get(this).runWithLooper {
-            val baseLayout = LayoutInflater.from(mContext).inflate(
+            baseLayout = LayoutInflater.from(mContext).inflate(
                     R.layout.controls_base_item, null, false) as ViewGroup
 
             cvh = ControlViewHolder(
@@ -105,6 +108,25 @@ class ControlViewHolderTest : SysuiTestCase() {
         cvh.updateStatusRow(enabled = true, CONTROL_TITLE, DRAWABLE, COLOR, control)
 
         assertThat(cvh.icon.imageTintList).isEqualTo(customIconTintList)
+    }
+
+    @Test
+    fun chevronIcon() {
+        val control = Control.StatefulBuilder(CONTROL_ID, mock(PendingIntent::class.java))
+            .setStatus(Control.STATUS_OK)
+            .setControlTemplate(ControlTemplate.NO_TEMPLATE)
+            .build()
+        val cws = ControlWithState(
+            ComponentName.createRelative("pkg", "cls"),
+            ControlInfo(
+                CONTROL_ID, CONTROL_TITLE, "subtitle", DeviceTypes.TYPE_AIR_FRESHENER
+            ),
+            control
+        )
+        cvh.bindData(cws, false)
+        val chevronIcon = baseLayout.findViewById<View>(R.id.chevron_icon)
+
+        assertThat(chevronIcon.visibility).isEqualTo(View.VISIBLE)
     }
 }
 

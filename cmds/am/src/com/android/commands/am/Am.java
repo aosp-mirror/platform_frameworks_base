@@ -189,6 +189,8 @@ public class Am extends BaseCommand {
                 instrument.abi = nextArgRequired();
             } else if (opt.equals("--no-restart")) {
                 instrument.noRestart = true;
+            } else if (opt.equals("--always-check-signature")) {
+                instrument.alwaysCheckSignature = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;

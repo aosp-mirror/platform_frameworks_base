@@ -59,17 +59,29 @@ public final class CarouselTemplateData extends BaseTemplateData {
             @Nullable Text titleText,
             @Nullable Icon titleIcon,
             @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
+            @Nullable Icon subtitleIcon,
             @Nullable TapAction primaryTapAction,
+            @Nullable SubItemLoggingInfo primaryLoggingInfo,
             @Nullable Text supplementalSubtitleText,
             @Nullable Icon supplementalSubtitleIcon,
             @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
+            @Nullable Text supplementalText,
+            @Nullable Icon supplementalIcon,
+            @Nullable TapAction supplementalTapAction,
+            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
             @Nullable Text supplementalAlarmText,
+            int layoutWeight,
             @NonNull List<CarouselItem> carouselItems,
             @Nullable TapAction carouselAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
+                primaryTapAction, primaryLoggingInfo,
+                supplementalSubtitleText, supplementalSubtitleIcon,
+                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
+                supplementalText, supplementalIcon,
+                supplementalTapAction, supplementalLoggingInfo,
+                supplementalAlarmText, layoutWeight);
+
         mCarouselItems = carouselItems;
         mCarouselAction = carouselAction;
     }
@@ -179,10 +191,14 @@ public final class CarouselTemplateData extends BaseTemplateData {
             }
 
             return new CarouselTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
+                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mCarouselItems,
-                    mCarouselAction);
+                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
+                    getSupplementalText(), getSupplementalIcon(),
+                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
+                    getSupplementalAlarmText(), getLayoutWeight(),
+                    mCarouselItems, mCarouselAction);
         }
     }
 

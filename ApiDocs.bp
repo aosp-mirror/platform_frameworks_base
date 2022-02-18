@@ -145,11 +145,9 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     aidl: {
-        local_include_dirs: [
-            "apex/media/aidl/stable",
-        ],
         include_dirs: [
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
         ],
     },
 }

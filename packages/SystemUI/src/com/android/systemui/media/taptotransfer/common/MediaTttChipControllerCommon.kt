@@ -25,8 +25,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.util.concurrency.DelayableExecutor
 
 /**
  * A superclass controller that provides common functionality for showing chips on the sender device
@@ -38,6 +41,7 @@ import com.android.systemui.R
 abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     internal val context: Context,
     private val windowManager: WindowManager,
+    @Main private val mainExecutor: DelayableExecutor,
     @LayoutRes private val chipLayoutRes: Int
 ) {
     /** The window layout parameters we'll use when attaching the view to a window. */
@@ -55,6 +59,9 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 
     /** The chip view currently being displayed. Null if the chip is not being displayed. */
     var chipView: ViewGroup? = null
+
+    /** A [Runnable] that, when run, will cancel the pending timeout of the chip. */
+    var cancelChipViewTimeout: Runnable? = null
 
     /**
      * Displays the chip with the current state.
@@ -77,8 +84,11 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         if (oldChipView == null) {
             windowManager.addView(chipView, windowLayoutParams)
         }
-    }
 
+        // Cancel and re-set the chip timeout each time we get a new state.
+        cancelChipViewTimeout?.run()
+        cancelChipViewTimeout = mainExecutor.executeDelayed(this::removeChip, TIMEOUT_MILLIS)
+    }
 
     /** Hides the chip. */
     fun removeChip() {
@@ -118,3 +128,5 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
+@VisibleForTesting
+const val TIMEOUT_MILLIS = 3000L

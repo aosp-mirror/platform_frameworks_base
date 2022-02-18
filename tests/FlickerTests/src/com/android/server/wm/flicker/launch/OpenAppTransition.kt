@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
-import android.platform.test.annotations.FlakyTest
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider

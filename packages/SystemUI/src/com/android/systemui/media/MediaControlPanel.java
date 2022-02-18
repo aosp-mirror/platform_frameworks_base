@@ -476,7 +476,7 @@ public class MediaControlPanel {
         appIconView.clearColorFilter();
         if (data.getAppIcon() != null && !data.getResumption()) {
             appIconView.setImageIcon(data.getAppIcon());
-            int color = mContext.getColor(android.R.color.system_accent2_900);
+            int color = mContext.getColor(R.color.material_dynamic_secondary10);
             appIconView.setColorFilter(color);
         } else {
             // Resume players use launcher icon
@@ -590,7 +590,7 @@ public class MediaControlPanel {
             } else {
                 appIconView.setImageResource(R.drawable.ic_music_note);
             }
-            int color = mContext.getColor(android.R.color.system_accent2_900);
+            int color = mContext.getColor(R.color.material_dynamic_secondary10);
             appIconView.setColorFilter(color);
         }
 

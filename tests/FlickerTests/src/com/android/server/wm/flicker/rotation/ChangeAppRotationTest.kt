@@ -112,10 +112,7 @@ class ChangeAppRotationTest(
      * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
      * doesn't flicker, and disappears before the transition is complete
      */
-    @Presubmit
-    @Test
-    fun rotationLayerAppearsAndVanishes() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
+    fun rotationLayerAppearsAndVanishesAssertion() {
         testSpec.assertLayers {
             this.isVisible(testApp.component)
                 .then()
@@ -126,11 +123,26 @@ class ChangeAppRotationTest(
         }
     }
 
+    /**
+     * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
+     * doesn't flicker, and disappears before the transition is complete
+     */
+    @Presubmit
+    @Test
+    fun rotationLayerAppearsAndVanishes() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        rotationLayerAppearsAndVanishesAssertion()
+    }
+
+    /**
+     * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
+     * doesn't flicker, and disappears before the transition is complete
+     */
     @FlakyTest(bugId = 218484127)
     @Test
     fun rotationLayerAppearsAndVanishes_shellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
-        rotationLayerAppearsAndVanishes()
+        rotationLayerAppearsAndVanishesAssertion()
     }
 
     /**

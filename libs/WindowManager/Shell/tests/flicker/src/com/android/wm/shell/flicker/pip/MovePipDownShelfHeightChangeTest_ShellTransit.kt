@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -58,7 +58,7 @@ class MovePipDownShelfHeightChangeTest_ShellTransit(
     testSpec: FlickerTestParameter
 ) : MovePipDownShelfHeightChangeTest(testSpec) {
     @Before
-    fun before() {
+    override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
 }

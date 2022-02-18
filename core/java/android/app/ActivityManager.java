@@ -179,6 +179,12 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_NO_RESTART = 1 << 3;
+    /**
+     * Force the check that instrumentation and the target package are signed with the same
+     * certificate even if {@link Build#IS_DEBUGGABLE} is {@code true}.
+     * @hide
+     */
+    public static final int INSTR_FLAG_ALWAYS_CHECK_SIGNATURE = 1 << 4;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;

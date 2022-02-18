@@ -16997,6 +16997,7 @@ package android.hardware {
 
   public class SensorEvent {
     field public int accuracy;
+    field public boolean firstEventAfterDiscontinuity;
     field public android.hardware.Sensor sensor;
     field public long timestamp;
     field public final float[] values;
@@ -17008,7 +17009,6 @@ package android.hardware {
     method public void onFlushCompleted(android.hardware.Sensor);
     method public void onSensorAdditionalInfo(android.hardware.SensorAdditionalInfo);
     method public void onSensorChanged(android.hardware.SensorEvent);
-    method public void onSensorDiscontinuity(@NonNull android.hardware.Sensor);
   }
 
   public interface SensorEventListener {
@@ -17126,6 +17126,9 @@ package android.hardware {
 
   public final class SensorPrivacyManager {
     method public boolean supportsSensorToggle(int);
+    method public boolean supportsSensorToggle(int, int);
+    field public static final int TOGGLE_TYPE_HARDWARE = 2; // 0x2
+    field public static final int TOGGLE_TYPE_SOFTWARE = 1; // 0x1
   }
 
   public static class SensorPrivacyManager.Sensors {
@@ -39513,7 +39516,7 @@ package android.speech {
     method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
     method protected abstract void onStartListening(android.content.Intent, android.speech.RecognitionService.Callback);
     method protected abstract void onStopListening(android.speech.RecognitionService.Callback);
-    method public void triggerModelDownload(@NonNull android.content.Intent);
+    method public void onTriggerModelDownload(@NonNull android.content.Intent);
     field public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
     field public static final String SERVICE_META_DATA = "android.speech";
   }
@@ -39570,12 +39573,21 @@ package android.speech {
     field public static final String ACTION_VOICE_SEARCH_HANDS_FREE = "android.speech.action.VOICE_SEARCH_HANDS_FREE";
     field public static final String ACTION_WEB_SEARCH = "android.speech.action.WEB_SEARCH";
     field public static final String DETAILS_META_DATA = "android.speech.DETAILS";
-    field public static final String EXTRA_AUDIO_INJECT_SOURCE = "android.speech.extra.AUDIO_INJECT_SOURCE";
+    field @Deprecated public static final String EXTRA_AUDIO_INJECT_SOURCE = "android.speech.extra.AUDIO_INJECT_SOURCE";
+    field public static final String EXTRA_AUDIO_SOURCE = "android.speech.extra.AUDIO_SOURCE";
+    field public static final String EXTRA_AUDIO_SOURCE_CHANNEL_COUNT = "android.speech.extra.AUDIO_SOURCE_CHANNEL_COUNT";
+    field public static final String EXTRA_AUDIO_SOURCE_ENCODING = "android.speech.extra.AUDIO_SOURCE_ENCODING";
+    field public static final String EXTRA_AUDIO_SOURCE_SAMPLING_RATE = "android.speech.extra.AUDIO_SOURCE_SAMPLING_RATE";
+    field public static final String EXTRA_BIASING_STRINGS = "android.speech.extra.BIASING_STRINGS";
     field public static final String EXTRA_CALLING_PACKAGE = "calling_package";
     field public static final String EXTRA_CONFIDENCE_SCORES = "android.speech.extra.CONFIDENCE_SCORES";
+    field public static final String EXTRA_ENABLE_BIASING_DEVICE_CONTEXT = "android.speech.extra.ENABLE_BIASING_DEVICE_CONTEXT";
+    field public static final String EXTRA_ENABLE_FORMATTING = "android.speech.extra.ENABLE_FORMATTING";
+    field public static final String EXTRA_HIDE_PARTIAL_TRAILING_PUNCTUATION = "android.speech.extra.HIDE_PARTIAL_TRAILING_PUNCTUATION";
     field public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
     field public static final String EXTRA_LANGUAGE_MODEL = "android.speech.extra.LANGUAGE_MODEL";
     field public static final String EXTRA_LANGUAGE_PREFERENCE = "android.speech.extra.LANGUAGE_PREFERENCE";
+    field public static final String EXTRA_MASK_OFFENSIVE_WORDS = "android.speech.extra.MASK_OFFENSIVE_WORDS";
     field public static final String EXTRA_MAX_RESULTS = "android.speech.extra.MAX_RESULTS";
     field public static final String EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE = "android.speech.extra.ONLY_RETURN_LANGUAGE_PREFERENCE";
     field public static final String EXTRA_ORIGIN = "android.speech.extra.ORIGIN";
@@ -39586,12 +39598,14 @@ package android.speech {
     field public static final String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";
     field public static final String EXTRA_RESULTS_PENDINGINTENT_BUNDLE = "android.speech.extra.RESULTS_PENDINGINTENT_BUNDLE";
     field public static final String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
-    field public static final String EXTRA_SEGMENT_SESSION = "android.speech.extra.SEGMENT_SESSION";
+    field public static final String EXTRA_SEGMENTED_SESSION = "android.speech.extra.SEGMENTED_SESSION";
     field public static final String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS";
     field public static final String EXTRA_SUPPORTED_LANGUAGES = "android.speech.extra.SUPPORTED_LANGUAGES";
     field public static final String EXTRA_WEB_SEARCH_ONLY = "android.speech.extra.WEB_SEARCH_ONLY";
+    field public static final String FORMATTING_OPTIMIZE_LATENCY = "latency";
+    field public static final String FORMATTING_OPTIMIZE_QUALITY = "quality";
     field public static final String LANGUAGE_MODEL_FREE_FORM = "free_form";
     field public static final String LANGUAGE_MODEL_WEB_SEARCH = "web_search";
     field public static final int RESULT_AUDIO_ERROR = 5; // 0x5

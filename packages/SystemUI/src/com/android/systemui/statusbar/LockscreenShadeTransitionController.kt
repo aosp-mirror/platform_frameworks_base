@@ -67,7 +67,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
-    dumpManager: DumpManager,
+    dumpManager: DumpManager
 ) : Dumpable {
     private var pulseHeight: Float = 0f
     private var useSplitShade: Boolean = false
@@ -363,6 +363,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
         depthController.transitionToFullShadeProgress = scrimProgress
         udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
+        statusbar.setTransitionToFullShadeProgress(scrimProgress)
     }
 
     private fun setDragDownAmountAnimated(

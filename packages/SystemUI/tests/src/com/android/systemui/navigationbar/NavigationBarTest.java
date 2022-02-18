@@ -28,6 +28,7 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -228,7 +229,8 @@ public class NavigationBarTest extends SysuiTestCase {
 
     @Test
     public void testHomeLongPress() {
-        mNavigationBar.onViewAttachedToWindow(mNavigationBar.createView(null));
+        mNavigationBar.onViewAttachedToWindow(mNavigationBar
+                .createView(null, /* initialVisibility= */ true));
         mNavigationBar.onHomeLongClick(mNavigationBar.getView());
 
         verify(mUiEventLogger, times(1)).log(NAVBAR_ASSIST_LONGPRESS);
@@ -241,7 +243,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     .setLong(HOME_BUTTON_LONG_PRESS_DURATION_MS, 100)
                     .build());
         when(mNavBarHelper.getLongPressHomeEnabled()).thenReturn(true);
-        mNavigationBar.onViewAttachedToWindow(mNavigationBar.createView(null));
+        mNavigationBar.onViewAttachedToWindow(mNavigationBar
+                .createView(null, /* initialVisibility= */ true));
 
         mNavigationBar.onHomeTouch(mNavigationBar.getView(), MotionEvent.obtain(
                 /*downTime=*/SystemClock.uptimeMillis(),
@@ -263,7 +266,8 @@ public class NavigationBarTest extends SysuiTestCase {
 
     @Test
     public void testRegisteredWithDispatcher() {
-        mNavigationBar.onViewAttachedToWindow(mNavigationBar.createView(null));
+        mNavigationBar.onViewAttachedToWindow(mNavigationBar
+                .createView(null, /* initialVisibility= */ true));
         verify(mBroadcastDispatcher).registerReceiverWithHandler(
                 any(BroadcastReceiver.class),
                 any(IntentFilter.class),
@@ -283,8 +287,8 @@ public class NavigationBarTest extends SysuiTestCase {
         doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
         doNothing().when(defaultNavBar).checkNavBarModes();
         doNothing().when(externalNavBar).checkNavBarModes();
-        defaultNavBar.createView(null);
-        externalNavBar.createView(null);
+        defaultNavBar.createView(null, /* initialVisibility= */ true);
+        externalNavBar.createView(null, /* initialVisibility= */ true);
 
         defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
@@ -318,7 +322,7 @@ public class NavigationBarTest extends SysuiTestCase {
         doReturn(mockShadeWindowView).when(mStatusBar).getNotificationShadeWindowView();
         doReturn(true).when(mockShadeWindowView).isAttachedToWindow();
         doNothing().when(mNavigationBar).checkNavBarModes();
-        mNavigationBar.createView(null);
+        mNavigationBar.createView(null, /* initialVisibility= */ true);
         WindowInsets windowInsets = new WindowInsets.Builder().setVisible(ime(), false).build();
         doReturn(windowInsets).when(mockShadeWindowView).getRootWindowInsets();
 
@@ -354,7 +358,7 @@ public class NavigationBarTest extends SysuiTestCase {
 
     @Test
     public void testA11yEventAfterDetach() {
-        View v = mNavigationBar.createView(null);
+        View v = mNavigationBar.createView(null, /* initialVisibility= */ true);
         mNavigationBar.onViewAttachedToWindow(v);
         verify(mNavBarHelper).registerNavTaskStateUpdater(any(
                 NavBarHelper.NavbarTaskbarStateUpdater.class));
@@ -364,6 +368,20 @@ public class NavigationBarTest extends SysuiTestCase {
 
         // Should be safe even though the internal view is now null.
         mNavigationBar.updateAccessibilityStateFlags();
+    }
+
+    @Test
+    public void testCreateView_initiallyVisible_viewIsVisible() {
+        mNavigationBar.createView(null, /* initialVisibility= */ true);
+
+        assertThat(mNavigationBar.getView().getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testCreateView_initiallyNotVisible_viewIsNotVisible() {
+        mNavigationBar.createView(null, /* initialVisibility= */ false);
+
+        assertThat(mNavigationBar.getView().getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     private NavigationBar createNavBar(Context context) {

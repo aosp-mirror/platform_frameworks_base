@@ -69,4 +69,7 @@
     <color name="settingslib_text_color_secondary_device_default">@android:color/system_neutral2_700</color>
 
     <color name="settingslib_text_color_preference_category_title">@android:color/system_accent1_600</color>
+
+    <color name="settingslib_ripple_color">?android:attr/colorControlHighlight</color>
+    <color name="settingslib_material_grey_900">#ff212121</color>
 </resources>

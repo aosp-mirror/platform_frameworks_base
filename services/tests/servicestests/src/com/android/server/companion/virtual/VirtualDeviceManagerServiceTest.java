@@ -361,6 +361,16 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void close_cleanVirtualAudioController() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+
+        mDeviceImpl.close();
+
+        assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNull();
+    }
+
+    @Test
     public void sendKeyEvent_noFd() {
         assertThrows(
                 IllegalArgumentException.class,

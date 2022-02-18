@@ -263,7 +263,7 @@ public class PowerManagerServiceMockingTest {
     @Test
     public void testUserActivityOnDeviceStateChange() {
         createService();
-        mService.systemReady();
+        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         final DisplayInfo info = new DisplayInfo();

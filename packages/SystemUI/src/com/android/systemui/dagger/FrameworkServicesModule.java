@@ -31,6 +31,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.om.OverlayManager;
@@ -447,6 +448,12 @@ public class FrameworkServicesModule {
             pm.initializeUsageHelper();
         }
         return pm;
+    }
+
+    @Provides
+    @Singleton
+    static ClipboardManager provideClipboardManager(Context context) {
+        return context.getSystemService(ClipboardManager.class);
     }
 
     @Provides

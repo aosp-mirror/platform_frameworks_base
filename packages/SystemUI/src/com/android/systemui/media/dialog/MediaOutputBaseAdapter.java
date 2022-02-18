@@ -177,6 +177,9 @@ public abstract class MediaOutputBaseAdapter extends
                                     .mutate() : mContext.getDrawable(
                             R.drawable.media_output_item_background)
                             .mutate();
+            backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
+                    mController.getColorItemBackground(),
+                    PorterDuff.Mode.SRC_IN));
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
@@ -212,8 +215,13 @@ public abstract class MediaOutputBaseAdapter extends
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
-            mItemLayout.setBackground(mContext.getDrawable(R.drawable.media_output_item_background)
-                    .mutate());
+            final Drawable backgroundDrawable = mContext.getDrawable(
+                            R.drawable.media_output_item_background)
+                    .mutate();
+            backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
+                    mController.getColorItemBackground(),
+                    PorterDuff.Mode.SRC_IN));
+            mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTwoLineTitleText.setTranslationY(0);

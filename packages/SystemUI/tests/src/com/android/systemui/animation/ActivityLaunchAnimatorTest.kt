@@ -46,7 +46,7 @@ import kotlin.concurrent.thread
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
-    private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
+    private val testLaunchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
     @Mock lateinit var listener: ActivityLaunchAnimator.Listener
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
@@ -58,7 +58,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(launchAnimator)
+        activityLaunchAnimator = ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator)
         activityLaunchAnimator.callback = callback
         activityLaunchAnimator.addListener(listener)
     }
@@ -129,13 +129,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun animatesIfActivityIsAlreadyOpenAndIsOnKeyguard() {
         `when`(callback.isOnKeyguard()).thenReturn(true)
-        val animator = ActivityLaunchAnimator(launchAnimator)
-        animator.callback = callback
 
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         var animationAdapter: RemoteAnimationAdapter? = null
 
-        startIntentWithAnimation(animator) { adapter ->
+        startIntentWithAnimation(activityLaunchAnimator) { adapter ->
             animationAdapter = adapter
             ActivityManager.START_DELIVERED_TO_TOP
         }

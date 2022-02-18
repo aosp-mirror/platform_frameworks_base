@@ -329,6 +329,20 @@ public final class LogcatManagerService extends SystemService {
 
             if (mStart) {
 
+                ActivityManagerInternal ami = LocalServices.getService(
+                        ActivityManagerInternal.class);
+                boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(mUid);
+
+                // The instrumented apks only run for testing, so we don't check user permission.
+                if (isCallerInstrumented) {
+                    try {
+                        getLogdService().approve(mUid, mGid, mPid, mFd);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
+
                 // TODO Temporarily approve all the requests to unblock testing failures.
                 try {
                     getLogdService().approve(mUid, mGid, mPid, mFd);

@@ -112,20 +112,11 @@ public final class MidiManager {
     // Binder stub for receiving device notifications from MidiService
     private class DeviceListener extends IMidiDeviceListener.Stub {
         private final DeviceCallback mCallback;
-        private final Handler mHandler;
         private final Executor mExecutor;
         private final int mTransport;
 
-        DeviceListener(DeviceCallback callback, Handler handler, int transport) {
-            mCallback = callback;
-            mHandler = handler;
-            mExecutor = null;
-            mTransport = transport;
-        }
-
         DeviceListener(DeviceCallback callback, Executor executor, int transport) {
             mCallback = callback;
-            mHandler = null;
             mExecutor = executor;
             mTransport = transport;
         }
@@ -136,13 +127,6 @@ public final class MidiManager {
                 if (mExecutor != null) {
                     mExecutor.execute(() ->
                             mCallback.onDeviceAdded(device));
-                } else if (mHandler != null) {
-                    final MidiDeviceInfo deviceF = device;
-                    mHandler.post(new Runnable() {
-                            @Override public void run() {
-                                mCallback.onDeviceAdded(deviceF);
-                            }
-                        });
                 } else {
                     mCallback.onDeviceAdded(device);
                 }
@@ -155,13 +139,6 @@ public final class MidiManager {
                 if (mExecutor != null) {
                     mExecutor.execute(() ->
                             mCallback.onDeviceRemoved(device));
-                } else if (mHandler != null) {
-                    final MidiDeviceInfo deviceF = device;
-                    mHandler.post(new Runnable() {
-                            @Override public void run() {
-                                mCallback.onDeviceRemoved(deviceF);
-                            }
-                        });
                 } else {
                     mCallback.onDeviceRemoved(device);
                 }
@@ -173,13 +150,6 @@ public final class MidiManager {
             if (mExecutor != null) {
                 mExecutor.execute(() ->
                         mCallback.onDeviceStatusChanged(status));
-            } else if (mHandler != null) {
-                final MidiDeviceStatus statusF = status;
-                mHandler.post(new Runnable() {
-                        @Override public void run() {
-                            mCallback.onDeviceStatusChanged(statusF);
-                        }
-                    });
             } else {
                 mCallback.onDeviceStatusChanged(status);
             }
@@ -275,7 +245,11 @@ public final class MidiManager {
      */
     @Deprecated
     public void registerDeviceCallback(DeviceCallback callback, Handler handler) {
-        DeviceListener deviceListener = new DeviceListener(callback, handler,
+        Executor executor = null;
+        if (handler != null) {
+            executor = handler::post;
+        }
+        DeviceListener deviceListener = new DeviceListener(callback, executor,
                 TRANSPORT_MIDI_BYTE_STREAM);
         try {
             mService.registerListener(mToken, deviceListener);

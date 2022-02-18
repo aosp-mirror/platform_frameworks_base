@@ -46,7 +46,7 @@ import java.io.PrintWriter;
  * Controller for IME inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
  */
-final class ImeInsetsSourceProvider extends InsetsSourceProvider {
+final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
 
     private InsetsControlTarget mImeRequester;
     private Runnable mShowImeRunner;
@@ -113,8 +113,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     private void reportImeDrawnForOrganizer(InsetsControlTarget caller) {
         if (caller.getWindow() != null && caller.getWindow().getTask() != null) {
             if (caller.getWindow().getTask().isOrganized()) {
-                mWin.mWmService.mAtmService.mTaskOrganizerController.reportImeDrawnOnTask(
-                        caller.getWindow().getTask());
+                mWindowContainer.mWmService.mAtmService.mTaskOrganizerController
+                        .reportImeDrawnOnTask(caller.getWindow().getTask());
             }
         }
     }
@@ -173,12 +173,18 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     void checkShowImePostLayout() {
+        if (mWindowContainer == null) {
+            return;
+        }
+        WindowState windowState =  mWindowContainer.asWindowState();
+        if (windowState == null) {
+            throw new IllegalArgumentException("IME insets must be provided by a window.");
+        }
         // check if IME is drawn
         if (mIsImeLayoutDrawn
                 || (isReadyToShowIme()
-                && mWin != null
-                && mWin.isDrawn()
-                && !mWin.mGivenInsetsPending)) {
+                && windowState.isDrawn()
+                && !windowState.mGivenInsetsPending)) {
             mIsImeLayoutDrawn = true;
             // show IME if InputMethodService requested it to be shown.
             if (mShowImeRunner != null) {
