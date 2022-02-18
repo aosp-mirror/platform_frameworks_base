@@ -16870,6 +16870,7 @@ package android.hardware {
     field public static final long USAGE_SENSOR_DIRECT_DATA = 8388608L; // 0x800000L
     field public static final long USAGE_VIDEO_ENCODE = 65536L; // 0x10000L
     field public static final int YCBCR_420_888 = 35; // 0x23
+    field public static final int YCBCR_P010 = 54; // 0x36
   }
 
   public final class Sensor {
