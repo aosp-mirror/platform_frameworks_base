@@ -245,7 +245,6 @@ import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
@@ -496,7 +495,6 @@ public class StatusBar extends CoreStartable implements
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final StatusBarComponent.Factory mStatusBarComponentFactory;
     private final PluginManager mPluginManager;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
@@ -753,7 +751,6 @@ public class StatusBar extends CoreStartable implements
             CommandQueue commandQueue,
             StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
-            Optional<LegacySplitScreen> splitScreenOptional,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
@@ -852,7 +849,6 @@ public class StatusBar extends CoreStartable implements
         mCommandQueue = commandQueue;
         mStatusBarComponentFactory = statusBarComponentFactory;
         mPluginManager = pluginManager;
-        mSplitScreenOptional = splitScreenOptional;
         mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -1670,35 +1666,6 @@ public class StatusBar extends CoreStartable implements
 
     public int getStatusBarHeight() {
         return mStatusBarWindowController.getStatusBarHeight();
-    }
-
-    public boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
-        if (!mSplitScreenOptional.isPresent()) {
-            return false;
-        }
-
-        final LegacySplitScreen legacySplitScreen = mSplitScreenOptional.get();
-        if (legacySplitScreen.isDividerVisible()) {
-            if (legacySplitScreen.isMinimized() && !legacySplitScreen.isHomeStackResizable()) {
-                // Undocking from the minimized state is not supported
-                return false;
-            }
-
-            legacySplitScreen.onUndockingTask();
-            if (metricsUndockAction != -1) {
-                mMetricsLogger.action(metricsUndockAction);
-            }
-            return true;
-        }
-
-        if (legacySplitScreen.splitPrimaryTask()) {
-            if (metricsDockAction != -1) {
-                mMetricsLogger.action(metricsDockAction);
-            }
-            return true;
-        }
-
-        return false;
     }
 
     /**
