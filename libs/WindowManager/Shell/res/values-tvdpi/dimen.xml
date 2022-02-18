@@ -37,5 +37,12 @@
     <dimen name="pip_menu_arrow_elevation">5dp</dimen>
 
     <dimen name="pip_menu_elevation">1dp</dimen>
+
+    <dimen name="pip_menu_edu_text_view_height">24dp</dimen>
+    <dimen name="pip_menu_edu_text_home_icon">9sp</dimen>
+    <dimen name="pip_menu_edu_text_home_icon_outline">14sp</dimen>
+    <integer name="pip_edu_text_show_duration_ms">10500</integer>
+    <integer name="pip_edu_text_window_exit_animation_duration_ms">1000</integer>
+    <integer name="pip_edu_text_view_exit_animation_duration_ms">300</integer>
 </resources>
 
