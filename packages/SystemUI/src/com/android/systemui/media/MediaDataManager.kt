@@ -531,7 +531,8 @@ class MediaDataManager(
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(userId, true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
-                    null, packageName, token, appIntent, device = null, active = false,
+                    MediaButton(playOrPause = mediaAction), packageName, token, appIntent,
+                    device = null, active = false,
                     resumeAction = resumeAction, resumption = true, notificationKey = packageName,
                     hasCheckedForResume = true, lastActive = lastActive))
         }
@@ -951,6 +952,7 @@ class MediaDataManager(
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
+                    semanticActions = MediaButton(playOrPause = resumeAction),
                     actionsToShowInCompact = listOf(0), active = false, resumption = true,
                     isPlaying = false, isClearable = true)
             val pkg = removed.packageName
