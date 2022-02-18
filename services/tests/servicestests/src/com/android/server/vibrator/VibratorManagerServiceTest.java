@@ -765,6 +765,9 @@ public class VibratorManagerServiceTest {
         when(mIInputManagerMock.getVibratorIds(eq(1))).thenReturn(new int[]{1});
         when(mIInputManagerMock.getInputDevice(eq(1))).thenReturn(createInputDeviceWithVibrator(1));
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        // Mock alarm intensity equals to default value to avoid scaling in this test.
+        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY,
+                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_ALARM));
         VibratorManagerService service = createSystemReadyService();
 
         CombinedVibration effect = CombinedVibration.createParallel(
@@ -804,6 +807,9 @@ public class VibratorManagerServiceTest {
         mockVibrators(1, 2);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        // Mock alarm intensity equals to default value to avoid scaling in this test.
+        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY,
+                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_ALARM));
         VibratorManagerService service = createSystemReadyService();
         // The native callback will be dispatched manually in this test.
         mTestLooper.stopAutoDispatchAndIgnoreExceptions();
