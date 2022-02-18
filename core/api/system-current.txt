@@ -6789,7 +6789,8 @@ package android.media.tv {
     method @NonNull @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE) public java.util.List<java.lang.String> getAvailableExtensionInterfaceNames(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPid(@NonNull String);
-    method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPriority(int, @Nullable String);
+    method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPriority(int, @NonNull String);
+    method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public int getClientPriority(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TUNED_INFO) public java.util.List<android.media.tv.TunedInfo> getCurrentTunedInfos();
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @Nullable @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE) public android.os.IBinder getExtensionInterface(@NonNull String, @NonNull String);
