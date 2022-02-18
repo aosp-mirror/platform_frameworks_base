@@ -3714,7 +3714,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void registerRemoteAnimationForNextActivityStart(String packageName,
-            RemoteAnimationAdapter adapter) {
+            RemoteAnimationAdapter adapter, IBinder launchCookie) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
         adapter.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
@@ -3722,7 +3722,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final long origId = Binder.clearCallingIdentity();
             try {
                 getActivityStartController().registerRemoteAnimationForNextActivityStart(
-                        packageName, adapter);
+                        packageName, adapter, launchCookie);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
