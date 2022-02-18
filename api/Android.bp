@@ -93,6 +93,7 @@ metalava_cmd = "$(location metalava)"
 // Silence reflection warnings. See b/168689341
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet --no-banner --format=v2 "
+metalava_cmd += " --hide ChangedThrows "
 
 genrule {
     name: "current-api-xml",
