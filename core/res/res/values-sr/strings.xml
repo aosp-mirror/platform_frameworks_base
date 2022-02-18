@@ -2175,7 +2175,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Обавештења"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Брза подешавања"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Дијалог напајања"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Закључани екран"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Закључавање екрана"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Снимак екрана"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Пречица за приступачност на екрану"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Алатка за бирање пречица за приступачност на екрану"</string>
