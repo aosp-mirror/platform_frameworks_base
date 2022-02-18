@@ -1893,7 +1893,7 @@ public final class ProcessList {
     /** Return true if the client app for the SDK sandbox process is debuggable. */
     private boolean isAppForSdkSandboxDebuggable(ProcessRecord sandboxProcess) {
         // TODO (b/221004701) use client app process name
-        final int appUid = Process.toAppUid(sandboxProcess.uid);
+        final int appUid = Process.sdkSandboxToAppUid(sandboxProcess.uid);
         IPackageManager pm = mService.getPackageManager();
         try {
             String[] packages = pm.getPackagesForUid(appUid);
