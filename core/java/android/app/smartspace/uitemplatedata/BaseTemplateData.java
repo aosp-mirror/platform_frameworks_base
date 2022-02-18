@@ -20,10 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.smartspace.SmartspaceTarget.FeatureType;
 import android.app.smartspace.SmartspaceTarget.UiTemplateType;
 import android.app.smartspace.SmartspaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -57,81 +59,39 @@ public class BaseTemplateData implements Parcelable {
     /**
      * Title text and title icon are shown at the first row. When both are absent, the date view
      * will be used, which has its own tap action applied to the title area.
+     *
+     * Primary tap action for the entire card, including the blank spaces, except: 1. When title is
+     * absent, the date view's default tap action is used; 2. Subtitle/Supplemental subtitle uses
+     * its own tap action if being set; 3. Secondary card uses its own tap action if being set.
      */
     @Nullable
-    private final Text mTitleText;
+    private final SubItemInfo mPrimaryItem;
 
-    @Nullable
-    private final Icon mTitleIcon;
 
     /** Subtitle text and icon are shown at the second row. */
     @Nullable
-    private final Text mSubtitleText;
-
-    @Nullable
-    private final Icon mSubtitleIcon;
-
-    /**
-     * Primary tap action for the entire card, including the blank spaces, except: 1. When title is
-     * absent, the date view's default tap action is used; 2. Supplemental subtitle uses its own tap
-     * action if being set; 3. Secondary card uses its own tap action if being set.
-     */
-    @Nullable
-    private final TapAction mPrimaryTapAction;
-
-    /**
-     * Primary logging info for the entire card. This will only be used when rendering a sub card
-     * within the base card. For the base card itself, BcSmartspaceCardLoggingInfo should be used,
-     * which has the display-specific info (e.g. display surface).
-     */
-    @Nullable
-    private final SubItemLoggingInfo mPrimaryLoggingInfo;
+    private final SubItemInfo mSubtitleItem;
 
     /**
      * Supplemental subtitle text and icon are shown at the second row following the subtitle text.
      * Mainly used for weather info on non-weather card.
      */
     @Nullable
-    private final Text mSupplementalSubtitleText;
-
-    @Nullable
-    private final Icon mSupplementalSubtitleIcon;
+    private final SubItemInfo mSubtitleSupplementalItem;
 
     /**
-     * Tap action for the supplemental subtitle's text and icon. Uses the primary tap action if
-     * not being set.
+     * Supplemental line is shown at the third row.
      */
     @Nullable
-    private final TapAction mSupplementalSubtitleTapAction;
+    private final SubItemInfo mSupplementalLineItem;
 
     /**
-     * Logging info for the supplemental subtitle's are. Uses the primary logging info if not being
-     * set.
+     * Supplemental alarm item is specifically used for holiday alarm, which is appended to "next
+     * alarm". This is also shown at the third row, but won't be shown the same time with
+     * mSupplementalLineItem.
      */
     @Nullable
-    private final SubItemLoggingInfo mSupplementalSubtitleLoggingInfo;
-
-    @Nullable
-    private final Text mSupplementalText;
-
-    @Nullable
-    private final Icon mSupplementalIcon;
-
-    @Nullable
-    private final TapAction mSupplementalTapAction;
-
-    /**
-     * Logging info for the supplemental line. Uses the primary logging info if not being set.
-     */
-    @Nullable
-    private final SubItemLoggingInfo mSupplementalLoggingInfo;
-
-    /**
-     * Supplemental alarm text is specifically used for holiday alarm, which is appended to "next
-     * alarm".
-     */
-    @Nullable
-    private final Text mSupplementalAlarmText;
+    private final SubItemInfo mSupplementalAlarmItem;
 
     /**
      * The layout weight info for the card, which indicates how much space it should occupy on the
@@ -141,21 +101,11 @@ public class BaseTemplateData implements Parcelable {
 
     BaseTemplateData(@NonNull Parcel in) {
         mTemplateType = in.readInt();
-        mTitleText = in.readTypedObject(Text.CREATOR);
-        mTitleIcon = in.readTypedObject(Icon.CREATOR);
-        mSubtitleText = in.readTypedObject(Text.CREATOR);
-        mSubtitleIcon = in.readTypedObject(Icon.CREATOR);
-        mPrimaryTapAction = in.readTypedObject(TapAction.CREATOR);
-        mPrimaryLoggingInfo = in.readTypedObject(SubItemLoggingInfo.CREATOR);
-        mSupplementalSubtitleText = in.readTypedObject(Text.CREATOR);
-        mSupplementalSubtitleIcon = in.readTypedObject(Icon.CREATOR);
-        mSupplementalSubtitleTapAction = in.readTypedObject(TapAction.CREATOR);
-        mSupplementalSubtitleLoggingInfo = in.readTypedObject(SubItemLoggingInfo.CREATOR);
-        mSupplementalText = in.readTypedObject(Text.CREATOR);
-        mSupplementalIcon = in.readTypedObject(Icon.CREATOR);
-        mSupplementalTapAction = in.readTypedObject(TapAction.CREATOR);
-        mSupplementalLoggingInfo = in.readTypedObject(SubItemLoggingInfo.CREATOR);
-        mSupplementalAlarmText = in.readTypedObject(Text.CREATOR);
+        mPrimaryItem = in.readTypedObject(SubItemInfo.CREATOR);
+        mSubtitleItem = in.readTypedObject(SubItemInfo.CREATOR);
+        mSubtitleSupplementalItem = in.readTypedObject(SubItemInfo.CREATOR);
+        mSupplementalLineItem = in.readTypedObject(SubItemInfo.CREATOR);
+        mSupplementalAlarmItem = in.readTypedObject(SubItemInfo.CREATOR);
         mLayoutWeight = in.readInt();
     }
 
@@ -164,38 +114,18 @@ public class BaseTemplateData implements Parcelable {
      * SmartspaceDefaultUiTemplateData.Builder.
      */
     BaseTemplateData(@UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subtitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable SubItemLoggingInfo primaryLoggingInfo,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
-            @Nullable Text supplementalText,
-            @Nullable Icon supplementalIcon,
-            @Nullable TapAction supplementalTapAction,
-            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
             int layoutWeight) {
         mTemplateType = templateType;
-        mTitleText = titleText;
-        mTitleIcon = titleIcon;
-        mSubtitleText = subtitleText;
-        mSubtitleIcon = subtitleIcon;
-        mPrimaryTapAction = primaryTapAction;
-        mPrimaryLoggingInfo = primaryLoggingInfo;
-        mSupplementalSubtitleText = supplementalSubtitleText;
-        mSupplementalSubtitleIcon = supplementalSubtitleIcon;
-        mSupplementalSubtitleTapAction = supplementalSubtitleTapAction;
-        mSupplementalSubtitleLoggingInfo = supplementalSubtitleLoggingInfo;
-        mSupplementalText = supplementalText;
-        mSupplementalIcon = supplementalIcon;
-        mSupplementalTapAction = supplementalTapAction;
-        mSupplementalLoggingInfo = supplementalLoggingInfo;
-        mSupplementalAlarmText = supplementalAlarmText;
+        mPrimaryItem = primaryItem;
+        mSubtitleItem = subtitleItem;
+        mSubtitleSupplementalItem = subtitleSupplementalItem;
+        mSupplementalLineItem = supplementalLineItem;
+        mSupplementalAlarmItem = supplementalAlarmItem;
         mLayoutWeight = layoutWeight;
     }
 
@@ -205,94 +135,34 @@ public class BaseTemplateData implements Parcelable {
         return mTemplateType;
     }
 
-    /** Returns the title's text. */
+    /** Returns the primary item (the first line). */
     @Nullable
-    public Text getTitleText() {
-        return mTitleText;
+    public SubItemInfo getPrimaryItem() {
+        return mPrimaryItem;
     }
 
-    /** Returns the title's icon. */
+    /** Returns the subtitle item (the second line). */
     @Nullable
-    public Icon getTitleIcon() {
-        return mTitleIcon;
+    public SubItemInfo getSubtitleItem() {
+        return mSubtitleItem;
     }
 
-    /** Returns the subtitle's text. */
+    /** Returns the subtitle's supplemental item (the second line following the subtitle). */
     @Nullable
-    public Text getSubtitleText() {
-        return mSubtitleText;
+    public SubItemInfo getSubtitleSupplementalItem() {
+        return mSubtitleSupplementalItem;
     }
 
-    /** Returns the subtitle's icon. */
+    /** Returns the supplemental line item (the 3rd line). */
     @Nullable
-    public Icon getSubtitleIcon() {
-        return mSubtitleIcon;
+    public SubItemInfo getSupplementalLineItem() {
+        return mSupplementalLineItem;
     }
 
-    /** Returns the card's primary tap action. */
+    /** Returns the supplemental alarm item (the 3rd line). */
     @Nullable
-    public TapAction getPrimaryTapAction() {
-        return mPrimaryTapAction;
-    }
-
-    /** Returns the card's primary logging info. */
-    @Nullable
-    public SubItemLoggingInfo getPrimaryLoggingInfo() {
-        return mPrimaryLoggingInfo;
-    }
-
-    /** Returns the supplemental subtitle's text. */
-    @Nullable
-    public Text getSupplementalSubtitleText() {
-        return mSupplementalSubtitleText;
-    }
-
-    /** Returns the supplemental subtitle's icon. */
-    @Nullable
-    public Icon getSupplementalSubtitleIcon() {
-        return mSupplementalSubtitleIcon;
-    }
-
-    /** Returns the supplemental subtitle's tap action. Can be null if not being set. */
-    @Nullable
-    public TapAction getSupplementalSubtitleTapAction() {
-        return mSupplementalSubtitleTapAction;
-    }
-
-    /** Returns the card's supplemental title's logging info. */
-    @Nullable
-    public SubItemLoggingInfo getSupplementalSubtitleLoggingInfo() {
-        return mSupplementalSubtitleLoggingInfo;
-    }
-
-    /** Returns the supplemental text. */
-    @Nullable
-    public Text getSupplementalText() {
-        return mSupplementalText;
-    }
-
-    /** Returns the supplemental icon. */
-    @Nullable
-    public Icon getSupplementalIcon() {
-        return mSupplementalIcon;
-    }
-
-    /** Returns the supplemental line's tap action. Can be null if not being set. */
-    @Nullable
-    public TapAction getSupplementalTapAction() {
-        return mSupplementalTapAction;
-    }
-
-    /** Returns the card's supplemental line logging info. */
-    @Nullable
-    public SubItemLoggingInfo getSupplementalLoggingInfo() {
-        return mSupplementalLoggingInfo;
-    }
-
-    /** Returns the supplemental alarm text. */
-    @Nullable
-    public Text getSupplementalAlarmText() {
-        return mSupplementalAlarmText;
+    public SubItemInfo getSupplementalAlarmItem() {
+        return mSupplementalAlarmItem;
     }
 
     /** Returns the card layout weight info. Default weight is 0. */
@@ -325,21 +195,11 @@ public class BaseTemplateData implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(mTemplateType);
-        out.writeTypedObject(mTitleText, flags);
-        out.writeTypedObject(mTitleIcon, flags);
-        out.writeTypedObject(mSubtitleText, flags);
-        out.writeTypedObject(mSubtitleIcon, flags);
-        out.writeTypedObject(mPrimaryTapAction, flags);
-        out.writeTypedObject(mPrimaryLoggingInfo, flags);
-        out.writeTypedObject(mSupplementalSubtitleText, flags);
-        out.writeTypedObject(mSupplementalSubtitleIcon, flags);
-        out.writeTypedObject(mSupplementalSubtitleTapAction, flags);
-        out.writeTypedObject(mSupplementalSubtitleLoggingInfo, flags);
-        out.writeTypedObject(mSupplementalText, flags);
-        out.writeTypedObject(mSupplementalIcon, flags);
-        out.writeTypedObject(mSupplementalTapAction, flags);
-        out.writeTypedObject(mSupplementalLoggingInfo, flags);
-        out.writeTypedObject(mSupplementalAlarmText, flags);
+        out.writeTypedObject(mPrimaryItem, flags);
+        out.writeTypedObject(mSubtitleItem, flags);
+        out.writeTypedObject(mSubtitleSupplementalItem, flags);
+        out.writeTypedObject(mSupplementalLineItem, flags);
+        out.writeTypedObject(mSupplementalAlarmItem, flags);
         out.writeInt(mLayoutWeight);
     }
 
@@ -348,58 +208,29 @@ public class BaseTemplateData implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof BaseTemplateData)) return false;
         BaseTemplateData that = (BaseTemplateData) o;
-        return mTemplateType == that.mTemplateType && SmartspaceUtils.isEqual(mTitleText,
-                that.mTitleText)
-                && Objects.equals(mTitleIcon, that.mTitleIcon)
-                && SmartspaceUtils.isEqual(mSubtitleText, that.mSubtitleText)
-                && Objects.equals(mSubtitleIcon, that.mSubtitleIcon)
-                && Objects.equals(mPrimaryTapAction, that.mPrimaryTapAction)
-                && Objects.equals(mPrimaryLoggingInfo, that.mPrimaryLoggingInfo)
-                && SmartspaceUtils.isEqual(mSupplementalSubtitleText,
-                that.mSupplementalSubtitleText)
-                && Objects.equals(mSupplementalSubtitleIcon, that.mSupplementalSubtitleIcon)
-                && Objects.equals(mSupplementalSubtitleTapAction,
-                that.mSupplementalSubtitleTapAction)
-                && Objects.equals(mSupplementalSubtitleLoggingInfo,
-                that.mSupplementalSubtitleLoggingInfo)
-                && SmartspaceUtils.isEqual(mSupplementalText,
-                that.mSupplementalText)
-                && Objects.equals(mSupplementalIcon, that.mSupplementalIcon)
-                && Objects.equals(mSupplementalTapAction, that.mSupplementalTapAction)
-                && Objects.equals(mSupplementalLoggingInfo, that.mSupplementalLoggingInfo)
-                && SmartspaceUtils.isEqual(mSupplementalAlarmText, that.mSupplementalAlarmText)
-                && mLayoutWeight == that.mLayoutWeight;
+        return mTemplateType == that.mTemplateType && mLayoutWeight == that.mLayoutWeight
+                && Objects.equals(mPrimaryItem, that.mPrimaryItem)
+                && Objects.equals(mSubtitleItem, that.mSubtitleItem)
+                && Objects.equals(mSubtitleSupplementalItem, that.mSubtitleSupplementalItem)
+                && Objects.equals(mSupplementalLineItem, that.mSupplementalLineItem)
+                && Objects.equals(mSupplementalAlarmItem, that.mSupplementalAlarmItem);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTemplateType, mTitleText, mTitleIcon, mSubtitleText, mSubtitleIcon,
-                mPrimaryTapAction, mPrimaryLoggingInfo, mSupplementalSubtitleText,
-                mSupplementalSubtitleIcon, mSupplementalSubtitleTapAction,
-                mSupplementalSubtitleLoggingInfo,
-                mSupplementalText, mSupplementalIcon, mSupplementalTapAction,
-                mSupplementalLoggingInfo, mSupplementalAlarmText, mLayoutWeight);
+        return Objects.hash(mTemplateType, mPrimaryItem, mSubtitleItem, mSubtitleSupplementalItem,
+                mSupplementalLineItem, mSupplementalAlarmItem, mLayoutWeight);
     }
 
     @Override
     public String toString() {
-        return "SmartspaceDefaultUiTemplateData{"
+        return "BaseTemplateData{"
                 + "mTemplateType=" + mTemplateType
-                + ", mTitleText=" + mTitleText
-                + ", mTitleIcon=" + mTitleIcon
-                + ", mSubtitleText=" + mSubtitleText
-                + ", mSubTitleIcon=" + mSubtitleIcon
-                + ", mPrimaryTapAction=" + mPrimaryTapAction
-                + ", mPrimaryLoggingInfo=" + mPrimaryLoggingInfo
-                + ", mSupplementalSubtitleText=" + mSupplementalSubtitleText
-                + ", mSupplementalSubtitleIcon=" + mSupplementalSubtitleIcon
-                + ", mSupplementalSubtitleTapAction=" + mSupplementalSubtitleTapAction
-                + ", mSupplementalSubtitleLoggingInfo=" + mSupplementalSubtitleLoggingInfo
-                + ", mSupplementalText=" + mSupplementalText
-                + ", mSupplementalIcon=" + mSupplementalIcon
-                + ", mSupplementalTapAction=" + mSupplementalTapAction
-                + ", mSupplementalLoggingInfo=" + mSupplementalLoggingInfo
-                + ", mSupplementalAlarmText=" + mSupplementalAlarmText
+                + ", mPrimaryItem=" + mPrimaryItem
+                + ", mSubtitleItem=" + mSubtitleItem
+                + ", mSubtitleSupplementalItem=" + mSubtitleSupplementalItem
+                + ", mSupplementalLineItem=" + mSupplementalLineItem
+                + ", mSupplementalAlarmItem=" + mSupplementalAlarmItem
                 + ", mLayoutWeight=" + mLayoutWeight
                 + '}';
     }
@@ -414,21 +245,12 @@ public class BaseTemplateData implements Parcelable {
     public static class Builder {
         @UiTemplateType
         private final int mTemplateType;
-        private Text mTitleText;
-        private Icon mTitleIcon;
-        private Text mSubtitleText;
-        private Icon mSubtitleIcon;
-        private TapAction mPrimaryTapAction;
-        private SubItemLoggingInfo mPrimaryLoggingInfo;
-        private Text mSupplementalSubtitleText;
-        private Icon mSupplementalSubtitleIcon;
-        private TapAction mSupplementalSubtitleTapAction;
-        private SubItemLoggingInfo mSupplementalSubtitleLoggingInfo;
-        private Text mSupplementalText;
-        private Icon mSupplementalIcon;
-        private TapAction mSupplementalTapAction;
-        private SubItemLoggingInfo mSupplementalLoggingInfo;
-        private Text mSupplementalAlarmText;
+
+        private SubItemInfo mPrimaryItem;
+        private SubItemInfo mSubtitleItem;
+        private SubItemInfo mSubtitleSupplementalItem;
+        private SubItemInfo mSupplementalLineItem;
+        private SubItemInfo mSupplementalAlarmItem;
         private int mLayoutWeight;
 
         /**
@@ -451,106 +273,36 @@ public class BaseTemplateData implements Parcelable {
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        Text getTitleText() {
-            return mTitleText;
+        SubItemInfo getPrimaryItem() {
+            return mPrimaryItem;
         }
 
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        Icon getTitleIcon() {
-            return mTitleIcon;
+        SubItemInfo getSubtitleItem() {
+            return mSubtitleItem;
         }
 
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        Text getSubtitleText() {
-            return mSubtitleText;
+        SubItemInfo getSubtitleSupplemtnalItem() {
+            return mSubtitleSupplementalItem;
         }
 
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        Icon getSubtitleIcon() {
-            return mSubtitleIcon;
+        SubItemInfo getSupplementalLineItem() {
+            return mSupplementalLineItem;
         }
 
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        TapAction getPrimaryTapAction() {
-            return mPrimaryTapAction;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        SubItemLoggingInfo getPrimaryLoggingInfo() {
-            return mPrimaryLoggingInfo;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        Text getSupplementalSubtitleText() {
-            return mSupplementalSubtitleText;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        Icon getSupplementalSubtitleIcon() {
-            return mSupplementalSubtitleIcon;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        TapAction getSupplementalSubtitleTapAction() {
-            return mSupplementalSubtitleTapAction;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        SubItemLoggingInfo getSupplementalSubtitleLoggingInfo() {
-            return mSupplementalSubtitleLoggingInfo;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        Text getSupplementalText() {
-            return mSupplementalText;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        Icon getSupplementalIcon() {
-            return mSupplementalIcon;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        TapAction getSupplementalTapAction() {
-            return mSupplementalTapAction;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        SubItemLoggingInfo getSupplementalLoggingInfo() {
-            return mSupplementalLoggingInfo;
-        }
-
-        /** Should ONLY be used by the subclasses */
-        @Nullable
-        @SuppressLint("GetterOnBuilder")
-        Text getSupplementalAlarmText() {
-            return mSupplementalAlarmText;
+        SubItemInfo getSupplementalAlarmItem() {
+            return mSupplementalAlarmItem;
         }
 
         /** Should ONLY be used by the subclasses */
@@ -560,144 +312,47 @@ public class BaseTemplateData implements Parcelable {
         }
 
         /**
-         * Sets the card title.
+         * Sets the card primary item.
          */
         @NonNull
-        public Builder setTitleText(@NonNull Text titleText) {
-            mTitleText = titleText;
+        public Builder setPrimaryItem(@NonNull SubItemInfo primaryItem) {
+            mPrimaryItem = primaryItem;
             return this;
         }
 
         /**
-         * Sets the card title icon.
+         * Sets the card subtitle item.
          */
         @NonNull
-        public Builder setTitleIcon(@NonNull Icon titleIcon) {
-            mTitleIcon = titleIcon;
+        public Builder setSubtitleItem(@NonNull SubItemInfo subtitleItem) {
+            mSubtitleItem = subtitleItem;
             return this;
         }
 
         /**
-         * Sets the card subtitle.
+         * Sets the card subtitle's supplemental item.
          */
         @NonNull
-        public Builder setSubtitleText(@NonNull Text subtitleText) {
-            mSubtitleText = subtitleText;
+        public Builder setSubtitleSupplementalItem(@NonNull SubItemInfo subtitleSupplementalItem) {
+            mSubtitleSupplementalItem = subtitleSupplementalItem;
             return this;
         }
 
         /**
-         * Sets the card subtitle icon.
+         * Sets the card supplemental line item.
          */
         @NonNull
-        public Builder setSubtitleIcon(@NonNull Icon subtitleIcon) {
-            mSubtitleIcon = subtitleIcon;
+        public Builder setSupplementalLineItem(@NonNull SubItemInfo supplementalLineItem) {
+            mSupplementalLineItem = supplementalLineItem;
             return this;
         }
 
         /**
-         * Sets the card primary tap action.
+         * Sets the card supplemental alarm item.
          */
         @NonNull
-        public Builder setPrimaryTapAction(@NonNull TapAction primaryTapAction) {
-            mPrimaryTapAction = primaryTapAction;
-            return this;
-        }
-
-        /**
-         * Sets the card primary logging info.
-         */
-        @NonNull
-        public Builder setPrimaryLoggingInfo(@NonNull SubItemLoggingInfo primaryLoggingInfo) {
-            mPrimaryLoggingInfo = primaryLoggingInfo;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental subtitle text.
-         */
-        @NonNull
-        public Builder setSupplementalSubtitleText(
-                @NonNull Text supplementalSubtitleText) {
-            mSupplementalSubtitleText = supplementalSubtitleText;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental subtitle icon.
-         */
-        @NonNull
-        public Builder setSupplementalSubtitleIcon(
-                @NonNull Icon supplementalSubtitleIcon) {
-            mSupplementalSubtitleIcon = supplementalSubtitleIcon;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental subtitle tap action. {@code mPrimaryTapAction} will be used if not
-         * being set.
-         */
-        @NonNull
-        public Builder setSupplementalSubtitleTapAction(
-                @NonNull TapAction supplementalSubtitleTapAction) {
-            mSupplementalSubtitleTapAction = supplementalSubtitleTapAction;
-            return this;
-        }
-
-        /**
-         * Sets the card supplemental title's logging info.
-         */
-        @NonNull
-        public Builder setSupplementalSubtitleLoggingInfo(
-                @NonNull SubItemLoggingInfo supplementalSubtitleLoggingInfo) {
-            mSupplementalSubtitleLoggingInfo = supplementalSubtitleLoggingInfo;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental text.
-         */
-        @NonNull
-        public Builder setSupplementalText(@NonNull Text supplementalText) {
-            mSupplementalText = supplementalText;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental icon.
-         */
-        @NonNull
-        public Builder setSupplementalIcon(@NonNull Icon supplementalIcon) {
-            mSupplementalIcon = supplementalIcon;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental line tap action. {@code mPrimaryTapAction} will be used if not
-         * being set.
-         */
-        @NonNull
-        public Builder setSupplementalTapAction(@NonNull TapAction supplementalTapAction) {
-            mSupplementalTapAction = supplementalTapAction;
-            return this;
-        }
-
-        /**
-         * Sets the card supplemental line's logging info.
-         */
-        @NonNull
-        public Builder setSupplementalLoggingInfo(
-                @NonNull SubItemLoggingInfo supplementalLoggingInfo) {
-            mSupplementalLoggingInfo = supplementalLoggingInfo;
-            return this;
-        }
-
-        /**
-         * Sets the supplemental alarm text.
-         */
-        @NonNull
-        public Builder setSupplementalAlarmText(@NonNull Text supplementalAlarmText) {
-            mSupplementalAlarmText = supplementalAlarmText;
+        public Builder setSupplementalAlarmItem(@NonNull SubItemInfo supplementalAlarmItem) {
+            mSupplementalAlarmItem = supplementalAlarmItem;
             return this;
         }
 
@@ -715,14 +370,197 @@ public class BaseTemplateData implements Parcelable {
          */
         @NonNull
         public BaseTemplateData build() {
-            return new BaseTemplateData(mTemplateType, mTitleText, mTitleIcon,
-                    mSubtitleText, mSubtitleIcon, mPrimaryTapAction,
-                    mPrimaryLoggingInfo,
-                    mSupplementalSubtitleText, mSupplementalSubtitleIcon,
-                    mSupplementalSubtitleTapAction, mSupplementalSubtitleLoggingInfo,
-                    mSupplementalText, mSupplementalIcon,
-                    mSupplementalTapAction, mSupplementalLoggingInfo,
-                    mSupplementalAlarmText, mLayoutWeight);
+            return new BaseTemplateData(
+                    mTemplateType,
+                    mPrimaryItem,
+                    mSubtitleItem,
+                    mSubtitleSupplementalItem,
+                    mSupplementalLineItem,
+                    mSupplementalAlarmItem,
+                    mLayoutWeight);
+        }
+    }
+
+    /**
+     * Holds all the rendering and logging info needed for a sub item within the base card.
+     */
+    public static final class SubItemInfo implements Parcelable {
+
+        /** The text information for the subitem, which will be rendered as it's text content. */
+        @Nullable
+        private final Text mText;
+
+        /** The icon for the subitem, which will be rendered as a drawable in front of the text. */
+        @Nullable
+        private final Icon mIcon;
+
+        /** The tap action for the subitem. */
+        @Nullable
+        private final TapAction mTapAction;
+
+        /** The logging info for the subitem. */
+        @Nullable
+        private final SubItemLoggingInfo mLoggingInfo;
+
+        SubItemInfo(@NonNull Parcel in) {
+            mText = in.readTypedObject(Text.CREATOR);
+            mIcon = in.readTypedObject(Icon.CREATOR);
+            mTapAction = in.readTypedObject(TapAction.CREATOR);
+            mLoggingInfo = in.readTypedObject(SubItemLoggingInfo.CREATOR);
+        }
+
+        private SubItemInfo(@Nullable Text text,
+                @Nullable Icon icon,
+                @Nullable TapAction tapAction,
+                @Nullable SubItemLoggingInfo loggingInfo) {
+            mText = text;
+            mIcon = icon;
+            mTapAction = tapAction;
+            mLoggingInfo = loggingInfo;
+        }
+
+        /** Returns the subitem's text. */
+        @Nullable
+        public Text getText() {
+            return mText;
+        }
+
+        /** Returns the subitem's icon. */
+        @Nullable
+        public Icon getIcon() {
+            return mIcon;
+        }
+
+        /** Returns the subitem's tap action. */
+        @Nullable
+        public TapAction getTapAction() {
+            return mTapAction;
+        }
+
+        /** Returns the subitem's logging info. */
+        @Nullable
+        public SubItemLoggingInfo getLoggingInfo() {
+            return mLoggingInfo;
+        }
+
+        /**
+         * @see Parcelable.Creator
+         */
+        @NonNull
+        public static final Creator<SubItemInfo> CREATOR =
+                new Creator<SubItemInfo>() {
+                    @Override
+                    public SubItemInfo createFromParcel(Parcel in) {
+                        return new SubItemInfo(in);
+                    }
+
+                    @Override
+                    public SubItemInfo[] newArray(int size) {
+                        return new SubItemInfo[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
+            out.writeTypedObject(mText, flags);
+            out.writeTypedObject(mIcon, flags);
+            out.writeTypedObject(mTapAction, flags);
+            out.writeTypedObject(mLoggingInfo, flags);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SubItemInfo)) return false;
+            SubItemInfo that = (SubItemInfo) o;
+            return SmartspaceUtils.isEqual(mText, that.mText) && Objects.equals(mIcon,
+                    that.mIcon) && Objects.equals(mTapAction, that.mTapAction)
+                    && Objects.equals(mLoggingInfo, that.mLoggingInfo);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mText, mIcon, mTapAction, mLoggingInfo);
+        }
+
+        @Override
+        public String toString() {
+            return "SubItemInfo{"
+                    + "mText=" + mText
+                    + ", mIcon=" + mIcon
+                    + ", mTapAction=" + mTapAction
+                    + ", mLoggingInfo=" + mLoggingInfo
+                    + '}';
+        }
+
+        /**
+         * A builder for {@link SubItemInfo} object.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final class Builder {
+
+            private Text mText;
+            private Icon mIcon;
+            private TapAction mTapAction;
+            private SubItemLoggingInfo mLoggingInfo;
+
+            /**
+             * Sets the sub item's text.
+             */
+            @NonNull
+            public Builder setText(@NonNull Text text) {
+                mText = text;
+                return this;
+            }
+
+            /**
+             * Sets the sub item's icon.
+             */
+            @NonNull
+            public Builder setIcon(@NonNull Icon icon) {
+                mIcon = icon;
+                return this;
+            }
+
+            /**
+             * Sets the sub item's tap action.
+             */
+            @NonNull
+            public Builder setTapAction(@NonNull TapAction tapAction) {
+                mTapAction = tapAction;
+                return this;
+            }
+
+            /**
+             * Sets the sub item's logging info.
+             */
+            @NonNull
+            public Builder setLoggingInfo(@NonNull SubItemLoggingInfo loggingInfo) {
+                mLoggingInfo = loggingInfo;
+                return this;
+            }
+
+            /**
+             * Builds a new {@link SubItemInfo} instance.
+             *
+             * @throws IllegalStateException if all the data field is empty.
+             */
+            @NonNull
+            public SubItemInfo build() {
+                if (SmartspaceUtils.isEmpty(mText) && mIcon == null && mTapAction == null
+                        && mLoggingInfo == null) {
+                    throw new IllegalStateException("SubItem data is empty");
+                }
+
+                return new SubItemInfo(mText, mIcon, mTapAction, mLoggingInfo);
+            }
         }
     }
 
@@ -735,25 +573,43 @@ public class BaseTemplateData implements Parcelable {
         /** A unique instance id for the sub item. */
         private final int mInstanceId;
 
-        /** The feature type for this sub item. */
+        /**
+         * {@link FeatureType} indicating the feature type of this subitem.
+         *
+         * @see FeatureType
+         */
+        @FeatureType
         private final int mFeatureType;
+
+        /** The data source's package name for this sub item. */
+        @Nullable
+        private final CharSequence mPackageName;
 
         SubItemLoggingInfo(@NonNull Parcel in) {
             mInstanceId = in.readInt();
             mFeatureType = in.readInt();
+            mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         }
 
-        private SubItemLoggingInfo(int instanceId, int featureType) {
+        private SubItemLoggingInfo(int instanceId, @FeatureType int featureType,
+                @Nullable CharSequence packageName) {
             mInstanceId = instanceId;
             mFeatureType = featureType;
+            mPackageName = packageName;
         }
 
         public int getInstanceId() {
             return mInstanceId;
         }
 
+        @FeatureType
         public int getFeatureType() {
             return mFeatureType;
+        }
+
+        @Nullable
+        public CharSequence getPackageName() {
+            return mPackageName;
         }
 
         /**
@@ -782,6 +638,7 @@ public class BaseTemplateData implements Parcelable {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             out.writeInt(mInstanceId);
             out.writeInt(mFeatureType);
+            TextUtils.writeToParcel(mPackageName, out, flags);
         }
 
         @Override
@@ -789,12 +646,13 @@ public class BaseTemplateData implements Parcelable {
             if (this == o) return true;
             if (!(o instanceof SubItemLoggingInfo)) return false;
             SubItemLoggingInfo that = (SubItemLoggingInfo) o;
-            return mInstanceId == that.mInstanceId && mFeatureType == that.mFeatureType;
+            return mInstanceId == that.mInstanceId && mFeatureType == that.mFeatureType
+                    && SmartspaceUtils.isEqual(mPackageName, that.mPackageName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mInstanceId, mFeatureType);
+            return Objects.hash(mInstanceId, mFeatureType, mPackageName);
         }
 
         @Override
@@ -802,6 +660,7 @@ public class BaseTemplateData implements Parcelable {
             return "SubItemLoggingInfo{"
                     + "mInstanceId=" + mInstanceId
                     + ", mFeatureType=" + mFeatureType
+                    + ", mPackageName=" + mPackageName
                     + '}';
         }
 
@@ -815,22 +674,32 @@ public class BaseTemplateData implements Parcelable {
 
             private final int mInstanceId;
             private final int mFeatureType;
+            private CharSequence mPackageName;
 
             /**
              * A builder for {@link SubItemLoggingInfo}.
              *
              * @param instanceId  A unique instance id for the sub item
-             * @param featureType The feature type for this sub item
+             * @param featureType The feature type id for this sub item
              */
-            public Builder(int instanceId, int featureType) {
+            public Builder(int instanceId, @FeatureType int featureType) {
                 mInstanceId = instanceId;
                 mFeatureType = featureType;
+            }
+
+            /**
+             * Sets the sub item's data source package name.
+             */
+            @NonNull
+            public Builder setPackageName(@NonNull CharSequence packageName) {
+                mPackageName = packageName;
+                return this;
             }
 
             /** Builds a new {@link SubItemLoggingInfo} instance. */
             @NonNull
             public SubItemLoggingInfo build() {
-                return new SubItemLoggingInfo(mInstanceId, mFeatureType);
+                return new SubItemLoggingInfo(mInstanceId, mFeatureType, mPackageName);
             }
         }
     }
