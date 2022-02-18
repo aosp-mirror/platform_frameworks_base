@@ -23,12 +23,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
 
+import com.android.telephony.Rlog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
 public final class PhysicalChannelConfig implements Parcelable {
+    static final String TAG = "PhysicalChannelConfig";
 
     // TODO(b/72993578) consolidate these enums in a central location.
     /** @hide */
@@ -568,19 +571,21 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setNetworkType(@NetworkType int networkType) {
             if (!TelephonyManager.isNetworkTypeValid(networkType)) {
-                throw new IllegalArgumentException("Network type: " + networkType + " is invalid.");
+                Rlog.e(TAG, "Builder.setNetworkType: Network type " + networkType + " is invalid.");
+            } else {
+                mNetworkType = networkType;
             }
-            mNetworkType = networkType;
             return this;
         }
 
         public @NonNull Builder setFrequencyRange(int frequencyRange) {
             if (!ServiceState.isFrequencyRangeValid(frequencyRange)
                     && frequencyRange != ServiceState.FREQUENCY_RANGE_UNKNOWN) {
-                throw new IllegalArgumentException("Frequency range: " + frequencyRange +
-                        " is invalid.");
+                Rlog.e(TAG, "Builder.setFrequencyRange: Frequency range " + frequencyRange
+                        + " is invalid.");
+            } else {
+                mFrequencyRange = frequencyRange;
             }
-            mFrequencyRange = frequencyRange;
             return this;
         }
 
@@ -596,19 +601,21 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setCellBandwidthDownlinkKhz(int cellBandwidthDownlinkKhz) {
             if (cellBandwidthDownlinkKhz < CELL_BANDWIDTH_UNKNOWN) {
-                throw new IllegalArgumentException("Cell downlink bandwidth(kHz): " +
-                        cellBandwidthDownlinkKhz + " is invalid.");
+                Rlog.e(TAG, "Builder.setCellBandwidthDownlinkKhz: Cell downlink bandwidth(kHz) "
+                        + cellBandwidthDownlinkKhz + " is invalid.");
+            } else {
+                mCellBandwidthDownlinkKhz = cellBandwidthDownlinkKhz;
             }
-            mCellBandwidthDownlinkKhz = cellBandwidthDownlinkKhz;
             return this;
         }
 
         public @NonNull Builder setCellBandwidthUplinkKhz(int cellBandwidthUplinkKhz) {
             if (cellBandwidthUplinkKhz < CELL_BANDWIDTH_UNKNOWN) {
-                throw new IllegalArgumentException("Cell uplink bandwidth(kHz): "+
-                        cellBandwidthUplinkKhz +" is invalid.");
+                Rlog.e(TAG, "Builder.setCellBandwidthUplinkKhz: Cell uplink bandwidth(kHz) "
+                        + cellBandwidthUplinkKhz + " is invalid.");
+            } else {
+                mCellBandwidthUplinkKhz = cellBandwidthUplinkKhz;
             }
-            mCellBandwidthUplinkKhz = cellBandwidthUplinkKhz;
             return this;
         }
 
@@ -625,19 +632,20 @@ public final class PhysicalChannelConfig implements Parcelable {
 
         public @NonNull Builder setPhysicalCellId(int physicalCellId) {
             if (physicalCellId > PHYSICAL_CELL_ID_MAXIMUM_VALUE) {
-                throw new IllegalArgumentException("Physical cell Id: " + physicalCellId +
-                        " is over limit.");
+                Rlog.e(TAG, "Builder.setPhysicalCellId: Physical cell ID " + physicalCellId
+                        + " is over limit.");
+            } else {
+                mPhysicalCellId = physicalCellId;
             }
-            mPhysicalCellId = physicalCellId;
             return this;
         }
 
         public @NonNull Builder setBand(int band) {
             if (band <= BAND_UNKNOWN) {
-                throw new IllegalArgumentException("Band: " + band +
-                        " is invalid.");
+                Rlog.e(TAG, "Builder.setBand: Band " + band + " is invalid.");
+            } else {
+                mBand = band;
             }
-            mBand = band;
             return this;
         }
     }
