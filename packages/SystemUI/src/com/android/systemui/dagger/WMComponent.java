@@ -17,6 +17,9 @@
 package com.android.systemui.dagger;
 
 import android.content.Context;
+import android.os.HandlerThread;
+
+import androidx.annotation.Nullable;
 
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.tv.TvWMComponent;
@@ -26,6 +29,7 @@ import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.dagger.TvWMShellModule;
 import com.android.wm.shell.dagger.WMShellModule;
@@ -44,6 +48,7 @@ import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Optional;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
@@ -64,6 +69,10 @@ public interface WMComponent {
      */
     @Subcomponent.Builder
     interface Builder {
+
+        @BindsInstance
+        Builder setShellMainThread(@Nullable @ShellMainThread HandlerThread t);
+
         WMComponent build();
     }
 
@@ -120,10 +129,10 @@ public interface WMComponent {
     Optional<RecentTasks> getRecentTasks();
 
     @WMSingleton
-    CompatUI getCompatUI();
+    Optional<CompatUI> getCompatUI();
 
     @WMSingleton
-    DragAndDrop getDragAndDrop();
+    Optional<DragAndDrop> getDragAndDrop();
 
     @WMSingleton
     Optional<BackAnimation> getBackAnimation();

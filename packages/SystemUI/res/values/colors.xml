@@ -87,7 +87,7 @@
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
-    <color name="user_switcher_fullscreen_bg">@android:color/system_neutral1_900</color>
+    <color name="user_switcher_fullscreen_bg">@color/material_dynamic_neutral10</color>
     <color name="user_switcher_fullscreen_popup_item_tint">@*android:color/text_color_primary_device_default_dark</color>
 
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
@@ -112,7 +112,7 @@
     <!-- Chosen so fill over background matches single tone -->
     <color name="dark_mode_qs_icon_color_dual_tone_fill">#99000000</color>
 
-    <color name="notif_pill_text">@android:color/system_neutral1_900</color>
+    <color name="notif_pill_text">@color/material_dynamic_neutral10</color>
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
@@ -131,7 +131,7 @@
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
-    <color name="biometric_dialog_accent">@android:color/system_accent1_600</color>
+    <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- UDFPS colors -->
@@ -155,6 +155,7 @@
     <color name="GM2_grey_900">#202124</color>
 
     <color name="GM2_red_300">#F28B82</color>
+    <color name="GM2_red_500">#EA4335</color>
     <color name="GM2_red_700">#C5221F</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
@@ -174,11 +175,11 @@
     <color name="media_seamless_border">?android:attr/colorAccent</color>
 
     <!-- media output dialog-->
-    <color name="media_dialog_background" android:lstar="98">@android:color/system_neutral1_100</color>
-    <color name="media_dialog_active_item_main_content">@android:color/system_accent1_900</color>
-    <color name="media_dialog_inactive_item_main_content">@android:color/system_accent1_600</color>
-    <color name="media_dialog_item_status">@android:color/system_accent1_900</color>
-    <color name="media_dialog_item_background">@android:color/system_accent2_50</color>
+    <color name="media_dialog_background" android:lstar="98">@color/material_dynamic_neutral90</color>
+    <color name="media_dialog_active_item_main_content">@color/material_dynamic_primary10</color>
+    <color name="media_dialog_inactive_item_main_content">@color/material_dynamic_primary40</color>
+    <color name="media_dialog_item_status">@color/material_dynamic_primary10</color>
+    <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
@@ -213,7 +214,7 @@
     <!-- Wallet screen -->
     <color name="wallet_card_border">#33FFFFFF</color>
 
-    <color name="people_tile_background">@android:color/system_accent2_50</color>
+    <color name="people_tile_background">@color/material_dynamic_secondary95</color>
 
     <!-- Internet Dialog -->
     <!-- Material next state on color-->

@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
@@ -85,6 +86,7 @@ public class NavigationBarController implements
     private final NavigationBar.Factory mNavigationBarFactory;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mNavMode;
     @VisibleForTesting boolean mIsTablet;
 
@@ -108,6 +110,7 @@ public class NavigationBarController implements
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
             NavigationBar.Factory navigationBarFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
@@ -122,6 +125,7 @@ public class NavigationBarController implements
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideController, lightBarController, pipOptional,
@@ -323,7 +327,8 @@ public class NavigationBarController implements
 
         mNavigationBars.put(displayId, navBar);
 
-        View navigationBarView = navBar.createView(savedState);
+        boolean navBarVisible = mStatusBarKeyguardViewManager.isNavBarVisible();
+        View navigationBarView = navBar.createView(savedState, navBarVisible);
         navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

@@ -1177,7 +1177,10 @@ public final class PowerManagerService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         synchronized (mLock) {
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                systemReady();
+
+            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 incrementBootCount();
 
             } else if (phase == PHASE_BOOT_COMPLETED) {
@@ -1203,7 +1206,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    public void systemReady() {
+    private void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
             mDreamManager = getLocalService(DreamManagerInternal.class);
@@ -2684,8 +2687,8 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private void updateUserActivitySummaryLocked(long now, int dirty) {
         // Update the status of the user activity timeout timer.
-        if ((dirty & (DIRTY_DISPLAY_GROUP_WAKEFULNESS | DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY
-                | DIRTY_WAKEFULNESS | DIRTY_SETTINGS | DIRTY_ATTENTIVE)) == 0) {
+        if ((dirty & (DIRTY_DISPLAY_GROUP_WAKEFULNESS | DIRTY_WAKE_LOCKS
+                | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) == 0) {
             return;
         }
         mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
@@ -2770,11 +2773,6 @@ public final class PowerManagerService extends SystemService
                         & WAKE_LOCK_STAY_AWAKE) == 0) {
                     groupNextTimeout = mAttentionDetector.updateUserActivity(groupNextTimeout,
                             screenDimDuration);
-                }
-
-                if (isAttentiveTimeoutExpired(powerGroup, now)) {
-                    groupUserActivitySummary = 0;
-                    groupNextTimeout = -1;
                 }
 
                 hasUserActivitySummary |= groupUserActivitySummary != 0;
@@ -3132,7 +3130,7 @@ public final class PowerManagerService extends SystemService
                     Message msg = mHandler.obtainMessage(MSG_SANDMAN);
                     msg.arg1 = powerGroup.getGroupId();
                     msg.setAsynchronous(true);
-                    mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
+                    mHandler.sendMessage(msg);
                 }
             }
         }

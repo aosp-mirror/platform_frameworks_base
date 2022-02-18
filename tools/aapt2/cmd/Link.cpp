@@ -207,7 +207,7 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
     }
 
     // Check to see if this is an 'id' with the target package.
-    if (name.type == ResourceType::kId && symbol->id) {
+    if (name.type.type == ResourceType::kId && symbol->id) {
       ResourceId* id = &symbol->id.value();
       if (id->package_id() > kAppPackageId) {
         // Rewrite the resource ID to be compatible pre-O.

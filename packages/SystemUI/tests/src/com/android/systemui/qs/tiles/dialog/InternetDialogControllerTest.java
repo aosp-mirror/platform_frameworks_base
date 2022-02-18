@@ -136,6 +136,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private LocationController mLocationController;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private View mDialogLaunchView;
 
     private TestableResources mTestableResources;
     private InternetDialogController mInternetDialogController;
@@ -384,7 +386,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void launchWifiNetworkDetailsSetting_withNoWifiEntryKey_doNothing() {
-        mInternetDialogController.launchWifiNetworkDetailsSetting(null /* key */);
+        mInternetDialogController.launchWifiNetworkDetailsSetting(null /* key */,
+                mDialogLaunchView);
 
         verify(mActivityStarter, never())
                 .postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
@@ -392,9 +395,11 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void launchWifiNetworkDetailsSetting_withWifiEntryKey_startActivity() {
-        mInternetDialogController.launchWifiNetworkDetailsSetting("wifi_entry_key");
+        mInternetDialogController.launchWifiNetworkDetailsSetting("wifi_entry_key",
+                mDialogLaunchView);
 
-        verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt());
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(any(Intent.class), anyInt(),
+                any());
     }
 
     @Test

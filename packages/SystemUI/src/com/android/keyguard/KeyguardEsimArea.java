@@ -43,6 +43,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     private static final String TAG = "KeyguardEsimArea";
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
+    private int mSubscriptionId;
     private EuiccManager mEuiccManager;
 
     private BroadcastReceiver mReceiver =
@@ -87,6 +88,10 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
         setOnClickListener(this);
     }
 
+    public void setSubscriptionId(int subscriptionId) {
+        mSubscriptionId = subscriptionId;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -113,6 +118,12 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        SubscriptionInfo sub = SubscriptionManager.from(mContext)
+                .getActiveSubscriptionInfo(mSubscriptionId);
+        if (sub == null) {
+            Log.e(TAG, "No active subscription with subscriptionId: " + mSubscriptionId);
+            return;
+        }
         Intent intent = new Intent(ACTION_DISABLE_ESIM);
         intent.setPackage(mContext.getPackageName());
         PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
@@ -120,7 +131,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
             0 /* requestCode */,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED, UserHandle.SYSTEM);
-        mEuiccManager
-                .switchToSubscription(SubscriptionManager.INVALID_SUBSCRIPTION_ID, callbackIntent);
+        mEuiccManager.switchToSubscription(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, sub.getPortIndex(), callbackIntent);
     }
 }

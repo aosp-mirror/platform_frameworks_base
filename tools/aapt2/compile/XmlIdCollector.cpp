@@ -46,7 +46,7 @@ struct IdCollector : public xml::Visitor {
       ResourceNameRef name;
       bool create = false;
       if (ResourceUtils::ParseReference(attr.value, &name, &create, nullptr)) {
-        if (create && name.type == ResourceType::kId) {
+        if (create && name.type.type == ResourceType::kId) {
           if (!text::IsValidResourceEntryName(name.entry)) {
             source_diag_->Error(DiagMessage(element->line_number)
                                    << "id '" << name << "' has an invalid entry name");

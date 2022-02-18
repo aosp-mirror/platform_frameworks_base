@@ -47,4 +47,6 @@
     <color name="settingslib_text_color_secondary_device_default">@android:color/system_neutral2_200</color>
 
     <color name="settingslib_text_color_preference_category_title">@android:color/system_accent1_100</color>
+
+    <color name="settingslib_ripple_color">@color/settingslib_material_grey_900</color>
 </resources>

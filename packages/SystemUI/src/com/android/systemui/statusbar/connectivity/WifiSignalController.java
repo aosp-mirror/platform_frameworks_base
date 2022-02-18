@@ -34,6 +34,7 @@ import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.R;
+import com.android.systemui.util.Assert;
 
 import java.io.PrintWriter;
 
@@ -190,6 +191,7 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
     }
 
     private void handleStatusUpdated() {
+        Assert.isMainThread();
         copyWifiStates();
         notifyListenersIfNecessary();
     }

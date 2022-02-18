@@ -17,6 +17,9 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
 import android.view.View
 import android.view.WindowManager
@@ -28,32 +31,50 @@ import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@Ignore("b/216286227")
 class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var controllerSender: MediaTttChipControllerSender
 
+    @Mock
+    private lateinit var packageManager: PackageManager
+    @Mock
+    private lateinit var applicationInfo: ApplicationInfo
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
+    private lateinit var fakeAppIconDrawable: Drawable
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        controllerSender = MediaTttChipControllerSender(commandQueue, context, windowManager)
+
+        fakeAppIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
+        whenever(applicationInfo.loadLabel(packageManager)).thenReturn(APP_NAME)
+        whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(fakeAppIconDrawable)
+        whenever(packageManager.getApplicationInfo(
+            eq(PACKAGE_NAME), any<PackageManager.ApplicationInfoFlags>()
+        )).thenReturn(applicationInfo)
+        context.setMockPackageManager(packageManager)
+
+        controllerSender = MediaTttChipControllerSender(
+            commandQueue, context, windowManager, FakeExecutor(FakeSystemClock())
+        )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())
@@ -192,9 +213,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -207,9 +227,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -222,9 +241,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -237,9 +255,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -252,9 +269,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
@@ -314,9 +330,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getFailureIcon().visibility).isEqualTo(View.GONE)
@@ -376,9 +391,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription)
-                .isEqualTo(state.getAppName(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_NAME)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -451,15 +465,15 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun almostCloseToStartCast() =
-        AlmostCloseToStartCast(PACKAGE_NAME, DEVICE_NAME)
+        AlmostCloseToStartCast(PACKAGE_NAME, OTHER_DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun almostCloseToEndCast() =
-        AlmostCloseToEndCast(PACKAGE_NAME, DEVICE_NAME)
+        AlmostCloseToEndCast(PACKAGE_NAME, OTHER_DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverTriggered() =
-        TransferToReceiverTriggered(PACKAGE_NAME, DEVICE_NAME)
+        TransferToReceiverTriggered(PACKAGE_NAME, OTHER_DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToThisDeviceTriggered() =
@@ -468,23 +482,24 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToReceiverSucceeded(
-            PACKAGE_NAME, DEVICE_NAME, undoCallback
+            PACKAGE_NAME, OTHER_DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToThisDeviceSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToThisDeviceSucceeded(
-            PACKAGE_NAME, DEVICE_NAME, undoCallback
+            PACKAGE_NAME, OTHER_DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferFailed() = TransferFailed(PACKAGE_NAME)
 }
 
-private const val DEVICE_NAME = "My Tablet"
+private const val APP_NAME = "Fake app name"
+private const val OTHER_DEVICE_NAME = "My Tablet"
 private const val PACKAGE_NAME = "com.android.systemui"
 
-private val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
+private val routeInfo = MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)
     .addFeature("feature")
     .setPackageName(PACKAGE_NAME)
     .build()

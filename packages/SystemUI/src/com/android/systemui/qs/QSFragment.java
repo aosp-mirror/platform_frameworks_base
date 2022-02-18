@@ -381,14 +381,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 : View.INVISIBLE);
         mHeader.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (expanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
-        boolean footerVisible = !mQsDisabled && (expanded || !keyguardShowing || mHeaderAnimating
+        boolean qsPanelVisible = !mQsDisabled && expandVisually;
+        boolean footerVisible = qsPanelVisible &&  (expanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
         mQSFooterActionController.setVisible(footerVisible);
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (expanded && !mStackScrollerOverscrolling));
-        mQSPanelController.setVisibility(
-                !mQsDisabled && expandVisually ? View.VISIBLE : View.INVISIBLE);
+        mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
+        if (DEBUG) {
+            Log.d(TAG, "Footer: " + footerVisible + ", QS Panel: " + qsPanelVisible);
+        }
     }
 
     private boolean isKeyguardState() {

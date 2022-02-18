@@ -140,8 +140,8 @@ final class PreferredActivityHelper {
             return false;
         }
         final Intent intent = mPm.getHomeIntent();
-        final List<ResolveInfo> resolveInfos = mPm.queryIntentActivitiesInternal(intent, null,
-                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
+        final List<ResolveInfo> resolveInfos = mPm.snapshotComputer().queryIntentActivitiesInternal(
+                intent, null, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
                 intent, null, 0, resolveInfos, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
@@ -209,7 +209,8 @@ final class PreferredActivityHelper {
             if (removeExisting && existing != null) {
                 Settings.removeFilters(pir, filter, existing);
             }
-            pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
+            pir.addFilter(mPm.snapshotComputer(),
+                    new PreferredActivity(filter, match, set, activity, always));
             mPm.scheduleWritePackageRestrictions(userId);
         }
         if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
@@ -394,6 +395,7 @@ final class PreferredActivityHelper {
         }
         synchronized (mPm.mLock) {
             mPm.mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
+                    mPm.snapshotComputer(),
                     new PersistentPreferredActivity(filter, activity, true));
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -672,8 +674,8 @@ final class PreferredActivityHelper {
                 0, userId, callingUid, false /*includeInstantApps*/,
                 mPm.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
                         0));
-        final List<ResolveInfo> query = mPm.queryIntentActivitiesInternal(intent, resolvedType,
-                flags, userId);
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
+                resolvedType, flags, userId);
         synchronized (mPm.mLock) {
             return mPm.findPersistentPreferredActivityLP(intent, resolvedType, flags, query, false,
                     userId);
@@ -699,8 +701,8 @@ final class PreferredActivityHelper {
             filter.dump(new PrintStreamPrinter(System.out), "    ");
         }
         intent.setComponent(null);
-        final List<ResolveInfo> query = mPm.queryIntentActivitiesInternal(intent, resolvedType,
-                flags, userId);
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
+                resolvedType, flags, userId);
         // Find any earlier preferred or last chosen entries and nuke them
         findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, false, true, false, userId);
@@ -715,8 +717,8 @@ final class PreferredActivityHelper {
         }
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
-        final List<ResolveInfo> query = mPm.queryIntentActivitiesInternal(intent, resolvedType,
-                flags, userId);
+        final List<ResolveInfo> query = mPm.snapshotComputer().queryIntentActivitiesInternal(intent,
+                resolvedType, flags, userId);
         return findPreferredActivityNotLocked(
                 intent, resolvedType, flags, query, false, false, false, userId);
     }

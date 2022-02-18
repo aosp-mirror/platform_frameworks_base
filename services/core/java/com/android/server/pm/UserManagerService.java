@@ -36,6 +36,7 @@ import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.StatsManager;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
@@ -98,6 +99,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.StatsEvent;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.TypedXmlPullParser;
@@ -608,6 +610,8 @@ public class UserManagerService extends IUserManager.Stub {
                 if (mUms.mPm.isDeviceUpgrading()) {
                     mUms.cleanupPreCreatedUsers();
                 }
+
+                mUms.registerStatsCallbacks();
             }
         }
 
@@ -4277,6 +4281,56 @@ public class UserManagerService extends IUserManager.Stub {
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
                 finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
                         : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    /** Register callbacks for statsd pulled atoms. */
+    private void registerStatsCallbacks() {
+        final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.USER_INFO,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                this::onPullAtom);
+    }
+
+    /** Writes a UserInfo pulled atom for each user on the device. */
+    private int onPullAtom(int atomTag, List<StatsEvent> data) {
+        if (atomTag != FrameworkStatsLog.USER_INFO) {
+            Slogf.e(LOG_TAG, "Unexpected atom tag: %d", atomTag);
+            return android.app.StatsManager.PULL_SKIP;
+        }
+        final List<UserInfo> users = getUsersInternal(true, true, true);
+        final int size = users.size();
+        for (int idx = 0; idx < size; idx++) {
+            final UserInfo user = users.get(idx);
+            if (user.id == UserHandle.USER_SYSTEM) {
+                // Skip user 0. It's not interesting. We already know it exists, is running, and (if
+                // we know the device configuration) its userType.
+                continue;
+            }
+
+            final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+            final String userTypeCustom = (userTypeStandard ==
+                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN) ?
+                    user.userType : null;
+
+            boolean isUserRunningUnlocked;
+            synchronized (mUserStates) {
+                isUserRunningUnlocked =
+                        mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
+            }
+
+            data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
+                    user.id,
+                    userTypeStandard,
+                    userTypeCustom,
+                    user.flags,
+                    user.creationTime,
+                    user.lastLoggedInTime,
+                    isUserRunningUnlocked
+            ));
+        }
+        return android.app.StatsManager.PULL_SUCCESS;
     }
 
     @VisibleForTesting

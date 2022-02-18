@@ -98,6 +98,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private final Handler mHandler;
     private final ChoreographerWrapper mChoreographer;
     private final Object mLock = InteractionJankMonitor.getInstance().getLock();
+    private final boolean mDeferMonitoring;
 
     @VisibleForTesting
     public final boolean mSurfaceOnly;
@@ -153,6 +154,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mHandler = handler;
         mChoreographer = choreographer;
         mSurfaceControlWrapper = surfaceControlWrapper;
+        mDeferMonitoring = config.shouldDeferMonitor();
 
         // HWUI instrumentation init.
         mRendererWrapper = mSurfaceOnly ? null : renderer;
@@ -228,12 +230,25 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     public void begin() {
         synchronized (mLock) {
-            mBeginVsyncId = mChoreographer.getVsyncId() + 1;
+            final long currentVsync = mChoreographer.getVsyncId();
+            // In normal case, we should begin at the next frame,
+            // the id of the next frame is not simply increased by 1,
+            // but we can exclude the current frame at least.
+            mBeginVsyncId = mDeferMonitoring ? currentVsync + 1 : currentVsync;
             if (DEBUG) {
-                Log.d(TAG, "begin: " + mSession.getName() + ", begin=" + mBeginVsyncId);
+                Log.d(TAG, "begin: " + mSession.getName() + ", begin=" + mBeginVsyncId
+                        + ", defer=" + mDeferMonitoring);
             }
             if (mSurfaceControl != null) {
-                postTraceStartMarker();
+                if (mDeferMonitoring) {
+                    // Normal case, we begin the instrument from the very beginning,
+                    // except the first frame.
+                    postTraceStartMarker();
+                } else {
+                    // If we don't begin the instrument from the very beginning,
+                    // there is no need to skip the frame where the begin invocation happens.
+                    beginInternal();
+                }
                 mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
             }
             if (!mSurfaceOnly) {
@@ -247,15 +262,18 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     @VisibleForTesting
     public void postTraceStartMarker() {
-        mChoreographer.mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, () -> {
-            synchronized (mLock) {
-                if (mCancelled || mEndVsyncId != INVALID_ID) {
-                    return;
-                }
-                mTracingStarted = true;
-                Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+        mChoreographer.mChoreographer.postCallback(
+                Choreographer.CALLBACK_INPUT, this::beginInternal, null);
+    }
+
+    private void beginInternal() {
+        synchronized (mLock) {
+            if (mCancelled || mEndVsyncId != INVALID_ID) {
+                return;
             }
-        }, null);
+            mTracingStarted = true;
+            Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
+        }
     }
 
     /**
@@ -464,8 +482,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
                 boolean missedFrame = false;
-                if ((info.jankType & PREDICTION_ERROR) != 0
-                        || ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0)) {
+                if ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0) {
                     Log.w(TAG, "Missed App frame:" + info.jankType);
                     missedAppFramesCount++;
                     missedFrame = true;
@@ -473,7 +490,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                 if ((info.jankType & DISPLAY_HAL) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_DEADLINE_MISSED) != 0
                         || (info.jankType & JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED) != 0
-                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0) {
+                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0
+                        || (info.jankType & PREDICTION_ERROR) != 0) {
                     Log.w(TAG, "Missed SF frame:" + info.jankType);
                     missedSfFramesCount++;
                     missedFrame = true;

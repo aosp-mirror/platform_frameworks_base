@@ -276,7 +276,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     }
 
     /**
-     * Called by {@link PowerManagerService#systemReady}, *with no lock held.*
+     * Called by {@link PowerManagerService#onBootPhase}, *with no lock held.*
      */
     public void systemReady() {
         ConcurrentUtils.wtfIfLockHeld(TAG, mLock);

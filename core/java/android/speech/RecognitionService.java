@@ -199,7 +199,7 @@ public abstract class RecognitionService extends Service {
     }
 
     private void dispatchTriggerModelDownload(Intent intent) {
-        RecognitionService.this.triggerModelDownload(intent);
+        RecognitionService.this.onTriggerModelDownload(intent);
     }
 
     private class StartListeningArgs {
@@ -283,7 +283,7 @@ public abstract class RecognitionService extends Service {
     /**
      * Requests the download of the recognizer support for {@code recognizerIntent}.
      */
-    public void triggerModelDownload(@NonNull Intent recognizerIntent) {
+    public void onTriggerModelDownload(@NonNull Intent recognizerIntent) {
         if (DBG) {
             Log.i(TAG, String.format("#downloadModel [%s]", recognizerIntent));
         }

@@ -125,7 +125,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private final long mCapabilities;
     private final int[] mVibratorIds;
     private final SparseArray<VibratorController> mVibrators;
-    private final VibrationCallbacks mVibrationCallbacks = new VibrationCallbacks();
+    private final VibrationThreadCallbacks mVibrationThreadCallbacks =
+            new VibrationThreadCallbacks();
     @GuardedBy("mLock")
     private final SparseArray<AlwaysOnVibration> mAlwaysOnEffects = new SparseArray<>();
     @GuardedBy("mLock")
@@ -634,7 +635,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             VibrationThread vibThread = new VibrationThread(vib, mVibrationSettings,
                     mDeviceVibrationEffectAdapter, mVibrators, mWakeLock, mBatteryStatsService,
-                    mVibrationCallbacks);
+                    mVibrationThreadCallbacks);
 
             if (mCurrentVibration == null) {
                 return startVibrationThreadLocked(vibThread);
@@ -1115,10 +1116,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /**
-     * Implementation of {@link VibrationThread.VibrationCallbacks} that controls synced vibrations
-     * and reports them when finished.
+     * Implementation of {@link VibrationThread.VibratorManagerHooks} that controls synced
+     * vibrations and reports them when finished.
      */
-    private final class VibrationCallbacks implements VibrationThread.VibrationCallbacks {
+    private final class VibrationThreadCallbacks implements VibrationThread.VibratorManagerHooks {
 
         @Override
         public boolean prepareSyncedVibration(long requiredCapabilities, int[] vibratorIds) {
@@ -1153,7 +1154,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         @Override
-        public void onVibratorsReleased() {
+        public void onVibrationThreadReleased() {
             if (DEBUG) {
                 Slog.d(TAG, "Vibrators released after finished vibration");
             }

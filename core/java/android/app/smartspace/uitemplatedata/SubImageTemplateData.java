@@ -63,18 +63,30 @@ public final class SubImageTemplateData extends BaseTemplateData {
             @Nullable Text titleText,
             @Nullable Icon titleIcon,
             @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
+            @Nullable Icon subtitleIcon,
             @Nullable TapAction primaryTapAction,
+            @Nullable SubItemLoggingInfo primaryLoggingInfo,
             @Nullable Text supplementalSubtitleText,
             @Nullable Icon supplementalSubtitleIcon,
             @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
+            @Nullable Text supplementalText,
+            @Nullable Icon supplementalIcon,
+            @Nullable TapAction supplementalTapAction,
+            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
             @Nullable Text supplementalAlarmText,
+            int layoutWeight,
             @NonNull List<Text> subImageTexts,
             @NonNull List<Icon> subImages,
             @Nullable TapAction subImageAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
+                primaryTapAction, primaryLoggingInfo,
+                supplementalSubtitleText, supplementalSubtitleIcon,
+                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
+                supplementalText, supplementalIcon,
+                supplementalTapAction, supplementalLoggingInfo,
+                supplementalAlarmText, layoutWeight);
+
         mSubImageTexts = subImageTexts;
         mSubImages = subImages;
         mSubImageAction = subImageAction;
@@ -193,9 +205,14 @@ public final class SubImageTemplateData extends BaseTemplateData {
         @NonNull
         public SubImageTemplateData build() {
             return new SubImageTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
+                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubImageTexts,
+                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
+                    getSupplementalText(), getSupplementalIcon(),
+                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
+                    getSupplementalAlarmText(), getLayoutWeight(),
+                    mSubImageTexts,
                     mSubImages,
                     mSubImageAction);
         }

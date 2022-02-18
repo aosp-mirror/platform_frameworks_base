@@ -72,6 +72,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -620,36 +621,32 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         return summary;
     }
 
-    void launchNetworkSetting() {
-        // Dismissing a dialog into its touch surface and starting an activity at the same time
-        // looks bad, so let's make sure the dialog just fades out quickly.
-        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-        mCallback.dismissDialog();
+    private void startActivity(Intent intent, View view) {
+        ActivityLaunchAnimator.Controller controller =
+                mDialogLaunchAnimator.createActivityLaunchController(view);
 
-        mActivityStarter.postStartActivityDismissingKeyguard(getSettingsIntent(), 0);
+        if (controller == null) {
+            mCallback.dismissDialog();
+        }
+
+        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0, controller);
     }
 
-    void launchWifiNetworkDetailsSetting(String key) {
+    void launchNetworkSetting(View view) {
+        startActivity(getSettingsIntent(), view);
+    }
+
+    void launchWifiNetworkDetailsSetting(String key, View view) {
         Intent intent = getWifiDetailsSettingsIntent(key);
         if (intent != null) {
-            // Dismissing a dialog into its touch surface and starting an activity at the same time
-            // looks bad, so let's make sure the dialog just fades out quickly.
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-            mCallback.dismissDialog();
-
-            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+            startActivity(intent, view);
         }
     }
 
-    void launchWifiScanningSetting() {
-        // Dismissing a dialog into its touch surface and starting an activity at the same time
-        // looks bad, so let's make sure the dialog just fades out quickly.
-        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-        mCallback.dismissDialog();
-
+    void launchWifiScanningSetting(View view) {
         final Intent intent = new Intent(ACTION_WIFI_SCANNING_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
+        startActivity(intent, view);
     }
 
     void connectCarrierNetwork() {

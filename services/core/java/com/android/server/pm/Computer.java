@@ -51,6 +51,8 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
+import com.android.server.pm.resolution.ComponentResolverApi;
+import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -98,7 +100,7 @@ import java.util.Set;
  * {@link ComputerEngine} and {@link ComputerLocked}.
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-public interface Computer {
+public interface Computer extends PackageDataSnapshot {
 
     /**
      * Every method must be annotated.
@@ -178,6 +180,18 @@ public interface Computer {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     List<CrossProfileIntentFilter> getMatchingCrossProfileIntentFilters(Intent intent,
             String resolvedType, int userId);
+
+    /**
+     * Filters out ephemeral activities.
+     * <p>When resolving for an ephemeral app, only activities that 1) are defined in the
+     * ephemeral app or 2) marked with {@code visibleToEphemeral} are returned.
+     *
+     * @param resolveInfos The pre-filtered list of resolved activities
+     * @param ephemeralPkgName The ephemeral package name. If {@code null}, no filtering
+     *          is performed.
+     * @param intent
+     * @return A filtered list of resolved activities.
+     */
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
@@ -648,4 +662,16 @@ public interface Computer {
     @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
     @NonNull
     ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId);
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @NonNull
+    ComponentResolverApi getComponentResolver();
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @Nullable
+    PackageStateInternal getDisabledSystemPackage(@NonNull String packageName);
+
+    @Computer.LiveImplementation(override = LiveImplementation.MANDATORY)
+    @Nullable
+    ResolveInfo getInstantAppInstallerInfo();
 }

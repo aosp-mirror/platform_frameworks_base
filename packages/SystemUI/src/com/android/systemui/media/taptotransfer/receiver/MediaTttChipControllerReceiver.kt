@@ -18,7 +18,6 @@ package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.os.Handler
@@ -27,10 +26,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 
 /**
@@ -43,9 +42,10 @@ class MediaTttChipControllerReceiver @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
     windowManager: WindowManager,
+    mainExecutor: DelayableExecutor,
     @Main private val mainHandler: Handler,
 ) : MediaTttChipControllerCommon<ChipStateReceiver>(
-    context, windowManager, R.layout.media_ttt_chip_receiver
+    context, windowManager, mainExecutor, R.layout.media_ttt_chip_receiver
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferReceiverDisplay(

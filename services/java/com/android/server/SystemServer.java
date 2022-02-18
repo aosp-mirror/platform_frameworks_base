@@ -2707,15 +2707,6 @@ public final class SystemServer implements Dumpable {
             systemTheme.rebase();
         }
 
-        t.traceBegin("MakePowerManagerServiceReady");
-        try {
-            // TODO: use boot phase
-            mPowerManagerService.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Power Manager Service ready", e);
-        }
-        t.traceEnd();
-
         // Permission policy service
         t.traceBegin("StartPermissionPolicyService");
         mSystemServiceManager.startService(PermissionPolicyService.class);

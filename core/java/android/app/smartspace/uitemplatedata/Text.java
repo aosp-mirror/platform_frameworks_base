@@ -131,16 +131,6 @@ public final class Text implements Parcelable {
         }
 
         /**
-         * A builder for {@link Text} with specifying {@link TextUtils.TruncateAt} type, and by
-         * default set the max lines to 1.
-         */
-        public Builder(@NonNull CharSequence text, @NonNull TextUtils.TruncateAt truncateAtType) {
-            mText = Objects.requireNonNull(text);
-            mTruncateAtType = Objects.requireNonNull(truncateAtType);
-            mMaxLines = 1;
-        }
-
-        /**
          * Sets truncateAtType, where the text content should be truncated if not all the content
          * can be presented.
          */
