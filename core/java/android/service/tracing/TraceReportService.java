@@ -112,7 +112,6 @@ public class TraceReportService extends Service {
         }
     }
 
-    // Methods to override.
     /**
      * Called when a trace is reported and sent to this class.
      *
@@ -123,15 +122,10 @@ public class TraceReportService extends Service {
     public void onReportTrace(@NonNull TraceParams args) {
     }
 
-    // Optional methods to override.
-    // Realistically, these methods are internal implementation details but since this class is
-    // a SystemApi, it's better to err on the side of flexibility just in-case we need to override
-    // these methods down the line.
-
     /**
      * Handles binder calls from system_server.
      */
-    public boolean onMessage(@NonNull Message msg) {
+    private boolean onMessage(@NonNull Message msg) {
         if (msg.what == MSG_REPORT_TRACE) {
             if (!(msg.obj instanceof TraceReportParams)) {
                 Log.e(TAG, "Received invalid type for report trace message.");
@@ -153,10 +147,12 @@ public class TraceReportService extends Service {
 
     /**
      * Returns an IBinder for handling binder calls from system_server.
+     *
+     * @hide
      */
     @Nullable
     @Override
-    public IBinder onBind(@NonNull Intent intent) {
+    public final IBinder onBind(@NonNull Intent intent) {
         if (mMessenger == null) {
             mMessenger = new Messenger(new Handler(Looper.getMainLooper(), this::onMessage));
         }
