@@ -10179,8 +10179,6 @@ package android.service.tracing {
 
   public class TraceReportService extends android.app.Service {
     ctor public TraceReportService();
-    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public boolean onMessage(@NonNull android.os.Message);
     method public void onReportTrace(@NonNull android.service.tracing.TraceReportService.TraceParams);
   }
 
