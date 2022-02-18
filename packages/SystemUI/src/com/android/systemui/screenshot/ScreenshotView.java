@@ -403,12 +403,16 @@ public class ScreenshotView extends FrameLayout implements
                     }
 
                     @Override
-                    public void onDismiss() {
+                    public void onSwipeDismissInitiated(Animator animator) {
                         if (DEBUG_DISMISS) {
                             Log.d(ScreenshotView.TAG, "dismiss triggered via swipe gesture");
                         }
                         mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
                                 mPackageName);
+                    }
+
+                    @Override
+                    public void onDismissComplete() {
                         mCallbacks.onDismiss();
                     }
                 });
