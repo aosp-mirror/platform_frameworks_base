@@ -89,7 +89,9 @@ public class InsetsState implements Parcelable {
             ITYPE_BOTTOM_DISPLAY_CUTOUT,
             ITYPE_IME,
             ITYPE_CLIMATE_BAR,
-            ITYPE_EXTRA_NAVIGATION_BAR
+            ITYPE_EXTRA_NAVIGATION_BAR,
+            ITYPE_LOCAL_NAVIGATION_BAR_1,
+            ITYPE_LOCAL_NAVIGATION_BAR_2
     })
     public @interface InternalInsetsType {}
 
@@ -132,7 +134,11 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_CLIMATE_BAR = 20;
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
 
-    static final int LAST_TYPE = ITYPE_EXTRA_NAVIGATION_BAR;
+    /** Additional types for local insets. **/
+    public static final int ITYPE_LOCAL_NAVIGATION_BAR_1 = 22;
+    public static final int ITYPE_LOCAL_NAVIGATION_BAR_2 = 23;
+
+    static final int LAST_TYPE = ITYPE_LOCAL_NAVIGATION_BAR_2;
     public static final int SIZE = LAST_TYPE + 1;
 
     // Derived types
@@ -674,6 +680,8 @@ public class InsetsState implements Parcelable {
         if ((types & Type.NAVIGATION_BARS) != 0) {
             result.add(ITYPE_NAVIGATION_BAR);
             result.add(ITYPE_EXTRA_NAVIGATION_BAR);
+            result.add(ITYPE_LOCAL_NAVIGATION_BAR_1);
+            result.add(ITYPE_LOCAL_NAVIGATION_BAR_2);
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
@@ -714,6 +722,8 @@ public class InsetsState implements Parcelable {
                 return Type.STATUS_BARS;
             case ITYPE_NAVIGATION_BAR:
             case ITYPE_EXTRA_NAVIGATION_BAR:
+            case ITYPE_LOCAL_NAVIGATION_BAR_1:
+            case ITYPE_LOCAL_NAVIGATION_BAR_2:
                 return Type.NAVIGATION_BARS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
@@ -833,6 +843,10 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_CLIMATE_BAR";
             case ITYPE_EXTRA_NAVIGATION_BAR:
                 return "ITYPE_EXTRA_NAVIGATION_BAR";
+            case ITYPE_LOCAL_NAVIGATION_BAR_1:
+                return "ITYPE_LOCAL_NAVIGATION_BAR_1";
+            case ITYPE_LOCAL_NAVIGATION_BAR_2:
+                return "ITYPE_LOCAL_NAVIGATION_BAR_2";
             default:
                 return "ITYPE_UNKNOWN_" + type;
         }

@@ -30,7 +30,7 @@
                     android:radius="28dp"/>
                 <size
                     android:height="64dp"/>
-                <solid android:color="@*android:color/system_accent1_200" />
+                <solid android:color="@color/material_dynamic_primary80" />
             </shape>
         </clip>
     </item>

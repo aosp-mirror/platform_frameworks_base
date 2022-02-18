@@ -23,7 +23,7 @@
         android:duration="@android:integer/config_activityShortDur" />
     <translate
         android:fromYDelta="0"
-        android:toYDelta="-10dp"
+        android:toYDelta="@android:dimen/popup_exit_animation_to_y_delta"
         android:interpolator="@interpolator/standard_accelerate"
         android:duration="@android:integer/config_activityShortDur" />
 </set>

@@ -42,7 +42,10 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Attribution;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.icu.text.ListFormatter;
 import android.media.AudioManager;
 import android.os.Process;
@@ -70,20 +73,30 @@ import java.util.Objects;
 public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedListener,
         AppOpsManager.OnOpStartedListener {
 
-    /** Whether to show the mic and camera icons.  */
+    /**
+     * Whether to show the mic and camera icons.
+     */
     private static final String PROPERTY_CAMERA_MIC_ICONS_ENABLED = "camera_mic_icons_enabled";
 
-    /** Whether to show the location indicators. */
+    /**
+     * Whether to show the location indicators.
+     */
     private static final String PROPERTY_LOCATION_INDICATORS_ENABLED =
             "location_indicators_enabled";
 
-    /** Whether to show the Permissions Hub.  */
+    /**
+     * Whether to show the Permissions Hub.
+     */
     private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
 
-    /** How long after an access to show it as "recent" */
+    /**
+     * How long after an access to show it as "recent"
+     */
     private static final String RECENT_ACCESS_TIME_MS = "recent_access_time_ms";
 
-    /** How long after an access to show it as "running" */
+    /**
+     * How long after an access to show it as "running"
+     */
     private static final String RUNNING_ACCESS_TIME_MS = "running_access_time_ms";
 
     private static final String SYSTEM_PKG = "android";
@@ -132,7 +145,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     );
 
     private static @NonNull String getGroupForOp(String op) {
-        switch(op) {
+        switch (op) {
             case OPSTR_RECORD_AUDIO:
                 return MICROPHONE;
             case OPSTR_CAMERA:
@@ -158,6 +171,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     /**
      * Constructor for PermissionUsageHelper
+     *
      * @param context The context from which to derive the package information
      */
     public PermissionUsageHelper(@NonNull Context context) {
@@ -167,9 +181,9 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         mUserContexts = new ArrayMap<>();
         mUserContexts.put(Process.myUserHandle(), mContext);
         // TODO ntmyren: make this listen for flag enable/disable changes
-        String[] opStrs = { OPSTR_CAMERA, OPSTR_RECORD_AUDIO };
+        String[] opStrs = {OPSTR_CAMERA, OPSTR_RECORD_AUDIO};
         mAppOpsManager.startWatchingActive(opStrs, context.getMainExecutor(), this);
-        int[] ops = { OP_CAMERA, OP_RECORD_AUDIO };
+        int[] ops = {OP_CAMERA, OP_RECORD_AUDIO};
         mAppOpsManager.startWatchingStarted(ops, this);
     }
 
@@ -225,8 +239,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     @Override
     public void onOpStarted(int op, int uid, String packageName, String attributionTag,
-                @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
-       // not part of an attribution chain. Do nothing
+            @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+        // not part of an attribution chain. Do nothing
     }
 
     @Override
@@ -274,8 +288,8 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     /**
      * @see PermissionManager.getIndicatorAppOpUsageData
      */
-    public @NonNull List<PermGroupUsage> getOpUsageData(boolean isMicMuted) {
-        List<PermGroupUsage> usages = new ArrayList<>();
+    public @NonNull List<PermissionGroupUsage> getOpUsageData(boolean isMicMuted) {
+        List<PermissionGroupUsage> usages = new ArrayList<>();
 
         if (!shouldShowIndicators()) {
             return usages;
@@ -313,12 +327,17 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             }
         }
 
+        // map of package name -> map of attribution tag -> attribution labels
+        ArrayMap<String, Map<String, String>> subAttributionLabelsMap = new ArrayMap<>();
+
         for (int permGroupNum = 0; permGroupNum < usedPermGroups.size(); permGroupNum++) {
             boolean isPhone = false;
             String permGroup = usedPermGroups.get(permGroupNum);
 
             ArrayMap<OpUsage, CharSequence> usagesWithLabels =
                     getUniqueUsagesWithLabels(permGroup, rawUsages.get(permGroup));
+
+            updateSubattributionLabelsMap(rawUsages.get(permGroup), subAttributionLabelsMap);
 
             if (permGroup.equals(OPSTR_PHONE_CALL_MICROPHONE)) {
                 isPhone = true;
@@ -330,13 +349,84 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
             for (int usageNum = 0; usageNum < usagesWithLabels.size(); usageNum++) {
                 OpUsage usage = usagesWithLabels.keyAt(usageNum);
-                usages.add(new PermGroupUsage(usage.packageName, usage.uid, permGroup,
-                        usage.lastAccessTime, usage.isRunning, isPhone,
-                        usagesWithLabels.valueAt(usageNum)));
+                String attributionLabel = subAttributionLabelsMap.getOrDefault(usage.packageName,
+                        new ArrayMap<>()).getOrDefault(usage.attributionTag, null);
+                usages.add(
+                        new PermissionGroupUsage(usage.packageName, usage.uid, usage.lastAccessTime,
+                                permGroup,
+                                usage.isRunning, isPhone, usage.attributionTag, attributionLabel,
+                                usagesWithLabels.valueAt(usageNum)));
             }
         }
 
         return usages;
+    }
+
+    private void updateSubattributionLabelsMap(List<OpUsage> usages,
+            ArrayMap<String, Map<String, String>> subAttributionLabelsMap) {
+        if (usages == null || usages.isEmpty()) {
+            return;
+        }
+        for (OpUsage usage : usages) {
+            if (usage.attributionTag != null && !subAttributionLabelsMap.containsKey(
+                    usage.packageName)) {
+                subAttributionLabelsMap.put(usage.packageName,
+                        getSubattributionLabelsForPackage(usage.packageName, usage.uid));
+            }
+        }
+    }
+
+    /**
+     * Query attribution labels for a package
+     *
+     * @param packageName
+     * @param uid
+     * @return map of attribution tag -> attribution labels for a package
+     */
+    private ArrayMap<String, String> getSubattributionLabelsForPackage(String packageName,
+            int uid) {
+        ArrayMap<String, String> attributionLabelMap = new ArrayMap<>();
+        UserHandle user = UserHandle.getUserHandleForUid(uid);
+        try {
+            if (!isSubattributionSupported(packageName, uid)) {
+                return attributionLabelMap;
+            }
+            Context userContext = getUserContext(user);
+            PackageInfo packageInfo = userContext.getPackageManager().getPackageInfo(
+                    packageName,
+                    PackageManager.GET_PERMISSIONS | PackageManager.GET_ATTRIBUTIONS);
+            Context pkgContext = userContext.createPackageContext(packageInfo.packageName, 0);
+            for (Attribution attribution : packageInfo.attributions) {
+                try {
+                    String resourceForLabel = pkgContext.getString(attribution.getLabel());
+                    attributionLabelMap.put(attribution.getTag(), resourceForLabel);
+                } catch (Resources.NotFoundException e) {
+                    // Shouldn't happen, do nothing
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // Did not find the package, do nothing
+        }
+        return attributionLabelMap;
+    }
+
+    /**
+     * Returns true if the app supports subattribution.
+     */
+    private boolean isSubattributionSupported(String packageName, int uid) {
+        try {
+            PackageManager userPkgManager =
+                    getUserContext(UserHandle.getUserHandleForUid(uid)).getPackageManager();
+            ApplicationInfo appInfo = userPkgManager.getApplicationInfoAsUser(packageName,
+                    PackageManager.ApplicationInfoFlags.of(0),
+                    UserHandle.getUserId(uid));
+            if (appInfo != null) {
+                return appInfo.areAttributionsUserVisible();
+            }
+            return false;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /**
@@ -346,7 +436,6 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
      * running/recent info, if the usage is a phone call, per permission group.
      *
      * @param opNames a list of op names to get usage for
-     *
      * @return A map of permission group -> list of usages that are recent or running
      */
     private Map<String, List<OpUsage>> getOpUsages(List<String> opNames) {
@@ -377,6 +466,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
                 String op = opEntry.getOpStr();
                 List<String> attributionTags =
                         new ArrayList<>(opEntry.getAttributedOpEntries().keySet());
+
 
                 int numAttrEntries = opEntry.getAttributedOpEntries().size();
                 for (int attrOpEntryNum = 0; attrOpEntryNum < numAttrEntries; attrOpEntryNum++) {
@@ -456,6 +546,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         ArrayMap<OpUsage, ArrayList<CharSequence>> proxyLabels = new ArrayMap<>();
         // map of usage.proxy hash -> usage hash, telling us if a usage is a proxy
         ArrayMap<Integer, OpUsage> proxies = new ArrayMap<>();
+
         for (int i = 0; i < usages.size(); i++) {
             OpUsage usage = usages.get(i);
             allUsages.put(usage.getPackageIdHash(), usage);
@@ -588,7 +679,6 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
                     } catch (PackageManager.NameNotFoundException e) {
                         // do nothing
                     }
-
                 }
                 usagesAndLabels.put(start.usage, proxyLabel);
             }

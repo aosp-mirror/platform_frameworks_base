@@ -457,8 +457,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mLastWallpaperVisible = false;
 
-    private Rect mBaseDisplayRect = new Rect();
-
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
@@ -487,9 +485,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
     private final Region mTmpRegion = new Region();
-
-    /** Used for handing back size of display */
-    private final Rect mTmpBounds = new Rect();
 
     private final Configuration mTmpConfiguration = new Configuration();
 
@@ -1362,8 +1357,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayRotation;
     }
 
-    void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider){
+    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider) {
         setInsetProvider(type, win, frameProvider, null /* imeFrameProvider */);
     }
 
@@ -1377,10 +1372,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param imeFrameProvider Function to compute the frame when dispatching insets to the IME, or
      *                         {@code null} if the normal frame should be taken.
      */
-    void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider) {
-        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider,
+    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
+            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider) {
+        mInsetsStateController.getSourceProvider(type).setWindowContainer(win, frameProvider,
                 imeFrameProvider);
     }
 
@@ -2080,8 +2075,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
                 mDisplayInfo);
 
-        mBaseDisplayRect.set(0, 0, dw, dh);
-
         if (isDefaultDisplay) {
             mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
                     mCompatDisplayMetrics);
@@ -2213,14 +2206,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void computeScreenConfiguration(Configuration config) {
         final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode, config);
-        calculateBounds(displayInfo, mTmpBounds);
-        config.windowConfiguration.setBounds(mTmpBounds);
-        config.windowConfiguration.setMaxBounds(mTmpBounds);
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
+        mTmpRect.set(0, 0, dw, dh);
+        config.windowConfiguration.setBounds(mTmpRect);
+        config.windowConfiguration.setMaxBounds(mTmpRect);
         config.windowConfiguration.setWindowingMode(getWindowingMode());
         config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
 
-        final int dw = displayInfo.logicalWidth;
-        final int dh = displayInfo.logicalHeight;
         computeScreenAppConfiguration(config, dw, dh, displayInfo.rotation, config.uiMode,
                 displayInfo.displayCutout);
 
@@ -2844,10 +2837,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Update base (override) display metrics. */
     void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity) {
-        final int originalWidth = mBaseDisplayWidth;
-        final int originalHeight = mBaseDisplayHeight;
-        final int originalDensity = mBaseDisplayDensity;
-
         mBaseDisplayWidth = baseWidth;
         mBaseDisplayHeight = baseHeight;
         mBaseDisplayDensity = baseDensity;
@@ -2866,12 +2855,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 Slog.v(TAG_WM, "Applying config restraints:" + mBaseDisplayWidth + "x"
                         + mBaseDisplayHeight + " on display:" + getDisplayId());
             }
-        }
-
-        if (mBaseDisplayWidth != originalWidth || mBaseDisplayHeight != originalHeight
-                || mBaseDisplayDensity != originalDensity) {
-            mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
-            updateBounds();
         }
     }
 
@@ -3021,7 +3004,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (focusedTask == null) {
             mTouchExcludeRegion.setEmpty();
         } else {
-            mTouchExcludeRegion.set(mBaseDisplayRect);
+            mTouchExcludeRegion.set(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
             final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
             mTmpRect.setEmpty();
             mTmpRect2.setEmpty();
@@ -3343,8 +3326,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         if (mInsetsStateController != null) {
             for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-                final InsetsSourceProvider provider = mInsetsStateController.peekSourceProvider(
-                        type);
+                final WindowContainerInsetsSourceProvider provider = mInsetsStateController
+                        .peekSourceProvider(type);
                 if (provider != null) {
                     provider.dumpDebug(proto, type == ITYPE_IME ? IME_INSETS_SOURCE_PROVIDER :
                             INSETS_SOURCE_PROVIDERS, logLevel);
@@ -3822,7 +3805,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final int imePid = mInputMethodWindow.mSession.mPid;
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
-        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
+        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null /* imeFrameProvider */);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
@@ -4053,7 +4036,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
         // 3. The z-order of IME might have been changed. Update the above insets state.
-        mInsetsStateController.updateAboveInsetsState(mInputMethodWindow,
+        mInsetsStateController.updateAboveInsetsState(
                 mInsetsStateController.getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
@@ -4184,7 +4167,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mImeInputTarget != target) {
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             setImeInputTarget(target);
-            mInsetsStateController.updateAboveInsetsState(mInputMethodWindow, mInsetsStateController
+            mInsetsStateController.updateAboveInsetsState(mInsetsStateController
                     .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
             updateImeControlTarget();
         }
@@ -4587,25 +4570,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    private void updateBounds() {
-        calculateBounds(mDisplayInfo, mTmpBounds);
-        setBounds(mTmpBounds);
-    }
-
-    // Determines the current display bounds based on the current state
-    private void calculateBounds(DisplayInfo displayInfo, Rect out) {
-        // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
-        final int rotation = displayInfo.rotation;
-        boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
-        final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
-        int width = displayInfo.logicalWidth;
-        int left = (physWidth - width) / 2;
-        int height = displayInfo.logicalHeight;
-        int top = (physHeight - height) / 2;
-        out.set(left, top, left + width, top + height);
-    }
-
     private void getBounds(Rect out, @Rotation int rotation) {
         getBounds(out);
 
@@ -4843,6 +4807,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             // IME does not participate in orientation.
             return candidate;
+        }
+
+        @Override
+        void updateAboveInsetsState(InsetsState aboveInsetsState,
+                SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+                ArraySet<WindowState> insetsChangedWindows) {
+            if (skipImeWindowsDuringTraversal(mDisplayContent)) {
+                return;
+            }
+            super.updateAboveInsetsState(aboveInsetsState, localInsetsSourceProvidersFromParent,
+                    insetsChangedWindows);
         }
 
         @Override
@@ -5561,8 +5536,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void onDisplayChanged() {
-        mDisplay.getRealSize(mTmpDisplaySize);
-        setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
         final int lastDisplayState = mDisplayInfo.state;
         updateDisplayInfo();
 

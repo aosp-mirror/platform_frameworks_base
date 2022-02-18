@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -60,4 +61,16 @@ class OpenAppFromOverviewTest_ShellTransit(testSpec: FlickerTestParameter)
     override fun before() {
         assumeTrue(isShellTransitionsEnabled)
     }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 216266712)
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() =
+            super.appWindowReplacesLauncherAsTopWindow()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 218470989)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 }

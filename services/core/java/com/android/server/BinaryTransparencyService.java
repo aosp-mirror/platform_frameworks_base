@@ -36,11 +36,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -434,7 +431,7 @@ public class BinaryTransparencyService extends SystemService {
                     entry.setValue(packageInfo.lastUpdateTime);
 
                     // compute the digest for the updated package
-                    String sha256digest = computeSha256DigestOfFile(
+                    String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
                             packageInfo.applicationInfo.sourceDir);
                     if (sha256digest == null) {
                         Slog.e(TAG, "Failed to compute SHA256sum for file at "
@@ -471,7 +468,7 @@ public class BinaryTransparencyService extends SystemService {
             ApplicationInfo appInfo = packageInfo.applicationInfo;
 
             // compute SHA256 for these APEXs
-            String sha256digest = computeSha256DigestOfFile(appInfo.sourceDir);
+            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(appInfo.sourceDir);
             if (sha256digest == null) {
                 Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                         packageInfo.packageName));
@@ -506,7 +503,8 @@ public class BinaryTransparencyService extends SystemService {
                 ApplicationInfo appInfo = packageInfo.applicationInfo;
 
                 // compute SHA256 digest for these modules
-                String sha256digest = computeSha256DigestOfFile(appInfo.sourceDir);
+                String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
+                        appInfo.sourceDir);
                 if (sha256digest == null) {
                     Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
                             packageName));
@@ -525,16 +523,4 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    @Nullable
-    private String computeSha256DigestOfFile(@NonNull String pathToFile) {
-        File apexFile = new File(pathToFile);
-
-        try {
-            byte[] apexFileBytes = Files.readAllBytes(apexFile.toPath());
-            return PackageUtils.computeSha256Digest(apexFileBytes);
-        } catch (IOException e) {
-            Slog.e(TAG, String.format("I/O error occurs when reading from %s", pathToFile));
-            return null;
-        }
-    }
 }

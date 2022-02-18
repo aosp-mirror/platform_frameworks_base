@@ -717,6 +717,7 @@ public class InteractionJankMonitor {
         private final boolean mSurfaceOnly;
         private final SurfaceControl mSurfaceControl;
         private final @CujType int mCujType;
+        private final boolean mDeferMonitor;
 
         /**
          * A builder for building Configuration. {@link #setView(View)} is essential
@@ -733,6 +734,7 @@ public class InteractionJankMonitor {
             private boolean mAttrSurfaceOnly;
             private SurfaceControl mAttrSurfaceControl;
             private @CujType int mAttrCujType;
+            private boolean mAttrDeferMonitor = true;
 
             /**
              * Creates a builder which instruments only surface.
@@ -823,6 +825,16 @@ public class InteractionJankMonitor {
             }
 
             /**
+             * Indicates if the instrument should be deferred to the next frame.
+             * @param defer true if the instrument should be deferred to the next frame.
+             * @return builder
+             */
+            public Builder setDeferMonitorForAnimationStart(boolean defer) {
+                mAttrDeferMonitor = defer;
+                return this;
+            }
+
+            /**
              * Builds the {@link Configuration} instance
              * @return the instance of {@link Configuration}
              * @throws IllegalArgumentException if any invalid attribute is set
@@ -830,12 +842,14 @@ public class InteractionJankMonitor {
             public Configuration build() throws IllegalArgumentException {
                 return new Configuration(
                         mAttrCujType, mAttrView, mAttrTag, mAttrTimeout,
-                        mAttrSurfaceOnly, mAttrContext, mAttrSurfaceControl);
+                        mAttrSurfaceOnly, mAttrContext, mAttrSurfaceControl,
+                        mAttrDeferMonitor);
             }
         }
 
         private Configuration(@CujType int cuj, View view, String tag, long timeout,
-                boolean surfaceOnly, Context context, SurfaceControl surfaceControl) {
+                boolean surfaceOnly, Context context, SurfaceControl surfaceControl,
+                boolean deferMonitor) {
             mCujType = cuj;
             mTag = tag;
             mTimeout = timeout;
@@ -845,6 +859,7 @@ public class InteractionJankMonitor {
                     ? context
                     : (view != null ? view.getContext().getApplicationContext() : null);
             mSurfaceControl = surfaceControl;
+            mDeferMonitor = deferMonitor;
             validate();
         }
 
@@ -900,6 +915,13 @@ public class InteractionJankMonitor {
 
         Context getContext() {
             return mContext;
+        }
+
+        /**
+         * @return true if the monitoring should be deferred to the next frame, false otherwise.
+         */
+        public boolean shouldDeferMonitor() {
+            return mDeferMonitor;
         }
     }
 

@@ -56,6 +56,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        allowTestableLooperAsMainThread();
         when(mWifiInfo.makeCopy(anyLong())).thenReturn(mWifiInfo);
         when(mWifiInfo.isPrimary()).thenReturn(true);
     }

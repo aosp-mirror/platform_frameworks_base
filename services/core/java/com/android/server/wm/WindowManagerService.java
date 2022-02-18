@@ -1823,7 +1823,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // This window doesn't have a frame yet. Don't let this window cause the insets change.
             displayContent.getInsetsStateController().updateAboveInsetsState(
-                    win, false /* notifyInsetsChanged */);
+                    false /* notifyInsetsChanged */);
 
             outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             getInsetsSourceControls(win, outActiveControls);

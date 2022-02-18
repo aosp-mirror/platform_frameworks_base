@@ -2020,6 +2020,7 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
+    @Ignore // b/220067877
     @Test
     public void testWorkTab_xProfileOff_noAppsAvailable_workOff_xProfileOffEmptyStateShown() {
         // enable the work tab feature flag
@@ -2304,6 +2305,7 @@ public class ChooserActivityTest {
         assertThat(logger.numCalls(), is(5));
     }
 
+    @Ignore // b/220067877
     @Test
     public void testCopyTextToClipboardLogging() throws Exception {
         Intent sendIntent = createSendTextIntent();

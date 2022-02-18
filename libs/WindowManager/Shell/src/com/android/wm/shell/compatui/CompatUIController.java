@@ -40,6 +40,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 
 import java.lang.ref.WeakReference;
@@ -105,9 +106,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private CompatUICallback mCallback;
 
-    // Only show once automatically in the process life.
-    private boolean mHasShownSizeCompatHint;
-    private boolean mHasShownCameraCompatHint;
+    // Only show each hint once automatically in the process life.
+    private final CompatUIHintsState mCompatUIHintsState;
 
     // Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
     // be shown.
@@ -127,6 +127,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mMainExecutor = mainExecutor;
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
+        mCompatUIHintsState = new CompatUIHintsState();
     }
 
     /** Returns implementation of {@link CompatUI}. */
@@ -259,19 +260,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @VisibleForTesting
     CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        final CompatUIWindowManager compatUIWindowManager = new CompatUIWindowManager(context,
+        return new CompatUIWindowManager(context,
                 taskInfo, mSyncQueue, mCallback, taskListener,
-                mDisplayController.getDisplayLayout(taskInfo.displayId), mHasShownSizeCompatHint,
-                mHasShownCameraCompatHint);
-        // TODO(b/218304113): updates values only if hints are actually shown to the user.
-        // Only show hints for the first time.
-        if (taskInfo.topActivityInSizeCompat) {
-            mHasShownSizeCompatHint = true;
-        }
-        if (taskInfo.hasCameraCompatControl()) {
-            mHasShownCameraCompatHint = true;
-        }
-        return compatUIWindowManager;
+                mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState);
     }
 
     private void createOrUpdateLetterboxEduLayout(TaskInfo taskInfo,
@@ -292,9 +283,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (context == null) {
             return;
         }
-        LetterboxEduWindowManager newLayout = new LetterboxEduWindowManager(context, taskInfo,
-                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                this::onLetterboxEduDismissed);
+        LetterboxEduWindowManager newLayout = createLetterboxEduWindowManager(context, taskInfo,
+                taskListener);
         if (newLayout.createLayout(showOnDisplay(taskInfo.displayId))) {
             // The new layout is eligible to be shown, make it the active layout.
             if (mActiveLetterboxEduLayout != null) {
@@ -305,6 +295,14 @@ public class CompatUIController implements OnDisplaysChangedListener,
             }
             mActiveLetterboxEduLayout = newLayout;
         }
+    }
+
+    @VisibleForTesting
+    LetterboxEduWindowManager createLetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        return new LetterboxEduWindowManager(context, taskInfo,
+                mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
+                this::onLetterboxEduDismissed);
     }
 
     private void onLetterboxEduDismissed() {

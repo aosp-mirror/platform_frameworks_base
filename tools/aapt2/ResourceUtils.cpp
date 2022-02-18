@@ -50,12 +50,11 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
   name_out.package =
       util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
 
-  const ResourceType* type;
+  std::optional<ResourceNamedTypeRef> type;
   if (name_in.type) {
-    type = ParseResourceType(
-        util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
+    type = ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
   } else if (name_in.type8) {
-    type = ParseResourceType(StringPiece(name_in.type8, name_in.typeLen));
+    type = ParseResourceNamedType(StringPiece(name_in.type8, name_in.typeLen));
   } else {
     return {};
   }
@@ -64,7 +63,7 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
     return {};
   }
 
-  name_out.type = *type;
+  name_out.type = type->ToResourceNamedType();
 
   if (name_in.name) {
     name_out.entry =
@@ -85,12 +84,12 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
 
   name_out.package = std::string(name_in.package, name_in.package_len);
 
-  const ResourceType* type;
+  std::optional<ResourceNamedTypeRef> type;
   if (name_in.type16) {
-    type = ParseResourceType(
-        util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
+    type =
+        ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
   } else if (name_in.type) {
-    type = ParseResourceType(StringPiece(name_in.type, name_in.type_len));
+    type = ParseResourceNamedType(StringPiece(name_in.type, name_in.type_len));
   } else {
     return {};
   }
@@ -99,7 +98,7 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
     return {};
   }
 
-  name_out.type = *type;
+  name_out.type = type->ToResourceNamedType();
 
   if (name_in.entry16) {
     name_out.entry =
@@ -133,7 +132,7 @@ bool ParseResourceName(const StringPiece& str, ResourceNameRef* out_ref,
     return false;
   }
 
-  const ResourceType* parsed_type = ParseResourceType(type);
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(type);
   if (!parsed_type) {
     return false;
   }
@@ -181,7 +180,7 @@ bool ParseReference(const StringPiece& str, ResourceNameRef* out_ref,
       return false;
     }
 
-    if (create && name.type != ResourceType::kId) {
+    if (create && name.type.type != ResourceType::kId) {
       return false;
     }
 
@@ -230,7 +229,7 @@ bool ParseAttributeReference(const StringPiece& str, ResourceNameRef* out_ref) {
 
     if (out_ref) {
       out_ref->package = package;
-      out_ref->type = ResourceType::kAttr;
+      out_ref->type = ResourceNamedTypeWithDefaultName(ResourceType::kAttr);
       out_ref->entry = entry;
     }
     return true;
@@ -272,7 +271,7 @@ std::optional<Reference> ParseStyleParentReference(const StringPiece& str, std::
   }
 
   ResourceNameRef ref;
-  ref.type = ResourceType::kStyle;
+  ref.type = ResourceNamedTypeWithDefaultName(ResourceType::kStyle);
 
   StringPiece type_str;
   android::ExtractResourceName(name, &ref.package, &type_str, &ref.entry);
@@ -323,7 +322,8 @@ std::optional<Reference> ParseXmlAttributeName(const StringPiece& str) {
     p++;
   }
 
-  ref.name = ResourceName(package, ResourceType::kAttr, name.empty() ? trimmed_str : name);
+  ref.name = ResourceName(package, ResourceNamedTypeWithDefaultName(ResourceType::kAttr),
+                          name.empty() ? trimmed_str : name);
   return std::optional<Reference>(std::move(ref));
 }
 

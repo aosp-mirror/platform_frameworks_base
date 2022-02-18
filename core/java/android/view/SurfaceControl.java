@@ -389,9 +389,7 @@ public final class SurfaceControl implements Parcelable {
         public static final int JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED = 0x4;
         // Either App or GPU took too long on the frame
         public static final int JANK_APP_DEADLINE_MISSED = 0x8;
-        // Predictions live for 120ms, if prediction is expired for a frame, there is definitely a
-        // jank
-        // associated with the App if this is for a SurfaceFrame, and SF for a DisplayFrame.
+        // Vsync predictions have drifted beyond the threshold from the actual HWVsync
         public static final int PREDICTION_ERROR = 0x10;
         // Latching a buffer early might cause an early present of the frame
         public static final int SURFACE_FLINGER_SCHEDULING = 0x20;

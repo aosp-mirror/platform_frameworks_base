@@ -197,6 +197,8 @@ import com.android.role.RoleManagerLocal;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
+import com.android.server.PinnerService;
+import com.android.server.PinnerService.PinnedFileStats;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
@@ -727,6 +729,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullAccessibilityFloatingMenuStatsLocked(atomTag, data);
                     case FrameworkStatsLog.MEDIA_CAPABILITIES:
                         return pullMediaCapabilitiesStats(atomTag, data);
+                    case FrameworkStatsLog.PINNED_FILE_SIZES_PER_PACKAGE:
+                        return pullSystemServerPinnerStats(atomTag, data);
                     case FrameworkStatsLog.PENDING_INTENTS_PER_PACKAGE:
                         return pullPendingIntentsPerPackage(atomTag, data);
                     default:
@@ -926,6 +930,7 @@ public class StatsPullAtomService extends SystemService {
         registerAccessibilityFloatingMenuStats();
         registerMediaCapabilitiesStats();
         registerPendingIntentsPerPackagePuller();
+        registerPinnerServiceStats();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -4603,6 +4608,26 @@ public class StatsPullAtomService extends SystemService {
         for (PendingIntentStats stats : pendingIntentStats) {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     atomTag, stats.uid, stats.count, stats.sizeKb));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerPinnerServiceStats() {
+        int tagId = FrameworkStatsLog.PINNED_FILE_SIZES_PER_PACKAGE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullSystemServerPinnerStats(int atomTag, List<StatsEvent> pulledData) {
+        PinnerService pinnerService = LocalServices.getService(PinnerService.class);
+        List<PinnedFileStats> pinnedFileStats = pinnerService.dumpDataForStatsd();
+        for (PinnedFileStats pfstats : pinnedFileStats) {
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                    pfstats.uid, pfstats.filename, pfstats.sizeKb));
         }
         return StatsManager.PULL_SUCCESS;
     }

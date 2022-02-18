@@ -120,7 +120,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @NonNull
     public AudioInjection startAudioInjection(@NonNull AudioFormat injectionFormat) {
         Objects.requireNonNull(injectionFormat, "injectionFormat must not be null");
-        mUserRestrictionsDetector.register(/* callback= */ this);
+
         synchronized (mLock) {
             if (mAudioInjection != null) {
                 throw new IllegalStateException(
@@ -130,6 +130,8 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
             mInjectionFormat = injectionFormat;
             mAudioInjection = new AudioInjection();
             mAudioInjection.play();
+
+            mUserRestrictionsDetector.register(/* callback= */ this);
             mAudioInjection.setSilent(mUserRestrictionsDetector.isUnmuteMicrophoneDisallowed());
             return mAudioInjection;
         }

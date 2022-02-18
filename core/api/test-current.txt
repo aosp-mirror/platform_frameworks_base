@@ -2058,17 +2058,6 @@ package android.os.vibrator {
 
 package android.permission {
 
-  public final class PermGroupUsage {
-    ctor public PermGroupUsage(@NonNull String, int, @NonNull String, long, boolean, boolean, @Nullable CharSequence);
-    method @Nullable public CharSequence getAttribution();
-    method public long getLastAccess();
-    method @NonNull public String getPackageName();
-    method @NonNull public String getPermGroupName();
-    method public int getUid();
-    method public boolean isActive();
-    method public boolean isPhoneCall();
-  }
-
   public final class PermissionControllerManager {
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void countPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull android.permission.PermissionControllerManager.OnCountPermissionAppsResultCallback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getAppPermissions(@NonNull String, @NonNull android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, @Nullable android.os.Handler);
@@ -2084,8 +2073,8 @@ package android.permission {
   }
 
   public final class PermissionManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
-    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData();
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermissionGroupUsage> getIndicatorAppOpUsageData(boolean);
     method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
     method @RequiresPermission(android.Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL) public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
   }

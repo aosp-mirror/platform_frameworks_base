@@ -405,7 +405,8 @@ final class DumpHelper {
         }
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
-            mPm.mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
+            mPm.mComponentResolver.dumpContentProviders(mPm.snapshotComputer(), pw, dumpState,
+                    packageName);
         }
 
         if (!checkin

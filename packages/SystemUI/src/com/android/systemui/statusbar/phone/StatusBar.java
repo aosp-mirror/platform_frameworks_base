@@ -344,6 +344,7 @@ public class StatusBar extends CoreStartable implements
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final DreamOverlayStateController mDreamOverlayStateController;
     private StatusBarCommandQueueCallbacks mCommandQueueCallbacks;
+    private float mTransitionToFullShadeProgress = 0f;
 
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
         updateBubblesVisibility();
@@ -2583,9 +2584,9 @@ public class StatusBar extends CoreStartable implements
             return controllerFromStatusBar.get();
         }
 
-        if (dismissShade && rootView == mNotificationShadeWindowView) {
-            // We are animating a view in the shade. We have to make sure that we collapse it when
-            // the animation ends or is cancelled.
+        if (dismissShade) {
+            // If the view is not in the status bar, then we are animating a view in the shade.
+            // We have to make sure that we collapse it when the animation ends or is cancelled.
             return new StatusBarLaunchAnimatorController(animationController, this,
                     true /* isLaunchForActivity */);
         }
@@ -3777,6 +3778,15 @@ public class StatusBar extends CoreStartable implements
         updateScrimController();
     }
 
+    /**
+     * Set the amount of progress we are currently in if we're transitioning to the full shade.
+     * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
+     * shade.
+     */
+    public void setTransitionToFullShadeProgress(float transitionToFullShadeProgress) {
+        mTransitionToFullShadeProgress = transitionToFullShadeProgress;
+    }
+
     @VisibleForTesting
     public void updateScrimController() {
         Trace.beginSection("StatusBar#updateScrimController");
@@ -3795,7 +3805,8 @@ public class StatusBar extends CoreStartable implements
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
         if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
-            if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED) {
+            if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
+                    || mTransitionToFullShadeProgress > 0f) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
             } else {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);

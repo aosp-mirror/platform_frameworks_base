@@ -3059,7 +3059,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
 
-        InsetsState state = mDisplayContent.getInsetsPolicy().getInsetsForWindow(app);
+        InsetsState state = app.getInsetsState();
         assertFalse(state.getSource(ITYPE_IME).isVisible());
         assertTrue(state.getSource(ITYPE_IME).getFrame().isEmpty());
 
@@ -3079,7 +3079,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
-        state = mDisplayContent.getInsetsPolicy().getInsetsForWindow(app);
+        state = app.getInsetsState();
         assertTrue(state.getSource(ITYPE_IME).isVisible());
         assertEquals(state.getSource(ITYPE_IME).getFrame(), imeSource.getFrame());
     }
@@ -3091,7 +3091,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
         final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
@@ -3125,7 +3125,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         verify(app2.mClient, atLeastOnce()).insetsChanged(insetsStateCaptor.capture(), anyBoolean(),
                 anyBoolean());
-        assertFalse(insetsStateCaptor.getAllValues().get(0).peekSource(ITYPE_IME).isVisible());
+        assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
     @Test

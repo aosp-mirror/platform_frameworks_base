@@ -93,6 +93,7 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -1064,7 +1065,7 @@ public class PackageManagerServiceUtils {
 
     // Static to give access to ComputeEngine
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolver resolver,
+            PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         // Do not enforce filter matching when the caller is system or root.

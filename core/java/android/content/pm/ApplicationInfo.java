@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
@@ -1865,7 +1866,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     public ApplicationInfo() {
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public ApplicationInfo(ApplicationInfo orig) {
@@ -1939,7 +1940,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
         localeConfigRes = orig.localeConfigRes;
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public String toString() {

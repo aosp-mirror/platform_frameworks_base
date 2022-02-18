@@ -27,8 +27,10 @@ import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 
 /**
@@ -40,8 +42,9 @@ class MediaTttChipControllerSender @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
     windowManager: WindowManager,
+    @Main private val mainExecutor: DelayableExecutor,
 ) : MediaTttChipControllerCommon<ChipStateSender>(
-    context, windowManager, R.layout.media_ttt_chip
+    context, windowManager, mainExecutor,  R.layout.media_ttt_chip
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferSenderDisplay(

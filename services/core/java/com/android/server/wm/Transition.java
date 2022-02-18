@@ -1251,6 +1251,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 final ActivityRecord topMostActivity = task.getTopMostActivity();
                 change.setAllowEnterPip(topMostActivity != null
                         && topMostActivity.checkEnterPictureInPictureAppOpsState());
+                final ActivityRecord topRunningActivity = task.topRunningActivity();
+                if (topRunningActivity != null && task.mDisplayContent != null) {
+                    // If Activity is in fixed rotation, its will be applied with the next rotation,
+                    // when the Task is still in the previous rotation.
+                    final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
+                    final int activityRotation = topRunningActivity.getWindowConfiguration()
+                            .getDisplayRotation();
+                    if (taskRotation != activityRotation) {
+                        change.setEndFixedRotation(activityRotation);
+                    }
+                }
             } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
                 change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
             }

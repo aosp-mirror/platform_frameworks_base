@@ -2824,7 +2824,7 @@ class Task extends TaskFragment {
         TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
         if (spec != null) {
             for (@InsetsState.InternalInsetsType int insetType : spec.animationBoundInsets) {
-                InsetsSourceProvider insetProvider = getDisplayContent()
+                WindowContainerInsetsSourceProvider insetProvider = getDisplayContent()
                         .getInsetsStateController()
                         .getSourceProvider(insetType);
 
@@ -6582,8 +6582,7 @@ class Task extends TaskFragment {
             return;
         }
         if (mOverlayHost != null) {
-            final InsetsState s = getDisplayContent().getInsetsPolicy()
-                .getInsetsForWindow(originalChange, true);
+            final InsetsState s = originalChange.getInsetsState(true);
             getBounds(mTmpRect);
             mOverlayHost.dispatchInsetsChanged(s, mTmpRect);
         }

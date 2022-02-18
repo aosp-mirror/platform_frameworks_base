@@ -24,6 +24,7 @@ import android.companion.virtual.IVirtualDevice;
 import android.content.Context;
 import android.hardware.display.VirtualDisplay;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.os.RemoteException;
@@ -96,7 +97,7 @@ public final class VirtualAudioDevice implements Closeable {
 
         if (mOngoingSession != null && mOngoingSession.getAudioInjection() != null) {
             throw new IllegalStateException("Cannot start an audio injection while a session is "
-                    + "ongoing. Call close() on this device first to end the previous injection.");
+                    + "ongoing. Call close() on this device first to end the previous session.");
         }
         if (mOngoingSession == null) {
             mOngoingSession = new VirtualAudioSession(mContext, mCallback, mExecutor);
@@ -113,6 +114,9 @@ public final class VirtualAudioDevice implements Closeable {
 
     /**
      * Begins recording audio emanating from this device.
+     *
+     * <p>Note: This method does not support capturing privileged playback, which means the
+     * application can opt out of capturing by {@link AudioManager#setAllowedCapturePolicy(int)}.
      *
      * @return An {@link AudioCapture} containing the recorded audio.
      */
@@ -150,6 +154,7 @@ public final class VirtualAudioDevice implements Closeable {
         return mOngoingSession != null ? mOngoingSession.getAudioInjection() : null;
     }
 
+    /** Stops audio capture and injection then releases all the resources */
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     @Override
     public void close() {
