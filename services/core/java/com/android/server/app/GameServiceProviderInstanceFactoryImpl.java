@@ -30,6 +30,7 @@ import android.service.games.IGameSessionService;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
@@ -43,9 +44,9 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
     @NonNull
     @Override
     public GameServiceProviderInstance create(
-            @NonNull GameServiceProviderConfiguration gameServiceProviderConfiguration) {
+            @NonNull GameServiceComponentConfiguration configuration) {
         return new GameServiceProviderInstanceImpl(
-                gameServiceProviderConfiguration.getUserHandle(),
+                configuration.getUserHandle(),
                 BackgroundThread.getExecutor(),
                 mContext,
                 new GameClassifierImpl(mContext.getPackageManager()),
@@ -53,8 +54,8 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
                 ActivityTaskManager.getService(),
                 (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
                 LocalServices.getService(WindowManagerInternal.class),
-                new GameServiceConnector(mContext, gameServiceProviderConfiguration),
-                new GameSessionServiceConnector(mContext, gameServiceProviderConfiguration));
+                new GameServiceConnector(mContext, configuration),
+                new GameSessionServiceConnector(mContext, configuration));
     }
 
     private static final class GameServiceConnector extends ServiceConnector.Impl<IGameService> {
@@ -63,7 +64,7 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
 
         GameServiceConnector(
                 @NonNull Context context,
-                @NonNull GameServiceProviderConfiguration configuration) {
+                @NonNull GameServiceComponentConfiguration configuration) {
             super(context, new Intent(GameService.ACTION_GAME_SERVICE)
                             .setComponent(configuration.getGameServiceComponentName()),
                     BINDING_FLAGS, configuration.getUserHandle().getIdentifier(),
@@ -86,7 +87,7 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
 
         GameSessionServiceConnector(
                 @NonNull Context context,
-                @NonNull GameServiceProviderConfiguration configuration) {
+                @NonNull GameServiceComponentConfiguration configuration) {
             super(context, new Intent(GameSessionService.ACTION_GAME_SESSION_SERVICE)
                             .setComponent(configuration.getGameSessionServiceComponentName()),
                     BINDING_FLAGS, configuration.getUserHandle().getIdentifier(),

@@ -244,11 +244,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
 
         // TODO(b/204503192): It is possible that the game service is disconnected. In this
         //  case we should avoid rebinding just to shut it down again.
-        AndroidFuture<Void> unusedPostDisconnectedFuture =
-                mGameServiceConnector.post(gameService -> {
-                    gameService.disconnected();
-                });
-        mGameServiceConnector.unbind();
+        mGameServiceConnector.post(gameService -> {
+            gameService.disconnected();
+        }).whenComplete((result, t) -> {
+            mGameServiceConnector.unbind();
+        });
         mGameSessionServiceConnector.unbind();
     }
 
