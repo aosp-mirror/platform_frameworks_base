@@ -68,12 +68,6 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     private AudioPolicy mAudioPolicy;
     @Nullable
     @GuardedBy("mLock")
-    private AudioFormat mCaptureFormat;
-    @Nullable
-    @GuardedBy("mLock")
-    private AudioFormat mInjectionFormat;
-    @Nullable
-    @GuardedBy("mLock")
     private AudioCapture mAudioCapture;
     @Nullable
     @GuardedBy("mLock")
@@ -104,8 +98,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
                         "Cannot start capture while another capture is ongoing.");
             }
 
-            mCaptureFormat = captureFormat;
-            mAudioCapture = new AudioCapture();
+            mAudioCapture = new AudioCapture(captureFormat);
             mAudioCapture.startRecording();
             return mAudioCapture;
         }
@@ -127,8 +120,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
                         "Cannot start injection while injection is already ongoing.");
             }
 
-            mInjectionFormat = injectionFormat;
-            mAudioInjection = new AudioInjection();
+            mAudioInjection = new AudioInjection(injectionFormat);
             mAudioInjection.play();
 
             mUserRestrictionsDetector.register(/* callback= */ this);
@@ -179,10 +171,14 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
         mUserRestrictionsDetector.unregister();
         releaseAudioStreams();
         synchronized (mLock) {
-            mAudioCapture = null;
-            mAudioInjection = null;
-            mCaptureFormat = null;
-            mInjectionFormat = null;
+            if (mAudioCapture != null) {
+                mAudioCapture.close();
+                mAudioCapture = null;
+            }
+            if (mAudioInjection != null) {
+                mAudioInjection.close();
+                mAudioInjection = null;
+            }
         }
     }
 
@@ -198,9 +194,9 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     private void createAudioStreams(int[] appUids) {
         synchronized (mLock) {
-            if (mCaptureFormat == null && mInjectionFormat == null) {
+            if (mAudioCapture == null && mAudioInjection == null) {
                 throw new IllegalStateException(
-                        "At least one of captureFormat and injectionFormat must be specified.");
+                        "At least one of AudioCapture and AudioInjection must be started.");
             }
             if (mAudioPolicy != null) {
                 throw new IllegalStateException(
@@ -218,12 +214,12 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
             AudioMix audioRecordMix = null;
             AudioMix audioTrackMix = null;
             AudioPolicy.Builder builder = new AudioPolicy.Builder(mContext);
-            if (mCaptureFormat != null) {
-                audioRecordMix = createAudioRecordMix(mCaptureFormat, appUids);
+            if (mAudioCapture != null) {
+                audioRecordMix = createAudioRecordMix(mAudioCapture.getFormat(), appUids);
                 builder.addMix(audioRecordMix);
             }
-            if (mInjectionFormat != null) {
-                audioTrackMix = createAudioTrackMix(mInjectionFormat, appUids);
+            if (mAudioInjection != null) {
+                audioTrackMix = createAudioTrackMix(mAudioInjection.getFormat(), appUids);
                 builder.addMix(audioTrackMix);
             }
             mAudioPolicy = builder.build();
