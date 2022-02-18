@@ -41,14 +41,16 @@ class Ledger {
         @Nullable
         public final String tag;
         public final long delta;
+        public final long ctp;
 
         Transaction(long startTimeMs, long endTimeMs,
-                int eventId, @Nullable String tag, long delta) {
+                int eventId, @Nullable String tag, long delta, long ctp) {
             this.startTimeMs = startTimeMs;
             this.endTimeMs = endTimeMs;
             this.eventId = eventId;
             this.tag = tag;
             this.delta = delta;
+            this.ctp = ctp;
         }
     }
 
@@ -144,7 +146,10 @@ class Ledger {
                 pw.print(")");
             }
             pw.print(" --> ");
-            pw.println(narcToString(transaction.delta));
+            pw.print(narcToString(transaction.delta));
+            pw.print(" (ctp=");
+            pw.print(narcToString(transaction.ctp));
+            pw.println(")");
         }
     }
 }
