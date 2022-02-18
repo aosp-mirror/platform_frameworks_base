@@ -18,8 +18,8 @@
     <dimen name="dismiss_circle_size">96dp</dimen>
     <dimen name="dismiss_circle_small">60dp</dimen>
 
-    <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="floating_dismiss_gradient_height">250dp</dimen>
+    <!-- The height of the gradient indicating the dismiss edge when moving a PIP or bubble. -->
+    <dimen name="floating_dismiss_gradient_height">548dp</dimen>
 
     <!-- The padding around a PiP actions. -->
     <dimen name="pip_action_padding">16dp</dimen>
