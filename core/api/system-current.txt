@@ -2636,18 +2636,18 @@ package android.app.wallpapereffectsgeneration {
     method public int describeContents();
     method @NonNull public float[] getAnchorPointInOutputUvSpace();
     method @NonNull public float[] getAnchorPointInWorldSpace();
-    method public float getCameraOrbitPitchDegrees();
-    method public float getCameraOrbitYawDegrees();
+    method @FloatRange(from=-90.0F, to=90.0f) public float getCameraOrbitPitchDegrees();
+    method @FloatRange(from=-180.0F, to=180.0f) public float getCameraOrbitYawDegrees();
     method public float getDollyDistanceInWorldSpace();
-    method public float getFrustumFarInWorldSpace();
-    method public float getFrustumNearInWorldSpace();
-    method public float getVerticalFovDegrees();
+    method @FloatRange(from=0.0f) public float getFrustumFarInWorldSpace();
+    method @FloatRange(from=0.0f) public float getFrustumNearInWorldSpace();
+    method @FloatRange(from=0.0f, to=180.0f, fromInclusive=false) public float getVerticalFovDegrees();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wallpapereffectsgeneration.CameraAttributes> CREATOR;
   }
 
   public static final class CameraAttributes.Builder {
-    ctor public CameraAttributes.Builder(@NonNull float[], @NonNull float[]);
+    ctor public CameraAttributes.Builder(@NonNull @Size(3) float[], @NonNull @Size(2) float[]);
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes build();
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes.Builder setCameraOrbitPitchDegrees(@FloatRange(from=-90.0F, to=90.0f) float);
     method @NonNull public android.app.wallpapereffectsgeneration.CameraAttributes.Builder setCameraOrbitYawDegrees(@FloatRange(from=-180.0F, to=180.0f) float);
@@ -2675,12 +2675,11 @@ package android.app.wallpapereffectsgeneration {
     method @NonNull public String getTaskId();
     method @NonNull public java.util.List<android.app.wallpapereffectsgeneration.TexturedMesh> getTexturedMeshes();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CINEMATIC_EFFECT_STATUS_ERROR = 2; // 0x2
-    field public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 3; // 0x3
+    field public static final int CINEMATIC_EFFECT_STATUS_ERROR = 0; // 0x0
+    field public static final int CINEMATIC_EFFECT_STATUS_NOT_READY = 2; // 0x2
     field public static final int CINEMATIC_EFFECT_STATUS_OK = 1; // 0x1
-    field public static final int CINEMATIC_EFFECT_STATUS_PENDING = 4; // 0x4
-    field public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 5; // 0x5
-    field public static final int CINEMATIC_EFFECT_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int CINEMATIC_EFFECT_STATUS_PENDING = 3; // 0x3
+    field public static final int CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wallpapereffectsgeneration.CinematicEffectResponse> CREATOR;
     field public static final int IMAGE_CONTENT_TYPE_LANDSCAPE = 2; // 0x2
     field public static final int IMAGE_CONTENT_TYPE_OTHER = 3; // 0x3
@@ -12041,8 +12040,9 @@ package android.service.wallpapereffectsgeneration {
   public abstract class WallpaperEffectsGenerationService extends android.app.Service {
     ctor public WallpaperEffectsGenerationService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onGenerateCinematicEffect(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectRequest);
+    method @MainThread public abstract void onGenerateCinematicEffect(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectRequest);
     method public final void returnCinematicEffectResponse(@NonNull android.app.wallpapereffectsgeneration.CinematicEffectResponse);
+    field public static final String SERVICE_INTERFACE = "android.service.wallpapereffectsgeneration.WallpaperEffectsGenerationService";
   }
 
 }
