@@ -2432,7 +2432,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void writeLPr() {
+    void writeLPr(@NonNull Computer computer) {
         //Debug.startMethodTracing("/data/system/packageprof", 8 * 1024 * 1024);
 
         final long startTime = SystemClock.uptimeMillis();
@@ -2524,8 +2524,8 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            mDomainVerificationManager.writeSettings(serializer, false /* includeSignatures */,
-                    UserHandle.USER_ALL);
+            mDomainVerificationManager.writeSettings(computer, serializer,
+                    false /* includeSignatures */, UserHandle.USER_ALL);
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
@@ -2967,7 +2967,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    boolean readLPw(@NonNull List<UserInfo> users) {
+    boolean readLPw(@NonNull Computer computer, @NonNull List<UserInfo> users) {
         FileInputStream str = null;
         if (mBackupSettingsFilename.exists()) {
             try {
@@ -3111,7 +3111,7 @@ public final class Settings implements Watchable, Snappable {
                     ver.databaseVersion = parser.getAttributeInt(null, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else if (tagName.equals(DomainVerificationPersistence.TAG_DOMAIN_VERIFICATIONS)) {
-                    mDomainVerificationManager.readSettings(parser);
+                    mDomainVerificationManager.readSettings(computer, parser);
                 } else if (tagName.equals(
                         DomainVerificationLegacySettings.TAG_DOMAIN_VERIFICATIONS_LEGACY)) {
                     mDomainVerificationManager.readLegacySettings(parser);
@@ -4287,11 +4287,11 @@ public final class Settings implements Watchable, Snappable {
         return Process.FIRST_APPLICATION_UID + size;
     }
 
-    public VerifierDeviceIdentity getVerifierDeviceIdentityLPw() {
+    public VerifierDeviceIdentity getVerifierDeviceIdentityLPw(@NonNull Computer computer) {
         if (mVerifierDeviceIdentity == null) {
             mVerifierDeviceIdentity = VerifierDeviceIdentity.generate();
 
-            writeLPr();
+            writeLPr(computer);
         }
 
         return mVerifierDeviceIdentity;
