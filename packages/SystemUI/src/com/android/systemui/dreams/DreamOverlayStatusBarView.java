@@ -16,15 +16,21 @@
 
 package com.android.systemui.dreams;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * {@link DreamOverlayStatusBarView} is the view responsible for displaying the status bar in a
@@ -32,7 +38,22 @@ import com.android.systemui.R;
  */
 public class DreamOverlayStatusBarView extends ConstraintLayout {
 
-    private ImageView mWifiStatusView;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "STATUS_ICON_" }, value = {
+            STATUS_ICON_NOTIFICATIONS,
+            STATUS_ICON_WIFI_UNAVAILABLE,
+            STATUS_ICON_ALARM_SET,
+            STATUS_ICON_MIC_CAMERA_DISABLED,
+            STATUS_ICON_PRIORITY_MODE_ON
+    })
+    public @interface StatusIconType {}
+    public static final int STATUS_ICON_NOTIFICATIONS = 0;
+    public static final int STATUS_ICON_WIFI_UNAVAILABLE = 1;
+    public static final int STATUS_ICON_ALARM_SET = 2;
+    public static final int STATUS_ICON_MIC_CAMERA_DISABLED = 3;
+    public static final int STATUS_ICON_PRIORITY_MODE_ON = 4;
+
+    private final Map<Integer, View> mStatusIcons = new HashMap<>();
 
     public DreamOverlayStatusBarView(Context context) {
         this(context, null);
@@ -55,16 +76,35 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mWifiStatusView = Preconditions.checkNotNull(findViewById(R.id.dream_overlay_wifi_status),
-                "R.id.dream_overlay_wifi_status must not be null");
+        mStatusIcons.put(STATUS_ICON_WIFI_UNAVAILABLE,
+                fetchStatusIconForResId(R.id.dream_overlay_wifi_status));
+        mStatusIcons.put(STATUS_ICON_ALARM_SET,
+                fetchStatusIconForResId(R.id.dream_overlay_alarm_set));
+        mStatusIcons.put(STATUS_ICON_MIC_CAMERA_DISABLED,
+                fetchStatusIconForResId(R.id.dream_overlay_camera_mic_off));
+        mStatusIcons.put(STATUS_ICON_NOTIFICATIONS,
+                fetchStatusIconForResId(R.id.dream_overlay_notification_indicator));
+        mStatusIcons.put(STATUS_ICON_PRIORITY_MODE_ON,
+                fetchStatusIconForResId(R.id.dream_overlay_priority_mode));
     }
 
-    /**
-     * Whether to show the wifi status icon.
-     * @param show True if the wifi status icon should be shown.
-     */
-    void showWifiStatus(boolean show) {
-        // Only show the wifi status icon when wifi isn't available.
-        mWifiStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+    void showIcon(@StatusIconType int iconType, boolean show) {
+        showIcon(iconType, show, null);
+    }
+
+    void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
+        View icon = mStatusIcons.get(iconType);
+        if (icon == null) {
+            return;
+        }
+        if (show && contentDescription != null) {
+            icon.setContentDescription(contentDescription);
+        }
+        icon.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private View fetchStatusIconForResId(int resId) {
+        final View statusIcon = findViewById(resId);
+        return Objects.requireNonNull(statusIcon);
     }
 }
