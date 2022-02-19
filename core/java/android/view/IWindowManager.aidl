@@ -18,6 +18,7 @@ package android.view;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 
 import android.app.IAssistDataReceiver;
@@ -198,6 +199,9 @@ interface IWindowManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
+
+    void addKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+    void removeKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);
