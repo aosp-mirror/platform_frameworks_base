@@ -108,7 +108,7 @@ public class WallpaperEffectsGenerationManagerService extends
         @Override
         public void generateCinematicEffect(@NonNull CinematicEffectRequest request,
                 @NonNull ICinematicEffectListener listener) {
-            if (!runForUserLocked("generateCinematicEffect", (service) ->
+            if (!runForUser("generateCinematicEffect", true, (service) ->
                     service.onGenerateCinematicEffectLocked(request, listener))) {
                 try {
                     listener.onCinematicEffectGenerated(
@@ -126,7 +126,7 @@ public class WallpaperEffectsGenerationManagerService extends
 
         @Override
         public void returnCinematicEffectResponse(@NonNull CinematicEffectResponse response) {
-            runForUserLocked("returnCinematicResponse", (service) ->
+            runForUser("returnCinematicResponse", false, (service) ->
                     service.onReturnCinematicEffectResponseLocked(response));
         }
 
@@ -140,30 +140,42 @@ public class WallpaperEffectsGenerationManagerService extends
         }
 
         /**
-         * Execute the operation for the user locked. Return true if
-         * WallpaperEffectsGenerationPerUserService is found for the user.
-         * Otherwise return false.
+         * Execute the operation for the user.
+         *
+         * @param func The name of function for logging purpose.
+         * @param checkManageWallpaperEffectsPermission whether to check if caller has
+         *    MANAGE_WALLPAPER_EFFECTS_GENERATION.
+         *    If false, check the uid of caller matching bind service.
+         * @param c WallpaperEffectsGenerationPerUserService operation.
+         * @return whether WallpaperEffectsGenerationPerUserService is found.
          */
-        private boolean runForUserLocked(@NonNull final String func,
+        private boolean runForUser(@NonNull final String func,
+                @NonNull final boolean checkManageWallpaperEffectsPermission,
                 @NonNull final Consumer<WallpaperEffectsGenerationPerUserService> c) {
             ActivityManagerInternal am = LocalServices.getService(ActivityManagerInternal.class);
             final int userId = am.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                     Binder.getCallingUserHandle().getIdentifier(), false, ALLOW_NON_FULL,
                     null, null);
             if (DEBUG) {
-                Slog.d(TAG, "runForUserLocked:" + func + " from pid=" + Binder.getCallingPid()
+                Slog.d(TAG, "runForUser:" + func + " from pid=" + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid());
             }
-            Context ctx = getContext();
-            if (!(ctx.checkCallingPermission(MANAGE_WALLPAPER_EFFECTS_GENERATION)
-                    == PERMISSION_GRANTED
-                    || mServiceNameResolver.isTemporary(userId)
-                    || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
-                String msg = "Permission Denial: Cannot call " + func + " from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
+            if (checkManageWallpaperEffectsPermission) {
+                // MANAGE_WALLPAPER_EFFECTS_GENERATION is required for all functions except for
+                // "returnCinematicResponse", whose calling permission checked in
+                // WallpaperEffectsGenerationPerUserService against remote binding.
+                Context ctx = getContext();
+                if (!(ctx.checkCallingPermission(MANAGE_WALLPAPER_EFFECTS_GENERATION)
+                        == PERMISSION_GRANTED
+                        || mServiceNameResolver.isTemporary(userId)
+                        || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
+                    String msg = "Permission Denial: Cannot call " + func + " from pid="
+                            + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
             }
+            final int origCallingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
             boolean accepted = false;
             try {
@@ -171,6 +183,16 @@ public class WallpaperEffectsGenerationManagerService extends
                     final WallpaperEffectsGenerationPerUserService service =
                             getServiceForUserLocked(userId);
                     if (service != null) {
+                        // Check uid of caller matches bind service implementation if
+                        // MANAGE_WALLPAPER_EFFECTS_GENERATION is skipped. This is useful
+                        // for service implementation to return response.
+                        if (!checkManageWallpaperEffectsPermission
+                                && !service.isCallingUidAllowed(origCallingUid)) {
+                            String msg = "Permission Denial: cannot call " + func + ", uid["
+                                    + origCallingUid + "] doesn't match service implementation";
+                            Slog.w(TAG, msg);
+                            throw new SecurityException(msg);
+                        }
                         accepted = true;
                         c.accept(service);
                     }
