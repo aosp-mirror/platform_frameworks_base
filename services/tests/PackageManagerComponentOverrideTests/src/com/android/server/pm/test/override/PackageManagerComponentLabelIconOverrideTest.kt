@@ -265,12 +265,14 @@ class PackageManagerComponentLabelIconOverrideTest {
         assertServiceInitialized() ?: return
         when (params.result) {
             is Result.Changed, Result.ChangedWithoutNotify -> {
-                assertThat(mockPendingBroadcasts.get(userId, params.pkgName) ?: emptyList<String>())
+                assertThat(mockPendingBroadcasts.copiedMap()?.get(userId)?.get(params.pkgName)
+                    ?: emptyList<String>())
                         .containsExactly(params.componentName!!.className)
                         .inOrder()
             }
             is Result.NotChanged, is Result.Exception -> {
-                assertThat(mockPendingBroadcasts.get(userId, params.pkgName)).isNull()
+                assertThat(mockPendingBroadcasts.copiedMap()?.get(userId)?.get(params.pkgName))
+                    .isNull()
             }
         }.run { /*exhaust*/ }
     }

@@ -382,6 +382,7 @@ final class PackageHandler extends Handler {
             case PRUNE_UNUSED_STATIC_SHARED_LIBRARIES: {
                 try {
                     mPm.mInjector.getSharedLibrariesImpl().pruneUnusedStaticSharedLibraries(
+                            mPm.snapshotComputer(),
                             Long.MAX_VALUE,
                             Settings.Global.getLong(mPm.mContext.getContentResolver(),
                                     Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,

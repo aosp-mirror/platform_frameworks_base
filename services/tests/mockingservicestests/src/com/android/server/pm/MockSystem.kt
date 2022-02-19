@@ -167,7 +167,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         }
         whenever(mocks.settings.packagesLocked).thenReturn(mSettingsMap)
         whenever(mocks.settings.getPackageLPr(anyString())) { mSettingsMap[getArgument<Any>(0)] }
-        whenever(mocks.settings.readLPw(nullable())) {
+        whenever(mocks.settings.readLPw(any(), nullable())) {
             mSettingsMap.putAll(mPreExistingSettings)
             !mPreExistingSettings.isEmpty()
         }

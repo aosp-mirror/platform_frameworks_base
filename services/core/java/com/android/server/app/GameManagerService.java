@@ -159,7 +159,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
             mGameServiceController = new GameServiceController(
-                    BackgroundThread.getExecutor(),
+                    context, BackgroundThread.getExecutor(),
                     new GameServiceProviderSelectorImpl(
                             context.getResources(),
                             context.getPackageManager()),
@@ -376,9 +376,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     /**
      * Called by games to communicate the current state to the platform.
+     *
      * @param packageName The client package name.
-     * @param gameState An object set to the current state.
-     * @param userId The user associated with this state.
+     * @param gameState   An object set to the current state.
+     * @param userId      The user associated with this state.
      */
     public void setGameState(String packageName, @NonNull GameState gameState,
             @UserIdInt int userId) {
@@ -1373,7 +1374,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * @hide
      */
     @VisibleForTesting
-    void updateConfigsForUser(@UserIdInt int userId, String ...packageNames) {
+    void updateConfigsForUser(@UserIdInt int userId, String... packageNames) {
         try {
             synchronized (mDeviceConfigLock) {
                 for (final String packageName : packageNames) {
@@ -1442,7 +1443,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         final List<PackageInfo> packages =
                 mPackageManager.getInstalledPackagesAsUser(0, userId);
         return packages.stream().filter(e -> e.applicationInfo != null && e.applicationInfo.category
-                == ApplicationInfo.CATEGORY_GAME)
+                        == ApplicationInfo.CATEGORY_GAME)
                 .map(e -> e.packageName)
                 .toArray(String[]::new);
     }
