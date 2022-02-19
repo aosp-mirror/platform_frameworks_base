@@ -1875,7 +1875,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void deleteKernelTagData(int uid) {
         try {
             mCookieTagMap.forEach((key, value) -> {
-                if (value.uid == uid) {
+                // If SkDestroyListener deletes the socket tag while this code is running,
+                // forEach will either restart iteration from the beginning or return null,
+                // depending on when the deletion happens.
+                // If it returns null, continue iteration to delete the data and in fact it would
+                // just iterate from first key because BpfMap#getNextKey would return first key
+                // if the current key is not exist.
+                if (value != null && value.uid == uid) {
                     try {
                         mCookieTagMap.deleteEntry(key);
                     } catch (ErrnoException e) {
