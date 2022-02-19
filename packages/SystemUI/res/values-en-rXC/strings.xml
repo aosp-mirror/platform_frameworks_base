@@ -806,6 +806,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‎‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‎‎‎‏‎‎‏‎‎‎‏‎(disconnected)‎‏‎‎‏‎"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‎‏‏‎Can\'t switch. Tap to try again.‎‏‎‎‏‎"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‏‏‎‎Pair new device‎‏‎‎‏‎"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎To cast this session, please open the app.‎‏‎‎‏‎"</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‎‎Unknown app‎‏‎‎‏‎"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‎‎Build number‎‏‎‎‏‎"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‏‎‎Build number copied to clipboard.‎‏‎‎‏‎"</string>
     <string name="basic_status" msgid="2315371112182658176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‎‎‎‎‎‎‎‎Open conversation‎‏‎‎‏‎"</string>

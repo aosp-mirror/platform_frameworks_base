@@ -818,6 +818,10 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(odpojené)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nedá sa prepnúť. Zopakujte klepnutím."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovať nové zariadenie"</string>
+    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
+    <skip />
+    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo zostavy"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo zostavy bolo skopírované do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>
@@ -891,8 +895,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktívnych aplikácií</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aktívna aplikácia</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informácie"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktívne aplikácie"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ukončiť"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastavená"</string>
@@ -903,8 +906,6 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Upraviť skopírovaný text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Upraviť skopírovaný obrázok"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Odoslať do zariadenia v okolí"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"Pridať"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovať používateľov"</string>
 </resources>
