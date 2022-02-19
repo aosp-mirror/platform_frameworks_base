@@ -545,7 +545,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lehetővé teszi az alkalmazás számára, hogy közzétegye jelenlétét a közeli Bluetooth-eszközök számára"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"közeli, ultraszélessávú eszközök közötti relatív pozíció meghatározása"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Az alkalmazás meghatározhatja a közeli, ultraszélessávú eszközök közötti relatív pozíciót"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveleteket végezhet a közeli Wi‑Fi-eszközökkel"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveletek végrehajtása a közeli Wi‑Fi-eszközökkel"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Engedélyezi az alkalmazás számára, hogy közzétegye és meghatározza a közeli Wi-Fi-eszközök viszonylagos helyzetét, és csatlakozzon hozzájuk."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferált NFC fizetési szolgáltatási információk"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lehetővé teszi az alkalmazás számára preferált NFC fizetési szolgáltatási információk (pl. regisztrált alkalmazásazonosítók és útvonali cél) lekérését."</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Kihagyás"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nincs találat"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Keresés az oldalon"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# egyezés}other{{total}/#}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Kész"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Közös tárhely tartalmának törlése…"</string>
     <string name="share" msgid="4157615043345227321">"Megosztás"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás már hosszú ideje fut a háttérben. Koppintson az áttekintéshez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezen az eszközön nem lehet hozzáférni a kamerához"</string>
 </resources>

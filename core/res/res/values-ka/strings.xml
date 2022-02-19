@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"გამოტოვება"</string>
     <string name="no_matches" msgid="6472699895759164599">"შესატყვისები არ არის."</string>
     <string name="find_on_page" msgid="5400537367077438198">"გვერდზე ძებნა"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# დამთხვევა}other{{total}-დან #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"დასრულდა"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"მიმდინარეობს ზიარი მეხსიერების ამოშლა…"</string>
     <string name="share" msgid="4157615043345227321">"გაზიარება"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> გაშვებულია ფონურ რეჟიმში და იყენებს ბატარეას. შეეხეთ გადასახედად."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ფონურ რეჟიმში დიდი ხანია გაშვებულია. შეეხეთ გადასახედად."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"კამერაზე წვდომა ამ მოწყობილობიდან ვერ მოხერხდება"</string>
 </resources>

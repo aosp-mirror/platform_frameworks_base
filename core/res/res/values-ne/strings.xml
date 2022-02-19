@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"छोड्नुहोस्"</string>
     <string name="no_matches" msgid="6472699895759164599">"कुनै मिलेन"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पृष्ठमा फेला पार्नुहोस्"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# वटा मिल्दोजुल्दो परिणाम}other{{total} मध्ये # वटा मिल्दाजुल्दा परिणाम}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"भयो"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"साझेदारी गरिएको भण्डारण मेट्दै…"</string>
     <string name="share" msgid="4157615043345227321">"सेयर गर्नुहोस्"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको हुनाले ब्याट्री खपत भइरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"यो डिभाइसमा भएको क्यामेरा प्रयोग गर्न सकिएन"</string>
 </resources>

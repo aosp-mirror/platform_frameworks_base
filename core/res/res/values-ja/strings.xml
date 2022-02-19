@@ -545,7 +545,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"付近の Bluetooth デバイスへの広告の配信をアプリに許可します"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"付近の Ultra Wideband デバイス間の相対位置の特定"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"付近の Ultra Wideband デバイス間の相対位置の特定をアプリに許可します"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとのやり取り"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとの通信"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"付近の Wi-Fi デバイスについて、情報の表示、接続、相対位置の確認をアプリに許可します"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"スキップ"</string>
     <string name="no_matches" msgid="6472699895759164599">"該当なし"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ページ内を検索"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{一致: # 件}other{#/{total} 件}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"完了"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"共有ストレージを消去しています…"</string>
     <string name="share" msgid="4157615043345227321">"共有"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行され、バッテリーを消費しています。タップしてご確認ください。"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで長時間実行されています。タップしてご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"有効なアプリをチェック"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"このデバイスからはカメラにアクセスできません"</string>
 </resources>

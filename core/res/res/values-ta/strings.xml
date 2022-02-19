@@ -545,7 +545,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"அருகிலுள்ள புளூடூத் சாதனங்களுக்குத் தெரியப்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானித்தல்"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பில் இருக்கும்"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பு கொள்ளுதல்"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"அருகிலுள்ள வைஃபை சாதனங்களைத் தெரியப்படுத்தவும் இணைக்கவும் இருப்பிடத்தைத் தீர்மானிக்கவும் இது ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"தவிர்"</string>
     <string name="no_matches" msgid="6472699895759164599">"பொருத்தம் ஏதுமில்லை"</string>
     <string name="find_on_page" msgid="5400537367077438198">"பக்கத்தில் கண்டறி"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# பொருத்தம்}other{# / {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"முடிந்தது"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"பகிர்ந்த சேமிப்பகத்தை அழிக்கிறது…"</string>
     <string name="share" msgid="4157615043345227321">"பகிர்"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பின்னணியில் இயங்குவதுடன் பேட்டரியை அதிகமாகப் பயன்படுத்துகிறது. பார்க்க தட்டவும்."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் நீண்ட நேரமாகப் பின்னணியில் இயங்குகிறது. பார்க்க தட்டவும்."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"இந்தச் சாதனத்திலிருந்து கேமராவை அணுக முடியவில்லை"</string>
 </resources>

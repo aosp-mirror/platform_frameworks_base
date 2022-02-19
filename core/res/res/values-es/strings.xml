@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder a tu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar y ver mensajes SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Archivos y documentos"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"acceder a archivos y documentos de tu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música y otros archivos de audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"acceder a los archivos de audio de tu dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos y vídeos"</string>
@@ -548,7 +546,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"calcular posición de dispositivos de banda ultraancha cercanos"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que la aplicación determine la posición relativa de los dispositivos de banda ultraancha cercanos"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Interactuar con dispositivos Wi-Fi cercanos"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite a la aplicación mostrar información de dispositivos Wi-Fi cercanos, conectarse a ellos y determinar su posición"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite a la aplicación mostrar, conectar y determinar la posición relativa de dispositivos Wi-Fi cercanos"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre el servicio de pago por NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la aplicación obtenga información sobre el servicio de pago por NFC preferido, como identificadores de aplicación registrados y destinos de rutas."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicación de campo cercano (NFC)"</string>
@@ -588,12 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduce tu bloqueo de pantalla para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Huella digital parcial detectada"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se ha podido procesar la huella digital. Vuelve a intentarlo."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpia el sensor de huellas digitales e inténtalo de nuevo"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpia el sensor e inténtalo de nuevo"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mantén pulsado firmemente el sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Has movido el dedo demasiado despacio. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prueba con otra huella digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Demasiada luz"</string>
@@ -601,10 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia ligeramente el dedo de posición cada vez"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Huella digital no reconocida"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Mantén pulsado firmemente el sensor"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Saltar"</string>
     <string name="no_matches" msgid="6472699895759164599">"No hay coincidencias."</string>
     <string name="find_on_page" msgid="5400537367077438198">"Buscar en la página"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidencia}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Hecho"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Borrando almacenamiento compartido…"</string>
     <string name="share" msgid="4157615043345227321">"Compartir"</string>
@@ -2263,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> se está ejecutando en segundo plano y consumiendo batería. Toca para revisarlo."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> lleva mucho tiempo ejecutándose en segundo plano. Toca para revisarlo."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consultar aplicaciones activas"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"No se puede acceder a la cámara desde este dispositivo"</string>
 </resources>
