@@ -189,6 +189,7 @@ package android {
     field public static final String START_VIEW_APP_FEATURES = "android.permission.START_VIEW_APP_FEATURES";
     field public static final String START_VIEW_PERMISSION_USAGE = "android.permission.START_VIEW_PERMISSION_USAGE";
     field public static final String STATUS_BAR = "android.permission.STATUS_BAR";
+    field public static final String SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE = "android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
     field public static final String TRANSMIT_IR = "android.permission.TRANSMIT_IR";
     field public static final String UNINSTALL_SHORTCUT = "com.android.launcher.permission.UNINSTALL_SHORTCUT";
@@ -5677,6 +5678,7 @@ package android.app {
   }
 
   public class KeyguardManager {
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void addKeyguardLockedStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method @Deprecated public android.content.Intent createConfirmDeviceCredentialIntent(CharSequence, CharSequence);
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method @Deprecated public boolean inKeyguardRestrictedInputMode();
@@ -5685,6 +5687,7 @@ package android.app {
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
     method @Deprecated public android.app.KeyguardManager.KeyguardLock newKeyguardLock(String);
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void removeKeyguardLockedStateListener(@NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
   }
 
@@ -5698,6 +5701,10 @@ package android.app {
   @Deprecated public class KeyguardManager.KeyguardLock {
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void disableKeyguard();
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void reenableKeyguard();
+  }
+
+  @java.lang.FunctionalInterface public static interface KeyguardManager.KeyguardLockedStateListener {
+    method public void onKeyguardLockedStateChanged(boolean);
   }
 
   @Deprecated public static interface KeyguardManager.OnKeyguardExitResult {
