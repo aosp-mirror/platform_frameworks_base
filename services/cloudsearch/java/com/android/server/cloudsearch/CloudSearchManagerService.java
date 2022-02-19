@@ -109,7 +109,7 @@ public class CloudSearchManagerService extends
         @Override
         public void search(@NonNull SearchRequest searchRequest,
                 @NonNull ICloudSearchManagerCallback callBack) {
-            searchRequest.setSource(
+            searchRequest.setCallerPackageName(
                     mContext.getPackageManager().getNameForUid(Binder.getCallingUid()));
             runForUserLocked("search", searchRequest.getRequestId(), (service) ->
                     service.onSearchLocked(searchRequest, callBack));

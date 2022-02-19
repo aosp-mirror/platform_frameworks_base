@@ -52,7 +52,7 @@ public final class Telecom extends BaseCommand {
 
       (new Telecom()).run(args);
     }
-
+    private static final String CALLING_PACKAGE = Telecom.class.getPackageName();
     private static final String COMMAND_SET_PHONE_ACCOUNT_ENABLED = "set-phone-account-enabled";
     private static final String COMMAND_SET_PHONE_ACCOUNT_DISABLED = "set-phone-account-disabled";
     private static final String COMMAND_REGISTER_PHONE_ACCOUNT = "register-phone-account";
@@ -286,7 +286,7 @@ public final class Telecom extends BaseCommand {
         final String label = nextArgRequired();
         PhoneAccount account = PhoneAccount.builder(handle, label)
                 .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER).build();
-        mTelecomService.registerPhoneAccount(account);
+        mTelecomService.registerPhoneAccount(account, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " registered.");
     }
 
@@ -316,7 +316,7 @@ public final class Telecom extends BaseCommand {
                 .addSupportedUriScheme(PhoneAccount.SCHEME_TEL)
                 .addSupportedUriScheme(PhoneAccount.SCHEME_VOICEMAIL)
                 .build();
-        mTelecomService.registerPhoneAccount(account);
+        mTelecomService.registerPhoneAccount(account, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " registered.");
     }
 
@@ -358,7 +358,7 @@ public final class Telecom extends BaseCommand {
 
     private void runUnregisterPhoneAccount() throws RemoteException {
         final PhoneAccountHandle handle = getPhoneAccountHandleFromArgs();
-        mTelecomService.unregisterPhoneAccount(handle);
+        mTelecomService.unregisterPhoneAccount(handle, CALLING_PACKAGE);
         System.out.println("Success - " + handle + " unregistered.");
     }
 
@@ -395,11 +395,11 @@ public final class Telecom extends BaseCommand {
     }
 
     private void runGetDefaultDialer() throws RemoteException {
-        System.out.println(mTelecomService.getDefaultDialerPackage());
+        System.out.println(mTelecomService.getDefaultDialerPackage(CALLING_PACKAGE));
     }
 
     private void runGetSystemDialer() throws RemoteException {
-        System.out.println(mTelecomService.getSystemDialerPackage());
+        System.out.println(mTelecomService.getSystemDialerPackage(CALLING_PACKAGE));
     }
 
     private void runWaitOnHandler() throws RemoteException {

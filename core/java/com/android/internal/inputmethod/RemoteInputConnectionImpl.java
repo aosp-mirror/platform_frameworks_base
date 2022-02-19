@@ -282,9 +282,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
 
                     if (!alwaysTrueEndBatchEditDetected) {
                         final TextSnapshot textSnapshot = ic.takeSnapshot();
-                        if (textSnapshot != null) {
-                            mParentInputMethodManager.doInvalidateInput(this, textSnapshot,
-                                    nextSessionId);
+                        if (textSnapshot != null && mParentInputMethodManager.doInvalidateInput(
+                                this, textSnapshot, nextSessionId)) {
                             return;
                         }
                     }

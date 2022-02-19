@@ -28,8 +28,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApexStagedEvent;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionInfo.SessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.StagedApexInfo;
@@ -124,7 +122,7 @@ public class StagingManager {
         boolean containsApkSession();
         boolean containsApexSession();
         void setSessionReady();
-        void setSessionFailed(@SessionErrorCode int errorCode, String errorMessage);
+        void setSessionFailed(int errorCode, String errorMessage);
         void setSessionApplied();
         CompletableFuture<Void> installSession();
         boolean hasParentSessionId();
@@ -279,7 +277,7 @@ public class StagingManager {
             String packageName = apexSession.getPackageName();
             String errorMsg = mApexManager.getApkInApexInstallError(packageName);
             if (errorMsg != null) {
-                throw new PackageManagerException(SessionInfo.SESSION_ACTIVATION_FAILED,
+                throw new PackageManagerException(PackageManager.INSTALL_ACTIVATION_FAILED,
                         "Failed to install apk-in-apex of " + packageName + " : " + errorMsg);
             }
         }
@@ -392,7 +390,7 @@ public class StagingManager {
                 revertMsg += " Reason for revert: " + reasonForRevert;
             }
             Slog.d(TAG, revertMsg);
-            session.setSessionFailed(SessionInfo.SESSION_UNKNOWN_ERROR, revertMsg);
+            session.setSessionFailed(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, revertMsg);
             return;
         }
 
@@ -477,7 +475,7 @@ public class StagingManager {
             for (String apkInApex : mApexManager.getApksInApex(packageName)) {
                 if (!apkNames.add(apkInApex)) {
                     throw new PackageManagerException(
-                            SessionInfo.SESSION_ACTIVATION_FAILED,
+                            PackageManager.INSTALL_ACTIVATION_FAILED,
                             "Package: " + packageName + " in session: "
                                     + apexSession.sessionId() + " has duplicate apk-in-apex: "
                                     + apkInApex, null);
@@ -495,9 +493,7 @@ public class StagingManager {
             // Should be impossible
             throw new RuntimeException(e);
         } catch (ExecutionException ee) {
-            PackageManagerException e = (PackageManagerException) ee.getCause();
-            final String errorMsg = PackageManager.installStatusToString(e.error, e.getMessage());
-            throw new PackageManagerException(SessionInfo.SESSION_ACTIVATION_FAILED, errorMsg);
+            throw (PackageManagerException) ee.getCause();
         }
     }
 
@@ -651,7 +647,7 @@ public class StagingManager {
             // is upgrading. Fail all the sessions and exit early.
             for (int i = 0; i < sessions.size(); i++) {
                 StagedSession session = sessions.get(i);
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED,
                         "Build fingerprint has changed");
             }
             return;
@@ -691,7 +687,7 @@ public class StagingManager {
             final ApexSessionInfo apexSession = apexSessions.get(session.sessionId());
             if (apexSession == null || apexSession.isUnknown) {
                 hasFailedApexSession = true;
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED, "apexd did "
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED, "apexd did "
                         + "not know anything about a staged session supposed to be activated");
                 continue;
             } else if (isApexSessionFailed(apexSession)) {
@@ -707,7 +703,7 @@ public class StagingManager {
                     errorMsg += " Error: " + apexSession.errorMessage;
                 }
                 Slog.d(TAG, errorMsg);
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED, errorMsg);
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED, errorMsg);
                 continue;
             } else if (apexSession.isActivated || apexSession.isSuccess) {
                 hasAppliedApexSession = true;
@@ -716,13 +712,13 @@ public class StagingManager {
                 // Apexd did not apply the session for some unknown reason. There is no guarantee
                 // that apexd will install it next time. Safer to proactively mark it as failed.
                 hasFailedApexSession = true;
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED,
                         "Staged session " + session.sessionId() + " at boot didn't activate nor "
                         + "fail. Marking it as failed anyway.");
             } else {
                 Slog.w(TAG, "Apex session " + session.sessionId() + " is in impossible state");
                 hasFailedApexSession = true;
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED,
                         "Impossible state");
             }
         }
@@ -742,7 +738,7 @@ public class StagingManager {
                     // Session has been already failed in the loop above.
                     continue;
                 }
-                session.setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                session.setSessionFailed(PackageManager.INSTALL_ACTIVATION_FAILED,
                         "Another apex session failed");
             }
             return;
@@ -758,7 +754,7 @@ public class StagingManager {
             } catch (Exception e) {
                 Slog.e(TAG, "Staged install failed due to unhandled exception", e);
                 onInstallationFailure(session, new PackageManagerException(
-                        SessionInfo.SESSION_ACTIVATION_FAILED,
+                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "Staged install failed due to unhandled exception: " + e),
                         supportsCheckpoint, needsCheckpoint);
             }

@@ -33,7 +33,8 @@ import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NO
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP;
@@ -70,7 +71,8 @@ import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAK
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.KEY_AM_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.KEY_AM_HARD_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP;
@@ -143,7 +145,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedBalanceExempted;
     private long mMinSatiatedBalanceOther;
     private long mMaxSatiatedBalance;
-    private long mMaxSatiatedCirculation;
+    private long mInitialSatiatedConsumptionLimit;
+    private long mHardSatiatedConsumptionLimit;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final InternalResourceService mInternalResourceService;
@@ -179,8 +182,13 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedCirculation() {
-        return mMaxSatiatedCirculation;
+    long getInitialSatiatedConsumptionLimit() {
+        return mInitialSatiatedConsumptionLimit;
+    }
+
+    @Override
+    long getHardSatiatedConsumptionLimit() {
+        return mHardSatiatedConsumptionLimit;
     }
 
     @NonNull
@@ -217,8 +225,11 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                 DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP));
         mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_AM_MAX_SATIATED_BALANCE,
                 DEFAULT_AM_MAX_SATIATED_BALANCE));
-        mMaxSatiatedCirculation = arcToNarc(mParser.getInt(KEY_AM_MAX_CIRCULATION,
-                DEFAULT_AM_MAX_CIRCULATION));
+        mInitialSatiatedConsumptionLimit = arcToNarc(mParser.getInt(
+                KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT));
+        mHardSatiatedConsumptionLimit = Math.max(mInitialSatiatedConsumptionLimit,
+                arcToNarc(mParser.getInt(
+                        KEY_AM_HARD_CONSUMPTION_LIMIT, DEFAULT_AM_HARD_CONSUMPTION_LIMIT)));
 
         final long exactAllowWhileIdleWakeupBasePrice = arcToNarc(
                 mParser.getInt(KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
@@ -357,7 +368,11 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         pw.print("Other", narcToString(mMinSatiatedBalanceOther)).println();
         pw.decreaseIndent();
         pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
-        pw.print("Max satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
+        pw.print("Consumption limits: [");
+        pw.print(narcToString(mInitialSatiatedConsumptionLimit));
+        pw.print(", ");
+        pw.print(narcToString(mHardSatiatedConsumptionLimit));
+        pw.println("]");
 
         pw.println();
         pw.println("Actions:");

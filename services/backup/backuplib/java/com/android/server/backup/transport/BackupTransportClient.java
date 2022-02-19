@@ -22,20 +22,18 @@ import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.infra.AndroidFuture;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,17 +47,19 @@ public class BackupTransportClient {
 
     private final IBackupTransport mTransportBinder;
     private final TransportStatusCallbackPool mCallbackPool;
+    private final TransportFutures mTransportFutures;
 
     BackupTransportClient(IBackupTransport transportBinder) {
         mTransportBinder = transportBinder;
         mCallbackPool = new TransportStatusCallbackPool();
+        mTransportFutures = new TransportFutures();
     }
 
     /**
      * See {@link IBackupTransport#name()}.
      */
     public String name() throws RemoteException {
-        AndroidFuture<String> resultFuture = new AndroidFuture<>();
+        AndroidFuture<String> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.name(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -68,7 +68,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#configurationIntent()}
      */
     public Intent configurationIntent() throws RemoteException {
-        AndroidFuture<Intent> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Intent> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.configurationIntent(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -77,7 +77,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#currentDestinationString()}
      */
     public String currentDestinationString() throws RemoteException {
-        AndroidFuture<String> resultFuture = new AndroidFuture<>();
+        AndroidFuture<String> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.currentDestinationString(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -86,7 +86,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#dataManagementIntent()}
      */
     public Intent dataManagementIntent() throws RemoteException {
-        AndroidFuture<Intent> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Intent> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.dataManagementIntent(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -96,7 +96,7 @@ public class BackupTransportClient {
      */
     @Nullable
     public CharSequence dataManagementIntentLabel() throws RemoteException {
-        AndroidFuture<CharSequence> resultFuture = new AndroidFuture<>();
+        AndroidFuture<CharSequence> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.dataManagementIntentLabel(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -105,7 +105,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#transportDirName()}
      */
     public String transportDirName() throws RemoteException {
-        AndroidFuture<String> resultFuture = new AndroidFuture<>();
+        AndroidFuture<String> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.transportDirName(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -153,7 +153,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#requestBackupTime()}
      */
     public long requestBackupTime() throws RemoteException {
-        AndroidFuture<Long> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Long> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.requestBackupTime(resultFuture);
         Long result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
@@ -177,7 +177,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#getAvailableRestoreSets()}
      */
     public RestoreSet[] getAvailableRestoreSets() throws RemoteException {
-        AndroidFuture<List<RestoreSet>> resultFuture = new AndroidFuture<>();
+        AndroidFuture<List<RestoreSet>> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getAvailableRestoreSets(resultFuture);
         List<RestoreSet> result = getFutureResult(resultFuture);
         return result == null ? null : result.toArray(new RestoreSet[] {});
@@ -187,7 +187,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#getCurrentRestoreSet()}
      */
     public long getCurrentRestoreSet() throws RemoteException {
-        AndroidFuture<Long> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Long> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getCurrentRestoreSet(resultFuture);
         Long result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
@@ -210,7 +210,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#nextRestorePackage()}
      */
     public RestoreDescription nextRestorePackage() throws RemoteException {
-        AndroidFuture<RestoreDescription> resultFuture = new AndroidFuture<>();
+        AndroidFuture<RestoreDescription> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.nextRestorePackage(resultFuture);
         return getFutureResult(resultFuture);
     }
@@ -245,7 +245,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#requestFullBackupTime()}
      */
     public long requestFullBackupTime() throws RemoteException {
-        AndroidFuture<Long> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Long> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.requestFullBackupTime(resultFuture);
         Long result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
@@ -309,7 +309,7 @@ public class BackupTransportClient {
      */
     public boolean isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup)
             throws RemoteException {
-        AndroidFuture<Boolean> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Boolean> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.isAppEligibleForBackup(targetPackage, isFullBackup, resultFuture);
         Boolean result = getFutureResult(resultFuture);
         return result != null && result;
@@ -319,7 +319,7 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#getBackupQuota(String, boolean)}
      */
     public long getBackupQuota(String packageName, boolean isFullBackup) throws RemoteException {
-        AndroidFuture<Long> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Long> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getBackupQuota(packageName, isFullBackup, resultFuture);
         Long result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
@@ -355,10 +355,20 @@ public class BackupTransportClient {
      * See {@link IBackupTransport#getTransportFlags()}
      */
     public int getTransportFlags() throws RemoteException {
-        AndroidFuture<Integer> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Integer> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getTransportFlags(resultFuture);
         Integer result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
+    }
+
+    /**
+     * Allows the {@link TransportConnection} to notify this client
+     * if the underlying transport has become unusable.  If that happens
+     * we want to cancel all active futures or callbacks.
+     */
+    void onBecomingUnusable() {
+        mCallbackPool.cancelActiveCallbacks();
+        mTransportFutures.cancelActiveFutures();
     }
 
     private <T> T getFutureResult(AndroidFuture<T> future) {
@@ -367,6 +377,36 @@ public class BackupTransportClient {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             Slog.w(TAG, "Failed to get result from transport:", e);
             return null;
+        } finally {
+            mTransportFutures.remove(future);
+        }
+    }
+
+    private static class TransportFutures {
+        private final Object mActiveFuturesLock = new Object();
+        private final Set<AndroidFuture<?>> mActiveFutures = new HashSet<>();
+
+        <T> AndroidFuture<T> newFuture() {
+            AndroidFuture<T> future = new AndroidFuture<>();
+            synchronized (mActiveFuturesLock) {
+                mActiveFutures.add(future);
+            }
+            return future;
+        }
+
+        <T> void remove(AndroidFuture<T> future) {
+            synchronized (mActiveFuturesLock) {
+                mActiveFutures.remove(future);
+            }
+        }
+
+        void cancelActiveFutures() {
+            synchronized (mActiveFuturesLock) {
+                for (AndroidFuture<?> future : mActiveFutures) {
+                    future.cancel(true);
+                }
+                mActiveFutures.clear();
+            }
         }
     }
 
@@ -375,26 +415,46 @@ public class BackupTransportClient {
 
         private final Object mPoolLock = new Object();
         private final Queue<TransportStatusCallback> mCallbackPool = new ArrayDeque<>();
+        private final Set<TransportStatusCallback> mActiveCallbacks = new HashSet<>();
 
         TransportStatusCallback acquire() {
             synchronized (mPoolLock) {
-                if (mCallbackPool.isEmpty()) {
-                    return new TransportStatusCallback();
-                } else {
-                    return mCallbackPool.poll();
+                TransportStatusCallback callback = mCallbackPool.poll();
+                if (callback == null) {
+                    callback = new TransportStatusCallback();
                 }
+                callback.reset();
+                mActiveCallbacks.add(callback);
+                return callback;
             }
         }
 
         void recycle(TransportStatusCallback callback) {
             synchronized (mPoolLock) {
+                mActiveCallbacks.remove(callback);
                 if (mCallbackPool.size() > MAX_POOL_SIZE) {
                     Slog.d(TAG, "TransportStatusCallback pool size exceeded");
                     return;
                 }
-
-                callback.reset();
                 mCallbackPool.add(callback);
+            }
+        }
+
+        void cancelActiveCallbacks() {
+            synchronized (mPoolLock) {
+                for (TransportStatusCallback callback : mActiveCallbacks) {
+                    try {
+                        callback.onOperationCompleteWithStatus(BackupTransport.TRANSPORT_ERROR);
+                        // This waits for status to propagate before the callback is reset.
+                        callback.getOperationStatus();
+                    } catch (RemoteException ex) {
+                        // Nothing we can do.
+                    }
+                    if (mCallbackPool.size() < MAX_POOL_SIZE) {
+                        mCallbackPool.add(callback);
+                    }
+                }
+                mActiveCallbacks.clear();
             }
         }
     }

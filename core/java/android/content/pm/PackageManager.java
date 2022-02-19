@@ -2202,6 +2202,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_PERMISSION_GROUP = -127;
 
+    /**
+     * Installation failed return code: an error occurred during the activation phase of this
+     * session.
+     *
+     * @hide
+     */
+    public static final int INSTALL_ACTIVATION_FAILED = -128;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,

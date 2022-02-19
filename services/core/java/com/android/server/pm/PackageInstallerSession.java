@@ -82,7 +82,6 @@ import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionInfo.SessionErrorCode;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -462,7 +461,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mSessionFailed;
     @GuardedBy("mLock")
-    private int mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
+    private int mSessionErrorCode = PackageManager.INSTALL_UNKNOWN;
     @GuardedBy("mLock")
     private String mSessionErrorMessage;
 
@@ -2315,7 +2314,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 maybeFinishChildSessions(INSTALL_SUCCEEDED, "Session installed");
             } else {
                 PackageManagerException e = (PackageManagerException) t.getCause();
-                setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                setSessionFailed(e.error,
                         PackageManager.installStatusToString(e.error, e.getMessage()));
                 dispatchSessionFinished(e.error, e.getMessage(), null);
                 maybeFinishChildSessions(e.error, e.getMessage());
@@ -4023,7 +4022,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionReady = true;
             mSessionApplied = false;
             mSessionFailed = false;
-            mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
+            mSessionErrorCode = PackageManager.INSTALL_UNKNOWN;
             mSessionErrorMessage = "";
         }
         mCallback.onSessionChanged(this);
@@ -4051,7 +4050,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionReady = false;
             mSessionApplied = true;
             mSessionFailed = false;
-            mSessionErrorCode = SessionInfo.SESSION_NO_ERROR;
+            mSessionErrorCode = INSTALL_SUCCEEDED;
             mSessionErrorMessage = "";
             Slog.d(TAG, "Marking session " + sessionId + " as applied");
         }
@@ -4081,7 +4080,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /** {@hide} */
-    @SessionErrorCode
     int getSessionErrorCode() {
         synchronized (mLock) {
             return mSessionErrorCode;
@@ -4569,7 +4567,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isFailed = in.getAttributeBoolean(null, ATTR_IS_FAILED, false);
         final boolean isApplied = in.getAttributeBoolean(null, ATTR_IS_APPLIED, false);
         final int sessionErrorCode = in.getAttributeInt(null, ATTR_SESSION_ERROR_CODE,
-                SessionInfo.SESSION_NO_ERROR);
+                PackageManager.INSTALL_UNKNOWN);
         final String sessionErrorMessage = readStringAttribute(in, ATTR_SESSION_ERROR_MESSAGE);
 
         if (!isStagedSessionStateValid(isReady, isApplied, isFailed)) {

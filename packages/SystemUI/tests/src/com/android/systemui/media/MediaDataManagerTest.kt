@@ -370,6 +370,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
         assertThat(data.actions).hasSize(1)
+        assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
     }
 

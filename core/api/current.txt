@@ -189,6 +189,7 @@ package android {
     field public static final String START_VIEW_APP_FEATURES = "android.permission.START_VIEW_APP_FEATURES";
     field public static final String START_VIEW_PERMISSION_USAGE = "android.permission.START_VIEW_PERMISSION_USAGE";
     field public static final String STATUS_BAR = "android.permission.STATUS_BAR";
+    field public static final String SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE = "android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
     field public static final String TRANSMIT_IR = "android.permission.TRANSMIT_IR";
     field public static final String UNINSTALL_SHORTCUT = "com.android.launcher.permission.UNINSTALL_SHORTCUT";
@@ -5677,6 +5678,7 @@ package android.app {
   }
 
   public class KeyguardManager {
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void addKeyguardLockedStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method @Deprecated public android.content.Intent createConfirmDeviceCredentialIntent(CharSequence, CharSequence);
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method @Deprecated public boolean inKeyguardRestrictedInputMode();
@@ -5685,6 +5687,7 @@ package android.app {
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
     method @Deprecated public android.app.KeyguardManager.KeyguardLock newKeyguardLock(String);
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void removeKeyguardLockedStateListener(@NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
   }
 
@@ -5698,6 +5701,10 @@ package android.app {
   @Deprecated public class KeyguardManager.KeyguardLock {
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void disableKeyguard();
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void reenableKeyguard();
+  }
+
+  @java.lang.FunctionalInterface public static interface KeyguardManager.KeyguardLockedStateListener {
+    method public void onKeyguardLockedStateChanged(boolean);
   }
 
   @Deprecated public static interface KeyguardManager.OnKeyguardExitResult {
@@ -12281,6 +12288,7 @@ package android.content.pm {
     method @Nullable public java.util.Set<java.lang.String> getCategories();
     method @Nullable public CharSequence getDisabledMessage();
     method public int getDisabledReason();
+    method public int getExcludedFromSurfaces();
     method @Nullable public android.os.PersistableBundle getExtras();
     method @NonNull public String getId();
     method @Nullable public android.content.Intent getIntent();
@@ -12298,8 +12306,8 @@ package android.content.pm {
     method public boolean isDeclaredInManifest();
     method public boolean isDynamic();
     method public boolean isEnabled();
+    method public boolean isExcludedFromSurfaces(int);
     method public boolean isImmutable();
-    method public boolean isIncludedIn(int);
     method public boolean isPinned();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutInfo> CREATOR;
@@ -14391,6 +14399,8 @@ package android.graphics {
     method @NonNull @Size(min=3) public abstract float[] fromXyz(@NonNull @Size(min=3) float[]);
     method @NonNull public static android.graphics.ColorSpace get(@NonNull android.graphics.ColorSpace.Named);
     method @IntRange(from=1, to=4) public int getComponentCount();
+    method public int getDataSpace();
+    method @Nullable public static android.graphics.ColorSpace getFromDataSpace(int);
     method @IntRange(from=android.graphics.ColorSpace.MIN_ID, to=android.graphics.ColorSpace.MAX_ID) public int getId();
     method public abstract float getMaxValue(@IntRange(from=0, to=3) int);
     method public abstract float getMinValue(@IntRange(from=0, to=3) int);
@@ -16392,18 +16402,21 @@ package android.graphics.pdf {
 package android.graphics.text {
 
   public final class LineBreakConfig {
-    ctor public LineBreakConfig();
     method public int getLineBreakStyle();
     method public int getLineBreakWordStyle();
-    method public void set(@NonNull android.graphics.text.LineBreakConfig);
-    method public void setLineBreakStyle(int);
-    method public void setLineBreakWordStyle(int);
     field public static final int LINE_BREAK_STYLE_LOOSE = 1; // 0x1
     field public static final int LINE_BREAK_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_STYLE_NORMAL = 2; // 0x2
     field public static final int LINE_BREAK_STYLE_STRICT = 3; // 0x3
     field public static final int LINE_BREAK_WORD_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1; // 0x1
+  }
+
+  public static final class LineBreakConfig.Builder {
+    ctor public LineBreakConfig.Builder();
+    method @NonNull public android.graphics.text.LineBreakConfig build();
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakStyle(int);
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakWordStyle(int);
   }
 
   public class LineBreaker {
@@ -16870,6 +16883,7 @@ package android.hardware {
     field public static final long USAGE_SENSOR_DIRECT_DATA = 8388608L; // 0x800000L
     field public static final long USAGE_VIDEO_ENCODE = 65536L; // 0x10000L
     field public static final int YCBCR_420_888 = 35; // 0x23
+    field public static final int YCBCR_P010 = 54; // 0x36
   }
 
   public final class Sensor {
@@ -45050,7 +45064,7 @@ package android.text {
   public static final class PrecomputedText.Params {
     method public int getBreakStrategy();
     method public int getHyphenationFrequency();
-    method @Nullable public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method @NonNull public android.text.TextDirectionHeuristic getTextDirection();
     method @NonNull public android.text.TextPaint getTextPaint();
   }
@@ -57358,7 +57372,8 @@ package android.widget {
     method public final android.text.Layout getLayout();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
-    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method public int getLineBreakStyle();
+    method public int getLineBreakWordStyle();
     method public int getLineCount();
     method public int getLineHeight();
     method public float getLineSpacingExtra();
@@ -57486,7 +57501,8 @@ package android.widget {
     method public void setKeyListener(android.text.method.KeyListener);
     method public void setLastBaselineToBottomHeight(@IntRange(from=0) @Px int);
     method public void setLetterSpacing(float);
-    method public void setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
+    method public void setLineBreakStyle(int);
+    method public void setLineBreakWordStyle(int);
     method public void setLineHeight(@IntRange(from=0) @Px int);
     method public void setLineSpacing(float, float);
     method public void setLines(int);

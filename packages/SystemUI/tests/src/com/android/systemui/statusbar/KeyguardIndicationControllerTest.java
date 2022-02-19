@@ -779,8 +779,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void testOnKeyguardShowingChanged_showing_updatesPersistentMessages() {
         createController();
 
-        // GIVEN keyguard is showing
+        // GIVEN keyguard is showing and not dozing
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mController.setVisible(true);
+        mExecutor.runAllReady();
+        reset(mRotateTextViewController);
 
         // WHEN keyguard showing changed called
         mKeyguardStateControllerCallback.onKeyguardShowingChanged();

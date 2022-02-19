@@ -67,7 +67,7 @@ import java.util.function.Consumer;
  *
  * @hide Only for use within the system server.
  */
-public abstract class PackageManagerInternal implements PackageSettingsSnapshotProvider {
+public abstract class PackageManagerInternal {
     @IntDef(prefix = "PACKAGE_", value = {
             PACKAGE_SYSTEM,
             PACKAGE_SETUP_WIZARD,
@@ -655,6 +655,11 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * Updates a package last used time.
      */
     public abstract void notifyPackageUse(String packageName, int reason);
+
+    /**
+     * Notify the package is force stopped.
+     */
+    public abstract void onPackageProcessKilledForUninstall(String packageName);
 
     /**
      * Returns a package object for the given package name.
