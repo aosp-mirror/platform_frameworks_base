@@ -16395,18 +16395,21 @@ package android.graphics.pdf {
 package android.graphics.text {
 
   public final class LineBreakConfig {
-    ctor public LineBreakConfig();
     method public int getLineBreakStyle();
     method public int getLineBreakWordStyle();
-    method public void set(@NonNull android.graphics.text.LineBreakConfig);
-    method public void setLineBreakStyle(int);
-    method public void setLineBreakWordStyle(int);
     field public static final int LINE_BREAK_STYLE_LOOSE = 1; // 0x1
     field public static final int LINE_BREAK_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_STYLE_NORMAL = 2; // 0x2
     field public static final int LINE_BREAK_STYLE_STRICT = 3; // 0x3
     field public static final int LINE_BREAK_WORD_STYLE_NONE = 0; // 0x0
     field public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1; // 0x1
+  }
+
+  public static final class LineBreakConfig.Builder {
+    ctor public LineBreakConfig.Builder();
+    method @NonNull public android.graphics.text.LineBreakConfig build();
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakStyle(int);
+    method @NonNull public android.graphics.text.LineBreakConfig.Builder setLineBreakWordStyle(int);
   }
 
   public class LineBreaker {
@@ -45054,7 +45057,7 @@ package android.text {
   public static final class PrecomputedText.Params {
     method public int getBreakStrategy();
     method public int getHyphenationFrequency();
-    method @Nullable public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
     method @NonNull public android.text.TextDirectionHeuristic getTextDirection();
     method @NonNull public android.text.TextPaint getTextPaint();
   }
@@ -57362,7 +57365,8 @@ package android.widget {
     method public final android.text.Layout getLayout();
     method public float getLetterSpacing();
     method public int getLineBounds(int, android.graphics.Rect);
-    method @NonNull public android.graphics.text.LineBreakConfig getLineBreakConfig();
+    method public int getLineBreakStyle();
+    method public int getLineBreakWordStyle();
     method public int getLineCount();
     method public int getLineHeight();
     method public float getLineSpacingExtra();
@@ -57490,7 +57494,8 @@ package android.widget {
     method public void setKeyListener(android.text.method.KeyListener);
     method public void setLastBaselineToBottomHeight(@IntRange(from=0) @Px int);
     method public void setLetterSpacing(float);
-    method public void setLineBreakConfig(@NonNull android.graphics.text.LineBreakConfig);
+    method public void setLineBreakStyle(int);
+    method public void setLineBreakWordStyle(int);
     method public void setLineHeight(@IntRange(from=0) @Px int);
     method public void setLineSpacing(float, float);
     method public void setLines(int);
