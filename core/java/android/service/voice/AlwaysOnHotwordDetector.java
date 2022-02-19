@@ -954,6 +954,34 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
      *
      * @param recognitionFlags The flags to control the recognition properties.
+     * @param data Additional pass-through data to the system voice engine along with the
+     *             startRecognition request. This data is intended to provide additional parameters
+     *             when starting the opaque sound model.
+     * @return Indicates whether the call succeeded or not.
+     * @throws UnsupportedOperationException if the recognition isn't supported.
+     *         Callers should only call this method after a supported state callback on
+     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid or error state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public boolean startRecognition(@RecognitionFlags int recognitionFlags, @NonNull byte[] data) {
+        synchronized (mLock) {
+            return startRecognitionLocked(recognitionFlags, data)
+                    == STATUS_OK;
+        }
+    }
+
+    /**
+     * Starts recognition for the associated keyphrase.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
+     *
+     * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+     * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
+     *
+     * @param recognitionFlags The flags to control the recognition properties.
      * @return Indicates whether the call succeeded or not.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
@@ -966,18 +994,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
-                throw new IllegalStateException(
-                        "startRecognition called on an invalid detector or error state");
-            }
-
-            // Check if we can start/stop a recognition.
-            if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
-                throw new UnsupportedOperationException(
-                        "Recognition for the given keyphrase is not supported");
-            }
-
-            return startRecognitionLocked(recognitionFlags) == STATUS_OK;
+            return startRecognitionLocked(recognitionFlags, null /* data */) == STATUS_OK;
         }
     }
 
@@ -1276,7 +1293,24 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
-    private int startRecognitionLocked(int recognitionFlags) {
+    private int startRecognitionLocked(int recognitionFlags,
+            @Nullable byte[] data) {
+        if (DBG) {
+            Slog.d(TAG, "startRecognition("
+                    + recognitionFlags
+                    + ", " + Arrays.toString(data) + ")");
+        }
+        if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+            throw new IllegalStateException(
+                    "startRecognition called on an invalid detector or error state");
+        }
+
+        // Check if we can start/stop a recognition.
+        if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+            throw new UnsupportedOperationException(
+                    "Recognition for the given keyphrase is not supported");
+        }
+
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
         recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.getId(),
@@ -1300,7 +1334,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             code = mSoundTriggerSession.startRecognition(
                     mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, null /* additional data */, audioCapabilities),
+                            recognitionExtra, data, audioCapabilities),
                     runInBatterySaver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
