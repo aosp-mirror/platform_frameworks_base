@@ -197,6 +197,7 @@ package android {
     field public static final String MANAGE_WEAK_ESCROW_TOKEN = "android.permission.MANAGE_WEAK_ESCROW_TOKEN";
     field public static final String MANAGE_WIFI_COUNTRY_CODE = "android.permission.MANAGE_WIFI_COUNTRY_CODE";
     field public static final String MARK_DEVICE_ORGANIZATION_OWNED = "android.permission.MARK_DEVICE_ORGANIZATION_OWNED";
+    field public static final String MEDIA_RESOURCE_OVERRIDE_PID = "android.permission.MEDIA_RESOURCE_OVERRIDE_PID";
     field public static final String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
@@ -6267,7 +6268,7 @@ package android.media {
   }
 
   public final class MediaCodec {
-    method @NonNull @RequiresPermission("android.permission.MEDIA_RESOURCE_OVERRIDE_PID") public static android.media.MediaCodec createByCodecNameForClient(@NonNull String, int, int) throws java.io.IOException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_RESOURCE_OVERRIDE_PID) public static android.media.MediaCodec createByCodecNameForClient(@NonNull String, int, int) throws java.io.IOException;
   }
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
