@@ -78,7 +78,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -110,6 +109,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.VirtualDisplay;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -1939,12 +1939,10 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Preparation: Simulate snapshot IME surface.
         spyOn(mWm.mTaskSnapshotController);
-        doReturn(mock(SurfaceControl.ScreenshotHardwareBuffer.class)).when(
-                mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(any());
-        final SurfaceControl imeSurface = mock(SurfaceControl.class);
-        spyOn(imeSurface);
-        doReturn(true).when(imeSurface).isValid();
-        doReturn(imeSurface).when(mDisplayContent).createImeSurface(any(), any());
+        SurfaceControl.ScreenshotHardwareBuffer mockHwBuffer = mock(
+                SurfaceControl.ScreenshotHardwareBuffer.class);
+        doReturn(mock(HardwareBuffer.class)).when(mockHwBuffer).getHardwareBuffer();
+        doReturn(mockHwBuffer).when(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(any());
 
         // Preparation: Simulate snapshot Task.
         ActivityRecord act1 = createActivityRecord(mDisplayContent);
@@ -1970,21 +1968,17 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState appWin2 = createWindow(null, TYPE_BASE_APPLICATION, act2, "appWin2");
         appWin2.setHasSurface(true);
         assertTrue(appWin2.canBeImeTarget());
-        doReturn(true).when(appWin1).isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        doReturn(true).when(appWin1).inAppOrRecentsTransition();
 
         // Test step 3: Verify appWin2 will be the next IME target and the IME snapshot surface will
-        // be shown at this time.
-        final Transaction t = mDisplayContent.getPendingTransaction();
-        spyOn(t);
+        // be attached and shown on the display at this time.
         mDisplayContent.computeImeTarget(true);
         assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
 
-        verify(mDisplayContent, atLeast(1)).attachAndShowImeScreenshotOnTarget();
+        verify(mDisplayContent, atLeast(1)).showImeScreenshot();
         verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());
         assertNotNull(mDisplayContent.mImeScreenshot);
-        verify(t).show(mDisplayContent.mImeScreenshot);
     }
 
     @UseTestDisplay(addWindows = {W_INPUT_METHOD}, addAllCommonWindows = true)

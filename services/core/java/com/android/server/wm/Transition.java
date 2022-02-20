@@ -574,6 +574,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                             false /* disableImeIcon */);
                 }
             }
+            dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
     }
