@@ -806,6 +806,10 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(डिसकनेक्ट हो गया)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"स्विच नहीं किया जा सकता. फिर से कोशिश करने के लिए टैप करें."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
+    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
+    <skip />
+    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
@@ -877,8 +881,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> ऐप्लिकेशन चालू है</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> ऐप्लिकेशन चालू हैं</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"नई जानकारी"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ये ऐप्लिकेशन चालू हैं"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"बंद करें"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"रुका हुआ है"</string>
@@ -886,14 +889,9 @@
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"कॉपी किया गया"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> से"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"कॉपी किया गया यूज़र इंटरफ़ेस (यूआई) खारिज करें"</string>
-    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
-    <skip />
-    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
-    <skip />
-    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
-    <skip />
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"कॉपी किए गए टेक्स्ट में बदलाव करें"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कॉपी की गई इमेज में बदलाव करें"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"कॉन्टेंट को आस-पास मौजूद डिवाइस पर भेजें"</string>
+    <string name="add" msgid="81036585205287996">"जोड़ें"</string>
+    <string name="manage_users" msgid="1823875311934643849">"उपयोगकर्ताओं को मैनेज करें"</string>
 </resources>

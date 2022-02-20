@@ -304,10 +304,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"파일 및 문서"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"기기의 파일 및 문서에 액세스"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"음악 및 기타 오디오"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"기기에 있는 오디오 파일에 액세스"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"사진 및 동영상"</string>
@@ -588,12 +586,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
@@ -601,10 +596,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
@@ -1508,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"건너뛰기"</string>
     <string name="no_matches" msgid="6472699895759164599">"검색결과 없음"</string>
     <string name="find_on_page" msgid="5400537367077438198">"페이지에서 찾기"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{#개 일치}other{총 {total}개 중 #번째}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"완료"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"공유 저장공간 지우는 중…"</string>
     <string name="share" msgid="4157615043345227321">"공유"</string>
@@ -2263,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중이며 배터리를 소모하고 있습니다. 확인하려면 탭하세요."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"이 기기에서 카메라에 액세스할 수 없습니다."</string>
 </resources>

@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"এৰি যাওক"</string>
     <string name="no_matches" msgid="6472699895759164599">"কোনো মিল নাই"</string>
     <string name="find_on_page" msgid="5400537367077438198">"পৃষ্ঠাত বিচাৰক"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# টা মিল}one{{total}ৰ #}other{{total}ৰ #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"সম্পন্ন হ’ল"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"শ্বেয়াৰ কৰি থোৱা ষ্ট’ৰেজ মচি থকা হৈছে…"</string>
     <string name="share" msgid="4157615043345227321">"শ্বেয়াৰ কৰক"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত চলি আছে আৰু অত্যধিক বেটাৰী খৰচ কৰিছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> নেপথ্যত দীৰ্ঘ সময় ধৰি চলি আছে। পৰ্যালোচনা কৰিবলৈ টিপক।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এইটো ডিভাইচৰ পৰা কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
 </resources>

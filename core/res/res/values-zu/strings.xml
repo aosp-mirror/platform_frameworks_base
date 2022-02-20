@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Yeqa"</string>
     <string name="no_matches" msgid="6472699895759164599">"Akukho okufanayo"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Thola ekhasini"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{okufanayo okungu-#}one{okungu-# kokungu-{total}}other{okungu-# kokungu-{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Kwenziwe"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Isusa isitoreji esabiwe…"</string>
     <string name="share" msgid="4157615043345227321">"Yabelana"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza ngemuva futhi idla ibhethri. Thepha ukuze ubuyekeze."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"I-<xliff:g id="APP">%1$s</xliff:g> isebenza ngemuva isikhathi eside. Thepha ukuze ubuyekeze."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Hlola ama-app asebenzayo"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ayikwazi ukufinyelela ikhamera kule divayisi"</string>
 </resources>

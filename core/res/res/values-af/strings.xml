@@ -1501,8 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Slaan oor"</string>
     <string name="no_matches" msgid="6472699895759164599">"Geen passings nie"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Vind op bladsy"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# passing}other{# van {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Klaar"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Vee tans gedeelde berging uit …"</string>
     <string name="share" msgid="4157615043345227321">"Deel"</string>
@@ -2256,6 +2255,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> werk tans op die agtergrond en gebruik batterykrag. Tik om na te gaan."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> werk al vir \'n lang tyd op die agtergrond. Tik om na te gaan."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Gaan aktiewe programme na"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Kan nie toegang tot kamera van hierdie toestel af kry nie"</string>
 </resources>

@@ -806,6 +806,10 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(disconnected)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Can\'t switch. Tap to try again."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Pair new device"</string>
+    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
+    <skip />
+    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
@@ -877,8 +881,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> active apps</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> active app</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"New information"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Active apps"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stopped"</string>
@@ -889,8 +892,6 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Edit copied text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Edit copied image"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Send to nearby device"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"Add"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Manage users"</string>
 </resources>
