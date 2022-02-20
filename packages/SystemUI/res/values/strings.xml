@@ -2407,4 +2407,7 @@
     <string name="add_user_supervised" translatable="false">@*android:string/supervised_user_creation_label</string>
     <!-- Manage users - For system user management [CHAR LIMIT=40]  -->
     <string name="manage_users">Manage users</string>
+
+    <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
+    <string name="drag_split_not_supported">This notification does not support dragging to Splitscreen.</string>
 </resources>

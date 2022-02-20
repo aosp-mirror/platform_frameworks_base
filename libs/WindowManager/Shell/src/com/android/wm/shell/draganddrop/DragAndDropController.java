@@ -35,6 +35,9 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -54,6 +57,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -205,6 +209,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
+                pd.dragLayout.update(event);
                 break;
             case ACTION_DRAG_LOCATION:
                 pd.dragLayout.update(event);
@@ -250,10 +255,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);
             }
-
-            // Clean up the drag surface
-            mTransaction.reparent(dragSurface, null);
-            mTransaction.apply();
         });
     }
 
