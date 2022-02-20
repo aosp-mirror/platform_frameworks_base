@@ -638,7 +638,7 @@ public abstract class SensorManager {
     /**
      * Unregisters a listener for the sensors with which it is registered.
      *
-     * <p class="note"></p>
+     * <p class="note">
      * Note: Don't use this method with a one shot trigger sensor such as
      * {@link Sensor#TYPE_SIGNIFICANT_MOTION}.
      * Use {@link #cancelTriggerSensor(TriggerEventListener, Sensor)} instead.
