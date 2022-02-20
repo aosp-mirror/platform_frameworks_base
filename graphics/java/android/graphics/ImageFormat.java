@@ -428,7 +428,7 @@ public class ImageFormat {
 
     /**
      * <p>Private raw camera sensor image format, a single channel image with
-     * implementation depedent pixel layout.</p>
+     * implementation dependent pixel layout.</p>
      *
      * <p>RAW_PRIVATE is a format for unprocessed raw image buffers coming from an
      * image sensor. The actual structure of buffers of this format is

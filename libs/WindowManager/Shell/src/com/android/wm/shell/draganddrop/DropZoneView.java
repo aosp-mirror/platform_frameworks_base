@@ -65,6 +65,7 @@ public class DropZoneView extends FrameLayout {
     private final float[] mContainerMargin = new float[4];
     private float mCornerRadius;
     private float mBottomInset;
+    private boolean mIgnoreBottomMargin;
     private int mMarginColor; // i.e. color used for negative space like the container insets
 
     private boolean mShowingHighlight;
@@ -136,6 +137,14 @@ public class DropZoneView extends FrameLayout {
         mContainerMargin[1] = top;
         mContainerMargin[2] = right;
         mContainerMargin[3] = bottom;
+        if (mMarginPercent > 0) {
+            mMarginView.invalidate();
+        }
+    }
+
+    /** Ignores the bottom margin provided by the insets. */
+    public void setForceIgnoreBottomMargin(boolean ignoreBottomMargin) {
+        mIgnoreBottomMargin = ignoreBottomMargin;
         if (mMarginPercent > 0) {
             mMarginView.invalidate();
         }
@@ -257,7 +266,8 @@ public class DropZoneView extends FrameLayout {
             mPath.addRoundRect(mContainerMargin[0] * mMarginPercent,
                     mContainerMargin[1] * mMarginPercent,
                     getWidth() - (mContainerMargin[2] * mMarginPercent),
-                    getHeight() - (mContainerMargin[3] * mMarginPercent) - mBottomInset,
+                    getHeight() - (mContainerMargin[3] * mMarginPercent)
+                            - (mIgnoreBottomMargin ? 0 : mBottomInset),
                     mCornerRadius * mMarginPercent,
                     mCornerRadius * mMarginPercent,
                     Path.Direction.CW);
