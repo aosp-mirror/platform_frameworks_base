@@ -492,6 +492,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         // current USB state
         private boolean mHostConnected;
+        private boolean mUsbAccessoryConnected;
         private boolean mSourcePower;
         private boolean mSinkPower;
         private boolean mConfigured;
@@ -961,10 +962,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     break;
                 case MSG_UPDATE_HOST_STATE:
                     Iterator devices = (Iterator) msg.obj;
-                    boolean connected = (msg.arg1 == 1);
+                    mUsbAccessoryConnected = (msg.arg1 == 1);
 
                     if (DEBUG) {
-                        Slog.i(TAG, "HOST_STATE connected:" + connected);
+                        Slog.i(TAG, "HOST_STATE connected:" + mUsbAccessoryConnected);
                     }
 
                     mHideUsbNotification = false;
@@ -1218,7 +1219,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             } else if (mSourcePower) {
                 titleRes = com.android.internal.R.string.usb_supplying_notification_title;
                 id = SystemMessage.NOTE_USB_SUPPLYING;
-            } else if (mHostConnected && mSinkPower && mUsbCharging) {
+            } else if (mHostConnected && mSinkPower && (mUsbCharging || mUsbAccessoryConnected)) {
                 titleRes = com.android.internal.R.string.usb_charging_notification_title;
                 id = SystemMessage.NOTE_USB_CHARGING;
             }

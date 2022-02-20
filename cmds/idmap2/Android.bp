@@ -39,6 +39,7 @@ cc_defaults {
         "-modernize-pass-by-value",
         "-modernize-replace-disallow-copy-and-assign-macro",
         "-modernize-return-braced-init-list",
+        "-modernize-use-default-member-init",
         "-modernize-use-equals-default",
         "-modernize-use-nodiscard",
         "-modernize-use-override",
