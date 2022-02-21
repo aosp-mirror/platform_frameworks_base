@@ -408,6 +408,11 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     @NonNull
     InputBindResult bindCurrentMethod() {
+        if (mSelectedMethodId == null) {
+            Slog.e(TAG, "mSelectedMethodId is null!");
+            return InputBindResult.NO_IME;
+        }
+
         InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
