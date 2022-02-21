@@ -81,7 +81,9 @@ public final class BackNavigationInfo implements Parcelable {
             TYPE_DIALOG_CLOSE,
             TYPE_RETURN_TO_HOME,
             TYPE_CROSS_ACTIVITY,
-            TYPE_CROSS_TASK})
+            TYPE_CROSS_TASK,
+            TYPE_CALLBACK
+    })
     @interface BackTargetType {
     }
 
@@ -121,8 +123,8 @@ public final class BackNavigationInfo implements Parcelable {
             @Nullable SurfaceControl screenshotSurface,
             @Nullable HardwareBuffer screenshotBuffer,
             @Nullable WindowConfiguration taskWindowConfiguration,
-            @NonNull RemoteCallback onBackNavigationDone,
-            @NonNull IOnBackInvokedCallback onBackInvokedCallback) {
+            @Nullable RemoteCallback onBackNavigationDone,
+            @Nullable IOnBackInvokedCallback onBackInvokedCallback) {
         mType = type;
         mDepartingAnimationTarget = departingAnimationTarget;
         mScreenshotSurface = screenshotSurface;
@@ -278,7 +280,98 @@ public final class BackNavigationInfo implements Parcelable {
                 return "TYPE_CROSS_ACTIVITY";
             case TYPE_CROSS_TASK:
                 return "TYPE_CROSS_TASK";
+            case TYPE_CALLBACK:
+                return "TYPE_CALLBACK";
         }
         return String.valueOf(type);
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressWarnings("UnusedReturnValue") // Builder pattern
+    public static class Builder {
+
+        private int mType = TYPE_UNDEFINED;
+        @Nullable
+        private RemoteAnimationTarget mDepartingAnimationTarget = null;
+        @Nullable
+        private SurfaceControl mScreenshotSurface = null;
+        @Nullable
+        private HardwareBuffer mScreenshotBuffer = null;
+        @Nullable
+        private WindowConfiguration mTaskWindowConfiguration = null;
+        @Nullable
+        private RemoteCallback mOnBackNavigationDone = null;
+        @Nullable
+        private IOnBackInvokedCallback mOnBackInvokedCallback = null;
+
+        /**
+         * @see BackNavigationInfo#getType()
+         */
+        public Builder setType(@BackTargetType int type) {
+            mType = type;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#getDepartingAnimationTarget
+         */
+        public Builder setDepartingAnimationTarget(
+                @Nullable RemoteAnimationTarget departingAnimationTarget) {
+            mDepartingAnimationTarget = departingAnimationTarget;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#getScreenshotSurface
+         */
+        public Builder setScreenshotSurface(@Nullable SurfaceControl screenshotSurface) {
+            mScreenshotSurface = screenshotSurface;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#getScreenshotHardwareBuffer()
+         */
+        public Builder setScreenshotBuffer(@Nullable HardwareBuffer screenshotBuffer) {
+            mScreenshotBuffer = screenshotBuffer;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#getTaskWindowConfiguration
+         */
+        public Builder setTaskWindowConfiguration(
+                @Nullable WindowConfiguration taskWindowConfiguration) {
+            mTaskWindowConfiguration = taskWindowConfiguration;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#onBackNavigationFinished(boolean)
+         */
+        public Builder setOnBackNavigationDone(@Nullable RemoteCallback onBackNavigationDone) {
+            mOnBackNavigationDone = onBackNavigationDone;
+            return this;
+        }
+
+        /**
+         * @see BackNavigationInfo#getOnBackInvokedCallback
+         */
+        public Builder setOnBackInvokedCallback(
+                @Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+            mOnBackInvokedCallback = onBackInvokedCallback;
+            return this;
+        }
+
+        /**
+         * Builds and returns an instance of {@link BackNavigationInfo}
+         */
+        public BackNavigationInfo build() {
+            return new BackNavigationInfo(mType, mDepartingAnimationTarget, mScreenshotSurface,
+                    mScreenshotBuffer, mTaskWindowConfiguration, mOnBackNavigationDone,
+                    mOnBackInvokedCallback);
+        }
     }
 }

@@ -1125,8 +1125,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void setOnBackInvokedCallback(
             @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
-                this, onBackInvokedCallback);
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s. Client IWindow %s",
+                this, onBackInvokedCallback, mClient);
         if (priority >= 0) {
             mApplicationOnBackInvokedCallback = onBackInvokedCallback;
             mSystemOnBackInvokedCallback = null;
