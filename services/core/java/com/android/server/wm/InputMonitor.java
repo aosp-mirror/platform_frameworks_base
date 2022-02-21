@@ -414,6 +414,17 @@ final class InputMonitor {
         final IBinder focusToken = focus != null ? focus.mInputChannelToken : null;
         if (focusToken == null) {
             mInputFocus = null;
+            // When an app is focused, but its window is not showing yet, remove the input focus
+            // from the current window.
+            if (mDisplayContent.mFocusedApp != null) {
+                ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "App %s is focused,"
+                        + " but the window is not ready. Start a transaction to remove focus from"
+                        + " the window of non-focused apps.",
+                        mDisplayContent.mFocusedApp.getName());
+                EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Requesting to set focus to null window",
+                        "reason=UpdateInputWindows");
+                mInputTransaction.removeCurrentInputFocus(mDisplayId);
+            }
             return;
         }
 
