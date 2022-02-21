@@ -137,6 +137,7 @@ import static java.lang.Integer.MAX_VALUE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData;
@@ -5688,7 +5689,7 @@ class Task extends TaskFragment {
         }
     }
 
-    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name, @UserIdInt int userId) {
         ArrayList<ActivityRecord> activities = new ArrayList<>();
 
         if ("all".equals(name)) {
@@ -5708,7 +5709,13 @@ class Task extends TaskFragment {
                 }
             });
         }
-
+        if (userId != UserHandle.USER_ALL) {
+            for (int i = activities.size() - 1; i >= 0; --i) {
+                if (activities.get(i).mUserId != userId) {
+                    activities.remove(i);
+                }
+            }
+        }
         return activities;
     }
 
