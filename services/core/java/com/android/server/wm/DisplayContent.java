@@ -5009,6 +5009,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final boolean canImeTargetSetRelativeLayer = imeTarget.getSurfaceControl() != null
                     && imeTarget.mToken == imeControlTargetToken
                     && !imeTarget.inMultiWindowMode()
+                    // We don't need to set relative layer if the IME target in non-multi-window
+                    // mode is the activity main window since updateImeParent will ensure the IME
+                    // surface be attached on the fullscreen activity.
+                    && imeTarget.mAttrs.type != TYPE_BASE_APPLICATION
                     && imeTarget.mToken.getActivity(app -> app.isAnimating(TRANSITION | PARENTS,
                             ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_RECENTS)) == null;
             if (canImeTargetSetRelativeLayer) {
