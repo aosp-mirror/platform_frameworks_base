@@ -248,6 +248,7 @@ public final class SurfaceControl implements Parcelable {
 
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
+    private static native void nativeRemoveCurrentInputFocus(long nativeObject, int displayId);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
             String windowName, IBinder focusedToken, String focusedWindowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
@@ -3649,6 +3650,17 @@ public final class SurfaceControl implements Parcelable {
                                                 int displayId) {
             nativeSetFocusedWindow(mNativeObject, token, windowName, focusedToken,
                     focusedWindowName, displayId);
+            return this;
+        }
+
+        /**
+         * Removes the input focus from the current window which is having the input focus. Should
+         * only be called when the current focused app is not responding and the current focused
+         * window is not beloged to the current focused app.
+         * @hide
+         */
+        public Transaction removeCurrentInputFocus(int displayId) {
+            nativeRemoveCurrentInputFocus(mNativeObject, displayId);
             return this;
         }
 
