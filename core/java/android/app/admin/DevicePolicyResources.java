@@ -317,6 +317,8 @@ import java.util.Set;
  */
 public final class DevicePolicyResources {
 
+    private DevicePolicyResources() {}
+
     /**
      * Resource identifiers used to update device management-related system drawable resources.
      *
