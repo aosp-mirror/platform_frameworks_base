@@ -7807,7 +7807,6 @@ package android.app.admin {
   }
 
   public final class DevicePolicyResources {
-    ctor public DevicePolicyResources();
   }
 
   public static final class DevicePolicyResources.Drawables {
