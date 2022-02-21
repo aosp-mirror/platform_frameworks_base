@@ -2523,7 +2523,7 @@ public class DevicePolicyManager {
     public @interface UserProvisioningState {}
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Unknown error code returned  for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}.
@@ -2531,10 +2531,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_UNKNOWN_ERROR = -1;
+    public static final int STATUS_UNKNOWN_ERROR = -1;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}
@@ -2543,10 +2543,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_OK = 0;
+    public static final int STATUS_OK = 0;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the device already has a
      * device owner.
@@ -2554,10 +2554,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_HAS_DEVICE_OWNER = 1;
+    public static final int STATUS_HAS_DEVICE_OWNER = 1;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user has a profile owner
      *  and for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the profile owner is already set.
@@ -2565,20 +2565,20 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_USER_HAS_PROFILE_OWNER = 2;
+    public static final int STATUS_USER_HAS_PROFILE_OWNER = 2;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user isn't running.
      *
      * @hide
      */
     @SystemApi
-    public static final int CODE_USER_NOT_RUNNING = 3;
+    public static final int STATUS_USER_NOT_RUNNING = 3;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the device has already been
      * setup and for {@link #ACTION_PROVISION_MANAGED_USER} if the user has already been setup.
@@ -2586,7 +2586,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_USER_SETUP_COMPLETED = 4;
+    public static final int STATUS_USER_SETUP_COMPLETED = 4;
 
     /**
      * Code used to indicate that the device also has a user other than the system user.
@@ -2594,7 +2594,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_NONSYSTEM_USER_EXISTS = 5;
+    public static final int STATUS_NONSYSTEM_USER_EXISTS = 5;
 
     /**
      * Code used to indicate that device has an account that prevents provisioning.
@@ -2602,20 +2602,20 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
+    public static final int STATUS_ACCOUNTS_NOT_EMPTY = 6;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the user is not a system user.
      *
      * @hide
      */
     @SystemApi
-    public static final int CODE_NOT_SYSTEM_USER = 7;
+    public static final int STATUS_NOT_SYSTEM_USER = 7;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_USER} when the device is a watch and is already paired.
@@ -2623,10 +2623,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_HAS_PAIRED = 8;
+    public static final int STATUS_HAS_PAIRED = 8;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link #ACTION_PROVISION_MANAGED_USER} on devices which do not support managed users.
@@ -2635,10 +2635,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9;
+    public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user and
      * for {@link #ACTION_PROVISION_MANAGED_DEVICE} on devices running headless system user mode
@@ -2647,10 +2647,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_SYSTEM_USER = 10;
+    public static final int STATUS_SYSTEM_USER = 10;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the user cannot have more
      * managed profiles.
@@ -2658,19 +2658,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
+    public static final int STATUS_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
-     * TODO (b/137101239): clean up split system user codes
-     *
-     * @hide
-     * @deprecated not used anymore but can't be removed since it's a @TestApi.
-     **/
-    @Deprecated
-    public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
-
-    /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support device
@@ -2679,21 +2670,21 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
+    public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
      * TODO (b/137101239): clean up split system user codes
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * @hide
      * @deprecated not used anymore but can't be removed since it's a @TestApi.
      */
     @Deprecated
     @TestApi
-    public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
+    public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
 
     /**
-     * Result code for {@link #checkProvisioningPreCondition}.
+     * Result code for {@link #checkProvisioningPrecondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support provisioning.
@@ -2701,24 +2692,24 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
+    public static final int STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
 
     /**
-     * Result codes for {@link #checkProvisioningPreCondition} indicating all the provisioning pre
+     * Result codes for {@link #checkProvisioningPrecondition} indicating all the provisioning pre
      * conditions.
      *
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CODE_" }, value = {
-            CODE_UNKNOWN_ERROR, CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER,
-            CODE_USER_NOT_RUNNING, CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
-            CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
-            CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
-            CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_UNKNOWN_ERROR, STATUS_OK, STATUS_HAS_DEVICE_OWNER, STATUS_USER_HAS_PROFILE_OWNER,
+            STATUS_USER_NOT_RUNNING, STATUS_USER_SETUP_COMPLETED, STATUS_NOT_SYSTEM_USER,
+            STATUS_HAS_PAIRED, STATUS_MANAGED_USERS_NOT_SUPPORTED, STATUS_SYSTEM_USER,
+            STATUS_CANNOT_ADD_MANAGED_PROFILE, STATUS_DEVICE_ADMIN_NOT_SUPPORTED,
+            STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
+            STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS
     })
-    public @interface ProvisioningPreCondition {}
+    public @interface ProvisioningPrecondition {}
 
     /**
      * Disable all configurable SystemUI features during LockTask mode. This includes,
@@ -11996,15 +11987,16 @@ public class DevicePolicyManager {
      *        {@link #ACTION_PROVISION_MANAGED_PROFILE}
      * @param packageName The package of the component that would be set as device, user, or profile
      *        owner.
-     * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
+     * @return An int constant value indicating whether provisioning is allowed.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public @ProvisioningPreCondition int checkProvisioningPreCondition(
+    @ProvisioningPrecondition
+    public int checkProvisioningPrecondition(
             @NonNull String action, @NonNull String packageName) {
         try {
-            return mService.checkProvisioningPreCondition(action, packageName);
+            return mService.checkProvisioningPrecondition(action, packageName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -14689,7 +14681,7 @@ public class DevicePolicyManager {
      * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
      * owner.
      *
-     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
      *
      * @param provisioningParams Params required to provision a managed profile,
@@ -14733,7 +14725,7 @@ public class DevicePolicyManager {
      * Provisions a managed device and sets the {@code deviceAdminComponentName} as the device
      * owner.
      *
-     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * <p>The method {@link #checkProvisioningPrecondition} must be returning {@link #STATUS_OK}
      * before calling this method.
      *
      * @param provisioningParams Params required to provision a fully managed device,

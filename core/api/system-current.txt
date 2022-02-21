@@ -1075,7 +1075,7 @@ package android.app.admin {
   }
 
   public class DevicePolicyManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int checkProvisioningPreCondition(@NonNull String, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int checkProvisioningPrecondition(@NonNull String, @NonNull String);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method @Nullable public android.content.Intent createProvisioningIntentFromNfcIntent(@NonNull android.content.Intent);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean getBluetoothContactSharingDisabled(@NonNull android.os.UserHandle);
@@ -1128,21 +1128,6 @@ package android.app.admin {
     field public static final String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field @Deprecated public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER";
-    field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
-    field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
-    field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
-    field public static final int CODE_HAS_DEVICE_OWNER = 1; // 0x1
-    field public static final int CODE_HAS_PAIRED = 8; // 0x8
-    field public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
-    field public static final int CODE_NONSYSTEM_USER_EXISTS = 5; // 0x5
-    field public static final int CODE_NOT_SYSTEM_USER = 7; // 0x7
-    field public static final int CODE_OK = 0; // 0x0
-    field public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
-    field public static final int CODE_SYSTEM_USER = 10; // 0xa
-    field public static final int CODE_UNKNOWN_ERROR = -1; // 0xffffffff
-    field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
-    field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
-    field public static final int CODE_USER_SETUP_COMPLETED = 4; // 0x4
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_LOST_MODE_LOCATION = "android.app.extra.LOST_MODE_LOCATION";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
@@ -1185,6 +1170,21 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
+    field public static final int STATUS_ACCOUNTS_NOT_EMPTY = 6; // 0x6
+    field public static final int STATUS_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
+    field public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
+    field public static final int STATUS_HAS_DEVICE_OWNER = 1; // 0x1
+    field public static final int STATUS_HAS_PAIRED = 8; // 0x8
+    field public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
+    field public static final int STATUS_NONSYSTEM_USER_EXISTS = 5; // 0x5
+    field public static final int STATUS_NOT_SYSTEM_USER = 7; // 0x7
+    field public static final int STATUS_OK = 0; // 0x0
+    field public static final int STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
+    field public static final int STATUS_SYSTEM_USER = 10; // 0xa
+    field public static final int STATUS_UNKNOWN_ERROR = -1; // 0xffffffff
+    field public static final int STATUS_USER_HAS_PROFILE_OWNER = 2; // 0x2
+    field public static final int STATUS_USER_NOT_RUNNING = 3; // 0x3
+    field public static final int STATUS_USER_SETUP_COMPLETED = 4; // 0x4
   }
 
   public static final class DevicePolicyResources.Strings {

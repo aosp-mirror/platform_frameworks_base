@@ -525,7 +525,6 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
-    field @Deprecated public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
     field public static final int DEVICE_OWNER_TYPE_DEFAULT = 0; // 0x0
     field public static final int DEVICE_OWNER_TYPE_FINANCED = 1; // 0x1
     field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
@@ -569,6 +568,7 @@ package android.app.admin {
     field public static final int OPERATION_SWITCH_USER = 2; // 0x2
     field public static final int OPERATION_UNINSTALL_CA_CERT = 40; // 0x28
     field public static final int OPERATION_WIPE_DATA = 8; // 0x8
+    field @Deprecated public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
