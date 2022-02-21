@@ -505,6 +505,12 @@
     <!-- Permissions needed for CTS test - CtsLocaleManagerTestCases -->
     <uses-permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES" />
 
+    <!-- Permissions used for manual testing of time detection behavior. -->
+    <uses-permission android:name="android.permission.SUGGEST_MANUAL_TIME" />
+    <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME" />
+    <uses-permission android:name="android.permission.SUGGEST_NETWORK_TIME" />
+    <uses-permission android:name="android.permission.SUGGEST_GNSS_TIME" />
+
     <!-- Permission required for CTS test - android.server.biometrics -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 

@@ -86,6 +86,9 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
 
+    /** The value in Unix epoch milliseconds of the Y2038 issue. */
+    private static final long Y2038_LIMIT_IN_MILLIS = 1000L * Integer.MAX_VALUE;
+
     /**
      * A log that records the decisions / decision metadata that affected the device's system clock
      * time. This is logged in bug reports to assist with debugging issues with detection.
@@ -186,6 +189,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
+
+        /**
+         * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
+         * defines time_t as a 32-bit signed integer for 32-bit processes).
+         */
+        boolean deviceHasY2038Issue();
     }
 
     static TimeDetectorStrategy create(
@@ -338,6 +347,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                         .mapToObj(TimeDetectorStrategy::originToString)
                         .collect(joining(",", "[", "]"));
         ipw.println("mEnvironment.autoOriginPriorities()=" + priorities);
+        ipw.println("mEnvironment.deviceHasY2038Issue()=" + mEnvironment.deviceHasY2038Issue());
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
@@ -416,6 +426,16 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             Slog.w(LOG_TAG, "New reference time is in the future? Ignoring."
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
                     + ", suggestion=" + suggestion);
+            return false;
+        }
+
+        if (newUnixEpochTime.getValue() > Y2038_LIMIT_IN_MILLIS
+                && mEnvironment.deviceHasY2038Issue()) {
+            // This check won't prevent a device's system clock exceeding Integer.MAX_VALUE Unix
+            // seconds through the normal passage of time, but it will stop it jumping above 2038
+            // because of a "bad" suggestion. b/204193177
+            Slog.w(LOG_TAG, "Suggested value is above max time supported by this device."
+                    + " suggestion=" + suggestion);
             return false;
         }
         return true;
