@@ -207,7 +207,9 @@ public class Utils {
         final BatteryStatus batteryStatus = new BatteryStatus(batteryChangedIntent);
 
         if (batteryStatus.isCharged()) {
-            statusString = res.getString(R.string.battery_info_status_full);
+            statusString = res.getString(compactStatus
+                    ? R.string.battery_info_status_full_charged
+                    : R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                 if (compactStatus) {
