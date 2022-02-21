@@ -653,7 +653,7 @@ interface IPackageManager {
 
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     String getPermissionControllerPackageName();
-    String getSupplementalProcessPackageName();
+    String getSdkSandboxPackageName();
 
     ParceledListSlice getInstantApps(int userId);
     byte[] getInstantAppCookie(String packageName, int userId);

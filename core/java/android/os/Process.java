@@ -281,23 +281,23 @@ public class Process {
 
     /**
      * Defines the start of a range of UIDs going from this number to
-     * {@link #LAST_SUPPLEMENTAL_UID} that are reserved for assigning to
-     * supplemental processes. There is a 1-1 mapping between a supplemental
+     * {@link #LAST_SDK_SANDBOX_UID} that are reserved for assigning to
+     * sdk sandbox processes. There is a 1-1 mapping between a sdk sandbox
      * process UID and the app that it belongs to, which can be computed by
-     * subtracting (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID) from the
-     * uid of a supplemental process.
+     * subtracting (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID) from the
+     * uid of a sdk sandbox process.
      *
      * Note that there are no GIDs associated with these processes; storage
      * attribution for them will be done using project IDs.
      * @hide
      */
-    public static final int FIRST_SUPPLEMENTAL_UID = 20000;
+    public static final int FIRST_SDK_SANDBOX_UID = 20000;
 
     /**
-     * Last UID that is used for supplemental processes.
+     * Last UID that is used for sdk sandbox processes.
      * @hide
      */
-    public static final int LAST_SUPPLEMENTAL_UID = 29999;
+    public static final int LAST_SDK_SANDBOX_UID = 29999;
 
     /**
      * First uid used for fully isolated sandboxed processes spawned from an app zygote
@@ -901,44 +901,44 @@ public class Process {
     }
 
     /**
-     * Returns whether the provided UID belongs to a supplemental process.
+     * Returns whether the provided UID belongs to a SDK sandbox process.
      *
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
-    public static final boolean isSupplemental(int uid) {
+    public static final boolean isSdkSandboxUid(int uid) {
         uid = UserHandle.getAppId(uid);
-        return (uid >= FIRST_SUPPLEMENTAL_UID && uid <= LAST_SUPPLEMENTAL_UID);
+        return (uid >= FIRST_SDK_SANDBOX_UID && uid <= LAST_SDK_SANDBOX_UID);
     }
 
     /**
      *
-     * Returns the app process corresponding to a supplemental process.
+     * Returns the app process corresponding to a sdk sandbox process.
      *
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int toAppUid(int uid) {
-        return uid - (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID);
+        return uid - (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 
     /**
      *
-     * Returns the supplemental process corresponding to an app process.
+     * Returns the sdk sandbox process corresponding to an app process.
      *
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
-    public static final int toSupplementalUid(int uid) {
-        return uid + (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID);
+    public static final int toSdkSandboxUid(int uid) {
+        return uid + (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 
     /**
-     * Returns whether the current process is a supplemental process.
+     * Returns whether the current process is a sdk sandbox process.
      */
-    public static final boolean isSupplemental() {
-        return isSupplemental(myUid());
+    public static final boolean isSdkSandbox() {
+        return isSdkSandboxUid(myUid());
     }
 
     /**

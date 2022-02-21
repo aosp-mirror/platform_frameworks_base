@@ -120,7 +120,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
-    method @NonNull public String getSupplementalProcessPackageName();
+    method @NonNull public String getSdkSandboxPackageName();
     field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
   }
 
@@ -362,9 +362,9 @@ package android.os {
   }
 
   public class Process {
-    method public static final boolean isSupplemental(int);
+    method public static final boolean isSdkSandboxUid(int);
     method public static final int toAppUid(int);
-    method public static final int toSupplementalUid(int);
+    method public static final int toSdkSandboxUid(int);
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int VPN_UID = 1016; // 0x3f8
   }

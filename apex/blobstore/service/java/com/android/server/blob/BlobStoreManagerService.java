@@ -1377,7 +1377,7 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private boolean isAllowedBlobAccess(int uid, String packageName) {
-        return (!Process.isSupplemental(uid) && !Process.isIsolated(uid)
+        return (!Process.isSdkSandboxUid(uid) && !Process.isIsolated(uid)
                 && !mPackageManagerInternal.isInstantApp(packageName, UserHandle.getUserId(uid)));
     }
 
