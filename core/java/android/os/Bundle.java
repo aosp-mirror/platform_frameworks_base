@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
@@ -908,6 +911,33 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             return (T) o;
         } catch (ClassCastException e) {
             typeWarning(key, o, "Parcelable", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the value associated with the given key, or {@code null} if
+     * no mapping of the desired type exists for the given key or a {@code null}
+     * value is explicitly associated with the key.
+     *
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key a String, or {@code null}
+     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     * @return a Parcelable value, or {@code null}
+     *
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T> T getParcelable(@Nullable String key, @NonNull Class<T> clazz) {
+        unparcel();
+        try {
+            return getValue(key, requireNonNull(clazz));
+        } catch (ClassCastException | BadParcelableException e) {
+            typeWarning(key, /* value */ null, "Parcelable", e);
             return null;
         }
     }
