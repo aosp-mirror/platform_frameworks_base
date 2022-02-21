@@ -16,7 +16,6 @@
 
 package com.android.server.vibrator;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
@@ -130,16 +129,17 @@ final class VibrationStepConductor {
                 previousStepVibratorOffTimeout);
     }
 
-    public void initializeForEffect(@NonNull CombinedVibration.Sequential vibration) {
+    /** Called when this conductor is going to be started running by the VibrationThread. */
+    public void prepareToStart() {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
-
+        CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffect());
         synchronized (mLock) {
             mPendingVibrateSteps++;
             // This count is decremented at the completion of the step, so we don't subtract one.
-            mRemainingStartSequentialEffectSteps = vibration.getEffects().size();
-            mNextSteps.offer(new StartSequentialEffectStep(this, vibration));
+            mRemainingStartSequentialEffectSteps = sequentialEffect.getEffects().size();
+            mNextSteps.offer(new StartSequentialEffectStep(this, sequentialEffect));
         }
     }
 
@@ -445,6 +445,15 @@ final class VibrationStepConductor {
                 }
             }
         }
+    }
+
+    private static CombinedVibration.Sequential toSequential(CombinedVibration effect) {
+        if (effect instanceof CombinedVibration.Sequential) {
+            return (CombinedVibration.Sequential) effect;
+        }
+        return (CombinedVibration.Sequential) CombinedVibration.startSequential()
+                .addNext(effect)
+                .combine();
     }
 
     /**

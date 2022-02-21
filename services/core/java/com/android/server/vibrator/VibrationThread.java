@@ -16,7 +16,6 @@
 
 package com.android.server.vibrator;
 
-import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -25,8 +24,6 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.util.Slog;
 import android.util.SparseArray;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.NoSuchElementException;
 
@@ -104,11 +101,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     Vibration getVibration() {
         return mStepConductor.getVibration();
-    }
-
-    @VisibleForTesting
-    SparseArray<VibratorController> getVibrators() {
-        return mStepConductor.getVibrators();
     }
 
     @Override
@@ -224,9 +216,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private void playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            CombinedVibration.Sequential sequentialEffect =
-                    toSequential(mStepConductor.getVibration().getEffect());
-            mStepConductor.initializeForEffect(sequentialEffect);
+            mStepConductor.prepareToStart();
 
             while (!mStepConductor.isFinished()) {
                 // Skip wait and next step if mForceStop already happened.
@@ -265,14 +255,4 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
-
-    private static CombinedVibration.Sequential toSequential(CombinedVibration effect) {
-        if (effect instanceof CombinedVibration.Sequential) {
-            return (CombinedVibration.Sequential) effect;
-        }
-        return (CombinedVibration.Sequential) CombinedVibration.startSequential()
-                .addNext(effect)
-                .combine();
-    }
-
 }
