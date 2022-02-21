@@ -834,10 +834,10 @@ public class WindowMagnificationManager implements
         }
 
         @Override
-        public void onDrag(int displayId) {
+        public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
                     FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
-                mTrace.logTrace(TAG + "ConnectionCallback.onDrag",
+                mTrace.logTrace(TAG + "ConnectionCallback.onMove",
                         FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId);
             }

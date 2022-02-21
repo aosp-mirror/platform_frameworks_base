@@ -40,6 +40,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -566,6 +567,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_move_right, null));
         assertTrue(
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_move_left, null));
+        verify(mWindowMagnifierCallback, times(4)).onMove(eq(displayId));
     }
 
     @Test
