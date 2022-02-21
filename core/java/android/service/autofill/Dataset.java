@@ -905,7 +905,7 @@ public final class Dataset implements Parcelable {
             if (field == null) {
                 setLifeTheUniverseAndEverything(id, null, null, null, null, null, null);
             } else {
-                final DatasetFieldFilter filter = field.getFilter();
+                final DatasetFieldFilter filter = field.getDatasetFieldFilter();
                 final Presentations presentations = field.getPresentations();
                 if (presentations == null) {
                     setLifeTheUniverseAndEverything(id, field.getValue(), null, null, null,
