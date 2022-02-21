@@ -59,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -97,7 +98,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
                 mBatteryController, mScrimController, () -> mBiometricUnlockController,
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler,
+                mKeyguardUpdateMonitor, mPulseExpansionHandler, Optional.empty(),
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
                 mAuthController, mNotificationIconAreaController);
 
