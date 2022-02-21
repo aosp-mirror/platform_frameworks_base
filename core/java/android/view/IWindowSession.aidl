@@ -104,7 +104,8 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Bundle bundle);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -142,7 +143,8 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
+            int seqId);
 
     @UnsupportedAppUsage
     oneway void setInTouchMode(boolean showFocus);

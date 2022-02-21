@@ -252,6 +252,7 @@ public abstract class WallpaperService extends Service {
         final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
+        final Bundle mSyncSeqIdBundle = new Bundle();
         private final Point mSurfaceSize = new Point();
         private final Point mLastSurfaceSize = new Point();
         private final Matrix mTmpMatrix = new Matrix();
@@ -391,7 +392,7 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(ClientWindowFrames frames, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, boolean forceLayout,
-                    boolean alwaysConsumeSystemBars, int displayId) {
+                    boolean alwaysConsumeSystemBars, int displayId, int syncSeqId) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
@@ -1151,7 +1152,7 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(
                             mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, mWinFrames, mMergedConfiguration, mSurfaceControl,
-                            mInsetsState, mTempControls);
+                            mInsetsState, mTempControls, mSyncSeqIdBundle);
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
                             (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
@@ -1338,7 +1339,8 @@ public abstract class WallpaperService extends Service {
                         mSurfaceCreated = true;
                         if (redrawNeeded) {
                             resetWindowPages();
-                            mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
+                            mSession.finishDrawing(mWindow, null /* postDrawTransaction */,
+                                                   Integer.MAX_VALUE);
                             processLocalColors(mPendingXOffset, mPendingXOffsetStep);
                             notifyColorsChanged();
                         }
