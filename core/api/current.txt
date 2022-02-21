@@ -5560,11 +5560,11 @@ package android.app {
 
   public final class GameState implements android.os.Parcelable {
     ctor public GameState(boolean, int);
-    ctor public GameState(boolean, int, @Nullable String, @NonNull android.os.Bundle);
+    ctor public GameState(boolean, int, int, int);
     method public int describeContents();
-    method @Nullable public String getDescription();
-    method @NonNull public android.os.Bundle getMetadata();
+    method public int getLabel();
     method public int getMode();
+    method public int getQuality();
     method public boolean isLoading();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameState> CREATOR;
