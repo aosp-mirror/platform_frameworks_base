@@ -43,6 +43,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -289,7 +290,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         if (DEBUG) Log.d(TAG, "checkIfPinnedTaskAppeared(), task=" + pinnedTask);
         if (pinnedTask == null || pinnedTask.topActivity == null) return;
         mPinnedTaskId = pinnedTask.taskId;
-        setState(STATE_PIP);
 
         mPipMediaController.onActivityPinned();
         mPipNotificationController.show(pinnedTask.topActivity.getPackageName());
@@ -326,6 +326,9 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     @Override
     public void onPipTransitionFinished(int direction) {
+        if (PipAnimationController.isInPipDirection(direction) && mState == STATE_NO_PIP) {
+            setState(STATE_PIP);
+        }
         if (DEBUG) Log.d(TAG, "onPipTransition_Finished(), state=" + stateToName(mState));
     }
 
