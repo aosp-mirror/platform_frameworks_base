@@ -71,6 +71,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
@@ -78,6 +79,7 @@ import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
@@ -144,6 +146,8 @@ public class VibratorManagerServiceTest {
     private AppOpsManager mAppOpsManagerMock;
     @Mock
     private IInputManager mIInputManagerMock;
+    @Mock
+    private IBatteryStats mBatteryStatsMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
@@ -152,12 +156,14 @@ public class VibratorManagerServiceTest {
     private FakeVibrator mVibrator;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
     private VibratorManagerService.ExternalVibratorService mExternalVibratorService;
+    private VibrationConfig mVibrationConfig;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
+        mVibrationConfig = new VibrationConfig(mContextSpy.getResources());
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
@@ -219,6 +225,11 @@ public class VibratorManagerServiceTest {
                     @Override
                     Handler createHandler(Looper looper) {
                         return new Handler(mTestLooper.getLooper());
+                    }
+
+                    @Override
+                    IBatteryStats getBatteryStatsService() {
+                        return mBatteryStatsMock;
                     }
 
                     @Override
@@ -382,6 +393,11 @@ public class VibratorManagerServiceTest {
         inOrderVerifier.verify(listenerMock).onVibrating(eq(true));
         inOrderVerifier.verify(listenerMock).onVibrating(eq(false));
         inOrderVerifier.verifyNoMoreInteractions();
+
+        InOrder batteryVerifier = inOrder(mBatteryStatsMock);
+        batteryVerifier.verify(mBatteryStatsMock)
+                .noteVibratorOn(UID, 40 + mVibrationConfig.getRampDownDurationMs());
+        batteryVerifier.verify(mBatteryStatsMock).noteVibratorOff(UID);
     }
 
     @Test
@@ -731,6 +747,12 @@ public class VibratorManagerServiceTest {
         // Wait before checking it never played a second effect.
         assertFalse(waitUntil(s -> mVibratorProviders.get(1).getEffectSegments().size() > 1,
                 service, /* timeout= */ 50));
+
+        // The time estimate is recorded when the vibration starts, repeating vibrations
+        // are capped at BATTERY_STATS_REPEATING_VIBRATION_DURATION (=5000).
+        verify(mBatteryStatsMock).noteVibratorOn(UID, 5000);
+        // The second vibration shouldn't have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
     }
 
     @Test
