@@ -42,6 +42,7 @@ import android.os.IVibratorStateListener;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
@@ -60,6 +61,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -87,6 +89,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final int ATTRIBUTES_ALL_BYPASS_FLAGS =
             VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
                     | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+
+    /** Fixed large duration used to note repeating vibrations to {@link IBatteryStats}. */
+    private static final long BATTERY_STATS_REPEATING_VIBRATION_DURATION = 5_000;
 
     /** Lifecycle responsible for initializing this class at the right system server phases. */
     public static class Lifecycle extends SystemService {
@@ -201,8 +206,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
                 .getSystemUiServiceComponent().getPackageName();
 
-        mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService(
-                BatteryStats.SERVICE_NAME));
+        mBatteryStatsService = injector.getBatteryStatsService();
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
 
@@ -634,7 +638,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
 
             VibrationThread vibThread = new VibrationThread(vib, mVibrationSettings,
-                    mDeviceVibrationEffectAdapter, mVibrators, mWakeLock, mBatteryStatsService,
+                    mDeviceVibrationEffectAdapter, mVibrators, mWakeLock,
                     mVibrationThreadCallbacks);
 
             if (mCurrentVibration == null) {
@@ -1105,6 +1109,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return new Handler(looper);
         }
 
+        IBatteryStats getBatteryStatsService() {
+            return IBatteryStats.Stub.asInterface(ServiceManager.getService(
+                    BatteryStats.SERVICE_NAME));
+        }
+
         VibratorController createVibratorController(int vibratorId,
                 VibratorController.OnVibrationCompleteListener listener) {
             return new VibratorController(vibratorId, listener);
@@ -1138,6 +1147,36 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         @Override
         public void cancelSyncedVibration() {
             mNativeWrapper.cancelSynced();
+        }
+
+        @Override
+        public void noteVibratorOn(int uid, long duration) {
+            try {
+                if (duration <= 0) {
+                    return;
+                }
+                if (duration == Long.MAX_VALUE) {
+                    // Repeating duration has started. Report a fixed duration here, noteVibratorOff
+                    // should be called when this is cancelled.
+                    duration = BATTERY_STATS_REPEATING_VIBRATION_DURATION;
+                }
+                mBatteryStatsService.noteVibratorOn(uid, duration);
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED,
+                        uid, null, FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__ON,
+                        duration);
+            } catch (RemoteException e) {
+            }
+        }
+
+        @Override
+        public void noteVibratorOff(int uid) {
+            try {
+                mBatteryStatsService.noteVibratorOff(uid);
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED,
+                        uid, null, FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__OFF,
+                        /* duration= */ 0);
+            } catch (RemoteException e) {
+            }
         }
 
         @Override
