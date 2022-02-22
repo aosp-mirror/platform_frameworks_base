@@ -888,6 +888,15 @@ public class ArrayUtils {
         }
     }
 
+    /**
+     * Returns the {@code i}-th item in {@code items}, if it exists and {@code items} is not {@code
+     * null}, otherwise returns {@code null}.
+     */
+    @Nullable
+    public static <T> T getOrNull(@Nullable T[] items, int i) {
+        return (items != null && items.length > i) ? items[i] : null;
+    }
+
     public static @Nullable <T> T firstOrNull(T[] items) {
         return items.length > 0 ? items[0] : null;
     }

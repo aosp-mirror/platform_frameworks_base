@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
@@ -65,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -287,26 +290,26 @@ public final class Parcel {
     private static final int VAL_NULL = -1;
     private static final int VAL_STRING = 0;
     private static final int VAL_INTEGER = 1;
-    private static final int VAL_MAP = 2;
+    private static final int VAL_MAP = 2; // length-prefixed
     private static final int VAL_BUNDLE = 3;
-    private static final int VAL_PARCELABLE = 4;
+    private static final int VAL_PARCELABLE = 4; // length-prefixed
     private static final int VAL_SHORT = 5;
     private static final int VAL_LONG = 6;
     private static final int VAL_FLOAT = 7;
     private static final int VAL_DOUBLE = 8;
     private static final int VAL_BOOLEAN = 9;
     private static final int VAL_CHARSEQUENCE = 10;
-    private static final int VAL_LIST  = 11;
-    private static final int VAL_SPARSEARRAY = 12;
+    private static final int VAL_LIST  = 11; // length-prefixed
+    private static final int VAL_SPARSEARRAY = 12; // length-prefixed
     private static final int VAL_BYTEARRAY = 13;
     private static final int VAL_STRINGARRAY = 14;
     private static final int VAL_IBINDER = 15;
-    private static final int VAL_PARCELABLEARRAY = 16;
-    private static final int VAL_OBJECTARRAY = 17;
+    private static final int VAL_PARCELABLEARRAY = 16; // length-prefixed
+    private static final int VAL_OBJECTARRAY = 17; // length-prefixed
     private static final int VAL_INTARRAY = 18;
     private static final int VAL_LONGARRAY = 19;
     private static final int VAL_BYTE = 20;
-    private static final int VAL_SERIALIZABLE = 21;
+    private static final int VAL_SERIALIZABLE = 21; // length-prefixed
     private static final int VAL_SPARSEBOOLEANARRAY = 22;
     private static final int VAL_BOOLEANARRAY = 23;
     private static final int VAL_CHARSEQUENCEARRAY = 24;
@@ -3170,8 +3173,7 @@ public final class Parcel {
      */
     @Deprecated
     public final void readMap(@NonNull Map outVal, @Nullable ClassLoader loader) {
-        int n = readInt();
-        readMapInternal(outVal, n, loader, /* clazzKey */ null, /* clazzValue */ null);
+        readMapInternal(outVal, loader, /* clazzKey */ null, /* clazzValue */ null);
     }
 
     /**
@@ -3186,8 +3188,7 @@ public final class Parcel {
             @NonNull Class<V> clazzValue) {
         Objects.requireNonNull(clazzKey);
         Objects.requireNonNull(clazzValue);
-        int n = readInt();
-        readMapInternal(outVal, n, loader, clazzKey, clazzValue);
+        readMapInternal(outVal, loader, clazzKey, clazzValue);
     }
 
     /**
@@ -3236,13 +3237,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public HashMap readHashMap(@Nullable ClassLoader loader) {
-        int n = readInt();
-        if (n < 0) {
-            return null;
-        }
-        HashMap m = new HashMap(n);
-        readMapInternal(m, n, loader, /* clazzKey */ null, /* clazzValue */ null);
-        return m;
+        return readHashMapInternal(loader, /* clazzKey */ null, /* clazzValue */ null);
     }
 
     /**
@@ -3258,13 +3253,7 @@ public final class Parcel {
             @NonNull Class<? extends K> clazzKey, @NonNull Class<? extends V> clazzValue) {
         Objects.requireNonNull(clazzKey);
         Objects.requireNonNull(clazzValue);
-        int n = readInt();
-        if (n < 0) {
-            return null;
-        }
-        HashMap<K, V> map = new HashMap<>(n);
-        readMapInternal(map, n, loader, clazzKey, clazzValue);
-        return map;
+        return readHashMapInternal(loader, clazzKey, clazzValue);
     }
 
     /**
@@ -4289,16 +4278,17 @@ public final class Parcel {
 
 
     /**
-     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     * @see #readValue(int, ClassLoader, Class, Class[])
      */
     @Nullable
-    private <T> T readValue(@Nullable ClassLoader loader, @Nullable Class<T> clazz) {
+    private <T> T readValue(@Nullable ClassLoader loader, @Nullable Class<T> clazz,
+            @Nullable Class<?>... itemTypes) {
         int type = readInt();
         final T object;
         if (isLengthPrefixed(type)) {
             int length = readInt();
             int start = dataPosition();
-            object = readValue(type, loader, clazz);
+            object = readValue(type, loader, clazz, itemTypes);
             int actual = dataPosition() - start;
             if (actual != length) {
                 Slog.wtfStack(TAG,
@@ -4306,25 +4296,26 @@ public final class Parcel {
                                 + "  consumed " + actual + " bytes, but " + length + " expected.");
             }
         } else {
-            object = readValue(type, loader, clazz);
+            object = readValue(type, loader, clazz, itemTypes);
         }
         return object;
     }
 
     /**
-     * This will return a {@link Function} for length-prefixed types that deserializes the object
-     * when {@link Function#apply} is called with the expected class of the return object (or {@code
-     * null} for no type check), for other types it will return the object itself.
+     * This will return a {@link BiFunction} for length-prefixed types that deserializes the object
+     * when {@link BiFunction#apply} is called (the arguments correspond to the ones of {@link
+     * #readValue(int, ClassLoader, Class, Class[])} after the class loader), for other types it
+     * will return the object itself.
      *
-     * <p>After calling {@link Function#apply(Object)} the parcel cursor will not change. Note that
-     * you shouldn't recycle the parcel, not at least until all objects have been retrieved. No
+     * <p>After calling {@link BiFunction#apply} the parcel cursor will not change. Note that you
+     * shouldn't recycle the parcel, not at least until all objects have been retrieved. No
      * synchronization attempts are made.
      *
      * </p>The function returned implements {@link #equals(Object)} and {@link #hashCode()}. Two
      * function objects are equal if either of the following is true:
      * <ul>
-     *   <li>{@link Function#apply} has been called on both and both objects returned are equal.
-     *   <li>{@link Function#apply} hasn't been called on either one and everything below is true:
+     *   <li>{@link BiFunction#apply} has been called on both and both objects returned are equal.
+     *   <li>{@link BiFunction#apply} hasn't been called on either one and everything below is true:
      *   <ul>
      *       <li>The {@code loader} parameters used to retrieve each are equal.
      *       <li>They both have the same type.
@@ -4351,7 +4342,7 @@ public final class Parcel {
     }
 
 
-    private static final class LazyValue implements Function<Class<?>, Object> {
+    private static final class LazyValue implements BiFunction<Class<?>, Class<?>[], Object> {
         /**
          *                      |   4B   |   4B   |
          * mSource = Parcel{... |  type  | length | object | ...}
@@ -4383,7 +4374,7 @@ public final class Parcel {
         }
 
         @Override
-        public Object apply(@Nullable Class<?> clazz) {
+        public Object apply(@Nullable Class<?> clazz, @Nullable Class<?>[] itemTypes) {
             Parcel source = mSource;
             if (source != null) {
                 synchronized (source) {
@@ -4392,7 +4383,7 @@ public final class Parcel {
                         int restore = source.dataPosition();
                         try {
                             source.setDataPosition(mPosition);
-                            mObject = source.readValue(mLoader, clazz);
+                            mObject = source.readValue(mLoader, clazz, itemTypes);
                         } finally {
                             source.setDataPosition(restore);
                         }
@@ -4472,14 +4463,25 @@ public final class Parcel {
         }
     }
 
+    /** Same as {@link #readValue(ClassLoader, Class, Class[])} without any item types. */
+    private <T> T readValue(int type, @Nullable ClassLoader loader, @Nullable Class<T> clazz) {
+        // Avoids allocating Class[0] array
+        return readValue(type, loader, clazz, (Class<?>[]) null);
+    }
+
     /**
      * Reads a value from the parcel of type {@code type}. Does NOT read the int representing the
      * type first.
+     *
      * @param clazz The type of the object expected or {@code null} for performing no checks.
+     * @param itemTypes If the value is a container, these represent the item types (eg. for a list
+     *                  it's the item type, for a map, it's the key type, followed by the value
+     *                  type).
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    private <T> T readValue(int type, @Nullable ClassLoader loader, @Nullable Class<T> clazz) {
+    private <T> T readValue(int type, @Nullable ClassLoader loader, @Nullable Class<T> clazz,
+            @Nullable Class<?>... itemTypes) {
         final Object object;
         switch (type) {
             case VAL_NULL:
@@ -4495,7 +4497,11 @@ public final class Parcel {
                 break;
 
             case VAL_MAP:
-                object = readHashMap(loader);
+                checkTypeToUnparcel(clazz, HashMap.class);
+                Class<?> keyType = ArrayUtils.getOrNull(itemTypes, 0);
+                Class<?> valueType = ArrayUtils.getOrNull(itemTypes, 1);
+                checkArgument((keyType == null) == (valueType == null));
+                object = readHashMapInternal(loader, keyType, valueType);
                 break;
 
             case VAL_PARCELABLE:
@@ -4526,10 +4532,12 @@ public final class Parcel {
                 object = readCharSequence();
                 break;
 
-            case VAL_LIST:
-                object = readArrayList(loader);
+            case VAL_LIST: {
+                checkTypeToUnparcel(clazz, ArrayList.class);
+                Class<?> itemType = ArrayUtils.getOrNull(itemTypes, 0);
+                object = readArrayListInternal(loader, itemType);
                 break;
-
+            }
             case VAL_BOOLEANARRAY:
                 object = createBooleanArray();
                 break;
@@ -4550,10 +4558,12 @@ public final class Parcel {
                 object = readStrongBinder();
                 break;
 
-            case VAL_OBJECTARRAY:
-                object = readArray(loader);
+            case VAL_OBJECTARRAY: {
+                Class<?> itemType = ArrayUtils.getOrNull(itemTypes, 0);
+                checkArrayTypeToUnparcel(clazz, (itemType != null) ? itemType : Object.class);
+                object = readArrayInternal(loader, itemType);
                 break;
-
+            }
             case VAL_INTARRAY:
                 object = createIntArray();
                 break;
@@ -4570,14 +4580,18 @@ public final class Parcel {
                 object = readSerializableInternal(loader, clazz);
                 break;
 
-            case VAL_PARCELABLEARRAY:
-                object = readParcelableArray(loader);
+            case VAL_PARCELABLEARRAY: {
+                Class<?> itemType = ArrayUtils.getOrNull(itemTypes, 0);
+                checkArrayTypeToUnparcel(clazz, (itemType != null) ? itemType : Parcelable.class);
+                object = readParcelableArrayInternal(loader, itemType);
                 break;
-
-            case VAL_SPARSEARRAY:
-                object = readSparseArray(loader);
+            }
+            case VAL_SPARSEARRAY: {
+                checkTypeToUnparcel(clazz, SparseArray.class);
+                Class<?> itemType = ArrayUtils.getOrNull(itemTypes, 0);
+                object = readSparseArrayInternal(loader, itemType);
                 break;
-
+            }
             case VAL_SPARSEBOOLEANARRAY:
                 object = readSparseBooleanArray();
                 break;
@@ -4625,7 +4639,7 @@ public final class Parcel {
                             + " at offset " + off);
         }
         if (object != null && clazz != null && !clazz.isInstance(object)) {
-            throw new BadParcelableException("Unparcelled object " + object
+            throw new BadTypeParcelableException("Unparcelled object " + object
                     + " is not an instance of required class " + clazz.getName()
                     + " provided in the parameter");
         }
@@ -4648,6 +4662,38 @@ public final class Parcel {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     * Checks that an array of type T[], where T is {@code componentTypeToUnparcel}, is a subtype of
+     * {@code requiredArrayType}.
+     */
+    private void checkArrayTypeToUnparcel(@Nullable Class<?> requiredArrayType,
+            Class<?> componentTypeToUnparcel) {
+        if (requiredArrayType != null) {
+            // In Java 12, we could use componentTypeToUnparcel.arrayType() for the check
+            Class<?> requiredComponentType = requiredArrayType.getComponentType();
+            if (requiredComponentType == null) {
+                throw new BadTypeParcelableException(
+                        "About to unparcel an array but type "
+                                + requiredArrayType.getCanonicalName()
+                                + " required by caller is not an array.");
+            }
+            checkTypeToUnparcel(requiredComponentType, componentTypeToUnparcel);
+        }
+    }
+
+    /**
+     * Checks that {@code typeToUnparcel} is a subtype of {@code requiredType}, if {@code
+     * requiredType} is not {@code null}.
+     */
+    private void checkTypeToUnparcel(@Nullable Class<?> requiredType, Class<?> typeToUnparcel) {
+        if (requiredType != null && !requiredType.isAssignableFrom(typeToUnparcel)) {
+            throw new BadTypeParcelableException(
+                    "About to unparcel a " + typeToUnparcel.getCanonicalName()
+                            + ", which is not a subtype of type " + requiredType.getCanonicalName()
+                            + " required by caller.");
         }
     }
 
@@ -4781,7 +4827,7 @@ public final class Parcel {
             if (clazz != null) {
                 Class<?> parcelableClass = creator.getClass().getEnclosingClass();
                 if (!clazz.isAssignableFrom(parcelableClass)) {
-                    throw new BadParcelableException("Parcelable creator " + name + " is not "
+                    throw new BadTypeParcelableException("Parcelable creator " + name + " is not "
                             + "a subclass of required class " + clazz.getName()
                             + " provided in the parameter");
                 }
@@ -4804,7 +4850,7 @@ public final class Parcel {
             }
             if (clazz != null) {
                 if (!clazz.isAssignableFrom(parcelableClass)) {
-                    throw new BadParcelableException("Parcelable creator " + name + " is not "
+                    throw new BadTypeParcelableException("Parcelable creator " + name + " is not "
                             + "a subclass of required class " + clazz.getName()
                             + " provided in the parameter");
                 }
@@ -4865,15 +4911,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public Parcelable[] readParcelableArray(@Nullable ClassLoader loader) {
-        int N = readInt();
-        if (N < 0) {
-            return null;
-        }
-        Parcelable[] p = new Parcelable[N];
-        for (int i = 0; i < N; i++) {
-            p[i] = readParcelable(loader);
-        }
-        return p;
+        return readParcelableArrayInternal(loader, /* clazz */ null);
     }
 
     /**
@@ -4885,14 +4923,20 @@ public final class Parcel {
      * trying to instantiate an element.
      */
     @SuppressLint({"ArrayReturn", "NullableCollection"})
-    @SuppressWarnings("unchecked")
     @Nullable
     public <T> T[] readParcelableArray(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        return readParcelableArrayInternal(loader, requireNonNull(clazz));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private <T> T[] readParcelableArrayInternal(@Nullable ClassLoader loader,
+            @Nullable Class<T> clazz) {
         int n = readInt();
         if (n < 0) {
             return null;
         }
-        T[] p = (T[]) Array.newInstance(clazz, n);
+        T[] p = (T[]) ((clazz == null) ? new Parcelable[n] : Array.newInstance(clazz, n));
         for (int i = 0; i < n; i++) {
             p[i] = readParcelableInternal(loader, clazz);
         }
@@ -4955,7 +4999,7 @@ public final class Parcel {
                 // the class the same way as ObjectInputStream, using the provided classloader.
                 Class<?> cl = Class.forName(name, false, loader);
                 if (!clazz.isAssignableFrom(cl)) {
-                    throw new BadParcelableException("Serializable object "
+                    throw new BadTypeParcelableException("Serializable object "
                             + cl.getName() + " is not a subclass of required class "
                             + clazz.getName() + " provided in the parameter");
                 }
@@ -4980,7 +5024,7 @@ public final class Parcel {
                 // the deserialized object, as we cannot resolve the class the same way as
                 // ObjectInputStream.
                 if (!clazz.isAssignableFrom(object.getClass())) {
-                    throw new BadParcelableException("Serializable object "
+                    throw new BadTypeParcelableException("Serializable object "
                             + object.getClass().getName() + " is not a subclass of required class "
                             + clazz.getName() + " provided in the parameter");
                 }
@@ -5090,7 +5134,26 @@ public final class Parcel {
         readMapInternal(outVal, n, loader, /* clazzKey */null, /* clazzValue */null);
     }
 
-    /* package */ <K, V> void readMapInternal(@NonNull Map<? super K, ? super V> outVal, int n,
+    @Nullable
+    private <K, V> HashMap<K, V> readHashMapInternal(@Nullable ClassLoader loader,
+            @NonNull Class<? extends K> clazzKey, @NonNull Class<? extends V> clazzValue) {
+        int n = readInt();
+        if (n < 0) {
+            return null;
+        }
+        HashMap<K, V> map = new HashMap<>(n);
+        readMapInternal(map, n, loader, clazzKey, clazzValue);
+        return map;
+    }
+
+    private <K, V> void readMapInternal(@NonNull Map<? super K, ? super V> outVal,
+            @Nullable ClassLoader loader, @Nullable Class<K> clazzKey,
+            @Nullable Class<V> clazzValue) {
+        int n = readInt();
+        readMapInternal(outVal, n, loader, clazzKey, clazzValue);
+    }
+
+    private <K, V> void readMapInternal(@NonNull Map<? super K, ? super V> outVal, int n,
             @Nullable ClassLoader loader, @Nullable Class<K> clazzKey,
             @Nullable Class<V> clazzValue) {
         while (n > 0) {
@@ -5101,7 +5164,7 @@ public final class Parcel {
         }
     }
 
-    /* package */ void readArrayMapInternal(@NonNull ArrayMap<? super String, Object> outVal,
+    private void readArrayMapInternal(@NonNull ArrayMap<? super String, Object> outVal,
             int size, @Nullable ClassLoader loader) {
         readArrayMap(outVal, size, /* sorted */ true, /* lazy */ false, loader);
     }
