@@ -3480,11 +3480,11 @@ public abstract class Context {
      *          <li>{@link #BIND_INCLUDE_CAPABILITIES}
      *      </ul>
      *
-      * @return {@code true} if the system is in the process of bringing up a
-     *         service that your client has permission to bind to; {@code false}
-     *         if the system couldn't find the service or if your client doesn't
-     *         have permission to bind to it. You should call {@link #unbindService}
-     *         to release the connection even if this method returned {@code false}.
+     * @return {@code true} if the system is in the process of bringing up a
+     *      service that your client has permission to bind to; {@code false}
+     *      if the system couldn't find the service or if your client doesn't
+     *      have permission to bind to it. Regardless of the return value, you
+     *      should later call {@link #unbindService} to release the connection.
      *
      * @throws SecurityException If the caller does not have permission to
      *      access the service or the service cannot be found. Call
@@ -3498,10 +3498,16 @@ public abstract class Context {
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
 
     /**
-     * Same as {@link #bindService(Intent, ServiceConnection, int)} with executor to control
-     * ServiceConnection callbacks.
+     * Same as {@link #bindService(Intent, ServiceConnection, int)
+     * bindService(Intent, ServiceConnection, int)} with executor to control ServiceConnection
+     * callbacks.
+     *
      * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
      *      instance for the same instance of ServiceConnection.
+     *
+     * @return The result of the binding as described in
+     *      {@link #bindService(Intent, ServiceConnection, int)
+     *      bindService(Intent, ServiceConnection, int)}.
      */
     public boolean bindService(@RequiresPermission @NonNull Intent service,
             @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
@@ -3527,11 +3533,12 @@ public abstract class Context {
      * @param instanceName Unique identifier for the service instance.  Each unique
      *      name here will result in a different service instance being created.  Identifiers
      *      must only contain ASCII letters, digits, underscores, and periods.
-     * @return Returns success of binding as per {@link #bindService}.
      * @param executor Callbacks on ServiceConnection will be called on executor.
      *      Must use same instance for the same instance of ServiceConnection.
      * @param conn Receives information as the service is started and stopped.
      *      This must be a valid ServiceConnection object; it must not be null.
+     *
+     * @return Returns success of binding as per {@link #bindService}.
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * @throws IllegalArgumentException If the instanceName is invalid.
@@ -3547,8 +3554,7 @@ public abstract class Context {
     }
 
     /**
-     * Binds to a service in the given {@code user} in the same manner as
-     * {@link #bindService(Intent, ServiceConnection, int)}.
+     * Binds to a service in the given {@code user} in the same manner as {@link #bindService}.
      *
      * <p>If the given {@code user} is in the same profile group and the target package is the
      * same as the caller, {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} is
