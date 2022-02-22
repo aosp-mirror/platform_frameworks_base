@@ -37,6 +37,7 @@ import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.os.Bundle;
 import android.os.Handler;
@@ -70,6 +71,9 @@ public class CompanionDeviceActivity extends AppCompatActivity {
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
     private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
+
+    // Activity result: Internal Error.
+    private static final int RESULT_INTERNAL_ERROR = 2;
 
     // AssociationRequestsProcessor -> UI
     private static final int RESULT_CODE_ASSOCIATION_CREATED = 0;
@@ -191,6 +195,20 @@ public class CompanionDeviceActivity extends AppCompatActivity {
     private void initUI() {
         if (DEBUG) Log.d(TAG, "initUI(), request=" + mRequest);
 
+        final String packageName = mRequest.getPackageName();
+        final int userId = mRequest.getUserId();
+        final CharSequence appLabel;
+
+        try {
+            appLabel = getApplicationLabel(this, packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Package u" + userId + "/" + packageName + " not found.");
+
+            CompanionDeviceDiscoveryService.stop(this);
+            setResultAndFinish(null, RESULT_INTERNAL_ERROR);
+            return;
+        }
+
         setContentView(R.layout.activity_confirmation);
 
         mTitle = findViewById(R.id.title);
@@ -202,8 +220,6 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
         findViewById(R.id.btn_negative).setOnClickListener(this::onNegativeButtonClick);
-
-        final CharSequence appLabel = getApplicationLabel(this, mRequest.getPackageName());
 
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation(appLabel);
@@ -257,7 +273,7 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         if (DEBUG) Log.i(TAG, "onAssociationCreated(), association=" + association);
 
         // Don't need to notify the app, CdmService has already done that. Just finish.
-        setResultAndFinish(association);
+        setResultAndFinish(association, RESULT_OK);
     }
 
     private void cancel(boolean discoveryTimeout) {
@@ -284,10 +300,10 @@ public class CompanionDeviceActivity extends AppCompatActivity {
         }
 
         // ... then set result and finish ("sending" onActivityResult()).
-        setResultAndFinish(null);
+        setResultAndFinish(null, RESULT_CANCELED);
     }
 
-    private void setResultAndFinish(@Nullable AssociationInfo association) {
+    private void setResultAndFinish(@Nullable AssociationInfo association, int resultCode) {
         if (DEBUG) Log.i(TAG, "setResultAndFinish(), association=" + association);
 
         final Intent data = new Intent();
@@ -297,7 +313,7 @@ public class CompanionDeviceActivity extends AppCompatActivity {
                 data.putExtra(CompanionDeviceManager.EXTRA_DEVICE, mSelectedDevice.getDevice());
             }
         }
-        setResult(association != null ? RESULT_OK : RESULT_CANCELED, data);
+        setResult(resultCode, data);
 
         finish();
     }
