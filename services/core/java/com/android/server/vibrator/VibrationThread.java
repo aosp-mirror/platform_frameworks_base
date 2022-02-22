@@ -242,8 +242,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     }
                 }
                 // Only run the next vibration step if we didn't have to wait in this loop.
-                // If we waited then the queue may have changed, so loop again to re-evaluate
-                // the scheduling of the queue top element.
+                // If we waited then the queue may have changed or the wait could have been
+                // interrupted by a cancel call, so loop again to re-evaluate the scheduling of
+                // the queue top element.
                 if (waitMillisBeforeNextStep <= 0) {
                     if (DEBUG) {
                         Slog.d(TAG, "Play vibration consuming next step...");
