@@ -17,24 +17,19 @@
 package com.android.systemui.dreams;
 
 import android.annotation.IntDef;
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 
-import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.dagger.DreamOverlayModule;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * View controller for {@link DreamOverlayStatusBarView}.
@@ -52,21 +47,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private static final int WIFI_STATUS_UNAVAILABLE = 1;
     private static final int WIFI_STATUS_AVAILABLE = 2;
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "BATTERY_STATUS_" }, value = {
-            BATTERY_STATUS_UNKNOWN,
-            BATTERY_STATUS_NOT_CHARGING,
-            BATTERY_STATUS_CHARGING
-    })
-    private @interface BatteryStatus {}
-    private static final int BATTERY_STATUS_UNKNOWN = 0;
-    private static final int BATTERY_STATUS_NOT_CHARGING = 1;
-    private static final int BATTERY_STATUS_CHARGING = 2;
-
-    private final BatteryController mBatteryController;
-    private final BatteryMeterViewController mBatteryMeterViewController;
     private final ConnectivityManager mConnectivityManager;
-    private final boolean mShowPercentAvailable;
 
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
@@ -91,43 +72,18 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         }
     };
 
-    private final BatteryController.BatteryStateChangeCallback mBatteryStateChangeCallback =
-            new BatteryController.BatteryStateChangeCallback() {
-                @Override
-                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                    DreamOverlayStatusBarViewController.this.onBatteryLevelChanged(charging);
-                }
-            };
-
     private @WifiStatus int mWifiStatus = WIFI_STATUS_UNKNOWN;
-    private @BatteryStatus int mBatteryStatus = BATTERY_STATUS_UNKNOWN;
 
     @Inject
     public DreamOverlayStatusBarViewController(
-            Context context,
             DreamOverlayStatusBarView view,
-            BatteryController batteryController,
-            @Named(DreamOverlayModule.DREAM_OVERLAY_BATTERY_CONTROLLER)
-                    BatteryMeterViewController batteryMeterViewController,
             ConnectivityManager connectivityManager) {
         super(view);
-        mBatteryController = batteryController;
-        mBatteryMeterViewController = batteryMeterViewController;
         mConnectivityManager = connectivityManager;
-
-        mShowPercentAvailable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_battery_percentage_setting_available);
-    }
-
-    @Override
-    protected void onInit() {
-        super.onInit();
-        mBatteryMeterViewController.init();
     }
 
     @Override
     protected void onViewAttached() {
-        mBatteryController.addCallback(mBatteryStateChangeCallback);
         mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
 
         NetworkCapabilities capabilities =
@@ -140,7 +96,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     @Override
     protected void onViewDetached() {
-        mBatteryController.removeCallback(mBatteryStateChangeCallback);
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
     }
 
@@ -153,20 +108,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         if (mWifiStatus != newWifiStatus) {
             mWifiStatus = newWifiStatus;
             mView.showWifiStatus(mWifiStatus == WIFI_STATUS_UNAVAILABLE);
-        }
-    }
-
-    /**
-     * The battery level has changed. Update the battery status icon as appropriate.
-     * @param charging Whether the battery is currently charging.
-     */
-    private void onBatteryLevelChanged(boolean charging) {
-        final int newBatteryStatus =
-                charging ? BATTERY_STATUS_CHARGING : BATTERY_STATUS_NOT_CHARGING;
-        if (mBatteryStatus != newBatteryStatus) {
-            mBatteryStatus = newBatteryStatus;
-            mView.showBatteryPercentText(
-                    mBatteryStatus == BATTERY_STATUS_CHARGING && mShowPercentAvailable);
         }
     }
 }
