@@ -205,6 +205,13 @@ public final class EditableInputConnection extends BaseInputConnection
     }
 
     @Override
+    public boolean requestCursorUpdates(
+            @CursorUpdateMode int cursorUpdateMode, @CursorUpdateFilter int cursorUpdateFilter) {
+        // TODO(b/210039666): use separate attrs for updateMode and updateFilter.
+        return requestCursorUpdates(cursorUpdateMode | cursorUpdateFilter);
+    }
+
+    @Override
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
 

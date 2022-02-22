@@ -30,13 +30,13 @@ import java.util.Objects;
 public final class EditorBoundsInfo implements Parcelable {
 
     /**
-     * Container of rectangular position of Editor in the current window.
+     * The bounding box of the of currently focused text editor in local coordinates.
      */
     private final RectF mEditorBounds;
 
     /**
-     * Container of rectangular position of Editor with additional padding around for initiating
-     * Stylus Handwriting in the current window.
+     * The bounding box of the of currently focused text editor with additional padding around it
+     * for initiating Stylus Handwriting in the current window.
      */
     private final RectF mHandwritingBounds;
 

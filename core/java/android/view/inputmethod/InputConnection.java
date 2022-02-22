@@ -1043,6 +1043,23 @@ public interface InputConnection {
     int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 1 << 4;
 
     /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {CURSOR_UPDATE_IMMEDIATE, CURSOR_UPDATE_MONITOR}, flag = true,
+            prefix = { "CURSOR_UPDATE_" })
+    @interface CursorUpdateMode{}
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {CURSOR_UPDATE_FILTER_EDITOR_BOUNDS, CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS,
+            CURSOR_UPDATE_FILTER_INSERTION_MARKER}, flag = true,
+            prefix = { "CURSOR_UPDATE_FILTER_" })
+    @interface CursorUpdateFilter{}
+
+    /**
      * Called by the input method to ask the editor for calling back
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
      * notify cursor/anchor locations.
@@ -1061,6 +1078,34 @@ public interface InputConnection {
      *         the target application does not implement this method.
      */
     boolean requestCursorUpdates(int cursorUpdateMode);
+
+    /**
+     * Called by the input method to ask the editor for calling back
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
+     * notify cursor/anchor locations.
+     *
+     * @param cursorUpdateMode combination of update modes:
+     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}
+     * @param cursorUpdateFilter any combination of data filters:
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     *
+     * <p>Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
+     * rejected and method will return {@code false}.</p>
+     * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
+     *         application will not call {@link InputMethodManager#updateCursorAnchorInfo(
+     *         android.view.View, CursorAnchorInfo)}.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
+     */
+    default boolean requestCursorUpdates(@CursorUpdateMode int cursorUpdateMode,
+            @CursorUpdateFilter int cursorUpdateFilter) {
+        if (cursorUpdateFilter == 0) {
+            return requestCursorUpdates(cursorUpdateMode);
+        }
+        return false;
+    }
 
     /**
      * Called by the system to enable application developers to specify a dedicated thread on which
