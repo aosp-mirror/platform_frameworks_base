@@ -105,6 +105,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
         controller = OngoingCallController(
+                context,
                 notificationCollection,
                 mockOngoingCallFlags,
                 clock,
@@ -215,6 +216,39 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         // There should be 1 observer still registered, so we should unregister n-1 times.
         verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_getUidProcessStateThrowsException_noCrash() {
+        `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
+                .thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_registerUidObserverThrowsException_noCrash() {
+        `when`(mockIActivityManager.registerUidObserver(
+            any(), any(), any(), nullable(String::class.java)
+        )).thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_packageNameProvidedToActivityManager() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        val packageNameCaptor = ArgumentCaptor.forClass(String::class.java)
+        verify(mockIActivityManager).registerUidObserver(
+            any(), any(), any(), packageNameCaptor.capture()
+        )
+        assertThat(packageNameCaptor.value).isNotNull()
     }
 
     /**

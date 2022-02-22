@@ -21,6 +21,7 @@ import android.app.IActivityManager
 import android.app.IUidObserver
 import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.View
@@ -52,6 +53,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class OngoingCallController @Inject constructor(
+    private val context: Context,
     private val notifCollection: CommonNotifCollection,
     private val ongoingCallFlags: OngoingCallFlags,
     private val systemClock: SystemClock,
@@ -242,8 +244,16 @@ class OngoingCallController @Inject constructor(
      * Sets up an [IUidObserver] to monitor the status of the application managing the ongoing call.
      */
     private fun setUpUidObserver(currentCallNotificationInfo: CallNotificationInfo) {
-        isCallAppVisible = isProcessVisibleToUser(
-                iActivityManager.getUidProcessState(currentCallNotificationInfo.uid, null))
+        try {
+            isCallAppVisible = isProcessVisibleToUser(
+                    iActivityManager.getUidProcessState(
+                        currentCallNotificationInfo.uid, context.opPackageName
+                    )
+            )
+        } catch (se: SecurityException) {
+            Log.e(TAG, "Security exception when trying to get process state: $se")
+            return
+        }
 
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)
@@ -275,12 +285,17 @@ class OngoingCallController @Inject constructor(
             override fun onUidCachedChanged(uid: Int, cached: Boolean) {}
         }
 
-        iActivityManager.registerUidObserver(
+        try {
+            iActivityManager.registerUidObserver(
                 uidObserver,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
-                null
-        )
+                context.opPackageName
+            )
+        } catch (se: SecurityException) {
+            Log.e(TAG, "Security exception when trying to register uid observer: $se")
+            return
+        }
     }
 
     /** Returns true if the given [procState] represents a process that's visible to the user. */
