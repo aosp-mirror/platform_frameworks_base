@@ -479,6 +479,8 @@ public class BtHelper {
         }
         if (profile == BluetoothProfile.A2DP) {
             mA2dp = (BluetoothA2dp) proxy;
+        } else if (profile == BluetoothProfile.HEARING_AID) {
+            mHearingAid = (BluetoothHearingAid) proxy;
         } else if (profile == BluetoothProfile.LE_AUDIO) {
             mLeAudio = (BluetoothLeAudio) proxy;
         }
