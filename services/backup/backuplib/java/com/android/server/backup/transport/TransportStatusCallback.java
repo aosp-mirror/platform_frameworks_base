@@ -75,13 +75,11 @@ public class TransportStatusCallback extends ITransportStatusCallback.Stub {
             }
 
             Slog.w(TAG, "Couldn't get operation status from transport");
-            return BackupTransport.TRANSPORT_ERROR;
         } catch (InterruptedException e) {
             Slog.w(TAG, "Couldn't get operation status from transport: ", e);
-            return BackupTransport.TRANSPORT_ERROR;
-        } finally {
-            reset();
         }
+
+        return BackupTransport.TRANSPORT_ERROR;
     }
 
     synchronized void reset() {
