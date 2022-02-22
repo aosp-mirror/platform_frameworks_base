@@ -38,7 +38,6 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.statusbar.StatusBarState;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieProperty;
@@ -68,6 +67,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private float mBurnInOffsetY;
     private float mBurnInProgress;
     private float mInterpolatedDarkAmount;
+    private boolean mAnimatingBetweenAodAndLockscreen; // As opposed to Unlocked => AOD
     private boolean mFullyInflated;
 
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
@@ -114,23 +114,32 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             return;
         }
 
+        final float darkAmountForAnimation = mAnimatingBetweenAodAndLockscreen
+                ? mInterpolatedDarkAmount : 1f /* animating from unlocked to AOD */;
         mBurnInOffsetX = MathUtils.lerp(0f,
             getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
-                - mMaxBurnInOffsetX, mInterpolatedDarkAmount);
+                - mMaxBurnInOffsetX, darkAmountForAnimation);
         mBurnInOffsetY = MathUtils.lerp(0f,
             getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
-                - mMaxBurnInOffsetY, mInterpolatedDarkAmount);
-        mBurnInProgress = MathUtils.lerp(0f, getBurnInProgressOffset(), mInterpolatedDarkAmount);
+                - mMaxBurnInOffsetY, darkAmountForAnimation);
+        mBurnInProgress = MathUtils.lerp(0f, getBurnInProgressOffset(), darkAmountForAnimation);
+
+        if (mAnimatingBetweenAodAndLockscreen) {
+            mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
+
+            mLockScreenFp.setTranslationX(mBurnInOffsetX);
+            mLockScreenFp.setTranslationY(mBurnInOffsetY);
+            mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
+            mLockScreenFp.setAlpha(1f - mInterpolatedDarkAmount);
+        } else {
+            mBgProtection.setAlpha(0f);
+            mLockScreenFp.setAlpha(0f);
+        }
 
         mAodFp.setTranslationX(mBurnInOffsetX);
         mAodFp.setTranslationY(mBurnInOffsetY);
         mAodFp.setProgress(mBurnInProgress);
-        mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
-
-        mLockScreenFp.setTranslationX(mBurnInOffsetX);
-        mLockScreenFp.setTranslationY(mBurnInOffsetY);
-        mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
-        mLockScreenFp.setAlpha((1f - mInterpolatedDarkAmount) * 255);
+        mAodFp.setAlpha(mInterpolatedDarkAmount);
     }
 
     void requestUdfps(boolean request, int color) {
@@ -171,14 +180,13 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     protected int updateAlpha() {
         int alpha = super.updateAlpha();
         if (mFullyInflated) {
-            mLockScreenFp.setAlpha(alpha / 255f);
-            if (mInterpolatedDarkAmount != 0f) {
-                mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
-            } else {
+            if (mInterpolatedDarkAmount == 0f) {
+                mLockScreenFp.setAlpha(alpha / 255f);
                 mBgProtection.setAlpha(alpha / 255f);
+            } else {
+                updateBurnInOffsets();
             }
         }
-
 
         return alpha;
     }
@@ -191,8 +199,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         return mAlpha;
     }
 
-    void onDozeAmountChanged(float linear, float eased) {
+    void onDozeAmountChanged(float linear, float eased, boolean animatingBetweenAodAndLockscreen) {
+        mAnimatingBetweenAodAndLockscreen = animatingBetweenAodAndLockscreen;
         mInterpolatedDarkAmount = eased;
+
         updateAlpha();
         updateBurnInOffsets();
     }
@@ -223,10 +233,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             }
         });
         mBackgroundInAnimator.start();
-    }
-
-    private boolean isShadeLocked() {
-        return mStatusBarState == StatusBarState.SHADE_LOCKED;
     }
 
     private final AsyncLayoutInflater.OnInflateFinishedListener mLayoutInflaterFinishListener =
