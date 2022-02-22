@@ -1428,6 +1428,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         ipw.println("Location Settings:");
         ipw.increaseIndent();
         mInjector.getSettingsHelper().dump(fd, ipw, args);
+        mInjector.getLocationSettings().dump(fd, ipw, args);
         ipw.decreaseIndent();
 
         synchronized (mLock) {
