@@ -17,18 +17,15 @@
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
-#include <surface_control_private.h>
-
 #include <configstore/Utils.h>
-
 #include <gui/HdrMetadata.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
-
+#include <private/android/choreographer.h>
+#include <surface_control_private.h>
 #include <ui/DynamicDisplayInfo.h>
-
 #include <utils/Timers.h>
 
 using namespace android::hardware::configstore;
@@ -671,7 +668,7 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
 void ASurfaceTransaction_setFrameTimeline(ASurfaceTransaction* aSurfaceTransaction,
                                           AVsyncId vsyncId) {
     CHECK_NOT_NULL(aSurfaceTransaction);
-    // TODO(b/210043506): Get start time from platform.
+    const auto startTime = AChoreographer_getStartTimeNanosForVsyncId(vsyncId);
     ASurfaceTransaction_to_Transaction(aSurfaceTransaction)
-            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = 0});
+            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = startTime});
 }
