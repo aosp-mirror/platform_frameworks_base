@@ -3110,7 +3110,8 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
@@ -3119,6 +3120,25 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Checks whether the new managed user disclaimer was viewed by the current user.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @TestApi
+    public boolean isNewUserDisclaimerAcknowledged() {
+        if (mService != null) {
+            try {
+                return mService.isNewUserDisclaimerAcknowledged();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**
