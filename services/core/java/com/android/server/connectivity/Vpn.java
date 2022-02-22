@@ -2020,7 +2020,8 @@ public class Vpn {
                             .setCategory(Notification.CATEGORY_SYSTEM)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setOngoing(true)
-                            .setColor(mContext.getColor(R.color.system_notification_accent_color));
+                            .setColor(mContext.getColor(
+                                    android.R.color.system_notification_accent_color));
             notificationManager.notify(TAG, SystemMessage.NOTE_VPN_DISCONNECTED, builder.build());
         } finally {
             Binder.restoreCallingIdentity(token);
