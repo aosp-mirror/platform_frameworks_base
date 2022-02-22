@@ -59,7 +59,8 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_SECURITY_LOGGING;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
-import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_ID;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_IDS;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE_DRAWABLE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE_STRING;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
@@ -18714,10 +18715,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         sendResourceUpdatedBroadcast(EXTRA_RESOURCE_TYPE_STRING, stringIds);
     }
 
-    private void sendResourceUpdatedBroadcast(String resourceType, String[] resourceIds) {
+    private void sendResourceUpdatedBroadcast(int resourceType, String[] resourceIds) {
         final Intent intent = new Intent(ACTION_DEVICE_POLICY_RESOURCE_UPDATED);
-        intent.putExtra(EXTRA_RESOURCE_ID, resourceIds);
-        intent.putExtra(resourceType, /* value= */ true);
+        intent.putExtra(EXTRA_RESOURCE_IDS, resourceIds);
+        intent.putExtra(EXTRA_RESOURCE_TYPE, resourceType);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 

@@ -7697,9 +7697,10 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
     field public static final String EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_USER_CERTIFICATE";
-    field public static final String EXTRA_RESOURCE_ID = "android.app.extra.RESOURCE_ID";
-    field public static final String EXTRA_RESOURCE_TYPE_DRAWABLE = "android.app.extra.RESOURCE_TYPE_DRAWABLE";
-    field public static final String EXTRA_RESOURCE_TYPE_STRING = "android.app.extra.RESOURCE_TYPE_STRING";
+    field public static final String EXTRA_RESOURCE_IDS = "android.app.extra.RESOURCE_IDS";
+    field public static final String EXTRA_RESOURCE_TYPE = "android.app.extra.RESOURCE_TYPE";
+    field public static final int EXTRA_RESOURCE_TYPE_DRAWABLE = 1; // 0x1
+    field public static final int EXTRA_RESOURCE_TYPE_STRING = 2; // 0x2
     field public static final String EXTRA_RESULT_LAUNCH_INTENT = "android.app.extra.RESULT_LAUNCH_INTENT";
     field public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1; // 0x1
     field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
