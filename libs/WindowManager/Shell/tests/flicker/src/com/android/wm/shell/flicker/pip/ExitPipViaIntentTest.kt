@@ -72,9 +72,9 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
             }
             transitions {
                 // This will bring PipApp to fullscreen
-                pipApp.launchViaIntent(wmHelper)
+                pipApp.exitPipToFullScreenViaIntent(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForSurfaceAppeared(testApp.component.toWindowName())
+                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
             }
         }
 
