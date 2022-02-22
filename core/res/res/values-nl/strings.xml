@@ -537,8 +537,8 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Hiermee kan de app bluetooth-apparaten in de buurt vinden en koppelen"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"verbinding maken met gekoppelde bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Hiermee kan de app verbinding maken met gekoppelde bluetooth-apparaten"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteren op bluetooth-apparaten in de buurt"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app adverteren op bluetooth-apparaten in de buurt"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"uitzenden naar bluetooth-apparaten in de buurt"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app uitzenden naar bluetooth-apparaten in de buurt"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"relatieve positie tussen ultrabreedbandapparaten in de buurt bepalen"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"De app toestaan om de relatieve positie tussen ultrabreedbandapparaten in de buurt te bepalen"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
