@@ -18,19 +18,19 @@
 
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <string>
-
-#include "android-base/logging.h"
-#include "android-base/macros.h"
-#include "android-base/stringprintf.h"
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/TypeWrappers.h"
 
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "Source.h"
 #include "ValueVisitor.h"
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/TypeWrappers.h"
 #include "format/binary/ResChunkPullParser.h"
 #include "util/Util.h"
 
@@ -364,7 +364,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
   config.copyFromDtoH(type->config);
 
   const std::string type_str = util::GetString(type_pool_, type->id - 1);
-  const ResourceType* parsed_type = ParseResourceType(type_str);
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(type_str);
   if (!parsed_type) {
     diag_->Warn(DiagMessage(source_)
                 << "invalid type name '" << type_str << "' for type with ID " << type->id);

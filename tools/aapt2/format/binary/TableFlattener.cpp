@@ -607,7 +607,7 @@ class PackageFlattener {
         expected_type_id++;
       }
       expected_type_id++;
-      type_pool_.MakeRef(to_string(type.named_type.type));
+      type_pool_.MakeRef(type.named_type.to_string());
 
       if (!FlattenTypeSpec(type, type.entries, buffer)) {
         return false;

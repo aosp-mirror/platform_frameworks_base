@@ -837,4 +837,45 @@ TEST_F(TableFlattenerTest, FlattenOverlayableNoPolicyFails) {
   ASSERT_FALSE(Flatten(context_.get(), {}, table.get(), &output_table));
 }
 
+TEST_F(TableFlattenerTest, FlattenCustomResourceTypes) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.app.test:id/one", ResourceId(0x7f010000))
+          .AddSimple("com.app.test:id.2/two", ResourceId(0x7f020000))
+          .AddValue("com.app.test:integer/one", ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 10u))
+          .AddValue("com.app.test:integer.1/one", ResourceId(0x7f040000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer.1/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(0x7f040000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:layout.custom/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
+          .Build();
+
+  ResTable res_table;
+  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &res_table));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/one", ResourceId(0x7f010000), {},
+                     Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id.2/two", ResourceId(0x7f020000), {},
+                     Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/one", ResourceId(0x7f030000), {},
+                     Res_value::TYPE_INT_DEC, 10u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer.1/one", ResourceId(0x7f040000), {},
+                     Res_value::TYPE_INT_DEC, 1u, ResTable_config::CONFIG_VERSION));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer.1/one", ResourceId(0x7f040000),
+                     test::ParseConfigOrDie("v1"), Res_value::TYPE_INT_DEC, 2u,
+                     ResTable_config::CONFIG_VERSION));
+
+  std::u16string bar_path = u"res/layout/bar.xml";
+  auto idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
+  ASSERT_TRUE(idx.has_value());
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:layout.custom/bar", ResourceId(0x7f050000), {},
+                     Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
+}
+
 }  // namespace aapt

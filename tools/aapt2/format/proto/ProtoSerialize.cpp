@@ -358,7 +358,7 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       if (type.id) {
         pb_type->mutable_type_id()->set_id(type.id.value());
       }
-      pb_type->set_name(to_string(type.named_type.type).to_string());
+      pb_type->set_name(type.named_type.to_string());
 
       // hardcoded string uses characters which make it an invalid resource name
       static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
