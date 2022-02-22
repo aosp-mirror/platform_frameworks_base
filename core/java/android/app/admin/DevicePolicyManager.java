@@ -15134,7 +15134,7 @@ public class DevicePolicyManager {
      * the combination of {@link DevicePolicyDrawableResource#getDrawableId()} and
      * {@link DevicePolicyDrawableResource#getDrawableStyle()}, (see
      * {@link DevicePolicyResources.Drawables} and {@link DevicePolicyResources.Drawables.Style}) to
-     * the drawable with ID {@link DevicePolicyDrawableResource#getCallingPackageResourceId()},
+     * the drawable with ID {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()},
      * meaning any system UI surface calling {@link #getDrawable}
      * with {@code drawableId} and {@code drawableStyle} will get the new resource after this API
      * is called.
@@ -15149,12 +15149,12 @@ public class DevicePolicyManager {
      * <p>Important notes to consider when using this API:
      * <ul>
      * <li>{@link #getDrawable} references the resource
-     * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} in the
+     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} in the
      * calling package each time it gets called. You have to ensure that the resource is always
      * available in the calling package as long as it is used as an updated resource.
      * <li>You still have to re-call {@code setDrawables} even if you only make changes to the
      * content of the resource with ID
-     * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} as the content might be
+     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} as the content might be
      * cached and would need updating.
      * </ul>
      *
