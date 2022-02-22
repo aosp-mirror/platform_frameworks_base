@@ -310,7 +310,7 @@ class TaskSnapshotController {
         }
         final ActivityRecord activity = result.first;
         final WindowState mainWindow = result.second;
-        final Rect contentInsets = getSystemBarInsets(task.getBounds(),
+        final Rect contentInsets = getSystemBarInsets(mainWindow.getFrame(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
         final Rect letterboxInsets = activity.getLetterboxInsets();
         InsetUtils.addInsets(contentInsets, letterboxInsets);
@@ -575,7 +575,7 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final Rect taskBounds = task.getBounds();
         final InsetsState insetsState = mainWindow.getInsetsStateWithVisibilityOverride();
-        final Rect systemBarInsets = getSystemBarInsets(taskBounds, insetsState);
+        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.insetsFlags.appearance, task.getTaskDescription(),
                 mHighResTaskSnapshotScale, insetsState);
