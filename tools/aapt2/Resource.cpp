@@ -139,10 +139,10 @@ ResourceNamedTypeRef ResourceNamedTypeWithDefaultName(ResourceType t) {
 }
 
 std::optional<ResourceNamedTypeRef> ParseResourceNamedType(const android::StringPiece& s) {
-  auto colon = std::find(s.begin(), s.end(), ':');
+  auto dot = std::find(s.begin(), s.end(), '.');
   const ResourceType* parsedType;
-  if (colon != s.end() && colon != std::prev(s.end())) {
-    parsedType = ParseResourceType(s.substr(s.begin(), colon));
+  if (dot != s.end() && dot != std::prev(s.end())) {
+    parsedType = ParseResourceType(s.substr(s.begin(), dot));
   } else {
     parsedType = ParseResourceType(s);
   }
