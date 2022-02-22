@@ -145,9 +145,10 @@ public class MagnificationControllerTest {
                         mCallbackDelegate, mTraceManager, mScaleProvider));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
-        new FullScreenMagnificationControllerStubber(mScreenMagnificationController);
         mMagnificationController = new MagnificationController(mService, globalLock, mContext,
                 mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider);
+        new FullScreenMagnificationControllerStubber(mScreenMagnificationController,
+                mMagnificationController);
 
         mMagnificationController.setMagnificationCapabilities(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
@@ -451,6 +452,29 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void onFullScreenMagnificationChanged_fullScreenEnabled_notifyMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        final MagnificationConfig config = obtainMagnificationConfig(MODE_FULLSCREEN);
+        mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
+                config.getScale(), config.getCenterX(), config.getCenterY(),
+                true, TEST_SERVICE_ID);
+
+        // The first time is triggered when setting magnification enabled. And the second time is
+        // triggered when calling setScaleAndCenter.
+        final ArgumentCaptor<MagnificationConfig> configCaptor = ArgumentCaptor.forClass(
+                MagnificationConfig.class);
+        verify(mService, times(2)).notifyMagnificationChanged(eq(TEST_DISPLAY),
+                eq(FullScreenMagnificationControllerStubber.MAGNIFICATION_REGION),
+                configCaptor.capture());
+        final MagnificationConfig actualConfig = configCaptor.getValue();
+        assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
+        assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
+        assertEquals(config.getScale(), actualConfig.getScale(), 0);
+    }
+
+    @Test
     public void onAccessibilityActionPerformed_magnifierEnabled_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
@@ -679,7 +703,7 @@ public class MagnificationControllerTest {
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
         mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
-                /* scale= */1, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
+                /* scale= */ 1, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 true, TEST_SERVICE_ID);
 
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, false);
@@ -884,6 +908,8 @@ public class MagnificationControllerTest {
     private static class FullScreenMagnificationControllerStubber {
         private static final Region MAGNIFICATION_REGION = new Region(0, 0, 500, 600);
         private final FullScreenMagnificationController mScreenMagnificationController;
+        private final FullScreenMagnificationController.MagnificationInfoChangedCallback
+                mMagnificationChangedCallback;
         private boolean mIsMagnifying = false;
         private float mScale = 1.0f;
         private float mCenterX = MAGNIFICATION_REGION.getBounds().exactCenterX();
@@ -891,8 +917,10 @@ public class MagnificationControllerTest {
         private int mServiceId = -1;
 
         FullScreenMagnificationControllerStubber(
-                FullScreenMagnificationController screenMagnificationController) {
+                FullScreenMagnificationController screenMagnificationController,
+                FullScreenMagnificationController.MagnificationInfoChangedCallback callback) {
             mScreenMagnificationController = screenMagnificationController;
+            mMagnificationChangedCallback = callback;
             stubMethods();
         }
 
@@ -930,6 +958,14 @@ public class MagnificationControllerTest {
                 } else {
                     reset();
                 }
+
+
+                final MagnificationConfig config = new MagnificationConfig.Builder().setMode(
+                        MODE_FULLSCREEN).setScale(mScale).setCenterX(mCenterX).setCenterY(
+                        mCenterY).build();
+                mMagnificationChangedCallback.onFullScreenMagnificationChanged(TEST_DISPLAY,
+                        FullScreenMagnificationControllerStubber.MAGNIFICATION_REGION,
+                        config);
                 return true;
             };
             doAnswer(setScaleAndCenterStubAnswer).when(

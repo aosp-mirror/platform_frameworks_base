@@ -151,8 +151,6 @@ public class FullScreenMagnificationGestureHandlerTest {
                 mock(FullScreenMagnificationController.ControllerContext.class);
         final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
         when(mockController.getContext()).thenReturn(mContext);
-        when(mockController.getAms()).thenReturn(mMockAccessibilityManagerService);
-        when(mMockAccessibilityManagerService.getTraceManager()).thenReturn(mMockTraceManager);
         when(mockController.getTraceManager()).thenReturn(mMockTraceManager);
         when(mockController.getWindowManager()).thenReturn(mockWindowManager);
         when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));

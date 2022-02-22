@@ -405,6 +405,12 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mAms.notifyMagnificationChanged(displayId, new Region(bounds), config);
     }
 
+    @Override
+    public void onFullScreenMagnificationChanged(int displayId, @NonNull Region region,
+            @NonNull MagnificationConfig config) {
+        mAms.notifyMagnificationChanged(displayId, region, config);
+    }
+
     private void disableFullScreenMagnificationIfNeeded(int displayId) {
         final FullScreenMagnificationController fullScreenMagnificationController =
                 getFullScreenMagnificationController();
@@ -590,7 +596,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         synchronized (mLock) {
             if (mFullScreenMagnificationController == null) {
                 mFullScreenMagnificationController = new FullScreenMagnificationController(mContext,
-                        mAms, mLock, this, mScaleProvider);
+                        mAms.getTraceManager(), mLock, this, mScaleProvider);
             }
         }
         return mFullScreenMagnificationController;
