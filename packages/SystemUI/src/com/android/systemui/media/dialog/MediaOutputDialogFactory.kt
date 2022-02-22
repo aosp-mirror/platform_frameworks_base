@@ -25,7 +25,6 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.phone.ShadeController
-import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import javax.inject.Inject
 
 /**
@@ -39,8 +38,7 @@ class MediaOutputDialogFactory @Inject constructor(
     private val starter: ActivityStarter,
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val dialogManager: SystemUIDialogManager
+    private val dialogLaunchAnimator: DialogLaunchAnimator
 ) {
     companion object {
         var mediaOutputDialog: MediaOutputDialog? = null
@@ -53,9 +51,8 @@ class MediaOutputDialogFactory @Inject constructor(
 
         val controller = MediaOutputController(context, packageName, aboveStatusBar,
             mediaSessionManager, lbm, shadeController, starter, notifCollection,
-            uiEventLogger, dialogLaunchAnimator, dialogManager)
-        val dialog = MediaOutputDialog(context, aboveStatusBar, controller, uiEventLogger,
-                dialogManager)
+            uiEventLogger, dialogLaunchAnimator)
+        val dialog = MediaOutputDialog(context, aboveStatusBar, controller, uiEventLogger)
         mediaOutputDialog = dialog
 
         // Show the dialog.

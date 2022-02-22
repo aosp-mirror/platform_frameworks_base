@@ -21,7 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
@@ -97,7 +97,7 @@ public final class WMShell extends CoreStartable
         implements CommandQueue.Callbacks, ProtoTraceable<SystemUiTraceProto> {
     private static final String TAG = WMShell.class.getName();
     private static final int INVALID_SYSUI_STATE_MASK =
-            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
+            SYSUI_STATE_DIALOG_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
                     | SYSUI_STATE_BOUNCER_SHOWING

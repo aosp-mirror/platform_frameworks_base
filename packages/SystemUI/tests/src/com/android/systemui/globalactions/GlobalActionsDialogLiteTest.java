@@ -19,7 +19,6 @@ package com.android.systemui.globalactions;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -57,13 +56,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -112,7 +109,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
-    @Mock private SysUiState mSysUiState;
     @Mock private PackageManager mPackageManager;
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
@@ -120,7 +116,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private StatusBar mStatusBar;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
-    @Mock private SystemUIDialogManager mDialogManager;
 
     private TestableLooper mTestableLooper;
 
@@ -161,19 +156,16 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mBackgroundExecutor,
                 mUiEventLogger,
                 mRingerModeTracker,
-                mSysUiState,
                 mHandler,
                 mPackageManager,
                 Optional.of(mStatusBar),
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator,
-                mDialogManager);
+                mDialogLaunchAnimator);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
         ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
         backdropColors.setMainColor(Color.BLACK);
         when(mColorExtractor.getNeutralColors()).thenReturn(backdropColors);
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
     }
 
     @Test
