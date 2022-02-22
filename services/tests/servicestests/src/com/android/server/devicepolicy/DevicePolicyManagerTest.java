@@ -3559,11 +3559,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_DeviceAdminFeatureOff();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED);
+                DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE,
-                DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED);
+                DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED);
+                DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED);
     }
 
     private void setup_ManagedProfileFeatureOff() throws Exception {
@@ -3595,11 +3595,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_ManagedProfileFeatureOff();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_MANAGED_USERS_NOT_SUPPORTED);
+                DevicePolicyManager.STATUS_MANAGED_USERS_NOT_SUPPORTED);
     }
 
     private void setup_firstBoot_systemUser() throws Exception {
@@ -3637,15 +3637,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().userManagerForMock.isHeadlessSystemUserMode()).thenReturn(false);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
 
         when(getServices().userManagerForMock.isHeadlessSystemUserMode()).thenReturn(true);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
     }
 
     private void setup_systemUserSetupComplete_systemUser() throws Exception {
@@ -3692,11 +3692,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_systemUserSetupComplete_systemUser();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_USER_SETUP_COMPLETED);
+                DevicePolicyManager.STATUS_USER_SETUP_COMPLETED);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE,
-                DevicePolicyManager.CODE_USER_SETUP_COMPLETED);
+                DevicePolicyManager.STATUS_USER_SETUP_COMPLETED);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_OK);
+                DevicePolicyManager.STATUS_OK);
     }
 
     @Test
@@ -3706,22 +3706,22 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
-                DevicePolicyManager.CODE_HAS_DEVICE_OWNER);
+                DevicePolicyManager.STATUS_HAS_DEVICE_OWNER);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE,
-                DevicePolicyManager.CODE_HAS_DEVICE_OWNER);
+                DevicePolicyManager.STATUS_HAS_DEVICE_OWNER);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE, false);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE, false);
 
         // COMP mode NOT is allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
 
         // And other DPCs can NOT provision a managed profile.
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
@@ -3743,13 +3743,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
 
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
@@ -3778,12 +3778,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // We can delete the managed profile to create a new one, so provisioning is allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
@@ -3807,13 +3807,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
 
         // But the device owner can still do it because it has set the restriction itself.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
     }
 
@@ -3885,7 +3885,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // COMP mode is NOT allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
     }
 
     private void setup_provisionManagedProfileOneAlreadyExist_primaryUser() throws Exception {
@@ -3919,14 +3919,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setup_provisionManagedProfileOneAlreadyExist_primaryUser();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+                DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE);
     }
 
     @Test
     public void testCheckProvisioningPreCondition_permission() {
         // GIVEN the permission MANAGE_PROFILE_AND_DEVICE_OWNERS is not granted
         assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.checkProvisioningPreCondition(
+                () -> dpm.checkProvisioningPrecondition(
                         DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, "some.package"));
     }
 
@@ -8680,7 +8680,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assertCheckProvisioningPreCondition(
             String action, String packageName, int provisioningCondition) {
         assertWithMessage("checkProvisioningPreCondition(%s, %s) returning unexpected result",
-                action, packageName).that(dpm.checkProvisioningPreCondition(action, packageName))
+                action, packageName).that(dpm.checkProvisioningPrecondition(action, packageName))
                         .isEqualTo(provisioningCondition);
     }
 

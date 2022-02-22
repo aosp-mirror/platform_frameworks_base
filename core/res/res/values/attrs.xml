@@ -7013,30 +7013,42 @@
 
     <!-- Defines the ExtendAnimation used to extend windows during animations -->
     <declare-styleable name="ExtendAnimation">
-        <!-- Defines the amount a window should be extended outward from the left at
-             the start of the animation. -->
-        <attr name="fromExtendLeft" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the top at
-             the start of the animation. -->
-        <attr name="fromExtendTop" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the right at
-             the start of the animation. -->
-        <attr name="fromExtendRight" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the bottom at
-             the start of the animation. -->
-        <attr name="fromExtendBottom" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the left by
-             the end of the animation by transitioning from the fromExtendLeft amount. -->
-        <attr name="toExtendLeft" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the top by
-             the end of the animation by transitioning from the fromExtendTop amount. -->
-        <attr name="toExtendTop" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the right by
-             the end of the animation by transitioning from the fromExtendRight amount. -->
-        <attr name="toExtendRight" format="float|fraction" />
-        <!-- Defines the amount a window should be extended outward from the bottom by
-             the end of the animation by transitioning from the fromExtendBottom amount. -->
-        <attr name="toExtendBottom" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the left at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's width. -->
+        <attr name="fromExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom at the start of
+             the animation in an absolute dimension (interpreted as pixels if no dimension unit is
+             provided) or as a percentage of the animation target's height. -->
+        <attr name="fromExtendBottom" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the left by the end of the
+             animation by transitioning from the fromExtendLeft amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's width. -->
+        <attr name="toExtendLeft" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the top by the end of the
+             animation by transitioning from the fromExtendTop amount in an absolute dimension
+             (interpreted as pixels if no dimension unit is provided) or as a percentage of the
+             animation target's height. -->
+        <attr name="toExtendTop" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the right by the end of
+             the animation by transitioning from the fromExtendRight amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's width. -->
+        <attr name="toExtendRight" format="float|fraction|dimension" />
+        <!-- Defines the amount a window should be extended outward from the bottom by the end of
+             the animation by transitioning from the fromExtendBottom amount in an absolute
+             dimension (interpreted as pixels if no dimension unit is provided) or as a percentage
+             of the animation target's height. -->
+        <attr name="toExtendBottom" format="float|fraction|dimension" />
     </declare-styleable>
 
     <declare-styleable name="LayoutAnimation">

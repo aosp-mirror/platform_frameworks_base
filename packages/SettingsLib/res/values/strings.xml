@@ -1160,6 +1160,8 @@
     <string name="battery_info_status_not_charging">Connected, not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Charged</string>
+    <!-- [CHAR_LIMIT=40] Battery Info screen. Value for a status item. A state which device is fully charged -->
+    <string name="battery_info_status_full_charged">Fully Charged</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
