@@ -31,20 +31,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEV
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED;
-import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
-import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
-import static android.app.admin.DevicePolicyManager.CODE_DEVICE_ADMIN_NOT_SUPPORTED;
-import static android.app.admin.DevicePolicyManager.CODE_HAS_DEVICE_OWNER;
-import static android.app.admin.DevicePolicyManager.CODE_HAS_PAIRED;
-import static android.app.admin.DevicePolicyManager.CODE_MANAGED_USERS_NOT_SUPPORTED;
-import static android.app.admin.DevicePolicyManager.CODE_NONSYSTEM_USER_EXISTS;
-import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER;
-import static android.app.admin.DevicePolicyManager.CODE_OK;
-import static android.app.admin.DevicePolicyManager.CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
-import static android.app.admin.DevicePolicyManager.CODE_SYSTEM_USER;
-import static android.app.admin.DevicePolicyManager.CODE_USER_HAS_PROFILE_OWNER;
-import static android.app.admin.DevicePolicyManager.CODE_USER_NOT_RUNNING;
-import static android.app.admin.DevicePolicyManager.CODE_USER_SETUP_COMPLETED;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
@@ -101,6 +87,20 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILUR
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.STATE_USER_UNMANAGED;
+import static android.app.admin.DevicePolicyManager.STATUS_ACCOUNTS_NOT_EMPTY;
+import static android.app.admin.DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE;
+import static android.app.admin.DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED;
+import static android.app.admin.DevicePolicyManager.STATUS_HAS_DEVICE_OWNER;
+import static android.app.admin.DevicePolicyManager.STATUS_HAS_PAIRED;
+import static android.app.admin.DevicePolicyManager.STATUS_MANAGED_USERS_NOT_SUPPORTED;
+import static android.app.admin.DevicePolicyManager.STATUS_NONSYSTEM_USER_EXISTS;
+import static android.app.admin.DevicePolicyManager.STATUS_NOT_SYSTEM_USER;
+import static android.app.admin.DevicePolicyManager.STATUS_OK;
+import static android.app.admin.DevicePolicyManager.STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
+import static android.app.admin.DevicePolicyManager.STATUS_SYSTEM_USER;
+import static android.app.admin.DevicePolicyManager.STATUS_USER_HAS_PROFILE_OWNER;
+import static android.app.admin.DevicePolicyManager.STATUS_USER_NOT_RUNNING;
+import static android.app.admin.DevicePolicyManager.STATUS_USER_SETUP_COMPLETED;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -9658,7 +9658,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner,
                 /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
                 isAdb(caller), hasIncompatibleAccountsOrNonAdb);
-        if (code != CODE_OK) {
+        if (code != STATUS_OK) {
             throw new IllegalStateException(
                     computeProvisioningErrorString(code, deviceOwnerUserId));
         }
@@ -9666,25 +9666,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static String computeProvisioningErrorString(int code, @UserIdInt int userId) {
         switch (code) {
-            case CODE_OK:
+            case STATUS_OK:
                 return "OK";
-            case CODE_HAS_DEVICE_OWNER:
+            case STATUS_HAS_DEVICE_OWNER:
                 return "Trying to set the device owner, but device owner is already set.";
-            case CODE_USER_HAS_PROFILE_OWNER:
+            case STATUS_USER_HAS_PROFILE_OWNER:
                 return "Trying to set the device owner, but the user already has a profile owner.";
-            case CODE_USER_NOT_RUNNING:
+            case STATUS_USER_NOT_RUNNING:
                 return "User " + userId + " not running.";
-            case CODE_NOT_SYSTEM_USER:
+            case STATUS_NOT_SYSTEM_USER:
                 return "User " + userId + " is not system user.";
-            case CODE_USER_SETUP_COMPLETED:
+            case STATUS_USER_SETUP_COMPLETED:
                 return  "Cannot set the device owner if the device is already set-up.";
-            case CODE_NONSYSTEM_USER_EXISTS:
+            case STATUS_NONSYSTEM_USER_EXISTS:
                 return "Not allowed to set the device owner because there are already several"
                         + " users on the device.";
-            case CODE_ACCOUNTS_NOT_EMPTY:
+            case STATUS_ACCOUNTS_NOT_EMPTY:
                 return "Not allowed to set the device owner because there are already some accounts"
                         + " on the device.";
-            case CODE_HAS_PAIRED:
+            case STATUS_HAS_PAIRED:
                 return "Not allowed to set the device owner because this device has already "
                         + "paired.";
             default:
@@ -14159,30 +14159,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(ident);
         }
 
-        return checkProvisioningPreConditionSkipPermission(action, packageName) == CODE_OK;
+        return checkProvisioningPreconditionSkipPermission(action, packageName) == STATUS_OK;
     }
 
     @Override
-    public int checkProvisioningPreCondition(String action, String packageName) {
+    public int checkProvisioningPrecondition(String action, String packageName) {
         Objects.requireNonNull(packageName, "packageName is null");
 
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
-        return checkProvisioningPreConditionSkipPermission(action, packageName);
+        return checkProvisioningPreconditionSkipPermission(action, packageName);
     }
 
-    private int checkProvisioningPreConditionSkipPermission(String action,
+    private int checkProvisioningPreconditionSkipPermission(String action,
             String packageName) {
         if (!mHasFeature) {
             logMissingFeatureAction("Cannot check provisioning for action " + action);
-            return CODE_DEVICE_ADMIN_NOT_SUPPORTED;
+            return STATUS_DEVICE_ADMIN_NOT_SUPPORTED;
         }
         if (!isProvisioningAllowed()) {
-            return CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
+            return STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
         }
         final int code = checkProvisioningPreConditionSkipPermissionNoLog(action, packageName);
-        if (code != CODE_OK) {
+        if (code != STATUS_OK) {
             Slogf.d(LOG_TAG, "checkProvisioningPreCondition(" + action + ", " + packageName
                     + ") failed: "
                     + computeProvisioningErrorString(code, mInjector.userHandleGetCallingUserId()));
@@ -14230,27 +14230,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             @UserIdInt int deviceOwnerUserId, @UserIdInt int callingUserId, boolean isAdb,
             boolean hasIncompatibleAccountsOrNonAdb) {
         if (mOwners.hasDeviceOwner()) {
-            return CODE_HAS_DEVICE_OWNER;
+            return STATUS_HAS_DEVICE_OWNER;
         }
         if (mOwners.hasProfileOwner(deviceOwnerUserId)) {
-            return CODE_USER_HAS_PROFILE_OWNER;
+            return STATUS_USER_HAS_PROFILE_OWNER;
         }
 
         boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
         // System user is always running in headless system user mode.
         if (!isHeadlessSystemUserMode
                 && !mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
-            return CODE_USER_NOT_RUNNING;
+            return STATUS_USER_NOT_RUNNING;
         }
         if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
-            return CODE_HAS_PAIRED;
+            return STATUS_HAS_PAIRED;
         }
 
         if (isHeadlessSystemUserMode) {
             if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
                 Slogf.e(LOG_TAG, "In headless system user mode, "
                         + "device owner can only be set on headless system user.");
-                return CODE_NOT_SYSTEM_USER;
+                return STATUS_NOT_SYSTEM_USER;
             }
         }
 
@@ -14265,7 +14265,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 int maxNumberOfExistingUsers = isHeadlessSystemUserMode ? 2 : 1;
                 if (mUserManager.getUserCount() > maxNumberOfExistingUsers) {
-                    return CODE_NONSYSTEM_USER_EXISTS;
+                    return STATUS_NONSYSTEM_USER_EXISTS;
                 }
 
                 int currentForegroundUser = getCurrentForegroundUserId();
@@ -14274,23 +14274,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         && currentForegroundUser == UserHandle.USER_SYSTEM) {
                     Slogf.wtf(LOG_TAG, "In headless system user mode, "
                             + "current user cannot be system user when setting device owner");
-                    return CODE_SYSTEM_USER;
+                    return STATUS_SYSTEM_USER;
                 }
                 if (hasIncompatibleAccountsOrNonAdb) {
-                    return CODE_ACCOUNTS_NOT_EMPTY;
+                    return STATUS_ACCOUNTS_NOT_EMPTY;
                 }
             }
-            return CODE_OK;
+            return STATUS_OK;
         } else {
             // DO has to be user 0
             if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
-                return CODE_NOT_SYSTEM_USER;
+                return STATUS_NOT_SYSTEM_USER;
             }
             // Only provision DO before setup wizard completes
             if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                return CODE_USER_SETUP_COMPLETED;
+                return STATUS_USER_SETUP_COMPLETED;
             }
-            return CODE_OK;
+            return STATUS_OK;
         }
     }
 
@@ -14311,11 +14311,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private int checkManagedProfileProvisioningPreCondition(String packageName,
             @UserIdInt int callingUserId) {
         if (!hasFeatureManagedUsers()) {
-            return CODE_MANAGED_USERS_NOT_SUPPORTED;
+            return STATUS_MANAGED_USERS_NOT_SUPPORTED;
         }
         if (getProfileOwnerAsUser(callingUserId) != null) {
             // Managed user cannot have a managed profile.
-            return CODE_USER_HAS_PROFILE_OWNER;
+            return STATUS_USER_HAS_PROFILE_OWNER;
         }
 
         final long ident = mInjector.binderClearCallingIdentity();
@@ -14334,7 +14334,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         callingUserId);
                 // The check is called from inside a managed profile. A managed profile cannot
                 // be provisioned from within another managed profile.
-                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+                return STATUS_CANNOT_ADD_MANAGED_PROFILE;
             }
 
             // If there's a device owner, the restriction on adding a managed profile must be set.
@@ -14346,19 +14346,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (addingProfileRestricted) {
                 Slogf.i(LOG_TAG, "Adding a profile is restricted: User %s Has device owner? %b",
                         callingUserHandle, hasDeviceOwner);
-                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+                return STATUS_CANNOT_ADD_MANAGED_PROFILE;
             }
 
             // Bail out if we are trying to provision a work profile but one already exists.
             if (!mUserManager.canAddMoreManagedProfiles(
                     callingUserId, /* allowedToRemoveOne= */ false)) {
                 Slogf.i(LOG_TAG, "A work profile already exists.");
-                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+                return STATUS_CANNOT_ADD_MANAGED_PROFILE;
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-        return CODE_OK;
+        return STATUS_OK;
     }
 
     private void checkIsDeviceOwner(CallerIdentity caller) {
@@ -17697,9 +17697,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         UserInfo userInfo = null;
         final long identity = Binder.clearCallingIdentity();
         try {
-            final int result = checkProvisioningPreConditionSkipPermission(
+            final int result = checkProvisioningPreconditionSkipPermission(
                     ACTION_PROVISION_MANAGED_PROFILE, admin.getPackageName());
-            if (result != CODE_OK) {
+            if (result != STATUS_OK) {
                 throw new ServiceSpecificException(
                         ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);
@@ -18076,9 +18076,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            int result = checkProvisioningPreConditionSkipPermission(
+            int result = checkProvisioningPreconditionSkipPermission(
                     ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin.getPackageName());
-            if (result != CODE_OK) {
+            if (result != STATUS_OK) {
                 throw new ServiceSpecificException(
                         ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);

@@ -28,6 +28,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistManager;
@@ -46,8 +48,11 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.unfold.FoldAodAnimationController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -73,6 +78,8 @@ public final class DozeServiceHost implements DozeHost {
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    @Nullable
+    private final FoldAodAnimationController mFoldAodAnimationController;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
     private final BatteryController mBatteryController;
     private final ScrimController mScrimController;
@@ -105,6 +112,7 @@ public final class DozeServiceHost implements DozeHost {
             Lazy<AssistManager> assistManagerLazy,
             DozeScrimController dozeScrimController, KeyguardUpdateMonitor keyguardUpdateMonitor,
             PulseExpansionHandler pulseExpansionHandler,
+            Optional<SysUIUnfoldComponent> sysUIUnfoldComponent,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
@@ -128,6 +136,8 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mFoldAodAnimationController = sysUIUnfoldComponent
+                .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -215,6 +225,9 @@ public final class DozeServiceHost implements DozeHost {
 
         mStatusBarStateController.setIsDozing(dozing);
         mNotificationShadeWindowViewController.setDozing(dozing);
+        if (mFoldAodAnimationController != null) {
+            mFoldAodAnimationController.setIsDozing(dozing);
+        }
     }
 
     @Override

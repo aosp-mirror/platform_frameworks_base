@@ -194,9 +194,11 @@ public class Utils {
      * @param context the context
      * @param batteryChangedIntent battery broadcast intent received from {@link
      *                             Intent.ACTION_BATTERY_CHANGED}.
+     * @param compactStatus to present compact battery charging string if {@code true}
      * @return battery status string
      */
-    public static String getBatteryStatus(Context context, Intent batteryChangedIntent) {
+    public static String getBatteryStatus(Context context, Intent batteryChangedIntent,
+            boolean compactStatus) {
         final int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
                 BatteryManager.BATTERY_STATUS_UNKNOWN);
         final Resources res = context.getResources();
@@ -205,10 +207,14 @@ public class Utils {
         final BatteryStatus batteryStatus = new BatteryStatus(batteryChangedIntent);
 
         if (batteryStatus.isCharged()) {
-            statusString = res.getString(R.string.battery_info_status_full);
+            statusString = res.getString(compactStatus
+                    ? R.string.battery_info_status_full_charged
+                    : R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                if (batteryStatus.isPluggedInWired()) {
+                if (compactStatus) {
+                    statusString = res.getString(R.string.battery_info_status_charging);
+                } else if (batteryStatus.isPluggedInWired()) {
                     switch (batteryStatus.getChargingSpeed(context)) {
                         case BatteryStatus.CHARGING_FAST:
                             statusString = res.getString(

@@ -389,7 +389,7 @@ public class ClipboardService extends SystemService {
             final long oldIdentity = Binder.clearCallingIdentity();
             try {
                 if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
-                        PROPERTY_AUTO_CLEAR_ENABLED, false)) {
+                        PROPERTY_AUTO_CLEAR_ENABLED, true)) {
                     mClipboardClearHandler.removeEqualMessages(ClipboardClearHandler.MSG_CLEAR,
                             userId);
                     Message clearMessage = Message.obtain(mClipboardClearHandler,
