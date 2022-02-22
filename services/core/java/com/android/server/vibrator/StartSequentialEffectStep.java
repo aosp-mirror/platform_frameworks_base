@@ -189,44 +189,42 @@ final class StartSequentialEffectStep extends Step {
         // vibrating different sets of vibrators in parallel. The manager can only prepareSynced
         // one set of vibrators at a time.
         // This property is guaranteed by there only being one thread (VibrationThread) executing
-        // one Step at a time, so there's no need to hold the state lock.
-        // TODO: remove the large locked block in a dedicated change.
-        synchronized (conductor.mLock) {
-            boolean hasPrepared = false;
-            boolean hasTriggered = false;
-            long maxDuration = 0;
-            try {
-                hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
-                        effectMapping.getRequiredSyncCapabilities(),
-                        effectMapping.getVibratorIds());
+        // one Step at a time, so there's no need to hold the state lock. Callbacks will be
+        // delivered asynchronously but enqueued until the step processing is finished.
+        boolean hasPrepared = false;
+        boolean hasTriggered = false;
+        long maxDuration = 0;
+        try {
+            hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
+                    effectMapping.getRequiredSyncCapabilities(),
+                    effectMapping.getVibratorIds());
 
-                for (AbstractVibratorStep step : steps) {
-                    long duration = startVibrating(step, nextSteps);
-                    if (duration < 0) {
-                        // One vibrator has failed, fail this entire sync attempt.
-                        return maxDuration = -1;
-                    }
-                    maxDuration = Math.max(maxDuration, duration);
+            for (AbstractVibratorStep step : steps) {
+                long duration = startVibrating(step, nextSteps);
+                if (duration < 0) {
+                    // One vibrator has failed, fail this entire sync attempt.
+                    return maxDuration = -1;
                 }
+                maxDuration = Math.max(maxDuration, duration);
+            }
 
-                // Check if sync was prepared and if any step was accepted by a vibrator,
-                // otherwise there is nothing to trigger here.
-                if (hasPrepared && maxDuration > 0) {
-                    hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
-                            getVibration().id);
-                }
-                return maxDuration;
-            } finally {
-                if (hasPrepared && !hasTriggered) {
-                    // Trigger has failed or all steps were ignored by the vibrators.
-                    conductor.vibratorManagerHooks.cancelSyncedVibration();
-                    nextSteps.clear();
-                } else if (maxDuration < 0) {
-                    // Some vibrator failed without being prepared so other vibrators might be
-                    // active. Cancel and remove every pending step from output list.
-                    for (int i = nextSteps.size() - 1; i >= 0; i--) {
-                        nextSteps.remove(i).cancelImmediately();
-                    }
+            // Check if sync was prepared and if any step was accepted by a vibrator,
+            // otherwise there is nothing to trigger here.
+            if (hasPrepared && maxDuration > 0) {
+                hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
+                        getVibration().id);
+            }
+            return maxDuration;
+        } finally {
+            if (hasPrepared && !hasTriggered) {
+                // Trigger has failed or all steps were ignored by the vibrators.
+                conductor.vibratorManagerHooks.cancelSyncedVibration();
+                nextSteps.clear();
+            } else if (maxDuration < 0) {
+                // Some vibrator failed without being prepared so other vibrators might be
+                // active. Cancel and remove every pending step from output list.
+                for (int i = nextSteps.size() - 1; i >= 0; i--) {
+                    nextSteps.remove(i).cancelImmediately();
                 }
             }
         }
