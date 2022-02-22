@@ -437,7 +437,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
       return false;
     }
 
-    ResourceTableType* type = pkg->FindOrCreateType(*res_type);
+    auto named_type = ResourceNamedTypeWithDefaultName(*res_type);
+    ResourceTableType* type = pkg->FindOrCreateType(named_type);
 
     for (const pb::Entry& pb_entry : pb_type.entry()) {
       ResourceEntry* entry = type->CreateEntry(pb_entry.name());
@@ -515,7 +516,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
                        pb_entry.entry_id().id());
       if (resid.is_valid()) {
-        id_index[resid] = ResourceNameRef(pkg->name, type->type, entry->name);
+        id_index[resid] = ResourceNameRef(pkg->name, type->named_type, entry->name);
       }
 
       for (const pb::ConfigValue& pb_config_value : pb_entry.config_value()) {

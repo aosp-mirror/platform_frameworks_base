@@ -243,9 +243,9 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
                 r_txt_printer.Print("private ");
             }
 
-            if (type->type != ResourceType::kStyleable) {
+            if (type->named_type.type != ResourceType::kStyleable) {
               r_txt_printer.Print("int ");
-              r_txt_printer.Print(to_string(type->type));
+              r_txt_printer.Print(type->named_type.to_string());
               r_txt_printer.Print(" ");
               r_txt_printer.Println(entry->name);
             } else {

@@ -556,7 +556,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           file_op.config = config_value->config;
           file_op.file_to_copy = file;
 
-          if (type->type != ResourceType::kRaw &&
+          if (type->named_type.type != ResourceType::kRaw &&
               (file_ref->type == ResourceFile::Type::kBinaryXml ||
                file_ref->type == ResourceFile::Type::kProtoXml)) {
             std::unique_ptr<io::IData> data = file->OpenAsData();
@@ -596,7 +596,8 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
 
             file_op.xml_to_flatten->file.config = config_value->config;
             file_op.xml_to_flatten->file.source = file_ref->GetSource();
-            file_op.xml_to_flatten->file.name = ResourceName(pkg->name, type->type, entry->name);
+            file_op.xml_to_flatten->file.name =
+                ResourceName(pkg->name, type->named_type, entry->name);
           }
 
           // NOTE(adamlesinski): Explicitly construct a StringPiece here, or
@@ -1009,7 +1010,7 @@ class Linker {
         // We have a package that is not related to the one we're building!
         for (const auto& type : package->types) {
           for (const auto& entry : type->entries) {
-            ResourceNameRef res_name(package->name, type->type, entry->name);
+            ResourceNameRef res_name(package->name, type->named_type, entry->name);
 
             for (const auto& config_value : entry->values) {
               // Special case the occurrence of an ID that is being generated
@@ -1046,7 +1047,7 @@ class Linker {
       for (const auto& type : package->types) {
         for (const auto& entry : type->entries) {
           if (entry->id) {
-            ResourceNameRef res_name(package->name, type->type, entry->name);
+            ResourceNameRef res_name(package->name, type->named_type, entry->name);
             context_->GetDiagnostics()->Error(DiagMessage() << "resource " << res_name << " has ID "
                                                             << entry->id.value() << " assigned");
             return false;
@@ -2016,7 +2017,7 @@ class Linker {
         for (auto& package : final_table_.packages) {
           for (auto& type : package->types) {
             for (auto& entry : type->entries) {
-              ResourceName name(package->name, type->type, entry->name);
+              ResourceName name(package->name, type->named_type, entry->name);
               // The IDs are guaranteed to exist.
               options_.stable_id_map[std::move(name)] = entry->id.value();
             }

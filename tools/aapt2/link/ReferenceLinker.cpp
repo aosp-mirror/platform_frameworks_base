@@ -468,7 +468,7 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
         // First, unmangle the name if necessary.
-        ResourceName name(package->name, type->type, entry->name);
+        ResourceName name(package->name, type->named_type, entry->name);
         NameMangler::Unmangle(&name.entry, &name.package);
 
         // Symbol state information may be lost if there is no value for the resource.

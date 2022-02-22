@@ -254,7 +254,7 @@ class Optimizer {
             }
 
             if (file_ref->file == nullptr) {
-              ResourceNameRef name(pkg->name, type->type, entry->name);
+              ResourceNameRef name(pkg->name, type->named_type, entry->name);
               context_->GetDiagnostics()->Warn(DiagMessage(file_ref->GetSource())
                                                << "file for resource " << name << " with config '"
                                                << config_value->config << "' not found");

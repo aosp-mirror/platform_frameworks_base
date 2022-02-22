@@ -168,7 +168,7 @@ class ResourceEntry {
 class ResourceTableType {
  public:
   // The logical type of resource (string, drawable, layout, etc.).
-  const ResourceType type;
+  const ResourceNamedType named_type;
 
   // Whether this type is public (and must maintain the same type ID across builds).
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
@@ -176,7 +176,9 @@ class ResourceTableType {
   // List of resources for this type.
   std::vector<std::unique_ptr<ResourceEntry>> entries;
 
-  explicit ResourceTableType(const ResourceType type) : type(type) {}
+  explicit ResourceTableType(const ResourceNamedTypeRef& type)
+      : named_type(type.ToResourceNamedType()) {
+  }
 
   ResourceEntry* CreateEntry(const android::StringPiece& name);
   ResourceEntry* FindEntry(const android::StringPiece& name) const;
@@ -196,8 +198,9 @@ class ResourceTablePackage {
   }
 
   ResourceTablePackage() = default;
-  ResourceTableType* FindType(ResourceType type) const;
-  ResourceTableType* FindOrCreateType(ResourceType type);
+  ResourceTableType* FindTypeWithDefaultName(const ResourceType type) const;
+  ResourceTableType* FindType(const ResourceNamedTypeRef& type) const;
+  ResourceTableType* FindOrCreateType(const ResourceNamedTypeRef& type);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
@@ -217,7 +220,7 @@ struct ResourceTableEntryView {
 };
 
 struct ResourceTableTypeView {
-  ResourceType type;
+  ResourceNamedType named_type;
   std::optional<uint8_t> id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
 

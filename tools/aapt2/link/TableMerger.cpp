@@ -235,7 +235,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
   bool error = false;
 
   for (auto& src_type : src_package->types) {
-    ResourceTableType* dst_type = main_package_->FindOrCreateType(src_type->type);
+    ResourceTableType* dst_type = main_package_->FindOrCreateType(src_type->named_type);
     if (!MergeType(context_, src, dst_type, src_type.get())) {
       error = true;
       continue;
@@ -254,7 +254,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
         dst_entry = dst_type->FindEntry(entry_name);
       }
 
-      const ResourceNameRef res_name(src_package->name, src_type->type, src_entry->name);
+      const ResourceNameRef res_name(src_package->name, src_type->named_type, src_entry->name);
 
       if (!dst_entry) {
         context_->GetDiagnostics()->Error(DiagMessage(src)
@@ -349,7 +349,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
-  pkg->FindOrCreateType(file_desc.name.type.type)
+  pkg->FindOrCreateType(file_desc.name.type)
       ->FindOrCreateEntry(file_desc.name.entry)
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);

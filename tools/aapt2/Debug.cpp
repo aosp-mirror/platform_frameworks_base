@@ -273,7 +273,7 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
     printer->Indent();
     for (const auto& type : package.types) {
       printer->Print("type ");
-      printer->Print(to_string(type.type));
+      printer->Print(type.named_type.to_string());
       if (type.id) {
         printer->Print(StringPrintf(" id=%02x", type.id.value()));
       }
@@ -287,7 +287,7 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
         printer->Print(" ");
 
         // Write the name without the package (this is obvious and too verbose).
-        printer->Print(to_string(type.type));
+        printer->Print(type.named_type.to_string());
         printer->Print("/");
         printer->Print(entry.name);
 
@@ -547,7 +547,7 @@ void Debug::DumpOverlayable(const ResourceTable& table, text::Printer* printer) 
           const auto policy_subsection = StringPrintf(R"(policies="%s")",
               android::idmap2::policy::PoliciesToDebugString(overlayable_item.policies).c_str());
           const auto value =
-            StringPrintf("%s/%s", to_string(type->type).data(), entry->name.c_str());
+              StringPrintf("%s/%s", type->named_type.to_string().data(), entry->name.c_str());
           items.push_back(DumpOverlayableEntry{overlayable_section, policy_subsection, value});
         }
       }

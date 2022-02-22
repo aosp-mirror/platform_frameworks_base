@@ -548,10 +548,11 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
     }
 
     // We need to make sure we hide the fact that we are generating kAttrPrivate attributes.
-    const ResourceNameRef resource_name(
-        package_name_to_generate,
-        type.type == ResourceType::kAttrPrivate ? ResourceType::kAttr : type.type,
-        unmangled_name.value());
+    const auto target_type = type.named_type.type == ResourceType::kAttrPrivate
+                                 ? ResourceNamedTypeWithDefaultName(ResourceType::kAttr)
+                                 : type.named_type;
+    const ResourceNameRef resource_name(package_name_to_generate, target_type,
+                                        unmangled_name.value());
 
     // Check to see if the unmangled name is a valid Java name (not a keyword).
     if (!IsValidSymbol(unmangled_name.value())) {
@@ -616,7 +617,8 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
 
   for (const auto& package : table_->packages) {
     for (const auto& type : package->types) {
-      if (type->type == ResourceType::kAttrPrivate || type->type == ResourceType::kMacro) {
+      if (type->named_type.type == ResourceType::kAttrPrivate ||
+          type->named_type.type == ResourceType::kMacro) {
         // We generate kAttrPrivate as part of the kAttr type, so skip them here.
         // Macros are not actual resources, so skip them as well.
         continue;
@@ -628,7 +630,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
       std::unique_ptr<ClassDefinition> class_def;
       if (out != nullptr) {
         class_def = util::make_unique<ClassDefinition>(
-            to_string(type->type), ClassQualifier::kStatic, force_creation_if_empty);
+            to_string(type->named_type.type), ClassQualifier::kStatic, force_creation_if_empty);
       }
 
       if (!ProcessType(package_name_to_generate, *package, *type, class_def.get(),
@@ -636,9 +638,10 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
         return false;
       }
 
-      if (type->type == ResourceType::kAttr) {
+      if (type->named_type.type == ResourceType::kAttr) {
         // Also include private attributes in this same class.
-        if (const ResourceTableType* priv_type = package->FindType(ResourceType::kAttrPrivate)) {
+        if (const ResourceTableType* priv_type =
+                package->FindTypeWithDefaultName(ResourceType::kAttrPrivate)) {
           if (!ProcessType(package_name_to_generate, *package, *priv_type, class_def.get(),
                            rewrite_method.get(), r_txt_printer.get())) {
             return false;
@@ -646,7 +649,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
         }
       }
 
-      if (out != nullptr && type->type == ResourceType::kStyleable && is_public) {
+      if (out != nullptr && type->named_type.type == ResourceType::kStyleable && is_public) {
         // When generating a public R class, we don't want Styleable to be part
         // of the API. It is only emitted for documentation purposes.
         class_def->GetCommentBuilder()->AppendComment("@doconly");
