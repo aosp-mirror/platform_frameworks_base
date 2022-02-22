@@ -298,6 +298,9 @@ class ActivityLaunchAnimator(
              *
              * Important: The view must be attached to a [ViewGroup] when calling this function and
              * during the animation. For safety, this method will return null when it is not.
+             *
+             * Note: The background of [view] should be a (rounded) rectangle so that it can be
+             * properly animated.
              */
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
