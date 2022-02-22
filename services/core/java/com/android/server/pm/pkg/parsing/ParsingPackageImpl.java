@@ -549,6 +549,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         private static final long SDK_LIBRARY = 1L << 49;
         private static final long INHERIT_KEYSTORE_KEYS = 1L << 50;
         private static final long ENABLE_ON_BACK_INVOKED_CALLBACK = 1L << 51;
+        private static final long LEAVING_SHARED_UID = 1L << 52;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -2403,6 +2404,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public boolean isLeavingSharedUid() {
+        return getBoolean(Booleans.LEAVING_SHARED_UID);
+    }
+
+    @Override
     public ParsingPackageImpl setBaseRevisionCode(int value) {
         baseRevisionCode = value;
         return this;
@@ -2548,6 +2554,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Override
     public ParsingPackageImpl setInheritKeyStoreKeys(boolean value) {
         return setBoolean(Booleans.INHERIT_KEYSTORE_KEYS, value);
+    }
+
+    @Override
+    public ParsingPackageImpl setLeavingSharedUid(boolean value) {
+        return setBoolean(Booleans.LEAVING_SHARED_UID, value);
     }
 
     @Override
