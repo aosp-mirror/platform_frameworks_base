@@ -71,6 +71,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.app.IBatteryStats;
@@ -116,6 +117,12 @@ public class FrameworkServicesModule {
     @Singleton
     static AudioManager provideAudioManager(Context context) {
         return context.getSystemService(AudioManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static CaptioningManager provideCaptioningManager(Context context) {
+        return context.getSystemService(CaptioningManager.class);
     }
 
     @Provides
