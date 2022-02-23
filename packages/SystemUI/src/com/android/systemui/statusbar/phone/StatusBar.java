@@ -2954,8 +2954,9 @@ public class StatusBar extends CoreStartable implements
         // turned off fully.
         boolean keyguardForDozing = mDozeServiceHost.getDozingRequested()
                 && (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
+        boolean isWakingAndOccluded = isOccluded() && isWaking();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
-                || keyguardForDozing) && !wakeAndUnlocking;
+                || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
         if (keyguardForDozing) {
             updatePanelExpansionForKeyguard();
         }
@@ -3763,6 +3764,10 @@ public class StatusBar extends CoreStartable implements
     boolean isGoingToSleep() {
         return mWakefulnessLifecycle.getWakefulness()
                 == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
+    }
+
+    boolean isWaking() {
+        return mWakefulnessLifecycle.getWakefulness() == WakefulnessLifecycle.WAKEFULNESS_WAKING;
     }
 
     public void notifyBiometricAuthModeChanged() {
