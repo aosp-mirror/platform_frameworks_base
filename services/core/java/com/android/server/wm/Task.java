@@ -5149,10 +5149,13 @@ class Task extends TaskFragment {
             // Ensure that we do not trigger entering PiP an activity on the root pinned task
             return false;
         }
+        final boolean isTransient = opts != null && opts.getTransientLaunch();
         final Task targetRootTask = toFrontTask != null
                 ? toFrontTask.getRootTask() : toFrontActivity.getRootTask();
-        if (targetRootTask != null && targetRootTask.isActivityTypeAssistant()) {
-            // Ensure the task/activity being brought forward is not the assistant
+        if (targetRootTask != null && (targetRootTask.isActivityTypeAssistant() || isTransient)) {
+            // Ensure the task/activity being brought forward is not the assistant and is not
+            // transient. In the case of transient-launch, we want to wait until the end of the
+            // transition and only allow switch if the transient launch was committed.
             return false;
         }
         return true;
