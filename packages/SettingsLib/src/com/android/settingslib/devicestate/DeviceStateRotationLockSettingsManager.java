@@ -22,6 +22,7 @@ import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_UNLOCK
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,7 +35,10 @@ import android.util.SparseIntArray;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -48,13 +52,14 @@ public final class DeviceStateRotationLockSettingsManager {
 
     private static DeviceStateRotationLockSettingsManager sSingleton;
 
-    private final String[] mDeviceStateRotationLockDefaults;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final Set<DeviceStateRotationLockSettingsListener> mListeners = new HashSet<>();
     private final SecureSettings mSecureSettings;
+    private String[] mDeviceStateRotationLockDefaults;
     private SparseIntArray mDeviceStateRotationLockSettings;
     private SparseIntArray mDeviceStateRotationLockFallbackSettings;
     private String mLastSettingValue;
+    private List<SettableDeviceState> mSettableDeviceStates;
 
     @VisibleForTesting
     DeviceStateRotationLockSettingsManager(Context context, SecureSettings secureSettings) {
@@ -77,6 +82,12 @@ public final class DeviceStateRotationLockSettingsManager {
                     new DeviceStateRotationLockSettingsManager(applicationContext, secureSettings);
         }
         return sSingleton;
+    }
+
+    /** Resets the singleton instance of this class. Only used for testing. */
+    @VisibleForTesting
+    public static synchronized void resetInstance() {
+        sSingleton = null;
     }
 
     /** Returns true if device-state based rotation lock settings are enabled. */
@@ -186,6 +197,12 @@ public final class DeviceStateRotationLockSettingsManager {
         return true;
     }
 
+    /** Returns a list of device states and their respective auto-rotation setting availability. */
+    public List<SettableDeviceState> getSettableDeviceStates() {
+        // Returning a copy to make sure that nothing outside can mutate our internal list.
+        return new ArrayList<>(mSettableDeviceStates);
+    }
+
     private void initializeInMemoryMap() {
         String serializedSetting =
                 mSecureSettings.getStringForUser(
@@ -218,6 +235,17 @@ public final class DeviceStateRotationLockSettingsManager {
                 return;
             }
         }
+    }
+
+    /**
+     * Resets the state of the class and saved settings back to the default values provided by the
+     * resources config.
+     */
+    @VisibleForTesting
+    public void resetStateForTesting(Resources resources) {
+        mDeviceStateRotationLockDefaults =
+                resources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults);
+        fallbackOnDefaults();
     }
 
     private void fallbackOnDefaults() {
@@ -259,6 +287,7 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     private void loadDefaults() {
+        mSettableDeviceStates = new ArrayList<>(mDeviceStateRotationLockDefaults.length);
         mDeviceStateRotationLockSettings = new SparseIntArray(
                 mDeviceStateRotationLockDefaults.length);
         mDeviceStateRotationLockFallbackSettings = new SparseIntArray(1);
@@ -279,6 +308,8 @@ public final class DeviceStateRotationLockSettingsManager {
                                         + values.length);
                     }
                 }
+                boolean isSettable = rotationLockSetting != DEVICE_STATE_ROTATION_LOCK_IGNORED;
+                mSettableDeviceStates.add(new SettableDeviceState(deviceState, isSettable));
                 mDeviceStateRotationLockSettings.put(deviceState, rotationLockSetting);
             } catch (NumberFormatException e) {
                 Log.wtf(TAG, "Error parsing settings entry. Entry was: " + entry, e);
@@ -307,5 +338,39 @@ public final class DeviceStateRotationLockSettingsManager {
     public interface DeviceStateRotationLockSettingsListener {
         /** Called whenever the settings have changed. */
         void onSettingsChanged();
+    }
+
+    /** Represents a device state and whether it has an auto-rotation setting. */
+    public static class SettableDeviceState {
+        private final int mDeviceState;
+        private final boolean mIsSettable;
+
+        SettableDeviceState(int deviceState, boolean isSettable) {
+            mDeviceState = deviceState;
+            mIsSettable = isSettable;
+        }
+
+        /** Returns the device state associated with this object. */
+        public int getDeviceState() {
+            return mDeviceState;
+        }
+
+        /** Returns whether there is an auto-rotation setting for this device state. */
+        public boolean isSettable() {
+            return mIsSettable;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SettableDeviceState)) return false;
+            SettableDeviceState that = (SettableDeviceState) o;
+            return mDeviceState == that.mDeviceState && mIsSettable == that.mIsSettable;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mDeviceState, mIsSettable);
+        }
     }
 }
