@@ -17,7 +17,6 @@
 package com.android.systemui.dreams;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -115,31 +114,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         assertEquals(
                 mController.getDreamOverlayNotificationsDragAreaHeight(),
                 DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
-    }
-
-    @Test
-    public void testOnViewAttachedRegistersComputeInsetsListener() {
-        mController.onViewAttached();
-        verify(mViewTreeObserver).addOnComputeInternalInsetsListener(any());
-    }
-
-    @Test
-    public void testOnViewDetachedUnregistersComputeInsetsListener() {
-        mController.onViewDetached();
-        verify(mViewTreeObserver).removeOnComputeInternalInsetsListener(any());
-    }
-
-    @Test
-    public void testComputeInsetsListenerReturnsRegion() {
-        final ArgumentCaptor<ViewTreeObserver.OnComputeInternalInsetsListener>
-                computeInsetsListenerCapture =
-                ArgumentCaptor.forClass(ViewTreeObserver.OnComputeInternalInsetsListener.class);
-        mController.onViewAttached();
-        verify(mViewTreeObserver).addOnComputeInternalInsetsListener(
-                computeInsetsListenerCapture.capture());
-        final ViewTreeObserver.InternalInsetsInfo info = new ViewTreeObserver.InternalInsetsInfo();
-        computeInsetsListenerCapture.getValue().onComputeInternalInsets(info);
-        assertNotNull(info.touchableRegion);
     }
 
     @Test
