@@ -35,9 +35,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-
 import androidx.constraintlayout.helper.widget.Flow
-
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.UserIcons
 import com.android.settingslib.Utils
 import com.android.systemui.R
@@ -47,12 +46,12 @@ import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
-import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA
+import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord
 import com.android.systemui.util.LifecycleActivity
-
 import javax.inject.Inject
+import kotlin.math.ceil
 
 private const val USER_VIEW = "user_view"
 
@@ -137,6 +136,18 @@ class UserSwitcherActivity @Inject constructor(
             return UserIcons.getDefaultUserIcon(resources, item.info.id, false)
         }
 
+        fun getTotalUserViews(): Int {
+            return users.count { item ->
+                !doNotRenderUserView(item)
+            }
+        }
+
+        fun doNotRenderUserView(item: UserRecord): Boolean {
+            return item.isAddUser ||
+                    item.isAddSupervisedUser ||
+                    item.isGuest && item.info == null
+        }
+
         private fun getDrawable(item: UserRecord): Drawable {
             var drawable = if (item.isCurrent && item.isGuest) {
                 getDrawable(R.drawable.ic_avatar_guest_user)
@@ -211,7 +222,8 @@ class UserSwitcherActivity @Inject constructor(
 
         userSwitcherController.init(parent)
         initBroadcastReceiver()
-        buildUserViews()
+
+        parent.post { buildUserViews() }
     }
 
     private fun showPopupMenu() {
@@ -272,16 +284,32 @@ class UserSwitcherActivity @Inject constructor(
         }
         parent.removeViews(start, count)
         addUserRecords.clear()
-
         val flow = requireViewById<Flow>(R.id.flow)
+        val totalWidth = parent.width
+        val userViewCount = adapter.getTotalUserViews()
+        val maxColumns = getMaxColumns(userViewCount)
+        val horizontalGap = resources
+            .getDimensionPixelSize(R.dimen.user_switcher_fullscreen_horizontal_gap)
+        val totalWidthOfHorizontalGap = (maxColumns - 1) * horizontalGap
+        val maxWidgetDiameter = (totalWidth - totalWidthOfHorizontalGap) / maxColumns
+
+        flow.setMaxElementsWrap(maxColumns)
+
         for (i in 0 until adapter.getCount()) {
             val item = adapter.getItem(i)
-            if (item.isAddUser ||
-                item.isAddSupervisedUser ||
-                item.isGuest && item.info == null) {
+            if (adapter.doNotRenderUserView(item)) {
                 addUserRecords.add(item)
             } else {
                 val userView = adapter.getView(i, null, parent)
+                userView.requireViewById<ImageView>(R.id.user_switcher_icon).apply {
+                    val lp = layoutParams
+                    if (maxWidgetDiameter < lp.width) {
+                        lp.width = maxWidgetDiameter
+                        lp.height = maxWidgetDiameter
+                        layoutParams = lp
+                    }
+                }
+
                 userView.setId(View.generateViewId())
                 parent.addView(userView)
 
@@ -331,6 +359,11 @@ class UserSwitcherActivity @Inject constructor(
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
         broadcastDispatcher.registerReceiver(broadcastReceiver, filter)
+    }
+
+    @VisibleForTesting
+    fun getMaxColumns(userCount: Int): Int {
+        return if (userCount < 5) 4 else ceil(userCount / 2.0).toInt()
     }
 
     private class ItemAdapter(
