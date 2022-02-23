@@ -46,6 +46,8 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -355,6 +357,21 @@ public final class InputMethodManager {
     public static final int SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES = 1;
     /** @hide */
     public static final int SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES = 2;
+
+    /**
+     * Clear {@link #SHOW_FORCED} flag when the next IME focused application changed.
+     *
+     * <p>
+     * Note that when this flag enabled in server side, {@link #SHOW_FORCED} will no longer
+     * affect the next focused application to keep showing IME, in case of unexpected IME visible
+     * when the next focused app isn't be the IME requester. </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // This is a bug id.
 
     @UnsupportedAppUsage
     final IInputMethodManager mService;
@@ -1646,7 +1663,14 @@ public final class InputMethodManager {
      * Flag for {@link #showSoftInput} to indicate that the user has forced
      * the input method open (such as by long-pressing menu) so it should
      * not be closed until they explicitly do so.
+     *
+     * @deprecated Use {@link #showSoftInput} without this flag instead. Using this flag can lead
+     * to the soft input remaining visible even when the calling application is closed. The
+     * use of this flag can make the soft input remains visible globally. Starting in
+     * {@link Build.VERSION_CODES#TIRAMISU Android T}, this flag only has an effect while the
+     * caller is currently focused.
      */
+    @Deprecated
     public static final int SHOW_FORCED = 0x0002;
 
     /**
