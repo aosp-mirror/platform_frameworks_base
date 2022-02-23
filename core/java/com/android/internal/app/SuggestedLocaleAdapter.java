@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 
-
 /**
  * This adapter wraps around a regular ListAdapter for LocaleInfo, and creates 2 sections.
  *
@@ -51,25 +50,25 @@ import java.util.Set;
  * (Austria, Belgium, Germany, Liechtenstein, Luxembourg)</p>
  */
 public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
-    private static final int TYPE_HEADER_SUGGESTED = 0;
-    private static final int TYPE_HEADER_ALL_OTHERS = 1;
-    private static final int TYPE_LOCALE = 2;
-    private static final int TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER = 3;
-    private static final int TYPE_CURRENT_LOCALE = 4;
-    private static final int MIN_REGIONS_FOR_SUGGESTIONS = 6;
-    private static final int APP_LANGUAGE_PICKER_TYPE_COUNT = 5;
-    private static final int SYSTEM_LANGUAGE_TYPE_COUNT = 3;
-    private static final int SYSTEM_LANGUAGE_WITHOUT_HEADER_TYPE_COUNT = 1;
+    protected static final int TYPE_HEADER_SUGGESTED = 0;
+    protected static final int TYPE_HEADER_ALL_OTHERS = 1;
+    protected static final int TYPE_LOCALE = 2;
+    protected static final int TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER = 3;
+    protected static final int TYPE_CURRENT_LOCALE = 4;
+    protected static final int MIN_REGIONS_FOR_SUGGESTIONS = 6;
+    protected static final int APP_LANGUAGE_PICKER_TYPE_COUNT = 5;
+    protected static final int SYSTEM_LANGUAGE_TYPE_COUNT = 3;
+    protected static final int SYSTEM_LANGUAGE_WITHOUT_HEADER_TYPE_COUNT = 1;
 
-    private ArrayList<LocaleStore.LocaleInfo> mLocaleOptions;
-    private ArrayList<LocaleStore.LocaleInfo> mOriginalLocaleOptions;
-    private int mSuggestionCount;
-    private final boolean mCountryMode;
-    private LayoutInflater mInflater;
+    protected ArrayList<LocaleStore.LocaleInfo> mLocaleOptions;
+    protected ArrayList<LocaleStore.LocaleInfo> mOriginalLocaleOptions;
+    protected int mSuggestionCount;
+    protected final boolean mCountryMode;
+    protected LayoutInflater mInflater;
 
-    private Locale mDisplayLocale = null;
+    protected Locale mDisplayLocale = null;
     // used to potentially cache a modified Context that uses mDisplayLocale
-    private Context mContextOverride = null;
+    protected Context mContextOverride = null;
     private String mAppPackageName;
 
     public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
@@ -122,6 +121,9 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             }
 
             LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
+            if (item == null) {
+                throw new NullPointerException("Non header locale cannot be null");
+            }
             if (item.isSystemLocale()) {
                 return TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER;
             }
@@ -156,12 +158,20 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public Object getItem(int position) {
+        if (isHeaderPosition(position)) {
+            return null;
+        }
+
         int offset = 0;
         if (showHeaders()) {
             offset = position > mSuggestionCount ? -2 : -1;
         }
 
         return mLocaleOptions.get(position + offset);
+    }
+
+    private boolean isHeaderPosition(int position) {
+        return showHeaders() && (position == 0 || position == mSuggestionCount + 1);
     }
 
     @Override
@@ -185,7 +195,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
         }
     }
 
-    private void setTextTo(@NonNull TextView textView, int resId) {
+    protected void setTextTo(@NonNull TextView textView, int resId) {
         if (mContextOverride == null) {
             textView.setText(resId);
         } else {
@@ -220,7 +230,11 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 break;
             case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
                 TextView title;
-                if (((LocaleStore.LocaleInfo)getItem(position)).isAppCurrentLocale()) {
+                LocaleStore.LocaleInfo info = (LocaleStore.LocaleInfo) getItem(position);
+                if (info == null) {
+                    throw new NullPointerException("Non header locale cannot be null.");
+                }
+                if (info.isAppCurrentLocale()) {
                     title = itemView.findViewById(R.id.language_picker_item);
                 } else {
                     title = itemView.findViewById(R.id.locale);
@@ -292,7 +306,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
         return updatedView;
     }
 
-    private boolean showHeaders() {
+    protected boolean showHeaders() {
         // We don't want to show suggestions for locales with very few regions
         // (e.g. Romanian, with 2 regions)
         // So we put a (somewhat) arbitrary limit.

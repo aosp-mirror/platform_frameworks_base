@@ -24,6 +24,8 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,9 +41,9 @@ public class LocaleStore {
     private static boolean sFullyInitialized = false;
 
     public static class LocaleInfo implements Serializable {
-        private static final int SUGGESTION_TYPE_NONE = 0;
-        private static final int SUGGESTION_TYPE_SIM = 1 << 0;
-        private static final int SUGGESTION_TYPE_CFG = 1 << 1;
+        @VisibleForTesting static final int SUGGESTION_TYPE_NONE = 0;
+        @VisibleForTesting static final int SUGGESTION_TYPE_SIM = 1 << 0;
+        @VisibleForTesting static final int SUGGESTION_TYPE_CFG = 1 << 1;
         // Only for per-app language picker
         private static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
         // Only for per-app language picker
@@ -55,7 +57,8 @@ public class LocaleStore {
         private boolean mIsChecked; // Used by the LocaleListEditor to mark entries for deletion
         // Combination of flags for various reasons to show a locale as a suggestion.
         // Can be SIM, location, etc.
-        private int mSuggestionFlags;
+        // Set to public to be accessible during runtime from the test app.
+        @VisibleForTesting public int mSuggestionFlags;
 
         private String mFullNameNative;
         private String mFullCountryNameNative;
