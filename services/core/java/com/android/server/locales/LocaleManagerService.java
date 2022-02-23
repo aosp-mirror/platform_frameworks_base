@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
@@ -38,14 +39,13 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 
 /**
  * The implementation of ILocaleManager.aidl.
@@ -62,6 +62,8 @@ public class LocaleManagerService extends SystemService {
 
     private LocaleManagerBackupHelper mBackupHelper;
 
+    private final PackageMonitor mPackageMonitor;
+
     public static final boolean DEBUG = false;
 
     public LocaleManagerService(Context context) {
@@ -71,15 +73,26 @@ public class LocaleManagerService extends SystemService {
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+
+        HandlerThread broadcastHandlerThread = new HandlerThread(TAG,
+                Process.THREAD_PRIORITY_BACKGROUND);
+        broadcastHandlerThread.start();
+
         mBackupHelper = new LocaleManagerBackupHelper(this,
-                mPackageManagerInternal);
+                mPackageManagerInternal, broadcastHandlerThread);
+
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper);
+        mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
+                UserHandle.ALL,
+                true);
     }
 
     @VisibleForTesting
     LocaleManagerService(Context context, ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
             PackageManagerInternal packageManagerInternal,
-            LocaleManagerBackupHelper localeManagerBackupHelper) {
+            LocaleManagerBackupHelper localeManagerBackupHelper,
+            PackageMonitor packageMonitor) {
         super(context);
         mContext = context;
         mBinderService = new LocaleManagerBinderService();
@@ -87,6 +100,7 @@ public class LocaleManagerService extends SystemService {
         mActivityManagerInternal = activityManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
         mBackupHelper = localeManagerBackupHelper;
+        mPackageMonitor = packageMonitor;
     }
 
     @Override
@@ -127,11 +141,6 @@ public class LocaleManagerService extends SystemService {
         public LocaleList getApplicationLocales(@NonNull String appPackageName,
                 @UserIdInt int userId) throws RemoteException {
             return LocaleManagerService.this.getApplicationLocales(appPackageName, userId);
-        }
-
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            LocaleManagerService.this.dump(fd, pw, args);
         }
 
         @Override
@@ -405,14 +414,6 @@ public class LocaleManagerService extends SystemService {
             Slog.w(TAG, "Package not found " + packageName);
         }
         return null;
-    }
-
-    /**
-     * Dumps useful info related to service.
-     */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-        // TODO(b/201766221): Implement when there is state.
     }
 
     private void logMetric(@NonNull AppLocaleChangedAtomRecord atomRecordForMetrics) {
