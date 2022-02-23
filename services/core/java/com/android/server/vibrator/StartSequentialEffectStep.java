@@ -55,13 +55,15 @@ final class StartSequentialEffectStep extends Step {
 
     private long mVibratorsOnMaxDuration;
 
+    /** Start a sequential effect at the beginning. */
     StartSequentialEffectStep(VibrationStepConductor conductor,
             CombinedVibration.Sequential effect) {
         this(conductor, SystemClock.uptimeMillis() + effect.getDelays().get(0), effect,
                 /* index= */ 0);
     }
 
-    StartSequentialEffectStep(VibrationStepConductor conductor, long startTime,
+    /** Continue a SequentialEffect from the specified index. */
+    private StartSequentialEffectStep(VibrationStepConductor conductor, long startTime,
             CombinedVibration.Sequential effect, int index) {
         super(conductor, startTime);
         sequentialEffect = effect;
@@ -123,8 +125,7 @@ final class StartSequentialEffectStep extends Step {
 
     /**
      * Create the next {@link StartSequentialEffectStep} to play this sequential effect, starting at
-     * the
-     * time this method is called, or null if sequence is complete.
+     * the time this method is called, or null if sequence is complete.
      */
     @Nullable
     Step nextStep() {
