@@ -69,7 +69,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +88,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
     private final List<TvInputHardwareInfo> mHardwareList = new ArrayList<>();
-    private final List<HdmiDeviceInfo> mHdmiDeviceList = new LinkedList<>();
+    private final List<HdmiDeviceInfo> mHdmiDeviceList = new ArrayList<>();
     /* A map from a device ID to the matching TV input ID. */
     private final SparseArray<String> mHardwareInputIdMap = new SparseArray<>();
     /* A map from a HDMI logical address to the matching TV input ID. */
@@ -112,9 +111,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private int mCurrentMaxIndex = 0;
 
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
-    private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
+    private final List<Message> mPendingHdmiDeviceEvents = new ArrayList<>();
 
-    private final List<Message> mPendingTvinputInfoEvents = new LinkedList<>();
+    private final List<Message> mPendingTvinputInfoEvents = new ArrayList<>();
 
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
@@ -234,11 +233,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             } else {
                 Message msg = mHandler.obtainMessage(ListenerHandler.TVINPUT_INFO_ADDED,
                     deviceId, cableConnectionStatus, connection);
-                for (Iterator<Message> it = mPendingTvinputInfoEvents.iterator(); it.hasNext();) {
-                    if (it.next().arg1 == deviceId) {
-                    it.remove();
-                    }
-                }
+                mPendingTvinputInfoEvents.removeIf(message -> message.arg1 == deviceId);
                 mPendingTvinputInfoEvents.add(msg);
            }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
