@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -51,6 +52,7 @@ public class SplitTestUtils {
         final SurfaceControl leash = createMockSurface();
         SplitLayout out = mock(SplitLayout.class);
         doReturn(dividerBounds).when(out).getDividerBounds();
+        doReturn(dividerBounds).when(out).getRefDividerBounds();
         doReturn(leash).when(out).getDividerLeash();
         return out;
     }
