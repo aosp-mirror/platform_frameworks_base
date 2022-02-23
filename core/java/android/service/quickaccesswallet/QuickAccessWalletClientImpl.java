@@ -45,9 +45,9 @@ import android.util.Log;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
@@ -85,7 +85,7 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         mServiceInfo = QuickAccessWalletServiceInfo.tryCreate(context);
         mHandler = new Handler(Looper.getMainLooper());
         mLifecycleExecutor = (bgExecutor == null) ? Runnable::run : bgExecutor;
-        mRequestQueue = new LinkedList<>();
+        mRequestQueue = new ArrayDeque<>();
         mEventListeners = new HashMap<>(1);
     }
 
