@@ -42,8 +42,8 @@ import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.DisplayManagerService.Clock;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Controls the status of high-brightness mode for devices that support it. This class assumes that
@@ -110,11 +110,11 @@ class HighBrightnessModeController {
     private long mRunningStartTimeMillis = -1;
 
     /**
-     * List of previous HBM-events ordered from most recent to least recent.
+     * Queue of previous HBM-events ordered from most recent to least recent.
      * Meant to store only the events that fall into the most recent
-     * {@link mHbmData.timeWindowMillis}.
+     * {@link HighBrightnessModeData#timeWindowMillis mHbmData.timeWindowMillis}.
      */
-    private LinkedList<HbmEvent> mEvents = new LinkedList<>();
+    private final ArrayDeque<HbmEvent> mEvents = new ArrayDeque<>();
 
     HighBrightnessModeController(Handler handler, int width, int height, IBinder displayToken,
             String displayUniqueId, float brightnessMin, float brightnessMax,
@@ -234,7 +234,7 @@ class HighBrightnessModeController {
                 mRunningStartTimeMillis = -1;
 
                 if (DEBUG) {
-                    Slog.d(TAG, "New HBM event: " + mEvents.getFirst());
+                    Slog.d(TAG, "New HBM event: " + mEvents.peekFirst());
                 }
             }
         }
@@ -433,7 +433,7 @@ class HighBrightnessModeController {
             // window by at least minTime. Basically, we're calculating the soonest time we can
             // get {@code timeMinMillis} back to us.
             final long windowstartTimeMillis = currentTime - mHbmData.timeWindowMillis;
-            final HbmEvent lastEvent = mEvents.getLast();
+            final HbmEvent lastEvent = mEvents.peekLast();
             final long startTimePlusMinMillis =
                     Math.max(windowstartTimeMillis, lastEvent.startTimeMillis)
                     + mHbmData.timeMinMillis;
