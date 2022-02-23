@@ -979,7 +979,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             t.setAlpha(dividerLeash, 1);
             t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER);
             t.setPosition(dividerLeash,
-                    mSplitLayout.getDividerBounds().left, mSplitLayout.getDividerBounds().top);
+                    mSplitLayout.getRefDividerBounds().left,
+                    mSplitLayout.getRefDividerBounds().top);
         } else {
             t.hide(dividerLeash);
         }
