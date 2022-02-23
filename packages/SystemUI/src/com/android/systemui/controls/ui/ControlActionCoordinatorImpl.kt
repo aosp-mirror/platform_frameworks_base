@@ -23,7 +23,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
 import android.os.VibrationEffect
+import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
@@ -38,6 +42,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.TaskViewFactory
 import java.util.Optional
 import javax.inject.Inject
@@ -51,17 +56,39 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val taskViewFactory: Optional<TaskViewFactory>,
     private val controlsMetricsLogger: ControlsMetricsLogger,
-    private val vibrator: VibratorHelper
+    private val vibrator: VibratorHelper,
+    private val secureSettings: SecureSettings,
+    @Main mainHandler: Handler
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
+    private var mAllowTrivialControls: Boolean = secureSettings.getInt(
+            Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0) != 0
     override lateinit var activityContext: Context
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
+    }
+
+    init {
+        val lockScreenShowControlsUri =
+            secureSettings.getUriFor(Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS)
+        val controlsContentObserver = object : ContentObserver(mainHandler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                super.onChange(selfChange, uri)
+                if (uri == lockScreenShowControlsUri) {
+                    mAllowTrivialControls = secureSettings.getInt(
+                            Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0) != 0
+                }
+            }
+        }
+        secureSettings.registerContentObserver(
+            lockScreenShowControlsUri,
+            false /* notifyForDescendants */, controlsContentObserver
+        )
     }
 
     override fun closeDialogs() {
@@ -80,7 +107,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 },
                 true /* blockable */
             ),
-            isAuthRequired(cvh)
+            isAuthRequired(cvh, mAllowTrivialControls)
         )
     }
 
@@ -100,7 +127,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 },
                 blockable
             ),
-            isAuthRequired(cvh)
+            isAuthRequired(cvh, mAllowTrivialControls)
         )
     }
 
@@ -120,7 +147,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 { cvh.action(FloatAction(templateId, newValue)) },
                 false /* blockable */
             ),
-            isAuthRequired(cvh)
+            isAuthRequired(cvh, mAllowTrivialControls)
         )
     }
 
@@ -139,7 +166,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 },
                 false /* blockable */
             ),
-            isAuthRequired(cvh)
+            isAuthRequired(cvh, mAllowTrivialControls)
         )
     }
 
@@ -156,7 +183,11 @@ class ControlActionCoordinatorImpl @Inject constructor(
         actionsInProgress.remove(controlId)
     }
 
-    private fun isAuthRequired(cvh: ControlViewHolder) = cvh.cws.control?.isAuthRequired() ?: true
+    @VisibleForTesting()
+    fun isAuthRequired(cvh: ControlViewHolder, allowTrivialControls: Boolean): Boolean {
+        val isAuthRequired = cvh.cws.control?.isAuthRequired ?: true
+        return isAuthRequired || !allowTrivialControls
+    }
 
     private fun shouldRunAction(controlId: String) =
         if (actionsInProgress.add(controlId)) {
