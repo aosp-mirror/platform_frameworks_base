@@ -506,6 +506,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        void injectPostToHandlerDebounced(@NonNull final Object token, @NonNull final Runnable r) {
+            runOnHandler(r);
+        }
+
+        @Override
         void injectEnforceCallingPermission(String permission, String message) {
             if (!mCallerPermissions.contains(permission)) {
                 throw new SecurityException("Missing permission: " + permission);

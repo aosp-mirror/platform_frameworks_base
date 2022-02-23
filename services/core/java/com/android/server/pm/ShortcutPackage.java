@@ -1172,7 +1172,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // This will send a notification to the launcher, and also save .
         // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
-        s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
+        s.packageShortcutsChanged(this, null, null);
 
         return true;
     }
@@ -1449,7 +1449,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             });
         }
         if (!CollectionUtils.isEmpty(changedShortcuts)) {
-            s.packageShortcutsChanged(getPackageName(), getPackageUserId(), changedShortcuts, null);
+            s.packageShortcutsChanged(this, changedShortcuts, null);
         }
     }
 
