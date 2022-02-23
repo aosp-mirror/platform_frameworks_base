@@ -83,9 +83,15 @@
             android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <include
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        layout="@layout/alert_dialog_button_bar_systemui" />
+        android:paddingStart="@dimen/dialog_side_padding"
+        android:paddingEnd="@dimen/dialog_side_padding">
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/alert_dialog_button_bar_systemui" />
+    </FrameLayout>
 
 </com.android.internal.widget.AlertDialogLayout>

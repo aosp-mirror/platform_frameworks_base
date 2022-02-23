@@ -42,7 +42,10 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +67,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private final Context mContext;
     @Nullable private final DismissReceiver mDismissReceiver;
     private final Handler mHandler = new Handler();
-    @Nullable private final SystemUIDialogManager mDialogManager;
+    private final SystemUIDialogManager mDialogManager;
+    private final SysUiState mSysUiState;
 
     private int mLastWidth = Integer.MIN_VALUE;
     private int mLastHeight = Integer.MIN_VALUE;
@@ -77,24 +81,11 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         this(context, R.style.Theme_SystemUI_Dialog);
     }
 
-    public SystemUIDialog(Context context, SystemUIDialogManager dialogManager) {
-        this(context, R.style.Theme_SystemUI_Dialog, true, dialogManager);
-    }
-
     public SystemUIDialog(Context context, int theme) {
         this(context, theme, true /* dismissOnDeviceLock */);
     }
 
-    public SystemUIDialog(Context context, int theme, SystemUIDialogManager dialogManager) {
-        this(context, theme, true /* dismissOnDeviceLock */, dialogManager);
-    }
-
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock) {
-        this(context, theme, dismissOnDeviceLock, null);
-    }
-
-    public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock,
-            @Nullable SystemUIDialogManager dialogManager) {
         super(context, theme);
         mContext = context;
 
@@ -104,7 +95,12 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this) : null;
-        mDialogManager = dialogManager;
+
+        // TODO(b/219008720): Remove those calls to Dependency.get by introducing a
+        // SystemUIDialogFactory and make all other dialogs create a SystemUIDialog to which we set
+        // the content and attach listeners.
+        mDialogManager = Dependency.get(SystemUIDialogManager.class);
+        mSysUiState = Dependency.get(SysUiState.class);
     }
 
     @Override
@@ -174,13 +170,11 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDismissReceiver.register();
         }
 
-        if (mDialogManager != null) {
-            mDialogManager.setShowing(this, true);
-        }
-
         // Listen for configuration changes to resize this dialog window. This is mostly necessary
         // for foldables that often go from large <=> small screen when folding/unfolding.
         ViewRootImpl.addConfigCallback(this);
+        mDialogManager.setShowing(this, true);
+        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true);
     }
 
     @Override
@@ -191,11 +185,9 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDismissReceiver.unregister();
         }
 
-        if (mDialogManager != null) {
-            mDialogManager.setShowing(this, false);
-        }
-
         ViewRootImpl.removeConfigCallback(this);
+        mDialogManager.setShowing(this, false);
+        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false);
     }
 
     public void setShowForAllUsers(boolean show) {
@@ -401,10 +393,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         private final Dialog mDialog;
         private boolean mRegistered;
         private final BroadcastDispatcher mBroadcastDispatcher;
+        private final DialogLaunchAnimator mDialogLaunchAnimator;
 
         DismissReceiver(Dialog dialog) {
             mDialog = dialog;
+            // TODO(b/219008720): Remove those calls to Dependency.get.
             mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
+            mDialogLaunchAnimator = Dependency.get(DialogLaunchAnimator.class);
         }
 
         void register() {
@@ -421,6 +416,10 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            // These broadcast are usually received when locking the device, swiping up to home
+            // (which collapses the shade), etc. In those cases, we usually don't want to animate
+            // back into the view.
+            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             mDialog.dismiss();
         }
     }

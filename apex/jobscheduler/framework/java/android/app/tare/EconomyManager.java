@@ -39,7 +39,9 @@ public class EconomyManager {
     /** @hide */
     public static final String KEY_AM_MAX_SATIATED_BALANCE = "am_max_satiated_balance";
     /** @hide */
-    public static final String KEY_AM_MAX_CIRCULATION = "am_max_circulation";
+    public static final String KEY_AM_INITIAL_CONSUMPTION_LIMIT = "am_initial_consumption_limit";
+    /** @hide */
+    public static final String KEY_AM_HARD_CONSUMPTION_LIMIT = "am_hard_consumption_limit";
     // TODO: Add AlarmManager modifier keys
     /** @hide */
     public static final String KEY_AM_REWARD_TOP_ACTIVITY_INSTANT =
@@ -163,7 +165,9 @@ public class EconomyManager {
     public static final String KEY_JS_MAX_SATIATED_BALANCE =
             "js_max_satiated_balance";
     /** @hide */
-    public static final String KEY_JS_MAX_CIRCULATION = "js_max_circulation";
+    public static final String KEY_JS_INITIAL_CONSUMPTION_LIMIT = "js_initial_consumption_limit";
+    /** @hide */
+    public static final String KEY_JS_HARD_CONSUMPTION_LIMIT = "js_hard_consumption_limit";
     // TODO: Add JobScheduler modifier keys
     /** @hide */
     public static final String KEY_JS_REWARD_TOP_ACTIVITY_INSTANT =
@@ -280,7 +284,9 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_AM_MAX_SATIATED_BALANCE = 1440;
     /** @hide */
-    public static final int DEFAULT_AM_MAX_CIRCULATION = 52000;
+    public static final int DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT = 28800;
+    /** @hide */
+    public static final int DEFAULT_AM_HARD_CONSUMPTION_LIMIT = 52000;
     // TODO: add AlarmManager modifier default values
     /** @hide */
     public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT = 0;
@@ -359,7 +365,7 @@ public class EconomyManager {
     // Default values JobScheduler factors
     // TODO: add time_since_usage variable to min satiated balance factors
     /** @hide */
-    public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED = 50000;
+    public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED = 20000;
     /** @hide */
     public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP = 10000;
     /** @hide */
@@ -367,7 +373,9 @@ public class EconomyManager {
     /** @hide */
     public static final int DEFAULT_JS_MAX_SATIATED_BALANCE = 60000;
     /** @hide */
-    public static final int DEFAULT_JS_MAX_CIRCULATION = 691200;
+    public static final int DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT = 460_000;
+    /** @hide */
+    public static final int DEFAULT_JS_HARD_CONSUMPTION_LIMIT = 900_000;
     // TODO: add JobScheduler modifier default values
     /** @hide */
     public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT = 0;

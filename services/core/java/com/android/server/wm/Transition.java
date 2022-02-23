@@ -459,9 +459,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // activity in a bad state.
                 if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
                     boolean commitVisibility = true;
-                    if (ar.getDeferHidingClient() && ar.getTask() != null) {
+                    if (ar.isVisible() && ar.getTask() != null) {
                         if (ar.pictureInPictureArgs != null
                                 && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
+                            if (mTransientLaunches != null) {
+                                for (int j = 0; j < mTransientLaunches.size(); ++j) {
+                                    if (mTransientLaunches.valueAt(j).isVisibleRequested()) {
+                                        // force enable pip-on-task-switch now that we've committed
+                                        // to actually launching to the transient activity.
+                                        ar.supportsEnterPipOnTaskSwitch = true;
+                                        break;
+                                    }
+                                }
+                            }
                             mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs);
                             // Avoid commit visibility to false here, or else we will get a sudden
                             // "flash" / surface going invisible for a split second.
