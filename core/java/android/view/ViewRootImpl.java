@@ -218,6 +218,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -775,6 +776,8 @@ public final class ViewRootImpl implements ViewParent,
             new ViewRootRectTracker(v -> v.getSystemGestureExclusionRects());
     private final ViewRootRectTracker mKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
+    private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
+            new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -4881,14 +4884,26 @@ public final class ViewRootImpl implements ViewParent,
      */
     void updateKeepClearRectsForView(View view) {
         mKeepClearRectsTracker.updateRectsForView(view);
+        mUnrestrictedKeepClearRectsTracker.updateRectsForView(view);
         mHandler.sendEmptyMessage(MSG_KEEP_CLEAR_RECTS_CHANGED);
     }
 
     void keepClearRectsChanged() {
-        final List<Rect> rectsForWindowManager = mKeepClearRectsTracker.computeChangedRects();
-        if (rectsForWindowManager != null && mView != null) {
+        List<Rect> restrictedKeepClearRects = mKeepClearRectsTracker.computeChangedRects();
+        List<Rect> unrestrictedKeepClearRects =
+                mUnrestrictedKeepClearRectsTracker.computeChangedRects();
+        if ((restrictedKeepClearRects != null || unrestrictedKeepClearRects != null)
+                && mView != null) {
+            if (restrictedKeepClearRects == null) {
+                restrictedKeepClearRects = Collections.emptyList();
+            }
+            if (unrestrictedKeepClearRects == null) {
+                unrestrictedKeepClearRects = Collections.emptyList();
+            }
+
             try {
-                mWindowSession.reportKeepClearAreasChanged(mWindow, rectsForWindowManager);
+                mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                        unrestrictedKeepClearRects);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
