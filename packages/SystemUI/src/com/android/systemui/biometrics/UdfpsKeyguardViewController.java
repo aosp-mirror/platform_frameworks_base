@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
@@ -47,6 +48,7 @@ import java.io.PrintWriter;
  * Class that coordinates non-HBM animations during keyguard authentication.
  */
 public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<UdfpsKeyguardView> {
+    public static final String TAG = "UdfpsKeyguardViewCtrl";
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final LockscreenShadeTransitionController mLockScreenShadeTransitionController;
@@ -246,7 +248,12 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
 
         if (mInputBouncerHiddenAmount < .5f || mIsBouncerVisible) {
-            return true;
+            if (!getStatusBarStateController().isDozing()) {
+                return true;
+            } else {
+                Log.e(TAG, "Bouncer state claims visible on doze hiddenAmount="
+                        + mInputBouncerHiddenAmount + " bouncerVisible=" + mIsBouncerVisible);
+            }
         }
 
         return false;
