@@ -1607,6 +1607,8 @@ public class LocationProviderManager extends
 
     public @Nullable Location getLastLocation(LastLocationRequest request,
             CallerIdentity identity, @PermissionLevel int permissionLevel) {
+        request = calculateLastLocationRequest(request);
+
         if (!isActive(request.isBypass(), identity)) {
             return null;
         }
@@ -1632,6 +1634,38 @@ public class LocationProviderManager extends
         }
 
         return location;
+    }
+
+    private LastLocationRequest calculateLastLocationRequest(LastLocationRequest baseRequest) {
+        LastLocationRequest.Builder builder = new LastLocationRequest.Builder(baseRequest);
+
+        boolean locationSettingsIgnored = baseRequest.isLocationSettingsIgnored();
+        if (locationSettingsIgnored) {
+            // if we are not currently allowed use location settings ignored, disable it
+            if (!mSettingsHelper.getIgnoreSettingsAllowlist().contains(
+                    getIdentity().getPackageName(), getIdentity().getAttributionTag())
+                    && !mLocationManagerInternal.isProvider(null, getIdentity())) {
+                locationSettingsIgnored = false;
+            }
+
+            builder.setLocationSettingsIgnored(locationSettingsIgnored);
+        }
+
+        boolean adasGnssBypass = baseRequest.isAdasGnssBypass();
+        if (adasGnssBypass) {
+            // if we are not currently allowed use adas gnss bypass, disable it
+            if (!GPS_PROVIDER.equals(mName)) {
+                Log.e(TAG, "adas gnss bypass request received in non-gps provider");
+                adasGnssBypass = false;
+            } else if (!mLocationSettings.getUserSettings(
+                    getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
+                adasGnssBypass = false;
+            }
+
+            builder.setAdasGnssBypass(adasGnssBypass);
+        }
+
+        return builder.build();
     }
 
     /**
