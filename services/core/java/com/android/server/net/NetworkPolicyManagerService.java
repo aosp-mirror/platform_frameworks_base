@@ -4864,7 +4864,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", isAllowed=" + isAllowed
                     + ", isRestrictedByAdmin=" + isRestrictedByAdmin
                     + ", oldBlockedState=" + previousUidBlockedState.toString()
-                    + ", newBlockedState="
+                    + ", newBlockedState=" + uidBlockedState.toString()
                     + ", oldBlockedMeteredReasons=" + NetworkPolicyManager.blockedReasonsToString(
                     uidBlockedState.blockedReasons & BLOCKED_METERED_REASON_MASK)
                     + ", oldBlockedMeteredEffectiveReasons="
@@ -5420,6 +5420,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "setMeteredNetworkDenylist " + uid + ": " + enable);
         try {
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, enable);
+            mLogger.meteredAllowlistChanged(uid, enable);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting denylist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
@@ -5431,6 +5432,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "setMeteredNetworkAllowlist " + uid + ": " + enable);
         try {
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, enable);
+            mLogger.meteredDenylistChanged(uid, enable);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting allowlist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
@@ -5562,7 +5564,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     .setFirewallUidRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid,
                             FIREWALL_RULE_DEFAULT);
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
+            mLogger.meteredAllowlistChanged(uid, false);
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
+            mLogger.meteredDenylistChanged(uid, false);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {
