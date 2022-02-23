@@ -40,11 +40,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -76,7 +77,7 @@ public class NotificationHistoryDatabase {
     private final Handler mFileWriteHandler;
     @VisibleForTesting
     // List of files holding history information, sorted newest to oldest
-    final LinkedList<AtomicFile> mHistoryFiles;
+    final List<AtomicFile> mHistoryFiles;
     private final File mHistoryDir;
     private final File mVersionFile;
     // Current version of the database files schema
@@ -94,7 +95,7 @@ public class NotificationHistoryDatabase {
         mFileWriteHandler = fileWriteHandler;
         mVersionFile = new File(dir, "version");
         mHistoryDir = new File(dir, "history");
-        mHistoryFiles = new LinkedList<>();
+        mHistoryFiles = new ArrayList<>();
         mBuffer = new NotificationHistory();
         mWriteBufferRunnable = new WriteBufferRunnable();
 
@@ -133,7 +134,7 @@ public class NotificationHistoryDatabase {
                 safeParseLong(lhs.getName())));
 
         for (File file : files) {
-            mHistoryFiles.addLast(new AtomicFile(file));
+            mHistoryFiles.add(new AtomicFile(file));
         }
     }
 
@@ -411,7 +412,7 @@ public class NotificationHistoryDatabase {
                         + file.getBaseFile().getAbsolutePath());
                 try {
                     writeLocked(file, mBuffer);
-                    mHistoryFiles.addFirst(file);
+                    mHistoryFiles.add(0, file);
                     mBuffer = new NotificationHistory();
 
                     scheduleDeletion(file.getBaseFile(), time, HISTORY_RETENTION_DAYS);
