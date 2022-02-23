@@ -396,7 +396,7 @@ public class MmTelFeature extends ImsFeature {
         /**
          * Undefined capability type for initialization
          * This is used to check the upper range of MmTel capability
-         * {@hide}
+         * @hide
          */
         public static final int CAPABILITY_TYPE_NONE = 0;
 
@@ -427,7 +427,7 @@ public class MmTelFeature extends ImsFeature {
 
         /**
          * This is used to check the upper range of MmTel capability
-         * {@hide}
+         * @hide
          */
         public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_CALL_COMPOSER + 1;
 
@@ -738,7 +738,7 @@ public class MmTelFeature extends ImsFeature {
      * Enabling/Disabling a capability here indicates that the capability should be registered or
      * deregistered (depending on the capability change) and become available or unavailable to
      * the framework.
-     * * @hide
+     * @hide
      */
     @Override
     @SystemApi
