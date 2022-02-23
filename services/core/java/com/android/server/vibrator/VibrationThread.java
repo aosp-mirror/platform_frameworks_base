@@ -16,16 +16,14 @@
 
 package com.android.server.vibrator;
 
-import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.WorkSource;
 import android.util.Slog;
 import android.util.SparseArray;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.NoSuchElementException;
 
@@ -105,11 +103,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         return mStepConductor.getVibration();
     }
 
-    @VisibleForTesting
-    SparseArray<VibratorController> getVibrators() {
-        return mStepConductor.getVibrators();
-    }
-
     @Override
     public void binderDied() {
         if (DEBUG) {
@@ -136,12 +129,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     /** Runs the VibrationThread ensuring that the wake lock is acquired and released. */
     private void runWithWakeLock() {
-        mWakeLock.setWorkSource(mStepConductor.getWorkSource());
+        WorkSource workSource = new WorkSource(mStepConductor.getVibration().uid);
+        mWakeLock.setWorkSource(workSource);
         mWakeLock.acquire();
         try {
             runWithWakeLockAndDeathLink();
         } finally {
             mWakeLock.release();
+            mWakeLock.setWorkSource(null);
         }
     }
 
@@ -178,12 +173,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             return;
         }
         mStop = true;
-        synchronized (mStepConductor.mLock) {
-            if (DEBUG) {
-                Slog.d(TAG, "Vibration cancelled");
-            }
-            mStepConductor.mLock.notify();
+        if (DEBUG) {
+            Slog.d(TAG, "Vibration cancelled");
         }
+        mStepConductor.notifyWakeUp();
     }
 
     /** Cancel current vibration and shuts off the vibrators immediately. */
@@ -192,13 +185,11 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             // Already forced the thread to stop, wait for it to finish.
             return;
         }
-        mStop = mForceStop = true;
-        synchronized (mStepConductor.mLock) {
-            if (DEBUG) {
-                Slog.d(TAG, "Vibration cancelled immediately");
-            }
-            mStepConductor.mLock.notify();
+        if (DEBUG) {
+            Slog.d(TAG, "Vibration cancelled immediately");
         }
+        mStop = mForceStop = true;
+        mStepConductor.notifyWakeUp();
     }
 
     /** Notify current vibration that a synced step has completed. */
@@ -225,27 +216,14 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private void playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            CombinedVibration.Sequential sequentialEffect =
-                    toSequential(mStepConductor.getVibration().getEffect());
-            final int sequentialEffectSize = sequentialEffect.getEffects().size();
-            mStepConductor.initializeForEffect(sequentialEffect);
+            mStepConductor.prepareToStart();
 
             while (!mStepConductor.isFinished()) {
-                long waitMillisBeforeNextStep;
-                synchronized (mStepConductor.mLock) {
-                    waitMillisBeforeNextStep = mStepConductor.getWaitMillisBeforeNextStepLocked();
-                    if (waitMillisBeforeNextStep > 0) {
-                        try {
-                            mStepConductor.mLock.wait(waitMillisBeforeNextStep);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-                // Only run the next vibration step if we didn't have to wait in this loop.
-                // If we waited then the queue may have changed or the wait could have been
-                // interrupted by a cancel call, so loop again to re-evaluate the scheduling of
-                // the queue top element.
-                if (waitMillisBeforeNextStep <= 0) {
+                // Skip wait and next step if mForceStop already happened.
+                boolean waited = mForceStop || mStepConductor.waitUntilNextStepIsDue();
+                // If we waited, don't run the next step, but instead re-evaluate cancellation
+                // status
+                if (!waited) {
                     if (DEBUG) {
                         Slog.d(TAG, "Play vibration consuming next step...");
                     }
@@ -253,8 +231,17 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     // blocking the thread.
                     mStepConductor.runNextStep();
                 }
+
+                if (mForceStop) {
+                    // Cancel every step and stop playing them right away, even clean-up steps.
+                    mStepConductor.cancelImmediately();
+                    clientVibrationCompleteIfNotAlready(Vibration.Status.CANCELLED);
+                    break;
+                }
+
                 Vibration.Status status = mStop ? Vibration.Status.CANCELLED
-                        : mStepConductor.calculateVibrationStatus(sequentialEffectSize);
+                        : mStepConductor.calculateVibrationStatus();
+                // This block can only run once due to mCalledVibrationCompleteCallback.
                 if (status != Vibration.Status.RUNNING && !mCalledVibrationCompleteCallback) {
                     // First time vibration stopped running, start clean-up tasks and notify
                     // callback immediately.
@@ -263,25 +250,9 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                         mStepConductor.cancel();
                     }
                 }
-                if (mForceStop) {
-                    // Cancel every step and stop playing them right away, even clean-up steps.
-                    mStepConductor.cancelImmediately();
-                    clientVibrationCompleteIfNotAlready(Vibration.Status.CANCELLED);
-                    break;
-                }
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
-
-    private static CombinedVibration.Sequential toSequential(CombinedVibration effect) {
-        if (effect instanceof CombinedVibration.Sequential) {
-            return (CombinedVibration.Sequential) effect;
-        }
-        return (CombinedVibration.Sequential) CombinedVibration.startSequential()
-                .addNext(effect)
-                .combine();
-    }
-
 }

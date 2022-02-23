@@ -16,11 +16,10 @@
 
 package com.android.server.vibrator;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.VibrationEffect;
-import android.os.WorkSource;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -42,6 +41,9 @@ import java.util.Queue;
  * dispatch of callbacks.
  */
 final class VibrationStepConductor {
+    private static final boolean DEBUG = VibrationThread.DEBUG;
+    private static final String TAG = VibrationThread.TAG;
+
     /**
      * Extra timeout added to the end of each vibration step to ensure it finishes even when
      * vibrator callbacks are lost.
@@ -51,14 +53,13 @@ final class VibrationStepConductor {
     static final float RAMP_OFF_AMPLITUDE_MIN = 1e-3f;
     static final List<Step> EMPTY_STEP_LIST = new ArrayList<>();
 
-    final Object mLock = new Object();
+    private final Object mLock = new Object();
 
     // Used within steps.
     public final VibrationSettings vibrationSettings;
     public final DeviceVibrationEffectAdapter deviceEffectAdapter;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
 
-    private final WorkSource mWorkSource;
     private final Vibration mVibration;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
 
@@ -72,7 +73,7 @@ final class VibrationStepConductor {
     @GuardedBy("mLock")
     private int mPendingVibrateSteps;
     @GuardedBy("mLock")
-    private int mConsumedStartVibrateSteps;
+    private int mRemainingStartSequentialEffectSteps;
     @GuardedBy("mLock")
     private int mSuccessfulVibratorOnSteps;
     @GuardedBy("mLock")
@@ -86,7 +87,6 @@ final class VibrationStepConductor {
         this.vibrationSettings = vibrationSettings;
         this.deviceEffectAdapter = effectAdapter;
         this.vibratorManagerHooks = vibratorManagerHooks;
-        this.mWorkSource = new WorkSource(mVibration.uid);
 
         CombinedVibration effect = vib.getEffect();
         for (int i = 0; i < availableVibrators.size(); i++) {
@@ -100,6 +100,9 @@ final class VibrationStepConductor {
     AbstractVibratorStep nextVibrateStep(long startTime, VibratorController controller,
             VibrationEffect.Composed effect, int segmentIndex,
             long previousStepVibratorOffTimeout) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
         if (segmentIndex >= effect.getSegments().size()) {
             segmentIndex = effect.getRepeatIndex();
         }
@@ -126,26 +129,35 @@ final class VibrationStepConductor {
                 previousStepVibratorOffTimeout);
     }
 
-    public void initializeForEffect(@NonNull CombinedVibration.Sequential vibration) {
+    /** Called when this conductor is going to be started running by the VibrationThread. */
+    public void prepareToStart() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+        CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffect());
         synchronized (mLock) {
             mPendingVibrateSteps++;
-            mNextSteps.offer(new StartSequentialEffectStep(this, vibration));
+            // This count is decremented at the completion of the step, so we don't subtract one.
+            mRemainingStartSequentialEffectSteps = sequentialEffect.getEffects().size();
+            mNextSteps.offer(new StartSequentialEffectStep(this, sequentialEffect));
         }
     }
 
     public Vibration getVibration() {
+        // No thread assertion: immutable
         return mVibration;
     }
 
-    public WorkSource getWorkSource() {
-        return mWorkSource;
-    }
-
     SparseArray<VibratorController> getVibrators() {
+        // No thread assertion: immutable
         return mVibrators;
     }
 
     public boolean isFinished() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         synchronized (mLock) {
             return mPendingOnVibratorCompleteSteps.isEmpty() && mNextSteps.isEmpty();
         }
@@ -155,10 +167,14 @@ final class VibrationStepConductor {
      * Calculate the {@link Vibration.Status} based on the current queue state and the expected
      * number of {@link StartSequentialEffectStep} to be played.
      */
-    public Vibration.Status calculateVibrationStatus(int expectedStartVibrateSteps) {
+    public Vibration.Status calculateVibrationStatus() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         synchronized (mLock) {
             if (mPendingVibrateSteps > 0
-                    || mConsumedStartVibrateSteps < expectedStartVibrateSteps) {
+                    || mRemainingStartSequentialEffectSteps > 0) {
                 return Vibration.Status.RUNNING;
             }
             if (mSuccessfulVibratorOnSteps > 0) {
@@ -169,15 +185,39 @@ final class VibrationStepConductor {
         }
     }
 
-    /** Returns the time in millis to wait before calling {@link #runNextStep()}. */
-    @GuardedBy("mLock")
-    public long getWaitMillisBeforeNextStepLocked() {
-        if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
-            // Steps resumed by vibrator complete callback should be played right away.
-            return 0;
+    /**
+     * Blocks until the next step is due to run. The wait here may be interrupted by calling
+     * {@link #notifyWakeUp} or other "notify" methods.
+     *
+     * <p>This method returns false if the next step is ready to run now. If the method returns
+     * true, then some waiting was done, but may have been interrupted by a wakeUp.
+     *
+     * @return true if the method waited at all, or false if a step is ready to run now.
+     */
+    public boolean waitUntilNextStepIsDue() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
         }
-        Step nextStep = mNextSteps.peek();
-        return nextStep == null ? 0 : nextStep.calculateWaitTime();
+
+        synchronized (mLock) {
+            if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
+                // Steps resumed by vibrator complete callback should be played right away.
+                return false;
+            }
+            Step nextStep = mNextSteps.peek();
+            if (nextStep == null) {
+                return false;
+            }
+            long waitMillis = nextStep.calculateWaitTime();
+            if (waitMillis <= 0) {
+                return false;
+            }
+            try {
+                mLock.wait(waitMillis);
+            } catch (InterruptedException e) {
+            }
+            return true;
+        }
     }
 
     /**
@@ -185,6 +225,10 @@ final class VibrationStepConductor {
      * to be played next.
      */
     public void runNextStep() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         // Vibrator callbacks should wait until the polled step is played and the next steps are
         // added back to the queue, so they can handle the callback.
         markWaitToProcessVibratorCallbacks();
@@ -199,7 +243,7 @@ final class VibrationStepConductor {
                         mSuccessfulVibratorOnSteps++;
                     }
                     if (nextStep instanceof StartSequentialEffectStep) {
-                        mConsumedStartVibrateSteps++;
+                        mRemainingStartSequentialEffectSteps--;
                     }
                     if (!nextStep.isCleanUp()) {
                         mPendingVibrateSteps--;
@@ -218,39 +262,71 @@ final class VibrationStepConductor {
     }
 
     /**
-     * Notify the vibrator completion.
+     * Wake up the execution thread, which may be waiting until the next step is due.
+     * The caller is responsible for diverting VibrationThread execution.
      *
-     * <p>This is a lightweight method that do not trigger any operation from {@link
-     * VibratorController}, so it can be called directly from a native callback.
+     * <p>At the moment this is used after the signal is set that a cancellation needs to be
+     * processed. The actual cancellation will be invoked from the VibrationThread.
      */
+    public void notifyWakeUp() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(false);
+        }
+
+        synchronized (mLock) {
+            mLock.notify();
+        }
+    }
+
     @GuardedBy("mLock")
-    private void notifyVibratorCompleteLocked(int vibratorId) {
+    private void markVibratorCompleteLocked(int vibratorId) {
         mCompletionNotifiedVibrators.offer(vibratorId);
         if (!mWaitToProcessVibratorCompleteCallbacks) {
             // No step is being played or cancelled now, process the callback right away.
             processVibratorCompleteCallbacksLocked();
         }
+        // mLock.notify() is done outside this method to ensure it's only done once when
+        // multiple vibrators are notified.
     }
 
+    /**
+     * Notify the conductor that a vibrator has completed its work.
+     *
+     * <p>This is a lightweight method intended to be called directly via native callbacks.
+     * The state update is recorded for processing on the main execution thread (VibrationThread).
+     */
     public void notifyVibratorComplete(int vibratorId) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(false);
+        }
+
         synchronized (mLock) {
-            if (VibrationThread.DEBUG) {
-                Slog.d(VibrationThread.TAG,
-                        "Vibration complete reported by vibrator " + vibratorId);
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration complete reported by vibrator " + vibratorId);
             }
-            notifyVibratorCompleteLocked(vibratorId);
+            markVibratorCompleteLocked(vibratorId);
             mLock.notify();
         }
     }
 
+    /**
+     * Notify that a VibratorManager sync operation has completed.
+     *
+     * <p>This is a lightweight method intended to be called directly via native callbacks.
+     * The state update is recorded for processing on the main execution thread
+     * (VibrationThread).
+     */
     public void notifySyncedVibrationComplete() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(false);
+        }
+
         synchronized (mLock) {
-            if (VibrationThread.DEBUG) {
-                Slog.d(VibrationThread.TAG,
-                        "Synced vibration complete reported by vibrator manager");
+            if (DEBUG) {
+                Slog.d(TAG, "Synced vibration complete reported by vibrator manager");
             }
             for (int i = 0; i < mVibrators.size(); i++) {
-                notifyVibratorCompleteLocked(mVibrators.keyAt(i));
+                markVibratorCompleteLocked(mVibrators.keyAt(i));
             }
             mLock.notify();
         }
@@ -263,6 +339,10 @@ final class VibrationStepConductor {
      * {@link Step#cancel()}.
      */
     public void cancel() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         // Vibrator callbacks should wait until all steps from the queue are properly cancelled
         // and clean up steps are added back to the queue, so they can handle the callback.
         markWaitToProcessVibratorCallbacks();
@@ -290,6 +370,10 @@ final class VibrationStepConductor {
      * <p>This will remove and trigger {@link Step#cancelImmediately()} in all steps, in order.
      */
     public void cancelImmediately() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         // Vibrator callbacks should wait until all steps from the queue are properly cancelled.
         markWaitToProcessVibratorCallbacks();
         try {
@@ -311,6 +395,10 @@ final class VibrationStepConductor {
 
     @Nullable
     private Step pollNext() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
         synchronized (mLock) {
             // Prioritize the steps resumed by a vibrator complete callback.
             if (!mPendingOnVibratorCompleteSteps.isEmpty()) {
@@ -338,6 +426,12 @@ final class VibrationStepConductor {
      */
     @GuardedBy("mLock")
     private void processVibratorCompleteCallbacksLocked() {
+        if (Build.IS_DEBUGGABLE) {
+            // TODO: ensure this method is only called on the vibration thread. Currently it
+            // can be invoked on the completion callback paths.
+            //expectIsVibrationThread(true);
+        }
+
         mWaitToProcessVibratorCompleteCallbacks = false;
         while (!mCompletionNotifiedVibrators.isEmpty()) {
             int vibratorId = mCompletionNotifiedVibrators.poll();
@@ -350,6 +444,29 @@ final class VibrationStepConductor {
                     break;
                 }
             }
+        }
+    }
+
+    private static CombinedVibration.Sequential toSequential(CombinedVibration effect) {
+        if (effect instanceof CombinedVibration.Sequential) {
+            return (CombinedVibration.Sequential) effect;
+        }
+        return (CombinedVibration.Sequential) CombinedVibration.startSequential()
+                .addNext(effect)
+                .combine();
+    }
+
+    /**
+     * This check is used for debugging and documentation to indicate the thread that's expected
+     * to invoke a given public method on this class. Most methods are only invoked by
+     * VibrationThread, which is where all the steps and HAL calls should be made. Other threads
+     * should only signal to the execution flow being run by VibrationThread.
+     */
+    private void expectIsVibrationThread(boolean isVibrationThread) {
+        if ((Thread.currentThread() instanceof VibrationThread) != isVibrationThread) {
+            Slog.wtfStack("VibrationStepConductor",
+                    "Thread caller assertion failed, expected isVibrationThread="
+                            + isVibrationThread);
         }
     }
 }
