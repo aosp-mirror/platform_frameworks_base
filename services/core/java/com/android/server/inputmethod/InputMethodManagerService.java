@@ -3617,6 +3617,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_USER;
         }
 
+        final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.uid);
+        // In case mShowForced flag affects the next client to keep IME visible, when the current
+        // client is leaving due to the next focused client, we clear mShowForced flag when the
+        // next client's targetSdkVersion is T or higher.
+        if (mCurFocusedWindow != windowToken && mShowForced && shouldClearFlag) {
+            mShowForced = false;
+        }
+
         // cross-profile access is always allowed here to allow profile-switching.
         if (!mSettings.isCurrentProfile(userId)) {
             Slog.w(TAG, "A background user is requesting window. Hiding IME.");

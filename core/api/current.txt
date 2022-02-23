@@ -53119,7 +53119,7 @@ package android.view.inputmethod {
     field public static final int RESULT_SHOWN = 2; // 0x2
     field public static final int RESULT_UNCHANGED_HIDDEN = 1; // 0x1
     field public static final int RESULT_UNCHANGED_SHOWN = 0; // 0x0
-    field public static final int SHOW_FORCED = 2; // 0x2
+    field @Deprecated public static final int SHOW_FORCED = 2; // 0x2
     field public static final int SHOW_IMPLICIT = 1; // 0x1
   }
 
