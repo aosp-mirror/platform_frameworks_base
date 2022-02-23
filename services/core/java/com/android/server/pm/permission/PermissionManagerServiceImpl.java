@@ -1603,8 +1603,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         int targetPackageUid = mPackageManagerInt.getPackageUid(packageName, 0, callingUserId);
         if (targetPackageUid != callingUid) {
             throw new SecurityException("uid " + callingUid
-                    + " cannot revoke permissions for package " + packageName + " with uid "
-                    + targetPackageUid);
+                    + " cannot revoke permissions for package " + packageName);
         }
         for (String permName : permissions) {
             if (!checkCallingOrSelfPermission(permName)) {
