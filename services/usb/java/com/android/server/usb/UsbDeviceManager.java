@@ -2187,7 +2187,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      * @param uid Uid of the caller
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory,
-            UsbUserPermissionManager permissions, int uid) {
+            UsbUserPermissionManager permissions, int pid, int uid) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -2198,7 +2198,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        permissions.checkPermission(accessory, uid);
+        permissions.checkPermission(accessory, pid, uid);
         return nativeOpenAccessory();
     }
 
