@@ -56,6 +56,8 @@ public class TvPipNotificationController {
             "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
     private static final String ACTION_CLOSE_PIP =
             "com.android.wm.shell.pip.tv.notification.action.CLOSE_PIP";
+    private static final String ACTION_MOVE_PIP =
+            "com.android.wm.shell.pip.tv.notification.action.MOVE_PIP";
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -222,6 +224,7 @@ public class TvPipNotificationController {
             mIntentFilter = new IntentFilter();
             mIntentFilter.addAction(ACTION_CLOSE_PIP);
             mIntentFilter.addAction(ACTION_SHOW_PIP_MENU);
+            mIntentFilter.addAction(ACTION_MOVE_PIP);
         }
         boolean mRegistered = false;
 
@@ -252,6 +255,8 @@ public class TvPipNotificationController {
                 mDelegate.showPictureInPictureMenu();
             } else if (ACTION_CLOSE_PIP.equals(action)) {
                 mDelegate.closePip();
+            } else if (ACTION_MOVE_PIP.equals(action)) {
+                mDelegate.enterPipMovementMenu();
             }
         }
     }
@@ -259,5 +264,6 @@ public class TvPipNotificationController {
     interface Delegate {
         void showPictureInPictureMenu();
         void closePip();
+        void enterPipMovementMenu();
     }
 }

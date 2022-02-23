@@ -234,11 +234,12 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
 
         setState(STATE_PIP_MENU);
+        mTvPipMenuController.showMenu();
         updatePinnedStackBounds();
     }
 
     @Override
-    public void closeMenu() {
+    public void onMenuClosed() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: closeMenu(), state before=%s", TAG, stateToName(mState));
@@ -282,6 +283,12 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mTvPipBoundsState.setTvPipManuallyCollapsed(!expanding);
         mTvPipBoundsState.setTvPipExpanded(expanding);
         updatePinnedStackBounds();
+    }
+
+    @Override
+    public void enterPipMovementMenu() {
+        setState(STATE_PIP_MENU);
+        mTvPipMenuController.showMovementMenuOnly();
     }
 
     @Override
@@ -438,7 +445,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
 
         mPipNotificationController.dismiss();
-        mTvPipMenuController.hideMenu();
+        mTvPipMenuController.closeMenu();
         mTvPipBoundsState.resetTvPipState();
         setState(STATE_NO_PIP);
         mPinnedTaskId = NONEXISTENT_TASK_ID;
@@ -478,16 +485,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                     TAG, stateToName(state), stateToName(mState));
         }
         mState = state;
-
-        if (mState == STATE_PIP_MENU) {
-            if (DEBUG) {
-                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s:  > show menu", TAG);
-            }
-            mTvPipMenuController.showMenu();
-        }
-
-        updatePinnedStackBounds();
     }
 
     private void loadConfigurations() {
