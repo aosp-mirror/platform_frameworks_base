@@ -766,7 +766,7 @@ public class NotificationManagerService extends SystemService {
 
         ArraySet<String> defaultDnds = mConditionProviders.getDefaultPackages();
         for (int i = 0; i < defaultDnds.size(); i++) {
-            allowDndPackage(defaultDnds.valueAt(i));
+            allowDndPackage(userId, defaultDnds.valueAt(i));
         }
 
         setDefaultAssistantForUser(userId);
@@ -866,9 +866,9 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void allowDndPackage(String packageName) {
+    private void allowDndPackage(int userId, String packageName) {
         try {
-            getBinderService().setNotificationPolicyAccessGranted(packageName, true);
+            getBinderService().setNotificationPolicyAccessGrantedForUser(packageName, userId, true);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

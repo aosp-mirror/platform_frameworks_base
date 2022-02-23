@@ -475,6 +475,7 @@ public final class NotificationRecord {
         pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
+        pw.println(prefix + "originalFlags=0x" + Integer.toHexString(mOriginalFlags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
@@ -541,6 +542,7 @@ public final class NotificationRecord {
         if (notification == null) {
             pw.println(prefix + "None");
             return;
+
         }
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
