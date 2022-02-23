@@ -6186,6 +6186,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The pending transition state will be cleared after the transition is started, so
             // save the state for launching the client later (used by LaunchActivityItem).
             mStartingData.mIsTransitionForward = true;
+            // Ensure that the transition can run with the latest orientation.
+            if (this != mDisplayContent.getLastOrientationSource()) {
+                mDisplayContent.updateOrientation();
+            }
             mDisplayContent.executeAppTransition();
         }
     }

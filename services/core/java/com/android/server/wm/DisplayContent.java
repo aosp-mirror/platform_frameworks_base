@@ -1642,16 +1642,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // It has been set and not yet finished.
             return true;
         }
-        if (!r.occludesParent()) {
+        if (!r.occludesParent() || r.isReportedDrawn()) {
             // While entering or leaving a translucent or floating activity (e.g. dialog style),
             // there is a visible activity in the background. Then it still needs rotation animation
             // to cover the activity configuration change.
-            return false;
-        }
-        if (mTransitionController.isShellTransitionsEnabled()
-                ? mTransitionController.wasVisibleAtStart(r) : r.isVisible()) {
-            // If activity is already visible, then it's not "launching". However, shell-transitions
-            // will make it visible immediately.
             return false;
         }
         if (checkOpening) {
