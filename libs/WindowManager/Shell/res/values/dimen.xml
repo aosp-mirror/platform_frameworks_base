@@ -129,6 +129,9 @@
     <dimen name="bubble_dismiss_encircle_size">52dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
     <dimen name="bubble_expanded_view_padding">16dp</dimen>
+    <!-- Padding for the edge of the expanded view that is closest to the edge of the screen used
+         when displaying in landscape on a large screen. -->
+    <dimen name="bubble_expanded_view_largescreen_landscape_padding">128dp</dimen>
     <!-- This should be at least the size of bubble_expanded_view_padding; it is used to include
          a slight touch slop around the expanded view. -->
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
