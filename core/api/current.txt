@@ -35449,8 +35449,8 @@ package android.provider {
     field public static final String EXTRA_WIFI_NETWORK_RESULT_LIST = "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
     field public static final String INTENT_CATEGORY_USAGE_ACCESS_CONFIG = "android.intent.category.USAGE_ACCESS_CONFIG";
     field public static final String METADATA_USAGE_ACCESS_REASON = "android.settings.metadata.USAGE_ACCESS_REASON";
-    field public static final String SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = "supervisor_restricted_biometrics_controller";
-    field public static final String SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = "";
+    field public static final int SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = 1; // 0x1
+    field public static final int SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = 0; // 0x0
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
