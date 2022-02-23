@@ -38,7 +38,8 @@ import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_BA
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_CTP;
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.DEFAULT_JS_HARD_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP;
@@ -79,7 +80,8 @@ import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_BASE_P
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_CTP;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
-import static android.app.tare.EconomyManager.KEY_JS_MAX_CIRCULATION;
+import static android.app.tare.EconomyManager.KEY_JS_HARD_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.KEY_JS_INITIAL_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
@@ -145,7 +147,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedBalanceExempted;
     private long mMinSatiatedBalanceOther;
     private long mMaxSatiatedBalance;
-    private long mMaxSatiatedCirculation;
+    private long mInitialSatiatedConsumptionLimit;
+    private long mHardSatiatedConsumptionLimit;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final InternalResourceService mInternalResourceService;
@@ -181,8 +184,13 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedCirculation() {
-        return mMaxSatiatedCirculation;
+    long getInitialSatiatedConsumptionLimit() {
+        return mInitialSatiatedConsumptionLimit;
+    }
+
+    @Override
+    long getHardSatiatedConsumptionLimit() {
+        return mHardSatiatedConsumptionLimit;
     }
 
     @NonNull
@@ -221,8 +229,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
                         DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP));
         mMaxSatiatedBalance = arcToNarc(mParser.getInt(KEY_JS_MAX_SATIATED_BALANCE,
                 DEFAULT_JS_MAX_SATIATED_BALANCE));
-        mMaxSatiatedCirculation = arcToNarc(mParser.getInt(KEY_JS_MAX_CIRCULATION,
-                DEFAULT_JS_MAX_CIRCULATION));
+        mInitialSatiatedConsumptionLimit = arcToNarc(mParser.getInt(
+                KEY_JS_INITIAL_CONSUMPTION_LIMIT, DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT));
+        mHardSatiatedConsumptionLimit = Math.max(mInitialSatiatedConsumptionLimit,
+                arcToNarc(mParser.getInt(
+                        KEY_JS_HARD_CONSUMPTION_LIMIT, DEFAULT_JS_HARD_CONSUMPTION_LIMIT)));
 
         mActions.put(ACTION_JOB_MAX_START, new Action(ACTION_JOB_MAX_START,
                 arcToNarc(mParser.getInt(KEY_JS_ACTION_JOB_MAX_START_CTP,
@@ -332,7 +343,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         pw.print("Other", narcToString(mMinSatiatedBalanceOther)).println();
         pw.decreaseIndent();
         pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
-        pw.print("Max satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
+        pw.print("Consumption limits: [");
+        pw.print(narcToString(mInitialSatiatedConsumptionLimit));
+        pw.print(", ");
+        pw.print(narcToString(mHardSatiatedConsumptionLimit));
+        pw.println("]");
 
         pw.println();
         pw.println("Actions:");

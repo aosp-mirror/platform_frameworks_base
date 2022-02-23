@@ -151,6 +151,16 @@ public abstract class EconomicPolicy {
         }
     }
 
+    static class Cost {
+        public final long costToProduce;
+        public final long price;
+
+        Cost(long costToProduce, long price) {
+            this.costToProduce = costToProduce;
+            this.price = price;
+        }
+    }
+
     private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
 
     EconomicPolicy(@NonNull InternalResourceService irs) {
@@ -193,10 +203,18 @@ public abstract class EconomicPolicy {
     abstract long getMaxSatiatedBalance();
 
     /**
-     * Returns the maximum number of narcs that should be in circulation at once when the device is
-     * at 100% battery.
+     * Returns the maximum number of narcs that should be consumed during a full 100% discharge
+     * cycle. This is the initial limit. The system may choose to increase the limit over time,
+     * but the increased limit should never exceed the value returned from
+     * {@link #getHardSatiatedConsumptionLimit()}.
      */
-    abstract long getMaxSatiatedCirculation();
+    abstract long getInitialSatiatedConsumptionLimit();
+
+    /**
+     * Returns the maximum number of narcs that should be consumed during a full 100% discharge
+     * cycle. This is the hard limit that should never be exceeded.
+     */
+    abstract long getHardSatiatedConsumptionLimit();
 
     /** Return the set of modifiers that should apply to this policy's costs. */
     @NonNull
@@ -211,10 +229,11 @@ public abstract class EconomicPolicy {
     void dump(IndentingPrintWriter pw) {
     }
 
-    final long getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
+    @NonNull
+    final Cost getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
         final Action action = getAction(actionId);
         if (action == null) {
-            return 0;
+            return new Cost(0, 0);
         }
         long ctp = action.costToProduce;
         long price = action.basePrice;
@@ -235,7 +254,7 @@ public abstract class EconomicPolicy {
                     (ProcessStateModifier) getModifier(COST_MODIFIER_PROCESS_STATE);
             price = processStateModifier.getModifiedPrice(userId, pkgName, ctp, price);
         }
-        return price;
+        return new Cost(ctp, price);
     }
 
     private static void initModifier(@Modifier.CostModifier final int modifierId,

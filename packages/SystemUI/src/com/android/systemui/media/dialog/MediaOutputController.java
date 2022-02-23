@@ -66,7 +66,6 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,7 +90,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final ShadeController mShadeController;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final SystemUIDialogManager mDialogManager;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
     private final boolean mVolumeAdjustmentForRemoteGroupSessions;
@@ -119,7 +117,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
             CommonNotifCollection notifCollection, UiEventLogger uiEventLogger,
-            DialogLaunchAnimator dialogLaunchAnimator, SystemUIDialogManager dialogManager) {
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -135,7 +133,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        mDialogManager = dialogManager;
         mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_active_item_main_content);
         mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
@@ -610,10 +607,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         // We show the output group dialog from the output dialog.
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mAboveStatusbar, mMediaSessionManager, mLocalBluetoothManager, mShadeController,
-                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
-                mDialogManager);
+                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
         MediaOutputGroupDialog dialog = new MediaOutputGroupDialog(mContext, mAboveStatusbar,
-                controller, mDialogManager);
+                controller);
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 

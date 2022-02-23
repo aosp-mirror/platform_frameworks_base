@@ -3094,6 +3094,10 @@ public final class SurfaceControl implements Parcelable {
          * @param destFrame The destination rectangle in parent space. Or null for the source frame.
          * @param orientation The buffer rotation
          * @return This transaction object.
+         * @deprecated Use {@link #setCrop(SurfaceControl, Rect)},
+         * {@link #setBufferTransform(SurfaceControl, int)},
+         * {@link #setPosition(SurfaceControl, float, float)} and
+         * {@link #setScale(SurfaceControl, float, float)} instead.
          */
         @NonNull
         public Transaction setGeometry(@NonNull SurfaceControl sc, @Nullable Rect sourceCrop,
