@@ -18,8 +18,7 @@ package android.util;
 import android.annotation.NonNull;
 
 /**
- * Objects that contains a list of {@link Dumpable}, which will be dumped when the object itself
- * is dumped.
+ * Represents a container that manages {@link Dumpable dumpables}.
  */
 public interface DumpableContainer {
 
