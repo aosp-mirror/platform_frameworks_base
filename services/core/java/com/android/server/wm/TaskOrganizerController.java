@@ -790,17 +790,24 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                DisplayContent dc = mService.mWindowManager.mRoot
+                final DisplayContent dc = mService.mWindowManager.mRoot
                         .getDisplayContent(displayId);
-                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
+                if (dc == null) {
                     return null;
                 }
+
+                final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
+                if (imeLayeringTarget == null || imeLayeringTarget.getWindow() == null) {
+                    return null;
+                }
+
                 // Avoid WindowState#getRootTask() so we don't attribute system windows to a task.
-                final Task task = dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getTask();
+                final Task task = imeLayeringTarget.getWindow().asTask();
                 if (task == null) {
                     return null;
                 }
-                return task.getRootTask().mRemoteToken.toWindowContainerToken();
+
+                return task.mRemoteToken.toWindowContainerToken();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

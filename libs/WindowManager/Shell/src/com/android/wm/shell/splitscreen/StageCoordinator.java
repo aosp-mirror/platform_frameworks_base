@@ -1115,9 +1115,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return SPLIT_POSITION_UNDEFINED;
         }
 
-        if (token.equals(mMainStage.mRootTaskInfo.getToken())) {
+        if (mMainStage.containsToken(token)) {
             return getMainStagePosition();
-        } else if (token.equals(mSideStage.mRootTaskInfo.getToken())) {
+        } else if (mSideStage.containsToken(token)) {
             return getSideStagePosition();
         }
 
