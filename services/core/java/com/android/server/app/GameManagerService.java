@@ -90,6 +90,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
@@ -268,16 +269,34 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     break;
                 }
                 case SET_GAME_STATE: {
-                    if (mPowerManagerInternal == null) {
-                        final Bundle data = msg.getData();
-                        Slog.d(TAG, "Error setting loading mode for package "
-                                + data.getString(PACKAGE_NAME_MSG_KEY)
-                                + " and userId " + data.getInt(USER_ID_MSG_KEY));
-                        break;
-                    }
                     final GameState gameState = (GameState) msg.obj;
                     final boolean isLoading = gameState.isLoading();
-                    mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, isLoading);
+                    final Bundle data = msg.getData();
+                    final String packageName = data.getString(PACKAGE_NAME_MSG_KEY);
+                    final int userId = data.getInt(USER_ID_MSG_KEY);
+
+                    // Restrict to games only. Requires performance mode to be enabled.
+                    final boolean boostEnabled =
+                            getGameMode(packageName, userId) == GameManager.GAME_MODE_PERFORMANCE;
+                    int uid;
+                    try {
+                        uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                    } catch (NameNotFoundException e) {
+                        Slog.v(TAG, "Failed to get package metadata");
+                        uid = -1;
+                    }
+                    FrameworkStatsLog.write(FrameworkStatsLog.GAME_STATE_CHANGED, packageName, uid,
+                            boostEnabled, gameStateModeToStatsdGameState(gameState.getMode()),
+                            isLoading, gameState.getLabel(), gameState.getQuality());
+
+                    if (boostEnabled) {
+                        if (mPowerManagerInternal == null) {
+                            Slog.d(TAG, "Error setting loading mode for package " + packageName
+                                    + " and userId " + userId);
+                            break;
+                        }
+                        mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, isLoading);
+                    }
                     break;
                 }
             }
@@ -387,12 +406,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // Restrict to games only.
             return;
         }
-
-        if (getGameMode(packageName, userId) != GameManager.GAME_MODE_PERFORMANCE) {
-            // Requires performance mode to be enabled.
-            return;
-        }
-
         final Message msg = mHandler.obtainMessage(SET_GAME_STATE);
         final Bundle data = new Bundle();
         data.putString(PACKAGE_NAME_MSG_KEY, packageName);
@@ -1541,6 +1554,22 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     .append("\nConfig: ").append(mConfigs.get(key).toString()).append("\n]");
         }
         return out.toString();
+    }
+
+    private static int gameStateModeToStatsdGameState(int mode) {
+        switch (mode) {
+            case GameState.MODE_NONE:
+                return FrameworkStatsLog.GAME_STATE_CHANGED__STATE__MODE_NONE;
+            case GameState.MODE_GAMEPLAY_INTERRUPTIBLE:
+                return FrameworkStatsLog.GAME_STATE_CHANGED__STATE__MODE_GAMEPLAY_INTERRUPTIBLE;
+            case GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE:
+                return FrameworkStatsLog.GAME_STATE_CHANGED__STATE__MODE_GAMEPLAY_UNINTERRUPTIBLE;
+            case GameState.MODE_CONTENT:
+                return FrameworkStatsLog.GAME_STATE_CHANGED__STATE__MODE_CONTENT;
+            case GameState.MODE_UNKNOWN:
+            default:
+                return FrameworkStatsLog.GAME_STATE_CHANGED__STATE__MODE_UNKNOWN;
+        }
     }
 
     private static ServiceThread createServiceThread() {
