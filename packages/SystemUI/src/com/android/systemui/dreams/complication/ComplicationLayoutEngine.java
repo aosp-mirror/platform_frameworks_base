@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
+import com.android.systemui.touch.TouchInsetManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,7 @@ public class ComplicationLayoutEngine  {
     private static class ViewEntry implements Comparable<ViewEntry> {
         private final View mView;
         private final ComplicationLayoutParams mLayoutParams;
+        private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
         private final Parent mParent;
         @Complication.Category
         private final int mCategory;
@@ -61,7 +63,8 @@ public class ComplicationLayoutEngine  {
          * Default constructor. {@link Parent} allows for the {@link ViewEntry}'s surrounding
          * view hierarchy to be accessed without traversing the entire view tree.
          */
-        ViewEntry(View view, ComplicationLayoutParams layoutParams, int category, Parent parent,
+        ViewEntry(View view, ComplicationLayoutParams layoutParams,
+                TouchInsetManager.TouchInsetSession touchSession, int category, Parent parent,
                 int margin) {
             mView = view;
             // Views that are generated programmatically do not have a unique id assigned to them
@@ -70,9 +73,12 @@ public class ComplicationLayoutEngine  {
             // {@link Complication.ViewHolder} should not reference the root container by id.
             mView.setId(View.generateViewId());
             mLayoutParams = layoutParams;
+            mTouchInsetSession = touchSession;
             mCategory = category;
             mParent = parent;
             mMargin = margin;
+
+            touchSession.addViewToTracking(mView);
         }
 
         /**
@@ -217,6 +223,7 @@ public class ComplicationLayoutEngine  {
             mParent.removeEntry(this);
 
             ((ViewGroup) mView.getParent()).removeView(mView);
+            mTouchInsetSession.removeViewFromTracking(mView);
         }
 
         @Override
@@ -242,15 +249,18 @@ public class ComplicationLayoutEngine  {
          */
         private static class Builder {
             private final View mView;
+            private final TouchInsetManager.TouchInsetSession mTouchSession;
             private final ComplicationLayoutParams mLayoutParams;
             private final int mCategory;
             private Parent mParent;
             private int mMargin;
 
-            Builder(View view, ComplicationLayoutParams lp, @Complication.Category int category) {
+            Builder(View view, TouchInsetManager.TouchInsetSession touchSession,
+                    ComplicationLayoutParams lp, @Complication.Category int category) {
                 mView = view;
                 mLayoutParams = lp;
                 mCategory = category;
+                mTouchSession = touchSession;
             }
 
             /**
@@ -291,7 +301,8 @@ public class ComplicationLayoutEngine  {
              * Builds and returns the resulting {@link ViewEntry}.
              */
             ViewEntry build() {
-                return new ViewEntry(mView, mLayoutParams, mCategory, mParent, mMargin);
+                return new ViewEntry(mView, mLayoutParams, mTouchSession, mCategory, mParent,
+                        mMargin);
             }
         }
 
@@ -442,13 +453,16 @@ public class ComplicationLayoutEngine  {
     private final int mMargin;
     private final HashMap<ComplicationId, ViewEntry> mEntries = new HashMap<>();
     private final HashMap<Integer, PositionGroup> mPositions = new HashMap<>();
+    private final TouchInsetManager.TouchInsetSession mSession;
 
     /** */
     @Inject
     public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
-            @Named(COMPLICATION_MARGIN) int margin) {
+            @Named(COMPLICATION_MARGIN) int margin,
+            TouchInsetManager.TouchInsetSession session) {
         mLayout = layout;
         mMargin = margin;
+        mSession = session;
     }
 
     /**
@@ -468,7 +482,7 @@ public class ComplicationLayoutEngine  {
             removeComplication(id);
         }
 
-        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, lp, category)
+        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, mSession, lp, category)
                 .setMargin(mMargin);
 
         // Add position group if doesn't already exist
