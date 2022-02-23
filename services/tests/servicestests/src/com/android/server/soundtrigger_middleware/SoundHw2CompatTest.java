@@ -31,7 +31,6 @@ import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,7 +48,6 @@ import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.IHwInterface;
 import android.os.RemoteException;
-import android.system.OsConstants;
 
 import org.junit.After;
 import org.junit.Before;
@@ -60,6 +58,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(Parameterized.class)
 public class SoundHw2CompatTest {
@@ -240,14 +239,15 @@ public class SoundHw2CompatTest {
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
         final int handle = 29;
-        ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel> modelCaptor =
-                ArgumentCaptor.forClass(
-                        android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel.class);
+        AtomicReference<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.SoundModel> model =
+                new AtomicReference<>();
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback> callbackCaptor =
                 ArgumentCaptor.forClass(
                         android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.class);
 
         doAnswer(invocation -> {
+            // We need to dup the model, as it gets invalidated after the call returns.
+            model.set(TestUtil.dupModel_2_1(invocation.getArgument(0)));
             android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadSoundModel_2_1Callback
                     resultCallback = invocation.getArgument(3);
 
@@ -259,10 +259,9 @@ public class SoundHw2CompatTest {
         assertEquals(handle,
                 mCanonical.loadSoundModel(TestUtil.createGenericSoundModel(), canonicalCallback));
 
-        verify(driver_2_1).loadSoundModel_2_1(modelCaptor.capture(), callbackCaptor.capture(),
-                anyInt(), any());
+        verify(driver_2_1).loadSoundModel_2_1(any(), callbackCaptor.capture(), anyInt(), any());
 
-        TestUtil.validateGenericSoundModel_2_1(modelCaptor.getValue());
+        TestUtil.validateGenericSoundModel_2_1(model.get());
         validateCallback_2_1(callbackCaptor.getValue(), canonicalCallback);
         return handle;
     }
@@ -355,14 +354,16 @@ public class SoundHw2CompatTest {
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
         final int handle = 29;
-        ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel>
-                modelCaptor = ArgumentCaptor.forClass(
-                android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel.class);
+        AtomicReference<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.PhraseSoundModel> model =
+                new AtomicReference<>();
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback> callbackCaptor =
                 ArgumentCaptor.forClass(
                         android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.class);
 
         doAnswer(invocation -> {
+            // We need to dup the model, as it gets invalidated after the call returns.
+            model.set(TestUtil.dupPhraseModel_2_1(invocation.getArgument(0)));
+
             android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadPhraseSoundModel_2_1Callback
                     resultCallback = invocation.getArgument(3);
 
@@ -374,10 +375,10 @@ public class SoundHw2CompatTest {
         assertEquals(handle, mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel(),
                 canonicalCallback));
 
-        verify(driver_2_1).loadPhraseSoundModel_2_1(modelCaptor.capture(), callbackCaptor.capture(),
-                anyInt(), any());
+        verify(driver_2_1).loadPhraseSoundModel_2_1(any(), callbackCaptor.capture(), anyInt(),
+                any());
 
-        TestUtil.validatePhraseSoundModel_2_1(modelCaptor.getValue());
+        TestUtil.validatePhraseSoundModel_2_1(model.get());
         validateCallback_2_1(callbackCaptor.getValue(), canonicalCallback);
         return handle;
     }
