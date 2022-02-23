@@ -31,6 +31,7 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCom
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
 
 /**
@@ -43,11 +44,17 @@ class MediaTttChipControllerReceiver @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
     windowManager: WindowManager,
+    viewUtil: ViewUtil,
     mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
     @Main private val mainHandler: Handler,
 ) : MediaTttChipControllerCommon<ChipStateReceiver>(
-    context, windowManager, mainExecutor, tapGestureDetector, R.layout.media_ttt_chip_receiver
+    context,
+    windowManager,
+    viewUtil,
+    mainExecutor,
+    tapGestureDetector,
+    R.layout.media_ttt_chip_receiver
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferReceiverDisplay(
