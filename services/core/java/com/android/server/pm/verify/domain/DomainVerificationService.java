@@ -256,8 +256,8 @@ public class DomainVerificationService extends SystemService
     public DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
             throws NameNotFoundException {
         mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             PackageStateInternal pkgSetting = snapshot.getPackageStateInternal(packageName);
             AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
             if (pkg == null) {
@@ -315,8 +315,8 @@ public class DomainVerificationService extends SystemService
             @NonNull Set<String> domains, int state)
             throws NameNotFoundException {
         mEnforcer.assertApprovedVerifier(callingUid, mProxy);
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             List<String> verifiedDomains = new ArrayList<>();
 
             GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
@@ -369,8 +369,8 @@ public class DomainVerificationService extends SystemService
 
         ArraySet<String> verifiedDomains = new ArraySet<>();
         if (packageName == null) {
+            final Computer snapshot = mConnection.snapshot();
             synchronized (mLock) {
-                final Computer snapshot = mConnection.snapshot();
                 ArraySet<String> validDomains = new ArraySet<>();
 
                 int size = mAttachedPkgStates.size();
@@ -403,8 +403,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         } else {
+            final Computer snapshot = mConnection.snapshot();
             synchronized (mLock) {
-                final Computer snapshot = mConnection.snapshot();
                 DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
                 if (pkgState == null) {
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
@@ -539,8 +539,8 @@ public class DomainVerificationService extends SystemService
             return DomainVerificationManager.ERROR_DOMAIN_SET_ID_INVALID;
         }
 
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             GetAttachedResult result = getAndValidateAttachedLocked(domainSetId, domains,
                     false /* forAutoVerify */, callingUid, userId, snapshot);
             if (result.isError()) {
@@ -578,8 +578,8 @@ public class DomainVerificationService extends SystemService
             @NonNull String packageName, boolean enabled, @Nullable ArraySet<String> domains)
             throws NameNotFoundException {
         mEnforcer.assertInternal(mConnection.getCallingUid());
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
@@ -682,8 +682,8 @@ public class DomainVerificationService extends SystemService
             throw DomainVerificationUtils.throwPackageUnavailable(packageName);
         }
 
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             PackageStateInternal pkgSetting = snapshot.getPackageStateInternal(packageName);
             AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
             if (pkg == null) {
@@ -1179,8 +1179,8 @@ public class DomainVerificationService extends SystemService
     public void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
             @Nullable String packageName, @Nullable @UserIdInt Integer userId)
             throws NameNotFoundException {
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             if (packageName == null) {
                 int size = mAttachedPkgStates.size();
                 for (int index = 0; index < size; index++) {
@@ -1227,8 +1227,8 @@ public class DomainVerificationService extends SystemService
     @Override
     public void printOwnersForDomains(@NonNull IndentingPrintWriter writer,
             @NonNull List<String> domains, @Nullable @UserIdInt Integer userId) {
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             int size = domains.size();
             for (int index = 0; index < size; index++) {
                 printOwnersForDomain(writer, domains.get(index), userId, snapshot);
@@ -1403,8 +1403,8 @@ public class DomainVerificationService extends SystemService
     @Override
     public void clearDomainVerificationState(@Nullable List<String> packageNames) {
         mEnforcer.assertInternal(mConnection.getCallingUid());
+        final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
-            final Computer snapshot = mConnection.snapshot();
             if (packageNames == null) {
                 int size = mAttachedPkgStates.size();
                 for (int index = 0; index < size; index++) {
