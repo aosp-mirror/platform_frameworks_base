@@ -87,7 +87,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
-import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
@@ -256,6 +255,89 @@ public final class AppRestrictionController {
     private List<String> mCarrierPrivilegedApps;
 
     final ActivityManagerService mActivityManagerService;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_ADDED: {
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        if (uid >= 0) {
+                            onUidAdded(uid);
+                        }
+                    }
+                }
+                // fall through.
+                case Intent.ACTION_PACKAGE_CHANGED: {
+                    final String pkgName = intent.getData().getSchemeSpecificPart();
+                    final String[] cmpList = intent.getStringArrayExtra(
+                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                    // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
+                    // enable/disable event (cmpList is just the package name itself), drop
+                    // our carrier privileged app & system-app caches and let them refresh
+                    if (cmpList == null
+                            || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
+                        clearCarrierPrivilegedApps();
+                    }
+                } break;
+                case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                    final Uri data = intent.getData();
+                    String ssp;
+                    if (uid >= 0 && data != null
+                            && (ssp = data.getSchemeSpecificPart()) != null) {
+                        onPackageRemoved(ssp, uid);
+                    }
+                } break;
+                case Intent.ACTION_UID_REMOVED: {
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        if (uid >= 0) {
+                            onUidRemoved(uid);
+                        }
+                    }
+                } break;
+                case Intent.ACTION_USER_ADDED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserAdded(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_STARTED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserStarted(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_STOPPED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserStopped(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_REMOVED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserRemoved(userId);
+                    }
+                } break;
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBootReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch (intent.getAction()) {
+                case Intent.ACTION_LOCKED_BOOT_COMPLETED: {
+                    onLockedBootCompleted();
+                } break;
+            }
+        }
+    };
 
     /**
      * The restriction levels that each package is on, the levels here are defined in
@@ -804,7 +886,7 @@ public final class AppRestrictionController {
 
     void onSystemReady() {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ActivityThread.currentApplication().getMainExecutor(), mConstantsObserver);
+                mBgExecutor, mConstantsObserver);
         mConstantsObserver.start();
         initBgRestrictionExemptioFromSysConfig();
         initRestrictionStates();
@@ -828,6 +910,13 @@ public final class AppRestrictionController {
     void resetRestrictionSettings() {
         mRestrictionSettings.reset();
         initRestrictionStates();
+    }
+
+    @VisibleForTesting
+    void tearDown() {
+        DeviceConfig.removeOnPropertiesChangedListener(mConstantsObserver);
+        unregisterForUidObservers();
+        unregisterForSystemBroadcasts();
     }
 
     private void initBgRestrictionExemptioFromSysConfig() {
@@ -907,6 +996,14 @@ public final class AppRestrictionController {
             mInjector.getIActivityManager().registerUidObserver(mUidObserver,
                     UID_OBSERVER_ACTIVE | UID_OBSERVER_GONE | UID_OBSERVER_IDLE
                     | UID_OBSERVER_PROCSTATE, PROCESS_STATE_FOREGROUND_SERVICE, "android");
+        } catch (RemoteException e) {
+            // Intra-process call, it won't happen.
+        }
+    }
+
+    private void unregisterForUidObservers() {
+        try {
+            mInjector.getIActivityManager().unregisterUidObserver(mUidObserver);
         } catch (RemoteException e) {
             // Intra-process call, it won't happen.
         }
@@ -2147,102 +2244,26 @@ public final class AppRestrictionController {
     }
 
     private void registerForSystemBroadcasts() {
-        final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                switch (intent.getAction()) {
-                    case Intent.ACTION_PACKAGE_ADDED: {
-                        if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                            if (uid >= 0) {
-                                onUidAdded(uid);
-                            }
-                        }
-                    }
-                    // fall through.
-                    case Intent.ACTION_PACKAGE_CHANGED: {
-                        final String pkgName = intent.getData().getSchemeSpecificPart();
-                        final String[] cmpList = intent.getStringArrayExtra(
-                                Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-                        // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
-                        // enable/disable event (cmpList is just the package name itself), drop
-                        // our carrier privileged app & system-app caches and let them refresh
-                        if (cmpList == null
-                                || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
-                            clearCarrierPrivilegedApps();
-                        }
-                    } break;
-                    case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
-                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                        final Uri data = intent.getData();
-                        String ssp;
-                        if (uid >= 0 && data != null
-                                && (ssp = data.getSchemeSpecificPart()) != null) {
-                            onPackageRemoved(ssp, uid);
-                        }
-                    } break;
-                    case Intent.ACTION_UID_REMOVED: {
-                        if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                            if (uid >= 0) {
-                                onUidRemoved(uid);
-                            }
-                        }
-                    } break;
-                    case Intent.ACTION_USER_ADDED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserAdded(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_STARTED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserStarted(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_STOPPED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserStopped(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_REMOVED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserRemoved(userId);
-                        }
-                    } break;
-                }
-            }
-        };
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         packageFilter.addDataScheme("package");
-        mContext.registerReceiverForAllUsers(broadcastReceiver, packageFilter, null, mBgHandler);
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, packageFilter, null, mBgHandler);
         final IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         userFilter.addAction(Intent.ACTION_UID_REMOVED);
-        mContext.registerReceiverForAllUsers(broadcastReceiver, userFilter, null, mBgHandler);
-        final BroadcastReceiver bootReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                switch (intent.getAction()) {
-                    case Intent.ACTION_LOCKED_BOOT_COMPLETED: {
-                        onLockedBootCompleted();
-                    } break;
-                }
-            }
-        };
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, userFilter, null, mBgHandler);
         final IntentFilter bootFilter = new IntentFilter();
         bootFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
-        mContext.registerReceiverAsUser(bootReceiver, UserHandle.SYSTEM,
+        mContext.registerReceiverAsUser(mBootReceiver, UserHandle.SYSTEM,
                 bootFilter, null, mBgHandler);
+    }
+
+    private void unregisterForSystemBroadcasts() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mBootReceiver);
     }
 
     void forEachTracker(Consumer<BaseAppStateTracker> sink) {
