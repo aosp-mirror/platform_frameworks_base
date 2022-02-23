@@ -156,6 +156,27 @@ public class WifiUtilsTest {
     }
 
     @Test
+    public void getWifiDialogIntent_returnsCorrectValues() {
+        String key = "test_key";
+
+        // Test that connectForCaller is true.
+        Intent intent = WifiUtils.getWifiDialogIntent(key, true /* connectForCaller */);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DIALOG);
+        assertThat(intent.getStringExtra(WifiUtils.EXTRA_CHOSEN_WIFI_ENTRY_KEY)).isEqualTo(key);
+        assertThat(intent.getBooleanExtra(WifiUtils.EXTRA_CONNECT_FOR_CALLER, true))
+                .isEqualTo(true /* connectForCaller */);
+
+        // Test that connectForCaller is false.
+        intent = WifiUtils.getWifiDialogIntent(key, false /* connectForCaller */);
+
+        assertThat(intent.getAction()).isEqualTo(WifiUtils.ACTION_WIFI_DIALOG);
+        assertThat(intent.getStringExtra(WifiUtils.EXTRA_CHOSEN_WIFI_ENTRY_KEY)).isEqualTo(key);
+        assertThat(intent.getBooleanExtra(WifiUtils.EXTRA_CONNECT_FOR_CALLER, true))
+                .isEqualTo(false /* connectForCaller */);
+    }
+
+    @Test
     public void getWifiDetailsSettingsIntent_returnsCorrectValues() {
         final String key = "test_key";
 

@@ -88,7 +88,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
-                require(wmHelper.waitImeShown()) { "IME didn't show in time" }
+                wmHelper.waitImeShown()
             }
             teardown {
                 test {

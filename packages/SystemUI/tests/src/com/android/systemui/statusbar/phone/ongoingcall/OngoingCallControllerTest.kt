@@ -105,6 +105,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
         controller = OngoingCallController(
+                context,
                 notificationCollection,
                 mockOngoingCallFlags,
                 clock,
@@ -204,17 +205,48 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/194731244. */
     @Test
-    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
-        val numCalls = 4
-
-        for (i in 0 until numCalls) {
+    fun onEntryUpdated_calledManyTimes_uidObserverOnlyRegisteredOnce() {
+        for (i in 0 until 4) {
             // Re-create the notification each time so that it's considered a different object and
-            // observers will get re-registered (and hopefully unregistered).
+            // will re-trigger the whole flow.
             notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         }
 
-        // There should be 1 observer still registered, so we should unregister n-1 times.
-        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+        verify(mockIActivityManager, times(1))
+            .registerUidObserver(any(), any(), any(), any())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_getUidProcessStateThrowsException_noCrash() {
+        `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
+                .thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_registerUidObserverThrowsException_noCrash() {
+        `when`(mockIActivityManager.registerUidObserver(
+            any(), any(), any(), nullable(String::class.java)
+        )).thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_packageNameProvidedToActivityManager() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        val packageNameCaptor = ArgumentCaptor.forClass(String::class.java)
+        verify(mockIActivityManager).registerUidObserver(
+            any(), any(), any(), packageNameCaptor.capture()
+        )
+        assertThat(packageNameCaptor.value).isNotNull()
     }
 
     /**

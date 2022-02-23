@@ -63,6 +63,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.RingBuffer;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
@@ -155,6 +156,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_OFF = 3;
 
+    private static final int RINGBUFFER_MAX = 100;
+
     private final String TAG;
 
     private final Object mLock = new Object();
@@ -211,6 +214,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final float mScreenBrightnessMinimumDimAmount;
 
     private final float mScreenBrightnessDefault;
+
+    // Previously logged screen brightness. Used for autobrightness event dumpsys.
+    private float mPreviousScreenBrightness = Float.NaN;
 
     // The minimum allowed brightness while in VR.
     private final float mScreenBrightnessForVrRangeMinimum;
@@ -386,6 +392,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final BrightnessSetting mBrightnessSetting;
 
     private final Runnable mOnBrightnessChangeRunnable;
+
+    // Used for keeping record in dumpsys for when and to which brightness auto adaptions were made.
+    private RingBuffer<AutobrightnessEvent> mAutobrightnessEventRingBuffer;
 
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
@@ -988,6 +997,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mHbmController, mBrightnessThrottler, mIdleModeBrightnessMapper,
                     mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong());
+
+            mAutobrightnessEventRingBuffer =
+                    new RingBuffer<>(AutobrightnessEvent.class, RINGBUFFER_MAX);
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
         }
@@ -1556,6 +1568,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         } else if (mBrightnessReasonTemp.reason == BrightnessReason.REASON_MANUAL
                 && userSetBrightnessChanged) {
             Slog.v(TAG, "Brightness [" + brightnessState + "] manual adjustment.");
+        }
+
+        // Add any automatic changes to autobrightness ringbuffer for dumpsys.
+        if (mBrightnessReason.reason == BrightnessReason.REASON_AUTOMATIC
+                && !BrightnessSynchronizer.floatEquals(
+                        mPreviousScreenBrightness, brightnessState)) {
+            mPreviousScreenBrightness = brightnessState;
+            mAutobrightnessEventRingBuffer.append(new AutobrightnessEvent(
+                    System.currentTimeMillis(), brightnessState));
         }
 
         // Update display white-balance.
@@ -2491,6 +2512,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.dump(pw);
+            dumpAutobrightnessEvents(pw);
         }
 
         if (mHbmController != null) {
@@ -2544,6 +2566,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return "RAMP_STATE_SKIP_AUTOBRIGHT";
             default:
                 return Integer.toString(state);
+        }
+    }
+
+    private void dumpAutobrightnessEvents(PrintWriter pw) {
+        int size = mAutobrightnessEventRingBuffer.size();
+        if (size < 1) {
+            pw.println("No Automatic Brightness Adjustments");
+            return;
+        }
+
+        pw.println("Automatic Brightness Adjustments Last " + size + " Events: ");
+        AutobrightnessEvent[] eventArray = mAutobrightnessEventRingBuffer.toArray();
+        for (int i = 0; i < mAutobrightnessEventRingBuffer.size(); i++) {
+            pw.println("  " + eventArray[i].toString());
         }
     }
 
@@ -2612,6 +2648,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         synchronized (mHandler) {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.DISPLAY_HBM_BRIGHTNESS_CHANGED, displayStatsId, brightness);
+        }
+    }
+
+    private static class AutobrightnessEvent {
+        final long mTime;
+        final float mBrightness;
+
+        AutobrightnessEvent(long time, float brightness) {
+            mTime = time;
+            mBrightness = brightness;
+        }
+
+        @Override
+        public String toString() {
+            return TimeUtils.formatForLogging(mTime) + " - Brightness: " + mBrightness;
         }
     }
 

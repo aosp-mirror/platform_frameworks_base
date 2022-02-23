@@ -123,6 +123,7 @@
     <dimen name="bouncer_user_switcher_icon_size">190dp</dimen>
     <dimen name="bouncer_user_switcher_icon_size_plus_margin">222dp</dimen>
 
+    <dimen name="user_switcher_fullscreen_horizontal_gap">64dp</dimen>
     <dimen name="user_switcher_icon_selected_width">8dp</dimen>
     <dimen name="user_switcher_fullscreen_button_text_size">14sp</dimen>
     <dimen name="user_switcher_fullscreen_button_padding">12dp</dimen>

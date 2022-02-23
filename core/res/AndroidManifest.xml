@@ -5970,7 +5970,7 @@
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide -->
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
-                android:protectionLevel="signature|privileged|development" />
+                android:protectionLevel="signature|privileged|development|role" />
 
     <!-- Allows internal management of the camera framework
          @hide -->
@@ -6920,6 +6920,10 @@
         </service>
 
         <service android:name="com.android.server.appsearch.contactsindexer.ContactsIndexerMaintenanceService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <service android:name="com.android.server.BinaryTransparencyService$UpdateMeasurementsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

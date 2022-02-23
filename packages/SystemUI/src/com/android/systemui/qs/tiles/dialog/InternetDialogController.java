@@ -112,7 +112,6 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             "android.settings.NETWORK_PROVIDER_SETTINGS";
     private static final String ACTION_WIFI_SCANNING_SETTINGS =
             "android.settings.WIFI_SCANNING_SETTINGS";
-    private static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
     public static final Drawable EMPTY_DRAWABLE = new ColorDrawable(Color.TRANSPARENT);
     public static final int NO_CELL_DATA_TYPE_ICON = 0;
     private static final int SUBTITLE_TEXT_WIFI_IS_OFF = R.string.wifi_is_off;
@@ -853,8 +852,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             }
 
             if (status == WifiEntry.ConnectCallback.CONNECT_STATUS_FAILURE_NO_CONFIG) {
-                final Intent intent = new Intent("com.android.settings.WIFI_DIALOG")
-                        .putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, mWifiEntry.getKey());
+                final Intent intent = WifiUtils.getWifiDialogIntent(mWifiEntry.getKey(),
+                        true /* connectForCaller */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {
