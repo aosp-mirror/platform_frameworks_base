@@ -175,7 +175,7 @@ class WiredChargingRippleController @Inject constructor(
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
         rippleView.radius = Integer.max(width, height).toFloat()
-        rippleView.origin = when (RotationUtils.getRotation(context)) {
+        rippleView.origin = when (RotationUtils.getExactRotation(context)) {
             RotationUtils.ROTATION_LANDSCAPE -> {
                 PointF(width * normalizedPortPosY, height * (1 - normalizedPortPosX))
             }
