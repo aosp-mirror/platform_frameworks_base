@@ -165,6 +165,7 @@ internal class FooterActionsController @Inject constructor(
             powerMenuLite.visibility = View.GONE
         }
         settingsButton.setOnClickListener(onClickListener)
+        multiUserSetting.isListening = true
         if (featureFlags.isEnabled(Flags.NEW_FOOTER)) {
             val securityFooter = securityFooterController.view as DualHeightHorizontalLinearLayout
             securityFootersContainer?.addView(securityFooter)
@@ -215,6 +216,7 @@ internal class FooterActionsController @Inject constructor(
 
     override fun onViewDetached() {
         setListening(false)
+        multiUserSetting.isListening = false
     }
 
     fun setListening(listening: Boolean) {
@@ -222,7 +224,6 @@ internal class FooterActionsController @Inject constructor(
             return
         }
         this.listening = listening
-        multiUserSetting.isListening = listening
         if (this.listening) {
             userInfoController.addCallback(onUserInfoChangedListener)
             updateView()

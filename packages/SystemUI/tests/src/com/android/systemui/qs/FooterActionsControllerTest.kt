@@ -100,7 +100,9 @@ class FooterActionsControllerTest : LeakCheckedTest() {
 
     @After
     fun tearDown() {
-        ViewUtils.detachView(view)
+        if (view.isAttachedToWindow) {
+            ViewUtils.detachView(view)
+        }
     }
 
     @Test
@@ -139,8 +141,7 @@ class FooterActionsControllerTest : LeakCheckedTest() {
 
     @Test
     fun testMultiUserSwitchUpdatedWhenSettingChanged() {
-        // When expanded, listening is true
-        controller.setListening(true)
+        // Always listening to setting while View is attached
         testableLooper.processAllMessages()
 
         val multiUserSwitch = view.requireViewById<View>(R.id.multi_user_switch)
@@ -155,5 +156,25 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         testableLooper.processAllMessages()
 
         assertThat(multiUserSwitch.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun testMultiUserSettingNotListenedAfterDetach() {
+        testableLooper.processAllMessages()
+
+        val multiUserSwitch = view.requireViewById<View>(R.id.multi_user_switch)
+        assertThat(multiUserSwitch.visibility).isNotEqualTo(View.VISIBLE)
+
+        ViewUtils.detachView(view)
+
+        // The setting is only used as an indicator for whether the view should refresh. The actual
+        // value of the setting is ignored; isMultiUserEnabled is the source of truth
+        whenever(multiUserSwitchController.isMultiUserEnabled).thenReturn(true)
+
+        // Changing the value of USER_SWITCHER_ENABLED should cause the view to update
+        fakeSettings.putIntForUser(Settings.Global.USER_SWITCHER_ENABLED, 1, userTracker.userId)
+        testableLooper.processAllMessages()
+
+        assertThat(multiUserSwitch.visibility).isNotEqualTo(View.VISIBLE)
     }
 }
