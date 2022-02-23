@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
+import android.app.WindowConfiguration;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -294,6 +295,17 @@ class TransitionController {
             return ar.isVisible();
         }
         return ci.mVisible;
+    }
+
+    @WindowConfiguration.WindowingMode
+    int getWindowingModeAtStart(@NonNull WindowContainer wc) {
+        if (mCollectingTransition == null) return wc.getWindowingMode();
+        final Transition.ChangeInfo ci = mCollectingTransition.mChanges.get(wc);
+        if (ci == null) {
+            // not part of transition, so use current state.
+            return wc.getWindowingMode();
+        }
+        return ci.mWindowingMode;
     }
 
     @WindowManager.TransitionType
