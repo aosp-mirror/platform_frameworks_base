@@ -104,4 +104,10 @@ const android::hardware::gnss::IGnssDebug::SatelliteData& GnssDebugUtil::getSate
     return satelliteDataArray[i];
 }
 
+template <>
+int64_t GnssDebugUtil::getTimeEstimateMs(
+        const android::hardware::gnss::IGnssDebug::DebugData& data) {
+    return data.time.timeEstimateMs;
+}
+
 } // namespace android::gnss

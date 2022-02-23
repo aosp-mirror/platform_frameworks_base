@@ -113,12 +113,6 @@ int64_t GnssDebugUtil::getTimeEstimateMs(const T& data) {
     return data.time.timeEstimate;
 }
 
-template <>
-int64_t GnssDebugUtil::getTimeEstimateMs(
-        const android::hardware::gnss::IGnssDebug::DebugData& data) {
-    return data.time.timeEstimateMs;
-}
-
 template <class T_DebugData, class T_SatelliteData>
 jstring GnssDebugUtil::parseDebugData(JNIEnv* env, std::stringstream& internalState,
                                       const T_DebugData& data) {
