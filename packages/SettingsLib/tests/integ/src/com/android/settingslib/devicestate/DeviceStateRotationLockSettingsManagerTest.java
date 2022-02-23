@@ -30,11 +30,16 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager.SettableDeviceState;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -93,5 +98,23 @@ public class DeviceStateRotationLockSettingsManagerTest {
         mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
 
         assertThat(mNumSettingsChanges).isEqualTo(3);
+    }
+
+    @Test
+    public void getSettableDeviceStates_returnsExpectedValuesInOriginalOrder() {
+        when(mMockResources.getStringArray(
+                R.array.config_perDeviceStateRotationLockDefaults)).thenReturn(
+                new String[]{"2:2", "4:0", "1:1", "0:0"});
+
+        List<SettableDeviceState> settableDeviceStates =
+                DeviceStateRotationLockSettingsManager.getInstance(
+                        mMockContext).getSettableDeviceStates();
+
+        assertThat(settableDeviceStates).containsExactly(
+                new SettableDeviceState(/* deviceState= */ 2, /* isSettable= */ true),
+                new SettableDeviceState(/* deviceState= */ 4, /* isSettable= */ false),
+                new SettableDeviceState(/* deviceState= */ 1, /* isSettable= */ true),
+                new SettableDeviceState(/* deviceState= */ 0, /* isSettable= */ false)
+        ).inOrder();
     }
 }
