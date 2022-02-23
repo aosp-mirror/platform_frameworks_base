@@ -58,7 +58,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -68,7 +67,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -129,9 +127,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private IStatusBarService mIStatusBarService;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Mock private ForegroundServiceDismissalFeatureController mFgFeatureController;
-    @Mock private ForegroundServiceSectionController mFgServicesSectionController;
-    @Mock private ForegroundServiceDungeonView mForegroundServiceDungeonView;
     @Mock private LayoutInflater mLayoutInflater;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
@@ -151,8 +146,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
-        when(mFgServicesSectionController.createView(mLayoutInflater))
-                .thenReturn(mForegroundServiceDungeonView);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -187,8 +180,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mIStatusBarService,
                 mUiEventLogger,
-                mFgFeatureController,
-                mFgServicesSectionController,
                 mLayoutInflater,
                 mRemoteInputManager,
                 mVisualStabilityManager,
@@ -396,22 +387,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         dismissListener.onClearAll(ROWS_ALL);
         verify(mUiEventLogger).log(NotificationPanelEvent.fromSelection(ROWS_ALL));
-    }
-
-    @Test
-    public void testForegroundDismissEnabled() {
-        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(true);
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout).initializeForegroundServiceSection(
-                mForegroundServiceDungeonView);
-    }
-
-    @Test
-    public void testForegroundDismissaDisabled() {
-        when(mFgFeatureController.isForegroundServiceDismissalEnabled()).thenReturn(false);
-        mController.attach(mNotificationStackScrollLayout);
-        verify(mNotificationStackScrollLayout, never()).initializeForegroundServiceSection(
-                any(ForegroundServiceDungeonView.class));
     }
 
     @Test
