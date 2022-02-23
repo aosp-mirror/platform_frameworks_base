@@ -84,11 +84,11 @@ interface IFingerprintService {
     void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName, long requestId);
 
     // Start fingerprint enrollment
-    void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
+    long enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
             String opPackageName, int enrollReason);
 
     // Cancel enrollment in progress
-    void cancelEnrollment(IBinder token);
+    void cancelEnrollment(IBinder token, long requestId);
 
     // Any errors resulting from this call will be returned to the listener
     void remove(IBinder token, int fingerId, int userId, IFingerprintServiceReceiver receiver,
