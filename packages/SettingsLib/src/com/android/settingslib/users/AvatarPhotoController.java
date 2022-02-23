@@ -21,6 +21,8 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -57,9 +59,9 @@ class AvatarPhotoController {
 
         void startActivityForResult(Intent intent, int resultCode);
 
-        int getPhotoSize();
+        boolean startSystemActivityForResult(Intent intent, int resultCode);
 
-        boolean canCropPhoto();
+        int getPhotoSize();
     }
 
     interface ContextInjector {
@@ -77,6 +79,7 @@ class AvatarPhotoController {
     static final int REQUEST_CODE_CROP_PHOTO = 1003;
 
     private static final String IMAGES_DIR = "multi_user";
+    private static final String PRE_CROP_PICTURE_FILE_NAME = "PreCropEditUserPhoto.jpg";
     private static final String CROP_PICTURE_FILE_NAME = "CropEditUserPhoto.jpg";
     private static final String TAKE_PICTURE_FILE_NAME = "TakeEditUserPhoto.jpg";
 
@@ -86,6 +89,7 @@ class AvatarPhotoController {
     private final ContextInjector mContextInjector;
 
     private final File mImagesDir;
+    private final Uri mPreCropPictureUri;
     private final Uri mCropPictureUri;
     private final Uri mTakePictureUri;
 
@@ -95,6 +99,8 @@ class AvatarPhotoController {
 
         mImagesDir = new File(mContextInjector.getCacheDir(), IMAGES_DIR);
         mImagesDir.mkdir();
+        mPreCropPictureUri = mContextInjector
+                .createTempImageUri(mImagesDir, PRE_CROP_PICTURE_FILE_NAME, !waiting);
         mCropPictureUri =
                 mContextInjector.createTempImageUri(mImagesDir, CROP_PICTURE_FILE_NAME, !waiting);
         mTakePictureUri =
@@ -127,7 +133,7 @@ class AvatarPhotoController {
             case REQUEST_CODE_TAKE_PHOTO:
             case REQUEST_CODE_CHOOSE_PHOTO:
                 if (mTakePictureUri.equals(pictureUri)) {
-                    cropPhoto();
+                    cropPhoto(pictureUri);
                 } else {
                     copyAndCropPhoto(pictureUri);
                 }
@@ -153,7 +159,7 @@ class AvatarPhotoController {
             ThreadUtils.postOnBackgroundThread(() -> {
                 final ContentResolver cr = mContextInjector.getContentResolver();
                 try (InputStream in = cr.openInputStream(pictureUri);
-                     OutputStream out = cr.openOutputStream(mTakePictureUri)) {
+                        OutputStream out = cr.openOutputStream(mPreCropPictureUri)) {
                     Streams.copy(in, out);
                 } catch (IOException e) {
                     Log.w(TAG, "Failed to copy photo", e);
@@ -161,7 +167,7 @@ class AvatarPhotoController {
                 }
                 ThreadUtils.postOnMainThread(() -> {
                     if (!mAvatarUi.isFinishing()) {
-                        cropPhoto();
+                        cropPhoto(mPreCropPictureUri);
                     }
                 });
             }).get();
@@ -170,22 +176,21 @@ class AvatarPhotoController {
         }
     }
 
-    private void cropPhoto() {
-        if (mAvatarUi.canCropPhoto()) {
-            // TODO: Use a public intent, when there is one.
-            Intent intent = new Intent("com.android.camera.action.CROP");
-            intent.setDataAndType(mTakePictureUri, "image/*");
-            appendOutputExtra(intent, mCropPictureUri);
-            appendCropExtras(intent);
-            try {
-                StrictMode.disableDeathOnFileUriExposure();
-                mAvatarUi.startActivityForResult(intent, REQUEST_CODE_CROP_PHOTO);
-            } finally {
-                StrictMode.enableDeathOnFileUriExposure();
+    private void cropPhoto(final Uri pictureUri) {
+        // TODO: Use a public intent, when there is one.
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(pictureUri, "image/*");
+        appendOutputExtra(intent, mCropPictureUri);
+        appendCropExtras(intent);
+        try {
+            StrictMode.disableDeathOnFileUriExposure();
+            if (mAvatarUi.startSystemActivityForResult(intent, REQUEST_CODE_CROP_PHOTO)) {
+                return;
             }
-        } else {
-            onPhotoNotCropped(mTakePictureUri);
+        } finally {
+            StrictMode.enableDeathOnFileUriExposure();
         }
+        onPhotoNotCropped(pictureUri);
     }
 
     private void appendOutputExtra(Intent intent, Uri pictureUri) {
@@ -307,14 +312,22 @@ class AvatarPhotoController {
         }
 
         @Override
-        public int getPhotoSize() {
-            return mActivity.getResources()
-                    .getDimensionPixelSize(com.android.internal.R.dimen.user_icon_size);
+        public boolean startSystemActivityForResult(Intent intent, int code) {
+            ActivityInfo info = intent.resolveActivityInfo(mActivity.getPackageManager(),
+                    PackageManager.MATCH_SYSTEM_ONLY);
+            if (info == null) {
+                Log.w(TAG, "No system package activity could be found for code " + code);
+                return false;
+            }
+            intent.setPackage(info.packageName);
+            mActivity.startActivityForResult(intent, code);
+            return true;
         }
 
         @Override
-        public boolean canCropPhoto() {
-            return PhotoCapabilityUtils.canCropPhoto(mActivity);
+        public int getPhotoSize() {
+            return mActivity.getResources()
+                    .getDimensionPixelSize(com.android.internal.R.dimen.user_icon_size);
         }
     }
 
