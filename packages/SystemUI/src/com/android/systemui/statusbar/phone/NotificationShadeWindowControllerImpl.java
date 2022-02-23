@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.os.Binder;
@@ -117,6 +118,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
      * @see #batchApplyWindowLayoutParams(Runnable)
      */
     private int mDeferWindowLayoutParams;
+    private boolean mLastKeyguardRotationAllowed;
 
     @Inject
     public NotificationShadeWindowControllerImpl(Context context, WindowManager windowManager,
@@ -143,7 +145,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mScreenOffAnimationController = screenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
         mAuthController = authController;
-
+        mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
         ((SysuiStatusBarStateController) statusBarStateController)
@@ -777,6 +779,17 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         // Make sure we have the correct navbar/statusbar colors.
         setKeyguardDark(useDarkText);
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        final boolean newScreenRotationAllowed = mKeyguardStateController
+                .isKeyguardScreenRotationAllowed();
+
+        if (mLastKeyguardRotationAllowed != newScreenRotationAllowed) {
+            apply(mCurrentState);
+            mLastKeyguardRotationAllowed = newScreenRotationAllowed;
+        }
     }
 
     /**
