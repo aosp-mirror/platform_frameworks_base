@@ -57,7 +57,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -126,7 +125,7 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
     private final Runnable mCollapseRunnable = this::collapseChip;
 
     private final Runnable mAccessibilityRunnable = this::makeAccessibilityAnnouncement;
-    private final List<PrivacyItem> mItemsBeforeLastAnnouncement = new LinkedList<>();
+    private final List<PrivacyItem> mItemsBeforeLastAnnouncement = new ArrayList<>();
 
     @State
     private int mState = STATE_NOT_SHOWN;
