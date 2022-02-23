@@ -118,13 +118,14 @@ class CompanionApplicationController {
 
             serviceConnectors = CollectionUtils.map(companionServices, componentName ->
                             new CompanionDeviceServiceConnector(mContext, userId, componentName));
-            mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
-        }
 
-        if (serviceConnectors.isEmpty()) {
-            Slog.e(TAG, "Can't find CompanionDeviceService implementer in package: "
-                    + packageName + ". Please check if they are correctly declared.");
-            return;
+            if (serviceConnectors.isEmpty()) {
+                Slog.e(TAG, "Can't find CompanionDeviceService implementer in package: "
+                        + packageName + ". Please check if they are correctly declared.");
+                return;
+            }
+
+            mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
         }
 
         // The first connector in the list is always the primary connector: set a listener to it.
