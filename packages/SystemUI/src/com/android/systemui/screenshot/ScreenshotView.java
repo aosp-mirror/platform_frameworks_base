@@ -403,12 +403,24 @@ public class ScreenshotView extends FrameLayout implements
                     }
 
                     @Override
-                    public void onDismiss() {
+                    public void onSwipeDismissInitiated(Animator anim) {
                         if (DEBUG_DISMISS) {
                             Log.d(ScreenshotView.TAG, "dismiss triggered via swipe gesture");
                         }
                         mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
                                 mPackageName);
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                super.onAnimationStart(animation);
+                                mBackgroundProtection.animate()
+                                        .alpha(0).setDuration(anim.getDuration()).start();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onDismissComplete() {
                         mCallbacks.onDismiss();
                     }
                 });
@@ -995,6 +1007,7 @@ public class ScreenshotView extends FrameLayout implements
         mSmartChips.clear();
         mQuickShareChip = null;
         setAlpha(1);
+        mScreenshotStatic.setAlpha(1);
         mScreenshotSelectorView.stop();
     }
 
