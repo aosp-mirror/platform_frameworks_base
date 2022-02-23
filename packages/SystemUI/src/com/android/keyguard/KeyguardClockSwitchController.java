@@ -292,8 +292,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private void updateClockLayout() {
         int largeClockTopMargin = getContext().getResources().getDimensionPixelSize(
-                R.dimen.keyguard_large_clock_top_margin);
-
+                R.dimen.keyguard_large_clock_top_margin)
+                - (int) mLargeClockViewController.getBottom();
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(MATCH_PARENT,
                 MATCH_PARENT);
         lp.topMargin = largeClockTopMargin;

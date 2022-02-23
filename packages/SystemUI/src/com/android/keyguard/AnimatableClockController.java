@@ -163,6 +163,18 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
     }
 
+    /**
+     * @return the number of pixels below the baseline. For fonts that support languages such as
+     * Burmese, this space can be significant.
+     */
+    public float getBottom() {
+        if (mView.getPaint() != null && mView.getPaint().getFontMetrics() != null) {
+            return mView.getPaint().getFontMetrics().bottom;
+        }
+
+        return 0f;
+    }
+
     /** Animate the clock appearance */
     public void animateAppear() {
         if (!mIsDozing) mView.animateAppearOnLockscreen();
