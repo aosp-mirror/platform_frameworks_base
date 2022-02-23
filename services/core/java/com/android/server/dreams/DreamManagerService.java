@@ -87,7 +87,7 @@ public final class DreamManagerService extends SystemService {
     private Binder mCurrentDreamToken;
     private ComponentName mCurrentDreamName;
     private int mCurrentDreamUserId;
-    private boolean mCurrentDreamIsTest;
+    private boolean mCurrentDreamIsPreview;
     private boolean mCurrentDreamCanDoze;
     private boolean mCurrentDreamIsDozing;
     private boolean mCurrentDreamIsWaking;
@@ -169,7 +169,7 @@ public final class DreamManagerService extends SystemService {
         pw.println("mCurrentDreamToken=" + mCurrentDreamToken);
         pw.println("mCurrentDreamName=" + mCurrentDreamName);
         pw.println("mCurrentDreamUserId=" + mCurrentDreamUserId);
-        pw.println("mCurrentDreamIsTest=" + mCurrentDreamIsTest);
+        pw.println("mCurrentDreamIsPreview=" + mCurrentDreamIsPreview);
         pw.println("mCurrentDreamCanDoze=" + mCurrentDreamCanDoze);
         pw.println("mCurrentDreamIsDozing=" + mCurrentDreamIsDozing);
         pw.println("mCurrentDreamIsWaking=" + mCurrentDreamIsWaking);
@@ -190,7 +190,7 @@ public final class DreamManagerService extends SystemService {
 
     private boolean isDreamingInternal() {
         synchronized (mLock) {
-            return mCurrentDreamToken != null && !mCurrentDreamIsTest
+            return mCurrentDreamToken != null && !mCurrentDreamIsPreview
                     && !mCurrentDreamIsWaking;
         }
     }
@@ -235,7 +235,7 @@ public final class DreamManagerService extends SystemService {
 
     private void testDreamInternal(ComponentName dream, int userId) {
         synchronized (mLock) {
-            startDreamLocked(dream, true /*isTest*/, false /*canDoze*/, userId);
+            startDreamLocked(dream, true /*isPreviewMode*/, false /*canDoze*/, userId);
         }
     }
 
@@ -244,7 +244,7 @@ public final class DreamManagerService extends SystemService {
         final ComponentName dream = chooseDreamForUser(doze, userId);
         if (dream != null) {
             synchronized (mLock) {
-                startDreamLocked(dream, false /*isTest*/, doze, userId);
+                startDreamLocked(dream, false /*isPreviewMode*/, doze, userId);
             }
         }
     }
@@ -395,10 +395,10 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void startDreamLocked(final ComponentName name,
-            final boolean isTest, final boolean canDoze, final int userId) {
+            final boolean isPreviewMode, final boolean canDoze, final int userId) {
         if (!mCurrentDreamIsWaking
                 && Objects.equals(mCurrentDreamName, name)
-                && mCurrentDreamIsTest == isTest
+                && mCurrentDreamIsPreview == isPreviewMode
                 && mCurrentDreamCanDoze == canDoze
                 && mCurrentDreamUserId == userId) {
             Slog.i(TAG, "Already in target dream.");
@@ -412,7 +412,7 @@ public final class DreamManagerService extends SystemService {
         final Binder newToken = new Binder();
         mCurrentDreamToken = newToken;
         mCurrentDreamName = name;
-        mCurrentDreamIsTest = isTest;
+        mCurrentDreamIsPreview = isPreviewMode;
         mCurrentDreamCanDoze = canDoze;
         mCurrentDreamUserId = userId;
 
@@ -424,7 +424,7 @@ public final class DreamManagerService extends SystemService {
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
         mHandler.post(wakeLock.wrap(() -> {
             mAtmInternal.notifyDreamStateChanged(true);
-            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock,
+            mController.startDream(newToken, name, isPreviewMode, canDoze, userId, wakeLock,
                     mDreamOverlayServiceName);
         }));
     }
@@ -457,7 +457,7 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamToken = null;
         mCurrentDreamName = null;
-        mCurrentDreamIsTest = false;
+        mCurrentDreamIsPreview = false;
         mCurrentDreamCanDoze = false;
         mCurrentDreamUserId = 0;
         mCurrentDreamIsWaking = false;
