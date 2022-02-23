@@ -2463,7 +2463,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
 
             if (mUserPreferredMode != null) {
-                pw.println(mUserPreferredMode);
+                pw.println(" mUserPreferredMode=" + mUserPreferredMode);
             }
 
             pw.println();
