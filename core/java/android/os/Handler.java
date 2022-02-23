@@ -182,7 +182,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
      * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
@@ -203,7 +203,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param callback The callback interface in which to handle messages, or null.
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
@@ -212,25 +212,17 @@ public class Handler {
      * @hide
      */
     public Handler(@Nullable Callback callback, boolean async) {
-        if (FIND_POTENTIAL_LEAKS) {
-            final Class<? extends Handler> klass = getClass();
-            if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &&
-                    (klass.getModifiers() & Modifier.STATIC) == 0) {
-                Log.w(TAG, "The following Handler class should be static or leaks might occur: " +
-                    klass.getCanonicalName());
-            }
-        }
+        this(getThreadLooper(), callback, async);
+    }
 
-        mLooper = Looper.myLooper();
-        if (mLooper == null) {
+    private static Looper getThreadLooper() {
+        final Looper looper = Looper.myLooper();
+        if (looper == null) {
             throw new RuntimeException(
-                "Can't create handler inside thread " + Thread.currentThread()
-                        + " that has not called Looper.prepare()");
+                    "Can't create handler inside thread " + Thread.currentThread()
+                            + " that has not called Looper.prepare()");
         }
-        mQueue = mLooper.mQueue;
-        mCallback = callback;
-        mAsynchronous = async;
-        mIsShared = false;
+        return looper;
     }
 
     /**
@@ -257,14 +249,44 @@ public class Handler {
         this(looper, callback, async, /* shared= */ false);
     }
 
-    /** @hide */
+    /**
+     * Use the provided {@link Looper} instead of the default one and take a callback
+     * interface in which to handle messages.  Also set whether the handler
+     * should be asynchronous.
+     *
+     * Handlers are synchronous by default unless this constructor is used to make
+     * one that is strictly asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with respect to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by conditions such as display vsync.
+     *
+     * @param looper   The looper, must not be null.
+     * @param callback The callback interface in which to handle messages, or null.
+     * @param async    If true, the handler calls {@link Message#setAsynchronous(boolean)} for
+     *                 each {@link Message} that is sent to it or {@link Runnable} that is posted to
+     *                 it.
+     * @param shared   Whether this Handler might be used by more than one client. A shared Handler
+     *                 applies some extra policy, such as disallowing the removal of all messages,
+     *                 in order to avoid one client affecting another's messages.
+     * @hide
+     */
     public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async,
             boolean shared) {
+        if (FIND_POTENTIAL_LEAKS) {
+            final Class<? extends Handler> klass = getClass();
+            if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass())
+                    && (klass.getModifiers() & Modifier.STATIC) == 0) {
+                Log.w(TAG, "The following Handler class should be static or leaks might occur: "
+                        + klass.getCanonicalName());
+            }
+        }
         mLooper = looper;
         mQueue = looper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
         mIsShared = shared;
+        mClock = looper.getClock();
     }
 
     /**
@@ -702,7 +724,14 @@ public class Handler {
         if (delayMillis < 0) {
             delayMillis = 0;
         }
-        return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);
+        // mClock should theoretically never be null, but some tests create a mock handler that
+        // instantiates an instance where all members are null. Ideally we'd fix these tests to
+        // not rely on this but there are quite a lot at this point, so it's easier to just keep
+        // the existing behavior.
+        if (mClock == null) {
+            return false;
+        }
+        return sendMessageAtTime(msg, mClock.uptimeMillis() + delayMillis);
     }
 
     /**
@@ -895,7 +924,7 @@ public class Handler {
     }
 
     public final void dump(@NonNull Printer pw, @NonNull String prefix) {
-        pw.println(prefix + this + " @ " + SystemClock.uptimeMillis());
+        pw.println(prefix + this + " @ " + mClock.uptimeMillis());
         if (mLooper == null) {
             pw.println(prefix + "looper uninitialized");
         } else {
@@ -907,7 +936,7 @@ public class Handler {
      * @hide
      */
     public final void dumpMine(@NonNull Printer pw, @NonNull String prefix) {
-        pw.println(prefix + this + " @ " + SystemClock.uptimeMillis());
+        pw.println(prefix + this + " @ " + mClock.uptimeMillis());
         if (mLooper == null) {
             pw.println(prefix + "looper uninitialized");
         } else {
@@ -964,6 +993,7 @@ public class Handler {
     @UnsupportedAppUsage
     final Callback mCallback;
     final boolean mAsynchronous;
+    final MessageQueue.Clock mClock;
     @UnsupportedAppUsage
     IMessenger mMessenger;
 
@@ -997,9 +1027,9 @@ public class Handler {
 
             synchronized (this) {
                 if (timeout > 0) {
-                    final long expirationTime = SystemClock.uptimeMillis() + timeout;
+                    final long expirationTime = handler.mClock.uptimeMillis() + timeout;
                     while (!mDone) {
-                        long delay = expirationTime - SystemClock.uptimeMillis();
+                        long delay = expirationTime - handler.mClock.uptimeMillis();
                         if (delay <= 0) {
                             return false; // timeout
                         }
