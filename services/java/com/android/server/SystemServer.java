@@ -386,8 +386,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
             "com.android.server.blob.BlobStoreManagerService";
-    private static final String APP_SEARCH_MANAGER_SERVICE_CLASS =
-            "com.android.server.appsearch.AppSearchManagerService";
+    private static final String APPSEARCH_MODULE_LIFECYCLE_CLASS =
+            "com.android.server.appsearch.AppSearchModule$Lifecycle";
     private static final String ISOLATED_COMPILATION_SERVICE_CLASS =
             "com.android.server.compos.IsolatedCompilationService";
     private static final String ROLLBACK_MANAGER_SERVICE_CLASS =
@@ -2764,8 +2764,8 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(SAFETY_CENTER_SERVICE_CLASS);
         t.traceEnd();
 
-        t.traceBegin("AppSearchManagerService");
-        mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
+        t.traceBegin("AppSearchModule");
+        mSystemServiceManager.startService(APPSEARCH_MODULE_LIFECYCLE_CLASS);
         t.traceEnd();
 
         if (SystemProperties.getBoolean("ro.config.isolated_compilation_enabled", false)) {
