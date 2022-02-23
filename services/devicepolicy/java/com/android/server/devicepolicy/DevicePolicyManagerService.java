@@ -9304,7 +9304,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
                 intent.putExtra(Intent.EXTRA_USER, new UserHandle(userId));
                 UserHandle parentHandle = new UserHandle(parent.id);
-                mLocalService.broadcastIntentToCrossProfileManifestReceiversAsUser(intent,
+                mLocalService.broadcastIntentToManifestReceivers(intent,
                         parentHandle, /* requiresPermission= */ true);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
@@ -13311,37 +13311,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return DevicePolicyManagerService.this.getDefaultCrossProfilePackages();
         }
 
-        /**
-         * Sends the {@code intent} to the packages with cross profile capabilities.
-         *
-         * <p>This means the application must have the {@code crossProfile} property and
-         * and at least one of the following permissions:
-         *
-         * <ul>
-         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_PROFILES}
-         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_USERS}
-         *     <li>{@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission or the
-         *     {@link AppOpsManager.OP_INTERACT_ACROSS_PROFILES} app operation authorization.
-         * </ul>
-         *
-         * <p>Note: The intent itself is not modified but copied before use.
-         *
-         * @param intent Template for the intent sent to the packages.
-         * @param parentHandle Handle of the user that will receive the intents.
-         * @param requiresPermission If false, all packages with the {@code crossProfile} property
-         *                           will receive the intent.
-         */
         @Override
-        public void broadcastIntentToCrossProfileManifestReceiversAsUser(Intent intent,
-                UserHandle parentHandle, boolean requiresPermission) {
+        public void broadcastIntentToManifestReceivers(
+                Intent intent, UserHandle parentHandle, boolean requiresPermission) {
             Objects.requireNonNull(intent);
             Objects.requireNonNull(parentHandle);
-            final int userId = parentHandle.getIdentifier();
             Slogf.i(LOG_TAG, "Sending %s broadcast to manifest receivers.", intent.getAction());
+            broadcastIntentToCrossProfileManifestReceivers(
+                    intent, parentHandle, requiresPermission);
+            broadcastIntentToDevicePolicyManagerRoleHolder(intent, parentHandle);
+        }
+
+        private void broadcastIntentToCrossProfileManifestReceivers(
+                Intent intent, UserHandle userHandle, boolean requiresPermission) {
+            final int userId = userHandle.getIdentifier();
             try {
                 final List<ResolveInfo> receivers = mIPackageManager.queryIntentReceivers(
                         intent, /* resolvedType= */ null,
-                        STOCK_PM_FLAGS, parentHandle.getIdentifier()).getList();
+                        STOCK_PM_FLAGS, userId).getList();
                 for (ResolveInfo receiver : receivers) {
                     final String packageName = receiver.getComponentInfo().packageName;
                     if (checkCrossProfilePackagePermissions(packageName, userId,
@@ -13352,9 +13339,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         final Intent packageIntent = new Intent(intent)
                                 .setComponent(receiver.getComponentInfo().getComponentName())
                                 .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                        mContext.sendBroadcastAsUser(packageIntent, parentHandle);
+                        mContext.sendBroadcastAsUser(packageIntent, userHandle);
                     }
                 }
+            } catch (RemoteException ex) {
+                Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
+                        intent.getAction(), ex);
+            }
+        }
+
+        private void broadcastIntentToDevicePolicyManagerRoleHolder(
+                Intent intent, UserHandle userHandle) {
+            final int userId = userHandle.getIdentifier();
+            final String packageName = getDevicePolicyManagementRoleHolderPackageName(mContext);
+            if (packageName == null) {
+                return;
+            }
+            try {
+                final Intent packageIntent = new Intent(intent)
+                        .setPackage(packageName);
+                final List<ResolveInfo> receivers = mIPackageManager.queryIntentReceivers(
+                        packageIntent,
+                        /* resolvedType= */ null,
+                        STOCK_PM_FLAGS,
+                        userId).getList();
+                if (receivers.isEmpty()) {
+                    return;
+                }
+                packageIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                mContext.sendBroadcastAsUser(packageIntent, userHandle);
             } catch (RemoteException ex) {
                 Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
                         intent.getAction(), ex);
