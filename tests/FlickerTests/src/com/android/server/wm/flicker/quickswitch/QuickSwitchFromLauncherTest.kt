@@ -91,6 +91,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
 
                 wmHelper.waitForFullScreenApp(testApp.component)
                 wmHelper.waitForAppTransitionIdle()
+                wmHelper.waitForNavBarStatusBarVisible()
             }
 
             teardown {
