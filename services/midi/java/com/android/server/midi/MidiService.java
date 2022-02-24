@@ -768,7 +768,6 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
                 if (device.isUidAllowed(uid)) {
-                    deviceInfos.add(device.getDeviceInfo());
                     // UMP devices have protocols that are not PROTOCOL_UNKNOWN
                     if (transport == MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
                         if (device.getDeviceInfo().getDefaultProtocol()
