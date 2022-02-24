@@ -79,6 +79,7 @@ stubs_defaults {
         ":conscrypt.module.public.api{.public.stubs.source}",
         ":i18n.module.public.api{.public.stubs.source}",
 
+        ":framework-adservices-sources",
         ":framework-appsearch-sources",
         ":framework-auxiliary-sources",
         ":framework-connectivity-sources",
