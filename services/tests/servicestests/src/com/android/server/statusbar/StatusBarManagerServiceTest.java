@@ -584,55 +584,55 @@ public class StatusBarManagerServiceTest {
     }
 
     @Test
-    public void testSetNavBarModeOverride_setsOverrideModeKids() throws RemoteException {
-        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+    public void testSetNavBarMode_setsModeKids() throws RemoteException {
+        int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
 
-        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+        mStatusBarManagerService.setNavBarMode(navBarModeKids);
 
-        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        assertEquals(navBarModeKids, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_setsOverrideModeNone() throws RemoteException {
-        int navBarModeOverrideNone = StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
+    public void testSetNavBarMode_setsModeNone() throws RemoteException {
+        int navBarModeNone = StatusBarManager.NAV_BAR_MODE_DEFAULT;
 
-        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideNone);
+        mStatusBarManagerService.setNavBarMode(navBarModeNone);
 
-        assertEquals(navBarModeOverrideNone, mStatusBarManagerService.getNavBarModeOverride());
+        assertEquals(navBarModeNone, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_invalidInputThrowsError() throws RemoteException {
-        int navBarModeOverrideInvalid = -1;
+    public void testSetNavBarMode_invalidInputThrowsError() throws RemoteException {
+        int navBarModeInvalid = -1;
 
         assertThrows(UnsupportedOperationException.class,
-                () -> mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideInvalid));
+                () -> mStatusBarManagerService.setNavBarMode(navBarModeInvalid));
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_noOverlayManagerDoesNotEnable() throws RemoteException {
+    public void testSetNavBarMode_noOverlayManagerDoesNotEnable() throws RemoteException {
         mOverlayManager = null;
-        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+        int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
 
-        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+        mStatusBarManagerService.setNavBarMode(navBarModeKids);
 
-        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        assertEquals(navBarModeKids, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_noPackageDoesNotEnable() throws Exception {
+    public void testSetNavBarMode_noPackageDoesNotEnable() throws Exception {
         mContext.setMockPackageManager(mPackageManager);
         when(mPackageManager.getPackageInfo(anyString(),
                 any(PackageManager.PackageInfoFlags.class))).thenReturn(null);
-        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+        int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
 
-        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+        mStatusBarManagerService.setNavBarMode(navBarModeKids);
 
-        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        assertEquals(navBarModeKids, mStatusBarManagerService.getNavBarMode());
         verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
