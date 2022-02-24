@@ -35,7 +35,7 @@ import java.util.Objects;
 @SystemApi
 public final class DevicePolicyStringResource implements Parcelable {
     @NonNull private final @DevicePolicyResources.UpdatableStringId String mStringId;
-    private final @StringRes int mCallingPackageResourceId;
+    private final @StringRes int mResourceIdInCallingPackage;
     @NonNull private ParcelableResource mResource;
 
     /**
@@ -43,32 +43,32 @@ public final class DevicePolicyStringResource implements Parcelable {
      * resource using {@link DevicePolicyManager#setStrings}.
      *
      * <p>It will be used to update the string defined by {@code stringId} to the string with ID
-     * {@code callingPackageResourceId} in the calling package</p>
+     * {@code resourceIdInCallingPackage} in the calling package</p>
      *
      * @param stringId The ID of the string to update.
-     * @param callingPackageResourceId The ID of the {@link StringRes} in the calling package to
+     * @param resourceIdInCallingPackage The ID of the {@link StringRes} in the calling package to
      * use as an updated resource.
      *
-     * @throws IllegalStateException if the resource with ID {@code callingPackageResourceId}
+     * @throws IllegalStateException if the resource with ID {@code resourceIdInCallingPackage}
      * doesn't exist in the {@code context} package.
      */
     public DevicePolicyStringResource(
             @NonNull Context context,
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @StringRes int callingPackageResourceId) {
-        this(stringId, callingPackageResourceId, new ParcelableResource(
-                context, callingPackageResourceId, ParcelableResource.RESOURCE_TYPE_STRING));
+            @StringRes int resourceIdInCallingPackage) {
+        this(stringId, resourceIdInCallingPackage, new ParcelableResource(
+                context, resourceIdInCallingPackage, ParcelableResource.RESOURCE_TYPE_STRING));
     }
 
     private DevicePolicyStringResource(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @StringRes int callingPackageResourceId,
+            @StringRes int resourceIdInCallingPackage,
             @NonNull ParcelableResource resource) {
         Objects.requireNonNull(stringId, "stringId must be provided.");
         Objects.requireNonNull(resource, "ParcelableResource must be provided.");
 
         this.mStringId = stringId;
-        this.mCallingPackageResourceId = callingPackageResourceId;
+        this.mResourceIdInCallingPackage = resourceIdInCallingPackage;
         this.mResource = resource;
     }
 
@@ -85,8 +85,8 @@ public final class DevicePolicyStringResource implements Parcelable {
      * Returns the ID of the {@link StringRes} in the calling package to use as an updated
      * resource.
      */
-    public int getCallingPackageResourceId() {
-        return mCallingPackageResourceId;
+    public int getResourceIdInCallingPackage() {
+        return mResourceIdInCallingPackage;
     }
 
     /**
@@ -105,13 +105,13 @@ public final class DevicePolicyStringResource implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         DevicePolicyStringResource other = (DevicePolicyStringResource) o;
         return mStringId == other.mStringId
-                && mCallingPackageResourceId == other.mCallingPackageResourceId
+                && mResourceIdInCallingPackage == other.mResourceIdInCallingPackage
                 && mResource.equals(other.mResource);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStringId, mCallingPackageResourceId, mResource);
+        return Objects.hash(mStringId, mResourceIdInCallingPackage, mResource);
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class DevicePolicyStringResource implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mStringId);
-        dest.writeInt(mCallingPackageResourceId);
+        dest.writeInt(mResourceIdInCallingPackage);
         dest.writeTypedObject(mResource, flags);
     }
 
@@ -131,10 +131,10 @@ public final class DevicePolicyStringResource implements Parcelable {
         @Override
         public DevicePolicyStringResource createFromParcel(Parcel in) {
             String stringId = in.readString();
-            int callingPackageResourceId = in.readInt();
+            int resourceIdInCallingPackage = in.readInt();
             ParcelableResource resource = in.readTypedObject(ParcelableResource.CREATOR);
 
-            return new DevicePolicyStringResource(stringId, callingPackageResourceId, resource);
+            return new DevicePolicyStringResource(stringId, resourceIdInCallingPackage, resource);
         }
 
         @Override
