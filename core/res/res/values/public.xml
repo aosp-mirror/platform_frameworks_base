@@ -3211,8 +3211,6 @@
   </staging-public-group-final>
 
   <public type="attr" name="shouldUseDefaultUnfoldTransition" id="0x0101064c" />
-  <public type="attr" name="lineBreakStyle" id="0x0101064d" />
-  <public type="attr" name="lineBreakWordStyle" id="0x0101064e" />
 
   <staging-public-group-final type="id" first-id="0x01fe0000">
     <public name="accessibilityActionDragStart" />
@@ -3281,6 +3279,8 @@
     <public name="intro" />
     <public name="enableOnBackInvokedCallback" />
     <public name="supportsInlineSuggestionsWithTouchExploration" />
+    <public name="lineBreakStyle" />
+    <public name="lineBreakWordStyle" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
