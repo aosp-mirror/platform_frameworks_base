@@ -3034,7 +3034,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void onKeyguardShowingAndNotOccludedChanged() {
         mH.sendEmptyMessage(H.RECOMPUTE_FOCUS);
-        dispatchKeyguardLockedStateState();
+        dispatchKeyguardLockedState();
     }
 
     @Override
@@ -3248,7 +3248,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " permission required to read keyguard visibility");
     }
 
-    private void dispatchKeyguardLockedStateState() {
+    private void dispatchKeyguardLockedState() {
         mH.post(() -> {
             final boolean isKeyguardLocked = mPolicy.isKeyguardShowing();
             if (mDispatchedKeyguardLockedState == isKeyguardLocked) {
