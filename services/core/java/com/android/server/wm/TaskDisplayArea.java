@@ -941,35 +941,31 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     Task getOrCreateRootTask(int windowingMode, int activityType, boolean onTop,
             @Nullable Task candidateTask, @Nullable Task sourceTask,
             @Nullable ActivityOptions options, int launchFlags) {
+        final int resolvedWindowingMode =
+                windowingMode == WINDOWING_MODE_UNDEFINED ? getWindowingMode() : windowingMode;
         // Need to pass in a determined windowing mode to see if a new root task should be created,
         // so use its parent's windowing mode if it is undefined.
-        if (!alwaysCreateRootTask(
-                windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : getWindowingMode(),
-                activityType)) {
-            Task rootTask = getRootTask(windowingMode, activityType);
+        if (!alwaysCreateRootTask(resolvedWindowingMode, activityType)) {
+            Task rootTask = getRootTask(resolvedWindowingMode, activityType);
             if (rootTask != null) {
                 return rootTask;
             }
         } else if (candidateTask != null) {
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
-            final Task launchRootTask = getLaunchRootTask(windowingMode, activityType, options,
-                    sourceTask, launchFlags);
+            final Task launchRootTask = getLaunchRootTask(resolvedWindowingMode, activityType,
+                    options, sourceTask, launchFlags);
             if (launchRootTask != null) {
                 if (candidateTask.getParent() == null) {
                     launchRootTask.addChild(candidateTask, position);
                 } else if (candidateTask.getParent() != launchRootTask) {
                     candidateTask.reparent(launchRootTask, position);
                 }
-            } else if (candidateTask.getDisplayArea() != this || !candidateTask.isRootTask()) {
+            } else if (candidateTask.getDisplayArea() != this) {
                 if (candidateTask.getParent() == null) {
                     addChild(candidateTask, position);
                 } else {
                     candidateTask.reparent(this, onTop);
                 }
-            }
-            // Update windowing mode if necessary, e.g. moving a pinned task to fullscreen.
-            if (candidateTask.getWindowingMode() != windowingMode) {
-                candidateTask.setWindowingMode(windowingMode);
             }
             return candidateTask.getRootTask();
         }
