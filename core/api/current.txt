@@ -3248,7 +3248,7 @@ package android.accessibilityservice {
     method public int getNonInteractiveUiTimeoutMillis();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public String getSettingsActivityName();
-    method @Nullable public String getTileServiceClassName();
+    method @Nullable public String getTileServiceName();
     method public boolean isAccessibilityTool();
     method public String loadDescription(android.content.pm.PackageManager);
     method @Nullable public CharSequence loadIntro(@NonNull android.content.pm.PackageManager);
