@@ -3329,7 +3329,7 @@ package android.accessibilityservice {
   }
 
   public class InputMethod {
-    ctor protected InputMethod(@NonNull android.accessibilityservice.AccessibilityService);
+    ctor public InputMethod(@NonNull android.accessibilityservice.AccessibilityService);
     method @Nullable public final android.accessibilityservice.InputMethod.AccessibilityInputConnection getCurrentInputConnection();
     method @Nullable public final android.view.inputmethod.EditorInfo getCurrentInputEditorInfo();
     method public final boolean getCurrentInputStarted();
