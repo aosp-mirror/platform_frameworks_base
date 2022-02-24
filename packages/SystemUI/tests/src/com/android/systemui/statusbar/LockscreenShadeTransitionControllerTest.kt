@@ -23,7 +23,7 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBar
-import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -66,6 +66,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock lateinit var mediaHierarchyManager: MediaHierarchyManager
     @Mock lateinit var scrimController: ScrimController
+    @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var notificationPanelController: NotificationPanelViewController
     @Mock lateinit var nsslController: NotificationStackScrollLayoutController
@@ -75,8 +76,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var statusbar: StatusBar
     @Mock lateinit var qS: QS
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-
-    private val configurationController = FakeConfigurationController()
 
     @Before
     fun setup() {
@@ -244,28 +243,5 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 anyBoolean(), anyLong())
         verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(depthController).transitionToFullShadeProgress = anyFloat()
-    }
-
-    @Test
-    fun setDragDownAmount_setsValueOnMediaHierarchyManager() {
-        transitionController.dragDownAmount = 10f
-
-        verify(mediaHierarchyManager).setTransitionToFullShadeAmount(10f)
-    }
-
-    @Test
-    fun setDragDownAmount_inSplitShade_setsValueOnMediaHierarchyManager() {
-        enableSplitShade()
-
-        transitionController.dragDownAmount = 10f
-
-        verify(mediaHierarchyManager).setTransitionToFullShadeAmount(10f)
-    }
-
-    private fun enableSplitShade() {
-        context.getOrCreateTestableResources().addOverride(
-            R.bool.config_use_split_notification_shade, true
-        )
-        configurationController.notifyConfigurationChanged()
     }
 }
