@@ -31,6 +31,7 @@
 
 class SkAnimatedImage;
 class SkCanvasState;
+class SkRRect;
 class SkRuntimeShaderBuilder;
 class SkVertices;
 

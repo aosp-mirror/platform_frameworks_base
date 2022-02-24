@@ -15,7 +15,11 @@
  */
 
 #include "RenderNodeDrawable.h"
+#include <SkPaint.h>
 #include <SkPaintFilterCanvas.h>
+#include <SkPoint.h>
+#include <SkRRect.h>
+#include <SkRect.h>
 #include <gui/TraceUtils.h>
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"

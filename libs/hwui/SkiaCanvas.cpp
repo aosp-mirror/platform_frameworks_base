@@ -27,6 +27,7 @@
 
 #include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
+#include <SkBitmap.h>
 #include <SkCanvasPriv.h>
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
@@ -36,8 +37,13 @@
 #include <SkGraphics.h>
 #include <SkImage.h>
 #include <SkImagePriv.h>
+#include <SkMatrix.h>
+#include <SkPaint.h>
 #include <SkPicture.h>
 #include <SkRSXform.h>
+#include <SkRRect.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <SkShader.h>
 #include <SkTemplates.h>
 #include <SkTextBlob.h>

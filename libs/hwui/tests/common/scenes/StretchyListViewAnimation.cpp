@@ -15,6 +15,7 @@
  */
 
 #include <SkFont.h>
+#include <SkRRect.h>
 #include <cstdio>
 #include "TestSceneBase.h"
 #include "hwui/Paint.h"
