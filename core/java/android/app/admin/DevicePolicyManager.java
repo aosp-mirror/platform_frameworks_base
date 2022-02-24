@@ -3611,42 +3611,45 @@ public class DevicePolicyManager {
 
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
-     * resources with IDs {@link #EXTRA_RESOURCE_ID} has been updated, the updated resources can be
+     * resources with IDs {@link #EXTRA_RESOURCE_IDS} has been updated, the updated resources can be
      * retrieved using {@link #getDrawable} and {@code #getString}.
      *
      * <p>This broadcast is sent to registered receivers only.
      *
-     * <p> The following extras will be included to identify the type of resource being updated:
-     * <ul>
-     *     <li>{@link #EXTRA_RESOURCE_TYPE_DRAWABLE} for drawable resources</li>
-     *     <li>{@link #EXTRA_RESOURCE_TYPE_STRING} for string resources</li>
-     * </ul>
+     * <p> {@link #EXTRA_RESOURCE_TYPE} will be included to identify the type of resource being
+     * updated.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED =
             "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
 
     /**
-     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
-     * resource of type {@link Drawable} is being updated.
+     * An {@code int} extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate the type
+     * of the resource being updated, the type can be {@link #EXTRA_RESOURCE_TYPE_DRAWABLE} or
+     * {@link #EXTRA_RESOURCE_TYPE_STRING}
      */
-    public static final String EXTRA_RESOURCE_TYPE_DRAWABLE =
-            "android.app.extra.RESOURCE_TYPE_DRAWABLE";
+    public static final String EXTRA_RESOURCE_TYPE =
+            "android.app.extra.RESOURCE_TYPE";
 
     /**
-     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
-     * resource of type {@link String} is being updated.
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link Drawable} is being updated.
      */
-    public static final String EXTRA_RESOURCE_TYPE_STRING =
-            "android.app.extra.RESOURCE_TYPE_STRING";
+    public static final int EXTRA_RESOURCE_TYPE_DRAWABLE = 1;
+
+    /**
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link String} is being updated.
+     */
+    public static final int EXTRA_RESOURCE_TYPE_STRING = 2;
 
     /**
      * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
-     * resource IDs (see {@link DevicePolicyResources.UpdatableDrawableId} and
-     * {@link DevicePolicyResources.UpdatableStringId}) have been updated.
+     * resource IDs (see {@link DevicePolicyResources.Drawables} and
+     * {@link DevicePolicyResources.Strings}) have been updated.
      */
-    public static final String EXTRA_RESOURCE_ID =
-            "android.app.extra.RESOURCE_ID";
+    public static final String EXTRA_RESOURCE_IDS =
+            "android.app.extra.RESOURCE_IDS";
 
     /** @hide */
     @NonNull

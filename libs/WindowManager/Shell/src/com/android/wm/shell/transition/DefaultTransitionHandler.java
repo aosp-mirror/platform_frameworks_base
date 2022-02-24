@@ -26,6 +26,7 @@ import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE_DRAWABLE;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
@@ -156,9 +157,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private BroadcastReceiver mEnterpriseResourceUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean isDrawable = intent.getBooleanExtra(
-                    EXTRA_RESOURCE_TYPE_DRAWABLE, /* default= */ false);
-            if (!isDrawable) {
+            if (intent.getIntExtra(EXTRA_RESOURCE_TYPE, /* default= */ -1)
+                    != EXTRA_RESOURCE_TYPE_DRAWABLE) {
                 return;
             }
             updateEnterpriseThumbnailDrawable();
