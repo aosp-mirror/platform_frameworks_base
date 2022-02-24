@@ -1141,8 +1141,13 @@ public class NotificationPanelViewController extends PanelViewController
                         R.dimen.split_shade_notifications_scrim_margin_bottom);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
-        mShouldUseSplitNotificationShade =
+
+        final boolean newShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mResources);
+        final boolean splitNotificationShadeChanged =
+                mShouldUseSplitNotificationShade != newShouldUseSplitNotificationShade;
+
+        mShouldUseSplitNotificationShade = newShouldUseSplitNotificationShade;
         if (mQs != null) {
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
@@ -1188,6 +1193,10 @@ public class NotificationPanelViewController extends PanelViewController
         updateKeyguardStatusViewAlignment(/* animate= */false);
 
         mKeyguardMediaController.refreshMediaPosition();
+
+        if (splitNotificationShadeChanged) {
+            updateClockAppearance();
+        }
     }
 
     private static void ensureAllViewsHaveIds(ViewGroup parentView) {
