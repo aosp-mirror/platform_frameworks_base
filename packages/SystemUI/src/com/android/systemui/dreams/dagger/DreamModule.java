@@ -19,6 +19,7 @@ package com.android.systemui.dreams.dagger;
 import android.content.Context;
 
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.dreams.complication.dagger.DreamPreviewComplicationComponent;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
 
@@ -34,6 +35,7 @@ import dagger.Provides;
         },
         subcomponents = {
             DreamOverlayComponent.class,
+            DreamPreviewComplicationComponent.class,
         })
 public interface DreamModule {
     /**
