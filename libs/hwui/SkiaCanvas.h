@@ -33,6 +33,8 @@
 #include <cassert>
 #include <optional>
 
+class SkRRect;
+
 namespace android {
 
 // Holds an SkCanvas reference plus additional native data.
