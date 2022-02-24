@@ -27,13 +27,13 @@ public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
     public long mNativeObject; // BLASTBufferQueue*
 
-    private static native long nativeCreate(String name);
+    private static native long nativeCreate(String name, boolean updateDestinationFrame);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetSyncTransaction(long ptr, long transactionPtr,
             boolean acquireSingleBuffer);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
-            int format, long transactionPtr);
+            int format);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
@@ -45,12 +45,12 @@ public final class BLASTBufferQueue {
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        this(name);
+        this(name, false /* updateDestinationFrame */);
         update(sc, width, height, format);
     }
 
-    public BLASTBufferQueue(String name) {
-        mNativeObject = nativeCreate(name);
+    public BLASTBufferQueue(String name, boolean updateDestinationFrame) {
+        mNativeObject = nativeCreate(name, updateDestinationFrame);
     }
 
     public void destroy() {
@@ -101,15 +101,9 @@ public final class BLASTBufferQueue {
      * @param width The new width for the buffer.
      * @param height The new height for the buffer.
      * @param format The new format for the buffer.
-     * @param t Adds destination frame changes to the passed in transaction.
      */
-    public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format,
-            SurfaceControl.Transaction t) {
-        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, t.mNativeObject);
-    }
-
     public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format) {
-        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, 0);
+        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format);
     }
 
     @Override
