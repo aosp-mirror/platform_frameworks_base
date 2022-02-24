@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 /**
@@ -42,6 +43,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     internal val context: Context,
     private val windowManager: WindowManager,
     @Main private val mainExecutor: DelayableExecutor,
+    private val tapGestureDetector: TapGestureDetector,
     @LayoutRes private val chipLayoutRes: Int
 ) {
     /** The window layout parameters we'll use when attaching the view to a window. */
@@ -82,6 +84,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 
         // Add view if necessary
         if (oldChipView == null) {
+            tapGestureDetector.addOnGestureDetectedCallback(TAG, this::removeChip)
             windowManager.addView(chipView, windowLayoutParams)
         }
 
@@ -96,6 +99,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         //  TransferTriggered state: Once the user has initiated the transfer, they should be able
         //  to move away from the receiver device but still see the status of the transfer.
         if (chipView == null) { return }
+        tapGestureDetector.removeOnGestureDetectedCallback(TAG)
         windowManager.removeView(chipView)
         chipView = null
     }
@@ -128,5 +132,6 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
+private val TAG = MediaTttChipControllerCommon::class.simpleName!!
 @VisibleForTesting
 const val TIMEOUT_MILLIS = 3000L
