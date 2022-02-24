@@ -1058,7 +1058,7 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private DynamicRangeProfiles getDynamicRangeProfiles() {
-        int[] profileArray = getBase(
+        long[] profileArray = getBase(
                 CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP);
 
         if (profileArray == null) {
