@@ -1605,7 +1605,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         task.mTransitionController.requestCloseTransitionIfNeeded(task);
         task.mInRemoveTask = true;
         try {
-            task.performClearTask(reason);
+            task.removeActivities(reason, false /* excludingTaskOverlay */);
             cleanUpRemovedTaskLocked(task, killProcess, removeFromRecents);
             mService.getLockTaskController().clearLockedTask(task);
             mService.getTaskChangeNotificationController().notifyTaskStackChanged();
