@@ -60,32 +60,17 @@ public final class SubImageTemplateData extends BaseTemplateData {
     }
 
     private SubImageTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subtitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable SubItemLoggingInfo primaryLoggingInfo,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
-            @Nullable Text supplementalText,
-            @Nullable Icon supplementalIcon,
-            @Nullable TapAction supplementalTapAction,
-            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
             int layoutWeight,
             @NonNull List<Text> subImageTexts,
             @NonNull List<Icon> subImages,
             @Nullable TapAction subImageAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
-                primaryTapAction, primaryLoggingInfo,
-                supplementalSubtitleText, supplementalSubtitleIcon,
-                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
-                supplementalText, supplementalIcon,
-                supplementalTapAction, supplementalLoggingInfo,
-                supplementalAlarmText, layoutWeight);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
 
         mSubImageTexts = subImageTexts;
         mSubImages = subImages;
@@ -204,14 +189,9 @@ public final class SubImageTemplateData extends BaseTemplateData {
          */
         @NonNull
         public SubImageTemplateData build() {
-            return new SubImageTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
-                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
-                    getSupplementalText(), getSupplementalIcon(),
-                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
-                    getSupplementalAlarmText(), getLayoutWeight(),
+            return new SubImageTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
                     mSubImageTexts,
                     mSubImages,
                     mSubImageAction);
