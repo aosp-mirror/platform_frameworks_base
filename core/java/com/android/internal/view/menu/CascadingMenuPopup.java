@@ -1,11 +1,5 @@
 package com.android.internal.view.menu;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import android.annotation.AttrRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -22,16 +16,16 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
+import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
-import android.widget.MenuItemHoverListener;
 import android.widget.ListView;
+import android.widget.MenuItemHoverListener;
 import android.widget.MenuPopupWindow;
 import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
@@ -39,6 +33,11 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A popup for a menu which will allow multiple submenus to appear in a cascading fashion, side by
@@ -70,7 +69,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private final Handler mSubMenuHoverHandler;
 
     /** List of menus that were added before this popup was shown. */
-    private final List<MenuBuilder> mPendingMenus = new LinkedList<>();
+    private final List<MenuBuilder> mPendingMenus = new ArrayList<>();
 
     /**
      * List of open menus. The first item is the root menu and each
