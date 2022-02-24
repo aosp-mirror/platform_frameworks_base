@@ -5499,7 +5499,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * display, which set unrestricted keep-clear areas.
      *
      * For context on restricted vs unrestricted keep-clear areas, see
-     * {@link android.Manifest.permission.USE_UNRESTRICTED_KEEP_CLEAR_AREAS}.
+     * {@link android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS}.
      */
     void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();

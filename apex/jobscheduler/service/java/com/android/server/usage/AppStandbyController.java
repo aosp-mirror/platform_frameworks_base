@@ -25,6 +25,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_APP_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_USER_FLAG_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
 import static android.app.usage.UsageStatsManager.REASON_SUB_PREDICTED_RESTORED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOUT;
@@ -1581,7 +1582,11 @@ public class AppStandbyController
                     // Only user force can bypass the delay restriction. If the user forced the
                     // app into the RESTRICTED bucket, then a toast confirming the action
                     // shouldn't be surprising.
-                    if (Build.IS_DEBUGGABLE) {
+                    // Exclude REASON_SUB_FORCED_USER_FLAG_INTERACTION since the RESTRICTED bucket
+                    // isn't directly visible in that flow.
+                    if (Build.IS_DEBUGGABLE
+                            && (reason & REASON_SUB_MASK)
+                            != REASON_SUB_FORCED_USER_FLAG_INTERACTION) {
                         Toast.makeText(mContext,
                                 // Since AppStandbyController sits low in the lock hierarchy,
                                 // make sure not to call out with the lock held.

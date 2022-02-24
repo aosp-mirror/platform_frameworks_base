@@ -148,6 +148,7 @@ import static com.android.server.wm.ActivityRecordProto.ALL_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.APP_STOPPED;
 import static com.android.server.wm.ActivityRecordProto.CLIENT_VISIBLE;
 import static com.android.server.wm.ActivityRecordProto.DEFER_HIDING_CLIENT;
+import static com.android.server.wm.ActivityRecordProto.ENABLE_RECENTS_SCREENSHOT;
 import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.wm.ActivityRecordProto.IN_SIZE_COMPAT_MODE;
@@ -771,7 +772,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
-    boolean mEnablePreviewScreenshots = true;
+    boolean mEnableRecentsScreenshot = true;
 
     // Information about an application starting window if displayed.
     // Note: these are de-referenced before the starting window animates away.
@@ -5151,7 +5152,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * See {@link Activity#setRecentsScreenshotEnabled}.
      */
     void setRecentsScreenshotEnabled(boolean enabled) {
-        mEnablePreviewScreenshots = enabled;
+        mEnableRecentsScreenshot = enabled;
     }
 
     /**
@@ -5163,7 +5164,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         screenshot.
      */
     boolean shouldUseAppThemeSnapshot() {
-        return !mEnablePreviewScreenshots || forAllWindows(WindowState::isSecureLocked,
+        return !mEnableRecentsScreenshot || forAllWindows(WindowState::isSecureLocked,
                 true /* topToBottom */);
     }
 
@@ -9184,6 +9185,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Only record if max bounds sandboxing is applied, if the caller has the necessary
         // permission to access the device configs.
         proto.write(PROVIDES_MAX_BOUNDS, providesMaxBounds());
+        proto.write(ENABLE_RECENTS_SCREENSHOT, mEnableRecentsScreenshot);
     }
 
     @Override

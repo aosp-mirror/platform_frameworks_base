@@ -32,6 +32,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
@@ -225,6 +227,36 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) != 0).isTrue();
         assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
+    }
+
+    @Test
+    public void rotationBecameAllowed_layoutParamsUpdated() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(false);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+        clearInvocations(mWindowManager);
+
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(true);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().screenOrientation)
+                .isEqualTo(ActivityInfo.SCREEN_ORIENTATION_USER);
+    }
+
+    @Test
+    public void rotationBecameNotAllowed_layoutParamsUpdated() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(true);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+        clearInvocations(mWindowManager);
+
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(false);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().screenOrientation)
+                .isEqualTo(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
     }
 
     @Test

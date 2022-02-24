@@ -79,6 +79,9 @@ class DialogLaunchAnimator @JvmOverloads constructor(
      * If [animateBackgroundBoundsChange] is true, then the background of the dialog will be
      * animated when the dialog bounds change.
      *
+     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
+     * animated.
+     *
      * Caveats: When calling this function and [dialog] is not a fullscreen dialog, then it will be
      * made fullscreen and 2 views will be inserted between the dialog DecorView and its children.
      */
@@ -152,6 +155,9 @@ class DialogLaunchAnimator @JvmOverloads constructor(
      * The returned controller will take care of dismissing the dialog at the right time after the
      * activity started, when the dialog to app animation is done (or when it is cancelled). If this
      * method returns null, then the dialog won't be dismissed.
+     *
+     * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
+     * animated.
      *
      * @param view any view inside the dialog to animate.
      */

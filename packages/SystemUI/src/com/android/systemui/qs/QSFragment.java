@@ -513,7 +513,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mContainer.setExpansion(expansion);
         final float translationScaleY = (mInSplitShade
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
-        boolean onKeyguardAndExpanded = isKeyguardState() && !mShowCollapsedOnKeyguard;
+        boolean onKeyguard = isKeyguardState();
+        boolean onKeyguardAndExpanded = onKeyguard && !mShowCollapsedOnKeyguard;
         if (!mHeaderAnimating && !headerWillBeAnimating()) {
             getView().setTranslationY(
                     onKeyguardAndExpanded
@@ -547,6 +548,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mHeader.updateResources();
             }
         }
+        mQSPanelController.setIsOnKeyguard(onKeyguard);
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSFooterActionController.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanelController.setRevealExpansion(expansion);

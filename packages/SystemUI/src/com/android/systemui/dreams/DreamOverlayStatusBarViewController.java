@@ -24,6 +24,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 
 import java.lang.annotation.Retention;
@@ -48,6 +49,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private static final int WIFI_STATUS_AVAILABLE = 2;
 
     private final ConnectivityManager mConnectivityManager;
+    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
 
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
@@ -77,9 +79,11 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     @Inject
     public DreamOverlayStatusBarViewController(
             DreamOverlayStatusBarView view,
-            ConnectivityManager connectivityManager) {
+            ConnectivityManager connectivityManager,
+            TouchInsetManager.TouchInsetSession touchInsetSession) {
         super(view);
         mConnectivityManager = connectivityManager;
+        mTouchInsetSession = touchInsetSession;
     }
 
     @Override
@@ -92,11 +96,13 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         onWifiAvailabilityChanged(
                 capabilities != null
                         && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+        mTouchInsetSession.addViewToTracking(mView);
     }
 
     @Override
     protected void onViewDetached() {
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+        mTouchInsetSession.clear();
     }
 
     /**

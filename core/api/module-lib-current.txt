@@ -413,6 +413,7 @@ package android.os.storage {
 
   public class StorageManager {
     method public long computeStorageCacheBytes(@NonNull java.io.File);
+    method @Nullable public String getCloudMediaProvider();
     method public void notifyAppIoBlocked(@NonNull java.util.UUID, int, int, int);
     method public void notifyAppIoResumed(@NonNull java.util.UUID, int, int, int);
     method public void setCloudMediaProvider(@Nullable String);
