@@ -48,7 +48,6 @@ import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
-import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
@@ -95,7 +94,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
-    @Mock private lateinit var shadeController: ShadeController
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
@@ -171,7 +169,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 interactionJankMonitor,
                 latencyTracker,
                 dumpManager,
-                { shadeController },
                 dialogLaunchAnimator)
         userSwitcherController.init(notificationShadeWindowView)
     }
