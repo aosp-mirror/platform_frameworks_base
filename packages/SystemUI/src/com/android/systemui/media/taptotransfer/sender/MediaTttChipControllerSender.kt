@@ -29,6 +29,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -43,12 +44,19 @@ import javax.inject.Inject
 class MediaTttChipControllerSender @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
+    @MediaTttSenderLogger logger: MediaTttLogger,
     windowManager: WindowManager,
     viewUtil: ViewUtil,
     @Main mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
 ) : MediaTttChipControllerCommon<ChipStateSender>(
-    context, windowManager, viewUtil, mainExecutor,  tapGestureDetector, R.layout.media_ttt_chip
+    context,
+    logger,
+    windowManager,
+    viewUtil,
+    mainExecutor,
+    tapGestureDetector,
+    R.layout.media_ttt_chip
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferSenderDisplay(
@@ -71,6 +79,7 @@ class MediaTttChipControllerSender @Inject constructor(
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?
     ) {
+        logger.logStateChange(stateIntToString(displayState), routeInfo.id)
         val appPackageName = routeInfo.packageName
         val otherDeviceName = routeInfo.name.toString()
         val chipState = when(displayState) {
@@ -90,7 +99,7 @@ class MediaTttChipControllerSender @Inject constructor(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
                 TransferFailed(appPackageName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER -> {
-                removeChip()
+                removeChip(removalReason = FAR_FROM_RECEIVER)
                 null
             }
             else -> {
@@ -129,6 +138,31 @@ class MediaTttChipControllerSender @Inject constructor(
         currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
             if (showFailure) { View.VISIBLE } else { View.GONE }
     }
+
+    private fun stateIntToString(@StatusBarManager.MediaTransferSenderState state: Int): String {
+        return when(state) {
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST ->
+                "ALMOST_CLOSE_TO_START_CAST"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST ->
+                "ALMOST_CLOSE_TO_END_CAST"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED ->
+                "TRANSFER_TO_RECEIVER_TRIGGERED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED ->
+                "TRANSFER_TO_THIS_DEVICE_TRIGGERED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED ->
+                "TRANSFER_TO_RECEIVER_SUCCEEDED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED ->
+                "TRANSFER_TO_THIS_DEVICE_SUCCEEDED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED ->
+                "TRANSFER_TO_RECEIVER_FAILED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
+                "TRANSFER_TO_THIS_DEVICE_FAILED"
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER ->
+                FAR_FROM_RECEIVER
+            else -> "INVALID: $state"
+        }
+    }
 }
 
 const val SENDER_TAG = "MediaTapToTransferSender"
+private const val FAR_FROM_RECEIVER = "FAR_FROM_RECEIVER"
