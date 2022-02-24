@@ -359,7 +359,7 @@ public class ParcelableCallAnalytics implements Parcelable {
         eventTimings = new ArrayList<>();
         in.readTypedList(eventTimings, EventTiming.CREATOR);
         isVideoCall = readByteAsBoolean(in);
-        videoEvents = new LinkedList<>();
+        videoEvents = new ArrayList<>();
         in.readTypedList(videoEvents, VideoEvent.CREATOR);
         callSource = in.readInt();
     }
