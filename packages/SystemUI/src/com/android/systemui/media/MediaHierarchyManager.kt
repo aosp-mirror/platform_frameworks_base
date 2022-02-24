@@ -785,7 +785,11 @@ class MediaHierarchyManager @Inject constructor(
      * @return true if this transformation is guided by an external progress like a finger
      */
     private fun isCurrentlyInGuidedTransformation(): Boolean {
-        return getTransformationProgress() >= 0
+        return hasValidStartAndEndLocations() && getTransformationProgress() >= 0
+    }
+
+    private fun hasValidStartAndEndLocations(): Boolean {
+        return previousLocation != -1 && desiredLocation != -1
     }
 
     /**
