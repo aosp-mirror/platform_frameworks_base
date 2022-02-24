@@ -3434,11 +3434,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * or all visible root tasks if {@param dumpVisibleRootTasksOnly} is true.
      */
     ArrayList<ActivityRecord> getDumpActivities(String name, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly) {
+            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
         if (dumpFocusedRootTaskOnly) {
             final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
             if (topFocusedRootTask != null) {
-                return topFocusedRootTask.getDumpActivitiesLocked(name);
+                return topFocusedRootTask.getDumpActivitiesLocked(name, userId);
             } else {
                 return new ArrayList<>();
             }
@@ -3446,7 +3446,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
             forAllRootTasks(rootTask -> {
                 if (!dumpVisibleRootTasksOnly || rootTask.shouldBeVisible(null)) {
-                    activities.addAll(rootTask.getDumpActivitiesLocked(name));
+                    activities.addAll(rootTask.getDumpActivitiesLocked(name, userId));
                 }
             });
             return activities;
