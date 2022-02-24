@@ -47,7 +47,7 @@ public class CameraStreamStats implements Parcelable {
     private int mHistogramType;
     private float[] mHistogramBins;
     private long[] mHistogramCounts;
-    private int mDynamicRangeProfile;
+    private long mDynamicRangeProfile;
     private int mStreamUseCase;
 
     private static final String TAG = "CameraStreamStats";
@@ -70,7 +70,7 @@ public class CameraStreamStats implements Parcelable {
 
     public CameraStreamStats(int width, int height, int format,
             int dataSpace, long usage, long requestCount, long errorCount,
-            int startLatencyMs, int maxHalBuffers, int maxAppBuffers, int dynamicRangeProfile,
+            int startLatencyMs, int maxHalBuffers, int maxAppBuffers, long dynamicRangeProfile,
             int streamUseCase) {
         mWidth = width;
         mHeight = height;
@@ -130,7 +130,7 @@ public class CameraStreamStats implements Parcelable {
         dest.writeInt(mHistogramType);
         dest.writeFloatArray(mHistogramBins);
         dest.writeLongArray(mHistogramCounts);
-        dest.writeInt(mDynamicRangeProfile);
+        dest.writeLong(mDynamicRangeProfile);
         dest.writeInt(mStreamUseCase);
     }
 
@@ -148,7 +148,7 @@ public class CameraStreamStats implements Parcelable {
         mHistogramType = in.readInt();
         mHistogramBins = in.createFloatArray();
         mHistogramCounts = in.createLongArray();
-        mDynamicRangeProfile = in.readInt();
+        mDynamicRangeProfile = in.readLong();
         mStreamUseCase = in.readInt();
     }
 
@@ -204,7 +204,7 @@ public class CameraStreamStats implements Parcelable {
         return mHistogramCounts;
     }
 
-    public int getDynamicRangeProfile() {
+    public long getDynamicRangeProfile() {
         return mDynamicRangeProfile;
     }
 

@@ -17402,7 +17402,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_RAW;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_PARTIAL_RESULT_COUNT;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Byte> REQUEST_PIPELINE_MAX_DEPTH;
-    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
@@ -18122,22 +18122,23 @@ package android.hardware.camera2.params {
   }
 
   public final class DynamicRangeProfiles {
-    ctor public DynamicRangeProfiles(@NonNull int[]);
-    method @NonNull public java.util.Set<java.lang.Integer> getProfileCaptureRequestConstraints(int);
-    method @NonNull public java.util.Set<java.lang.Integer> getSupportedProfiles();
-    field public static final int DOLBY_VISION_10B_HDR_OEM = 64; // 0x40
-    field public static final int DOLBY_VISION_10B_HDR_OEM_PO = 128; // 0x80
-    field public static final int DOLBY_VISION_10B_HDR_REF = 16; // 0x10
-    field public static final int DOLBY_VISION_10B_HDR_REF_PO = 32; // 0x20
-    field public static final int DOLBY_VISION_8B_HDR_OEM = 1024; // 0x400
-    field public static final int DOLBY_VISION_8B_HDR_OEM_PO = 2048; // 0x800
-    field public static final int DOLBY_VISION_8B_HDR_REF = 256; // 0x100
-    field public static final int DOLBY_VISION_8B_HDR_REF_PO = 512; // 0x200
-    field public static final int HDR10 = 4; // 0x4
-    field public static final int HDR10_PLUS = 8; // 0x8
-    field public static final int HLG10 = 2; // 0x2
-    field public static final int PUBLIC_MAX = 4096; // 0x1000
-    field public static final int STANDARD = 1; // 0x1
+    ctor public DynamicRangeProfiles(@NonNull long[]);
+    method @NonNull public java.util.Set<java.lang.Long> getProfileCaptureRequestConstraints(long);
+    method @NonNull public java.util.Set<java.lang.Long> getSupportedProfiles();
+    method public boolean isExtraLatencyPresent(long);
+    field public static final long DOLBY_VISION_10B_HDR_OEM = 64L; // 0x40L
+    field public static final long DOLBY_VISION_10B_HDR_OEM_PO = 128L; // 0x80L
+    field public static final long DOLBY_VISION_10B_HDR_REF = 16L; // 0x10L
+    field public static final long DOLBY_VISION_10B_HDR_REF_PO = 32L; // 0x20L
+    field public static final long DOLBY_VISION_8B_HDR_OEM = 1024L; // 0x400L
+    field public static final long DOLBY_VISION_8B_HDR_OEM_PO = 2048L; // 0x800L
+    field public static final long DOLBY_VISION_8B_HDR_REF = 256L; // 0x100L
+    field public static final long DOLBY_VISION_8B_HDR_REF_PO = 512L; // 0x200L
+    field public static final long HDR10 = 4L; // 0x4L
+    field public static final long HDR10_PLUS = 8L; // 0x8L
+    field public static final long HLG10 = 2L; // 0x2L
+    field public static final long PUBLIC_MAX = 4096L; // 0x1000L
+    field public static final long STANDARD = 1L; // 0x1L
   }
 
   public final class ExtensionSessionConfiguration {
@@ -18244,7 +18245,7 @@ package android.hardware.camera2.params {
     method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
     method public int describeContents();
     method public void enableSurfaceSharing();
-    method public int getDynamicRangeProfile();
+    method public long getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
     method public int getMirrorMode();
     method public int getStreamUseCase();
@@ -18254,7 +18255,7 @@ package android.hardware.camera2.params {
     method public int getTimestampBase();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
-    method public void setDynamicRangeProfile(int);
+    method public void setDynamicRangeProfile(long);
     method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(int);
