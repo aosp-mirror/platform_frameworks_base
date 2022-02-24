@@ -17,7 +17,7 @@
 package android.companion;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.OneTimeUseBuilder;
@@ -38,10 +38,25 @@ public final class SystemDataTransferRequest implements Parcelable {
     private final List<String> mPermissionSyncPackages;
 
     /**
+     * User Id that the request belongs to.
+     * Populated by the system.
+     *
      * @hide
      */
+    @UserIdInt
+    private int mUserId;
+
+    /**
+     * Whether the request is consented by the user.
+     * Populated by the system.
+     *
+     * @hide
+     */
+    private boolean mUserConsented = false;
+
+    /* @hide */
     public SystemDataTransferRequest(int associationId, boolean syncAllPackages,
-            @Nullable List<String> permissionSyncPackages) {
+            @NonNull List<String> permissionSyncPackages) {
         mAssociationId = associationId;
         mPermissionSyncAllPackages = syncAllPackages;
         mPermissionSyncPackages = permissionSyncPackages;
@@ -59,6 +74,37 @@ public final class SystemDataTransferRequest implements Parcelable {
     @NonNull
     public List<String> getPermissionSyncPackages() {
         return mPermissionSyncPackages;
+    }
+
+    /* @hide */
+    public int getUserId() {
+        return mUserId;
+    }
+
+    /* @hide */
+    public boolean isUserConsented() {
+        return mUserConsented;
+    }
+
+    /* @hide */
+    public void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
+    /* @hide */
+    public void setUserConsented(boolean isUserConsented) {
+        mUserConsented = isUserConsented;
+    }
+
+    /* @hide */
+    @Override
+    public String toString() {
+        return "SystemDataTransferRequest("
+                + "associationId=" + mAssociationId
+                + ", isPermissionSyncAllPackages=" + mPermissionSyncAllPackages
+                + ", permissionSyncPackages=[" + String.join(",", mPermissionSyncPackages) + "]"
+                + ", isUserConsented=" + mUserConsented
+                + ")";
     }
 
     /**
@@ -90,9 +136,8 @@ public final class SystemDataTransferRequest implements Parcelable {
          * <p>If a system or policy granted or revoked permission is granted or revoked by the user
          * later, the permission will be ignored.</p>
          *
-         * @see #setPermissionSyncPackages(List)
-         *
          * @return the builder
+         * @see #setPermissionSyncPackages(List)
          */
         @NonNull
         public Builder setPermissionSyncAllPackages() {
@@ -104,10 +149,9 @@ public final class SystemDataTransferRequest implements Parcelable {
          * Set a list of packages to sync permissions. You can optionally call
          * {@link #setPermissionSyncAllPackages()} to sync permissions for all the packages.
          *
-         * @see #setPermissionSyncAllPackages()
-         *
          * @param permissionSyncPackages packages to sync permissions
          * @return builder
+         * @see #setPermissionSyncAllPackages()
          */
         @NonNull
         public Builder setPermissionSyncPackages(@NonNull List<String> permissionSyncPackages) {
@@ -127,6 +171,8 @@ public final class SystemDataTransferRequest implements Parcelable {
         mAssociationId = in.readInt();
         mPermissionSyncAllPackages = in.readBoolean();
         mPermissionSyncPackages = Arrays.asList(in.createString8Array());
+        mUserId = in.readInt();
+        mUserConsented = in.readBoolean();
     }
 
     @Override
@@ -134,11 +180,25 @@ public final class SystemDataTransferRequest implements Parcelable {
         dest.writeInt(mAssociationId);
         dest.writeBoolean(mPermissionSyncAllPackages);
         dest.writeString8Array(mPermissionSyncPackages.toArray(new String[0]));
+        dest.writeInt(mUserId);
+        dest.writeBoolean(mUserConsented);
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Check if two requests have the same data type.
+     */
+    public boolean hasSameDataType(SystemDataTransferRequest request) {
+        // Check if they are permission sync requests.
+        if (this.isPermissionSyncAllPackages() || !this.getPermissionSyncPackages().isEmpty()) {
+            return request.isPermissionSyncAllPackages() || !request.getPermissionSyncPackages()
+                    .isEmpty();
+        }
+        return false;
     }
 
     @NonNull

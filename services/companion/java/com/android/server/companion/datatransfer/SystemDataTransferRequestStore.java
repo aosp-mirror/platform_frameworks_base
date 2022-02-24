@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.datatransfer;
 
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -33,10 +33,12 @@ import android.annotation.UserIdInt;
 import android.companion.SystemDataTransferRequest;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,15 +51,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The class is responsible for reading/writing SystemDataTransferRequest records from/to the disk.
- *
+ * <p>
  * The following snippet is a sample XML file stored in the disk.
  * <pre>{@code
  * <requests>
  *   <request
  *     association_id="1"
+ *     user_id="12"
+ *     is_user_consented="true"
  *     is_permission_sync_all_packages="false">
  *     <list name="permission_sync_packages">
  *       <string>com.sample.app1</string>
@@ -67,9 +77,9 @@ import java.util.concurrent.ConcurrentMap;
  * </requests>
  * }</pre>
  */
-public class SystemDataTransferRequestDataStore {
+public class SystemDataTransferRequestStore {
 
-    private static final String LOG_TAG = SystemDataTransferRequestDataStore.class.getSimpleName();
+    private static final String LOG_TAG = SystemDataTransferRequestStore.class.getSimpleName();
 
     private static final String FILE_NAME = "companion_device_system_data_transfer_requests.xml";
 
@@ -78,12 +88,77 @@ public class SystemDataTransferRequestDataStore {
     private static final String XML_TAG_LIST = "list";
 
     private static final String XML_ATTR_ASSOCIATION_ID = "association_id";
+    private static final String XML_ATTR_USER_ID = "user_id";
+    private static final String XML_ATTR_IS_USER_CONSENTED = "is_user_consented";
     private static final String XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES =
             "is_permission_sync_all_packages";
     private static final String XML_ATTR_PERMISSION_SYNC_PACKAGES = "permission_sync_packages";
 
+    private static final int READ_FROM_DISK_TIMEOUT = 5; // in seconds
+
+    private final ExecutorService mExecutor;
     private final ConcurrentMap<Integer, AtomicFile> mUserIdToStorageFile =
             new ConcurrentHashMap<>();
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private final SparseArray<List<SystemDataTransferRequest>> mCachedPerUser = new SparseArray<>();
+
+    public SystemDataTransferRequestStore() {
+        mExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    @NonNull
+    List<SystemDataTransferRequest> readRequestsByAssociationId(@UserIdInt int userId,
+            int associationId) {
+        List<SystemDataTransferRequest> cachedRequests;
+        synchronized (mLock) {
+            cachedRequests = readRequestsFromCache(userId);
+        }
+
+        List<SystemDataTransferRequest> requestsByAssociationId = new ArrayList<>();
+        for (SystemDataTransferRequest request : cachedRequests) {
+            if (request.getAssociationId() == associationId) {
+                requestsByAssociationId.add(request);
+            }
+        }
+        return requestsByAssociationId;
+    }
+
+    void writeRequest(@UserIdInt int userId, SystemDataTransferRequest request) {
+        List<SystemDataTransferRequest> cachedRequests;
+        synchronized (mLock) {
+            // Write to cache
+            cachedRequests = readRequestsFromCache(userId);
+            cachedRequests.add(request);
+            mCachedPerUser.set(userId, cachedRequests);
+        }
+        // Write to store
+        mExecutor.execute(() -> writeRequestsToStore(userId, cachedRequests));
+    }
+
+    @GuardedBy("mLock")
+    private List<SystemDataTransferRequest> readRequestsFromCache(@UserIdInt int userId) {
+        List<SystemDataTransferRequest> cachedRequests = mCachedPerUser.get(userId);
+        if (cachedRequests == null) {
+            Future<List<SystemDataTransferRequest>> future =
+                    mExecutor.submit(() -> readRequestsFromStore(userId));
+            try {
+                cachedRequests = future.get(READ_FROM_DISK_TIMEOUT, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Slog.e(LOG_TAG, "Thread reading SystemDataTransferRequest from disk is "
+                        + "interrupted.");
+            } catch (ExecutionException e) {
+                Slog.e(LOG_TAG, "Error occurred while reading SystemDataTransferRequest "
+                        + "from disk.");
+            } catch (TimeoutException e) {
+                Slog.e(LOG_TAG, "Reading SystemDataTransferRequest from disk timed out.");
+            }
+            mCachedPerUser.set(userId, cachedRequests);
+        }
+        return cachedRequests;
+    }
 
     /**
      * Reads previously persisted data for the given user
@@ -92,7 +167,7 @@ public class SystemDataTransferRequestDataStore {
      * @return a list of SystemDataTransferRequest
      */
     @NonNull
-    List<SystemDataTransferRequest> readRequestsForUser(@UserIdInt int userId) {
+    private List<SystemDataTransferRequest> readRequestsFromStore(@UserIdInt int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
         Slog.i(LOG_TAG, "Reading SystemDataTransferRequests for user " + userId + " from "
                 + "file=" + file.getBaseFile().getPath());
@@ -108,7 +183,7 @@ public class SystemDataTransferRequestDataStore {
                 final TypedXmlPullParser parser = Xml.resolvePullParser(in);
                 XmlUtils.beginDocument(parser, XML_TAG_REQUESTS);
 
-                return readRequests(parser);
+                return readRequestsFromXml(parser);
             } catch (XmlPullParserException | IOException e) {
                 Slog.e(LOG_TAG, "Error while reading requests file", e);
                 return Collections.emptyList();
@@ -117,7 +192,7 @@ public class SystemDataTransferRequestDataStore {
     }
 
     @NonNull
-    private List<SystemDataTransferRequest> readRequests(@NonNull TypedXmlPullParser parser)
+    private List<SystemDataTransferRequest> readRequestsFromXml(@NonNull TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         if (!isStartOfTag(parser, XML_TAG_REQUESTS)) {
             throw new XmlPullParserException("The XML doesn't have start tag: " + XML_TAG_REQUESTS);
@@ -127,22 +202,26 @@ public class SystemDataTransferRequestDataStore {
 
         while (true) {
             parser.nextTag();
-            if (isEndOfTag(parser, XML_TAG_REQUESTS)) break;
+            if (isEndOfTag(parser, XML_TAG_REQUESTS)) {
+                break;
+            }
             if (isStartOfTag(parser, XML_TAG_REQUEST)) {
-                requests.add(readRequest(parser));
+                requests.add(readRequestFromXml(parser));
             }
         }
 
         return requests;
     }
 
-    private SystemDataTransferRequest readRequest(@NonNull TypedXmlPullParser parser)
+    private SystemDataTransferRequest readRequestFromXml(@NonNull TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         if (!isStartOfTag(parser, XML_TAG_REQUEST)) {
             throw new XmlPullParserException("XML doesn't have start tag: " + XML_TAG_REQUEST);
         }
 
         final int associationId = readIntAttribute(parser, XML_ATTR_ASSOCIATION_ID);
+        final int userId = readIntAttribute(parser, XML_ATTR_USER_ID);
+        final boolean isUserConsented = readBooleanAttribute(parser, XML_ATTR_IS_USER_CONSENTED);
         final boolean isPermissionSyncAllPackages = readBooleanAttribute(parser,
                 XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES);
         parser.nextTag();
@@ -153,8 +232,13 @@ public class SystemDataTransferRequestDataStore {
                     new String[1]);
         }
 
-        return new SystemDataTransferRequest(associationId, isPermissionSyncAllPackages,
-                permissionSyncPackages);
+        SystemDataTransferRequest request =
+                new SystemDataTransferRequest(associationId, isPermissionSyncAllPackages,
+                        permissionSyncPackages);
+        request.setUserId(userId);
+        request.setUserConsented(isUserConsented);
+
+        return request;
     }
 
     /**
@@ -163,7 +247,7 @@ public class SystemDataTransferRequestDataStore {
      * @param userId   Android UserID
      * @param requests a list of user's SystemDataTransferRequest.
      */
-    void writeRequestsForUser(@UserIdInt int userId,
+    void writeRequestsToStore(@UserIdInt int userId,
             @NonNull List<SystemDataTransferRequest> requests) {
         final AtomicFile file = getStorageFileForUser(userId);
         Slog.i(LOG_TAG, "Writing SystemDataTransferRequests for user " + userId + " to file="
@@ -177,28 +261,30 @@ public class SystemDataTransferRequestDataStore {
                 serializer.setFeature(
                         "http://xmlpull.org/v1/doc/features.html#indent-output", true);
                 serializer.startDocument(null, true);
-                writeRequests(serializer, requests);
+                writeRequestsToXml(serializer, requests);
                 serializer.endDocument();
             });
         }
     }
 
-    private void writeRequests(@NonNull TypedXmlSerializer serializer,
+    private void writeRequestsToXml(@NonNull TypedXmlSerializer serializer,
             @Nullable Collection<SystemDataTransferRequest> requests) throws IOException {
         serializer.startTag(null, XML_TAG_REQUESTS);
 
         for (SystemDataTransferRequest request : requests) {
-            writeRequest(serializer, request);
+            writeRequestToXml(serializer, request);
         }
 
         serializer.endTag(null, XML_TAG_REQUESTS);
     }
 
-    private void writeRequest(@NonNull TypedXmlSerializer serializer,
+    private void writeRequestToXml(@NonNull TypedXmlSerializer serializer,
             @NonNull SystemDataTransferRequest request) throws IOException {
         serializer.startTag(null, XML_TAG_REQUEST);
 
         writeIntAttribute(serializer, XML_ATTR_ASSOCIATION_ID, request.getAssociationId());
+        writeIntAttribute(serializer, XML_ATTR_USER_ID, request.getUserId());
+        writeBooleanAttribute(serializer, XML_ATTR_IS_USER_CONSENTED, request.isUserConsented());
         writeBooleanAttribute(serializer, XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES,
                 request.isPermissionSyncAllPackages());
         try {
@@ -215,11 +301,12 @@ public class SystemDataTransferRequestDataStore {
     /**
      * Creates and caches {@link AtomicFile} object that represents the back-up file for the given
      * user.
-     *
+     * <p>
      * IMPORTANT: the method will ALWAYS return the same {@link AtomicFile} object, which makes it
      * possible to synchronize reads and writes to the file using the returned object.
      */
-    private @NonNull AtomicFile getStorageFileForUser(@UserIdInt int userId) {
+    @NonNull
+    private AtomicFile getStorageFileForUser(@UserIdInt int userId) {
         return mUserIdToStorageFile.computeIfAbsent(userId,
                 u -> createStorageFileForUser(userId, FILE_NAME));
     }
