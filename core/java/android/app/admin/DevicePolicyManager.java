@@ -132,11 +132,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 // TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
@@ -15215,7 +15215,7 @@ public class DevicePolicyManager {
      *
      * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
      * set a different value use
-     * {@link #getDrawableForDensity(String, String, int, Callable)}.
+     * {@link #getDrawableForDensity(String, String, int, Supplier)}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15232,16 +15232,16 @@ public class DevicePolicyManager {
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
         return getDrawable(
                 drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultDrawableLoader);
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
      * a {@code drawableSource} (see {@link DevicePolicyResources.Drawables.Source}) which
      * could result in returning a different drawable than
-     * {@link #getDrawable(String, String, Callable)}
+     * {@link #getDrawable(String, String, Supplier)}
      * if an override was set for that specific source.
      *
      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15261,7 +15261,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
 
         Objects.requireNonNull(drawableId, "drawableId can't be null");
         Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
@@ -15296,7 +15296,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15318,7 +15318,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             int density,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
         return getDrawableForDensity(
                 drawableId,
                 drawableStyle,
@@ -15328,7 +15328,7 @@ public class DevicePolicyManager {
     }
 
      /**
-     * Similar to {@link #getDrawable(String, String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, String, Supplier)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
       * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15352,7 +15352,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             int density,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
 
         Objects.requireNonNull(drawableId, "drawableId can't be null");
         Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
@@ -15383,7 +15383,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, String, Callable)} but returns an
+     * Similar to {@link #getDrawable(String, String, String, Supplier)} but returns an
      * {@link Icon} instead of a {@link Drawable}.
      *
      * @param drawableId The drawable ID to get the updated resource for.
@@ -15425,7 +15425,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)} but returns an {@link Icon}
+     * Similar to {@link #getDrawable(String, String, Supplier)} but returns an {@link Icon}
      * instead of a {@link Drawable}.
      *
      * @param drawableId The drawable ID to get the updated resource for.
@@ -15531,7 +15531,7 @@ public class DevicePolicyManager {
     @Nullable
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Callable<String> defaultStringLoader) {
+            @NonNull Supplier<String> defaultStringLoader) {
 
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
@@ -15558,7 +15558,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getString(String, Callable)} but accepts {@code formatArgs} and returns a
+     * Similar to {@link #getString(String, Supplier)} but accepts {@code formatArgs} and returns a
      * localized formatted string, substituting the format arguments as defined in
      * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
      * {@link Resources#getString(int, Object...)}).
@@ -15578,7 +15578,7 @@ public class DevicePolicyManager {
     @SuppressLint("SamShouldBeLast")
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Supplier<String> defaultStringLoader,
             @NonNull Object... formatArgs) {
 
         Objects.requireNonNull(stringId, "stringId can't be null");
