@@ -2184,11 +2184,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSupportsPictureInPicture() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setDisplay(mDisplayContent).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
+                .setTask(task)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
                 .build();
+        spyOn(mDisplayContent);
+        spyOn(mDisplayContent.mDwpcHelper);
+        doReturn(true).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
+                WINDOWING_MODE_PINNED);
 
         // Device not supports PIP
         mAtm.mSupportsPictureInPicture = false;
@@ -2200,6 +2206,15 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Activity not supports PIP
         activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        assertFalse(activity.supportsPictureInPicture());
+
+        // Activity supports PIP
+        activity.info.flags |= FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        assertTrue(activity.supportsPictureInPicture());
+
+        // Display not supports PIP
+        doReturn(false).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
+                WINDOWING_MODE_PINNED);
         assertFalse(activity.supportsPictureInPicture());
     }
 
