@@ -46,6 +46,7 @@ public abstract class DreamOverlayModule {
     public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
+    public static final String MILLIS_UNTIL_FULL_JITTER = "millis_until_full_jitter";
 
     /** */
     @Provides
@@ -104,6 +105,13 @@ public abstract class DreamOverlayModule {
     static long providesBurnInProtectionUpdateInterval(@Main Resources resources) {
         return resources.getInteger(
                 R.integer.config_dreamOverlayBurnInProtectionUpdateIntervalMillis);
+    }
+
+    /** */
+    @Provides
+    @Named(MILLIS_UNTIL_FULL_JITTER)
+    static long providesMillisUntilFullJitter(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayMillisUntilFullJitter);
     }
 
     @Provides
