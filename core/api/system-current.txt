@@ -915,10 +915,10 @@ package android.app {
 
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarModeOverride();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarMode();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void registerNearbyMediaDevicesProvider(@NonNull android.media.NearbyMediaDevicesProvider);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarModeOverride(int);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarMode(int);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void unregisterNearbyMediaDevicesProvider(@NonNull android.media.NearbyMediaDevicesProvider);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferReceiverDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable android.graphics.drawable.Icon, @Nullable CharSequence);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferSenderDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
@@ -933,8 +933,8 @@ package android.app {
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED = 7; // 0x7
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED = 5; // 0x5
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED = 3; // 0x3
-    field public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1; // 0x1
-    field public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0; // 0x0
+    field public static final int NAV_BAR_MODE_DEFAULT = 0; // 0x0
+    field public static final int NAV_BAR_MODE_KIDS = 1; // 0x1
   }
 
   public static final class StatusBarManager.DisableInfo {
