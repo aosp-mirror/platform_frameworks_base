@@ -68,6 +68,7 @@ public class AutoTileManager implements UserAwareController {
 
     private UserHandle mCurrentUser;
     private boolean mInitialized;
+    private final String mSafetySpec;
 
     protected final Context mContext;
     protected final QSTileHost mHost;
@@ -113,6 +114,13 @@ public class AutoTileManager implements UserAwareController {
         mIsReduceBrightColorsAvailable = isReduceBrightColorsAvailable;
         mDeviceControlsController = deviceControlsController;
         mWalletController = walletController;
+        String safetySpecRes;
+        try {
+            safetySpecRes = context.getResources().getString(R.string.safety_quick_settings_tile);
+        } catch (Resources.NotFoundException | NullPointerException e) {
+            safetySpecRes = null;
+        }
+        mSafetySpec = safetySpecRes;
     }
 
     /**
@@ -154,6 +162,9 @@ public class AutoTileManager implements UserAwareController {
         }
         if (!mAutoTracker.isAdded(WALLET)) {
             initWalletController();
+        }
+        if (mSafetySpec != null && !mAutoTracker.isAdded(mSafetySpec)) {
+            initSafetyTile();
         }
 
         int settingsN = mAutoAddSettingList.size();
@@ -313,6 +324,15 @@ public class AutoTileManager implements UserAwareController {
             mHost.addTile(WALLET, position);
             mAutoTracker.setTileAdded(WALLET);
         }
+    }
+
+    private void initSafetyTile() {
+        if (mSafetySpec == null) {
+            return;
+        }
+        if (mAutoTracker.isAdded(mSafetySpec)) return;
+        mHost.addTile(CustomTile.getComponentFromSpec(mSafetySpec), true);
+        mAutoTracker.setTileAdded(mSafetySpec);
     }
 
     @VisibleForTesting
