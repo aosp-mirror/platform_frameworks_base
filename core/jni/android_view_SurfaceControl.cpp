@@ -1833,6 +1833,15 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return reinterpret_cast<jlong>(surfaceControl->getHandle().get());
 }
 
+static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                          jint displayId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    FocusRequest request;
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
+}
+
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
                                    jobject toTokenObj, jstring windowNameJstr,
                                    jobject focusedTokenObj, jstring focusedWindowNameJstr,
@@ -2167,6 +2176,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFixedTransformHint},
     {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
+    {"nativeRemoveCurrentInputFocus", "(JI)V",
+            (void*)nativeRemoveCurrentInputFocus},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
     {"nativeAddJankDataListener", "(JJ)V",
