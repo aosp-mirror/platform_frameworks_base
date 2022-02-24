@@ -544,7 +544,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void suppressAmbientDisplay(boolean suppressed) {
-        mDozeServiceHost.setDozeSuppressed(suppressed);
+        mDozeServiceHost.setAlwaysOnSuppressed(suppressed);
     }
 
     @Override

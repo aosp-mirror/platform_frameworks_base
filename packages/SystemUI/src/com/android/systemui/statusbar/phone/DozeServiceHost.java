@@ -98,7 +98,7 @@ public final class DozeServiceHost implements DozeHost {
     private NotificationPanelViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
     private StatusBar mStatusBar;
-    private boolean mSuppressed;
+    private boolean mAlwaysOnSuppressed;
 
     @Inject
     public DozeServiceHost(DozeLog dozeLog, PowerManager powerManager,
@@ -332,15 +332,6 @@ public final class DozeServiceHost implements DozeHost {
     }
 
     @Override
-    public boolean isBlockingDoze() {
-        if (mBiometricUnlockControllerLazy.get().hasPendingAuthentication()) {
-            Log.i(StatusBar.TAG, "Blocking AOD because fingerprint has authenticated");
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void extendPulse(int reason) {
         if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
             mScrimController.setWakeLockScreenSensorActive(true);
@@ -452,18 +443,25 @@ public final class DozeServiceHost implements DozeHost {
         return mIgnoreTouchWhilePulsing;
     }
 
-    void setDozeSuppressed(boolean suppressed) {
-        if (suppressed == mSuppressed) {
+    /**
+     * Suppresses always-on-display and waking up the display for notifications.
+     * Does not disable wakeup gestures like pickup and tap.
+     */
+    void setAlwaysOnSuppressed(boolean suppressed) {
+        if (suppressed == mAlwaysOnSuppressed) {
             return;
         }
-        mSuppressed = suppressed;
-        mDozeLog.traceDozingSuppressed(mSuppressed);
+        mAlwaysOnSuppressed = suppressed;
         for (Callback callback : mCallbacks) {
-            callback.onDozeSuppressedChanged(suppressed);
+            callback.onAlwaysOnSuppressedChanged(suppressed);
         }
     }
 
-    public boolean isDozeSuppressed() {
-        return mSuppressed;
+    /**
+     * Whether always-on-display is being suppressed. This does not affect wakeup gestures like
+     * pickup and tap.
+     */
+    public boolean isAlwaysOnSuppressed() {
+        return mAlwaysOnSuppressed;
     }
 }
