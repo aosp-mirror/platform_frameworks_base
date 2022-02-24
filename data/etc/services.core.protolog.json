@@ -3793,6 +3793,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/NonAppWindowAnimationAdapter.java"
     },
+    "2001473656": {
+      "message": "App %s is focused, but the window is not ready. Start a transaction to remove focus from the window of non-focused apps.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/InputMonitor.java"
+    },
     "2018454757": {
       "message": "WS.removeImmediately: %s Already removed...",
       "level": "VERBOSE",
