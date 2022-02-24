@@ -25,8 +25,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
@@ -61,9 +64,11 @@ open class SetRequestedOrientationWhilePinnedTest(
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
-
             setup {
+                test {
+                    removeAllTasksButHome()
+                    device.wakeUpAndGoToHomeScreen()
+                }
                 eachRun {
                     // Launch the PiP activity fixed as landscape.
                     pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
@@ -80,6 +85,10 @@ open class SetRequestedOrientationWhilePinnedTest(
             teardown {
                 eachRun {
                     pipApp.exit(wmHelper)
+                    setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    removeAllTasksButHome()
                 }
             }
             transitions {
