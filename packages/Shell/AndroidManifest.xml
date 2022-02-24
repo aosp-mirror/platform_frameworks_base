@@ -559,6 +559,9 @@
 
     <uses-permission android:name="android.permission.MANAGE_APP_HIBERNATION"/>
 
+    <!-- Permission required for CTS test - MediaCodecResourceTest -->
+    <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
+
     <!-- Permission required for CTS test - ResourceObserverNativeTest -->
     <uses-permission android:name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
 
