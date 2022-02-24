@@ -2196,8 +2196,9 @@ class ActivityStarter {
             // removed from calling performClearTaskLocked (For example, if it is being brought out
             // of history or if it is finished immediately), thus disassociating the task. Also note
             // that mReuseTask is reset as a result of {@link Task#performClearTaskLocked}
-            // launching another activity.
-            targetTask.performClearTaskLocked();
+            // launching another activity. Keep the task-overlay activity because the targetTask
+            // will be reused to launch new activity.
+            targetTask.performClearTaskForReuse(true /* excludingTaskOverlay*/);
             targetTask.setIntent(mStartActivity);
             mAddingToTask = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
@@ -2207,8 +2208,7 @@ class ActivityStarter {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
-            final ActivityRecord top = targetTask.performClearTaskForReuseLocked(mStartActivity,
-                    mLaunchFlags);
+            final ActivityRecord top = targetTask.performClearTop(mStartActivity, mLaunchFlags);
 
             if (top != null) {
                 if (top.isRootOfTask()) {
