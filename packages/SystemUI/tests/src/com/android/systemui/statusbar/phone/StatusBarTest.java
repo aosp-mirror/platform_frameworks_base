@@ -381,7 +381,7 @@ public class StatusBarTest extends SysuiTestCase {
         mShadeController = new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> Optional.of(mStatusBar), () -> mAssistManager, Optional.of(mBubbles));
+                () -> Optional.of(mStatusBar), () -> mAssistManager);
 
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
