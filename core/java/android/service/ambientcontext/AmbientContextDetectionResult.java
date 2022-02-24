@@ -26,6 +26,7 @@ import com.android.internal.util.AnnotationValidations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a {@code AmbientContextEvent} detection result reported by the detection service.
@@ -127,7 +128,9 @@ public final class AmbientContextDetectionResult implements Parcelable {
         private @NonNull String mPackageName;
         private long mBuilderFieldsSet = 0L;
 
-        public Builder() {
+        public Builder(@NonNull String packageName) {
+            Objects.requireNonNull(packageName);
+            mPackageName = packageName;
         }
 
         /**
@@ -144,25 +147,36 @@ public final class AmbientContextDetectionResult implements Parcelable {
         }
 
         /**
-         * The package to deliver the response to.
+         * Adds a list of events to the builder.
          */
-        public @NonNull Builder setPackageName(@NonNull String value) {
+        public @NonNull Builder addEvents(@NonNull List<AmbientContextEvent> values) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x2;
-            mPackageName = value;
+            if (mEvents == null) {
+                mBuilderFieldsSet |= 0x1;
+                mEvents = new ArrayList<>();
+            }
+            mEvents.addAll(values);
+            return this;
+        }
+
+        /**
+         * Clears all events from the builder.
+         */
+        public @NonNull Builder clearEvents() {
+            checkNotUsed();
+            if (mEvents != null) {
+                mEvents.clear();
+            }
             return this;
         }
 
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull AmbientContextDetectionResult build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x2; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mEvents = new ArrayList<>();
-            }
-            if ((mBuilderFieldsSet & 0x2) == 0) {
-                mPackageName = "";
             }
             AmbientContextDetectionResult o = new AmbientContextDetectionResult(
                     mEvents,
@@ -171,7 +185,7 @@ public final class AmbientContextDetectionResult implements Parcelable {
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x2) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
