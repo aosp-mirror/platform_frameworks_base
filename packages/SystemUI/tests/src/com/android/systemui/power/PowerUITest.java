@@ -430,12 +430,6 @@ public class PowerUITest extends SysuiTestCase {
         state.mIsPowerSaver = true;
         shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
         assertThat(shouldShow).isFalse();
-
-        state.mIsPowerSaver = false;
-        // if disabled we should not show the low warning.
-        state.mIsLowLevelWarningEnabled = false;
-        shouldShow = mPowerUI.shouldShowHybridWarning(state.get());
-        assertThat(shouldShow).isFalse();
     }
 
     @Test

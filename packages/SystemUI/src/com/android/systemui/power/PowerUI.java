@@ -69,7 +69,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     private static final long TEMPERATURE_LOGGING_INTERVAL = DateUtils.HOUR_IN_MILLIS;
     private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
     static final long THREE_HOURS_IN_MILLIS = DateUtils.HOUR_IN_MILLIS * 3;
-    private static final int CHARGE_CYCLE_PERCENT_RESET = 45;
+    private static final int CHARGE_CYCLE_PERCENT_RESET = 30;
     private static final long SIX_HOURS_MILLIS = Duration.ofHours(6).toMillis();
     public static final int NO_ESTIMATE_AVAILABLE = -1;
     private static final String BOOT_COUNT_KEY = "boot_count";
@@ -206,7 +206,8 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
      *
      * 1 means that the battery is "ok"
      * 0 means that the battery is between "ok" and what we should warn about.
-     * less than 0 means that the battery is low
+     * less than 0 means that the battery is low, -1 means the battery is reaching warning level,
+     * -2 means the battery is reaching severe level.
      */
     private int findBatteryLevelBucket(int level) {
         if (level >= mLowBatteryAlertCloseLevel) {
@@ -388,12 +389,8 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     @VisibleForTesting
     void maybeShowHybridWarning(BatteryStateSnapshot currentSnapshot,
             BatteryStateSnapshot lastSnapshot) {
-        // if we are now over 45% battery & 6 hours remaining so we can trigger hybrid
-        // notification again
-        final long timeRemainingMillis = currentSnapshot.getTimeRemainingMillis();
-        if (currentSnapshot.getBatteryLevel() >= CHARGE_CYCLE_PERCENT_RESET
-                && (timeRemainingMillis > SIX_HOURS_MILLIS
-                || timeRemainingMillis == NO_ESTIMATE_AVAILABLE)) {
+        // if we are now over 30% battery, we can trigger hybrid notification again
+        if (currentSnapshot.getBatteryLevel() >= CHARGE_CYCLE_PERCENT_RESET) {
             mLowWarningShownThisChargeCycle = false;
             mSevereWarningShownThisChargeCycle = false;
             if (DEBUG) {
@@ -403,6 +400,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
         final boolean playSound = currentSnapshot.getBucket() != lastSnapshot.getBucket()
                 || lastSnapshot.getPlugged();
+        final long timeRemainingMillis = currentSnapshot.getTimeRemainingMillis();
 
         if (shouldShowHybridWarning(currentSnapshot)) {
             mWarnings.showLowBatteryWarning(playSound);
@@ -444,19 +442,13 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
             return false;
         }
 
-        final long timeRemainingMillis = snapshot.getTimeRemainingMillis();
         // Only show the low warning if enabled once per charge cycle & no battery saver
-        final boolean canShowWarning = snapshot.isLowWarningEnabled()
-                && !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
-                && ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
-                && timeRemainingMillis < snapshot.getLowThresholdMillis())
-                || snapshot.getBatteryLevel() <= snapshot.getLowLevelThreshold());
+        final boolean canShowWarning = !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
+                && snapshot.getBatteryLevel() <= snapshot.getLowLevelThreshold();
 
         // Only show the severe warning once per charge cycle
         final boolean canShowSevereWarning = !mSevereWarningShownThisChargeCycle
-                && ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
-                && timeRemainingMillis < snapshot.getSevereThresholdMillis())
-                || snapshot.getBatteryLevel() <= snapshot.getSevereLevelThreshold());
+                && snapshot.getBatteryLevel() <= snapshot.getSevereLevelThreshold();
 
         final boolean canShow = canShowWarning || canShowSevereWarning;
 
