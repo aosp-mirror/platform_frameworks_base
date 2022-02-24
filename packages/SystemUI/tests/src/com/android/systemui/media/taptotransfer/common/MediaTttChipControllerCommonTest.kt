@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -50,6 +51,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var appIconDrawable: Drawable
     @Mock
     private lateinit var windowManager: WindowManager
+    @Mock
+    private lateinit var tapGestureDetector: TapGestureDetector
 
     @Before
     fun setUp() {
@@ -58,23 +61,28 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
 
-        controllerCommon = TestControllerCommon(context, windowManager, fakeExecutor)
+        controllerCommon = TestControllerCommon(
+            context, windowManager, fakeExecutor, tapGestureDetector
+        )
     }
 
     @Test
-    fun displayChip_chipAdded() {
+    fun displayChip_chipAddedAndGestureDetectionStarted() {
         controllerCommon.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
+        verify(tapGestureDetector).addOnGestureDetectedCallback(any(), any())
     }
 
     @Test
-    fun displayChip_twice_chipNotAddedTwice() {
+    fun displayChip_twice_chipAndGestureDetectionNotAddedTwice() {
         controllerCommon.displayChip(getState())
         reset(windowManager)
+        reset(tapGestureDetector)
 
         controllerCommon.displayChip(getState())
         verify(windowManager, never()).addView(any(), any())
+        verify(tapGestureDetector, never()).addOnGestureDetectedCallback(any(), any())
     }
 
     @Test
@@ -130,7 +138,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     @Test
-    fun removeChip_chipRemoved() {
+    fun removeChip_chipRemovedAndGestureDetectionStopped() {
         // First, add the chip
         controllerCommon.displayChip(getState())
 
@@ -138,6 +146,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.removeChip()
 
         verify(windowManager).removeView(any())
+        verify(tapGestureDetector).removeOnGestureDetectedCallback(any())
     }
 
     @Test
@@ -174,8 +183,9 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         context: Context,
         windowManager: WindowManager,
         @Main mainExecutor: DelayableExecutor,
-        ) : MediaTttChipControllerCommon<MediaTttChipState>(
-        context, windowManager, mainExecutor, R.layout.media_ttt_chip
+        tapGestureDetector: TapGestureDetector,
+    ) : MediaTttChipControllerCommon<MediaTttChipState>(
+        context, windowManager, mainExecutor, tapGestureDetector, R.layout.media_ttt_chip
     ) {
         override fun updateChipView(chipState: MediaTttChipState, currentChipView: ViewGroup) {
         }
