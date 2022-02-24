@@ -109,6 +109,15 @@ public final class Text implements Parcelable {
         out.writeInt(mMaxLines);
     }
 
+    @Override
+    public String toString() {
+        return "Text{"
+                + "mText=" + mText
+                + ", mTruncateAtType=" + mTruncateAtType
+                + ", mMaxLines=" + mMaxLines
+                + '}';
+    }
+
     /**
      * A builder for {@link Text} object.
      *
