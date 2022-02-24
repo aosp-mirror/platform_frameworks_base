@@ -17,6 +17,7 @@
 package com.android.server.trust;
 
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_DISPLAY_MESSAGE;
+import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
@@ -158,7 +159,7 @@ public class TrustAgentWrapper {
                     mMessage = (CharSequence) msg.obj;
                     int flags = msg.arg1;
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
-                    if ((flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
+                    if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
                         mWaitingForTrustableDowngrade = true;
                     } else {
                         mWaitingForTrustableDowngrade = false;
@@ -636,6 +637,11 @@ public class TrustAgentWrapper {
 
     public boolean isTrustable() {
         return mTrustable && mManagingTrust && !mTrustDisabledByDpm;
+    }
+
+    /** Set the trustagent as not trustable */
+    public void setUntrustable() {
+        mTrustable = false;
     }
 
     public boolean isManagingTrust() {
