@@ -11299,6 +11299,7 @@ public class AudioService extends IAudioService.Stub
     @Override
     public void setActiveAssistantServiceUids(int [] activeAssistantUids) {
         enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(activeAssistantUids);
         synchronized (mSettingsLock) {
             mActiveAssistantServiceUids = activeAssistantUids;
         }
