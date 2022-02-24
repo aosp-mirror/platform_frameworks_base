@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.WindowManagerGlobal;
 
 import androidx.annotation.Nullable;
 
@@ -143,7 +144,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mSystemWindows.addView(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
-        mPipMenuView.setFocusGrantToken(mSystemWindows.getFocusGrantToken(mPipMenuView));
     }
 
     @Override
@@ -164,6 +164,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 t.setPosition(menuSurfaceControl, menuBounds.left, menuBounds.top);
                 t.apply();
             }
+            grantPipMenuFocus(true);
             mPipMenuView.show(mInMoveMode, mDelegate.getPipGravity());
         }
     }
@@ -194,8 +195,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             if (DEBUG) Log.d(TAG, "hideMenu()");
         }
 
-        mPipMenuView.hide(mInMoveMode);
+        mPipMenuView.hide();
         if (!mInMoveMode) {
+            grantPipMenuFocus(false);
             mDelegate.closeMenu();
         }
     }
@@ -452,5 +454,16 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         void closeMenu();
 
         void closePip();
+    }
+
+    private void grantPipMenuFocus(boolean grantFocus) {
+        if (DEBUG) Log.d(TAG, "grantWindowFocus(" + grantFocus + ")");
+
+        try {
+            WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
+                    mSystemWindows.getFocusGrantToken(mPipMenuView), grantFocus);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to update focus", e);
+        }
     }
 }

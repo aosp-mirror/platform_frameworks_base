@@ -183,25 +183,29 @@ public final class PowerManager {
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
      * <p>
-     * Normally wake locks don't actually wake the device, they just cause
-     * the screen to remain on once it's already on.  Think of the video player
-     * application as the normal behavior.  Notifications that pop up and want
-     * the device to be on are the exception; use this flag to be like them.
+     * Normally wake locks don't actually wake the device, they just cause the screen to remain on
+     * once it's already on. This flag will cause the device to wake up when the wake lock is
+     * acquired.
      * </p><p>
      * Android TV playback devices attempt to turn on the HDMI-connected TV via HDMI-CEC on any
      * wake-up, including wake-ups triggered by wake locks.
      * </p><p>
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>
+     *
+     * @deprecated Most applications should use {@link android.R.attr#turnScreenOn} or
+     * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the previous
+     * foreground app from being resumed first when the screen turns on. Note that this flag may
+     * require a permission in the future.
      */
+    @Deprecated
     public static final int ACQUIRE_CAUSES_WAKEUP = 0x10000000;
 
     /**
      * Wake lock flag: When this wake lock is released, poke the user activity timer
      * so the screen stays on for a little longer.
      * <p>
-     * Will not turn the screen on if it is not already on.
-     * See {@link #ACQUIRE_CAUSES_WAKEUP} if you want that.
+     * This will not turn the screen on if it is not already on.
      * </p><p>
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>

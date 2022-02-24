@@ -694,12 +694,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
     }
 
-    /**
-     * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
-     * <p>Not actually used</p>
-     */
-    private volatile String mDeviceOwnerName;
-
     private volatile int mDeviceOwnerUid = INVALID_UID;
 
     /**
@@ -6235,17 +6229,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         return ActivityClient.getInstance().getTaskForActivity(token, onlyRoot);
-    }
-
-    @Override
-    public void updateDeviceOwner(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != SYSTEM_UID) {
-            throw new SecurityException("updateDeviceOwner called from non-system process");
-        }
-        synchronized (this) {
-            mDeviceOwnerName = packageName;
-        }
     }
 
     @Override
@@ -15623,24 +15606,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         for (int i = 0, size = processes.size(); i < size; i++) {
             ProcessRecord app = processes.get(i);
-            pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
+            pw.println(String.format("Resources History for %s (%s)",
                     app.processName,
                     app.info.packageName));
             pw.flush();
             try {
-                TransferPipe tp = new TransferPipe();
+                TransferPipe tp = new TransferPipe("  ");
                 try {
                     IApplicationThread thread = app.getThread();
                     if (thread != null) {
                         app.getThread().dumpResources(tp.getWriteFd(), null);
                         tp.go(fd.getFileDescriptor(), 2000);
-                        pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
-                                app.processName,
-                                app.info.packageName));
-                        pw.flush();
                     } else {
                         pw.println(String.format(
-                                "------ DUMP RESOURCES %s (%s) failed, no thread ------",
+                                "  Resources history for %s (%s) failed, no thread",
                                 app.processName,
                                 app.info.packageName));
                     }
@@ -15648,11 +15627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     tp.kill();
                 }
             } catch (IOException e) {
-                pw.println(String.format(
-                        "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
-                        app.processName,
-                        app.info.packageName,
-                        e.getMessage()));
+                pw.println("  " + e.getMessage());
                 pw.flush();
             }
 

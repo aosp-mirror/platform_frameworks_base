@@ -29,6 +29,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.touch.TouchInsetManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,13 +50,16 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     NetworkCapabilities mNetworkCapabilities;
     @Mock
     Network mNetwork;
+    @Mock
+    TouchInsetManager.TouchInsetSession mTouchSession;
 
     DreamOverlayStatusBarViewController mController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new DreamOverlayStatusBarViewController(mView, mConnectivityManager);
+        mController = new DreamOverlayStatusBarViewController(mView, mConnectivityManager,
+                mTouchSession);
     }
 
     @Test

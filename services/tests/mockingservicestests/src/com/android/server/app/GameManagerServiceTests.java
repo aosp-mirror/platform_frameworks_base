@@ -1167,7 +1167,14 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(
                 mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        GameState gameState = new GameState(isLoading, GameState.MODE_NONE);
+        int testMode = GameState.MODE_NONE;
+        int testLabel = 99;
+        int testQuality = 123;
+        GameState gameState = new GameState(isLoading, testMode, testLabel, testQuality);
+        assertEquals(isLoading, gameState.isLoading());
+        assertEquals(testMode, gameState.getMode());
+        assertEquals(testLabel, gameState.getLabel());
+        assertEquals(testQuality, gameState.getQuality());
         gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
         mTestLooper.dispatchAll();
         verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, isLoading);

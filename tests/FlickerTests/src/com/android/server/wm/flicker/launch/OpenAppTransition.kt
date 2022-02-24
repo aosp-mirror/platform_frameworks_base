@@ -56,7 +56,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         }
         teardown {
             test {
-                testApp.exit()
+                testApp.exit(wmHelper)
             }
         }
     }

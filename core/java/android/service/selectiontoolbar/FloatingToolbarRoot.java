@@ -40,7 +40,7 @@ public class FloatingToolbarRoot extends LinearLayout {
 
     private final IBinder mTargetInputToken;
     private final SelectionToolbarRenderService.TransferTouchListener mTransferTouchListener;
-    private Rect mContentRect;
+    private final Rect mContentRect = new Rect();
 
     private int mLastDownX = -1;
     private int mLastDownY = -1;
@@ -57,7 +57,7 @@ public class FloatingToolbarRoot extends LinearLayout {
      * Sets the Rect that shows the selection toolbar content.
      */
     public void setContentRect(Rect contentRect) {
-        mContentRect = contentRect;
+        mContentRect.set(contentRect);
     }
 
     @Override

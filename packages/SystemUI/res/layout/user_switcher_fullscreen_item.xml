@@ -21,8 +21,8 @@
   <ImageView
       android:id="@+id/user_switcher_icon"
       android:layout_gravity="center"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content" />
+      android:layout_width="@dimen/bouncer_user_switcher_icon_size_plus_margin"
+      android:layout_height="@dimen/bouncer_user_switcher_icon_size_plus_margin" />
   <TextView
       style="@style/Bouncer.UserSwitcher.Spinner.Item"
       android:id="@+id/user_switcher_text"

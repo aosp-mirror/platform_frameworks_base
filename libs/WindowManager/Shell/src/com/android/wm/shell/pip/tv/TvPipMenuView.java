@@ -30,7 +30,6 @@ import android.app.RemoteAction;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -39,7 +38,6 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -72,7 +70,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ImageView mArrowRight;
     private final ImageView mArrowDown;
     private final ImageView mArrowLeft;
-    private IBinder mFocusGrantToken = null;
 
     private final ViewGroup mScrollView;
     private final ViewGroup mHorizontalScrollView;
@@ -152,10 +149,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mListener = listener;
     }
 
-    void setFocusGrantToken(IBinder token) {
-        mFocusGrantToken = token;
-    }
-
     void setExpandedModeEnabled(boolean enabled) {
         mExpandButton.setVisibility(enabled ? VISIBLE : GONE);
     }
@@ -170,8 +163,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     void show(boolean inMoveMode, int gravity) {
         if (DEBUG) Log.d(TAG, "show(), inMoveMode: " + inMoveMode);
-        grantWindowFocus(true);
-
         if (inMoveMode) {
             showMovementHints(gravity);
         } else {
@@ -180,15 +171,11 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         animateAlphaTo(1, mMenuFrameView);
     }
 
-    void hide(boolean isInMoveMode) {
+    void hide() {
         if (DEBUG) Log.d(TAG, "hide()");
         animateAlphaTo(0, mActionButtonsContainer);
         animateAlphaTo(0, mMenuFrameView);
         hideMovementHints();
-
-        if (!isInMoveMode) {
-            grantWindowFocus(false);
-        }
     }
 
     private void animateAlphaTo(float alpha, View view) {
@@ -215,17 +202,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 || mArrowRight.getAlpha() != 0f
                 || mArrowDown.getAlpha() != 0f
                 || mArrowLeft.getAlpha() != 0f;
-    }
-
-    private void grantWindowFocus(boolean grantFocus) {
-        if (DEBUG) Log.d(TAG, "grantWindowFocus(" + grantFocus + ")");
-
-        try {
-            WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                    mFocusGrantToken, grantFocus);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to update focus", e);
-        }
     }
 
     void setAdditionalActions(List<RemoteAction> actions, Handler mainHandler) {

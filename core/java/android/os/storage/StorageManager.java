@@ -3022,9 +3022,17 @@ public class StorageManager {
         }
     }
 
-    /** @hide */
-    @TestApi
+    /**
+     * Returns the authority of the current cloud media provider that was set by the
+     * {@link android.service.storage.ExternalStorageService} holding the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission via
+     * {@link #setCloudMediaProvider(String)}.
+     *
+     * @hide
+     */
     @Nullable
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public String getCloudMediaProvider() {
         try {
             return mStorageManager.getCloudMediaProvider();

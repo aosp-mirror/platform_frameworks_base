@@ -144,19 +144,40 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return Math.max(dividerInset, radius);
     }
 
-    /** Gets bounds of the primary split. */
+    /** Gets bounds of the primary split with screen based coordinate. */
     public Rect getBounds1() {
         return new Rect(mBounds1);
     }
 
-    /** Gets bounds of the secondary split. */
+    /** Gets bounds of the primary split with parent based coordinate. */
+    public Rect getRefBounds1() {
+        Rect outBounds = getBounds1();
+        outBounds.offset(-mRootBounds.left, -mRootBounds.top);
+        return outBounds;
+    }
+
+    /** Gets bounds of the secondary split with screen based coordinate. */
     public Rect getBounds2() {
         return new Rect(mBounds2);
     }
 
-    /** Gets bounds of divider window. */
+    /** Gets bounds of the secondary split with parent based coordinate. */
+    public Rect getRefBounds2() {
+        final Rect outBounds = getBounds2();
+        outBounds.offset(-mRootBounds.left, -mRootBounds.top);
+        return outBounds;
+    }
+
+    /** Gets bounds of divider window with screen based coordinate. */
     public Rect getDividerBounds() {
         return new Rect(mDividerBounds);
+    }
+
+    /** Gets bounds of divider window with parent based coordinate. */
+    public Rect getRefDividerBounds() {
+        final Rect outBounds = getDividerBounds();
+        outBounds.offset(-mRootBounds.left, -mRootBounds.top);
+        return outBounds;
     }
 
     /** Returns leash of the current divider bar. */
@@ -452,14 +473,17 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
         final SurfaceControl dividerLeash = getDividerLeash();
         if (dividerLeash != null) {
-            t.setPosition(dividerLeash, mDividerBounds.left, mDividerBounds.top);
+            mTempRect.set(getRefDividerBounds());
+            t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
             // Resets layer of divider bar to make sure it is always on top.
             t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER);
         }
-        t.setPosition(leash1, mBounds1.left, mBounds1.top)
-                .setWindowCrop(leash1, mBounds1.width(), mBounds1.height());
-        t.setPosition(leash2, mBounds2.left, mBounds2.top)
-                .setWindowCrop(leash2, mBounds2.width(), mBounds2.height());
+        mTempRect.set(getRefBounds1());
+        t.setPosition(leash1, mTempRect.left, mTempRect.top)
+                .setWindowCrop(leash1, mTempRect.width(), mTempRect.height());
+        mTempRect.set(getRefBounds2());
+        t.setPosition(leash2, mTempRect.left, mTempRect.top)
+                .setWindowCrop(leash2, mTempRect.width(), mTempRect.height());
 
         if (mImePositionProcessor.adjustSurfaceLayoutForIme(
                 t, dividerLeash, leash1, leash2, dimLayer1, dimLayer2)) {
