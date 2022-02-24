@@ -19,6 +19,7 @@ package com.google.android.lint
 import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
+import com.google.android.lint.parcel.SaferParcelChecker
 import com.google.auto.service.AutoService
 
 @AutoService(IssueRegistry::class)
@@ -33,7 +34,8 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
             CallingIdentityTokenDetector.ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
             CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
             EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
-            EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION
+            EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
+            SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
     )
 
     override val api: Int
