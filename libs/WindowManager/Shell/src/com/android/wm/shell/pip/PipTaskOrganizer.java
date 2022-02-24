@@ -1071,13 +1071,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
         final Rational currentAspectRatio =
-                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatioRational()
+                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatio()
                         : null;
         final boolean aspectRatioChanged = !Objects.equals(currentAspectRatio,
-                params.getAspectRatioRational());
+                params.getAspectRatio());
         mPictureInPictureParams = params;
         if (aspectRatioChanged) {
-            mPipBoundsState.setAspectRatio(params.getAspectRatio());
+            mPipBoundsState.setAspectRatio(params.getAspectRatioFloat());
         }
         return aspectRatioChanged;
     }

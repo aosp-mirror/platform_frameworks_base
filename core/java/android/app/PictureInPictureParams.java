@@ -280,7 +280,7 @@ public final class PictureInPictureParams implements Parcelable {
     private Rational mAspectRatio;
 
     /**
-     * The expected aspect ratio of the vertically expanded picture-in-picture window.
+     * The expected aspect ratio of the expanded picture-in-picture window.
      */
     @Nullable
     private Rational mExpandedAspectRatio;
@@ -441,15 +441,21 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     @TestApi
-    public float getAspectRatio() {
+    public float getAspectRatioFloat() {
         if (mAspectRatio != null) {
             return mAspectRatio.floatValue();
         }
         return 0f;
     }
 
-    /** @hide */
-    public Rational getAspectRatioRational() {
+    /**
+     * Returns the expected aspect ratio of the picture-in-picture window.
+     *
+     * @return aspect ratio as the desired width / height or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setAspectRatio(Rational)
+     */
+    @Nullable
+    public Rational getAspectRatio() {
         return mAspectRatio;
     }
 
@@ -466,11 +472,22 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     @TestApi
-    public float getExpandedAspectRatio() {
+    public float getExpandedAspectRatioFloat() {
         if (mExpandedAspectRatio != null) {
             return mExpandedAspectRatio.floatValue();
         }
         return 0f;
+    }
+
+    /**
+     * Returns the desired aspect ratio of the expanded picture-in-picture window.
+     *
+     * @return aspect ratio as the desired width / height or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setExpandedAspectRatio(Rational)
+     */
+    @Nullable
+    public Rational getExpandedAspectRatio() {
+        return mExpandedAspectRatio;
     }
 
     /**
@@ -482,11 +499,17 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the set of user actions.
-     * @hide
+     * Returns the list of user actions that are associated with the activity when in
+     * picture-in-picture mode.
+     *
+     * @return the user actions in a new list.
+     * @see PictureInPictureParams.Builder#setActions(List)
      */
-    @TestApi
+    @NonNull
     public List<RemoteAction> getActions() {
+        if (mUserActions == null) {
+            return new ArrayList<>();
+        }
         return mUserActions;
     }
 
@@ -499,10 +522,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the close action.
-     * @hide
+     * Returns the action that is to replace the system close action.
+     *
+     * @return the close action or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setCloseAction(RemoteAction)
      */
-    @TestApi
     @Nullable
     public RemoteAction getCloseAction() {
         return mCloseAction;
@@ -528,10 +552,12 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return the source rect hint
-     * @hide
+     * Returns the source rect hint.
+     *
+     * @return the source rect hint also known as launch bounds or {@code null} if not set.
+     * @see PictureInPictureParams.Builder#setSourceRectHint(Rect)
      */
-    @TestApi
+    @Nullable
     public Rect getSourceRectHint() {
         return mSourceRectHint;
     }
@@ -545,18 +571,23 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return whether auto pip is enabled.
-     * @hide
+     * Returns whether auto enter picture-in-picture is enabled.
+     *
+     * @return {@code true} if the system will automatically put the activity in
+     * picture-in-picture mode.
+     * @see PictureInPictureParams.Builder#setAutoEnterEnabled(boolean)
      */
     public boolean isAutoEnterEnabled() {
         return mAutoEnterEnabled == null ? false : mAutoEnterEnabled;
     }
 
     /**
-     * @return whether seamless resize is enabled.
-     * @hide
+     * Returns whether seamless resize is enabled.
+     *
+     * @return true if the system can seamlessly resize the window while activity is in
+     * picture-in-picture mode.
+     * @see PictureInPictureParams.Builder#setSeamlessResizeEnabled(boolean)
      */
-    @TestApi
     public boolean isSeamlessResizeEnabled() {
         return mSeamlessResizeEnabled == null ? true : mSeamlessResizeEnabled;
     }
@@ -570,10 +601,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return title of the pip.
-     * @hide
+     * Returns the title of the picture-in-picture window that may be displayed to the user.
+     *
+     * @return title of the picture-in-picture window.
+     * @see PictureInPictureParams.Builder#setTitle(CharSequence)
      */
-    @TestApi
     @Nullable
     public CharSequence getTitle() {
         return mTitle;
@@ -588,10 +620,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
-     * @return subtitle of the pip.
-     * @hide
+     * Returns the subtitle of the picture-in-picture window that may be displayed to the user.
+     *
+     * @return subtitle of the picture-in-picture window.
+     * @see PictureInPictureParams.Builder#setSubtitle(CharSequence)
      */
-    @TestApi
     @Nullable
     public CharSequence getSubtitle() {
         return mSubtitle;
@@ -716,7 +749,7 @@ public final class PictureInPictureParams implements Parcelable {
     @Override
     public String toString() {
         return "PictureInPictureParams("
-                + " aspectRatio=" + getAspectRatioRational()
+                + " aspectRatio=" + getAspectRatio()
                 + " expandedAspectRatio=" + mExpandedAspectRatio
                 + " sourceRectHint=" + getSourceRectHint()
                 + " hasSetActions=" + hasSetActions()
