@@ -218,6 +218,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -3691,7 +3692,7 @@ public final class ViewRootImpl implements ViewParent,
             return current;
         }
 
-        final Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
+        final Queue<AccessibilityNodeInfo> fringe = new ArrayDeque<>();
         fringe.offer(current);
 
         while (!fringe.isEmpty()) {
