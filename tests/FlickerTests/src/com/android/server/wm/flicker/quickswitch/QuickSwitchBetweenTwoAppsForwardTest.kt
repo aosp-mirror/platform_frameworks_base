@@ -116,12 +116,13 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
 
                 wmHelper.waitForFullScreenApp(testApp2.component)
                 wmHelper.waitForAppTransitionIdle()
+                wmHelper.waitForNavBarStatusBarVisible()
             }
 
             teardown {
                 test {
-                    testApp1.exit()
-                    testApp2.exit()
+                    testApp1.exit(wmHelper)
+                    testApp2.exit(wmHelper)
                 }
             }
         }
