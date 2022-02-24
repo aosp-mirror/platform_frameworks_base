@@ -1059,10 +1059,10 @@ package android.app.admin {
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @NonNull String, @DrawableRes int);
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @DrawableRes int);
     method public int describeContents();
-    method @DrawableRes public int getCallingPackageResourceId();
     method @NonNull public String getDrawableId();
     method @NonNull public String getDrawableSource();
     method @NonNull public String getDrawableStyle();
+    method @DrawableRes public int getResourceIdInCallingPackage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyDrawableResource> CREATOR;
   }
@@ -1239,7 +1239,7 @@ package android.app.admin {
   public final class DevicePolicyStringResource implements android.os.Parcelable {
     ctor public DevicePolicyStringResource(@NonNull android.content.Context, @NonNull String, @StringRes int);
     method public int describeContents();
-    method public int getCallingPackageResourceId();
+    method public int getResourceIdInCallingPackage();
     method @NonNull public String getStringId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyStringResource> CREATOR;
