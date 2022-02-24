@@ -440,7 +440,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         mHomeButtonLongPressDurationMs = Optional.of(
                             properties.getLong(HOME_BUTTON_LONG_PRESS_DURATION_MS, 0)
                         ).filter(duration -> duration != 0);
-                        reconfigureHomeLongClick();
+                        if (mNavigationBarView != null) {
+                            reconfigureHomeLongClick();
+                        }
                     }
                 }
             };
