@@ -48,6 +48,7 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextParams;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -143,6 +144,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -388,16 +390,8 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public TelephonyManager(Context context, int subId) {
         mSubId = subId;
-        Context appContext = context.getApplicationContext();
-        if (appContext != null) {
-            if (Objects.equals(context.getAttributionTag(), appContext.getAttributionTag())) {
-                mContext = appContext;
-            } else {
-                mContext = appContext.createAttributionContext(context.getAttributionTag());
-            }
-        } else {
-            mContext = context;
-        }
+        mContext = mergeAttributionAndRenouncedPermissions(context.getApplicationContext(),
+            context);
         mSubscriptionManager = SubscriptionManager.from(mContext);
     }
 
@@ -416,6 +410,34 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelephonyManager getDefault() {
         return sInstance;
+    }
+
+    // This method takes the Application context and adds the attributionTag
+    // and renouncedPermissions from the given context.
+    private Context mergeAttributionAndRenouncedPermissions(Context to, Context from) {
+        Context contextToReturn = from;
+        if (to != null) {
+            if (!Objects.equals(from.getAttributionTag(), to.getAttributionTag())) {
+                contextToReturn = to.createAttributionContext(from.getAttributionTag());
+            } else {
+                contextToReturn = to;
+            }
+
+            Set<String> renouncedPermissions =
+                    from.getAttributionSource().getRenouncedPermissions();
+            if (!renouncedPermissions.isEmpty()) {
+                if (to.getParams() != null) {
+                    contextToReturn = contextToReturn.createContext(
+                            new ContextParams.Builder(to.getParams())
+                                    .setRenouncedPermissions(renouncedPermissions).build());
+                } else {
+                    contextToReturn = contextToReturn.createContext(
+                            new ContextParams.Builder()
+                                    .setRenouncedPermissions(renouncedPermissions).build());
+                }
+            }
+        }
+        return contextToReturn;
     }
 
     private String getOpPackageName() {
@@ -446,6 +468,16 @@ public class TelephonyManager {
             return mContext.getAttributionTag();
         }
         return null;
+    }
+
+    private Set<String> getRenouncedPermissions() {
+        // For legacy reasons the TelephonyManager has API for getting
+        // a static instance with no context set preventing us from
+        // getting the attribution source.
+        if (mContext != null) {
+            return mContext.getAttributionSource().getRenouncedPermissions();
+        }
+        return Collections.emptySet();
     }
 
     /**
@@ -6308,8 +6340,14 @@ public class TelephonyManager {
                 (TelephonyRegistryManager)
                         mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
         if (telephonyRegistry != null) {
-            telephonyRegistry.listenFromListener(mSubId, getOpPackageName(),
-                    getAttributionTag(), listener, events, notifyNow);
+            Set<String> renouncedPermissions = getRenouncedPermissions();
+            boolean renounceFineLocationAccess = renouncedPermissions
+                    .contains(Manifest.permission.ACCESS_FINE_LOCATION);
+            boolean renounceCoarseLocationAccess = renouncedPermissions
+                    .contains(Manifest.permission.ACCESS_COARSE_LOCATION);
+            telephonyRegistry.listenFromListener(mSubId, renounceFineLocationAccess,
+                    renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag(),
+                    listener, events, notifyNow);
         } else {
             Rlog.w(TAG, "telephony registry not ready.");
         }
@@ -12132,7 +12170,10 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState() {
-        return getServiceState(false, false);
+        return getServiceState(getRenouncedPermissions()
+                    .contains(Manifest.permission.ACCESS_FINE_LOCATION),
+                               getRenouncedPermissions()
+                    .contains(Manifest.permission.ACCESS_COARSE_LOCATION));
     }
 
     /**
@@ -12143,6 +12184,11 @@ public class TelephonyManager {
      *
      * If you want continuous updates of service state info, register a {@link PhoneStateListener}
      * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     *
+     * There's another way to renounce permissions with a custom context
+     * {@code AttributionSource.Builder#setRenouncedPermissions(Set<String>)} but only for system
+     * apps. To avoid confusion, calling this method supersede renouncing permissions with a
+     * custom context.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
@@ -12187,8 +12233,7 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
-                        renounceCoarseLocationAccess,
-                        getOpPackageName(), getAttributionTag());
+                        renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
@@ -16123,7 +16168,10 @@ public class TelephonyManager {
      */
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        registerTelephonyCallback(false, false, executor, callback);
+        registerTelephonyCallback(
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_FINE_LOCATION),
+                getRenouncedPermissions().contains(Manifest.permission.ACCESS_COARSE_LOCATION),
+                executor, callback);
     }
 
     /**
@@ -16152,6 +16200,12 @@ public class TelephonyManager {
      * This API should be used sparingly -- large numbers of callbacks will cause system
      * instability. If a process has registered too many callbacks without unregistering them, it
      * may encounter an {@link IllegalStateException} when trying to register more callbacks.
+     *
+     * <p>
+     * There's another way to renounce permissions with a custom context
+     * {@code AttributionSource.Builder#setRenouncedPermissions(Set<String>)} but only for system
+     * apps. To avoid confusion, calling this method supersede renouncing permissions with a
+     * custom context.
      *
      * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
      * location related information which will be sent if the caller already possess
