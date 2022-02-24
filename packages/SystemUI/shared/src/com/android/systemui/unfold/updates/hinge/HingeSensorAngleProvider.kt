@@ -4,6 +4,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Trace
 import androidx.core.util.Consumer
 
 internal class HingeSensorAngleProvider(private val sensorManager: SensorManager) :
@@ -13,8 +14,10 @@ internal class HingeSensorAngleProvider(private val sensorManager: SensorManager
     private val listeners: MutableList<Consumer<Float>> = arrayListOf()
 
     override fun start() {
+        Trace.beginSection("HingeSensorAngleProvider#start")
         val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
         sensorManager.registerListener(sensorListener, sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        Trace.endSection()
     }
 
     override fun stop() {
