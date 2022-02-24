@@ -550,7 +550,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"تحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏التفاعل مع أجهزة Wi‑Fi المجاورة"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بالإعلان والربط وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بعرض الإعلانات والاتصال بالأجهزة الأخرى وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -1451,7 +1451,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"طلب البحث في كل الحِزم"</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"البحث في كل الحِزم"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
     <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"‏الوصول إلى SupplementalApis"</string>
     <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"‏السماح لأحد التطبيقات بالوصول إلى SupplementalApis"</string>

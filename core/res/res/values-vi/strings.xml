@@ -546,7 +546,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
