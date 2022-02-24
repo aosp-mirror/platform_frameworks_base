@@ -76,13 +76,10 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
 import com.android.systemui.util.settings.SecureSettings;
-
-import dagger.Lazy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -129,7 +126,6 @@ public class UserSwitcherController implements Dumpable {
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final Lazy<ShadeController> mShadeController;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -178,7 +174,6 @@ public class UserSwitcherController implements Dumpable {
             InteractionJankMonitor interactionJankMonitor,
             LatencyTracker latencyTracker,
             DumpManager dumpManager,
-            Lazy<ShadeController> shadeController,
             DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mActivityManager = activityManager;
@@ -207,7 +202,6 @@ public class UserSwitcherController implements Dumpable {
         mActivityStarter = activityStarter;
         mUserManager = userManager;
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mShadeController = shadeController;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -1206,8 +1200,12 @@ public class UserSwitcherController implements Dumpable {
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }
-                mShadeController.get().collapsePanel();
-                getContext().startActivity(CreateUserActivity.createIntentForStart(getContext()));
+                // Use broadcast instead of ShadeController, as this dialog may have started in
+                // another process and normal dagger bindings are not available
+                getContext().sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                getContext().startActivityAsUser(
+                        CreateUserActivity.createIntentForStart(getContext()),
+                        mUserTracker.getUserHandle());
             }
         }
     }
