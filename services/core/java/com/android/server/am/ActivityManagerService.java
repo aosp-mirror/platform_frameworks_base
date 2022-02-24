@@ -9176,6 +9176,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
+        int dumpUserId = UserHandle.USER_ALL;
 
         int opti = 0;
         while (opti < args.length) {
@@ -9207,6 +9208,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 dumpCheckinFormat = true;
             } else if ("--normal-priority".equals(opt)) {
                 dumpNormalPriority = true;
+            } else if ("--user".equals(opt)) {
+                if (opti < args.length) {
+                    dumpUserId = UserHandle.parseUserArg(args[opti]);
+                    if (dumpUserId == UserHandle.USER_CURRENT) {
+                        dumpUserId = mUserController.getCurrentUserId();
+                    }
+                    opti++;
+                } else {
+                    pw.println("Error: --user option requires user id argument");
+                    return;
+                }
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
@@ -9397,29 +9409,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("service".equals(cmd)) {
                 String[] newArgs;
                 String name;
-                int[] users = null;
                 if (opti >= args.length) {
                     name = null;
                     newArgs = EMPTY_STRING_ARRAY;
                 } else {
                     name = args[opti];
                     opti++;
-                    if ("--user".equals(name) && opti < args.length) {
-                        int userId = UserHandle.parseUserArg(args[opti]);
-                        opti++;
-                        if (userId != UserHandle.USER_ALL) {
-                            if (userId == UserHandle.USER_CURRENT) {
-                                userId = getCurrentUser().id;
-                            }
-                            users = new int[] { userId };
-                        }
-                        name = args[opti];
-                        opti++;
-                    }
                     newArgs = new String[args.length - opti];
                     if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
                             args.length - opti);
                 }
+                int[] users = dumpUserId == UserHandle.USER_ALL ? null : new int[] { dumpUserId };
                 if (!mServices.dumpService(fd, pw, name, users, newArgs, 0, dumpAll)) {
                     pw.println("No services match: " + name);
                     pw.println("Use -h for help.");
@@ -9480,7 +9480,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
-                        dumpVisibleStacksOnly, dumpFocusedStackOnly)) {
+                        dumpVisibleStacksOnly, dumpFocusedStackOnly, dumpUserId)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, null,
                             new ResultReceiver(null));
