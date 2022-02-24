@@ -1668,13 +1668,14 @@ public class AudioSystem
      *   otherwise (typically one device, except for duplicated paths).
      */
     public static @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
-            @NonNull AudioAttributes attributes) {
+            @NonNull AudioAttributes attributes, boolean forVolume) {
         Objects.requireNonNull(attributes);
         final AudioDeviceAttributes[] devices = new AudioDeviceAttributes[MAX_DEVICE_ROUTING];
-        final int res = getDevicesForAttributes(attributes, devices);
+        final int res = getDevicesForAttributes(attributes, devices, forVolume);
         final ArrayList<AudioDeviceAttributes> routeDevices = new ArrayList<>();
         if (res != SUCCESS) {
-            Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
+            Log.e(TAG, "error " + res + " in getDevicesForAttributes attributes: " + attributes
+                    + " forVolume: " + forVolume);
             return routeDevices;
         }
 
@@ -1693,7 +1694,8 @@ public class AudioSystem
     private static final int MAX_DEVICE_ROUTING = 4;
 
     private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
-                                                      @NonNull AudioDeviceAttributes[] devices);
+                                                      @NonNull AudioDeviceAttributes[] devices,
+                                                      boolean forVolume);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();

@@ -2712,10 +2712,10 @@ static jint android_media_AudioSystem_getDevicesForRoleAndCapturePreset(JNIEnv *
     return AUDIO_JAVA_SUCCESS;
 }
 
-static jint
-android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
-        jobject jaa, jobjectArray jDeviceArray)
-{
+static jint android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
+                                                              jobject jaa,
+                                                              jobjectArray jDeviceArray,
+                                                              jboolean forVolume) {
     const jsize maxResultSize = env->GetArrayLength(jDeviceArray);
     // the JNI is always expected to provide us with an array capable of holding enough
     // devices i.e. the most we ever route a track to. This is preferred over receiving an ArrayList
@@ -2734,7 +2734,7 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
 
     AudioDeviceTypeAddrVector devices;
     jStatus = check_AudioSystem_Command(
-            AudioSystem::getDevicesForAttributes(*(paa.get()), &devices));
+            AudioSystem::getDevicesForAttributes(*(paa.get()), &devices, forVolume));
     if (jStatus != NO_ERROR) {
         return jStatus;
     }
@@ -3045,7 +3045,7 @@ static const JNINativeMethod gMethods[] =
          {"getDevicesForRoleAndCapturePreset", "(IILjava/util/List;)I",
           (void *)android_media_AudioSystem_getDevicesForRoleAndCapturePreset},
          {"getDevicesForAttributes",
-          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;)I",
+          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;Z)I",
           (void *)android_media_AudioSystem_getDevicesForAttributes},
          {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
