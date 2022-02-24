@@ -59,7 +59,19 @@ public class SmartSpaceComplication implements Complication {
 
         @Override
         public void start() {
-            if (mSmartSpaceController.isEnabled()) {
+            addOrRemoveOverlay();
+            mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
+                @Override
+                public void onStateChanged() {
+                    addOrRemoveOverlay();
+                }
+            });
+        }
+
+        private void addOrRemoveOverlay() {
+            if (mDreamOverlayStateController.isPreviewMode()) {
+                mDreamOverlayStateController.removeComplication(mComplication);
+            } else if (mSmartSpaceController.isEnabled()) {
                 mDreamOverlayStateController.addComplication(mComplication);
             }
         }
