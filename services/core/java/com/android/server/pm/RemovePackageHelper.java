@@ -239,6 +239,7 @@ final class RemovePackageHelper {
                     && deletedPkg.getStaticSharedLibName() != null;
             outInfo.populateUsers(deletedPs.queryInstalledUsers(
                     mUserManagerInternal.getUserIds(), true), deletedPs);
+            outInfo.mIsExternal = deletedPs.isExternalStorage();
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
