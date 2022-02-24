@@ -139,16 +139,21 @@
          If this value changes then R.dimen.bubble_expanded_view_min_height in CtsVerifier
          should also be updated. -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
-    <!-- On large screens the width of the expanded view is restricted to this size. -->
-    <dimen name="bubble_expanded_view_phone_landscape_overflow_width">412dp</dimen>
+    <!-- The width of the overflow view on large screens or in landscape on phone. -->
+    <dimen name="bubble_expanded_view_overflow_width">380dp</dimen>
     <!-- Inset to apply to the icon in the overflow button. -->
     <dimen name="bubble_overflow_icon_inset">30dp</dimen>
     <!-- Default (and minimum) height of bubble overflow -->
     <dimen name="bubble_overflow_height">480dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
     <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
-    <!-- Padding of container for overflow bubbles -->
-    <dimen name="bubble_overflow_padding">15dp</dimen>
+    <!-- Horizontal padding of the overflow container. Total desired padding is 16dp but the items
+         already have 5dp added to each side. -->
+    <dimen name="bubble_overflow_container_padding_horizontal">11dp</dimen>
+    <!-- Horizontal padding between items in the overflow view, half of the desired amount. -->
+    <dimen name="bubble_overflow_item_padding_horizontal">5dp</dimen>
+    <!-- Vertical padding between items in the overflow view, half the desired amount. -->
+    <dimen name="bubble_overflow_item_padding_vertical">16dp</dimen>
     <!-- Padding of label for bubble overflow view -->
     <dimen name="bubble_overflow_text_padding">7dp</dimen>
     <!-- Height of bubble overflow empty state illustration -->
