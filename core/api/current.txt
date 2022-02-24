@@ -189,6 +189,7 @@ package android {
     field public static final String START_VIEW_APP_FEATURES = "android.permission.START_VIEW_APP_FEATURES";
     field public static final String START_VIEW_PERMISSION_USAGE = "android.permission.START_VIEW_PERMISSION_USAGE";
     field public static final String STATUS_BAR = "android.permission.STATUS_BAR";
+    field public static final String SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE = "android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
     field public static final String TRANSMIT_IR = "android.permission.TRANSMIT_IR";
     field public static final String UNINSTALL_SHORTCUT = "com.android.launcher.permission.UNINSTALL_SHORTCUT";
@@ -5559,11 +5560,11 @@ package android.app {
 
   public final class GameState implements android.os.Parcelable {
     ctor public GameState(boolean, int);
-    ctor public GameState(boolean, int, @Nullable String, @NonNull android.os.Bundle);
+    ctor public GameState(boolean, int, int, int);
     method public int describeContents();
-    method @Nullable public String getDescription();
-    method @NonNull public android.os.Bundle getMetadata();
+    method public int getLabel();
     method public int getMode();
+    method public int getQuality();
     method public boolean isLoading();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameState> CREATOR;
@@ -5677,6 +5678,7 @@ package android.app {
   }
 
   public class KeyguardManager {
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void addKeyguardLockedStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method @Deprecated public android.content.Intent createConfirmDeviceCredentialIntent(CharSequence, CharSequence);
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method @Deprecated public boolean inKeyguardRestrictedInputMode();
@@ -5685,6 +5687,7 @@ package android.app {
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
     method @Deprecated public android.app.KeyguardManager.KeyguardLock newKeyguardLock(String);
+    method @RequiresPermission(android.Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE) public void removeKeyguardLockedStateListener(@NonNull android.app.KeyguardManager.KeyguardLockedStateListener);
     method public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
   }
 
@@ -5698,6 +5701,10 @@ package android.app {
   @Deprecated public class KeyguardManager.KeyguardLock {
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void disableKeyguard();
     method @Deprecated @RequiresPermission(android.Manifest.permission.DISABLE_KEYGUARD) public void reenableKeyguard();
+  }
+
+  @java.lang.FunctionalInterface public static interface KeyguardManager.KeyguardLockedStateListener {
+    method public void onKeyguardLockedStateChanged(boolean);
   }
 
   @Deprecated public static interface KeyguardManager.OnKeyguardExitResult {
@@ -31791,7 +31798,7 @@ package android.os {
     method public android.os.PowerManager.WakeLock newWakeLock(int, String);
     method @RequiresPermission(android.Manifest.permission.REBOOT) public void reboot(@Nullable String);
     method public void removeThermalStatusListener(@NonNull android.os.PowerManager.OnThermalStatusChangedListener);
-    field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
+    field @Deprecated public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED = "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
@@ -35442,8 +35449,8 @@ package android.provider {
     field public static final String EXTRA_WIFI_NETWORK_RESULT_LIST = "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
     field public static final String INTENT_CATEGORY_USAGE_ACCESS_CONFIG = "android.intent.category.USAGE_ACCESS_CONFIG";
     field public static final String METADATA_USAGE_ACCESS_REASON = "android.settings.metadata.USAGE_ACCESS_REASON";
-    field public static final String SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = "supervisor_restricted_biometrics_controller";
-    field public static final String SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = "";
+    field public static final int SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS = 1; // 0x1
+    field public static final int SUPERVISOR_VERIFICATION_SETTING_UNKNOWN = 0; // 0x0
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -53112,7 +53119,7 @@ package android.view.inputmethod {
     field public static final int RESULT_SHOWN = 2; // 0x2
     field public static final int RESULT_UNCHANGED_HIDDEN = 1; // 0x1
     field public static final int RESULT_UNCHANGED_SHOWN = 0; // 0x0
-    field public static final int SHOW_FORCED = 2; // 0x2
+    field @Deprecated public static final int SHOW_FORCED = 2; // 0x2
     field public static final int SHOW_IMPLICIT = 1; // 0x1
   }
 

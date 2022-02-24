@@ -216,6 +216,18 @@ public class DreamService extends Service implements Window.Callback {
             "android.service.dreams.SHOW_COMPLICATIONS";
 
     /**
+     * Extra containing a boolean for whether we are showing this dream in preview mode.
+     * @hide
+     */
+    public static final String EXTRA_IS_PREVIEW = "android.service.dreams.IS_PREVIEW";
+
+    /**
+     * The user-facing label of the current dream service.
+     * @hide
+     */
+    public static final String EXTRA_DREAM_LABEL = "android.service.dreams.DREAM_LABEL";
+
+    /**
      * The default value for whether to show complications on the overlay.
      * @hide
      */
@@ -258,15 +270,19 @@ public class DreamService extends Service implements Window.Callback {
         }
 
         public void bind(Context context, @Nullable ComponentName overlayService,
-                ComponentName dreamService) {
+                ComponentName dreamService, boolean isPreviewMode) {
             if (overlayService == null) {
                 return;
             }
 
+            final ServiceInfo serviceInfo = fetchServiceInfo(context, dreamService);
+
             final Intent overlayIntent = new Intent();
             overlayIntent.setComponent(overlayService);
             overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
-                    fetchShouldShowComplications(context, dreamService));
+                    fetchShouldShowComplications(context, serviceInfo));
+            overlayIntent.putExtra(EXTRA_DREAM_LABEL, fetchDreamLabel(context, serviceInfo));
+            overlayIntent.putExtra(EXTRA_IS_PREVIEW, isPreviewMode);
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -988,8 +1004,11 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless) {
-            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
-                    new ComponentName(this, getClass()));
+            mOverlayConnection.bind(
+                    /* context= */ this,
+                    intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+                    new ComponentName(this, getClass()),
+                    intent.getBooleanExtra(EXTRA_IS_PREVIEW, /* defaultValue= */ false));
         }
 
         return mDreamServiceWrapper;
@@ -1111,7 +1130,10 @@ public class DreamService extends Service implements Window.Callback {
      * @hide
      */
     @Nullable
-    public static DreamMetadata getDreamMetadata(Context context, ServiceInfo serviceInfo) {
+    public static DreamMetadata getDreamMetadata(Context context,
+            @Nullable ServiceInfo serviceInfo) {
+        if (serviceInfo == null) return null;
+
         final PackageManager pm = context.getPackageManager();
 
         final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
@@ -1350,22 +1372,33 @@ public class DreamService extends Service implements Window.Callback {
      * {@link DreamService#DEFAULT_SHOW_COMPLICATIONS}.
      */
     private static boolean fetchShouldShowComplications(Context context,
-            ComponentName componentName) {
+            @Nullable ServiceInfo serviceInfo) {
+        final DreamMetadata metadata = getDreamMetadata(context, serviceInfo);
+        if (metadata != null) {
+            return metadata.showComplications;
+        }
+        return DEFAULT_SHOW_COMPLICATIONS;
+    }
+
+    @Nullable
+    private static CharSequence fetchDreamLabel(Context context,
+            @Nullable ServiceInfo serviceInfo) {
+        if (serviceInfo == null) return null;
+        final PackageManager pm = context.getPackageManager();
+        return serviceInfo.loadLabel(pm);
+    }
+
+    @Nullable
+    private static ServiceInfo fetchServiceInfo(Context context, ComponentName componentName) {
         final PackageManager pm = context.getPackageManager();
 
         try {
-            final ServiceInfo si = pm.getServiceInfo(componentName,
+            return pm.getServiceInfo(componentName,
                     PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
-            final DreamMetadata metadata = getDreamMetadata(context, si);
-
-            if (metadata != null) {
-                return metadata.showComplications;
-            }
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) Log.w(TAG, "cannot find component " + componentName.flattenToShortString());
         }
-
-        return DEFAULT_SHOW_COMPLICATIONS;
+        return null;
     }
 
     @Override

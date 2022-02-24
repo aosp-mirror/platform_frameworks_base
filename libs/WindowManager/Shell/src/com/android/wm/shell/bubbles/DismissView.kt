@@ -16,11 +16,16 @@
 
 package com.android.wm.shell.bubbles
 
+import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.drawable.TransitionDrawable
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.util.IntProperty
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_LOW_BOUNCY
@@ -28,8 +33,6 @@ import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.wm.shell.common.DismissCircleView
-import android.view.WindowInsets
-import android.view.WindowManager
 
 /*
  * View that handles interactions between DismissCircleView and BubbleStackView.
@@ -41,9 +44,21 @@ class DismissView(context: Context) : FrameLayout(context) {
 
     private val animator = PhysicsAnimator.getInstance(circle)
     private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY)
-    private val DISMISS_SCRIM_FADE_MS = 200
+    private val DISMISS_SCRIM_FADE_MS = 200L
     private var wm: WindowManager =
             context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private var gradientDrawable = createGradient()
+
+    private val GRADIENT_ALPHA: IntProperty<GradientDrawable> =
+            object : IntProperty<GradientDrawable>("alpha") {
+        override fun setValue(d: GradientDrawable, percent: Int) {
+            d.alpha = percent
+        }
+        override fun get(d: GradientDrawable): Int {
+            return d.alpha
+        }
+    }
+
     init {
         setLayoutParams(LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -53,8 +68,7 @@ class DismissView(context: Context) : FrameLayout(context) {
         setClipToPadding(false)
         setClipChildren(false)
         setVisibility(View.INVISIBLE)
-        setBackgroundResource(
-            R.drawable.floating_dismiss_gradient_transition)
+        setBackgroundDrawable(gradientDrawable)
 
         val targetSize: Int = resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
         addView(circle, LayoutParams(targetSize, targetSize,
@@ -71,7 +85,11 @@ class DismissView(context: Context) : FrameLayout(context) {
         if (isShowing) return
         isShowing = true
         setVisibility(View.VISIBLE)
-        (getBackground() as TransitionDrawable).startTransition(DISMISS_SCRIM_FADE_MS)
+        val alphaAnim = ObjectAnimator.ofInt(gradientDrawable, GRADIENT_ALPHA,
+                gradientDrawable.alpha, 255)
+        alphaAnim.setDuration(DISMISS_SCRIM_FADE_MS)
+        alphaAnim.start()
+
         animator.cancel()
         animator
             .spring(DynamicAnimation.TRANSLATION_Y, 0f, spring)
@@ -85,12 +103,22 @@ class DismissView(context: Context) : FrameLayout(context) {
     fun hide() {
         if (!isShowing) return
         isShowing = false
-        (getBackground() as TransitionDrawable).reverseTransition(DISMISS_SCRIM_FADE_MS)
+        val alphaAnim = ObjectAnimator.ofInt(gradientDrawable, GRADIENT_ALPHA,
+                gradientDrawable.alpha, 0)
+        alphaAnim.setDuration(DISMISS_SCRIM_FADE_MS)
+        alphaAnim.start()
         animator
             .spring(DynamicAnimation.TRANSLATION_Y, height.toFloat(),
                 spring)
             .withEndActions({ setVisibility(View.INVISIBLE) })
             .start()
+    }
+
+    /**
+     * Cancels the animator for the dismiss target.
+     */
+    fun cancelAnimators() {
+        animator.cancel()
     }
 
     fun updateResources() {
@@ -102,6 +130,20 @@ class DismissView(context: Context) : FrameLayout(context) {
         circle.layoutParams.width = targetSize
         circle.layoutParams.height = targetSize
         circle.requestLayout()
+    }
+
+    private fun createGradient(): GradientDrawable {
+        val gradientColor = context.resources.getColor(android.R.color.system_neutral1_900)
+        val alpha = 0.7f * 255
+        val gradientColorWithAlpha = Color.argb(alpha.toInt(),
+                Color.red(gradientColor),
+                Color.green(gradientColor),
+                Color.blue(gradientColor))
+        val gd = GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                intArrayOf(gradientColorWithAlpha, Color.TRANSPARENT))
+        gd.setAlpha(0)
+        return gd
     }
 
     private fun updatePadding() {

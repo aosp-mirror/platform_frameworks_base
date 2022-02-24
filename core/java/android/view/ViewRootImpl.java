@@ -2721,6 +2721,10 @@ public final class ViewRootImpl implements ViewParent,
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
+        if (mApplyInsetsRequested && !(mWillMove || mWillResize)) {
+            dispatchApplyInsets(host);
+        }
+
         boolean layoutRequested = mLayoutRequested && (!mStopped || mReportNextDraw);
         if (layoutRequested) {
 
@@ -2782,18 +2786,6 @@ public final class ViewRootImpl implements ViewParent,
                     lp.softInputMode = (lp.softInputMode & ~SOFT_INPUT_MASK_ADJUST) | resizeMode;
                     params = lp;
                 }
-            }
-        }
-
-        if (mApplyInsetsRequested && !(mWillMove || mWillResize)) {
-            dispatchApplyInsets(host);
-            if (mLayoutRequested) {
-                // Short-circuit catching a new layout request here, so
-                // we don't need to go through two layout passes when things
-                // change due to fitting system windows, which can happen a lot.
-                windowSizeMayChange |= measureHierarchy(host, lp,
-                        mView.getContext().getResources(),
-                        desiredWindowWidth, desiredWindowHeight);
             }
         }
 

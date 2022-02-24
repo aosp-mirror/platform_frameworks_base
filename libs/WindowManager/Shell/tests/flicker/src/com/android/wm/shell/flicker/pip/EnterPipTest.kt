@@ -64,7 +64,18 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      * Defines the transition used to run the test
      */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true, stringExtras = emptyMap()) {
+        get() = {
+            setupAndTeardown(this)
+            setup {
+                eachRun {
+                    pipApp.launchViaIntent(wmHelper)
+                }
+            }
+            teardown {
+                eachRun {
+                    pipApp.exit(wmHelper)
+                }
+            }
             transitions {
                 pipApp.clickEnterPipButton(wmHelper)
             }
