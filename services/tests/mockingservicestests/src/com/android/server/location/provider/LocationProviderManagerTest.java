@@ -213,7 +213,7 @@ public class LocationProviderManagerTest {
     public void testProperties() {
         assertThat(mManager.getName()).isEqualTo(NAME);
         assertThat(mManager.getProperties()).isEqualTo(PROPERTIES);
-        assertThat(mManager.getIdentity()).isEqualTo(IDENTITY);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(IDENTITY);
         assertThat(mManager.hasProvider()).isTrue();
 
         ProviderProperties newProperties = new ProviderProperties.Builder()
@@ -230,7 +230,7 @@ public class LocationProviderManagerTest {
         CallerIdentity newIdentity = CallerIdentity.forTest(OTHER_USER, 1, "otherpackage",
                 "otherattribution");
         mProvider.setIdentity(newIdentity);
-        assertThat(mManager.getIdentity()).isEqualTo(newIdentity);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(newIdentity);
 
         mManager.setRealProvider(null);
         assertThat(mManager.hasProvider()).isFalse();

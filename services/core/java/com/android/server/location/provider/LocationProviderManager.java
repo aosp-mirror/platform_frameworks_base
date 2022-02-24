@@ -1468,7 +1468,7 @@ public class LocationProviderManager extends
         return mProvider.getState();
     }
 
-    public @Nullable CallerIdentity getIdentity() {
+    public @Nullable CallerIdentity getProviderIdentity() {
         return mProvider.getState().identity;
     }
 
@@ -1607,7 +1607,7 @@ public class LocationProviderManager extends
 
     public @Nullable Location getLastLocation(LastLocationRequest request,
             CallerIdentity identity, @PermissionLevel int permissionLevel) {
-        request = calculateLastLocationRequest(request);
+        request = calculateLastLocationRequest(request, identity);
 
         if (!isActive(request.isBypass(), identity)) {
             return null;
@@ -1636,15 +1636,16 @@ public class LocationProviderManager extends
         return location;
     }
 
-    private LastLocationRequest calculateLastLocationRequest(LastLocationRequest baseRequest) {
+    private LastLocationRequest calculateLastLocationRequest(LastLocationRequest baseRequest,
+            CallerIdentity identity) {
         LastLocationRequest.Builder builder = new LastLocationRequest.Builder(baseRequest);
 
         boolean locationSettingsIgnored = baseRequest.isLocationSettingsIgnored();
         if (locationSettingsIgnored) {
             // if we are not currently allowed use location settings ignored, disable it
             if (!mSettingsHelper.getIgnoreSettingsAllowlist().contains(
-                    getIdentity().getPackageName(), getIdentity().getAttributionTag())
-                    && !mLocationManagerInternal.isProvider(null, getIdentity())) {
+                    identity.getPackageName(), identity.getAttributionTag())
+                    && !mLocationManagerInternal.isProvider(null, identity)) {
                 locationSettingsIgnored = false;
             }
 
@@ -1658,7 +1659,7 @@ public class LocationProviderManager extends
                 Log.e(TAG, "adas gnss bypass request received in non-gps provider");
                 adasGnssBypass = false;
             } else if (!mLocationSettings.getUserSettings(
-                    getIdentity().getUserId()).isAdasGnssLocationEnabled()) {
+                    identity.getUserId()).isAdasGnssLocationEnabled()) {
                 adasGnssBypass = false;
             }
 
