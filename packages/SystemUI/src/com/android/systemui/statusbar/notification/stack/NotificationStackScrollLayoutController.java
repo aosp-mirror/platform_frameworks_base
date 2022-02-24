@@ -1406,7 +1406,7 @@ public class NotificationStackScrollLayoutController {
         return mNotificationRoundnessManager;
     }
 
-    public NotificationListContainer getNotificationListContainer() {
+    NotificationListContainer getNotificationListContainer() {
         return mNotificationListContainer;
     }
 

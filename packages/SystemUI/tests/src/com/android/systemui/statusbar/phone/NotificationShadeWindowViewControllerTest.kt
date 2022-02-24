@@ -107,10 +107,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             mStatusBarKeyguardViewManager,
             mStatusBarWindowStateController,
             mLockIconViewController,
-            Optional.of(mLowLightClockController)
+            Optional.of(mLowLightClockController),
+            mStatusBar,
+            mNotificationShadeWindowController
         )
         mController.setupExpandedStatusBar()
-        mController.setService(mStatusBar, mNotificationShadeWindowController)
 
         mInteractionEventHandlerCaptor =
             ArgumentCaptor.forClass(InteractionEventHandler::class.java)

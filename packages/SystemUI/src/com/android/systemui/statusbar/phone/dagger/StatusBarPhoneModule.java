@@ -95,7 +95,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
@@ -198,8 +197,6 @@ public interface StatusBarPhoneModule {
             CommandQueue commandQueue,
             StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
-            StatusBarNotificationActivityStarter.Builder
-                    statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -296,7 +293,6 @@ public interface StatusBarPhoneModule {
                 commandQueue,
                 statusBarComponentFactory,
                 pluginManager,
-                statusBarNotificationActivityStarterBuilder,
                 shadeController,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,

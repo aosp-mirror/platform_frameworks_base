@@ -258,8 +258,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
-    @Mock private StatusBarNotificationActivityStarter.Builder
-            mStatusBarNotificationActivityStarterBuilder;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock private ExtensionController mExtensionController;
@@ -336,8 +334,6 @@ public class StatusBarTest extends SysuiTestCase {
         mContext.setTheme(R.style.Theme_SystemUI_LightWallpaper);
 
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
-        when(mStackScrollerController.getNotificationListContainer()).thenReturn(
-                mNotificationListContainer);
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelViewController.getView()).thenReturn(mNotificationPanelView);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
@@ -445,7 +441,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mStatusBarComponentFactory,
                 mPluginManager,
-                mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
