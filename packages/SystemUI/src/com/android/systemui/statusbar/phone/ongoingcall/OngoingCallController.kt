@@ -249,7 +249,7 @@ class OngoingCallController @Inject constructor(
             swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
         } else {
             swipeStatusBarAwayGestureHandler.ifPresent {
-                it.addOnGestureDetectedCallback(TAG, this::onSwipeAwayGestureDetected)
+                it.addOnGestureDetectedCallback(TAG) { _ -> onSwipeAwayGestureDetected() }
             }
         }
     }
