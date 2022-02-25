@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -31,6 +32,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.view.ViewUtil
 
 /**
  * A superclass controller that provides common functionality for showing chips on the sender device
@@ -42,6 +44,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     internal val context: Context,
     private val windowManager: WindowManager,
+    private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
     private val tapGestureDetector: TapGestureDetector,
     @LayoutRes private val chipLayoutRes: Int
@@ -84,7 +87,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 
         // Add view if necessary
         if (oldChipView == null) {
-            tapGestureDetector.addOnGestureDetectedCallback(TAG, this::removeChip)
+            tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
             windowManager.addView(chipView, windowLayoutParams)
         }
 
@@ -126,6 +129,15 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         }
         appIconView.setImageDrawable(appIcon)
         appIconView.visibility = visibility
+    }
+
+    private fun onScreenTapped(e: MotionEvent) {
+        val view = chipView ?: return
+        // If the tap is within the chip bounds, we shouldn't hide the chip (in case users think the
+        // chip is tappable).
+        if (!viewUtil.touchIsWithinView(view, e.x, e.y)) {
+            removeChip()
+        }
     }
 }
 
