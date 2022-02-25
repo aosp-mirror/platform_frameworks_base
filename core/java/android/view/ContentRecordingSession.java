@@ -66,10 +66,11 @@ public final class ContentRecordingSession implements Parcelable {
     private int mContentToRecord = RECORD_CONTENT_DISPLAY;
 
     /**
-     * The window token of the layer of the hierarchy to record.
-     * The display content if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_DISPLAY}, or task if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_TASK}.
+     * The token of the layer of the hierarchy to record.
+     * If {@link #getContentToRecord()} is @link RecordContent#RECORD_CONTENT_DISPLAY}, then
+     * represents the WindowToken corresponding to the DisplayContent to record.
+     * If {@link #getContentToRecord()} is {@link RecordContent#RECORD_CONTENT_TASK}, then
+     * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
     @VisibleForTesting
     @Nullable
@@ -192,10 +193,11 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     /**
-     * The window token of the layer of the hierarchy to record.
-     * The display content if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_DISPLAY}, or task if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_TASK}.
+     * {The token of the layer of the hierarchy to record.
+     * If {@link #getContentToRecord()} is @link RecordContent#RECORD_CONTENT_DISPLAY}, then
+     * represents the WindowToken corresponding to the DisplayContent to record.
+     * If {@link #getContentToRecord()} is {@link RecordContent#RECORD_CONTENT_TASK}, then
+     * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
     @DataClass.Generated.Member
     public @VisibleForTesting @Nullable IBinder getTokenToRecord() {
@@ -231,10 +233,11 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     /**
-     * The window token of the layer of the hierarchy to record.
-     * The display content if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_DISPLAY}, or task if {@link #getContentToRecord()} is
-     * {@link RecordContent#RECORD_CONTENT_TASK}.
+     * {The token of the layer of the hierarchy to record.
+     * If {@link #getContentToRecord()} is @link RecordContent#RECORD_CONTENT_DISPLAY}, then
+     * represents the WindowToken corresponding to the DisplayContent to record.
+     * If {@link #getContentToRecord()} is {@link RecordContent#RECORD_CONTENT_TASK}, then
+     * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
     @DataClass.Generated.Member
     public @NonNull ContentRecordingSession setTokenToRecord(@VisibleForTesting @NonNull IBinder value) {
@@ -390,10 +393,11 @@ public final class ContentRecordingSession implements Parcelable {
         }
 
         /**
-         * The window token of the layer of the hierarchy to record.
-         * The display content if {@link #getContentToRecord()} is
-         * {@link RecordContent#RECORD_CONTENT_DISPLAY}, or task if {@link #getContentToRecord()} is
-         * {@link RecordContent#RECORD_CONTENT_TASK}.
+         * {The token of the layer of the hierarchy to record.
+         * If {@link #getContentToRecord()} is @link RecordContent#RECORD_CONTENT_DISPLAY}, then
+         * represents the WindowToken corresponding to the DisplayContent to record.
+         * If {@link #getContentToRecord()} is {@link RecordContent#RECORD_CONTENT_TASK}, then
+         * represents the {@link android.window.WindowContainerToken} of the Task to record.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setTokenToRecord(@VisibleForTesting @NonNull IBinder value) {
@@ -433,7 +437,7 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1644843382972L,
+            time = 1645803878639L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/ContentRecordingSession.java",
             inputSignatures = "public static final  int RECORD_CONTENT_DISPLAY\npublic static final  int RECORD_CONTENT_TASK\nprivate  int mDisplayId\nprivate @android.view.ContentRecordingSession.RecordContent int mContentToRecord\nprivate @com.android.internal.annotations.VisibleForTesting @android.annotation.Nullable android.os.IBinder mTokenToRecord\npublic static  android.view.ContentRecordingSession createDisplaySession(android.os.IBinder)\npublic static  android.view.ContentRecordingSession createTaskSession(android.os.IBinder)\npublic static  boolean isValid(android.view.ContentRecordingSession)\npublic static  boolean isSameDisplay(android.view.ContentRecordingSession,android.view.ContentRecordingSession)\nclass ContentRecordingSession extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true, genSetters=true, genEqualsHashCode=true)")

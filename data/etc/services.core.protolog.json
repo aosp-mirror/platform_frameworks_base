@@ -2251,6 +2251,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
+    "264036181": {
+      "message": "Unable to retrieve task to start recording for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "269576220": {
       "message": "Resuming rotation after drag",
       "level": "DEBUG",
@@ -2671,12 +2677,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "664667685": {
-      "message": "Activity %s: enableOnBackInvokedCallback=false. Returning null BackNavigationInfo.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "665256544": {
       "message": "All windows drawn!",
       "level": "DEBUG",
@@ -2755,6 +2755,12 @@
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperWindowToken.java"
     },
+    "736003885": {
+      "message": "Unable to retrieve the task token to start recording for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "736692676": {
       "message": "Config is relaunching %s",
       "level": "VERBOSE",
@@ -2784,6 +2790,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "778774915": {
+      "message": "Unable to record task since feature is disabled %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
     "781471998": {
       "message": "moveWindowTokenToDisplay: Cannot move to the original display for token: %s",
