@@ -6298,13 +6298,16 @@ public class AudioService extends IAudioService.Stub
                 return AudioSystem.DEVICE_OUT_HDMI_ARC;
             } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_HDMI_EARC)) {
                 return AudioSystem.DEVICE_OUT_HDMI_EARC;
-            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_SPDIF)) {
-                return AudioSystem.DEVICE_OUT_SPDIF;
             } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_AUX_LINE)) {
                 return AudioSystem.DEVICE_OUT_AUX_LINE;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_SPDIF)) {
+                return AudioSystem.DEVICE_OUT_SPDIF;
             } else {
-                for (int deviceType : AudioSystem.DEVICE_OUT_ALL_A2DP_SET) {
-                    if (deviceSet.contains(deviceType)) {
+                // At this point, deviceSet should contain exactly one A2DP device;
+                // regardless, return the first A2DP device in numeric order.
+                // If there is no A2DP device, this falls through to log an error.
+                for (int deviceType : deviceSet) {
+                    if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(deviceType)) {
                         return deviceType;
                     }
                 }
