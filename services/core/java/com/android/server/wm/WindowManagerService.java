@@ -229,6 +229,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -747,6 +748,9 @@ public class WindowManagerService extends IWindowManager.Stub
             new WindowContextListenerController();
 
     private InputTarget mFocusedInputTarget;
+
+    @VisibleForTesting
+    final ContentRecordingController mContentRecordingController = new ContentRecordingController();
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -2891,6 +2895,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             dc.reParentWindowToken(token);
+        }
+    }
+
+    /**
+     * Updates the current content mirroring session.
+     */
+    @Override
+    public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
+        synchronized (mGlobalLock) {
+            mContentRecordingController.setContentRecordingSessionLocked(incomingSession, this);
         }
     }
 

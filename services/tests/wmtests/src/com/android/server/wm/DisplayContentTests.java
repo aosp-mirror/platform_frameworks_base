@@ -119,6 +119,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
+import android.view.ContentRecordingSession;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -2301,8 +2302,18 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent virtualDisplay = new TestDisplayContent.Builder(mAtm,
                 mDisplayInfo).build();
 
+        // GIVEN a session is set up to capture a DisplayContent.
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                tokenToMirror);
+        session.setDisplayId(virtualDisplay.getDisplayId());
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
+
+        // WHEN attempting to mirror on the virtual display.
+        virtualDisplay.updateRecording();
+
         // THEN mirroring is initiated for the default display's DisplayArea.
-        assertThat(virtualDisplay.mTokenToMirror).isEqualTo(tokenToMirror);
+        assertThat(virtualDisplay.isCurrentlyRecording()).isTrue();
+        assertThat(virtualDisplay.getContentRecordingSession()).isEqualTo(session);
 
         mockSession.finishMocking();
     }
@@ -2329,9 +2340,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent virtualDisplay = new TestDisplayContent.Builder(mAtm,
                 mDisplayInfo).build();
 
-        // THEN mirroring is initiated for the default display's DisplayArea.
-        assertThat(virtualDisplay.mTokenToMirror).isEqualTo(tokenToMirror);
+        // GIVEN a session is set up to capture a DisplayContent.
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                tokenToMirror);
+        session.setDisplayId(virtualDisplay.getDisplayId());
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
 
+        // WHEN attempting to mirror on the virtual display, and the captured content is resized.
+        virtualDisplay.updateRecording();
         float xScale = 0.7f;
         float yScale = 2f;
         Rect displayAreaBounds = new Rect(0, 0, Math.round(surfaceSize.x * xScale),
@@ -2359,7 +2375,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl does not mirror a null surface.
         Point surfaceSize = new Point(
@@ -2373,9 +2389,15 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // WHEN getting the DisplayContent for the new virtual display.
         DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                tokenToMirror);
+        session.setDisplayId(displayId);
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
+        actualDC.updateRecording();
 
         // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
-        assertThat(actualDC.mTokenToMirror).isNull();
+        assertThat(actualDC.isCurrentlyRecording()).isFalse();
+        assertThat(actualDC.getContentRecordingSession()).isEqualTo(session);
 
         display.release();
         mockSession.finishMocking();
@@ -2402,44 +2424,27 @@ public class DisplayContentTests extends WindowTestsBase {
         // GIVEN a new VirtualDisplay with an associated surface.
         final VirtualDisplay display = createVirtualDisplay(surfaceSize, new Surface());
         final int displayId = display.getDisplay().getDisplayId();
+
+        // GIVEN a session for this display.
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                tokenToMirror);
+        session.setDisplayId(displayId);
+        mWm.setContentRecordingSession(session);
         mWm.mRoot.onDisplayAdded(displayId);
 
         // WHEN getting the DisplayContent for the new virtual display.
         DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
+        actualDC.updateRecording();
 
         // THEN mirroring is initiated for the default display's DisplayArea.
-        assertThat(actualDC.mTokenToMirror).isEqualTo(tokenToMirror);
+        assertThat(actualDC.isCurrentlyRecording()).isTrue();
+        assertThat(actualDC.getContentRecordingSession()).isEqualTo(session);
 
         display.release();
         mockSession.finishMocking();
     }
 
-    @Test
-    public void testKeepClearAreasMultipleWindows() {
-        final WindowState w1 = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent, "w1");
-        final Rect rect1 = new Rect(0, 0, 10, 10);
-        w1.setKeepClearAreas(Arrays.asList(rect1), Collections.emptyList());
-        final WindowState w2 = createWindow(null, TYPE_NOTIFICATION_SHADE, mDisplayContent, "w2");
-        final Rect rect2 = new Rect(10, 10, 20, 20);
-        w2.setKeepClearAreas(Arrays.asList(rect2), Collections.emptyList());
-
-        // No keep clear areas on display, because the windows are not visible
-        assertEquals(Arrays.asList(), mDisplayContent.getKeepClearAreas());
-
-        makeWindowVisible(w1);
-
-        // The returned keep-clear areas contain the areas just from the visible window
-        assertEquals(new ArraySet(Arrays.asList(rect1)),
-                     new ArraySet(mDisplayContent.getKeepClearAreas()));
-
-        makeWindowVisible(w1, w2);
-
-        // The returned keep-clear areas contain the areas from all visible windows
-        assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
-                     new ArraySet(mDisplayContent.getKeepClearAreas()));
-    }
-
-    private class TestToken extends Binder {
+    private static class MirroringTestToken extends Binder {
     }
 
     /**
@@ -2449,10 +2454,7 @@ public class DisplayContentTests extends WindowTestsBase {
     private IBinder setUpDefaultTaskDisplayAreaWindowToken() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        final IBinder tokenToMirror = new TestToken();
-        doReturn(tokenToMirror).when(mWm.mDisplayManagerInternal).getWindowTokenClientToMirror(
-                anyInt());
-
+        final IBinder tokenToMirror = new MirroringTestToken();
         // GIVEN the default task display area is represented by the WindowToken.
         spyOn(mWm.mWindowContextListenerController);
         doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
@@ -2479,6 +2481,31 @@ public class DisplayContentTests extends WindowTestsBase {
     private VirtualDisplay createVirtualDisplay(Point size, Surface surface) {
         return mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay", size.x, size.y,
                 DisplayMetrics.DENSITY_140, surface, VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
+    }
+
+    @Test
+    public void testKeepClearAreasMultipleWindows() {
+        final WindowState w1 = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent, "w1");
+        final Rect rect1 = new Rect(0, 0, 10, 10);
+        w1.setKeepClearAreas(Arrays.asList(rect1), Collections.emptyList());
+        final WindowState w2 = createWindow(null, TYPE_NOTIFICATION_SHADE, mDisplayContent, "w2");
+        final Rect rect2 = new Rect(10, 10, 20, 20);
+        w2.setKeepClearAreas(Arrays.asList(rect2), Collections.emptyList());
+
+        // No keep clear areas on display, because the windows are not visible
+        assertEquals(Arrays.asList(), mDisplayContent.getKeepClearAreas());
+
+        makeWindowVisible(w1);
+
+        // The returned keep-clear areas contain the areas just from the visible window
+        assertEquals(new ArraySet(Arrays.asList(rect1)),
+                new ArraySet(mDisplayContent.getKeepClearAreas()));
+
+        makeWindowVisible(w1, w2);
+
+        // The returned keep-clear areas contain the areas from all visible windows
+        assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
+                new ArraySet(mDisplayContent.getKeepClearAreas()));
     }
 
     private void removeRootTaskTests(Runnable runnable) {
