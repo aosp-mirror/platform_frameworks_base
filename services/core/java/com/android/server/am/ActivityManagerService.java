@@ -9155,10 +9155,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mComponentAliasResolver.dump(pw);
         }
-        if (dumpAll) {
-            pw.println("-------------------------------------------------------------------------------");
-            mAppRestrictionController.dump(pw, "");
-        }
+    }
+
+    /**
+     * Dump the app restriction controller, it's required not to hold the global lock here.
+     */
+    private void dumpAppRestrictionController(PrintWriter pw) {
+        pw.println("-------------------------------------------------------------------------------");
+        mAppRestrictionController.dump(pw, "");
     }
 
     /**
@@ -9513,6 +9517,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
                             dumpNormalPriority, dumpAppId, false /* dumpProxies */);
                 }
+            }
+            if (dumpAll) {
+                dumpAppRestrictionController(pw);
             }
         }
         Binder.restoreCallingIdentity(origId);
