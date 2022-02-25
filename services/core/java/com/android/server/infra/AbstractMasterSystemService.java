@@ -828,7 +828,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         for (int i = 0; i < size; i++) {
             List<S> services = mServicesCacheList.valueAt(i);
             for (int j = 0; j < services.size(); j++) {
-                visitor.visit(services.get(i));
+                visitor.visit(services.get(j));
             }
         }
     }
