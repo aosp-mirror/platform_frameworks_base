@@ -50,6 +50,7 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -136,10 +137,12 @@ public class MidiService extends IMidiManager.Stub {
     private final Object mUsbMidiLock = new Object();
 
     // Number of times a USB MIDI 1.0 device has opened, based on the device name.
+    @GuardedBy("mUsbMidiLock")
     private final HashMap<String, Integer> mUsbMidiLegacyDeviceOpenCount =
             new HashMap<String, Integer>();
 
     // Whether a USB MIDI device has opened, based on the device name.
+    @GuardedBy("mUsbMidiLock")
     private final HashSet<String> mUsbMidiUniversalDeviceInUse = new HashSet<String>();
 
     // UID of BluetoothMidiService
@@ -1246,7 +1249,7 @@ public class MidiService extends IMidiManager.Stub {
         pw.decreaseIndent();
     }
 
-    // hold mUsbMidiLock before calling this
+    @GuardedBy("mUsbMidiLock")
     private boolean isUsbMidiDeviceInUseLocked(MidiDeviceInfo info) {
         String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
         if (name.length() < MIDI_LEGACY_STRING.length()) {
@@ -1265,7 +1268,7 @@ public class MidiService extends IMidiManager.Stub {
         return false;
     }
 
-    // hold mUsbMidiLock before calling this
+    @GuardedBy("mUsbMidiLock")
     void addUsbMidiDeviceLocked(MidiDeviceInfo info) {
         String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
         if (name.length() < MIDI_LEGACY_STRING.length()) {
@@ -1282,7 +1285,7 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
-    // hold mUsbMidiLock before calling this
+    @GuardedBy("mUsbMidiLock")
     void removeUsbMidiDeviceLocked(MidiDeviceInfo info) {
         String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
         if (name.length() < MIDI_LEGACY_STRING.length()) {
