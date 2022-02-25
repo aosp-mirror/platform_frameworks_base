@@ -128,6 +128,7 @@ import com.android.systemui.communal.CommunalSourceMonitor;
 import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.controls.dagger.ControlsComponent;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -176,7 +177,6 @@ import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -223,8 +223,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @CentralSurfacesComponent.CentralSurfacesScope
-public class NotificationPanelViewController extends PanelViewController
-        implements NotifPanelEventSource {
+public class NotificationPanelViewController extends PanelViewController {
 
     private static final boolean DEBUG = false;
 
@@ -335,6 +334,7 @@ public class NotificationPanelViewController extends PanelViewController
     private final TapAgainViewController mTapAgainViewController;
     private final SplitShadeHeaderController mSplitShadeHeaderController;
     private final RecordingController mRecordingController;
+    private final PanelEventsEmitter mPanelEventsEmitter;
     private boolean mShouldUseSplitNotificationShade;
     // The bottom padding reserved for elements of the keyguard measuring notifications
     private float mKeyguardNotificationBottomPadding;
@@ -664,8 +664,6 @@ public class NotificationPanelViewController extends PanelViewController
     private Optional<NotificationPanelUnfoldAnimationController>
             mNotificationPanelUnfoldAnimationController;
 
-    private final ListenerSet<Callbacks> mNotifEventSourceCallbacks = new ListenerSet<>();
-
     private final NotificationListContainer mNotificationListContainer;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -796,7 +794,8 @@ public class NotificationPanelViewController extends PanelViewController
             QsFrameTranslateController qsFrameTranslateController,
             SysUiState sysUiState,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            NotificationListContainer notificationListContainer) {
+            NotificationListContainer notificationListContainer,
+            PanelEventsEmitter panelEventsEmitter) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -868,6 +867,7 @@ public class NotificationPanelViewController extends PanelViewController
         mSecureSettings = secureSettings;
         mInteractionJankMonitor = interactionJankMonitor;
         mSysUiState = sysUiState;
+        mPanelEventsEmitter = panelEventsEmitter;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -3460,9 +3460,7 @@ public class NotificationPanelViewController extends PanelViewController
         boolean wasRunning = isLaunchTransitionRunning();
         super.setIsLaunchAnimationRunning(running);
         if (wasRunning != isLaunchTransitionRunning()) {
-            for (Callbacks cb : mNotifEventSourceCallbacks) {
-                cb.onLaunchingActivityChanged(running);
-            }
+            mPanelEventsEmitter.notifyLaunchingActivityChanged(running);
         }
     }
 
@@ -3471,9 +3469,7 @@ public class NotificationPanelViewController extends PanelViewController
         boolean wasClosing = isClosing();
         super.setIsClosing(isClosing);
         if (wasClosing != isClosing) {
-            for (Callbacks cb : mNotifEventSourceCallbacks) {
-                cb.onPanelCollapsingChanged(isClosing);
-            }
+            mPanelEventsEmitter.notifyPanelCollapsingChanged(isClosing);
         }
     }
 
@@ -4375,16 +4371,6 @@ public class NotificationPanelViewController extends PanelViewController
                 .commitUpdate(mDisplayId);
     }
 
-    @Override
-    public void registerCallbacks(Callbacks callbacks) {
-        mNotifEventSourceCallbacks.addIfAbsent(callbacks);
-    }
-
-    @Override
-    public void unregisterCallbacks(Callbacks callbacks) {
-        mNotifEventSourceCallbacks.remove(callbacks);
-    }
-
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {
         @Override
         public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
@@ -5156,6 +5142,37 @@ public class NotificationPanelViewController extends PanelViewController
                     false /* animate */,
                     false /* delayed */,
                     1.0f /* speedUpFactor */);
+        }
+    }
+
+    @SysUISingleton
+    static class PanelEventsEmitter implements NotifPanelEvents {
+
+        private final ListenerSet<Listener> mListeners = new ListenerSet<>();
+
+        @Inject
+        PanelEventsEmitter() {}
+
+        @Override
+        public void registerListener(@NonNull Listener listener) {
+            mListeners.addIfAbsent(listener);
+        }
+
+        @Override
+        public void unregisterListener(@NonNull Listener listener) {
+            mListeners.remove(listener);
+        }
+
+        private void notifyLaunchingActivityChanged(boolean isLaunchingActivity) {
+            for (Listener cb : mListeners) {
+                cb.onLaunchingActivityChanged(isLaunchingActivity);
+            }
+        }
+
+        private void notifyPanelCollapsingChanged(boolean isCollapsing) {
+            for (NotifPanelEvents.Listener cb : mListeners) {
+                cb.onPanelCollapsingChanged(isCollapsing);
+            }
         }
     }
 }
