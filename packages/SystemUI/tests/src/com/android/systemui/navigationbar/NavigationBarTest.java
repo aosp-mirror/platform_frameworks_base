@@ -28,6 +28,7 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -94,12 +95,10 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
 import org.junit.After;
@@ -401,7 +400,6 @@ public class NavigationBarTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mCommandQueue,
                 Optional.of(mock(Pip.class)),
-                Optional.of(mock(LegacySplitScreen.class)),
                 Optional.of(mock(Recents.class)),
                 () -> Optional.of(mStatusBar),
                 mock(ShadeController.class),

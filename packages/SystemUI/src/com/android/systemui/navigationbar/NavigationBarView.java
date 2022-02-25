@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
@@ -1423,10 +1422,6 @@ public class NavigationBarView extends FrameLayout implements
         setClipToPadding(shouldClip);
 
         return super.onApplyWindowInsets(insets);
-    }
-
-    void registerDockedListener(LegacySplitScreen legacySplitScreen) {
-        legacySplitScreen.registerInSplitScreenListener(mDockedListener);
     }
 
     void addPipExclusionBoundsChangeListener(Pip pip) {

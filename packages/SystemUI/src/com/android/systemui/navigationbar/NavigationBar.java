@@ -57,7 +57,6 @@ import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
 
 import android.annotation.IdRes;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
@@ -140,7 +139,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
@@ -187,7 +185,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
@@ -488,7 +485,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             ShadeController shadeController,
@@ -522,7 +518,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
         mPipOptional = pipOptional;
-        mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
@@ -629,7 +624,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
-        mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
         mPipOptional.ifPresent(mNavigationBarView::addPipExclusionBoundsChangeListener);
         mBackAnimation.ifPresent(mNavigationBarView::registerBackAnimation);
 
@@ -789,10 +783,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return;
         }
 
-        if (mStartingQuickSwitchRotation == -1 || mSplitScreenOptional
-                .map(LegacySplitScreen::isDividerVisible).orElse(false)) {
-            // Hide the secondary home handle if we are in multiwindow since apps in multiwindow
-            // aren't allowed to set the display orientation
+        if (mStartingQuickSwitchRotation == -1) {
             resetSecondaryHandle();
         } else {
             int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
@@ -1327,7 +1318,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         return true;
                     } else if (v.getId() == btnId2) {
                         return btnId2 == R.id.recent_apps
-                                ? onLongPressRecents()
+                                ? false
                                 : onHomeLongClick(
                                         mNavigationBarView.getHomeButton().getCurrentView());
                     }
@@ -1350,24 +1341,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             Log.d(TAG, "Unable to reach activity manager", e);
         }
         return false;
-    }
-
-    private boolean onLongPressRecents() {
-        if (mRecentsOptional.isPresent() || !ActivityTaskManager.supportsMultiWindow(mContext)
-                || ActivityManager.isLowRamDeviceStatic()
-                // If we are connected to the overview service, then disable the recents button
-                || mOverviewProxyService.getProxy() != null
-                || !mSplitScreenOptional.map(splitScreen ->
-                splitScreen.getDividerView().getSnapAlgorithm().isSplitScreenFeasible())
-                .orElse(false)) {
-            return false;
-        }
-
-        return mStatusBarOptionalLazy.get().map(
-                statusBar -> statusBar.toggleSplitScreenMode(
-                        MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
-                        MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS))
-            .orElse(false);
     }
 
     private void onAccessibilityClick(View v) {
@@ -1654,7 +1627,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         private final BroadcastDispatcher mBroadcastDispatcher;
         private final CommandQueue mCommandQueue;
         private final Optional<Pip> mPipOptional;
-        private final Optional<LegacySplitScreen> mSplitScreenOptional;
         private final Optional<Recents> mRecentsOptional;
         private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
         private final ShadeController mShadeController;
@@ -1686,7 +1658,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 BroadcastDispatcher broadcastDispatcher,
                 CommandQueue commandQueue,
                 Optional<Pip> pipOptional,
-                Optional<LegacySplitScreen> splitScreenOptional,
                 Optional<Recents> recentsOptional,
                 Lazy<Optional<StatusBar>> statusBarOptionalLazy,
                 ShadeController shadeController,
@@ -1715,7 +1686,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mBroadcastDispatcher = broadcastDispatcher;
             mCommandQueue = commandQueue;
             mPipOptional = pipOptional;
-            mSplitScreenOptional = splitScreenOptional;
             mRecentsOptional = recentsOptional;
             mStatusBarOptionalLazy = statusBarOptionalLazy;
             mShadeController = shadeController;
@@ -1742,7 +1712,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mOverviewProxyService, mNavigationModeController,
                     mAccessibilityButtonModeObserver, mStatusBarStateController,
                     mSysUiFlagsContainer, mBroadcastDispatcher, mCommandQueue, mPipOptional,
-                    mSplitScreenOptional, mRecentsOptional, mStatusBarOptionalLazy,
+                    mRecentsOptional, mStatusBarOptionalLazy,
                     mShadeController, mNotificationRemoteInputManager,
                     mNotificationShadeDepthController, mMainHandler,
                     mNavbarOverlayController, mUiEventLogger, mNavBarHelper,
