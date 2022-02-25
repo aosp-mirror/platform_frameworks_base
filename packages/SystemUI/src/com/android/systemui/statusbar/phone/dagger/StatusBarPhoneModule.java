@@ -115,7 +115,6 @@ import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
 import java.util.Optional;
@@ -199,7 +198,6 @@ public interface StatusBarPhoneModule {
             CommandQueue commandQueue,
             StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
-            Optional<LegacySplitScreen> splitScreenOptional,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
@@ -298,7 +296,6 @@ public interface StatusBarPhoneModule {
                 commandQueue,
                 statusBarComponentFactory,
                 pluginManager,
-                splitScreenOptional,
                 statusBarNotificationActivityStarterBuilder,
                 shadeController,
                 statusBarKeyguardViewManager,
