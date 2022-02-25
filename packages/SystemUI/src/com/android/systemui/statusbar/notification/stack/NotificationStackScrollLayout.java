@@ -100,7 +100,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -453,7 +452,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     private final NotificationSectionsManager mSectionsManager;
-    private ForegroundServiceDungeonView mFgsSectionView;
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
@@ -612,14 +610,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-    }
-
-    void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
-        if (mFgsSectionView != null) {
-            return;
-        }
-        mFgsSectionView = fgsSectionView;
-        addView(mFgsSectionView, -1);
     }
 
     /**
@@ -5286,9 +5276,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // incremented in the following "changeViewPosition" calls so that its value is correct for
         // subsequent calls.
         int offsetFromEnd = 1;
-        if (mFgsSectionView != null) {
-            changeViewPosition(mFgsSectionView, getChildCount() - offsetFromEnd++);
-        }
         changeViewPosition(mFooterView, getChildCount() - offsetFromEnd++);
         changeViewPosition(mEmptyShadeView, getChildCount() - offsetFromEnd++);
 
