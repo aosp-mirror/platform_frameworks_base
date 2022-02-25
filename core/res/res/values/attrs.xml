@@ -3932,12 +3932,12 @@
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR}. -->
             <flag name="flagInputMethodEditor" value="0x0008000" />
         </attr>
-        <!-- Component name of an activity that allows the user to modify
-             the settings for this service. This setting cannot be changed at runtime. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
-        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
-             with this accessibility service for one to one mapping. It is used by system settings
-             to remind users this accessibility service has a
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility service for one to one mapping. It is used by system
+             settings to remind users this accessibility service has a
              {@link android.service.quicksettings.TileService}. -->
         <attr name="tileService" format="string" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
@@ -4026,12 +4026,12 @@
         <!-- Html description of the target of accessibility shortcut usage, availability, or
              limitations (e.g. isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
-        <!-- Component name of an activity that allows the user to modify the settings for this
-             target of accessibility shortcut. -->
+        <!-- Fully qualified class name of an activity that allows the user to modify the settings
+             for this target of accessibility shortcut. -->
         <attr name="settingsActivity" />
-        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
-             with this accessibility shortcut target for one to one mapping. It is used by system
-             settings to remind users this accessibility service has a
+        <!-- Fully qualified class name of {@link android.service.quicksettings.TileService} is
+             associated with this accessibility shortcut target for one to one mapping. It is used
+             by system settings to remind users this accessibility service has a
              {@link android.service.quicksettings.TileService}. -->
         <attr name="tileService" format="string" />
         <!-- Detailed intro of the target of accessibility shortcut purpose or behavior. -->

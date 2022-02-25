@@ -101,11 +101,11 @@ public final class AccessibilityShortcutInfo {
     private String mSettingsActivityName;
 
     /**
-     * The class name of {@link android.service.quicksettings.TileService} is associated with this
+     * The name of {@link android.service.quicksettings.TileService} is associated with this
      * accessibility shortcut target for one to one mapping. It is used by system settings to remind
      * users this accessibility service has a {@link android.service.quicksettings.TileService}.
      */
-    private String mTileServiceClassName;
+    private String mTileServiceName;
 
     /**
      * Creates a new instance.
@@ -163,7 +163,7 @@ public final class AccessibilityShortcutInfo {
             mSettingsActivityName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_settingsActivity);
             // Get tile service class name
-            mTileServiceClassName = asAttributes.getString(
+            mTileServiceName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_tileService);
             // Gets intro
             mIntroResId = asAttributes.getResourceId(
@@ -287,14 +287,14 @@ public final class AccessibilityShortcutInfo {
     }
 
     /**
-     * Gets the class name of {@link android.service.quicksettings.TileService} is associated with
+     * Gets the name of {@link android.service.quicksettings.TileService} is associated with
      * this accessibility shortcut target.
      *
-     * @return The class names of {@link android.service.quicksettings.TileService}.
+     * @return The class name of {@link android.service.quicksettings.TileService}.
      */
     @Nullable
-    public String getTileServiceClassName() {
-        return mTileServiceClassName;
+    public String getTileServiceName() {
+        return mTileServiceName;
     }
 
     /**
