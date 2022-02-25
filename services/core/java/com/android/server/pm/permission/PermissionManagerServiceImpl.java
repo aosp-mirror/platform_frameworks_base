@@ -89,6 +89,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -125,7 +126,6 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -174,10 +174,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
 
     private static final long BACKUP_TIMEOUT_MILLIS = SECONDS.toMillis(60);
-
-    // For automotive products, CarService enforces allow-listing of the privileged permissions
-    // com.android.car is the package name which declares auto specific permissions
-    private static final String CAR_PACKAGE_NAME = "com.android.car";
 
     /** Cap the size of permission trees that 3rd party apps can define; in characters of text */
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;
@@ -388,7 +384,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         // PackageManager.hasSystemFeature() is not used here because PackageManagerService
         // isn't ready yet.
         if (availableFeatures.containsKey(PackageManager.FEATURE_AUTOMOTIVE)) {
-            mPrivilegedPermissionAllowlistSourcePackageNames.add(CAR_PACKAGE_NAME);
+            // The property defined in car api surface, so use the string directly.
+            String carServicePackage = SystemProperties.get("ro.android.car.carservice.package",
+                    null);
+            if (carServicePackage != null) {
+                mPrivilegedPermissionAllowlistSourcePackageNames.add(carServicePackage);
+            }
         }
 
         mHandlerThread = new ServiceThread(TAG,
