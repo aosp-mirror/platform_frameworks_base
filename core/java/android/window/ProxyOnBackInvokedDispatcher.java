@@ -81,6 +81,10 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         synchronized (mLock) {
             mCallbacks.removeIf((p) -> p.first.equals(callback));
+            if (mActualDispatcherOwner != null) {
+                mActualDispatcherOwner.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(
+                        callback);
+            }
         }
     }
 
