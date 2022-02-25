@@ -915,10 +915,10 @@ package android.app {
 
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarModeOverride();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarMode();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void registerNearbyMediaDevicesProvider(@NonNull android.media.NearbyMediaDevicesProvider);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarModeOverride(int);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setNavBarMode(int);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void unregisterNearbyMediaDevicesProvider(@NonNull android.media.NearbyMediaDevicesProvider);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferReceiverDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable android.graphics.drawable.Icon, @Nullable CharSequence);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void updateMediaTapToTransferSenderDisplay(int, @NonNull android.media.MediaRoute2Info, @Nullable java.util.concurrent.Executor, @Nullable Runnable);
@@ -933,8 +933,8 @@ package android.app {
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED = 7; // 0x7
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED = 5; // 0x5
     field public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED = 3; // 0x3
-    field public static final int NAV_BAR_MODE_OVERRIDE_KIDS = 1; // 0x1
-    field public static final int NAV_BAR_MODE_OVERRIDE_NONE = 0; // 0x0
+    field public static final int NAV_BAR_MODE_DEFAULT = 0; // 0x0
+    field public static final int NAV_BAR_MODE_KIDS = 1; // 0x1
   }
 
   public static final class StatusBarManager.DisableInfo {
@@ -1059,10 +1059,10 @@ package android.app.admin {
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @NonNull String, @DrawableRes int);
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @DrawableRes int);
     method public int describeContents();
-    method @DrawableRes public int getCallingPackageResourceId();
     method @NonNull public String getDrawableId();
     method @NonNull public String getDrawableSource();
     method @NonNull public String getDrawableStyle();
+    method @DrawableRes public int getResourceIdInCallingPackage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyDrawableResource> CREATOR;
   }
@@ -1088,8 +1088,8 @@ package android.app.admin {
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>);
-    method @Nullable public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>, @NonNull java.lang.Object...);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public int getUserProvisioningState();
     method public boolean isDeviceManaged();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
@@ -1239,7 +1239,7 @@ package android.app.admin {
   public final class DevicePolicyStringResource implements android.os.Parcelable {
     ctor public DevicePolicyStringResource(@NonNull android.content.Context, @NonNull String, @StringRes int);
     method public int describeContents();
-    method public int getCallingPackageResourceId();
+    method public int getResourceIdInCallingPackage();
     method @NonNull public String getStringId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyStringResource> CREATOR;
@@ -2172,23 +2172,41 @@ package android.app.smartspace {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceTarget> CREATOR;
     field public static final int FEATURE_ALARM = 7; // 0x7
     field public static final int FEATURE_BEDTIME_ROUTINE = 16; // 0x10
+    field public static final int FEATURE_BLAZE_BUILD_PROGRESS = 40; // 0x28
     field public static final int FEATURE_CALENDAR = 2; // 0x2
     field public static final int FEATURE_COMMUTE_TIME = 3; // 0x3
     field public static final int FEATURE_CONSENT = 11; // 0xb
+    field public static final int FEATURE_CROSS_DEVICE_TIMER = 32; // 0x20
+    field public static final int FEATURE_DOORBELL = 30; // 0x1e
+    field public static final int FEATURE_DRIVING_MODE = 26; // 0x1a
+    field public static final int FEATURE_EARTHQUAKE_ALERT = 38; // 0x26
+    field public static final int FEATURE_EARTHQUAKE_OCCURRED = 41; // 0x29
     field public static final int FEATURE_ETA_MONITORING = 18; // 0x12
     field public static final int FEATURE_FITNESS_TRACKING = 17; // 0x11
+    field public static final int FEATURE_FLASHLIGHT = 28; // 0x1c
     field public static final int FEATURE_FLIGHT = 4; // 0x4
+    field public static final int FEATURE_GAS_STATION_PAYMENT = 24; // 0x18
+    field public static final int FEATURE_HOLIDAY_ALARM = 34; // 0x22
     field public static final int FEATURE_LOYALTY_CARD = 14; // 0xe
     field public static final int FEATURE_MEDIA = 15; // 0xf
+    field public static final int FEATURE_MEDIA_HEADS_UP = 36; // 0x24
+    field public static final int FEATURE_MEDIA_RESUME = 31; // 0x1f
     field public static final int FEATURE_MISSED_CALL = 19; // 0x13
     field public static final int FEATURE_ONBOARDING = 8; // 0x8
     field public static final int FEATURE_PACKAGE_TRACKING = 20; // 0x14
+    field public static final int FEATURE_PAIRED_DEVICE_STATE = 25; // 0x19
     field public static final int FEATURE_REMINDER = 6; // 0x6
+    field public static final int FEATURE_SAFETY_CHECK = 35; // 0x23
+    field public static final int FEATURE_SEVERE_WEATHER_ALERT = 33; // 0x21
     field public static final int FEATURE_SHOPPING_LIST = 13; // 0xd
+    field public static final int FEATURE_SLEEP_SUMMARY = 27; // 0x1b
     field public static final int FEATURE_SPORTS = 9; // 0x9
+    field public static final int FEATURE_STEP_COUNTING = 37; // 0x25
+    field public static final int FEATURE_STEP_DATE = 39; // 0x27
     field public static final int FEATURE_STOCK_PRICE_CHANGE = 12; // 0xc
     field public static final int FEATURE_STOPWATCH = 22; // 0x16
     field public static final int FEATURE_TIMER = 21; // 0x15
+    field public static final int FEATURE_TIME_TO_LEAVE = 29; // 0x1d
     field public static final int FEATURE_TIPS = 5; // 0x5
     field public static final int FEATURE_UNDEFINED = 0; // 0x0
     field public static final int FEATURE_UPCOMING_ALARM = 23; // 0x17
@@ -2254,22 +2272,12 @@ package android.app.smartspace.uitemplatedata {
   public class BaseTemplateData implements android.os.Parcelable {
     method public int describeContents();
     method public int getLayoutWeight();
-    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getPrimaryLoggingInfo();
-    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getPrimaryTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSubtitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.Text getSubtitleText();
-    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalAlarmText();
-    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSupplementalIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getSupplementalLoggingInfo();
-    method @Nullable public android.app.smartspace.uitemplatedata.Icon getSupplementalSubtitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getSupplementalSubtitleLoggingInfo();
-    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSupplementalSubtitleTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalSubtitleText();
-    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getSupplementalTapAction();
-    method @Nullable public android.app.smartspace.uitemplatedata.Text getSupplementalText();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo getPrimaryItem();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo getSubtitleItem();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo getSubtitleSupplementalItem();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo getSupplementalAlarmItem();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo getSupplementalLineItem();
     method public int getTemplateType();
-    method @Nullable public android.app.smartspace.uitemplatedata.Icon getTitleIcon();
-    method @Nullable public android.app.smartspace.uitemplatedata.Text getTitleText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.BaseTemplateData> CREATOR;
   }
@@ -2278,27 +2286,37 @@ package android.app.smartspace.uitemplatedata {
     ctor public BaseTemplateData.Builder(int);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData build();
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setLayoutWeight(int);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalAlarmText(@NonNull android.app.smartspace.uitemplatedata.Text);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalSubtitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalText(@NonNull android.app.smartspace.uitemplatedata.Text);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
-    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setTitleText(@NonNull android.app.smartspace.uitemplatedata.Text);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setPrimaryItem(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleItem(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSubtitleSupplementalItem(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalAlarmItem(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.Builder setSupplementalLineItem(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo);
+  }
+
+  public static final class BaseTemplateData.SubItemInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.app.smartspace.uitemplatedata.Icon getIcon();
+    method @Nullable public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo getLoggingInfo();
+    method @Nullable public android.app.smartspace.uitemplatedata.TapAction getTapAction();
+    method @Nullable public android.app.smartspace.uitemplatedata.Text getText();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo> CREATOR;
+  }
+
+  public static final class BaseTemplateData.SubItemInfo.Builder {
+    ctor public BaseTemplateData.SubItemInfo.Builder();
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo build();
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo.Builder setIcon(@NonNull android.app.smartspace.uitemplatedata.Icon);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo.Builder setLoggingInfo(@NonNull android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo.Builder setTapAction(@NonNull android.app.smartspace.uitemplatedata.TapAction);
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemInfo.Builder setText(@NonNull android.app.smartspace.uitemplatedata.Text);
   }
 
   public static final class BaseTemplateData.SubItemLoggingInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getFeatureType();
     method public int getInstanceId();
+    method @Nullable public CharSequence getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo> CREATOR;
   }
@@ -2306,6 +2324,7 @@ package android.app.smartspace.uitemplatedata {
   public static final class BaseTemplateData.SubItemLoggingInfo.Builder {
     ctor public BaseTemplateData.SubItemLoggingInfo.Builder(int, int);
     method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo build();
+    method @NonNull public android.app.smartspace.uitemplatedata.BaseTemplateData.SubItemLoggingInfo.Builder setPackageName(@NonNull CharSequence);
   }
 
   public final class CarouselTemplateData extends android.app.smartspace.uitemplatedata.BaseTemplateData {
@@ -2793,7 +2812,7 @@ package android.companion.virtual {
     method public void addActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener, @NonNull java.util.concurrent.Executor);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
-    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @NonNull java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
+    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);

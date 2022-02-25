@@ -925,14 +925,10 @@ public class ActivityStarterTests extends WindowTestsBase {
                 any(), anyBoolean(), anyBoolean(), eq(false));
     }
 
-    private ActivityRecord createSingleTaskActivityOn(Task stack) {
+    private ActivityRecord createSingleTaskActivityOn(Task task) {
         final ComponentName componentName = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
-        final Task task = new TaskBuilder(mSupervisor)
-                .setComponent(componentName)
-                .setParentTaskFragment(stack)
-                .build();
         return new ActivityBuilder(mAtm)
                 .setComponent(componentName)
                 .setLaunchMode(LAUNCH_SINGLE_TASK)

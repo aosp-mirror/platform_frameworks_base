@@ -43,11 +43,17 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     private final Resources mResources;
+    private final SystemPropertiesHelper mSystemProperties;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
+
     @Inject
-    public FeatureFlagsRelease(@Main Resources resources, DumpManager dumpManager) {
+    public FeatureFlagsRelease(
+            @Main Resources resources,
+            SystemPropertiesHelper systemProperties,
+            DumpManager dumpManager) {
         mResources = resources;
+        mSystemProperties = systemProperties;
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -67,6 +73,17 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
         if (cacheIndex < 0) {
             return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
+        }
+
+        return mBooleanCache.valueAt(cacheIndex);
+    }
+
+    @Override
+    public boolean isEnabled(SysPropBooleanFlag flag) {
+        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
+        if (cacheIndex < 0) {
+            return isEnabled(
+                    flag.getId(), mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
         }
 
         return mBooleanCache.valueAt(cacheIndex);

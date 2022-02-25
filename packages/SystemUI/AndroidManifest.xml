@@ -311,6 +311,9 @@
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.SUPPRESS_CLIPBOARD_ACCESS_NOTIFICATION" />
 
+    <!-- To change system captions state -->
+    <uses-permission android:name="android.permission.SET_SYSTEM_AUDIO_CAPTION" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -764,22 +767,6 @@
             <intent-filter android:priority="1">
                 <action android:name="android.settings.FOREGROUND_SERVICES_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".chooser.ChooserActivity"
-                android:theme="@*android:style/Theme.NoDisplay"
-                android:finishOnCloseSystemDialogs="true"
-                android:excludeFromRecents="true"
-                android:documentLaunchMode="never"
-                android:relinquishTaskIdentity="true"
-                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                android:process=":ui"
-                android:visibleToInstantApps="true"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.CHOOSER" />
-                <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
 

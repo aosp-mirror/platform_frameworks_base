@@ -246,7 +246,7 @@ public final class MandatoryStreamCombination {
          * @return true if stream is able to output 10-bit pixels
          *
          * @see android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
-         * @see OutputConfiguration#setDynamicRangeProfile(int)
+         * @see OutputConfiguration#setDynamicRangeProfile
          */
         public boolean is10BitCapable() {
             return mIs10BitCapable;

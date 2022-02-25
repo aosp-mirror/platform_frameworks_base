@@ -120,7 +120,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         behind.setState(ActivityRecord.State.STARTED, "test");
         behind.mVisibleRequested = true;
 
-        task.performClearTask("test");
+        task.removeActivities("test", false /* excludingTaskOverlay */);
         assertFalse(mDisplayContent.mAppTransition.isReady());
     }
 

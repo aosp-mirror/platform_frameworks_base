@@ -667,6 +667,10 @@ public class AccessibilityWindowManager {
                 return null;
             }
 
+            // Don't need to add the embedded hierarchy windows into the accessibility windows list.
+            if (mHostEmbeddedMap.size() > 0 && isEmbeddedHierarchyWindowsLocked(windowId)) {
+                return null;
+            }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);
@@ -697,6 +701,21 @@ public class AccessibilityWindowManager {
             }
 
             return reportedWindow;
+        }
+
+        private boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
+            final IBinder leashToken = mWindowIdMap.get(windowId);
+            if (leashToken == null) {
+                return false;
+            }
+
+            for (int i = 0; i < mHostEmbeddedMap.size(); i++) {
+                if (mHostEmbeddedMap.keyAt(i).equals(leashToken)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private int getTypeForWindowManagerWindowType(int windowType) {

@@ -29,6 +29,10 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
+/**
+ * Test exiting Pip with orientation changes.
+ * To run this test: `atest WMShellFlickerTests:SetRequestedOrientationWhilePinnedTestShellTransit`
+ */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

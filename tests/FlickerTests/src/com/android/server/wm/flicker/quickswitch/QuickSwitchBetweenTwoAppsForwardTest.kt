@@ -22,6 +22,7 @@ import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -65,6 +66,7 @@ import org.junit.runners.Parameterized
 @Group1
 open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val taplInstrumentation = LauncherInstrumentation()
 
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
@@ -73,6 +75,10 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
+                test {
+                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
+                }
+
                 eachRun {
                     testApp1.launchViaIntent(wmHelper)
                     wmHelper.waitForFullScreenApp(testApp1.component)
@@ -85,43 +91,24 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
                         ?.layerStackSpace
                         ?: error("Display not found")
 
-                    // Swipe right from bottom to quick switch back
-                    // NOTE: We don't perform an edge-to-edge swipe but instead only swipe in the
-                    // middle as to not accidentally trigger a swipe back or forward action which
-                    // would result in the same behavior but not testing quick swap.
-                    device.swipe(
-                            startDisplayBounds.right / 3,
-                            startDisplayBounds.bottom,
-                            2 * startDisplayBounds.right / 3,
-                            startDisplayBounds.bottom,
-                            if (testSpec.isLandscapeOrSeascapeAtStart) 75 else 30
-                    )
+                    taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
 
                     wmHelper.waitForFullScreenApp(testApp1.component)
                     wmHelper.waitForAppTransitionIdle()
                 }
             }
             transitions {
-                // Swipe left from bottom to quick switch forward
-                // NOTE: We don't perform an edge-to-edge swipe but instead only swipe in the middle
-                // as to not accidentally trigger a swipe back or forward action which would result
-                // in the same behavior but not testing quick swap.
-                device.swipe(
-                        2 * startDisplayBounds.right / 3,
-                        startDisplayBounds.bottom,
-                        startDisplayBounds.right / 3,
-                        startDisplayBounds.bottom,
-                        if (testSpec.isLandscapeOrSeascapeAtStart) 75 else 30
-                )
+                taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
 
                 wmHelper.waitForFullScreenApp(testApp2.component)
                 wmHelper.waitForAppTransitionIdle()
+                wmHelper.waitForNavBarStatusBarVisible()
             }
 
             teardown {
                 test {
-                    testApp1.exit()
-                    testApp2.exit()
+                    testApp1.exit(wmHelper)
+                    testApp2.exit(wmHelper)
                 }
             }
         }

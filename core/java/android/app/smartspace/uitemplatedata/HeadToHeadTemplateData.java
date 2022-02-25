@@ -66,21 +66,11 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
     }
 
     private HeadToHeadTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subtitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable SubItemLoggingInfo primaryLoggingInfo,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
-            @Nullable Text supplementalText,
-            @Nullable Icon supplementalIcon,
-            @Nullable TapAction supplementalTapAction,
-            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
             int layoutWeight,
             @Nullable Text headToHeadTitle,
             @Nullable Icon headToHeadFirstCompetitorIcon,
@@ -88,13 +78,8 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
             @Nullable Text headToHeadFirstCompetitorText,
             @Nullable Text headToHeadSecondCompetitorText,
             @Nullable TapAction headToHeadAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
-                primaryTapAction, primaryLoggingInfo,
-                supplementalSubtitleText, supplementalSubtitleIcon,
-                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
-                supplementalText, supplementalIcon,
-                supplementalTapAction, supplementalLoggingInfo,
-                supplementalAlarmText, layoutWeight);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
 
         mHeadToHeadTitle = headToHeadTitle;
         mHeadToHeadFirstCompetitorIcon = headToHeadFirstCompetitorIcon;
@@ -296,14 +281,9 @@ public final class HeadToHeadTemplateData extends BaseTemplateData {
          */
         @NonNull
         public HeadToHeadTemplateData build() {
-            return new HeadToHeadTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
-                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
-                    getSupplementalText(), getSupplementalIcon(),
-                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
-                    getSupplementalAlarmText(), getLayoutWeight(),
+            return new HeadToHeadTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
                     mHeadToHeadTitle,
                     mHeadToHeadFirstCompetitorIcon,
                     mHeadToHeadSecondCompetitorIcon, mHeadToHeadFirstCompetitorText,

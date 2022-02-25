@@ -1377,18 +1377,16 @@ public final class LoadedApk {
                     Slog.wtf(TAG, "App instance already created for package=" + mPackageName
                             + " instance=" + cached);
                 }
-                // TODO Return the cached one, unless it's for the wrong user?
+                // TODO Return the cached one, unles it's for the wrong user?
                 // For now, we just add WTF checks.
             }
         }
 
         Application app = null;
 
-        // Temporarily disable per-process app class to investigate b/185177290
-//        final String myProcessName = Process.myProcessName();
-//        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
-//                myProcessName);
-        String appClass = mApplicationInfo.className;
+        final String myProcessName = Process.myProcessName();
+        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+                myProcessName);
         if (forceDefaultAppClass || (appClass == null)) {
             appClass = "android.app.Application";
         }

@@ -7390,12 +7390,12 @@ package android.app.admin {
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method @Nullable public String getDeviceManagerRoleHolderPackageName();
     method public CharSequence getDeviceOwnerLockScreenInfo();
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
     method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7704,9 +7704,10 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
     field public static final String EXTRA_PROVISIONING_WIFI_USER_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_USER_CERTIFICATE";
-    field public static final String EXTRA_RESOURCE_ID = "android.app.extra.RESOURCE_ID";
-    field public static final String EXTRA_RESOURCE_TYPE_DRAWABLE = "android.app.extra.RESOURCE_TYPE_DRAWABLE";
-    field public static final String EXTRA_RESOURCE_TYPE_STRING = "android.app.extra.RESOURCE_TYPE_STRING";
+    field public static final String EXTRA_RESOURCE_IDS = "android.app.extra.RESOURCE_IDS";
+    field public static final String EXTRA_RESOURCE_TYPE = "android.app.extra.RESOURCE_TYPE";
+    field public static final int EXTRA_RESOURCE_TYPE_DRAWABLE = 1; // 0x1
+    field public static final int EXTRA_RESOURCE_TYPE_STRING = 2; // 0x2
     field public static final String EXTRA_RESULT_LAUNCH_INTENT = "android.app.extra.RESULT_LAUNCH_INTENT";
     field public static final int FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY = 1; // 0x1
     field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
@@ -17398,7 +17399,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_RAW;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_PARTIAL_RESULT_COUNT;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Byte> REQUEST_PIPELINE_MAX_DEPTH;
-    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
@@ -18118,22 +18119,23 @@ package android.hardware.camera2.params {
   }
 
   public final class DynamicRangeProfiles {
-    ctor public DynamicRangeProfiles(@NonNull int[]);
-    method @NonNull public java.util.Set<java.lang.Integer> getProfileCaptureRequestConstraints(int);
-    method @NonNull public java.util.Set<java.lang.Integer> getSupportedProfiles();
-    field public static final int DOLBY_VISION_10B_HDR_OEM = 64; // 0x40
-    field public static final int DOLBY_VISION_10B_HDR_OEM_PO = 128; // 0x80
-    field public static final int DOLBY_VISION_10B_HDR_REF = 16; // 0x10
-    field public static final int DOLBY_VISION_10B_HDR_REF_PO = 32; // 0x20
-    field public static final int DOLBY_VISION_8B_HDR_OEM = 1024; // 0x400
-    field public static final int DOLBY_VISION_8B_HDR_OEM_PO = 2048; // 0x800
-    field public static final int DOLBY_VISION_8B_HDR_REF = 256; // 0x100
-    field public static final int DOLBY_VISION_8B_HDR_REF_PO = 512; // 0x200
-    field public static final int HDR10 = 4; // 0x4
-    field public static final int HDR10_PLUS = 8; // 0x8
-    field public static final int HLG10 = 2; // 0x2
-    field public static final int PUBLIC_MAX = 4096; // 0x1000
-    field public static final int STANDARD = 1; // 0x1
+    ctor public DynamicRangeProfiles(@NonNull long[]);
+    method @NonNull public java.util.Set<java.lang.Long> getProfileCaptureRequestConstraints(long);
+    method @NonNull public java.util.Set<java.lang.Long> getSupportedProfiles();
+    method public boolean isExtraLatencyPresent(long);
+    field public static final long DOLBY_VISION_10B_HDR_OEM = 64L; // 0x40L
+    field public static final long DOLBY_VISION_10B_HDR_OEM_PO = 128L; // 0x80L
+    field public static final long DOLBY_VISION_10B_HDR_REF = 16L; // 0x10L
+    field public static final long DOLBY_VISION_10B_HDR_REF_PO = 32L; // 0x20L
+    field public static final long DOLBY_VISION_8B_HDR_OEM = 1024L; // 0x400L
+    field public static final long DOLBY_VISION_8B_HDR_OEM_PO = 2048L; // 0x800L
+    field public static final long DOLBY_VISION_8B_HDR_REF = 256L; // 0x100L
+    field public static final long DOLBY_VISION_8B_HDR_REF_PO = 512L; // 0x200L
+    field public static final long HDR10 = 4L; // 0x4L
+    field public static final long HDR10_PLUS = 8L; // 0x8L
+    field public static final long HLG10 = 2L; // 0x2L
+    field public static final long PUBLIC_MAX = 4096L; // 0x1000L
+    field public static final long STANDARD = 1L; // 0x1L
   }
 
   public final class ExtensionSessionConfiguration {
@@ -18240,7 +18242,7 @@ package android.hardware.camera2.params {
     method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
     method public int describeContents();
     method public void enableSurfaceSharing();
-    method public int getDynamicRangeProfile();
+    method public long getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
     method public int getMirrorMode();
     method public int getStreamUseCase();
@@ -18250,7 +18252,7 @@ package android.hardware.camera2.params {
     method public int getTimestampBase();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
-    method public void setDynamicRangeProfile(int);
+    method public void setDynamicRangeProfile(long);
     method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(int);

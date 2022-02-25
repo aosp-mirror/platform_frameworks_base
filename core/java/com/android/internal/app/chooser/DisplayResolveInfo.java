@@ -30,11 +30,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,11 +43,6 @@ import java.util.List;
  * resolve it to an activity.
  */
 public class DisplayResolveInfo implements TargetInfo, Parcelable {
-    private final boolean mEnableChooserDelegate =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
-                    false);
-
     private final ResolveInfo mResolveInfo;
     private CharSequence mDisplayLabel;
     private Drawable mDisplayIcon;
@@ -180,12 +173,9 @@ public class DisplayResolveInfo implements TargetInfo, Parcelable {
 
     @Override
     public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-        if (mEnableChooserDelegate) {
-            return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
-        } else {
-            activity.startActivityAsCaller(mResolvedIntent, options, null, false, userId);
-            return true;
-        }
+        // TODO: if the start-as-caller API no longer requires a permission token, this can go back
+        // to inlining the real activity-start call, and we can remove startAsCallerImpl.
+        return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
     }
 
     @Override

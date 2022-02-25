@@ -348,6 +348,13 @@ public abstract class ApexManager {
     public abstract String getApexModuleNameForPackageName(String apexPackageName);
 
     /**
+     * Returns the package name of the active APEX whose name is {@code apexModuleName}. If not
+     * found, returns {@code null}.
+     */
+    @Nullable
+    public abstract String getActivePackageNameForApexModuleName(String apexModuleName);
+
+    /**
      * Copies the CE apex data directory for the given {@code userId} to a backup location, for use
      * in case of rollback.
      *
@@ -485,6 +492,12 @@ public abstract class ApexManager {
         private ArrayMap<String, String> mPackageNameToApexModuleName;
 
         /**
+         * Reverse mapping of {@link #mPackageNameToApexModuleName}, for active packages only.
+         */
+        @GuardedBy("mLock")
+        private ArrayMap<String, String> mApexModuleNameToActivePackageName;
+
+        /**
          * Whether an APEX package is active or not.
          *
          * @param packageInfo the package to check
@@ -552,6 +565,7 @@ public abstract class ApexManager {
             try {
                 mAllPackagesCache = new ArrayList<>();
                 mPackageNameToApexModuleName = new ArrayMap<>();
+                mApexModuleNameToActivePackageName = new ArrayMap<>();
                 allPkgs = waitForApexService().getAllPackages();
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
@@ -634,6 +648,13 @@ public abstract class ApexManager {
                                             + packageInfo.packageName);
                         }
                         activePackagesSet.add(packageInfo.packageName);
+                        if (mApexModuleNameToActivePackageName.containsKey(ai.moduleName)) {
+                            throw new IllegalStateException(
+                                    "Two active packages have the same APEX module name: "
+                                            + ai.moduleName);
+                        }
+                        mApexModuleNameToActivePackageName.put(
+                                ai.moduleName, packageInfo.packageName);
                     }
                     if (ai.isFactory) {
                         // Don't throw when the duplicating APEX is VNDK APEX
@@ -963,6 +984,16 @@ public abstract class ApexManager {
                 Preconditions.checkState(mPackageNameToApexModuleName != null,
                         "APEX packages have not been scanned");
                 return mPackageNameToApexModuleName.get(apexPackageName);
+            }
+        }
+
+        @Override
+        @Nullable
+        public String getActivePackageNameForApexModuleName(String apexModuleName) {
+            synchronized (mLock) {
+                Preconditions.checkState(mApexModuleNameToActivePackageName != null,
+                        "APEX packages have not been scanned");
+                return mApexModuleNameToActivePackageName.get(apexModuleName);
             }
         }
 
@@ -1387,6 +1418,12 @@ public abstract class ApexManager {
         @Override
         @Nullable
         public String getApexModuleNameForPackageName(String apexPackageName) {
+            return null;
+        }
+
+        @Override
+        @Nullable
+        public String getActivePackageNameForApexModuleName(String apexModuleName) {
             return null;
         }
 

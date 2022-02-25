@@ -28,7 +28,7 @@
         android:layout_height="match_parent"
         android:layout_marginEnd="@dimen/new_qs_footer_action_inset"
         android:background="@drawable/qs_security_footer_background"
-        android:layout_gravity="center"
+        android:layout_gravity="end"
         android:gravity="center"
         android:paddingHorizontal="@dimen/qs_footer_padding"
         >
