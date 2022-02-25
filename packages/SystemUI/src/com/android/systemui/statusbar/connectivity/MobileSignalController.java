@@ -843,7 +843,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         }
     }
 
-    /** Box for StatusBar icon info */
+    /** Box for status bar icon info */
     private static final class SbInfo {
         final boolean showTriangle;
         final int ratTypeIcon;

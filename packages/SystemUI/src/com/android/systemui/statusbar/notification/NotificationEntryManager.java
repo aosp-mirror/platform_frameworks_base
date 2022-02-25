@@ -955,7 +955,7 @@ public class NotificationEntryManager implements
         Trace.endSection();
     }
 
-    /** dump the current active notification list. Called from StatusBar */
+    /** dump the current active notification list. Called from CentralSurfaces */
     public void dump(PrintWriter pw, String indent) {
         pw.println("NotificationEntryManager (Legacy)");
         int filteredLen = mSortedAndFiltered.size();

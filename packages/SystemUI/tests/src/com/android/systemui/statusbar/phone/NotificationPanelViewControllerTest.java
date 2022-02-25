@@ -169,7 +169,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private static final int NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE = 50;
 
     @Mock
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock
@@ -548,7 +548,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mNotificationListContainer);
         mNotificationPanelViewController.initDependencies(
-                mStatusBar,
+                mCentralSurfaces,
                 () -> {},
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

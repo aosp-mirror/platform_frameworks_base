@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * Manages power menu plugins and communicates power menu actions to the StatusBar.
+ * Manages power menu plugins and communicates power menu actions to the CentralSurfaces.
  */
 @SysUISingleton
 public class GlobalActionsComponent extends CoreStartable

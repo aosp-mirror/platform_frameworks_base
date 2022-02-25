@@ -57,8 +57,8 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
-    @Mock private StatusBar mStatusBar;
+public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
@@ -81,14 +81,14 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private LightBarController mLightBarController;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
-    StatusBarCommandQueueCallbacks mSbcqCallbacks;
+    CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mSbcqCallbacks = new StatusBarCommandQueueCallbacks(
-                mStatusBar,
+        mSbcqCallbacks = new CentralSurfacesCommandQueueCallbacks(
+                mCentralSurfaces,
                 mContext,
                 mContext.getResources(),
                 mShadeController,
@@ -122,13 +122,13 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Test
     public void testDisableNotificationShade() {
-        when(mStatusBar.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mStatusBar.getDisabled2()).thenReturn(StatusBarManager.DISABLE_NONE);
+        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
+        when(mCentralSurfaces.getDisabled2()).thenReturn(StatusBarManager.DISABLE_NONE);
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
-        verify(mStatusBar).updateQsExpansionEnabled();
+        verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController).animateCollapsePanels();
 
         // Trying to open it does nothing.
@@ -140,12 +140,13 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Test
     public void testEnableNotificationShade() {
-        when(mStatusBar.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
-        when(mStatusBar.getDisabled2()).thenReturn(StatusBarManager.DISABLE2_NOTIFICATION_SHADE);
+        when(mCentralSurfaces.getDisabled1()).thenReturn(StatusBarManager.DISABLE_NONE);
+        when(mCentralSurfaces.getDisabled2())
+                .thenReturn(StatusBarManager.DISABLE2_NOTIFICATION_SHADE);
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
-        verify(mStatusBar).updateQsExpansionEnabled();
+        verify(mCentralSurfaces).updateQsExpansionEnabled();
         verify(mShadeController, never()).animateCollapsePanels();
 
         // Can now be opened.

@@ -32,7 +32,7 @@ import android.view.VelocityTracker;
 
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -71,7 +71,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private float mCurrentExpansion;
-    private final StatusBar mStatusBar;
+    private final CentralSurfaces mCentralSurfaces;
 
     private VelocityTracker mVelocityTracker;
 
@@ -114,10 +114,9 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // is fully hidden at full expansion (1) and fully visible when fully collapsed
                     // (0).
                     final float screenTravelPercentage =
-                            Math.abs((e1.getY() - e2.getY()) / mStatusBar.getDisplayHeight());
-                    setPanelExpansion(mStatusBar.isBouncerShowing()
+                            Math.abs((e1.getY() - e2.getY()) / mCentralSurfaces.getDisplayHeight());
+                    setPanelExpansion(mCentralSurfaces.isBouncerShowing()
                             ? screenTravelPercentage : 1 - screenTravelPercentage);
-
                     return true;
                 }
             };
@@ -131,7 +130,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     public BouncerSwipeTouchHandler(
             DisplayMetrics displayMetrics,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            StatusBar statusBar,
+            CentralSurfaces centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
             VelocityTrackerFactory velocityTrackerFactory,
@@ -141,7 +140,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage) {
         mDisplayMetrics = displayMetrics;
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mBouncerZoneScreenPercentage = swipeRegionPercentage;
@@ -153,7 +152,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     @Override
     public void getTouchInitiationRegion(Region region) {
-        if (mStatusBar.isBouncerShowing()) {
+        if (mCentralSurfaces.isBouncerShowing()) {
             region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
                     Math.round(mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
                     Region.Op.UNION);
@@ -247,7 +246,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     protected void flingToExpansion(float velocity, float expansion) {
-        final float viewHeight = mStatusBar.getDisplayHeight();
+        final float viewHeight = mCentralSurfaces.getDisplayHeight();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
 
