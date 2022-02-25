@@ -48,6 +48,10 @@ platform_bootclasspath {
     // bootclasspath.
     fragments: [
         {
+            apex: "com.android.adservices",
+            module: "com.android.adservices-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.appsearch",
             module: "com.android.appsearch-bootclasspath-fragment",
         },
