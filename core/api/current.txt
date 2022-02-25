@@ -191,6 +191,7 @@ package android {
     field public static final String SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE = "android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
     field public static final String TRANSMIT_IR = "android.permission.TRANSMIT_IR";
+    field public static final String TURN_SCREEN_ON = "android.permission.TURN_SCREEN_ON";
     field public static final String UNINSTALL_SHORTCUT = "com.android.launcher.permission.UNINSTALL_SHORTCUT";
     field public static final String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
     field public static final String UPDATE_PACKAGES_WITHOUT_USER_ACTION = "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION";
@@ -31900,7 +31901,7 @@ package android.os {
     method public android.os.PowerManager.WakeLock newWakeLock(int, String);
     method @RequiresPermission(android.Manifest.permission.REBOOT) public void reboot(@Nullable String);
     method public void removeThermalStatusListener(@NonNull android.os.PowerManager.OnThermalStatusChangedListener);
-    field @Deprecated public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
+    field @Deprecated @RequiresPermission(value=android.Manifest.permission.TURN_SCREEN_ON, conditional=true) public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED = "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
