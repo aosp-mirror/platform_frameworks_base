@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioSessionCallback;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -72,7 +73,8 @@ public class VirtualAudioControllerTest {
                 /* allowedUsers= */ new ArraySet<>(),
                 /* allowedActivities= */ new ArraySet<>(),
                 /* blockedActivities= */ new ArraySet<>(),
-                /* activityListener= */null,
+                VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                /* activityListener= */ null,
                 /* activityBlockedCallback= */ null);
     }
 
