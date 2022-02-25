@@ -413,7 +413,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
 
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
-            mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
+            mAnimationDelay = CentralSurfaces.FADE_KEYGUARD_START_DELAY;
             scheduleUpdate();
         } else if (((oldState == ScrimState.AOD || oldState == ScrimState.PULSING)  // leaving doze
                 && (!mDozeParameters.getAlwaysOn() || mState == ScrimState.UNLOCKED))
@@ -1255,7 +1255,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
         // TODO: remove this. This is necessary because of an order-of-operations limitation.
-        // The fix is to move more of these class into @StatusBarScope
+        // The fix is to move more of these class into @CentralSurfacesScope
         if (mScrimBehind == null) {
             mScrimBehindChangeRunnable = changeRunnable;
         } else {

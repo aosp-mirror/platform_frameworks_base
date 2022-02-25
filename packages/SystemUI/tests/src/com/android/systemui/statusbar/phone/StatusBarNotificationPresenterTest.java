@@ -80,7 +80,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
     private ShadeController mShadeController = mock(ShadeController.class);
-    private StatusBar mStatusBar = mock(StatusBar.class);
+    private CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
     private InitController mInitController = new InitController();
 
     @Before
@@ -117,7 +117,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class),
-                mStatusBar,
+                mCentralSurfaces,
                 mock(ShadeControllerImpl.class),
                 mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,
@@ -203,9 +203,9 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 .setTag("a")
                 .setNotification(n)
                 .build();
-        when(mStatusBar.areNotificationAlertsDisabled()).thenReturn(true);
+        when(mCentralSurfaces.areNotificationAlertsDisabled()).thenReturn(true);
 
-        assertTrue("StatusBar alerts disabled shouldn't allow interruptions",
+        assertTrue("CentralSurfaces alerts disabled shouldn't allow interruptions",
                 mInterruptSuppressor.suppressInterruptions(entry));
     }
 

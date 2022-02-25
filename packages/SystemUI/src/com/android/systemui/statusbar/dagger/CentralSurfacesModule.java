@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.dagger
+package com.android.systemui.statusbar.dagger;
 
-import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.phone.StatusBar
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
+import com.android.systemui.statusbar.notification.row.NotificationRowModule;
+import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 
-@Module
-interface StartStatusBarModule {
-    /** Start the StatusBar   */
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBar::class)
-    abstract fun bindsStatusBar(statusBar: StatusBar): CoreStartable
+import dagger.Module;
+
+/** */
+@Module(includes = {StatusBarPhoneModule.class, CentralSurfacesDependenciesModule.class,
+        NotificationsModule.class, NotificationRowModule.class})
+public interface CentralSurfacesModule {
 }

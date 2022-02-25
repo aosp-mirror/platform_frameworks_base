@@ -70,8 +70,8 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -120,7 +120,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     private final Optional<BubblesManager> mBubblesManagerOptional;
@@ -139,7 +139,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
      * Injected constructor. See {@link NotificationsModule}.
      */
     public NotificationGutsManager(Context context,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -158,7 +158,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ShadeController shadeController,
             DumpManager dumpManager) {
         mContext = context;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mAccessibilityManager = accessibilityManager;
@@ -342,7 +342,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         }
         StatusBarNotification sbn = row.getEntry().getSbn();
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(mContext,
                 userHandle.getIdentifier());
 
         feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
@@ -363,7 +363,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
         final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
@@ -416,7 +416,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
 
         if (!userHandle.equals(UserHandle.ALL)
@@ -458,7 +458,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // Settings link is only valid for notifications that specify a non-system user
         NotificationConversationInfo.OnSettingsClickListener onSettingsClick = null;
         UserHandle userHandle = sbn.getUser();
-        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+        PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
         final NotificationConversationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
@@ -571,11 +571,12 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                             .setLeaveOpenOnKeyguardHide(true);
                 }
 
-                Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-                if (statusBarOptional.isPresent()) {
+                Optional<CentralSurfaces> centralSurfacesOptional =
+                        mCentralSurfacesOptionalLazy.get();
+                if (centralSurfacesOptional.isPresent()) {
                     Runnable r = () -> mMainHandler.post(
                             () -> openGutsInternal(view, x, y, menuItem));
-                    statusBarOptional.get().executeRunnableDismissingKeyguard(
+                    centralSurfacesOptional.get().executeRunnableDismissingKeyguard(
                             r,
                             null /* cancelAction */,
                             false /* dismissShade */,
@@ -584,7 +585,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                     return true;
                 }
                 /**
-                 * When {@link StatusBar} doesn't exist, falling through to call
+                 * When {@link CentralSurfaces} doesn't exist, falling through to call
                  * {@link #openGutsInternal(View,int,int,NotificationMenuRowPlugin.MenuItem)}.
                  */
             }

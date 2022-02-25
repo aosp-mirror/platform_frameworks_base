@@ -127,7 +127,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -2709,22 +2709,22 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     /**
-     * Registers the StatusBar to which the Keyguard View is mounted.
+     * Registers the CentralSurfaces to which the Keyguard View is mounted.
      *
-     * @param statusBar
+     * @param centralSurfaces
      * @param panelView
      * @param biometricUnlockController
      * @param notificationContainer
      * @param bypassController
      * @return the View Controller for the Keyguard View this class is mediating.
      */
-    public KeyguardViewController registerStatusBar(StatusBar statusBar,
+    public KeyguardViewController registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController panelView,
             @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
-        mKeyguardViewControllerLazy.get().registerStatusBar(
-                statusBar,
+        mKeyguardViewControllerLazy.get().registerCentralSurfaces(
+                centralSurfaces,
                 panelView,
                 panelExpansionStateManager,
                 biometricUnlockController,

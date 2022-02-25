@@ -58,7 +58,7 @@ import com.android.systemui.R;
  */
 public class NotificationShadeWindowView extends FrameLayout {
     public static final String TAG = "NotificationShadeWindowView";
-    public static final boolean DEBUG = StatusBar.DEBUG;
+    public static final boolean DEBUG = CentralSurfaces.DEBUG;
 
     private int mRightInset = 0;
     private int mLeftInset = 0;
