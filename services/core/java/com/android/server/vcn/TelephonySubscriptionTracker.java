@@ -39,7 +39,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.telephony.TelephonyManager.CarrierPrivilegesListener;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -98,8 +98,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @NonNull private final OnSubscriptionsChangedListener mSubscriptionChangedListener;
 
     @NonNull
-    private final List<CarrierPrivilegesListener> mCarrierPrivilegesChangedListeners =
-            new ArrayList<>();
+    private final List<CarrierPrivilegesCallback> mCarrierPrivilegesCallbacks = new ArrayList<>();
 
     @NonNull private TelephonySubscriptionSnapshot mCurrentSnapshot;
 
@@ -151,20 +150,21 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
                 executor, mSubscriptionChangedListener);
         mTelephonyManager.registerTelephonyCallback(executor, mActiveDataSubIdListener);
 
-        registerCarrierPrivilegesListeners();
+        registerCarrierPrivilegesCallbacks();
     }
 
-    private void registerCarrierPrivilegesListeners() {
+    // TODO(b/221306368): Refactor with the new onCarrierServiceChange in the new CPCallback
+    private void registerCarrierPrivilegesCallbacks() {
         final HandlerExecutor executor = new HandlerExecutor(mHandler);
         final int modemCount = mTelephonyManager.getActiveModemCount();
         try {
             for (int i = 0; i < modemCount; i++) {
-                CarrierPrivilegesListener carrierPrivilegesListener =
-                        new CarrierPrivilegesListener() {
+                CarrierPrivilegesCallback carrierPrivilegesCallback =
+                        new CarrierPrivilegesCallback() {
                             @Override
                             public void onCarrierPrivilegesChanged(
-                                    @NonNull List<String> privilegedPackageNames,
-                                    @NonNull int[] privilegedUids) {
+                                    @NonNull Set<String> privilegedPackageNames,
+                                    @NonNull Set<Integer> privilegedUids) {
                                 // Re-trigger the synchronous check (which is also very cheap due
                                 // to caching in CarrierPrivilegesTracker). This allows consistency
                                 // with the onSubscriptionsChangedListener and broadcasts.
@@ -172,9 +172,9 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
                             }
                         };
 
-                mTelephonyManager.addCarrierPrivilegesListener(
-                        i, executor, carrierPrivilegesListener);
-                mCarrierPrivilegesChangedListeners.add(carrierPrivilegesListener);
+                mTelephonyManager.registerCarrierPrivilegesCallback(
+                        i, executor, carrierPrivilegesCallback);
+                mCarrierPrivilegesCallbacks.add(carrierPrivilegesCallback);
             }
         } catch (IllegalArgumentException e) {
             Slog.wtf(TAG, "Encounted exception registering carrier privileges listeners", e);
@@ -191,15 +191,15 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         mTelephonyManager.unregisterTelephonyCallback(mActiveDataSubIdListener);
 
-        unregisterCarrierPrivilegesListeners();
+        unregisterCarrierPrivilegesCallbacks();
     }
 
-    private void unregisterCarrierPrivilegesListeners() {
-        for (CarrierPrivilegesListener carrierPrivilegesListener :
-                mCarrierPrivilegesChangedListeners) {
-            mTelephonyManager.removeCarrierPrivilegesListener(carrierPrivilegesListener);
+    private void unregisterCarrierPrivilegesCallbacks() {
+        for (CarrierPrivilegesCallback carrierPrivilegesCallback :
+                mCarrierPrivilegesCallbacks) {
+            mTelephonyManager.unregisterCarrierPrivilegesCallback(carrierPrivilegesCallback);
         }
-        mCarrierPrivilegesChangedListeners.clear();
+        mCarrierPrivilegesCallbacks.clear();
     }
 
     /**
@@ -283,7 +283,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     }
 
     private void handleActionMultiSimConfigChanged(Context context, Intent intent) {
-        unregisterCarrierPrivilegesListeners();
+        unregisterCarrierPrivilegesCallbacks();
 
         // Clear invalid slotIds from the mReadySubIdsBySlotId map.
         final int modemCount = mTelephonyManager.getActiveModemCount();
@@ -296,7 +296,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
             }
         }
 
-        registerCarrierPrivilegesListeners();
+        registerCarrierPrivilegesCallbacks();
         handleSubscriptionsChanged();
     }
 
