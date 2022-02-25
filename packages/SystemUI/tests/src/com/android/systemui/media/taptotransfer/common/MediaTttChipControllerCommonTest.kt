@@ -18,6 +18,7 @@ package com.android.systemui.media.taptotransfer.common
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -30,7 +31,10 @@ import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -39,6 +43,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -52,6 +57,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
+    private lateinit var viewUtil: ViewUtil
+    @Mock
     private lateinit var tapGestureDetector: TapGestureDetector
 
     @Before
@@ -62,7 +69,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(fakeClock)
 
         controllerCommon = TestControllerCommon(
-            context, windowManager, fakeExecutor, tapGestureDetector
+            context, windowManager, viewUtil, fakeExecutor, tapGestureDetector
         )
     }
 
@@ -169,6 +176,40 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
                 .isEqualTo(state.getAppName(context))
     }
 
+    @Test
+    fun tapGestureDetected_outsideViewBounds_viewHidden() {
+        controllerCommon.displayChip(getState())
+        whenever(viewUtil.touchIsWithinView(any(), any(), any())).thenReturn(false)
+        val gestureCallbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
+        verify(tapGestureDetector).addOnGestureDetectedCallback(
+            any(), capture(gestureCallbackCaptor)
+        )
+        val callback = gestureCallbackCaptor.value!!
+
+        callback.invoke(
+            MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        )
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun tapGestureDetected_insideViewBounds_viewNotHidden() {
+        controllerCommon.displayChip(getState())
+        whenever(viewUtil.touchIsWithinView(any(), any(), any())).thenReturn(true)
+        val gestureCallbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
+        verify(tapGestureDetector).addOnGestureDetectedCallback(
+            any(), capture(gestureCallbackCaptor)
+        )
+        val callback = gestureCallbackCaptor.value!!
+
+        callback.invoke(
+            MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        )
+
+        verify(windowManager, never()).removeView(any())
+    }
+
     private fun getState() = MediaTttChipState(PACKAGE_NAME)
 
     private fun getChipView(): ViewGroup {
@@ -182,10 +223,11 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     inner class TestControllerCommon(
         context: Context,
         windowManager: WindowManager,
+        viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         tapGestureDetector: TapGestureDetector,
     ) : MediaTttChipControllerCommon<MediaTttChipState>(
-        context, windowManager, mainExecutor, tapGestureDetector, R.layout.media_ttt_chip
+        context, windowManager, viewUtil, mainExecutor, tapGestureDetector, R.layout.media_ttt_chip
     ) {
         override fun updateChipView(chipState: MediaTttChipState, currentChipView: ViewGroup) {
         }
