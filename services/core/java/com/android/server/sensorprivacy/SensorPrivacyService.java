@@ -918,7 +918,6 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void addToggleSensorPrivacyListener(ISensorPrivacyListener listener) {
-            Log.d("evan", "trying to add from " + Binder.getCallingUid());
             enforceObserveSensorPrivacyPermission();
             if (listener == null) {
                 throw new IllegalArgumentException("listener cannot be null");
