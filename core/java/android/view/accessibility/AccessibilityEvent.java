@@ -592,6 +592,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Change type for {@link #TYPE_WINDOW_STATE_CHANGED} event:
      * The node's pane title changed.
+     * <p>
+     * If this makes the pane appear, {@link #CONTENT_CHANGE_TYPE_PANE_APPEARED} is sent
+     * instead. If this makes the pane disappear, {@link #CONTENT_CHANGE_TYPE_PANE_DISAPPEARED}
+     * is sent.
+     *
      */
     public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 0x00000008;
 
