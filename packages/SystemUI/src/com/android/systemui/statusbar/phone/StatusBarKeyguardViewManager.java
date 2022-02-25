@@ -1077,7 +1077,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 && mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
         boolean keyguardShowing = mShowing && !mOccluded;
         boolean hideWhileDozing = mDozing && !isWakeAndUnlockPulsing;
-        boolean keyguardWithGestureNav = (keyguardShowing && !mDozing || mPulsing && !mIsDocked)
+        boolean keyguardWithGestureNav = (keyguardShowing && !mDozing && !mScreenOffAnimationPlaying
+                || mPulsing && !mIsDocked)
                 && mGesturalNav;
         return (!keyguardShowing && !hideWhileDozing && !mScreenOffAnimationPlaying
                 || mBouncer.isShowing() || mRemoteInputActive || keyguardWithGestureNav
@@ -1091,7 +1092,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean keyguardShowing = mLastShowing && !mLastOccluded;
         boolean hideWhileDozing = mLastDozing && mLastBiometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         boolean keyguardWithGestureNav = (keyguardShowing && !mLastDozing
-                || mLastPulsing && !mLastIsDocked) && mLastGesturalNav;
+                && !mLastScreenOffAnimationPlaying || mLastPulsing && !mLastIsDocked)
+                && mLastGesturalNav;
         return (!keyguardShowing && !hideWhileDozing && !mLastScreenOffAnimationPlaying
                 || mLastBouncerShowing || mLastRemoteInputActive || keyguardWithGestureNav
                 || mLastGlobalActionsVisible);

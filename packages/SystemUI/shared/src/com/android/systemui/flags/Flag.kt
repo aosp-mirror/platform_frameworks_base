@@ -35,6 +35,11 @@ interface ResourceFlag<T> : Flag<T> {
     val resourceId: Int
 }
 
+interface SysPropFlag<T> : Flag<T> {
+    val name: String
+    val default: T
+}
+
 // Consider using the "parcelize" kotlin library.
 
 data class BooleanFlag @JvmOverloads constructor(
@@ -65,6 +70,12 @@ data class ResourceBooleanFlag constructor(
     override val id: Int,
     @BoolRes override val resourceId: Int
 ) : ResourceFlag<Boolean>
+
+data class SysPropBooleanFlag constructor(
+    override val id: Int,
+    override val name: String,
+    override val default: Boolean = false
+) : SysPropFlag<Boolean>
 
 data class StringFlag @JvmOverloads constructor(
     override val id: Int,

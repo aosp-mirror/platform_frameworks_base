@@ -48,7 +48,6 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.view.Surface;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -223,7 +222,8 @@ public final class VirtualDeviceManager {
          * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
          * @param executor The executor on which {@code callback} will be invoked. This is ignored
-         * if {@code callback} is {@code null}.
+         * if {@code callback} is {@code null}. If {@code callback} is specified, this executor must
+         * not be null.
          * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
          * @return The newly created virtual display, or {@code null} if the application could
          * not create the virtual display.
@@ -237,7 +237,7 @@ public final class VirtualDeviceManager {
                 @IntRange(from = 1) int densityDpi,
                 @Nullable Surface surface,
                 @VirtualDisplayFlag int flags,
-                @NonNull @CallbackExecutor Executor executor,
+                @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
             // TODO(b/205343547): Handle display groups properly instead of creating a new display
             //  group for every new virtual display created using this API.
@@ -253,7 +253,7 @@ public final class VirtualDeviceManager {
                             .setFlags(getVirtualDisplayFlags(flags))
                             .build(),
                     callback,
-                    Objects.requireNonNull(executor));
+                    executor);
         }
 
         /**

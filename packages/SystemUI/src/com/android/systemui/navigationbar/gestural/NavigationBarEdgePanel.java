@@ -280,7 +280,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 }
             };
     private BackCallback mBackCallback;
-    private BackAnimation mBackAnimation;
+    private final BackAnimation mBackAnimation;
 
     public NavigationBarEdgePanel(Context context,
             BackAnimation backAnimation) {
@@ -383,10 +383,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 }, backgroundExecutor);
         mRegionSamplingHelper.setWindowVisible(true);
         mShowProtection = !isPrimaryDisplay;
-    }
-
-    public void setBackAnimation(BackAnimation backAnimation) {
-        mBackAnimation = backAnimation;
     }
 
     @Override

@@ -936,9 +936,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
-        if (mEdgeBackPlugin != null && mEdgeBackPlugin instanceof NavigationBarEdgePanel) {
-            ((NavigationBarEdgePanel) mEdgeBackPlugin).setBackAnimation(backAnimation);
-        }
     }
 
     /**

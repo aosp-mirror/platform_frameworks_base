@@ -847,14 +847,20 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         pw.println("  mIsRoundedCornerMultipleRadius:" + mIsRoundedCornerMultipleRadius);
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
         pw.println("  mPendingRotationChange:" + mPendingRotationChange);
-        pw.println("  mHwcScreenDecorationSupport:");
-        if (mHwcScreenDecorationSupport == null) {
-            pw.println("    null");
-        } else {
-            pw.println("    format: "
+        if (mHwcScreenDecorationSupport != null) {
+            pw.println("  mHwcScreenDecorationSupport:");
+            pw.println("    format="
                     + PixelFormat.formatToString(mHwcScreenDecorationSupport.format));
-            pw.println("    alphaInterpretation: "
+            pw.println("    alphaInterpretation="
                     + alphaInterpretationToString(mHwcScreenDecorationSupport.alphaInterpretation));
+        } else {
+            pw.println("  mHwcScreenDecorationSupport: null");
+        }
+        if (mScreenDecorHwcLayer != null) {
+            pw.println("  mScreenDecorHwcLayer:");
+            pw.println("    transparentRegion=" + mScreenDecorHwcLayer.transparentRect);
+        } else {
+            pw.println("  mScreenDecorHwcLayer: null");
         }
         pw.println("  mRoundedDefault(x,y)=(" + mRoundedDefault.x + "," + mRoundedDefault.y + ")");
         pw.println("  mRoundedDefaultTop(x,y)=(" + mRoundedDefaultTop.x + "," + mRoundedDefaultTop.y

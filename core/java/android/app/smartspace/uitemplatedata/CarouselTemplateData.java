@@ -56,31 +56,16 @@ public final class CarouselTemplateData extends BaseTemplateData {
     }
 
     private CarouselTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subtitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable SubItemLoggingInfo primaryLoggingInfo,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable SubItemLoggingInfo supplementalSubtitleLoggingInfo,
-            @Nullable Text supplementalText,
-            @Nullable Icon supplementalIcon,
-            @Nullable TapAction supplementalTapAction,
-            @Nullable SubItemLoggingInfo supplementalLoggingInfo,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
             int layoutWeight,
             @NonNull List<CarouselItem> carouselItems,
             @Nullable TapAction carouselAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subtitleIcon,
-                primaryTapAction, primaryLoggingInfo,
-                supplementalSubtitleText, supplementalSubtitleIcon,
-                supplementalSubtitleTapAction, supplementalSubtitleLoggingInfo,
-                supplementalText, supplementalIcon,
-                supplementalTapAction, supplementalLoggingInfo,
-                supplementalAlarmText, layoutWeight);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
 
         mCarouselItems = carouselItems;
         mCarouselAction = carouselAction;
@@ -190,14 +175,9 @@ public final class CarouselTemplateData extends BaseTemplateData {
                 throw new IllegalStateException("Carousel data is empty");
             }
 
-            return new CarouselTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(),
-                    getPrimaryTapAction(), getPrimaryLoggingInfo(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalSubtitleLoggingInfo(),
-                    getSupplementalText(), getSupplementalIcon(),
-                    getSupplementalTapAction(), getSupplementalLoggingInfo(),
-                    getSupplementalAlarmText(), getLayoutWeight(),
+            return new CarouselTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
                     mCarouselItems, mCarouselAction);
         }
     }

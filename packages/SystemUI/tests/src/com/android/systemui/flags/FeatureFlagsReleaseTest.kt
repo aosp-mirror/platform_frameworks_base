@@ -17,7 +17,7 @@ package com.android.systemui.flags
 
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
-import androidx.test.filters.SmallTest
+import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.any
@@ -44,12 +44,13 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     private lateinit var mFeatureFlagsRelease: FeatureFlagsRelease
 
     @Mock private lateinit var mResources: Resources
+    @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var mDumpManager: DumpManager
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mDumpManager)
+        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mSystemProperties, mDumpManager)
     }
 
     @After
@@ -84,6 +85,17 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         assertThrows(NameNotFoundException::class.java) {
             mFeatureFlagsRelease.getString(ResourceStringFlag(4, 1004))
         }
+    }
+
+    @Test
+    fun testSysPropBooleanFlag() {
+        val flagId = 213
+        val flagName = "sys_prop_flag"
+        val flagDefault = true
+
+        val flag = SysPropBooleanFlag(flagId, flagName, flagDefault)
+        whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
     }
 
     @Test

@@ -47,7 +47,10 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -130,6 +133,10 @@ public class BubbleController {
     public static final String LEFT_POSITION = "Left";
     public static final String RIGHT_POSITION = "Right";
     public static final String BOTTOM_POSITION = "Bottom";
+
+    // Should match with PhoneWindowManager
+    private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
+    private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
     private final Context mContext;
     private final BubblesImpl mImpl = new BubblesImpl();
@@ -675,6 +682,7 @@ public class BubbleController {
 
         try {
             mAddedToWindowManager = true;
+            registerBroadcastReceiver();
             mBubbleData.getOverflow().initialize(this);
             mWindowManager.addView(mStackView, mWmLayoutParams);
             mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
@@ -717,6 +725,7 @@ public class BubbleController {
 
         try {
             mAddedToWindowManager = false;
+            mContext.unregisterReceiver(mBroadcastReceiver);
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
                 mBubbleData.getOverflow().cleanUpExpandedState();
@@ -730,11 +739,34 @@ public class BubbleController {
         }
     }
 
+    private void registerBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!isStackExpanded()) return; // Nothing to do
+
+            String action = intent.getAction();
+            String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+            if ((Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                    && SYSTEM_DIALOG_REASON_GESTURE_NAV.equals(reason))
+                    || Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mMainExecutor.execute(() -> collapseStack());
+            }
+        }
+    };
+
     /**
      * Called by the BubbleStackView and whenever all bubbles have animated out, and none have been
      * added in the meantime.
      */
-    void onAllBubblesAnimatedOut() {
+    @VisibleForTesting
+    public void onAllBubblesAnimatedOut() {
         if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
             removeFromWindowManagerMaybe();

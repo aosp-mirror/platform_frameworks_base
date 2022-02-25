@@ -18,9 +18,9 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
-import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
-import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
-import static android.app.StatusBarManager.NavBarModeOverride;
+import static android.app.StatusBarManager.NAV_BAR_MODE_DEFAULT;
+import static android.app.StatusBarManager.NAV_BAR_MODE_KIDS;
+import static android.app.StatusBarManager.NavBarMode;
 import static android.app.StatusBarManager.SessionFlags;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -1945,26 +1945,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     /**
-     * Sets or removes the navigation bar mode override.
+     * Sets or removes the navigation bar mode.
      *
-     * @param navBarModeOverride the mode of the navigation bar override to be set.
+     * @param navBarMode the mode of the navigation bar to be set.
      */
-    public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
+    public void setNavBarMode(@NavBarMode int navBarMode) {
         enforceStatusBar();
-        if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
-                && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
+        if (navBarMode != NAV_BAR_MODE_DEFAULT && navBarMode != NAV_BAR_MODE_KIDS) {
             throw new UnsupportedOperationException(
-                    "Supplied navBarModeOverride not supported: " + navBarModeOverride);
+                    "Supplied navBarMode not supported: " + navBarMode);
         }
 
         final int userId = mCurrentUserId;
         final long userIdentity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.NAV_BAR_KIDS_MODE, navBarModeOverride, userId);
+                    Settings.Secure.NAV_BAR_KIDS_MODE, navBarMode, userId);
 
             IOverlayManager overlayManager = getOverlayManager();
-            if (overlayManager != null && navBarModeOverride == NAV_BAR_MODE_OVERRIDE_KIDS
+            if (overlayManager != null && navBarMode == NAV_BAR_MODE_KIDS
                     && isPackageSupported(NAV_BAR_MODE_3BUTTON_OVERLAY)) {
                 overlayManager.setEnabledExclusiveInCategory(NAV_BAR_MODE_3BUTTON_OVERLAY, userId);
             }
@@ -1976,14 +1975,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     /**
-     * Gets the navigation bar mode override. Returns default value if no override is set.
+     * Gets the navigation bar mode. Returns default value if no mode is set.
      *
      * @hide
      */
-    public @NavBarModeOverride int getNavBarModeOverride() {
+    public @NavBarMode int getNavBarMode() {
         enforceStatusBar();
 
-        int navBarKidsMode = NAV_BAR_MODE_OVERRIDE_NONE;
+        int navBarKidsMode = NAV_BAR_MODE_DEFAULT;
         final int userId = mCurrentUserId;
         final long userIdentity = Binder.clearCallingIdentity();
         try {

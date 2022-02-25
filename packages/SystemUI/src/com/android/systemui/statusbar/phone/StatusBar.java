@@ -270,6 +270,7 @@ public class StatusBar extends CoreStartable implements
     protected static final int MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU = 1027;
 
     // Should match the values in PhoneWindowManager
+    public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
     static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
@@ -2661,15 +2662,12 @@ public class StatusBar extends CoreStartable implements
             Trace.beginSection("StatusBar#onReceive");
             if (DEBUG) Log.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
+            String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
                 mRemoteInputManager.closeRemoteInputs();
-                if (mBubblesOptional.isPresent() && mBubblesOptional.get().isStackExpanded()) {
-                    mBubblesOptional.get().collapseStack();
-                }
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
-                    String reason = intent.getStringExtra("reason");
                     if (reason != null) {
                         if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
                             flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
@@ -2684,19 +2682,13 @@ public class StatusBar extends CoreStartable implements
                     }
                     mShadeController.animateCollapsePanels(flags);
                 }
-            }
-            else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 if (mNotificationShadeWindowController != null) {
                     mNotificationShadeWindowController.setNotTouchable(false);
                 }
-                if (mBubblesOptional.isPresent() && mBubblesOptional.get().isStackExpanded()) {
-                    // Post to main thread, since updating the UI.
-                    mMainExecutor.execute(() -> mBubblesOptional.get().collapseStack());
-                }
                 finishBarAnimations();
                 resetUserExpandedStates();
-            }
-            else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
+            } else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
                 mQSPanelController.showDeviceMonitoringDialog();
             }
             Trace.endSection();
