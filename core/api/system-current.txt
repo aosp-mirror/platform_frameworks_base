@@ -10867,10 +10867,11 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionResult.Builder {
-    ctor public AmbientContextDetectionResult.Builder();
+    ctor public AmbientContextDetectionResult.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvents(@NonNull java.util.List<android.app.ambientcontext.AmbientContextEvent>);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder setPackageName(@NonNull String);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder clearEvents();
   }
 
   public abstract class AmbientContextDetectionService extends android.app.Service {
@@ -10891,9 +10892,8 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionServiceStatus.Builder {
-    ctor public AmbientContextDetectionServiceStatus.Builder();
+    ctor public AmbientContextDetectionServiceStatus.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setPackageName(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setStatusCode(int);
   }
 
