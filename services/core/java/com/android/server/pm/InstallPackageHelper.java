@@ -36,6 +36,7 @@ import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.content.pm.PackageManagerInternal.PACKAGE_SETUP_WIZARD;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
@@ -183,6 +184,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -1595,16 +1597,18 @@ final class InstallPackageHelper {
                         parsedPackage.setRestrictUpdateHash(oldPackage.getRestrictUpdateHash());
                     }
 
-                    // APK should not change its sharedUserId declarations
-                    final var oldSharedUid = oldPackage.getSharedUserId() != null
-                            ? oldPackage.getSharedUserId() : "<nothing>";
-                    final var newSharedUid = parsedPackage.getSharedUserId() != null
-                            ? parsedPackage.getSharedUserId() : "<nothing>";
-                    if (!oldSharedUid.equals(newSharedUid)) {
+                    // Check for shared user id changes
+                    if (!Objects.equals(oldPackage.getSharedUserId(),
+                            parsedPackage.getSharedUserId())
+                            // Don't mark as invalid if the app is trying to
+                            // leave a sharedUserId
+                            && parsedPackage.getSharedUserId() != null) {
                         throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
                                 "Package " + parsedPackage.getPackageName()
                                         + " shared user changed from "
-                                        + oldSharedUid + " to " + newSharedUid);
+                                        + (oldPackage.getSharedUserId() != null
+                                        ? oldPackage.getSharedUserId() : "<nothing>")
+                                        + " to " + parsedPackage.getSharedUserId());
                     }
 
                     // In case of rollback, remember per-user/profile install state
@@ -3693,13 +3697,10 @@ final class InstallPackageHelper {
             }
             disabledPkgSetting = mPm.mSettings.getDisabledSystemPkgLPr(
                     parsedPackage.getPackageName());
-            if (parsedPackage.getSharedUserId() != null && !parsedPackage.isLeavingSharedUid()) {
-                sharedUserSetting = mPm.mSettings.getSharedUserLPw(
-                        parsedPackage.getSharedUserId(),
-                        0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
-            } else {
-                sharedUserSetting = null;
-            }
+            sharedUserSetting = (parsedPackage.getSharedUserId() != null)
+                    ? mPm.mSettings.getSharedUserLPw(parsedPackage.getSharedUserId(),
+                    0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true)
+                    : null;
             if (DEBUG_PACKAGE_SCANNING
                     && (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0
                     && sharedUserSetting != null) {
