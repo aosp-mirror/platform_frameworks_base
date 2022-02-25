@@ -95,8 +95,8 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         // Cancel and re-set the chip timeout each time we get a new state.
         cancelChipViewTimeout?.run()
         cancelChipViewTimeout = mainExecutor.executeDelayed(
-            { removeChip(REASON_TIMEOUT) },
-            TIMEOUT_MILLIS
+            { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
+            chipState.getTimeoutMs()
         )
     }
 
@@ -106,10 +106,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
      * @param removalReason a short string describing why the chip was removed (timeout, state
      *     change, etc.)
      */
-    fun removeChip(removalReason: String) {
-        // TODO(b/203800347): We may not want to hide the chip if we're currently in a
-        //  TransferTriggered state: Once the user has initiated the transfer, they should be able
-        //  to move away from the receiver device but still see the status of the transfer.
+    open fun removeChip(removalReason: String) {
         if (chipView == null) { return }
         logger.logChipRemoval(removalReason)
         tapGestureDetector.removeOnGestureDetectedCallback(TAG)
@@ -148,7 +145,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         // If the tap is within the chip bounds, we shouldn't hide the chip (in case users think the
         // chip is tappable).
         if (!viewUtil.touchIsWithinView(view, e.x, e.y)) {
-            removeChip(REASON_SCREEN_TAP)
+            removeChip(MediaTttRemovalReason.REASON_SCREEN_TAP)
         }
     }
 }
@@ -157,8 +154,9 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
 private val TAG = MediaTttChipControllerCommon::class.simpleName!!
-@VisibleForTesting
-const val TIMEOUT_MILLIS = 3000L
 
-private const val REASON_TIMEOUT = "TIMEOUT"
-private const val REASON_SCREEN_TAP = "SCREEN_TAP"
+object MediaTttRemovalReason {
+    const val REASON_TIMEOUT = "TIMEOUT"
+    const val REASON_SCREEN_TAP = "SCREEN_TAP"
+}
+

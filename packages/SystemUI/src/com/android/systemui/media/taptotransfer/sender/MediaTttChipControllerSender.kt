@@ -30,6 +30,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -58,6 +59,8 @@ class MediaTttChipControllerSender @Inject constructor(
     tapGestureDetector,
     R.layout.media_ttt_chip
 ) {
+    private var currentlyDisplayedChipState: ChipStateSender? = null
+
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferSenderDisplay(
                 @StatusBarManager.MediaTransferSenderState displayState: Int,
@@ -115,6 +118,8 @@ class MediaTttChipControllerSender @Inject constructor(
 
     /** Displays the chip view for the given state. */
     override fun updateChipView(chipState: ChipStateSender, currentChipView: ViewGroup) {
+        currentlyDisplayedChipState = chipState
+
         // App icon
         setIcon(chipState, currentChipView)
 
@@ -137,6 +142,18 @@ class MediaTttChipControllerSender @Inject constructor(
         val showFailure = chipState is TransferFailed
         currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
             if (showFailure) { View.VISIBLE } else { View.GONE }
+    }
+
+    override fun removeChip(removalReason: String) {
+        // Don't remove the chip if we're mid-transfer since the user should still be able to
+        // see the status of the transfer. (But do remove it if it's finally timed out.)
+        if ((currentlyDisplayedChipState is TransferToReceiverTriggered ||
+                currentlyDisplayedChipState is TransferToThisDeviceTriggered)
+            && removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
+            return
+        }
+        super.removeChip(removalReason)
+        currentlyDisplayedChipState = null
     }
 
     private fun stateIntToString(@StatusBarManager.MediaTransferSenderState state: Int): String {

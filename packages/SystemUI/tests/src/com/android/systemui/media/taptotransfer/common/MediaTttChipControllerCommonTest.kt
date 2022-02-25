@@ -96,20 +96,22 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipDoesNotDisappearsBeforeTimeout() {
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
         reset(windowManager)
 
-        fakeClock.advanceTime(TIMEOUT_MILLIS - 1)
+        fakeClock.advanceTime(state.getTimeoutMs() - 1)
 
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
     fun displayChip_chipDisappearsAfterTimeout() {
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
         reset(windowManager)
 
-        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
 
         verify(windowManager).removeView(any())
     }
@@ -117,7 +119,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Test
     fun displayChip_calledAgainBeforeTimeout_timeoutReset() {
         // First, display the chip
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
 
         // After some time, re-display the chip
         val waitTime = 1000L
@@ -125,7 +128,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.displayChip(getState())
 
         // Wait until the timeout for the first display would've happened
-        fakeClock.advanceTime(TIMEOUT_MILLIS - waitTime + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() - waitTime + 1)
 
         // Verify we didn't hide the chip
         verify(windowManager, never()).removeView(any())
@@ -134,14 +137,15 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Test
     fun displayChip_calledAgainBeforeTimeout_eventuallyTimesOut() {
         // First, display the chip
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
 
         // After some time, re-display the chip
         fakeClock.advanceTime(1000L)
         controllerCommon.displayChip(getState())
 
         // Ensure we still hide the chip eventually
-        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
 
         verify(windowManager).removeView(any())
     }

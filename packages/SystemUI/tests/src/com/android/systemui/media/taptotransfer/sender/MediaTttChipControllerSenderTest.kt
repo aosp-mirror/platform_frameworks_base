@@ -72,6 +72,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
+    private lateinit var fakeClock: FakeSystemClock
+    private lateinit var fakeExecutor: FakeExecutor
 
     @Before
     fun setUp() {
@@ -85,13 +87,16 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        fakeClock = FakeSystemClock()
+        fakeExecutor = FakeExecutor(fakeClock)
+
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
             context,
             logger,
             windowManager,
             viewUtil,
-            FakeExecutor(FakeSystemClock()),
+            fakeExecutor,
             TapGestureDetector(context)
         )
 
@@ -473,6 +478,52 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(transferFailed())
 
         assertThat(getChipView().getFailureIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenRemoveChip_chipStillDisplayed() {
+        controllerSender.displayChip(transferToReceiverTriggered())
+        fakeClock.advanceTime(1000L)
+
+        controllerSender.removeChip("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenFarFromReceiver_eventuallyTimesOut() {
+        val state = transferToReceiverTriggered()
+        controllerSender.displayChip(state)
+        fakeClock.advanceTime(1000L)
+        controllerSender.removeChip("fakeRemovalReason")
+
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceTriggeredThenRemoveChip_chipStillDisplayed() {
+        controllerSender.displayChip(transferToThisDeviceTriggered())
+        fakeClock.advanceTime(1000L)
+
+        controllerSender.removeChip("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceTriggeredThenFarFromReceiver_eventuallyTimesOut() {
+        val state = transferToThisDeviceTriggered()
+        controllerSender.displayChip(state)
+        fakeClock.advanceTime(1000L)
+        controllerSender.removeChip("fakeRemovalReason")
+
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
+
+        verify(windowManager).removeView(any())
     }
 
     private fun LinearLayout.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)

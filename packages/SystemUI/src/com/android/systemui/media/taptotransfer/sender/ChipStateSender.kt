@@ -97,6 +97,7 @@ class TransferToReceiverTriggered(
     }
 
     override fun showLoading() = true
+    override fun getTimeoutMs() = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
 }
 
 /**
@@ -111,6 +112,7 @@ class TransferToThisDeviceTriggered(
     }
 
     override fun showLoading() = true
+    override fun getTimeoutMs() = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
 }
 
 /**
@@ -194,3 +196,8 @@ class TransferFailed(
         return context.getString(R.string.media_transfer_failed)
     }
 }
+
+// Give the Transfer*Triggered states a longer timeout since those states represent an active
+// process and we should keep the user informed about it as long as possible (but don't allow it to
+// continue indefinitely).
+private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 15000L
