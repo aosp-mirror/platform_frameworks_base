@@ -799,6 +799,9 @@ class MediaHierarchyManager @Inject constructor(
     @TransformationType
     fun calculateTransformationType(): Int {
         if (isTransitioningToFullShade) {
+            if (inSplitShade) {
+                return TRANSFORMATION_TYPE_TRANSITION
+            }
             return TRANSFORMATION_TYPE_FADE
         }
         if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS ||
@@ -965,6 +968,7 @@ class MediaHierarchyManager @Inject constructor(
             (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             !hasActiveMedia -> LOCATION_QS
+            onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
             onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
             onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS
@@ -990,11 +994,19 @@ class MediaHierarchyManager @Inject constructor(
         return location
     }
 
+    private fun isSplitShadeExpanding(): Boolean {
+        return inSplitShade && isTransitioningToFullShade
+    }
+
     /**
      * Are we currently transforming to the full shade and already in QQS
      */
     private fun isTransformingToFullShadeAndInQQS(): Boolean {
         if (!isTransitioningToFullShade) {
+            return false
+        }
+        if (inSplitShade) {
+            // Split shade doesn't use QQS.
             return false
         }
         return fullShadeTransitionProgress > 0.5f
@@ -1004,6 +1016,10 @@ class MediaHierarchyManager @Inject constructor(
      * Is the current transformationType fading
      */
     private fun isCurrentlyFading(): Boolean {
+        if (isSplitShadeExpanding()) {
+            // Split shade always uses transition instead of fade.
+            return false
+        }
         if (isTransitioningToFullShade) {
             return true
         }
