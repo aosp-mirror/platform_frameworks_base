@@ -15360,16 +15360,16 @@ public class DevicePolicyManager {
      * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
      * registered receivers when a resource has been reset successfully.
      *
-     * @param drawableIds The list of IDs  to remove.
+     * @param drawableIds The list of IDs to remove.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetDrawables(@NonNull String[] drawableIds) {
+    public void resetDrawables(@NonNull Set<String> drawableIds) {
         if (mService != null) {
             try {
-                mService.resetDrawables(drawableIds);
+                mService.resetDrawables(new ArrayList<>(drawableIds));
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -15669,10 +15669,10 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetStrings(@NonNull String[] stringIds) {
+    public void resetStrings(@NonNull Set<String> stringIds) {
         if (mService != null) {
             try {
-                mService.resetStrings(stringIds);
+                mService.resetStrings(new ArrayList<>(stringIds));
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -15682,7 +15682,7 @@ public class DevicePolicyManager {
     /**
      * Returns the appropriate updated string for the {@code stringId} (see
      * {@link DevicePolicyResources.Strings}) if one was set using
-     * {@link #setStrings}, otherwise returns the string from {@code defaultStringLoader}.
+     * {@code setStrings}, otherwise returns the string from {@code defaultStringLoader}.
      *
      * <p>Also returns the string from {@code defaultStringLoader} if
      * {@link DevicePolicyResources.Strings#UNDEFINED} was passed.
@@ -15694,15 +15694,12 @@ public class DevicePolicyManager {
      * notified when a resource has been updated.
      *
      * <p>Note that each call to this API loads the resource from the package that called
-     * {@link #setStrings} to set the updated resource.
+     * {@code setStrings} to set the updated resource.
      *
      * @param stringId The IDs to get the updated resource for.
      * @param defaultStringLoader To get the default string if no updated string was set for
      *         {@code stringId}.
-     *
-     * @hide
      */
-    @SystemApi
     @Nullable
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
@@ -15745,10 +15742,7 @@ public class DevicePolicyManager {
      * @param defaultStringLoader To get the default string if no updated string was set for
      *         {@code stringId}.
      * @param formatArgs The format arguments that will be used for substitution.
-     *
-     * @hide
      */
-    @SystemApi
     @Nullable
     @SuppressLint("SamShouldBeLast")
     public String getString(

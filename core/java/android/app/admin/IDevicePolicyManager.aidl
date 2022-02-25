@@ -552,14 +552,14 @@ interface IDevicePolicyManager {
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
-    void resetDrawables(in String[] drawableIds);
+    void resetDrawables(in List<String> drawableIds);
     ParcelableResource getDrawable(String drawableId, String drawableStyle, String drawableSource);
 
     boolean isDpcDownloaded();
     void setDpcDownloaded(boolean downloaded);
 
     void setStrings(in List<DevicePolicyStringResource> strings);
-    void resetStrings(in String[] stringIds);
+    void resetStrings(in List<String> stringIds);
     ParcelableResource getString(String stringId);
 
     boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();

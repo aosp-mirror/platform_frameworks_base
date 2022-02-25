@@ -7477,6 +7477,8 @@ package android.app.admin {
     method public CharSequence getStartUserSessionMessage(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getStorageEncryption(@Nullable android.content.ComponentName);
     method public int getStorageEncryptionStatus();
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.function.Supplier<java.lang.String>, @NonNull java.lang.Object...);
     method @Nullable public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method @Nullable public android.os.PersistableBundle getTransferOwnershipBundle();
     method @Nullable public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(@Nullable android.content.ComponentName, @NonNull android.content.ComponentName);
