@@ -865,6 +865,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mSurfaceHeight);
                 }
 
+                geometryTransaction.setDesintationFrame(mBlastSurfaceControl, mSurfaceWidth,
+                            mSurfaceHeight);
+
                 if (isHardwareAccelerated()) {
                     // This will consume the passed in transaction and the transaction will be
                     // applied on a render worker thread.
@@ -1107,7 +1110,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mBlastSurfaceControl.setTransformHint(mTransformHint);
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight,
-                        mFormat, transaction);
+                        mFormat);
         }
     }
 
@@ -1184,9 +1187,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         mTransformHint = viewRoot.getBufferTransformHint();
         mBlastSurfaceControl.setTransformHint(mTransformHint);
-        mBlastBufferQueue = new BLASTBufferQueue(name);
-        mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat,
-                geometryTransaction);
+        mBlastBufferQueue = new BLASTBufferQueue(name, false /* updateDestinationFrame */);
+        mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
     }
 
     private void onDrawFinished(Transaction t) {
