@@ -261,6 +261,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     @SysUISingleton
     static OngoingCallController provideOngoingCallController(
+            Context context,
             CommonNotifCollection notifCollection,
             SystemClock systemClock,
             ActivityStarter activityStarter,
@@ -284,6 +285,7 @@ public interface StatusBarDependenciesModule {
                         : Optional.empty();
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
+                        context,
                         notifCollection,
                         ongoingCallFlags,
                         systemClock,

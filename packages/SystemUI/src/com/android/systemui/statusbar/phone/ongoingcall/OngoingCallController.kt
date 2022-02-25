@@ -21,6 +21,7 @@ import android.app.IActivityManager
 import android.app.IUidObserver
 import android.app.Notification
 import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.View
@@ -52,6 +53,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class OngoingCallController @Inject constructor(
+    private val context: Context,
     private val notifCollection: CommonNotifCollection,
     private val ongoingCallFlags: OngoingCallFlags,
     private val systemClock: SystemClock,
@@ -244,7 +246,9 @@ class OngoingCallController @Inject constructor(
     private fun setUpUidObserver(currentCallNotificationInfo: CallNotificationInfo) {
         try {
             isCallAppVisible = isProcessVisibleToUser(
-                    iActivityManager.getUidProcessState(currentCallNotificationInfo.uid, null)
+                    iActivityManager.getUidProcessState(
+                        currentCallNotificationInfo.uid, context.opPackageName
+                    )
             )
         } catch (se: SecurityException) {
             Log.e(TAG, "Security exception when trying to get process state: $se")
@@ -286,7 +290,7 @@ class OngoingCallController @Inject constructor(
                 uidObserver,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
-                null
+                context.opPackageName
             )
         } catch (se: SecurityException) {
             Log.e(TAG, "Security exception when trying to register uid observer: $se")
