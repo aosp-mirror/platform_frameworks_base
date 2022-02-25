@@ -176,11 +176,11 @@ class DeviceManagementResourcesProvider {
     /**
      * Returns {@code false} if no resources were removed.
      */
-    boolean removeDrawables(@NonNull String[] drawableIds) {
+    boolean removeDrawables(@NonNull List<String> drawableIds) {
         synchronized (mLock) {
             boolean removed = false;
-            for (int i = 0; i < drawableIds.length; i++) {
-                String drawableId = drawableIds[i];
+            for (int i = 0; i < drawableIds.size(); i++) {
+                String drawableId = drawableIds.get(i);
                 removed |= mUpdatedDrawablesForStyle.remove(drawableId) != null
                         || mUpdatedDrawablesForSource.remove(drawableId) != null;
             }
@@ -265,11 +265,11 @@ class DeviceManagementResourcesProvider {
     /**
      * Returns {@code false} if no resources were removed.
      */
-    boolean removeStrings(@NonNull String[] stringIds) {
+    boolean removeStrings(@NonNull List<String> stringIds) {
         synchronized (mLock) {
             boolean removed = false;
-            for (int i = 0; i < stringIds.length; i++) {
-                String stringId = stringIds[i];
+            for (int i = 0; i < stringIds.size(); i++) {
+                String stringId = stringIds.get(i);
                 removed |= mUpdatedStrings.remove(stringId) != null;
             }
             if (!removed) {
