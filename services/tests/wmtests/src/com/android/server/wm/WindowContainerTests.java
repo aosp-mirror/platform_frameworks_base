@@ -1340,6 +1340,41 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAddLocalInsetsSourceProvider_sameType_replacesInsets() {
+         /*
+                ___ rootTask ________________________________________
+               |                  |                                  |
+          activity0      navigationBarInsetsProvider1    navigationBarInsetsProvider2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+    }
+
+    @Test
     public void testRemoveLocalInsetsSourceProvider() {
          /*
                 ___ rootTask _______________________________________________

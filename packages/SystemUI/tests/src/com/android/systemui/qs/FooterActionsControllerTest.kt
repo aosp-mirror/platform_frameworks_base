@@ -33,12 +33,15 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
 class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
@@ -55,6 +58,8 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     private lateinit var multiUserSwitchControllerFactory: MultiUserSwitchController.Factory
     @Mock
     private lateinit var multiUserSwitchController: MultiUserSwitchController
+    @Mock
+    private lateinit var globalActionsDialogProvider: Provider<GlobalActionsDialogLite>
     @Mock
     private lateinit var globalActionsDialog: GlobalActionsDialogLite
     @Mock
@@ -83,15 +88,11 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         whenever(multiUserSwitchControllerFactory.create(any()))
                 .thenReturn(multiUserSwitchController)
         whenever(featureFlags.isEnabled(Flags.NEW_FOOTER)).thenReturn(false)
+        whenever(globalActionsDialogProvider.get()).thenReturn(globalActionsDialog)
 
-        view = LayoutInflater.from(context)
-                .inflate(R.layout.footer_actions, null) as FooterActionsView
+        view = inflateView()
 
-        controller = FooterActionsController(view, multiUserSwitchControllerFactory,
-                activityStarter, userManager, userTracker, userInfoController,
-                deviceProvisionedController, securityFooterController, fgsManagerController,
-                falsingManager, metricsLogger, globalActionsDialog, uiEventLogger,
-                showPMLiteButton = true, fakeSettings, Handler(testableLooper.looper), featureFlags)
+        controller = constructFooterActionsController(view)
         controller.init()
         ViewUtils.attachView(view)
         // View looper is the testable looper associated with the test
@@ -176,5 +177,37 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         testableLooper.processAllMessages()
 
         assertThat(multiUserSwitch.visibility).isNotEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun testCleanUpGAD() {
+        reset(globalActionsDialogProvider)
+        whenever(globalActionsDialogProvider.get()).thenReturn(globalActionsDialog)
+        val view = inflateView()
+        controller = constructFooterActionsController(view)
+        controller.init()
+        verify(globalActionsDialogProvider, never()).get()
+
+        // GAD is constructed during attachment
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+        verify(globalActionsDialogProvider).get()
+
+        ViewUtils.detachView(view)
+        testableLooper.processAllMessages()
+        verify(globalActionsDialog).destroy()
+    }
+
+    private fun inflateView(): FooterActionsView {
+        return LayoutInflater.from(context)
+                .inflate(R.layout.footer_actions, null) as FooterActionsView
+    }
+
+    private fun constructFooterActionsController(view: FooterActionsView): FooterActionsController {
+        return FooterActionsController(view, multiUserSwitchControllerFactory,
+                activityStarter, userManager, userTracker, userInfoController,
+                deviceProvisionedController, securityFooterController, fgsManagerController,
+                falsingManager, metricsLogger, globalActionsDialogProvider, uiEventLogger,
+                showPMLiteButton = true, fakeSettings, Handler(testableLooper.looper), featureFlags)
     }
 }

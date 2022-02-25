@@ -30,6 +30,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
@@ -358,10 +359,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t != null && callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
+                final Transition transition = Transition.fromBinder(transitionToken);
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
                 if (t != null) {
-                    applyTransaction(t, syncId, null /*transition*/, caller);
+                    applyTransaction(t, syncId, null /*transition*/, caller, transition);
                 }
                 getTransitionController().finishTransition(transitionToken);
                 if (syncId >= 0) {
@@ -374,13 +376,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
+    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+            @Nullable Transition transition, @NonNull CallerInfo caller) {
+        applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+    }
+
     /**
      * @param syncId If non-null, this will be a sync-transaction.
      * @param transition A transition to collect changes into.
      * @param caller Info about the calling process.
+     * @param finishTransition The transition that is currently being finished.
      */
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
-            @Nullable Transition transition, @NonNull CallerInfo caller) {
+            @Nullable Transition transition, @NonNull CallerInfo caller,
+            @Nullable Transition finishTransition) {
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
@@ -433,7 +442,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 for (int i = 0; i < hopSize; ++i) {
                     effects |= applyHierarchyOp(hops.get(i), effects, syncId, transition,
                             isInLockTaskMode, caller, t.getErrorCallbackToken(),
-                            t.getTaskFragmentOrganizer());
+                            t.getTaskFragmentOrganizer(), finishTransition);
                 }
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
@@ -604,7 +613,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private int applyHierarchyOp(WindowContainerTransaction.HierarchyOp hop, int effects,
             int syncId, @Nullable Transition transition, boolean isInLockTaskMode,
             @NonNull CallerInfo caller, @Nullable IBinder errorCallbackToken,
-            @Nullable ITaskFragmentOrganizer organizer) {
+            @Nullable ITaskFragmentOrganizer organizer, @Nullable Transition finishTransition) {
         final int type = hop.getType();
         switch (type) {
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
@@ -871,6 +880,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 reparentTaskFragment(oldParent, newParent, errorCallbackToken);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                break;
+            }
+            case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
+                if (finishTransition == null) break;
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) break;
+                final Task thisTask = container.asActivityRecord() != null
+                        ? container.asActivityRecord().getTask() : container.asTask();
+                if (thisTask == null) break;
+                final Task restoreAt = finishTransition.getTransientLaunchRestoreTarget(container);
+                if (restoreAt == null) break;
+                final TaskDisplayArea taskDisplayArea = thisTask.getTaskDisplayArea();
+                taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
                 break;
             }
         }

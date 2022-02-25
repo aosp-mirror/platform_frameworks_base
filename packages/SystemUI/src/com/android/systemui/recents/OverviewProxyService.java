@@ -106,7 +106,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -148,7 +147,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Context mContext;
     private final Optional<Pip> mPipOptional;
     private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
-    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
@@ -298,14 +296,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public Rect getNonMinimizedSplitScreenSecondaryBounds() {
-            return verifyCallerAndClearCallingIdentity(
-                    "getNonMinimizedSplitScreenSecondaryBounds",
-                    () -> mLegacySplitScreenOptional.map(splitScreen ->
-                            splitScreen
-                                    .getDividerView()
-                                    .getNonMinimizedSplitScreenSecondaryBounds())
-                            .orElse(null)
-            );
+            // Deprecated
+            return null;
         }
 
         @Override
@@ -362,8 +354,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
         @Override
         public void setSplitScreenMinimized(boolean minimized) {
-            mLegacySplitScreenOptional.ifPresent(
-                    splitScreen -> splitScreen.setMinimized(minimized));
+            // Deprecated
         }
 
         @Override
@@ -568,7 +559,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<RecentTasks> recentTasks,
@@ -634,9 +624,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mCommandQueue = commandQueue;
 
         mSplitScreenOptional = splitScreenOptional;
-        legacySplitScreenOptional.ifPresent(splitScreen ->
-                splitScreen.registerBoundsChangeListener(mSplitScreenBoundsChangeListener));
-        mLegacySplitScreenOptional = legacySplitScreenOptional;
 
         // Listen for user setup
         startTracking();
@@ -751,10 +738,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
             });
         }
         startConnectionToCurrentUser();
-
-        // Clean up the minimized state if launcher dies
-        mLegacySplitScreenOptional.ifPresent(
-                splitScreen -> splitScreen.setMinimized(false));
     }
 
     public void startConnectionToCurrentUser() {

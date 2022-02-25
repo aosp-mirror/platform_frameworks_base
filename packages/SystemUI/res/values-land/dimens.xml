@@ -22,7 +22,6 @@
     <dimen name="docked_divider_handle_width">2dp</dimen>
     <dimen name="docked_divider_handle_height">16dp</dimen>
 
-    <dimen name="qs_tile_height">84dp</dimen>
     <dimen name="qs_brightness_margin_top">0dp</dimen>
     <dimen name="qs_brightness_margin_bottom">12dp</dimen>
     <dimen name="qqs_layout_margin_top">8dp</dimen>

@@ -48,6 +48,10 @@ platform_bootclasspath {
     // bootclasspath.
     fragments: [
         {
+            apex: "com.android.adservices",
+            module: "com.android.adservices-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.appsearch",
             module: "com.android.appsearch-bootclasspath-fragment",
         },
@@ -58,6 +62,10 @@ platform_bootclasspath {
         {
             apex: "com.android.auxiliary",
             module: "com.android.auxiliary-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.bluetooth",
+            module: "com.android.bluetooth-bootclasspath-fragment",
         },
         {
             apex: "com.android.conscrypt",

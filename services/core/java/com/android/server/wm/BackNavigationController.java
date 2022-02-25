@@ -98,20 +98,33 @@ class BackNavigationController {
         HardwareBuffer screenshotBuffer = null;
         int prevTaskId;
         int prevUserId;
-        IOnBackInvokedCallback applicationCallback = null;
-        IOnBackInvokedCallback systemCallback = null;
         RemoteAnimationTarget topAppTarget;
         SurfaceControl animLeash;
+        IOnBackInvokedCallback callback = null;
 
         synchronized (task.mWmService.mGlobalLock) {
-            activityRecord = task.topRunningActivity();
 
-            removedWindowContainer = activityRecord;
-            taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
-            WindowState window = task.getWindow(WindowState::isFocused);
+            // TODO Temp workaround for Sysui until b/221071505 is fixed
+            WindowState window = task.mWmService.getFocusedWindowLocked();
+            if (window == null) {
+                activityRecord = task.topRunningActivity();
+                removedWindowContainer = activityRecord;
+                taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
+                window = task.getWindow(WindowState::isFocused);
+            } else {
+                activityRecord = window.mActivityRecord;
+                removedWindowContainer = activityRecord;
+                taskWindowConfiguration = window.getWindowConfiguration();
+            }
+            IOnBackInvokedCallback applicationCallback = null;
+            IOnBackInvokedCallback systemCallback = null;
             if (window != null) {
                 applicationCallback = window.getApplicationOnBackInvokedCallback();
-                systemCallback = window.getSystemOnBackInvokedCallback();
+                callback = applicationCallback;
+                if (callback == null) {
+                    systemCallback = window.getSystemOnBackInvokedCallback();
+                    callback = systemCallback;
+                }
             }
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, "
@@ -119,16 +132,25 @@ class BackNavigationController {
                             + "systemBackCallback=%s",
                     task, activityRecord, applicationCallback, systemCallback);
 
+            // TODO Temp workaround for Sysui until b/221071505 is fixed
+            if (activityRecord == null && callback != null) {
+                return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
+                        null /* topWindowLeash */, null /* screenshotSurface */,
+                        null /* screenshotBuffer */, null /* taskWindowConfiguration */,
+                        null /* onBackNavigationDone */,
+                        callback /* onBackInvokedCallback */);
+            }
+
             // For IME and Home, either a callback is registered, or we do nothing. In both cases,
             // we don't need to pass the leashes below.
-            if (task.getDisplayContent().getImeContainer().isVisible()
+            if (activityRecord == null || task.getDisplayContent().getImeContainer().isVisible()
                     || activityRecord.isActivityTypeHome()) {
-                if (applicationCallback != null) {
+                if (callback != null) {
                     return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
                             null /* topWindowLeash */, null /* screenshotSurface */,
                             null /* screenshotBuffer */, null /* taskWindowConfiguration */,
                             null /* onBackNavigationDone */,
-                            applicationCallback /* onBackInvokedCallback */);
+                            callback /* onBackInvokedCallback */);
                 } else {
                     return null;
                 }
@@ -137,12 +159,12 @@ class BackNavigationController {
             prev = task.getActivity(
                     (r) -> !r.finishing && r.getTask() == task && !r.isTopRunningActivity());
 
-            if (applicationCallback != null) {
+            if (callback != null) {
                 return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
                         null /* topWindowLeash */, null /* screenshotSurface */,
                         null /* screenshotBuffer */, null /* taskWindowConfiguration */,
                         null /* onBackNavigationDone */,
-                        applicationCallback /* onBackInvokedCallback */);
+                        callback /* onBackInvokedCallback */);
             } else if (prev != null) {
                 backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
             } else if (task.returnsToHomeRootTask()) {
@@ -239,8 +261,6 @@ class BackNavigationController {
             return null;
         }
 
-        final IOnBackInvokedCallback callback =
-                applicationCallback != null ? applicationCallback : systemCallback;
         RemoteCallback onBackNavigationDone = new RemoteCallback(
                 result -> resetSurfaces(finalRemovedWindowContainer
                 ));
