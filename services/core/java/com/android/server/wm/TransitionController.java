@@ -282,21 +282,6 @@ class TransitionController {
         return false;
     }
 
-    /**
-     * Temporary work-around to deal with integration of legacy fixed-rotation. Returns whether
-     * the activity was visible before the collecting transition.
-     * TODO: at-least replace the polling mechanism.
-     */
-    boolean wasVisibleAtStart(@NonNull ActivityRecord ar) {
-        if (mCollectingTransition == null) return ar.isVisible();
-        final Transition.ChangeInfo ci = mCollectingTransition.mChanges.get(ar);
-        if (ci == null) {
-            // not part of transition, so use current state.
-            return ar.isVisible();
-        }
-        return ci.mVisible;
-    }
-
     @WindowConfiguration.WindowingMode
     int getWindowingModeAtStart(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return wc.getWindowingMode();
