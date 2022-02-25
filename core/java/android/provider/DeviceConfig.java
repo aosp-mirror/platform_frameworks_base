@@ -586,7 +586,7 @@ public final class DeviceConfig {
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
             Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
-                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR);
+                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR, NAMESPACE_AUTOFILL);
     /**
      * Privacy related properties definitions.
      *
