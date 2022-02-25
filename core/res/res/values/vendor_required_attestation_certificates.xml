@@ -29,4 +29,10 @@
   -->
     <string-array translatable="false" name="vendor_required_attestation_certificates">
     </string-array>
+
+    <!-- Url to mapping of revoked certificates' hex encoded serial numbers. Example format
+      can be found at:
+      https://developer.android.com/training/articles/security-key-attestation#certificate_status
+    -->
+    <string translatable="false" name="vendor_required_attestation_revocation_list_url"></string>
 </resources>

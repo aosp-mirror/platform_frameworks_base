@@ -105,6 +105,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
         controller = OngoingCallController(
+                context,
                 notificationCollection,
                 mockOngoingCallFlags,
                 clock,
@@ -236,6 +237,18 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         // No assert required, just check no crash
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_packageNameProvidedToActivityManager() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        val packageNameCaptor = ArgumentCaptor.forClass(String::class.java)
+        verify(mockIActivityManager).registerUidObserver(
+            any(), any(), any(), packageNameCaptor.capture()
+        )
+        assertThat(packageNameCaptor.value).isNotNull()
     }
 
     /**

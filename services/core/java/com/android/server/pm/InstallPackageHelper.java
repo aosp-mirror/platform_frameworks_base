@@ -1607,6 +1607,13 @@ final class InstallPackageHelper {
                                         + oldSharedUid + " to " + newSharedUid);
                     }
 
+                    // APK should not re-join shared UID
+                    if (oldPackage.isLeavingSharedUid() && !parsedPackage.isLeavingSharedUid()) {
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " attempting to rejoin " + newSharedUid);
+                    }
+
                     // In case of rollback, remember per-user/profile install state
                     allUsers = mPm.mUserManager.getUserIds();
                     installedUsers = ps.queryInstalledUsers(allUsers, true);

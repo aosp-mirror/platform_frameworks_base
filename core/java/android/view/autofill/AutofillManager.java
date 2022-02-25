@@ -58,6 +58,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.DeviceConfig;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillCallback;
 import android.service.autofill.FillEventHistory;
@@ -491,6 +492,15 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
             "compat_mode_allowed_packages";
 
+    /**
+     * Sets the fill dialog feature enabled or not.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED =
+            "autofill_dialog_enabled";
+
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
@@ -539,7 +549,7 @@ public final class AutofillManager {
      */
     public static final int NO_SESSION = Integer.MAX_VALUE;
 
-    private static final boolean HAS_FILL_DIALOG_UI_FEATURE = false;
+    private static final boolean HAS_FILL_DIALOG_UI_FEATURE_DEFAULT = false;
 
     private final IAutoFillManager mService;
 
@@ -654,6 +664,8 @@ public final class AutofillManager {
     private boolean mIsFillRequested;
 
     @Nullable private List<AutofillId> mFillDialogTriggerIds;
+
+    private final boolean mIsFillDialogEnabled;
 
     /** @hide */
     public interface AutofillClient {
@@ -794,6 +806,14 @@ public final class AutofillManager {
         mOptions = context.getAutofillOptions();
         mIsFillRequested = false;
         mRequireAutofill = false;
+
+        mIsFillDialogEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
+                HAS_FILL_DIALOG_UI_FEATURE_DEFAULT);
+        if (sDebug) {
+            Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled);
+        }
 
         if (mOptions != null) {
             sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
@@ -1081,7 +1101,7 @@ public final class AutofillManager {
     }
 
     private boolean hasFillDialogUiFeature() {
-        return HAS_FILL_DIALOG_UI_FEATURE;
+        return mIsFillDialogEnabled;
     }
 
     /**
@@ -3012,6 +3032,7 @@ public final class AutofillManager {
         }
         pw.print(pfx); pw.print("compat mode enabled: ");
         synchronized (mLock) {
+            pw.print(pfx); pw.print("fill dialog enabled: "); pw.println(mIsFillDialogEnabled);
             if (mCompatibilityBridge != null) {
                 final String pfx2 = pfx + "  ";
                 pw.println("true");
