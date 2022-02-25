@@ -505,6 +505,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             getAllowedUserHandles(),
                             mParams.getAllowedActivities(),
                             mParams.getBlockedActivities(),
+                            mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(displayId),
                             activityInfo -> onActivityBlocked(displayId, activityInfo));
             mWindowPolicyControllers.put(displayId, dwpc);
