@@ -345,6 +345,7 @@ public final class BackgroundRestrictionTest {
 
     @After
     public void tearDown() {
+        mBgRestrictionController.tearDown();
         mBgRestrictionController.getBackgroundHandlerThread().quitSafely();
     }
 
@@ -561,6 +562,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
+        DeviceConfigSession<Long> bgNotificationMinInterval = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -614,6 +616,13 @@ public final class BackgroundRestrictionTest {
                     mContext.getResources().getBoolean(
                             R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted));
             bgPromptFgsWithNotiToBgRestricted.set(true);
+
+            bgNotificationMinInterval = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL,
+                    DeviceConfig::getLong,
+                    ConstantsObserver.DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS);
+            bgNotificationMinInterval.set(windowMs);
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
@@ -754,6 +763,7 @@ public final class BackgroundRestrictionTest {
             // Sleep a while and set a higher drain
             Thread.sleep(windowMs);
             clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mInjector.getNotificationManager());
             clearInvocations(mBgRestrictionController);
 
             // We're not going to prompt the user if the abusive app has a FGS with notification.
@@ -794,6 +804,7 @@ public final class BackgroundRestrictionTest {
             mAppFGSTracker.onForegroundServiceNotificationUpdated(
                     testPkgName, testUid, -notificationId);
             clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mInjector.getNotificationManager());
             clearInvocations(mBgRestrictionController);
 
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
@@ -832,6 +843,7 @@ public final class BackgroundRestrictionTest {
             // Now we'll prompt the user even it has a FGS with notification.
             bgPromptFgsWithNotiToBgRestricted.set(true);
             clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mInjector.getNotificationManager());
             clearInvocations(mBgRestrictionController);
 
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
@@ -899,6 +911,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
+            closeIfNotNull(bgNotificationMinInterval);
         }
     }
 
@@ -1921,6 +1934,7 @@ public final class BackgroundRestrictionTest {
                     .checkUidPermission(uid, perm);
             mInjector.getAppPermissionTracker().onPermissionsChanged(uid);
         }
+        waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
         runExemptionTestOnce(
                 packageName, uid, pid, serviceType, sleepMs, stopAfterSleep,
                 perm, mediaControllers, topStateChanges, resetFGSTracker, false,

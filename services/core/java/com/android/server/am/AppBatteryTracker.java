@@ -1531,7 +1531,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
             if (excessive) {
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
-                    Slog.i(TAG, "Excessive background current drain " + uid
+                    Slog.i(TAG, "Excessive background current drain " + uid + " "
                             + usage + " (" + usage.percentageToString() + " ) over "
                             + TimeUtils.formatDuration(mBgCurrentDrainWindowMs));
                 }
@@ -1542,7 +1542,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
             } else {
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
-                    Slog.i(TAG, "Background current drain backs to normal " + uid
+                    Slog.i(TAG, "Background current drain backs to normal " + uid + " "
                             + usage + " (" + usage.percentageToString() + " ) over "
                             + TimeUtils.formatDuration(mBgCurrentDrainWindowMs));
                 }
