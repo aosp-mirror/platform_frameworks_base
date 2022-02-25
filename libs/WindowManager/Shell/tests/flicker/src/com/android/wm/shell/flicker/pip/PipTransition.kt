@@ -56,13 +56,6 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                 .sendBroadcast(createIntentWithAction(broadcastAction))
         }
 
-        fun requestOrientationForPip(orientation: Int) {
-            instrumentation.context.sendBroadcast(
-                    createIntentWithAction(Components.PipActivity.ACTION_SET_REQUESTED_ORIENTATION)
-                    .putExtra(Components.PipActivity.EXTRA_PIP_ORIENTATION, orientation.toString())
-            )
-        }
-
         companion object {
             // Corresponds to ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             @JvmStatic

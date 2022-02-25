@@ -471,7 +471,7 @@ public abstract class ActivityTaskManagerInternal {
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly);
+            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);

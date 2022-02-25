@@ -205,8 +205,6 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
-import android.os.storage.IStorageManager;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
 import android.service.dreams.DreamManagerInternal;
@@ -4062,12 +4060,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly) {
+            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (mGlobalLock) {
             activities = mRootWindowContainer.getDumpActivities(name, dumpVisibleRootTasksOnly,
-                    dumpFocusedRootTaskOnly);
+                    dumpFocusedRootTaskOnly, userId);
         }
 
         if (activities.size() <= 0) {
@@ -4310,11 +4308,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             SystemProperties.set("persist.sys.locale",
                     locales.get(bestLocaleIndex).toLanguageTag());
             LocaleList.setDefault(locales, bestLocaleIndex);
-
-            final Message m = PooledLambda.obtainMessage(
-                    ActivityTaskManagerService::sendLocaleToMountDaemonMsg, this,
-                    locales.get(bestLocaleIndex));
-            mH.sendMessage(m);
         }
 
         mTempConfig.seq = increaseConfigurationSeqLocked();
@@ -4466,17 +4459,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private void sendPutConfigurationForUserMsg(int userId, Configuration config) {
         final ContentResolver resolver = mContext.getContentResolver();
         Settings.System.putConfigurationForUser(resolver, config, userId);
-    }
-
-    private void sendLocaleToMountDaemonMsg(Locale l) {
-        try {
-            IBinder service = ServiceManager.getService("mount");
-            IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
-            Log.d(TAG, "Storing locale " + l.toLanguageTag() + " for decryption UI");
-            storageManager.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error storing locale for decryption UI", e);
-        }
     }
 
     private void expireStartAsCallerTokenMsg(IBinder permissionToken) {
@@ -6410,9 +6392,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-                boolean dumpFocusedRootTaskOnly) {
+                boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
             return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
-                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly);
+                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, userId);
         }
 
         @Override

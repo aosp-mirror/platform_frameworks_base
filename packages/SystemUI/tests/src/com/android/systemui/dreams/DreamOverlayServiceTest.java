@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.DreamPreviewComplication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -95,6 +96,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamOverlayStateController mStateController;
 
+    @Mock
+    DreamPreviewComplication mPreviewComplication;
+
     DreamOverlayService mService;
 
     @Before
@@ -119,7 +123,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mService = new DreamOverlayService(mContext, mMainExecutor,
                 mDreamOverlayComponentFactory,
                 mStateController,
-                mKeyguardUpdateMonitor);
+                mKeyguardUpdateMonitor,
+                mPreviewComplication);
     }
 
     @Test

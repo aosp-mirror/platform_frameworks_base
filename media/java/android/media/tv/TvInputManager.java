@@ -60,7 +60,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -484,7 +483,7 @@ public final class TvInputManager {
     private final Object mLock = new Object();
 
     // @GuardedBy("mLock")
-    private final List<TvInputCallbackRecord> mCallbackRecords = new LinkedList<>();
+    private final List<TvInputCallbackRecord> mCallbackRecords = new ArrayList<>();
 
     // A mapping from TV input ID to the state of corresponding input.
     // @GuardedBy("mLock")

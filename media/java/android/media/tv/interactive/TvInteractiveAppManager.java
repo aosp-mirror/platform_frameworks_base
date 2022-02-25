@@ -51,8 +51,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -293,7 +293,7 @@ public final class TvInteractiveAppManager {
             new SparseArray<>();
 
     // @GuardedBy("mLock")
-    private final List<TvInteractiveAppCallbackRecord> mCallbackRecords = new LinkedList<>();
+    private final List<TvInteractiveAppCallbackRecord> mCallbackRecords = new ArrayList<>();
 
     // A sequence number for the next session to be created. Should be protected by a lock
     // {@code mSessionCallbackRecordMap}.

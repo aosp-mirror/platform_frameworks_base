@@ -542,12 +542,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite aplicației să descopere și să asocieze dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"să se conecteze la dispozitive Bluetooth asociate"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite aplicației să se conecteze la dispozitive Bluetooth asociate"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să transmită anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite aplicației să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permiteți-i aplicației să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"să interacționeze cu dispozitive Wi‑Fi din apropiere"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la, să afișeze date și să stabilească poziția relativă pentru dispozitive Wi-Fi din apropiere"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la dispozitive Wi-Fi din apropiere, să transmită anunțuri și să stabilească poziția relativă a acestora"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>

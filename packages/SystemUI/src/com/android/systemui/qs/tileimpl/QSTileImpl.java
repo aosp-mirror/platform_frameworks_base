@@ -116,7 +116,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private String mTileSpec;
     @Nullable
-    private EnforcedAdmin mEnforcedAdmin;
+    @VisibleForTesting
+    protected EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
     private int mIsFullQs;
 

@@ -54,6 +54,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 
 import androidx.lifecycle.Observer;
 
@@ -130,6 +131,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Receiver mReceiver = new Receiver();
     private final RingerModeObservers mRingerModeObservers;
     private final MediaSessions mMediaSessions;
+    private final CaptioningManager mCaptioningManager;
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
@@ -175,7 +177,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             IAudioService iAudioService,
             AccessibilityManager accessibilityManager,
             PackageManager packageManager,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            WakefulnessLifecycle wakefulnessLifecycle,
+            CaptioningManager captioningManager) {
         mContext = context.getApplicationContext();
         mPackageManager = packageManager;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -200,6 +203,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mVibrator = vibrator;
         mHasVibrator = mVibrator.hasVibrator();
         mAudioService = iAudioService;
+        mCaptioningManager = captioningManager;
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
                 .isAccessibilityVolumeStreamActive();
@@ -307,20 +311,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public boolean areCaptionsEnabled() {
-        int currentValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, 0, UserHandle.USER_CURRENT);
-        return currentValue == 1;
+        return mCaptioningManager.isSystemAudioCaptioningEnabled();
     }
 
     public void setCaptionsEnabled(boolean isEnabled) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, isEnabled ? 1 : 0, UserHandle.USER_CURRENT);
-    }
-
-    @Override
-    public boolean isCaptionStreamOptedOut() {
-        // TODO(b/129768185): Removing secure setting, to be replaced by sound event listener
-        return false;
+        mCaptioningManager.setSystemAudioCaptioningEnabled(isEnabled);
     }
 
     public void getCaptionsComponentState(boolean fromTooltip) {
@@ -423,6 +418,13 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onGetCaptionsComponentStateW(boolean fromTooltip) {
+        if (mCaptioningManager.isSystemAudioCaptioningUiEnabled()) {
+            mCallbacks.onCaptionComponentStateChanged(true, fromTooltip);
+            return;
+        }
+
+        // TODO(b/220968335): Remove this check once system captions component migrates
+        // to new CaptioningManager APIs.
         try {
             String componentNameString = mContext.getString(
                     com.android.internal.R.string.config_defaultSystemCaptionsService);

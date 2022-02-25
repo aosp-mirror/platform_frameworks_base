@@ -99,15 +99,6 @@ ProtectedMember: android.service.notification.NotificationAssistantService#attac
     
 
 
-RethrowRemoteException: android.app.WallpaperManager#getWallpaperDimAmount():
-    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
-RethrowRemoteException: android.app.WallpaperManager#getWallpaperDimmingAmount():
-    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
-RethrowRemoteException: android.app.WallpaperManager#setWallpaperDimAmount(float):
-    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
-RethrowRemoteException: android.app.WallpaperManager#setWallpaperDimmingAmount(float):
-    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
-
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
     

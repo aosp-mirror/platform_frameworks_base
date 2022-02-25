@@ -76,6 +76,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -217,6 +218,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -2460,8 +2462,9 @@ public final class ViewRootImpl implements ViewParent,
             if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": baseSize=" + baseSize
                     + ", desiredWindowWidth=" + desiredWindowWidth);
             if (baseSize != 0 && desiredWindowWidth > baseSize) {
-                childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
-                childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+                childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width, lp.privateFlags);
+                childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height,
+                        lp.privateFlags);
                 performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                 if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": measured ("
                         + host.getMeasuredWidth() + "," + host.getMeasuredHeight()
@@ -2474,7 +2477,7 @@ public final class ViewRootImpl implements ViewParent,
                     baseSize = (baseSize+desiredWindowWidth)/2;
                     if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": next baseSize="
                             + baseSize);
-                    childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
+                    childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width, lp.privateFlags);
                     performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                     if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": measured ("
                             + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
@@ -2487,8 +2490,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!goodMeasure) {
-            childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
-            childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+            childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width,
+                    lp.privateFlags);
+            childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height,
+                    lp.privateFlags);
             performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
             if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()) {
                 windowSizeMayChange = true;
@@ -2721,6 +2726,10 @@ public final class ViewRootImpl implements ViewParent,
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
+        if (mApplyInsetsRequested && !(mWillMove || mWillResize)) {
+            dispatchApplyInsets(host);
+        }
+
         boolean layoutRequested = mLayoutRequested && (!mStopped || mReportNextDraw);
         if (layoutRequested) {
 
@@ -2782,18 +2791,6 @@ public final class ViewRootImpl implements ViewParent,
                     lp.softInputMode = (lp.softInputMode & ~SOFT_INPUT_MASK_ADJUST) | resizeMode;
                     params = lp;
                 }
-            }
-        }
-
-        if (mApplyInsetsRequested && !(mWillMove || mWillResize)) {
-            dispatchApplyInsets(host);
-            if (mLayoutRequested) {
-                // Short-circuit catching a new layout request here, so
-                // we don't need to go through two layout passes when things
-                // change due to fitting system windows, which can happen a lot.
-                windowSizeMayChange |= measureHierarchy(host, lp,
-                        mView.getContext().getResources(),
-                        desiredWindowWidth, desiredWindowHeight);
             }
         }
 
@@ -3156,8 +3153,10 @@ public final class ViewRootImpl implements ViewParent,
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
                         || mHeight != host.getMeasuredHeight() || dispatchApplyInsets ||
                         updatedConfiguration) {
-                    int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
-                    int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
+                    int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width,
+                            lp.privateFlags);
+                    int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height,
+                            lp.privateFlags);
 
                     if (DEBUG_LAYOUT) Log.v(mTag, "Ooops, something changed!  mWidth="
                             + mWidth + " measuredWidth=" + host.getMeasuredWidth()
@@ -3693,7 +3692,7 @@ public final class ViewRootImpl implements ViewParent,
             return current;
         }
 
-        final Queue<AccessibilityNodeInfo> fringe = new LinkedList<>();
+        final Queue<AccessibilityNodeInfo> fringe = new ArrayDeque<>();
         fringe.offer(current);
 
         while (!fringe.isEmpty()) {
@@ -3957,31 +3956,28 @@ public final class ViewRootImpl implements ViewParent,
      * Figures out the measure spec for the root view in a window based on it's
      * layout params.
      *
-     * @param windowSize
-     *            The available width or height of the window
-     *
-     * @param rootDimension
-     *            The layout params for one dimension (width or height) of the
-     *            window.
-     *
+     * @param windowSize The available width or height of the window.
+     * @param measurement The layout width or height requested in the layout params.
+     * @param privateFlags The private flags in the layout params of the window.
      * @return The measure spec to use to measure the root view.
      */
-    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
+    private static int getRootMeasureSpec(int windowSize, int measurement, int privateFlags) {
         int measureSpec;
+        final int rootDimension = (privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0
+                ? MATCH_PARENT : measurement;
         switch (rootDimension) {
-
-        case ViewGroup.LayoutParams.MATCH_PARENT:
-            // Window can't resize. Force root view to be windowSize.
-            measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);
-            break;
-        case ViewGroup.LayoutParams.WRAP_CONTENT:
-            // Window can resize. Set max size for root view.
-            measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.AT_MOST);
-            break;
-        default:
-            // Window wants to be an exact size. Force root view to be that size.
-            measureSpec = MeasureSpec.makeMeasureSpec(rootDimension, MeasureSpec.EXACTLY);
-            break;
+            case ViewGroup.LayoutParams.MATCH_PARENT:
+                // Window can't resize. Force root view to be windowSize.
+                measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);
+                break;
+            case ViewGroup.LayoutParams.WRAP_CONTENT:
+                // Window can resize. Set max size for root view.
+                measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.AT_MOST);
+                break;
+            default:
+                // Window wants to be an exact size. Force root view to be that size.
+                measureSpec = MeasureSpec.makeMeasureSpec(rootDimension, MeasureSpec.EXACTLY);
+                break;
         }
         return measureSpec;
     }

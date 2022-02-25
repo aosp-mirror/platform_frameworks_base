@@ -26,6 +26,7 @@ import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
+import static com.android.server.companion.Utils.prepareForIpc;
 
 import static java.util.Objects.requireNonNull;
 
@@ -47,7 +48,6 @@ import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.PackageUtils;
@@ -396,21 +396,5 @@ class AssociationRequestsProcessor {
         }
 
         return sameOemPackageCerts;
-    }
-
-    /**
-     * Convert an instance of a "locally-defined" ResultReceiver to an instance of
-     * {@link android.os.ResultReceiver} itself, which the receiving process will be able to
-     * unmarshall.
-     */
-    private static <T extends ResultReceiver> ResultReceiver prepareForIpc(T resultReceiver) {
-        final Parcel parcel = Parcel.obtain();
-        resultReceiver.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-
-        final ResultReceiver ipcFriendly = ResultReceiver.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-
-        return ipcFriendly;
     }
 }

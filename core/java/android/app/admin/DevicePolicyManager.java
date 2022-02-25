@@ -132,11 +132,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 // TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
@@ -3611,42 +3611,45 @@ public class DevicePolicyManager {
 
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
-     * resources with IDs {@link #EXTRA_RESOURCE_ID} has been updated, the updated resources can be
+     * resources with IDs {@link #EXTRA_RESOURCE_IDS} has been updated, the updated resources can be
      * retrieved using {@link #getDrawable} and {@code #getString}.
      *
      * <p>This broadcast is sent to registered receivers only.
      *
-     * <p> The following extras will be included to identify the type of resource being updated:
-     * <ul>
-     *     <li>{@link #EXTRA_RESOURCE_TYPE_DRAWABLE} for drawable resources</li>
-     *     <li>{@link #EXTRA_RESOURCE_TYPE_STRING} for string resources</li>
-     * </ul>
+     * <p> {@link #EXTRA_RESOURCE_TYPE} will be included to identify the type of resource being
+     * updated.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_POLICY_RESOURCE_UPDATED =
             "android.app.action.DEVICE_POLICY_RESOURCE_UPDATED";
 
     /**
-     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
-     * resource of type {@link Drawable} is being updated.
+     * An {@code int} extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate the type
+     * of the resource being updated, the type can be {@link #EXTRA_RESOURCE_TYPE_DRAWABLE} or
+     * {@link #EXTRA_RESOURCE_TYPE_STRING}
      */
-    public static final String EXTRA_RESOURCE_TYPE_DRAWABLE =
-            "android.app.extra.RESOURCE_TYPE_DRAWABLE";
+    public static final String EXTRA_RESOURCE_TYPE =
+            "android.app.extra.RESOURCE_TYPE";
 
     /**
-     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
-     * resource of type {@link String} is being updated.
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link Drawable} is being updated.
      */
-    public static final String EXTRA_RESOURCE_TYPE_STRING =
-            "android.app.extra.RESOURCE_TYPE_STRING";
+    public static final int EXTRA_RESOURCE_TYPE_DRAWABLE = 1;
+
+    /**
+     * A {@code int} value for {@link #EXTRA_RESOURCE_TYPE} to indicate that a resource of type
+     * {@link String} is being updated.
+     */
+    public static final int EXTRA_RESOURCE_TYPE_STRING = 2;
 
     /**
      * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
-     * resource IDs (see {@link DevicePolicyResources.UpdatableDrawableId} and
-     * {@link DevicePolicyResources.UpdatableStringId}) have been updated.
+     * resource IDs (see {@link DevicePolicyResources.Drawables} and
+     * {@link DevicePolicyResources.Strings}) have been updated.
      */
-    public static final String EXTRA_RESOURCE_ID =
-            "android.app.extra.RESOURCE_ID";
+    public static final String EXTRA_RESOURCE_IDS =
+            "android.app.extra.RESOURCE_IDS";
 
     /** @hide */
     @NonNull
@@ -7913,6 +7916,10 @@ public class DevicePolicyManager {
     /**
      * Returns the current runtime nearby notification streaming policy set by the device or profile
      * owner.
+     * <p>
+     * The caller must be the target user's device owner/profile owner or hold the
+     * {@link android.Manifest.permission#READ_NEARBY_STREAMING_POLICY READ_NEARBY_STREAMING_POLICY}
+     * permission.
      */
     @RequiresPermission(
             value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
@@ -7956,6 +7963,10 @@ public class DevicePolicyManager {
 
     /**
      * Returns the current runtime nearby app streaming policy set by the device or profile owner.
+     * <p>
+     * The caller must be the target user's device owner/profile owner or hold the
+     * {@link android.Manifest.permission#READ_NEARBY_STREAMING_POLICY READ_NEARBY_STREAMING_POLICY}
+     * permission.
      */
     @RequiresPermission(
             value = android.Manifest.permission.READ_NEARBY_STREAMING_POLICY,
@@ -15123,7 +15134,7 @@ public class DevicePolicyManager {
      * the combination of {@link DevicePolicyDrawableResource#getDrawableId()} and
      * {@link DevicePolicyDrawableResource#getDrawableStyle()}, (see
      * {@link DevicePolicyResources.Drawables} and {@link DevicePolicyResources.Drawables.Style}) to
-     * the drawable with ID {@link DevicePolicyDrawableResource#getCallingPackageResourceId()},
+     * the drawable with ID {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()},
      * meaning any system UI surface calling {@link #getDrawable}
      * with {@code drawableId} and {@code drawableStyle} will get the new resource after this API
      * is called.
@@ -15138,12 +15149,12 @@ public class DevicePolicyManager {
      * <p>Important notes to consider when using this API:
      * <ul>
      * <li>{@link #getDrawable} references the resource
-     * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} in the
+     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} in the
      * calling package each time it gets called. You have to ensure that the resource is always
      * available in the calling package as long as it is used as an updated resource.
      * <li>You still have to re-call {@code setDrawables} even if you only make changes to the
      * content of the resource with ID
-     * {@link DevicePolicyDrawableResource#getCallingPackageResourceId()} as the content might be
+     * {@link DevicePolicyDrawableResource#getResourceIdInCallingPackage()} as the content might be
      * cached and would need updating.
      * </ul>
      *
@@ -15204,7 +15215,7 @@ public class DevicePolicyManager {
      *
      * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
      * set a different value use
-     * {@link #getDrawableForDensity(String, String, int, Callable)}.
+     * {@link #getDrawableForDensity(String, String, int, Supplier)}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15221,16 +15232,16 @@ public class DevicePolicyManager {
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
         return getDrawable(
                 drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultDrawableLoader);
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
      * a {@code drawableSource} (see {@link DevicePolicyResources.Drawables.Source}) which
      * could result in returning a different drawable than
-     * {@link #getDrawable(String, String, Callable)}
+     * {@link #getDrawable(String, String, Supplier)}
      * if an override was set for that specific source.
      *
      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15250,7 +15261,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
 
         Objects.requireNonNull(drawableId, "drawableId can't be null");
         Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
@@ -15285,7 +15296,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, Supplier)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15307,7 +15318,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             int density,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
         return getDrawableForDensity(
                 drawableId,
                 drawableStyle,
@@ -15317,7 +15328,7 @@ public class DevicePolicyManager {
     }
 
      /**
-     * Similar to {@link #getDrawable(String, String, String, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, String, Supplier)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
       * <p>Calls to this API will not return {@code null} unless no updated drawable was found
@@ -15341,7 +15352,7 @@ public class DevicePolicyManager {
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             int density,
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+            @NonNull Supplier<Drawable> defaultDrawableLoader) {
 
         Objects.requireNonNull(drawableId, "drawableId can't be null");
         Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
@@ -15372,7 +15383,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, String, Callable)} but returns an
+     * Similar to {@link #getDrawable(String, String, String, Supplier)} but returns an
      * {@link Icon} instead of a {@link Drawable}.
      *
      * @param drawableId The drawable ID to get the updated resource for.
@@ -15414,7 +15425,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(String, String, Callable)} but returns an {@link Icon}
+     * Similar to {@link #getDrawable(String, String, Supplier)} but returns an {@link Icon}
      * instead of a {@link Drawable}.
      *
      * @param drawableId The drawable ID to get the updated resource for.
@@ -15520,7 +15531,7 @@ public class DevicePolicyManager {
     @Nullable
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Callable<String> defaultStringLoader) {
+            @NonNull Supplier<String> defaultStringLoader) {
 
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
@@ -15547,7 +15558,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getString(String, Callable)} but accepts {@code formatArgs} and returns a
+     * Similar to {@link #getString(String, Supplier)} but accepts {@code formatArgs} and returns a
      * localized formatted string, substituting the format arguments as defined in
      * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
      * {@link Resources#getString(int, Object...)}).
@@ -15567,7 +15578,7 @@ public class DevicePolicyManager {
     @SuppressLint("SamShouldBeLast")
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
-            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Supplier<String> defaultStringLoader,
             @NonNull Object... formatArgs) {
 
         Objects.requireNonNull(stringId, "stringId can't be null");

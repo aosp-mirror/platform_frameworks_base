@@ -34,6 +34,8 @@
 #include <SkRuntimeEffect.h>
 #include <vector>
 
+class SkRRect;
+
 namespace android {
 namespace uirenderer {
 

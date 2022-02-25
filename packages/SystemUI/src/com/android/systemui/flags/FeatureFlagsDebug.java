@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -69,6 +70,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final FlagManager mFlagManager;
     private final SecureSettings mSecureSettings;
     private final Resources mResources;
+    private final SystemPropertiesHelper mSystemProperties;
     private final Supplier<Map<Integer, Flag<?>>> mFlagsCollector;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
@@ -79,6 +81,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             FlagManager flagManager,
             Context context,
             SecureSettings secureSettings,
+            SystemPropertiesHelper systemProperties,
             @Main Resources resources,
             DumpManager dumpManager,
             @Nullable Supplier<Map<Integer, Flag<?>>> flagsCollector,
@@ -86,11 +89,12 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
         mResources = resources;
+        mSystemProperties = systemProperties;
         mFlagsCollector = flagsCollector != null ? flagsCollector : Flags::collectFlags;
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
-        flagManager.setRestartAction(this::restartSystemUI);
+        flagManager.setOnSettingsChangedAction(this::restartSystemUI);
         flagManager.setClearCacheAction(this::removeFromCache);
         context.registerReceiver(mReceiver, filter, null, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
@@ -116,6 +120,17 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             mBooleanFlagCache.put(id,
                     readFlagValue(id, mResources.getBoolean(flag.getResourceId()),
                             BooleanFlagSerializer.INSTANCE));
+        }
+
+        return mBooleanFlagCache.get(id);
+    }
+
+    @Override
+    public boolean isEnabled(@NonNull SysPropBooleanFlag flag) {
+        int id = flag.getId();
+        if (!mBooleanFlagCache.containsKey(id)) {
+            mBooleanFlagCache.put(
+                    id, mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
         }
 
         return mBooleanFlagCache.get(id);
@@ -180,16 +195,28 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         mSecureSettings.putString(mFlagManager.idToSettingsKey(id), data);
         Log.i(TAG, "Set id " + id + " to " + value);
         removeFromCache(id);
-        mFlagManager.dispatchListenersAndMaybeRestart(id);
+        mFlagManager.dispatchListenersAndMaybeRestart(id, this::restartSystemUI);
+    }
+
+    private <T> void eraseFlag(Flag<T> flag) {
+        if (flag instanceof SysPropFlag) {
+            mSystemProperties.erase(((SysPropFlag<T>) flag).getName());
+            dispatchListenersAndMaybeRestart(flag.getId(), this::restartAndroid);
+        } else {
+            eraseFlag(flag.getId());
+        }
     }
 
     /** Erase a flag's overridden value if there is one. */
-    public void eraseFlag(int id) {
+    private void eraseFlag(int id) {
         eraseInternal(id);
         removeFromCache(id);
-        mFlagManager.dispatchListenersAndMaybeRestart(id);
+        dispatchListenersAndMaybeRestart(id, this::restartSystemUI);
     }
 
+    private void dispatchListenersAndMaybeRestart(int id, Consumer<Boolean> restartAction) {
+        mFlagManager.dispatchListenersAndMaybeRestart(id, restartAction);
+    }
     /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
     private void eraseInternal(int id) {
         // We can't actually "erase" things from sysprops, but we can set them to empty!
@@ -217,7 +244,11 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         System.exit(0);
     }
 
-    private void restartAndroid() {
+    private void restartAndroid(boolean requestSuppress) {
+        if (requestSuppress) {
+            Log.i(TAG, "Android Restart Suppressed");
+            return;
+        }
         Log.i(TAG, "Restarting Android");
         try {
             mBarService.restart();
@@ -273,7 +304,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             Flag<?> flag = flagMap.get(id);
 
             if (!extras.containsKey(EXTRA_VALUE)) {
-                eraseFlag(id);
+                eraseFlag(flag);
                 return;
             }
 
@@ -282,6 +313,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
                 setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
             } else  if (flag instanceof ResourceBooleanFlag && value instanceof Boolean) {
                 setFlagValue(id, (Boolean) value, BooleanFlagSerializer.INSTANCE);
+            } else  if (flag instanceof SysPropBooleanFlag && value instanceof Boolean) {
+                // Store SysProp flags in SystemProperties where they can read by outside parties.
+                mSystemProperties.setBoolean(
+                        ((SysPropBooleanFlag) flag).getName(), (Boolean) value);
             } else if (flag instanceof StringFlag && value instanceof String) {
                 setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
             } else if (flag instanceof ResourceStringFlag && value instanceof String) {
@@ -305,6 +340,9 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             }
             if (f instanceof ResourceBooleanFlag) {
                 return new BooleanFlag(f.getId(), isEnabled((ResourceBooleanFlag) f));
+            }
+            if (f instanceof SysPropBooleanFlag) {
+                return new BooleanFlag(f.getId(), isEnabled((SysPropBooleanFlag) f));
             }
 
             // TODO: add support for other flag types.

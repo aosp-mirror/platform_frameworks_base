@@ -19,6 +19,8 @@
 #include "HolePunch.h"
 #include "SkData.h"
 #include "SkDrawable.h"
+#include "SkPaint.h"
+#include "SkRRect.h"
 
 using namespace android::uirenderer::skiapipeline;
 

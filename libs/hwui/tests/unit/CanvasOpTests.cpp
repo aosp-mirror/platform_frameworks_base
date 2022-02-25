@@ -23,9 +23,17 @@
 
 #include <tests/common/CallCountingCanvas.h>
 
-#include "SkPictureRecorder.h"
+#include "SkBitmap.h"
+#include "SkCanvas.h"
 #include "SkColor.h"
+#include "SkImageInfo.h"
 #include "SkLatticeIter.h"
+#include "SkPaint.h"
+#include "SkPath.h"
+#include "SkPictureRecorder.h"
+#include "SkRRect.h"
+#include "SkRect.h"
+#include "SkRegion.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include <SkNoDrawCanvas.h>
 

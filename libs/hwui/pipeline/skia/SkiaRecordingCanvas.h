@@ -22,6 +22,11 @@
 #include "SkiaDisplayList.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+class SkBitmap;
+class SkMatrix;
+class SkPaint;
+class SkRRect;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {

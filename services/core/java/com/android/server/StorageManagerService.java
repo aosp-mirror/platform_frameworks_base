@@ -75,7 +75,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -124,7 +123,6 @@ import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.storage.ExternalStorageService;
-import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -1414,39 +1412,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void handleDaemonConnected() {
         initIfBootedAndConnected();
         resetIfBootedAndConnected();
-
-        // On an encrypted device we can't see system properties yet, so pull
-        // the system locale out of the mount service.
-        if ("".equals(VoldProperties.encrypt_progress().orElse(""))) {
-            copyLocaleFromMountService();
-        }
-    }
-
-    private void copyLocaleFromMountService() {
-        String systemLocale;
-        try {
-            systemLocale = getField(StorageManager.SYSTEM_LOCALE_KEY);
-        } catch (RemoteException e) {
-            return;
-        }
-        if (TextUtils.isEmpty(systemLocale)) {
-            return;
-        }
-
-        Slog.d(TAG, "Got locale " + systemLocale + " from mount service");
-        Locale locale = Locale.forLanguageTag(systemLocale);
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        try {
-            ActivityManager.getService().updatePersistentConfigurationWithAttribution(config,
-                    mContext.getOpPackageName(), mContext.getAttributionTag());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error setting system locale from mount service", e);
-        }
-
-        // Temporary workaround for http://b/17945169.
-        Slog.d(TAG, "Setting system properties to " + systemLocale + " from mount service");
-        SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
     }
 
     private final IVoldListener mListener = new IVoldListener.Stub() {
@@ -3171,203 +3136,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    @Override
-    public int getEncryptionState() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeComplete();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int decryptStorage(String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "decrypting storage...");
-        }
-
-        try {
-            mVold.fdeCheckPassword(password);
-            mHandler.postDelayed(() -> {
-                try {
-                    mVold.fdeRestart();
-                } catch (Exception e) {
-                    Slog.wtf(TAG, e);
-                }
-            }, DateUtils.SECOND_IN_MILLIS);
-            return 0;
-        } catch (ServiceSpecificException e) {
-            Slog.e(TAG, "fdeCheckPassword failed", e);
-            return e.errorCode;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return StorageManager.ENCRYPTION_STATE_ERROR_UNKNOWN;
-        }
-    }
-
-    @Override
-    public int encryptStorage(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "encrypting storage...");
-        }
-
-        try {
-            mVold.fdeEnable(type, password, 0);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-
-        return 0;
-    }
-
-    /** Set the password for encrypting the main key.
-     *  @param type One of the CRYPTO_TYPE_XXX consts defined in StorageManager.
-     *  @param password The password to set.
-     */
-    @Override
-    public int changeEncryptionPassword(int type, String password) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            // Not supported on FBE devices
-            return -1;
-        }
-
-        if (type == StorageManager.CRYPT_TYPE_DEFAULT) {
-            password = "";
-        } else if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "changing encryption password...");
-        }
-
-        try {
-            mVold.fdeChangePassword(type, password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Validate a user-supplied password string with cryptfs
-     */
-    @Override
-    public int verifyEncryptionPassword(String password) throws RemoteException {
-        // Only the system process is permitted to validate passwords
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to access the crypt keeper");
-        }
-
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (TextUtils.isEmpty(password)) {
-            throw new IllegalArgumentException("password cannot be empty");
-        }
-
-        if (DEBUG_EVENTS) {
-            Slog.i(TAG, "validating encryption password...");
-        }
-
-        try {
-            mVold.fdeVerifyPassword(password);
-            return 0;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Get the type of encryption used to encrypt the main key.
-     * @return The type, one of the CRYPT_TYPE_XXX consts from StorageManager.
-     */
-    @Override
-    public int getPasswordType() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        try {
-            return mVold.fdeGetPasswordType();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return -1;
-        }
-    }
-
-    /**
-     * Set a field in the crypto header.
-     * @param field field to set
-     * @param contents contents to set in field
-     */
-    @Override
-    public void setField(String field, String contents) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return;
-        }
-
-        try {
-            mVold.fdeSetField(field, contents);
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
-    }
-
-    /**
-     * Gets a field from the crypto header.
-     * @param field field to get
-     * @return contents of field
-     */
-    @Override
-    public String getField(String field) throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-            "no permission to access the crypt keeper");
-
-        if (!StorageManager.isBlockEncrypted()) {
-            // Only supported on FDE devices
-            return null;
-        }
-
-        try {
-            return mVold.fdeGetField(field);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
     /**
      * Is userdata convertible to file based encryption?
      * @return non zero for convertible
@@ -3447,33 +3215,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         mVold.abortChanges(message, retry);
-    }
-
-    @Override
-    public String getPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can retrieve password");
-
-        try {
-            return mVold.fdeGetPassword();
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return null;
-        }
-    }
-
-    @Override
-    public void clearPassword() throws RemoteException {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
-                "only keyguard can clear password");
-
-        try {
-            mVold.fdeClearPassword();
-            return;
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-            return;
-        }
     }
 
     @Override

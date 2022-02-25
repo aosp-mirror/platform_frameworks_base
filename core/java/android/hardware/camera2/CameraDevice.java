@@ -990,7 +990,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>Reprocessing with 10-bit output targets on 10-bit capable
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT} devices is
      * not supported. Trying to initialize a repreocessable capture session with one ore more
-     * output configurations set {@link OutputConfiguration#setDynamicRangeProfile(int)} to use
+     * output configurations set {@link OutputConfiguration#setDynamicRangeProfile} to use
      * a 10-bit dynamic range profile {@link android.hardware.camera2.params.DynamicRangeProfiles}
      * will trigger {@link IllegalArgumentException}.</p>
      *
@@ -1179,7 +1179,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #createCaptureSessionByOutputConfigurations
      * @see #createReprocessableCaptureSession
      * @see #createConstrainedHighSpeedCaptureSession
-     * @see OutputConfiguration#setDynamicRangeProfile(int)
+     * @see OutputConfiguration#setDynamicRangeProfile
      * @see android.hardware.camera2.params.DynamicRangeProfiles
      */
     public void createCaptureSession(

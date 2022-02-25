@@ -1267,7 +1267,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 change.setAllowEnterPip(topMostActivity != null
                         && topMostActivity.checkEnterPictureInPictureAppOpsState());
                 final ActivityRecord topRunningActivity = task.topRunningActivity();
-                if (topRunningActivity != null && task.mDisplayContent != null) {
+                if (topRunningActivity != null && task.mDisplayContent != null
+                        // Display won't be rotated for multi window Task, so the fixed rotation
+                        // won't be applied. This can happen when the windowing mode is changed
+                        // before the previous fixed rotation is applied.
+                        && !task.inMultiWindowMode()) {
                     // If Activity is in fixed rotation, its will be applied with the next rotation,
                     // when the Task is still in the previous rotation.
                     final int taskRotation = task.getWindowConfiguration().getDisplayRotation();

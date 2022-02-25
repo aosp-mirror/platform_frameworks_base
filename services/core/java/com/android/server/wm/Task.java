@@ -137,6 +137,7 @@ import static java.lang.Integer.MAX_VALUE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData;
@@ -1583,19 +1584,23 @@ class Task extends TaskFragment {
     }
 
     /** Completely remove all activities associated with an existing task. */
-    void performClearTask(String reason) {
+    void removeActivities(String reason, boolean excludingTaskOverlay) {
         clearPinnedTaskIfNeed();
         // Broken down into to cases to avoid object create due to capturing mStack.
         if (getRootTask() == null) {
             forAllActivities((r) -> {
-                if (r.finishing) return;
+                if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
+                    return;
+                }
                 // Task was restored from persistent storage.
                 r.takeFromHistory();
                 removeChild(r, reason);
             });
         } else {
             forAllActivities((r) -> {
-                if (r.finishing) return;
+                if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
+                    return;
+                }
                 // Prevent the transition from being executed too early if the top activity is
                 // resumed but the mVisibleRequested of any other activity is true, the transition
                 // should wait until next activity resumed.
@@ -1612,26 +1617,24 @@ class Task extends TaskFragment {
     /**
      * Completely remove all activities associated with an existing task.
      */
-    void performClearTaskLocked() {
+    void performClearTaskForReuse(boolean excludingTaskOverlay) {
         mReuseTask = true;
         mTaskSupervisor.beginDeferResume();
         try {
-            performClearTask("clear-task-all");
+            removeActivities("clear-task-all", excludingTaskOverlay);
         } finally {
             mTaskSupervisor.endDeferResume();
             mReuseTask = false;
         }
     }
 
-    ActivityRecord performClearTaskForReuseLocked(ActivityRecord newR, int launchFlags) {
-        mReuseTask = true;
+    ActivityRecord performClearTop(ActivityRecord newR, int launchFlags) {
         mTaskSupervisor.beginDeferResume();
         final ActivityRecord result;
         try {
-            result = performClearTaskLocked(newR, launchFlags);
+            result = clearTopActivities(newR, launchFlags);
         } finally {
             mTaskSupervisor.endDeferResume();
-            mReuseTask = false;
         }
         return result;
     }
@@ -1647,7 +1650,7 @@ class Task extends TaskFragment {
      * @return Returns the old activity that should be continued to be used,
      * or {@code null} if none was found.
      */
-    private ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
+    private ActivityRecord clearTopActivities(ActivityRecord newR, int launchFlags) {
         final ActivityRecord r = findActivityInHistory(newR.mActivityComponent);
         if (r == null) return null;
 
@@ -1674,7 +1677,7 @@ class Task extends TaskFragment {
         // Stop operation once we reach the boundary activity.
         if (r == boundaryActivity) return true;
 
-        if (!r.finishing) {
+        if (!r.finishing && !r.isTaskOverlay()) {
             final ActivityOptions opts = r.getOptions();
             if (opts != null) {
                 r.clearOptionsAnimation();
@@ -5691,7 +5694,7 @@ class Task extends TaskFragment {
         }
     }
 
-    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name, @UserIdInt int userId) {
         ArrayList<ActivityRecord> activities = new ArrayList<>();
 
         if ("all".equals(name)) {
@@ -5711,7 +5714,13 @@ class Task extends TaskFragment {
                 }
             });
         }
-
+        if (userId != UserHandle.USER_ALL) {
+            for (int i = activities.size() - 1; i >= 0; --i) {
+                if (activities.get(i).mUserId != userId) {
+                    activities.remove(i);
+                }
+            }
+        }
         return activities;
     }
 

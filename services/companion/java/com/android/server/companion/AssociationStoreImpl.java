@@ -54,7 +54,7 @@ import java.util.StringJoiner;
  * should use public {@link AssociationStore} interface.
  */
 @SuppressLint("LongLogTag")
-class AssociationStoreImpl implements AssociationStore {
+public class AssociationStoreImpl implements AssociationStore {
     private static final boolean DEBUG = false;
     private static final String TAG = "CompanionDevice_AssociationStore";
 

@@ -101,7 +101,7 @@ import java.util.concurrent.ConcurrentMap;
  * Since Android T the data is stored to "companion_device_manager.xml" file in
  * {@link Environment#getDataSystemDeDirectory(int) /data/system_de/}.
  *
- * See {@link #getBaseStorageFileForUser(int) getBaseStorageFileForUser()}
+ * See {@link #getStorageFileForUser(int)}
  *
  * <p>
  * Since Android T the data is stored using the v1 schema.
