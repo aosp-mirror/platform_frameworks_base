@@ -148,6 +148,7 @@ public class SystemServicesTestRule implements TestRule {
     private void setUp() {
         mMockitoSession = mockitoSession()
                 .spyStatic(LocalServices.class)
+                .spyStatic(SurfaceControl.class)
                 .mockStatic(LockGuard.class)
                 .mockStatic(Watchdog.class)
                 .strictness(Strictness.LENIENT)
