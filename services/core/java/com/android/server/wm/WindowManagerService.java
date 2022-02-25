@@ -4900,7 +4900,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private WindowState getFocusedWindowLocked() {
+    WindowState getFocusedWindowLocked() {
         // Return the focused window in the focused display.
         return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
