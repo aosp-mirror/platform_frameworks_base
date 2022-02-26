@@ -927,6 +927,47 @@ public class WindowStateTests extends WindowTestsBase {
 
     @UseTestDisplay(addWindows = { W_ACTIVITY })
     @Test
+    public void testAdjustImeInsetsVisibilityWhenSwitchingApps_toAppInMultiWindowMode() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app2 = createWindow(null, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app2");
+        final WindowState imeWindow = createWindow(null, TYPE_APPLICATION, "imeWindow");
+        spyOn(imeWindow);
+        doReturn(true).when(imeWindow).isVisible();
+        mDisplayContent.mInputMethodWindow = imeWindow;
+
+        final InsetsStateController controller = mDisplayContent.getInsetsStateController();
+        controller.getImeSourceProvider().setWindow(imeWindow, null, null);
+
+        // Simulate app2 in multi-window mode is going to background to switch to the fullscreen
+        // app which requests IME with updating all windows Insets State when IME is above app.
+        app2.mActivityRecord.mImeInsetsFrozenUntilStartInput = true;
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().getSource().setVisible(true);
+        controller.updateAboveInsetsState(imeWindow, false);
+
+        // Expect app windows behind IME can receive IME insets visible,
+        // but not for app2 in background.
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
+
+        // Simulate app plays closing transition to app2.
+        // And app2 is now IME layering target but not yet to be the IME input target.
+        mDisplayContent.setImeLayeringTarget(app2);
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Verify the IME insets is still visible on app, but not for app2 during task switching.
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY})
+    @Test
     public void testUpdateImeControlTargetWhenLeavingMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
                 mAppWindow.mToken, "app");
