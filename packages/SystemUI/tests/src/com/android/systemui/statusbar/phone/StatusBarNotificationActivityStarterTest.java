@@ -203,7 +203,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mJankMonitor);
 
         mNotificationActivityStarter =
-                new StatusBarNotificationActivityStarter.Builder(
+                new StatusBarNotificationActivityStarter(
                         getContext(),
                         mock(CommandQueue.class),
                         mHandler,
@@ -229,18 +229,16 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(LockPatternUtils.class),
                         mock(StatusBarRemoteInputCallback.class),
                         mActivityIntentHelper,
-
                         mNotifPipelineFlags,
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
-                        mOnUserInteractionCallback)
-                        .setStatusBar(mStatusBar)
-                        .setNotificationPresenter(mock(NotificationPresenter.class))
-                        .setNotificationPanelViewController(
-                                mock(NotificationPanelViewController.class))
-                        .setActivityLaunchAnimator(mActivityLaunchAnimator)
-                        .setNotificationAnimatorControllerProvider(notificationAnimationProvider)
-                        .build();
+                        mOnUserInteractionCallback,
+                        mStatusBar,
+                        mock(NotificationPresenter.class),
+                        mock(NotificationPanelViewController.class),
+                        mActivityLaunchAnimator,
+                        notificationAnimationProvider
+                );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
         doAnswer(mCallOnDismiss).when(mActivityStarter).dismissKeyguardThenExecute(

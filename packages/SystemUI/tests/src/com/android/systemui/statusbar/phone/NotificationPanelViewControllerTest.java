@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -358,6 +359,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock
     private SysUiState mSysUiState;
+    @Mock
+    private NotificationListContainer mNotificationListContainer;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -542,7 +545,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mQsFrameTranslateController,
                 mSysUiState,
-                mKeyguardUnlockAnimationController);
+                mKeyguardUnlockAnimationController,
+                mNotificationListContainer);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 () -> {},
