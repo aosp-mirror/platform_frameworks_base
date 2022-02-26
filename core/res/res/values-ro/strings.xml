@@ -540,7 +540,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite aplicației să descopere și să asocieze dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"să se conecteze la dispozitive Bluetooth asociate"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite aplicației să se conecteze la dispozitive Bluetooth asociate"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să transmită anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite aplicației să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permiteți-i aplicației să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
