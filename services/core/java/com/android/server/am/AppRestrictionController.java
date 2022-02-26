@@ -87,7 +87,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
-import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
@@ -192,7 +191,7 @@ public final class AppRestrictionController {
     // No lock is needed, as it's immutable after initialization in constructor.
     private final ArrayList<BaseAppStateTracker> mAppStateTrackers = new ArrayList<>();
 
-    @GuardedBy("mLock")
+    @GuardedBy("mSettingsLock")
     private final RestrictionSettings mRestrictionSettings = new RestrictionSettings();
 
     private final CopyOnWriteArraySet<AppBackgroundRestrictionListener> mRestrictionListeners =
@@ -202,7 +201,7 @@ public final class AppRestrictionController {
      * A mapping between the UID/Pkg and its pending work which should be triggered on inactive;
      * an active UID/pkg pair should have an entry here, although its pending work could be null.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mSettingsLock")
     private final SparseArrayMap<String, Runnable> mActiveUids = new SparseArrayMap<>();
 
     // No lock is needed as it's accessed in bg handler thread only.
@@ -219,6 +218,7 @@ public final class AppRestrictionController {
     private int[] mDeviceIdleExceptIdleAllowlist = new int[0]; // No lock is needed.
 
     private final Object mLock = new Object();
+    private final Object mSettingsLock = new Object();
     private final Injector mInjector;
     private final NotificationHelper mNotificationHelper;
 
@@ -257,12 +257,95 @@ public final class AppRestrictionController {
 
     final ActivityManagerService mActivityManagerService;
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_ADDED: {
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        if (uid >= 0) {
+                            onUidAdded(uid);
+                        }
+                    }
+                }
+                // fall through.
+                case Intent.ACTION_PACKAGE_CHANGED: {
+                    final String pkgName = intent.getData().getSchemeSpecificPart();
+                    final String[] cmpList = intent.getStringArrayExtra(
+                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                    // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
+                    // enable/disable event (cmpList is just the package name itself), drop
+                    // our carrier privileged app & system-app caches and let them refresh
+                    if (cmpList == null
+                            || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
+                        clearCarrierPrivilegedApps();
+                    }
+                } break;
+                case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                    final Uri data = intent.getData();
+                    String ssp;
+                    if (uid >= 0 && data != null
+                            && (ssp = data.getSchemeSpecificPart()) != null) {
+                        onPackageRemoved(ssp, uid);
+                    }
+                } break;
+                case Intent.ACTION_UID_REMOVED: {
+                    if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        if (uid >= 0) {
+                            onUidRemoved(uid);
+                        }
+                    }
+                } break;
+                case Intent.ACTION_USER_ADDED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserAdded(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_STARTED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserStarted(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_STOPPED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserStopped(userId);
+                    }
+                } break;
+                case Intent.ACTION_USER_REMOVED: {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (userId >= 0) {
+                        onUserRemoved(userId);
+                    }
+                } break;
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBootReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            switch (intent.getAction()) {
+                case Intent.ACTION_LOCKED_BOOT_COMPLETED: {
+                    onLockedBootCompleted();
+                } break;
+            }
+        }
+    };
+
     /**
      * The restriction levels that each package is on, the levels here are defined in
      * {@link android.app.ActivityManager.RESTRICTION_LEVEL_*}.
      */
     final class RestrictionSettings {
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         final SparseArrayMap<String, PkgSettings> mRestrictionLevels = new SparseArrayMap();
 
         final class PkgSettings {
@@ -283,6 +366,7 @@ public final class AppRestrictionController {
                 mCurrentRestrictionLevel = mLastRestrictionLevel = RESTRICTION_LEVEL_UNKNOWN;
             }
 
+            @GuardedBy("mSettingsLock")
             @RestrictionLevel int update(@RestrictionLevel int level, int reason, int subReason) {
                 if (level != mCurrentRestrictionLevel) {
                     mLastRestrictionLevel = mCurrentRestrictionLevel;
@@ -296,6 +380,7 @@ public final class AppRestrictionController {
             }
 
             @Override
+            @GuardedBy("mSettingsLock")
             public String toString() {
                 final StringBuilder sb = new StringBuilder(128);
                 sb.append("RestrictionLevel{");
@@ -313,6 +398,7 @@ public final class AppRestrictionController {
                 return sb.toString();
             }
 
+            @GuardedBy("mSettingsLock")
             void dump(PrintWriter pw, @ElapsedRealtimeLong long nowElapsed) {
                 pw.print(toString());
                 if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
@@ -344,18 +430,22 @@ public final class AppRestrictionController {
                 return mUid;
             }
 
+            @GuardedBy("mSettingsLock")
             @RestrictionLevel int getCurrentRestrictionLevel() {
                 return mCurrentRestrictionLevel;
             }
 
+            @GuardedBy("mSettingsLock")
             @RestrictionLevel int getLastRestrictionLevel() {
                 return mLastRestrictionLevel;
             }
 
+            @GuardedBy("mSettingsLock")
             int getReason() {
                 return mReason;
             }
 
+            @GuardedBy("mSettingsLock")
             @ElapsedRealtimeLong long getLastNotificationTime(
                     @NotificationHelper.NotificationType int notificationType) {
                 if (mLastNotificationShownTimeElapsed == null) {
@@ -364,6 +454,7 @@ public final class AppRestrictionController {
                 return mLastNotificationShownTimeElapsed[notificationType];
             }
 
+            @GuardedBy("mSettingsLock")
             void setLastNotificationTime(@NotificationHelper.NotificationType int notificationType,
                     @ElapsedRealtimeLong long timestamp) {
                 if (mLastNotificationShownTimeElapsed == null) {
@@ -373,6 +464,7 @@ public final class AppRestrictionController {
                 mLastNotificationShownTimeElapsed[notificationType] = timestamp;
             }
 
+            @GuardedBy("mSettingsLock")
             int getNotificationId(@NotificationHelper.NotificationType int notificationType) {
                 if (mNotificationId == null) {
                     return 0;
@@ -380,6 +472,7 @@ public final class AppRestrictionController {
                 return mNotificationId[notificationType];
             }
 
+            @GuardedBy("mSettingsLock")
             void setNotificationId(@NotificationHelper.NotificationType int notificationType,
                     int notificationId) {
                 if (mNotificationId == null) {
@@ -396,7 +489,7 @@ public final class AppRestrictionController {
          */
         @RestrictionLevel int update(String packageName, int uid, @RestrictionLevel int level,
                 int reason, int subReason) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 PkgSettings settings = getRestrictionSettingsLocked(uid, packageName);
                 if (settings == null) {
                     settings = new PkgSettings(packageName, uid);
@@ -410,7 +503,7 @@ public final class AppRestrictionController {
          * @return The reason of why it's in this level.
          */
         int getReason(String packageName, int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final PkgSettings settings = mRestrictionLevels.get(uid, packageName);
                 return settings != null ? settings.getReason()
                         : (REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_UNDEFINED);
@@ -418,7 +511,7 @@ public final class AppRestrictionController {
         }
 
         @RestrictionLevel int getRestrictionLevel(int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final int uidKeyIndex = mRestrictionLevels.indexOfKey(uid);
                 if (uidKeyIndex < 0) {
                     return RESTRICTION_LEVEL_UNKNOWN;
@@ -440,7 +533,7 @@ public final class AppRestrictionController {
         }
 
         @RestrictionLevel int getRestrictionLevel(int uid, String packageName) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final PkgSettings settings = getRestrictionSettingsLocked(uid, packageName);
                 return settings == null
                         ? getRestrictionLevel(uid) : settings.getCurrentRestrictionLevel();
@@ -454,14 +547,14 @@ public final class AppRestrictionController {
         }
 
         private @RestrictionLevel int getLastRestrictionLevel(int uid, String packageName) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final PkgSettings settings = mRestrictionLevels.get(uid, packageName);
                 return settings == null
-                        ? RESTRICTION_LEVEL_UNKNOWN : settings.mLastRestrictionLevel;
+                        ? RESTRICTION_LEVEL_UNKNOWN : settings.getLastRestrictionLevel();
             }
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         void forEachPackageInUidLocked(int uid,
                 @NonNull TriConsumer<String, Integer, Integer> consumer) {
             final int uidKeyIndex = mRestrictionLevels.indexOfKey(uid);
@@ -476,20 +569,20 @@ public final class AppRestrictionController {
             }
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         void forEachUidLocked(@NonNull Consumer<Integer> consumer) {
             for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
                 consumer.accept(mRestrictionLevels.keyAt(i));
             }
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         PkgSettings getRestrictionSettingsLocked(int uid, String packageName) {
             return mRestrictionLevels.get(uid, packageName);
         }
 
         void removeUser(@UserIdInt int userId) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 for (int i = mRestrictionLevels.numMaps() - 1; i >= 0; i--) {
                     final int uid = mRestrictionLevels.keyAt(i);
                     if (UserHandle.getUserId(uid) != userId) {
@@ -501,25 +594,25 @@ public final class AppRestrictionController {
         }
 
         void removePackage(String pkgName, int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 mRestrictionLevels.delete(uid, pkgName);
             }
         }
 
         void removeUid(int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 mRestrictionLevels.delete(uid);
             }
         }
 
         @VisibleForTesting
         void reset() {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 mRestrictionLevels.clear();
             }
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         void dumpLocked(PrintWriter pw, String prefix) {
             final ArrayList<PkgSettings> settings = new ArrayList<>();
             mRestrictionLevels.forEach(setting -> settings.add(setting));
@@ -804,7 +897,7 @@ public final class AppRestrictionController {
 
     void onSystemReady() {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                ActivityThread.currentApplication().getMainExecutor(), mConstantsObserver);
+                mBgExecutor, mConstantsObserver);
         mConstantsObserver.start();
         initBgRestrictionExemptioFromSysConfig();
         initRestrictionStates();
@@ -826,8 +919,17 @@ public final class AppRestrictionController {
 
     @VisibleForTesting
     void resetRestrictionSettings() {
-        mRestrictionSettings.reset();
+        synchronized (mSettingsLock) {
+            mRestrictionSettings.reset();
+        }
         initRestrictionStates();
+    }
+
+    @VisibleForTesting
+    void tearDown() {
+        DeviceConfig.removeOnPropertiesChangedListener(mConstantsObserver);
+        unregisterForUidObservers();
+        unregisterForSystemBroadcasts();
     }
 
     private void initBgRestrictionExemptioFromSysConfig() {
@@ -907,6 +1009,14 @@ public final class AppRestrictionController {
             mInjector.getIActivityManager().registerUidObserver(mUidObserver,
                     UID_OBSERVER_ACTIVE | UID_OBSERVER_GONE | UID_OBSERVER_IDLE
                     | UID_OBSERVER_PROCSTATE, PROCESS_STATE_FOREGROUND_SERVICE, "android");
+        } catch (RemoteException e) {
+            // Intra-process call, it won't happen.
+        }
+    }
+
+    private void unregisterForUidObservers() {
+        try {
+            mInjector.getIActivityManager().unregisterUidObserver(mUidObserver);
         } catch (RemoteException e) {
             // Intra-process call, it won't happen.
         }
@@ -1212,7 +1322,7 @@ public final class AppRestrictionController {
         prefix = "  " + prefix;
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
-        synchronized (mLock) {
+        synchronized (mSettingsLock) {
             mRestrictionSettings.dumpLocked(pw, "  " + prefix);
         }
         mConstantsObserver.dump(pw, "  " + prefix);
@@ -1226,7 +1336,7 @@ public final class AppRestrictionController {
             int curBucket, boolean allowUpdateBucket, int reason, int subReason) {
         int curLevel;
         int prevReason;
-        synchronized (mLock) {
+        synchronized (mSettingsLock) {
             curLevel = getRestrictionLevel(uid, pkgName);
             if (curLevel == level) {
                 // Nothing to do.
@@ -1264,7 +1374,7 @@ public final class AppRestrictionController {
                     || level == RESTRICTION_LEVEL_RESTRICTED_BUCKET)) {
                 // restrict the app if it hasn't done so.
                 boolean doIt = true;
-                synchronized (mLock) {
+                synchronized (mSettingsLock) {
                     final int index = mActiveUids.indexOfKey(uid, pkgName);
                     if (index >= 0) {
                         // It's currently active, enqueue it.
@@ -1282,7 +1392,7 @@ public final class AppRestrictionController {
                 && level < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
             // Moved out of the background-restricted state.
             if (curBucket != STANDBY_BUCKET_RARE) {
-                synchronized (mLock) {
+                synchronized (mSettingsLock) {
                     final int index = mActiveUids.indexOfKey(uid, pkgName);
                     if (index >= 0) {
                         mActiveUids.add(uid, pkgName, null);
@@ -1340,7 +1450,7 @@ public final class AppRestrictionController {
     private void dispatchAutoRestrictedBucketFeatureFlagChanged(boolean newValue) {
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         final ArrayList<Runnable> pendingTasks = new ArrayList<>();
-        synchronized (mLock) {
+        synchronized (mSettingsLock) {
             mRestrictionSettings.forEachUidLocked(uid -> {
                 mRestrictionSettings.forEachPackageInUidLocked(uid, (pkgName, level, reason) -> {
                     if (level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
@@ -1434,6 +1544,7 @@ public final class AppRestrictionController {
         private final NotificationManager mNotificationManager;
         private final Injector mInjector;
         private final Object mLock;
+        private final Object mSettingsLock;
         private final Context mContext;
 
         private final BroadcastReceiver mActionButtonReceiver = new BroadcastReceiver() {
@@ -1454,7 +1565,7 @@ public final class AppRestrictionController {
             }
         };
 
-        @GuardedBy("mLock")
+        @GuardedBy("mSettingsLock")
         private int mNotificationIDStepper = SUMMARY_NOTIFICATION_ID + 1;
 
         NotificationHelper(AppRestrictionController controller) {
@@ -1462,6 +1573,7 @@ public final class AppRestrictionController {
             mInjector = controller.mInjector;
             mNotificationManager = mInjector.getNotificationManager();
             mLock = controller.mLock;
+            mSettingsLock = controller.mSettingsLock;
             mContext = mInjector.getContext();
         }
 
@@ -1540,7 +1652,7 @@ public final class AppRestrictionController {
 
         int getNotificationIdIfNecessary(@NotificationType int notificationType,
                 String packageName, int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
                 if (settings == null) {
@@ -1644,7 +1756,7 @@ public final class AppRestrictionController {
         }
 
         void cancelRequestBgRestrictedIfNecessary(String packageName, int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
                 if (settings != null) {
@@ -1658,7 +1770,7 @@ public final class AppRestrictionController {
         }
 
         void cancelLongRunningFGSNotificationIfNecessary(String packageName, int uid) {
-            synchronized (mLock) {
+            synchronized (mSettingsLock) {
                 final RestrictionSettings.PkgSettings settings = mBgController.mRestrictionSettings
                         .getRestrictionSettingsLocked(uid, packageName);
                 if (settings != null) {
@@ -1674,7 +1786,7 @@ public final class AppRestrictionController {
 
     void handleUidInactive(int uid, boolean disabled) {
         final ArrayList<Runnable> pendingTasks = mTmpRunnables;
-        synchronized (mLock) {
+        synchronized (mSettingsLock) {
             final int index = mActiveUids.indexOfKey(uid);
             if (index < 0) {
                 return;
@@ -1695,7 +1807,7 @@ public final class AppRestrictionController {
     }
 
     void handleUidActive(int uid) {
-        synchronized (mLock) {
+        synchronized (mSettingsLock) {
             final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
             final int userId = UserHandle.getUserId(uid);
             mRestrictionSettings.forEachPackageInUidLocked(uid, (pkgName, level, reason) -> {
@@ -2147,102 +2259,26 @@ public final class AppRestrictionController {
     }
 
     private void registerForSystemBroadcasts() {
-        final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                switch (intent.getAction()) {
-                    case Intent.ACTION_PACKAGE_ADDED: {
-                        if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                            if (uid >= 0) {
-                                onUidAdded(uid);
-                            }
-                        }
-                    }
-                    // fall through.
-                    case Intent.ACTION_PACKAGE_CHANGED: {
-                        final String pkgName = intent.getData().getSchemeSpecificPart();
-                        final String[] cmpList = intent.getStringArrayExtra(
-                                Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-                        // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
-                        // enable/disable event (cmpList is just the package name itself), drop
-                        // our carrier privileged app & system-app caches and let them refresh
-                        if (cmpList == null
-                                || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
-                            clearCarrierPrivilegedApps();
-                        }
-                    } break;
-                    case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
-                        final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                        final Uri data = intent.getData();
-                        String ssp;
-                        if (uid >= 0 && data != null
-                                && (ssp = data.getSchemeSpecificPart()) != null) {
-                            onPackageRemoved(ssp, uid);
-                        }
-                    } break;
-                    case Intent.ACTION_UID_REMOVED: {
-                        if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-                            if (uid >= 0) {
-                                onUidRemoved(uid);
-                            }
-                        }
-                    } break;
-                    case Intent.ACTION_USER_ADDED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserAdded(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_STARTED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserStarted(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_STOPPED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserStopped(userId);
-                        }
-                    } break;
-                    case Intent.ACTION_USER_REMOVED: {
-                        final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                        if (userId >= 0) {
-                            onUserRemoved(userId);
-                        }
-                    } break;
-                }
-            }
-        };
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         packageFilter.addDataScheme("package");
-        mContext.registerReceiverForAllUsers(broadcastReceiver, packageFilter, null, mBgHandler);
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, packageFilter, null, mBgHandler);
         final IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         userFilter.addAction(Intent.ACTION_UID_REMOVED);
-        mContext.registerReceiverForAllUsers(broadcastReceiver, userFilter, null, mBgHandler);
-        final BroadcastReceiver bootReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                switch (intent.getAction()) {
-                    case Intent.ACTION_LOCKED_BOOT_COMPLETED: {
-                        onLockedBootCompleted();
-                    } break;
-                }
-            }
-        };
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, userFilter, null, mBgHandler);
         final IntentFilter bootFilter = new IntentFilter();
         bootFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
-        mContext.registerReceiverAsUser(bootReceiver, UserHandle.SYSTEM,
+        mContext.registerReceiverAsUser(mBootReceiver, UserHandle.SYSTEM,
                 bootFilter, null, mBgHandler);
+    }
+
+    private void unregisterForSystemBroadcasts() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mBootReceiver);
     }
 
     void forEachTracker(Consumer<BaseAppStateTracker> sink) {

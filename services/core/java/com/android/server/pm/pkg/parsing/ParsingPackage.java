@@ -290,6 +290,9 @@ public interface ParsingPackage extends ParsingPackageRead {
     /** @see R#styleable.AndroidManifest_inheritKeyStoreKeys */
     ParsingPackage setInheritKeyStoreKeys(boolean inheritKeyStoreKeys);
 
+    /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
+    ParsingPackage setLeavingSharedUid(boolean leavingSharedUid);
+
     ParsingPackage setLabelRes(int labelRes);
 
     ParsingPackage setLargestWidthLimitDp(int largestWidthLimitDp);

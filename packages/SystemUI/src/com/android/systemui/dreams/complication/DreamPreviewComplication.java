@@ -20,6 +20,8 @@ import static com.android.systemui.dreams.complication.dagger.DreamPreviewCompli
 import static com.android.systemui.dreams.complication.dagger.DreamPreviewComplicationComponent.DreamPreviewComplicationModule.DREAM_PREVIEW_COMPLICATION_LAYOUT_PARAMS;
 import static com.android.systemui.dreams.complication.dagger.DreamPreviewComplicationComponent.DreamPreviewComplicationModule.DREAM_PREVIEW_COMPLICATION_VIEW;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -85,6 +87,11 @@ public class DreamPreviewComplication implements Complication {
 
             if (!TextUtils.isEmpty(dreamLabel)) {
                 mView.setText(dreamLabel);
+            }
+            for (Drawable drawable : mView.getCompoundDrawablesRelative()) {
+                if (drawable instanceof BitmapDrawable) {
+                    drawable.setAutoMirrored(true);
+                }
             }
         }
 

@@ -50,6 +50,7 @@ import com.android.systemui.util.ViewController
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * Manages [FooterActionsView] behaviour, both when it's placed in QS or QQS (split shade).
@@ -69,13 +70,15 @@ internal class FooterActionsController @Inject constructor(
     private val fgsManagerFooterController: QSFgsManagerFooter,
     private val falsingManager: FalsingManager,
     private val metricsLogger: MetricsLogger,
-    private val globalActionsDialog: GlobalActionsDialogLite,
+    private val globalActionsDialogProvider: Provider<GlobalActionsDialogLite>,
     private val uiEventLogger: UiEventLogger,
     @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
     private val globalSetting: GlobalSettings,
     private val handler: Handler,
     private val featureFlags: FeatureFlags
 ) : ViewController<FooterActionsView>(view) {
+
+    private var globalActionsDialog: GlobalActionsDialogLite? = null
 
     private var lastExpansion = -1f
     private var listening: Boolean = false
@@ -131,7 +134,7 @@ internal class FooterActionsController @Inject constructor(
             startSettingsActivity()
         } else if (v === powerMenuLite) {
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
-            globalActionsDialog.showOrHideDialog(false, true, v)
+            globalActionsDialog?.showOrHideDialog(false, true, v)
         }
     }
 
@@ -158,6 +161,7 @@ internal class FooterActionsController @Inject constructor(
 
     @VisibleForTesting
     public override fun onViewAttached() {
+        globalActionsDialog = globalActionsDialogProvider.get()
         if (showPMLiteButton) {
             powerMenuLite.visibility = View.VISIBLE
             powerMenuLite.setOnClickListener(onClickListener)
@@ -215,6 +219,8 @@ internal class FooterActionsController @Inject constructor(
     }
 
     override fun onViewDetached() {
+        globalActionsDialog?.destroy()
+        globalActionsDialog = null
         setListening(false)
         multiUserSetting.isListening = false
     }

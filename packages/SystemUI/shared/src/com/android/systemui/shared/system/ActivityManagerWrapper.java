@@ -262,7 +262,6 @@ public class ActivityManagerWrapper {
      * Starts a task from Recents synchronously.
      */
     public boolean startActivityFromRecents(Task.TaskKey taskKey, ActivityOptions options) {
-        ActivityOptionsCompat.addTaskInfo(options, taskKey);
         return startActivityFromRecents(taskKey.id, options);
     }
 

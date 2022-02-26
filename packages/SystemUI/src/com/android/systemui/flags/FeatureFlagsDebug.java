@@ -317,6 +317,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
                 // Store SysProp flags in SystemProperties where they can read by outside parties.
                 mSystemProperties.setBoolean(
                         ((SysPropBooleanFlag) flag).getName(), (Boolean) value);
+                dispatchListenersAndMaybeRestart(flag.getId(),
+                        FeatureFlagsDebug.this::restartAndroid);
             } else if (flag instanceof StringFlag && value instanceof String) {
                 setFlagValue(id, (String) value, StringFlagSerializer.INSTANCE);
             } else if (flag instanceof ResourceStringFlag && value instanceof String) {

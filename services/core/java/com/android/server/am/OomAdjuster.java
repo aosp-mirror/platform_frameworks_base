@@ -1499,7 +1499,6 @@ public class OomAdjuster {
         int adj;
         int schedGroup;
         int procState;
-        int cachedAdjSeq;
         int capability = cycleReEval ? app.mState.getCurCapability() : 0;
 
         boolean foregroundActivities = false;

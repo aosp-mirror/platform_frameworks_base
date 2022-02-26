@@ -50,6 +50,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.util.PackageUtils;
 import android.util.Slog;
 
@@ -201,8 +202,10 @@ class AssociationRequestsProcessor {
             // requests at the same time.
             // If the application already has a pending association request, that PendingIntent
             // will be cancelled.
-            pendingIntent = PendingIntent.getActivity(mContext, /*requestCode */ packageUid, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
+            pendingIntent = PendingIntent.getActivityAsUser(
+                    mContext, /*requestCode */ packageUid, intent,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                    /* options= */ null, UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

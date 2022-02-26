@@ -7416,7 +7416,6 @@ public class Activity extends ContextThemeWrapper
                     } else {
                         mDumpableContainer.listDumpables(prefix, writer);
                     }
-                    mDumpableContainer.listDumpables(prefix, writer);
                     return;
                 case DUMP_ARG_DUMP_DUMPABLE:
                     if (args.length == 1) {

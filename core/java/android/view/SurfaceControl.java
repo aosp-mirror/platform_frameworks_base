@@ -248,6 +248,7 @@ public final class SurfaceControl implements Parcelable {
 
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
+    private static native void nativeRemoveCurrentInputFocus(long nativeObject, int displayId);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
             String windowName, IBinder focusedToken, String focusedWindowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
@@ -264,6 +265,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
     private static native void nativeSanitize(long transactionObject);
+    private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
+            int l, int t, int r, int b);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -3657,6 +3660,17 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Removes the input focus from the current window which is having the input focus. Should
+         * only be called when the current focused app is not responding and the current focused
+         * window is not beloged to the current focused app.
+         * @hide
+         */
+        public Transaction removeCurrentInputFocus(int displayId) {
+            nativeRemoveCurrentInputFocus(mNativeObject, displayId);
+            return this;
+        }
+
+        /**
          * Adds or removes the flag SKIP_SCREENSHOT of the surface.  Setting the flag is equivalent
          * to creating the Surface with the {@link #SKIP_SCREENSHOT} flag.
          *
@@ -3835,6 +3849,26 @@ public final class SurfaceControl implements Parcelable {
          */
         public void sanitize() {
             nativeSanitize(mNativeObject);
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setDesintationFrame(SurfaceControl sc, @NonNull Rect destinationFrame) {
+            checkPreconditions(sc);
+            nativeSetDestinationFrame(mNativeObject, sc.mNativeObject,
+                    destinationFrame.left, destinationFrame.top, destinationFrame.right,
+                    destinationFrame.bottom);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setDesintationFrame(SurfaceControl sc, int width, int height) {
+            checkPreconditions(sc);
+            nativeSetDestinationFrame(mNativeObject, sc.mNativeObject, 0, 0, width, height);
+            return this;
         }
 
         /**
