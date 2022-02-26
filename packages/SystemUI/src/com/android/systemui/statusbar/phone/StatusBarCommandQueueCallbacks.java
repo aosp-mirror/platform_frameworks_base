@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -78,7 +77,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -114,7 +112,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             ShadeController shadeController,
             CommandQueue commandQueue,
             NotificationPanelViewController notificationPanelViewController,
-            Optional<LegacySplitScreen> splitScreenOptional,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             MetricsLogger metricsLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -141,7 +138,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mNotificationPanelViewController = notificationPanelViewController;
-        mSplitScreenOptional = splitScreenOptional;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
         mMetricsLogger = metricsLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -240,16 +236,10 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void appTransitionCancelled(int displayId) {
-        if (displayId == mDisplayId) {
-            mSplitScreenOptional.ifPresent(LegacySplitScreen::onAppTransitionFinished);
-        }
     }
 
     @Override
     public void appTransitionFinished(int displayId) {
-        if (displayId == mDisplayId) {
-            mSplitScreenOptional.ifPresent(LegacySplitScreen::onAppTransitionFinished);
-        }
     }
 
     @Override
@@ -554,11 +544,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         } else {
             animateExpandNotificationsPanel();
         }
-    }
-
-    @Override
-    public void toggleSplitScreen() {
-        mStatusBar.toggleSplitScreenMode(-1 /* metricsDockAction */, -1 /* metricsUndockAction */);
     }
 
     private boolean isGoingToSleep() {

@@ -5624,27 +5624,33 @@ public class AudioManager {
      * Note that the information may be imprecise when the implementation
      * cannot distinguish whether a particular device is enabled.
      *
-     * {@hide}
+     * @deprecated on {@link android.os.Build.VERSION_CODES#T} as new devices
+     *             will have multi-bit device types.
+     *             Prefer to use {@link #getDevicesForAttributes()} instead,
+     *             noting that getDevicesForStream() has a few small discrepancies
+     *             for better volume handling.
+     * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int getDevicesForStream(int streamType) {
         switch (streamType) {
-        case STREAM_VOICE_CALL:
-        case STREAM_SYSTEM:
-        case STREAM_RING:
-        case STREAM_MUSIC:
-        case STREAM_ALARM:
-        case STREAM_NOTIFICATION:
-        case STREAM_DTMF:
-        case STREAM_ACCESSIBILITY:
-            final IAudioService service = getService();
-            try {
-                return service.getDevicesForStream(streamType);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        default:
-            return 0;
+            case STREAM_VOICE_CALL:
+            case STREAM_SYSTEM:
+            case STREAM_RING:
+            case STREAM_MUSIC:
+            case STREAM_ALARM:
+            case STREAM_NOTIFICATION:
+            case STREAM_DTMF:
+            case STREAM_ACCESSIBILITY:
+                final IAudioService service = getService();
+                try {
+                    return service.getDeviceMaskForStream(streamType);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            default:
+                return 0;
         }
     }
 

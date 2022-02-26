@@ -33,8 +33,8 @@ class TapGestureDetector @Inject constructor(
 ) : GenericGestureDetector(TapGestureDetector::class.simpleName!!) {
 
     private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            onGestureDetected()
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            onGestureDetected(e)
             return true
         }
     }

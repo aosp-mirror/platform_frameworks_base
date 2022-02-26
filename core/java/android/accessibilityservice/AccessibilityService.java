@@ -825,17 +825,7 @@ public abstract class AccessibilityService extends Service {
             for (int i = 0; i < mMagnificationControllers.size(); i++) {
                 mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
             }
-            AccessibilityServiceInfo info = getServiceInfo();
-            if (info != null) {
-                boolean requestIme = (info.flags
-                        & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
-                if (requestIme && !mInputMethodInitialized) {
-                    mInputMethod = onCreateInputMethod();
-                    mInputMethodInitialized = true;
-                }
-            } else {
-                Log.e(LOG_TAG, "AccessibilityServiceInfo is null in dispatchServiceConnected");
-            }
+            updateInputMethod(getServiceInfo());
         }
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.onServiceConnected();
@@ -844,6 +834,20 @@ public abstract class AccessibilityService extends Service {
         // The client gets to handle service connection last, after we've set
         // up any state upon which their code may rely.
         onServiceConnected();
+    }
+
+    private void updateInputMethod(AccessibilityServiceInfo info) {
+        if (info != null) {
+            boolean requestIme = (info.flags
+                    & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
+            if (requestIme && !mInputMethodInitialized) {
+                mInputMethod = onCreateInputMethod();
+                mInputMethodInitialized = true;
+            } else if (!requestIme & mInputMethodInitialized) {
+                mInputMethod = null;
+                mInputMethodInitialized = false;
+            }
+        }
     }
 
     /**
@@ -2521,6 +2525,7 @@ public abstract class AccessibilityService extends Service {
      */
     public final void setServiceInfo(AccessibilityServiceInfo info) {
         mInfo = info;
+        updateInputMethod(info);
         sendServiceInfo();
     }
 

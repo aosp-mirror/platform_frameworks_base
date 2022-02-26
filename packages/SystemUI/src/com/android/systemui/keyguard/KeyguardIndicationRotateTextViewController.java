@@ -35,8 +35,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,7 @@ public class KeyguardIndicationRotateTextViewController extends
     @Nullable private ShowNextIndication mShowNextIndicationRunnable;
 
     // List of indication types to show. The next indication to show is always at index 0
-    private final List<Integer> mIndicationQueue = new LinkedList<>();
+    private final List<Integer> mIndicationQueue = new ArrayList<>();
     private @IndicationType int mCurrIndicationType = INDICATION_TYPE_NONE;
     private CharSequence mCurrMessage;
     private long mLastIndicationSwitch;

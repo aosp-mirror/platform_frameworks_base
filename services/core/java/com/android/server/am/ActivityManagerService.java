@@ -9155,10 +9155,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mComponentAliasResolver.dump(pw);
         }
-        if (dumpAll) {
-            pw.println("-------------------------------------------------------------------------------");
-            mAppRestrictionController.dump(pw, "");
-        }
+    }
+
+    /**
+     * Dump the app restriction controller, it's required not to hold the global lock here.
+     */
+    private void dumpAppRestrictionController(PrintWriter pw) {
+        pw.println("-------------------------------------------------------------------------------");
+        mAppRestrictionController.dump(pw, "");
     }
 
     /**
@@ -9513,6 +9517,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
                             dumpNormalPriority, dumpAppId, false /* dumpProxies */);
                 }
+            }
+            if (dumpAll) {
+                dumpAppRestrictionController(pw);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -14332,7 +14339,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             int match = mContext.getPackageManager().checkSignatures(
                     ii.targetPackage, ii.packageName);
             if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
-                if (Build.IS_DEBUGGABLE && (flags & INSTR_FLAG_ALWAYS_CHECK_SIGNATURE) == 0) {
+                if (Build.IS_DEBUGGABLE && (callingUid == Process.ROOT_UID)
+                        && (flags & INSTR_FLAG_ALWAYS_CHECK_SIGNATURE) == 0) {
                     Slog.w(TAG, "Instrumentation test " + ii.packageName
                             + " doesn't have a signature matching the target " + ii.targetPackage
                             + ", which would not be allowed on the production Android builds");

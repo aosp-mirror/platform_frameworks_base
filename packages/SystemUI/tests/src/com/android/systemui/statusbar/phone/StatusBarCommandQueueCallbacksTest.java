@@ -45,7 +45,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +62,6 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
-    @Mock private LegacySplitScreen mLegacySplitScreen;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -96,7 +94,6 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
                 mShadeController,
                 mCommandQueue,
                 mNotificationPanelViewController,
-                Optional.of(mLegacySplitScreen),
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,
                 mKeyguardUpdateMonitor,

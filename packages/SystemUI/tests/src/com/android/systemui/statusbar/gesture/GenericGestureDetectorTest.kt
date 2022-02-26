@@ -111,7 +111,7 @@ class GenericGestureDetectorTest : SysuiTestCase() {
 
         override fun onInputEvent(ev: InputEvent) {
             if (ev is MotionEvent && ev.x == CORRECT_X) {
-                onGestureDetected()
+                onGestureDetected(ev)
             }
         }
 

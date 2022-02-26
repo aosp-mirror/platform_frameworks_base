@@ -80,7 +80,7 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
                 ) {
                     monitoringCurrentTouch = false
                     logger.logGestureDetected(ev.y.toInt())
-                    onGestureDetected()
+                    onGestureDetected(ev)
                 }
             }
             ACTION_CANCEL, ACTION_UP -> {

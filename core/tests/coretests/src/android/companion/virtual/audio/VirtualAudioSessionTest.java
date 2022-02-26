@@ -22,6 +22,7 @@ import static android.media.AudioFormat.ENCODING_PCM_16BIT;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertThrows;
 
@@ -168,7 +169,7 @@ public class VirtualAudioSessionTest {
 
         mVirtualAudioSession.onPlaybackConfigChanged(configs);
 
-        verify(mCallback).onPlaybackConfigChanged(configs);
+        verify(mCallback, timeout(2000)).onPlaybackConfigChanged(configs);
     }
 
     @Test
@@ -177,6 +178,6 @@ public class VirtualAudioSessionTest {
 
         mVirtualAudioSession.onRecordingConfigChanged(configs);
 
-        verify(mCallback).onRecordingConfigChanged(configs);
+        verify(mCallback, timeout(2000)).onRecordingConfigChanged(configs);
     }
 }

@@ -22,6 +22,7 @@ import android.os.Looper
 import android.view.Choreographer
 import android.view.Display
 import android.view.InputEvent
+import android.view.MotionEvent
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.shared.system.InputMonitorCompat
 
@@ -43,13 +44,17 @@ abstract class GenericGestureDetector(
      * Active callbacks, each associated with a tag. Gestures will only be monitored if
      * [callbacks.size] > 0.
      */
-    private val callbacks: MutableMap<String, () -> Unit> = mutableMapOf()
+    private val callbacks: MutableMap<String, (MotionEvent) -> Unit> = mutableMapOf()
 
     private var inputMonitor: InputMonitorCompat? = null
     private var inputReceiver: InputChannelCompat.InputEventReceiver? = null
 
-    /** Adds a callback that will be triggered when the tap gesture is detected. */
-    fun addOnGestureDetectedCallback(tag: String, callback: () -> Unit) {
+    /**
+     * Adds a callback that will be triggered when the tap gesture is detected.
+     *
+     * The callback receive the last motion event in the gesture.
+     */
+    fun addOnGestureDetectedCallback(tag: String, callback: (MotionEvent) -> Unit) {
         val callbacksWasEmpty = callbacks.isEmpty()
         callbacks[tag] = callback
         if (callbacksWasEmpty) {
@@ -68,9 +73,12 @@ abstract class GenericGestureDetector(
     /** Triggered each time a touch event occurs (and at least one callback is registered). */
     abstract fun onInputEvent(ev: InputEvent)
 
-    /** Should be called by subclasses when their specific gesture is detected. */
-    internal fun onGestureDetected() {
-        callbacks.values.forEach { it.invoke() }
+    /**
+     * Should be called by subclasses when their specific gesture is detected with the last motion
+     * event in the gesture.
+     */
+    internal fun onGestureDetected(e: MotionEvent) {
+        callbacks.values.forEach { it.invoke(e) }
     }
 
     /** Start listening to touch events. */

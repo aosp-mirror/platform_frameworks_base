@@ -29,14 +29,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.autofill.AutofillManager;
 
-import com.android.internal.annotations.GuardedBy;
-
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -74,12 +72,8 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     @UnsupportedAppUsage
     public LoadedApk mLoadedApk;
 
-    @GuardedBy("sInstances")
-    private static final ArrayMap<Class<?>, Application> sInstances =
-            DEBUG_DUP_APP_INSTANCES ? new ArrayMap<>(1) : null;
-
-    // Only set when DEBUG_DUP_APP_INSTANCES is true.
-    private StackTrace mConstructorStackTrace;
+    private static final AtomicReference<StackTrace> sConstructorStackTrace =
+            new AtomicReference<>();
 
     public interface ActivityLifecycleCallbacks {
 
@@ -252,28 +246,20 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     }
 
     private void checkDuplicateInstances() {
-        final Class<?> myClass = this.getClass();
-
-        // We only activate this check for custom application classes.
-        // Otherwise, it'd misfire if multiple apps share the same process, if all of them use
-        // the same Application class (on the same classloader).
-        if (myClass == Application.class) {
+        // STOPSHIP: Delete this check b/221248960
+        // Only run this check for gms-core.
+        if (!"com.google.android.gms".equals(ActivityThread.currentOpPackageName())) {
             return;
         }
-        synchronized (sInstances) {
-            final Application firstInstance = sInstances.get(myClass);
-            if (firstInstance == null) {
-                this.mConstructorStackTrace = new StackTrace("First ctor was called here");
-                sInstances.put(myClass, this);
-                return;
-            }
-            final StackTrace currentStackTrace = new StackTrace("Current ctor was called here",
-                    firstInstance.mConstructorStackTrace);
-            this.mConstructorStackTrace = currentStackTrace;
-            Slog.wtf(TAG, "Application ctor called twice for " + myClass
-                    + " first LoadedApk=" + firstInstance.getLoadedApkInfo(),
-                    currentStackTrace);
+
+        final StackTrace previousStackTrace = sConstructorStackTrace.getAndSet(
+                new StackTrace("Previous stack trace"));
+        if (previousStackTrace == null) {
+            // This is the first call.
+            return;
         }
+        Slog.wtf(TAG, "Application ctor called twice for " + this.getClass(),
+                new StackTrace("Current stack trace", previousStackTrace));
     }
 
     private String getLoadedApkInfo() {

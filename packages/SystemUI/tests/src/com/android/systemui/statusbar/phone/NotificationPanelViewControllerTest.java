@@ -904,6 +904,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void testSwitchesToCorrectClockInSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
+        clearInvocations(mKeyguardStatusViewController);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         triggerPositionClockAndNotifications();
@@ -918,11 +919,56 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHasNotifications_switchesToLargeClockWhenEnteringSplitShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+
+        enableSplitShade(/* enabled= */ true);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+    }
+
+    @Test
+    public void testNoNotifications_switchesToLargeClockWhenEnteringSplitShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+
+        enableSplitShade(/* enabled= */ true);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+    }
+
+    @Test
+    public void testHasNotifications_switchesToSmallClockWhenExitingSplitShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+        clearInvocations(mKeyguardStatusViewController);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+
+        enableSplitShade(/* enabled= */ false);
+
+        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
+    }
+
+    @Test
+    public void testNoNotifications_switchesToLargeClockWhenExitingSplitShade() {
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+        clearInvocations(mKeyguardStatusViewController);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+
+        enableSplitShade(/* enabled= */ false);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
+    }
+
+    @Test
     public void testSwitchesToBigClockInSplitShadeOnAod() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        clearInvocations(mKeyguardStatusViewController);
 
         mNotificationPanelViewController.setDozing(true, false, null);
 
@@ -934,6 +980,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
+        clearInvocations(mKeyguardStatusViewController);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
 
@@ -946,6 +993,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
+        clearInvocations(mKeyguardStatusViewController);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
 
         // one notification + media player visible

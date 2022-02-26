@@ -2824,11 +2824,14 @@ package android.companion.virtual {
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public java.util.Set<android.content.ComponentName> getAllowedActivities();
-    method @Nullable public java.util.Set<android.content.ComponentName> getBlockedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getAllowedActivities();
+    method @NonNull public java.util.Set<android.content.ComponentName> getBlockedActivities();
+    method public int getDefaultActivityPolicy();
     method public int getLockState();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTIVITY_POLICY_DEFAULT_ALLOWED = 0; // 0x0
+    field public static final int ACTIVITY_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
     field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
     field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
@@ -2837,8 +2840,8 @@ package android.companion.virtual {
   public static final class VirtualDeviceParams.Builder {
     ctor public VirtualDeviceParams.Builder();
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@Nullable java.util.Set<android.content.ComponentName>);
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@Nullable java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@NonNull java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
   }
@@ -3036,6 +3039,7 @@ package android.content {
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
     field public static final String ACTION_USER_SWITCHED = "android.intent.action.USER_SWITCHED";
     field @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES) public static final String ACTION_VIEW_APP_FEATURES = "android.intent.action.VIEW_APP_FEATURES";
+    field @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public static final String ACTION_VIEW_SAFETY_CENTER_QS = "android.intent.action.VIEW_SAFETY_CENTER_QS";
     field public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
     field public static final String EXTRA_CALLING_PACKAGE = "android.intent.extra.CALLING_PACKAGE";
@@ -5909,16 +5913,16 @@ package android.location {
     method @IntRange(from=0, to=1023) public int getIssueOfDataClock();
     method @IntRange(from=0, to=255) public int getIssueOfDataEphemeris();
     method @Nullable public android.location.SatellitePvt.PositionEcef getPositionEcef();
-    method @IntRange(from=0) public long getTimeOfClock();
-    method @IntRange(from=0) public long getTimeOfEphemeris();
+    method @IntRange(from=0) public long getTimeOfClockSeconds();
+    method @IntRange(from=0) public long getTimeOfEphemerisSeconds();
     method @FloatRange public double getTropoDelayMeters();
     method @Nullable public android.location.SatellitePvt.VelocityEcef getVelocityEcef();
     method public boolean hasIono();
     method public boolean hasIssueOfDataClock();
     method public boolean hasIssueOfDataEphemeris();
     method public boolean hasPositionVelocityClockInfo();
-    method public boolean hasTimeOfClock();
-    method public boolean hasTimeOfEphemeris();
+    method public boolean hasTimeOfClockSeconds();
+    method public boolean hasTimeOfEphemerisSeconds();
     method public boolean hasTropo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt> CREATOR;
@@ -5937,8 +5941,8 @@ package android.location {
     method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataClock(@IntRange(from=0, to=1023) int);
     method @NonNull public android.location.SatellitePvt.Builder setIssueOfDataEphemeris(@IntRange(from=0, to=255) int);
     method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
-    method @NonNull public android.location.SatellitePvt.Builder setTimeOfClock(@IntRange(from=0) long);
-    method @NonNull public android.location.SatellitePvt.Builder setTimeOfEphemeris(@IntRange(from=0) int);
+    method @NonNull public android.location.SatellitePvt.Builder setTimeOfClockSeconds(@IntRange(from=0) long);
+    method @NonNull public android.location.SatellitePvt.Builder setTimeOfEphemerisSeconds(@IntRange(from=0) long);
     method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange(from=0.0f, to=100.0f) double);
     method @NonNull public android.location.SatellitePvt.Builder setVelocityEcef(@NonNull android.location.SatellitePvt.VelocityEcef);
   }
@@ -10319,6 +10323,7 @@ package android.provider {
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SCHEDULER = "scheduler";
+    field public static final String NAMESPACE_SDK_SANDBOX = "sdk_sandbox";
     field public static final String NAMESPACE_STATSD_JAVA = "statsd_java";
     field public static final String NAMESPACE_STATSD_JAVA_BOOT = "statsd_java_boot";
     field public static final String NAMESPACE_STATSD_NATIVE = "statsd_native";
@@ -10867,10 +10872,11 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionResult.Builder {
-    ctor public AmbientContextDetectionResult.Builder();
+    ctor public AmbientContextDetectionResult.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvents(@NonNull java.util.List<android.app.ambientcontext.AmbientContextEvent>);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder setPackageName(@NonNull String);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder clearEvents();
   }
 
   public abstract class AmbientContextDetectionService extends android.app.Service {
@@ -10891,9 +10897,8 @@ package android.service.ambientcontext {
   }
 
   public static final class AmbientContextDetectionServiceStatus.Builder {
-    ctor public AmbientContextDetectionServiceStatus.Builder();
+    ctor public AmbientContextDetectionServiceStatus.Builder(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus build();
-    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setPackageName(@NonNull String);
     method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setStatusCode(int);
   }
 

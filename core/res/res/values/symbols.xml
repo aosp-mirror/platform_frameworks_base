@@ -1291,6 +1291,7 @@
   <java-symbol type="array" name="vendor_required_apps_managed_profile" />
   <java-symbol type="array" name="vendor_required_apps_managed_device" />
   <java-symbol type="array" name="vendor_required_attestation_certificates" />
+  <java-symbol type="string" name="vendor_required_attestation_revocation_list_url" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_user" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_profile" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_device" />
@@ -3674,7 +3675,7 @@
   <java-symbol type="string" name="notification_channel_network_status" />
   <java-symbol type="string" name="notification_channel_network_alerts" />
   <java-symbol type="string" name="notification_channel_network_available" />
-  <java-symbol type="string" name="config_defaultCloudSearchService" />
+  <java-symbol type="array" name="config_defaultCloudSearchServices" />
   <java-symbol type="string" name="notification_channel_vpn" />
   <java-symbol type="string" name="notification_channel_device_admin" />
   <java-symbol type="string" name="notification_channel_alerts" />

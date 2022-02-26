@@ -2054,7 +2054,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
 
     /**
-     * Activity action: Launch the Safety Hub UI.
+     * Activity action: Launch the Safety Center Quick Settings UI.
      *
      * <p>
      * Input: Nothing.
@@ -2062,11 +2062,14 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * Output: Nothing.
      * </p>
+     *
+     * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public static final String ACTION_VIEW_SAFETY_HUB =
-            "android.intent.action.VIEW_SAFETY_HUB";
+    public static final String ACTION_VIEW_SAFETY_CENTER_QS =
+            "android.intent.action.VIEW_SAFETY_CENTER_QS";
 
     /**
      * Activity action: Launch UI to manage a default app.

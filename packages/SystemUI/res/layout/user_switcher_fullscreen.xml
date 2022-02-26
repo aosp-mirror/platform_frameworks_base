@@ -55,16 +55,17 @@
 
   <TextView
       android:id="@+id/add"
-      android:visibility="gone"
+      style="@style/Widget.Dialog.Button.BorderButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:gravity="center"
-      app:layout_constraintHeight_min="48dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
       android:paddingHorizontal="@dimen/user_switcher_fullscreen_button_padding"
-      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:text="@string/add"
       android:textColor="?androidprv:attr/colorAccentPrimary"
-      android:text="@string/add" />
+      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHeight_min="48dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
