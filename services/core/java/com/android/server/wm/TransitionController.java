@@ -282,21 +282,6 @@ class TransitionController {
         return false;
     }
 
-    /**
-     * Temporary work-around to deal with integration of legacy fixed-rotation. Returns whether
-     * the activity was visible before the collecting transition.
-     * TODO: at-least replace the polling mechanism.
-     */
-    boolean wasVisibleAtStart(@NonNull ActivityRecord ar) {
-        if (mCollectingTransition == null) return ar.isVisible();
-        final Transition.ChangeInfo ci = mCollectingTransition.mChanges.get(ar);
-        if (ci == null) {
-            // not part of transition, so use current state.
-            return ar.isVisible();
-        }
-        return ci.mVisible;
-    }
-
     @WindowConfiguration.WindowingMode
     int getWindowingModeAtStart(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return wc.getWindowingMode();
@@ -520,10 +505,12 @@ class TransitionController {
     /**
      * Record that the launch of {@param activity} is transient (meaning its lifecycle is currently
      * tied to the transition).
+     * @param restoreBelowTask If non-null, the activity's task will be ordered right below this
+     *                         task if requested.
      */
-    void setTransientLaunch(@NonNull ActivityRecord activity) {
+    void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelowTask) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setTransientLaunch(activity);
+        mCollectingTransition.setTransientLaunch(activity, restoreBelowTask);
 
         // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
         // Also interpret HOME transient launch as recents

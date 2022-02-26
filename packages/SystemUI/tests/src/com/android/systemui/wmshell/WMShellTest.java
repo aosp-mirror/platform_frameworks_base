@@ -39,7 +39,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -72,7 +71,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
-    @Mock LegacySplitScreen mLegacySplitScreen;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock HideDisplayCutout mHideDisplayCutout;
@@ -88,7 +86,7 @@ public class WMShellTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mWMShell = new WMShell(mContext, Optional.of(mPip), Optional.of(mLegacySplitScreen),
+        mWMShell = new WMShell(mContext, Optional.of(mPip),
                 Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
                 Optional.of(mShellCommandHandler), Optional.of(mCompatUI),
                 Optional.of(mDragAndDrop),
@@ -102,13 +100,6 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initPip(mPip);
 
         verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
-    }
-
-    @Test
-    public void initLegacySplitScreen_registersCallbacks() {
-        mWMShell.initLegacySplitScreen(mLegacySplitScreen);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
     }
 
     @Test

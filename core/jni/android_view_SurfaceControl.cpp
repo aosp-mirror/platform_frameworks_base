@@ -62,6 +62,7 @@
 
 namespace android {
 
+using gui::CaptureArgs;
 using gui::FocusRequest;
 
 static void doThrowNPE(JNIEnv* env) {
@@ -961,6 +962,14 @@ static void nativeSanitize(JNIEnv* env, jclass clazz, jlong transactionObj) {
     transaction->sanitize();
 }
 
+static void nativeSetDestinationFrame(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                      jlong nativeObject, jint l, jint t, jint r, jint b) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    Rect crop(l, t, r, b);
+    transaction->setDestinationFrame(ctrl, crop);
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     jlongArray array = env->NewLongArray(displayIds.size());
@@ -1833,6 +1842,15 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return reinterpret_cast<jlong>(surfaceControl->getHandle().get());
 }
 
+static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                          jint displayId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    FocusRequest request;
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
+}
+
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
                                    jobject toTokenObj, jstring windowNameJstr,
                                    jobject focusedTokenObj, jstring focusedWindowNameJstr,
@@ -2167,6 +2185,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFixedTransformHint},
     {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
+    {"nativeRemoveCurrentInputFocus", "(JI)V",
+            (void*)nativeRemoveCurrentInputFocus},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
     {"nativeAddJankDataListener", "(JJ)V",
@@ -2190,7 +2210,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
     {"nativeSanitize", "(J)V",
-            (void*) nativeSanitize }
+            (void*) nativeSanitize },
+    {"nativeSetDestinationFrame", "(JJIIII)V",
+                (void*)nativeSetDestinationFrame },
         // clang-format on
 };
 

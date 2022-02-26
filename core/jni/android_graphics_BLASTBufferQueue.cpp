@@ -35,9 +35,10 @@ static struct {
     jmethodID ctor;
 } gTransactionClassInfo;
 
-static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName) {
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,
+                          jboolean updateDestinationFrame) {
     ScopedUtfChars name(env, jName);
-    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str());
+    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str(), updateDestinationFrame);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -62,11 +63,9 @@ static void nativeSetSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
-                         jlong height, jint format, jlong transactionPtr) {
+                         jlong height, jint format) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format,
-                  transaction);
+    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format);
 }
 
 static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlong transactionPtr,
@@ -102,11 +101,11 @@ static jobject nativeGatherPendingTransactions(JNIEnv* env, jclass clazz, jlong 
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
-        {"nativeCreate", "(Ljava/lang/String;)J", (void*)nativeCreate},
+        {"nativeCreate", "(Ljava/lang/String;Z)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetSyncTransaction", "(JJZ)V", (void*)nativeSetSyncTransaction},
-        {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
+        {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},

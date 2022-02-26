@@ -18,7 +18,6 @@ package com.android.systemui.dreams;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +48,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     private static final int DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT = 100;
     private static final int MAX_BURN_IN_OFFSET = 20;
     private static final long BURN_IN_PROTECTION_UPDATE_INTERVAL = 10;
+    private static final long MILLIS_UNTIL_FULL_JITTER = 240 * 1000;
 
     @Mock
     Resources mResources;
@@ -100,7 +100,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStatusBarViewController,
                 mHandler,
                 MAX_BURN_IN_OFFSET,
-                BURN_IN_PROTECTION_UPDATE_INTERVAL);
+                BURN_IN_PROTECTION_UPDATE_INTERVAL,
+                MILLIS_UNTIL_FULL_JITTER);
     }
 
     @Test
@@ -129,14 +130,14 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBurnInProtectionUpdatesPeriodically() {
+    public void testBurnInProtectionOffsetsStartAtZero() {
         ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         mController.onViewAttached();
         verify(mHandler).postDelayed(
                 runnableCaptor.capture(), eq(BURN_IN_PROTECTION_UPDATE_INTERVAL));
         runnableCaptor.getValue().run();
-        verify(mDreamOverlayContainerView).setTranslationX(anyFloat());
-        verify(mDreamOverlayContainerView).setTranslationY(anyFloat());
+        verify(mDreamOverlayContainerView).setTranslationX(0.f);
+        verify(mDreamOverlayContainerView).setTranslationY(0.f);
     }
 
     @Test

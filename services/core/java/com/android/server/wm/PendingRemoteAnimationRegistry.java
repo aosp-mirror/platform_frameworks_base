@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.ArrayMap;
 import android.view.RemoteAnimationAdapter;
 
@@ -43,8 +44,9 @@ class PendingRemoteAnimationRegistry {
     /**
      * Adds a remote animation to be run for all activity starts originating from a certain package.
      */
-    void addPendingAnimation(String packageName, RemoteAnimationAdapter adapter) {
-        mEntries.put(packageName, new Entry(packageName, adapter));
+    void addPendingAnimation(String packageName, RemoteAnimationAdapter adapter,
+            @Nullable IBinder launchCookie) {
+        mEntries.put(packageName, new Entry(packageName, adapter, launchCookie));
     }
 
     /**
@@ -62,6 +64,10 @@ class PendingRemoteAnimationRegistry {
         } else {
             options.setRemoteAnimationAdapter(entry.adapter);
         }
+        IBinder launchCookie = entry.launchCookie;
+        if (launchCookie != null) {
+            options.setLaunchCookie(launchCookie);
+        }
         mEntries.remove(callingPackage);
         return options;
     }
@@ -69,10 +75,13 @@ class PendingRemoteAnimationRegistry {
     private class Entry {
         final String packageName;
         final RemoteAnimationAdapter adapter;
+        @Nullable
+        final IBinder launchCookie;
 
-        Entry(String packageName, RemoteAnimationAdapter adapter) {
+        Entry(String packageName, RemoteAnimationAdapter adapter, @Nullable IBinder launchCookie) {
             this.packageName = packageName;
             this.adapter = adapter;
+            this.launchCookie = launchCookie;
             mHandler.postDelayed(() -> {
                 synchronized (mLock) {
                     final Entry entry = mEntries.get(packageName);

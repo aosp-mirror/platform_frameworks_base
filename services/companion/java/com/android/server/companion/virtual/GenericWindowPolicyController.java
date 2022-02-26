@@ -24,6 +24,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
+import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.VirtualDeviceParams.ActivityPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -77,7 +79,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @Nullable
     private final ArraySet<ComponentName> mBlockedActivities;
     private final Object mGenericWindowPolicyControllerLock = new Object();
-    private Consumer<ActivityInfo> mActivityBlockedCallback;
+    @ActivityPolicy
+    private final int mDefaultActivityPolicy;
+    private final Consumer<ActivityInfo> mActivityBlockedCallback;
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -95,18 +99,30 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      * @param windowFlags The window flags that this controller is interested in.
      * @param systemWindowFlags The system window flags that this controller is interested in.
      * @param allowedUsers The set of users that are allowed to stream in this display.
+     * @param allowedActivities The set of activities explicitly allowed to stream on this device.
+     *   Used only if the {@code activityPolicy} is
+     *   {@link VirtualDeviceParams#ACTIVITY_POLICY_DEFAULT_BLOCKED}.
+     * @param blockedActivities The set of activities explicitly blocked from streaming on this
+     *   device. Used only if the {@code activityPolicy} is
+     *   {@link VirtualDeviceParams#ACTIVITY_POLICY_DEFAULT_ALLOWED}
+     * @param defaultActivityPolicy Whether activities are default allowed to be displayed or
+     *   blocked.
      * @param activityListener Activity listener to listen for activity changes. The display ID
      *   is not populated in this callback and is always {@link Display#INVALID_DISPLAY}.
+     * @param activityBlockedCallback Callback that is called when an activity is blocked from
+     *   launching.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
-            @Nullable Set<ComponentName> allowedActivities,
-            @Nullable Set<ComponentName> blockedActivities,
+            @NonNull Set<ComponentName> allowedActivities,
+            @NonNull Set<ComponentName> blockedActivities,
+            @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
             @NonNull Consumer<ActivityInfo> activityBlockedCallback) {
         mAllowedUsers = allowedUsers;
-        mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
-        mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
+        mAllowedActivities = new ArraySet<>(allowedActivities);
+        mBlockedActivities = new ArraySet<>(blockedActivities);
+        mDefaultActivityPolicy = defaultActivityPolicy;
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
@@ -191,11 +207,13 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             Slog.d(TAG, "Virtual device activity not allowed from user " + activityUser);
             return false;
         }
-        if (mBlockedActivities != null && mBlockedActivities.contains(activityComponent)) {
+        if (mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED
+                && mBlockedActivities.contains(activityComponent)) {
             Slog.d(TAG, "Virtual device blocking launch of " + activityComponent);
             return false;
         }
-        if (mAllowedActivities != null && !mAllowedActivities.contains(activityComponent)) {
+        if (mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_BLOCKED
+                && !mAllowedActivities.contains(activityComponent)) {
             Slog.d(TAG, activityComponent + " is not in the allowed list.");
             return false;
         }

@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -198,7 +197,6 @@ public interface StatusBarDependenciesModule {
             KeyguardBypassController bypassController,
             Optional<Bubbles> bubblesOptional,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
             AssistantFeedbackController assistantFeedbackController,
@@ -217,7 +215,6 @@ public interface StatusBarDependenciesModule {
                 bypassController,
                 bubblesOptional,
                 privacyController,
-                fgsSectionController,
                 dynamicChildBindController,
                 lowPriorityInflationHelper,
                 assistantFeedbackController,
@@ -261,6 +258,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     @SysUISingleton
     static OngoingCallController provideOngoingCallController(
+            Context context,
             CommonNotifCollection notifCollection,
             SystemClock systemClock,
             ActivityStarter activityStarter,
@@ -284,6 +282,7 @@ public interface StatusBarDependenciesModule {
                         : Optional.empty();
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
+                        context,
                         notifCollection,
                         ongoingCallFlags,
                         systemClock,

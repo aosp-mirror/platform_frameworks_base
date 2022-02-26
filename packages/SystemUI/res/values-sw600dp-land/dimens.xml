@@ -42,4 +42,8 @@
          the shade (in alpha) -->
     <dimen name="lockscreen_shade_scrim_transition_distance">200dp</dimen>
 
+    <!-- Distance that the full shade transition takes in order for media to fully transition to
+     the shade -->
+    <dimen name="lockscreen_shade_media_transition_distance">200dp</dimen>
+
 </resources>

@@ -38,7 +38,6 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
@@ -128,7 +127,6 @@ public interface NotificationsModule {
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager) {
@@ -139,7 +137,6 @@ public interface NotificationsModule {
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
-                fgsFeatureController,
                 statusBarService,
                 notifLiveDataStore,
                 dumpManager);

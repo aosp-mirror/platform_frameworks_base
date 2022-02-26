@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,10 +59,8 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -80,15 +78,12 @@ public class InstantAppNotifier extends CoreStartable
     private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
-    private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor, Optional<LegacySplitScreen> splitScreenOptional) {
+            @UiBackground Executor uiBgExecutor) {
         super(context);
-        mSplitScreenOptional = splitScreenOptional;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
     }
@@ -106,12 +101,6 @@ public class InstantAppNotifier extends CoreStartable
 
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
-
-        mSplitScreenOptional.ifPresent(splitScreen ->
-                splitScreen.registerInSplitScreenListener(exists -> {
-                    mDockedStackExists = exists;
-                    updateForegroundInstantApps();
-                }));
 
         // Clear out all old notifications on startup (only present in the case where sysui dies)
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
@@ -169,13 +158,10 @@ public class InstantAppNotifier extends CoreStartable
                                     focusedTask.configuration.windowConfiguration
                                             .getWindowingMode();
                             if (windowingMode == WINDOWING_MODE_FULLSCREEN
-                                    || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                                    || windowingMode == WINDOWING_MODE_MULTI_WINDOW
                                     || windowingMode == WINDOWING_MODE_FREEFORM) {
                                 checkAndPostForStack(focusedTask, notifs, noMan, pm);
                             }
-                        }
-                        if (mDockedStackExists) {
-                            checkAndPostForPrimaryScreen(notifs, noMan, pm);
                         }
                     } catch (RemoteException e) {
                         e.rethrowFromSystemServer();

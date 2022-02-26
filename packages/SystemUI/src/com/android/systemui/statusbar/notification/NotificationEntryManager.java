@@ -111,7 +111,6 @@ public class NotificationEntryManager implements
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
     private final LeakDetector mLeakDetector;
-    private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
     private final IStatusBarService mStatusBarService;
     private final NotifLiveDataStoreImpl mNotifLiveDataStore;
     private final DumpManager mDumpManager;
@@ -159,7 +158,6 @@ public class NotificationEntryManager implements
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager
@@ -170,7 +168,6 @@ public class NotificationEntryManager implements
         mNotificationRowBinderLazy = notificationRowBinderLazy;
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
-        mFgsFeatureController = fgsFeatureController;
         mStatusBarService = statusBarService;
         mNotifLiveDataStore = notifLiveDataStore;
         mDumpManager = dumpManager;
