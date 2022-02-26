@@ -94,6 +94,8 @@ import com.android.systemui.wmshell.BubblesManager;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import javax.inject.Provider;
+
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
@@ -276,8 +278,8 @@ public interface NotificationsModule {
     @Provides
     static NotificationsController provideNotificationsController(
             Context context,
-            Lazy<NotificationsControllerImpl> realController,
-            Lazy<NotificationsControllerStub> stubController) {
+            Provider<NotificationsControllerImpl> realController,
+            Provider<NotificationsControllerStub> stubController) {
         if (context.getResources().getBoolean(R.bool.config_renderNotifications)) {
             return realController.get();
         } else {

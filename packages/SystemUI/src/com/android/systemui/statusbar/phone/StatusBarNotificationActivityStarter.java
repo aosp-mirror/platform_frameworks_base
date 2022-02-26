@@ -51,9 +51,6 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -75,6 +72,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
+import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wmshell.BubblesManager;
@@ -89,7 +87,8 @@ import dagger.Lazy;
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
  */
-public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
+@StatusBarComponent.StatusBarScope
+class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
     private final Context mContext;
 
@@ -132,7 +131,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
-    private StatusBarNotificationActivityStarter(
+    @Inject
+    StatusBarNotificationActivityStarter(
             Context context,
             CommandQueue commandQueue,
             Handler mainThreadHandler,
@@ -656,181 +656,5 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
 
         return entry.shouldSuppressFullScreenIntent();
-    }
-
-    // --------------------- NotificationEntryManager/NotifPipeline methods ------------------------
-
-    /**
-     * Public builder for {@link StatusBarNotificationActivityStarter}.
-     */
-    @SysUISingleton
-    public static class Builder {
-        private final Context mContext;
-        private final CommandQueue mCommandQueue;
-        private final Handler mMainThreadHandler;
-
-        private final Executor mUiBgExecutor;
-        private final NotificationEntryManager mEntryManager;
-        private final NotifPipeline mNotifPipeline;
-        private final NotificationVisibilityProvider mVisibilityProvider;
-        private final HeadsUpManagerPhone mHeadsUpManager;
-        private final ActivityStarter mActivityStarter;
-        private final NotificationClickNotifier mClickNotifier;
-        private final StatusBarStateController mStatusBarStateController;
-        private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-        private final KeyguardManager mKeyguardManager;
-        private final IDreamManager mDreamManager;
-        private final Optional<BubblesManager> mBubblesManagerOptional;
-        private final Lazy<AssistManager> mAssistManagerLazy;
-        private final NotificationRemoteInputManager mRemoteInputManager;
-        private final GroupMembershipManager mGroupMembershipManager;
-        private final NotificationLockscreenUserManager mLockscreenUserManager;
-        private final ShadeController mShadeController;
-        private final KeyguardStateController mKeyguardStateController;
-        private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
-        private final LockPatternUtils mLockPatternUtils;
-        private final StatusBarRemoteInputCallback mRemoteInputCallback;
-        private final ActivityIntentHelper mActivityIntentHelper;;
-        private final MetricsLogger mMetricsLogger;
-        private final StatusBarNotificationActivityStarterLogger mLogger;
-        private final OnUserInteractionCallback mOnUserInteractionCallback;
-        private final NotifPipelineFlags mNotifPipelineFlags;
-        private StatusBar mStatusBar;
-        private NotificationPresenter mNotificationPresenter;
-        private NotificationPanelViewController mNotificationPanelViewController;
-        private ActivityLaunchAnimator mActivityLaunchAnimator;
-        private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
-
-        @Inject
-        public Builder(
-                Context context,
-                CommandQueue commandQueue,
-                @Main Handler mainThreadHandler,
-                @UiBackground Executor uiBgExecutor,
-                NotificationEntryManager entryManager,
-                NotifPipeline notifPipeline,
-                NotificationVisibilityProvider visibilityProvider,
-                HeadsUpManagerPhone headsUpManager,
-                ActivityStarter activityStarter,
-                NotificationClickNotifier clickNotifier,
-                StatusBarStateController statusBarStateController,
-                StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-                KeyguardManager keyguardManager,
-                IDreamManager dreamManager,
-                Optional<BubblesManager> bubblesManager,
-                Lazy<AssistManager> assistManagerLazy,
-                NotificationRemoteInputManager remoteInputManager,
-                GroupMembershipManager groupMembershipManager,
-                NotificationLockscreenUserManager lockscreenUserManager,
-                ShadeController shadeController,
-                KeyguardStateController keyguardStateController,
-                NotificationInterruptStateProvider notificationInterruptStateProvider,
-                LockPatternUtils lockPatternUtils,
-                StatusBarRemoteInputCallback remoteInputCallback,
-                ActivityIntentHelper activityIntentHelper,
-                NotifPipelineFlags notifPipelineFlags,
-                MetricsLogger metricsLogger,
-                StatusBarNotificationActivityStarterLogger logger,
-                OnUserInteractionCallback onUserInteractionCallback) {
-
-            mContext = context;
-            mCommandQueue = commandQueue;
-            mMainThreadHandler = mainThreadHandler;
-            mUiBgExecutor = uiBgExecutor;
-            mEntryManager = entryManager;
-            mNotifPipeline = notifPipeline;
-            mVisibilityProvider = visibilityProvider;
-            mHeadsUpManager = headsUpManager;
-            mActivityStarter = activityStarter;
-            mClickNotifier = clickNotifier;
-            mStatusBarStateController = statusBarStateController;
-            mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-            mKeyguardManager = keyguardManager;
-            mDreamManager = dreamManager;
-            mBubblesManagerOptional = bubblesManager;
-            mAssistManagerLazy = assistManagerLazy;
-            mRemoteInputManager = remoteInputManager;
-            mGroupMembershipManager = groupMembershipManager;
-            mLockscreenUserManager = lockscreenUserManager;
-            mShadeController = shadeController;
-            mKeyguardStateController = keyguardStateController;
-            mNotificationInterruptStateProvider = notificationInterruptStateProvider;
-            mLockPatternUtils = lockPatternUtils;
-            mRemoteInputCallback = remoteInputCallback;
-            mActivityIntentHelper = activityIntentHelper;
-            mNotifPipelineFlags = notifPipelineFlags;
-            mMetricsLogger = metricsLogger;
-            mLogger = logger;
-            mOnUserInteractionCallback = onUserInteractionCallback;
-        }
-
-        /** Sets the status bar to use as {@link StatusBar}. */
-        public Builder setStatusBar(StatusBar statusBar) {
-            mStatusBar = statusBar;
-            return this;
-        }
-
-        public Builder setNotificationPresenter(NotificationPresenter notificationPresenter) {
-            mNotificationPresenter = notificationPresenter;
-            return this;
-        }
-
-        /** Set the ActivityLaunchAnimator. */
-        public Builder setActivityLaunchAnimator(ActivityLaunchAnimator activityLaunchAnimator) {
-            mActivityLaunchAnimator = activityLaunchAnimator;
-            return this;
-        }
-
-        /** Set the NotificationLaunchAnimatorControllerProvider. */
-        public Builder setNotificationAnimatorControllerProvider(
-                NotificationLaunchAnimatorControllerProvider notificationAnimationProvider) {
-            mNotificationAnimationProvider = notificationAnimationProvider;
-            return this;
-        }
-
-        /** Set the NotificationPanelViewController. */
-        public Builder setNotificationPanelViewController(
-                NotificationPanelViewController notificationPanelViewController) {
-            mNotificationPanelViewController = notificationPanelViewController;
-            return this;
-        }
-
-        public StatusBarNotificationActivityStarter build() {
-            return new StatusBarNotificationActivityStarter(
-                    mContext,
-                    mCommandQueue,
-                    mMainThreadHandler,
-                    mUiBgExecutor,
-                    mEntryManager,
-                    mNotifPipeline,
-                    mVisibilityProvider,
-                    mHeadsUpManager,
-                    mActivityStarter,
-                    mClickNotifier,
-                    mStatusBarStateController,
-                    mStatusBarKeyguardViewManager,
-                    mKeyguardManager,
-                    mDreamManager,
-                    mBubblesManagerOptional,
-                    mAssistManagerLazy,
-                    mRemoteInputManager,
-                    mGroupMembershipManager,
-                    mLockscreenUserManager,
-                    mShadeController,
-                    mKeyguardStateController,
-                    mNotificationInterruptStateProvider,
-                    mLockPatternUtils,
-                    mRemoteInputCallback,
-                    mActivityIntentHelper,
-                    mNotifPipelineFlags,
-                    mMetricsLogger,
-                    mLogger,
-                    mOnUserInteractionCallback,
-                    mStatusBar,
-                    mNotificationPresenter,
-                    mNotificationPanelViewController,
-                    mActivityLaunchAnimator,
-                    mNotificationAnimationProvider);
-        }
     }
 }
