@@ -26189,7 +26189,6 @@ package android.nfc.cardemulation {
     field public static final String CATEGORY_PAYMENT = "payment";
     field public static final String EXTRA_CATEGORY = "category";
     field public static final String EXTRA_SERVICE_COMPONENT = "component";
-    field public static final String EXTRA_USERID = "android.nfc.cardemulation.extra.USERID";
     field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
     field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
     field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
@@ -29424,7 +29423,7 @@ package android.os {
   public class BaseBundle {
     method public void clear();
     method public boolean containsKey(String);
-    method @Nullable public Object get(String);
+    method @Deprecated @Nullable public Object get(String);
     method public boolean getBoolean(String);
     method public boolean getBoolean(String, boolean);
     method @Nullable public boolean[] getBooleanArray(@Nullable String);
@@ -29665,16 +29664,21 @@ package android.os {
     method public float getFloat(String, float);
     method @Nullable public float[] getFloatArray(@Nullable String);
     method @Nullable public java.util.ArrayList<java.lang.Integer> getIntegerArrayList(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> T getParcelable(@Nullable String);
-    method @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
-    method @Nullable public java.io.Serializable getSerializable(@Nullable String);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> T getParcelable(@Nullable String);
+    method @Nullable public <T> T getParcelable(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
+    method @Nullable public <T> T[] getParcelableArray(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public java.io.Serializable getSerializable(@Nullable String);
+    method @Nullable public <T extends java.io.Serializable> T getSerializable(@Nullable String, @NonNull Class<T>);
     method public short getShort(String);
     method public short getShort(String, short);
     method @Nullable public short[] getShortArray(@Nullable String);
     method @Nullable public android.util.Size getSize(@Nullable String);
     method @Nullable public android.util.SizeF getSizeF(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
+    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<T>);
     method @Nullable public java.util.ArrayList<java.lang.String> getStringArrayList(@Nullable String);
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);
@@ -30297,7 +30301,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
-    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
+    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();

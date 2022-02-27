@@ -489,6 +489,20 @@ public class ApexManagerTest {
         assertThat(e).hasMessageThat().contains("Failed to collect certificates from ");
     }
 
+    @Test
+    public void testGetActivePackageNameForApexModuleName() throws Exception {
+        final String moduleName = "com.android.module_name";
+
+        ApexInfo[] apexInfo = createApexInfoForTestPkg(true, false);
+        apexInfo[0].moduleName = moduleName;
+        when(mApexService.getAllPackages()).thenReturn(apexInfo);
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        assertThat(mApexManager.getActivePackageNameForApexModuleName(moduleName))
+                .isEqualTo(TEST_APEX_PKG);
+    }
+
     private ApexInfo[] createApexInfoForTestPkg(boolean isActive, boolean isFactory) {
         File apexFile = extractResource(TEST_APEX_PKG,  TEST_APEX_FILE_NAME);
         ApexInfo apexInfo = new ApexInfo();
