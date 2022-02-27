@@ -68,20 +68,25 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
+import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.List;
 
-public class StatusBarNotificationPresenter implements NotificationPresenter,
+import javax.inject.Inject;
+
+@StatusBarComponent.StatusBarScope
+class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
         NotificationRowBinderImpl.BindRowCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "StatusBarNotificationPresenter";
 
-    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
+    private final ActivityStarter mActivityStarter;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
@@ -110,16 +115,19 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
+    private final NotificationListContainer mNotifListContainer;
     private boolean mReinflateNotificationsOnUserSwitched;
     private boolean mDispatchUiModeChangeOnUserSwitched;
     private TextView mNotificationPanelDebugText;
 
     protected boolean mVrMode;
 
-    public StatusBarNotificationPresenter(Context context,
+    @Inject
+    StatusBarNotificationPresenter(Context context,
             NotificationPanelViewController panel,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,
+            ActivityStarter activityStarter,
             NotificationStackScrollLayoutController stackScrollerController,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
@@ -144,7 +152,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationRemoteInputManager remoteInputManager,
             ConfigurationController configurationController,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            NotificationRemoteInputManager.Callback remoteInputManagerCallback,
+            NotificationListContainer notificationListContainer) {
+        mActivityStarter = activityStarter;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -175,6 +186,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mNotifListContainer = notificationListContainer;
 
         IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
@@ -186,14 +198,14 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             }
         }
         remoteInputManager.setUpWithCallback(
-                Dependency.get(NotificationRemoteInputManager.Callback.class),
+                remoteInputManagerCallback,
                 mNotificationPanel.createRemoteInputDelegate());
 
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
             mViewHierarchyManager.setUpWithPresenter(this,
                     stackScrollerController.getNotifStackController(),
-                    stackScrollerController.getNotificationListContainer());
+                    mNotifListContainer);
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
             if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
@@ -206,9 +218,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
-            mGutsManager.setUpWithPresenter(this,
-                    stackScrollerController.getNotificationListContainer(), mCheckSaveListener,
-                    mOnSettingsClickListener);
+            mGutsManager.setUpWithPresenter(
+                    this, mNotifListContainer, mCheckSaveListener, mOnSettingsClickListener);
             // ForegroundServiceNotificationListener adds its listener in its constructor
             // but we need to request it here in order for it to be instantiated.
             // TODO: figure out how to do this correctly once Dependency.get() is gone.

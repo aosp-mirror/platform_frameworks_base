@@ -22,16 +22,23 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.render.StatusBarNotifPanelEventSourceModule;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
 import com.android.systemui.statusbar.phone.StatusBarCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
+import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
+import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import java.lang.annotation.Documented;
@@ -53,11 +60,15 @@ import dagger.Subcomponent;
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
 @Subcomponent(modules = {
+        NotificationStackScrollLayoutListContainerModule.class,
         StatusBarNotifPanelEventSourceModule.class,
-        StatusBarViewModule.class
+        StatusBarViewModule.class,
+        StatusBarNotificationActivityStarterModule.class,
+        StatusBarNotificationPresenterModule.class,
 })
 @StatusBarComponent.StatusBarScope
 public interface StatusBarComponent {
+
     /**
      * Builder for {@link StatusBarComponent}.
      */
@@ -75,59 +86,57 @@ public interface StatusBarComponent {
     @interface StatusBarScope {}
 
     /**
+     * Performs initialization logic after {@link StatusBarComponent} has been constructed.
+     */
+    interface Startable {
+        void start();
+        void stop();
+    }
+
+    /**
      * Creates a {@link NotificationShadeWindowView}.
      */
-    @StatusBarScope
     NotificationShadeWindowView getNotificationShadeWindowView();
 
     /** */
-    @StatusBarScope
     NotificationShelfController getNotificationShelfController();
 
     /** */
-    @StatusBarScope
     NotificationStackScrollLayoutController getNotificationStackScrollLayoutController();
 
     /**
      * Creates a NotificationShadeWindowViewController.
      */
-    @StatusBarScope
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
     /**
      * Creates a NotificationPanelViewController.
      */
-    @StatusBarScope
     NotificationPanelViewController getNotificationPanelViewController();
 
     /**
      * Creates a LockIconViewController. Must be init after creation.
      */
-    @StatusBarScope
     LockIconViewController getLockIconViewController();
 
     /**
      * Creates an AuthRippleViewController. Must be init after creation.
      */
-    @StatusBarScope
     AuthRippleController getAuthRippleController();
 
     /**
      * Creates a StatusBarHeadsUpChangeListener.
      */
-    @StatusBarScope
     StatusBarHeadsUpChangeListener getStatusBarHeadsUpChangeListener();
 
     /**
      * Creates a StatusBarCommandQueueCallbacks.
      */
-    @StatusBarScope
     StatusBarCommandQueueCallbacks getStatusBarCommandQueueCallbacks();
 
     /**
      * Creates a SplitShadeHeaderController.
      */
-    @StatusBarScope
     SplitShadeHeaderController getSplitShadeHeaderController();
 
     /**
@@ -140,20 +149,18 @@ public interface StatusBarComponent {
     /**
      * Creates a StatusBarInitializer
      */
-    @StatusBarScope
     StatusBarInitializer getStatusBarInitializer();
 
     /**
      * Set of startables to be run after a StatusBarComponent has been constructed.
      */
-    @StatusBarScope
     Set<Startable> getStartables();
 
-    /**
-     * Performs initialization logic after {@link StatusBarComponent} has been constructed.
-     */
-    interface Startable {
-        void start();
-        void stop();
-    }
+    NotificationActivityStarter getNotificationActivityStarter();
+
+    NotificationPresenter getNotificationPresenter();
+
+    NotificationRowBinderImpl.BindRowCallback getBindRowCallback();
+
+    NotificationListContainer getNotificationListContainer();
 }
