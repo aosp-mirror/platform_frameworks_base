@@ -64,6 +64,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
+    private val statusBar: Lazy<StatusBar>,
     private val notifPipelineFlags: NotifPipelineFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,
@@ -86,12 +87,11 @@ class NotificationsControllerImpl @Inject constructor(
     private val headsUpViewBinder: HeadsUpViewBinder,
     private val clickerBuilder: NotificationClicker.Builder,
     private val animatedImageNotificationManager: AnimatedImageNotificationManager,
-    private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager
+    private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
+    private val bubblesOptional: Optional<Bubbles>,
 ) : NotificationsController {
 
     override fun initialize(
-        statusBar: StatusBar,
-        bubblesOptional: Optional<Bubbles>,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         stackController: NotifStackController,
@@ -109,7 +109,7 @@ class NotificationsControllerImpl @Inject constructor(
 
         notificationRowBinder.setNotificationClicker(
                 clickerBuilder.build(
-                        Optional.of(statusBar), bubblesOptional, notificationActivityStarter))
+                        Optional.of(statusBar.get()), bubblesOptional, notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,

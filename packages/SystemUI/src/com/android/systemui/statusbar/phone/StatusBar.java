@@ -345,6 +345,7 @@ public class StatusBar extends CoreStartable implements
     private final DreamOverlayStateController mDreamOverlayStateController;
     private StatusBarCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
+    private NotificationListContainer mNotifListContainer;
 
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
         updateBubblesVisibility();
@@ -468,7 +469,7 @@ public class StatusBar extends CoreStartable implements
     private PhoneStatusBarTransitions mStatusBarTransitions;
     private AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
-    protected NotificationShadeWindowController mNotificationShadeWindowController;
+    protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
@@ -496,8 +497,6 @@ public class StatusBar extends CoreStartable implements
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final StatusBarComponent.Factory mStatusBarComponentFactory;
     private final PluginManager mPluginManager;
-    private final StatusBarNotificationActivityStarter.Builder
-            mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
     private final InitController mInitController;
 
@@ -665,7 +664,7 @@ public class StatusBar extends CoreStartable implements
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
-    protected StatusBarNotificationPresenter mPresenter;
+    protected NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<BubblesManager> mBubblesManagerOptional;
@@ -752,8 +751,6 @@ public class StatusBar extends CoreStartable implements
             CommandQueue commandQueue,
             StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
-            StatusBarNotificationActivityStarter.Builder
-                    statusBarNotificationActivityStarterBuilder,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -850,7 +847,6 @@ public class StatusBar extends CoreStartable implements
         mCommandQueue = commandQueue;
         mStatusBarComponentFactory = statusBarComponentFactory;
         mPluginManager = pluginManager;
-        mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mShadeController = shadeController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
@@ -1155,19 +1151,14 @@ public class StatusBar extends CoreStartable implements
         updateTheme();
 
         inflateStatusBarWindow();
-        mNotificationShadeWindowViewController.setService(this, mNotificationShadeWindowController);
         mNotificationShadeWindowView.setOnTouchListener(getStatusBarWindowTouchListener());
         mWallpaperController.setRootView(mNotificationShadeWindowView);
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        NotificationListContainer notifListContainer =
-                mStackScrollerController.getNotificationListContainer();
-        mNotificationLogger.setUpWithContainer(notifListContainer);
-
+        mNotificationLogger.setUpWithContainer(mNotifListContainer);
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mPanelExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
-
         mUserSwitcherController.init(mNotificationShadeWindowView);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
@@ -1442,65 +1433,19 @@ public class StatusBar extends CoreStartable implements
         mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
-                mStackScrollerController.getNotificationListContainer(),
+                mNotifListContainer,
                 mHeadsUpManager,
-                mJankMonitor
-        );
-
-        // TODO: inject this.
-        mPresenter = new StatusBarNotificationPresenter(
-                mContext,
-                mNotificationPanelViewController,
-                mHeadsUpManager,
-                mNotificationShadeWindowView,
-                mStackScrollerController,
-                mDozeScrimController,
-                mScrimController,
-                mNotificationShadeWindowController,
-                mDynamicPrivacyController,
-                mKeyguardStateController,
-                mKeyguardIndicationController,
-                this /* statusBar */,
-                mShadeController,
-                mLockscreenShadeTransitionController,
-                mCommandQueue,
-                mViewHierarchyManager,
-                mLockscreenUserManager,
-                mStatusBarStateController,
-                mNotifShadeEventSource,
-                mEntryManager,
-                mMediaManager,
-                mGutsManager,
-                mKeyguardUpdateMonitor,
-                mLockscreenGestureLogger,
-                mInitController,
-                mNotificationInterruptStateProvider,
-                mRemoteInputManager,
-                mConfigurationController,
-                mNotifPipelineFlags);
-
+                mJankMonitor);
         mNotificationShelfController.setOnActivatedListener(mPresenter);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
-
-        mNotificationActivityStarter =
-                mStatusBarNotificationActivityStarterBuilder
-                        .setStatusBar(this)
-                        .setActivityLaunchAnimator(mActivityLaunchAnimator)
-                        .setNotificationAnimatorControllerProvider(mNotificationAnimationProvider)
-                        .setNotificationPresenter(mPresenter)
-                        .setNotificationPanelViewController(mNotificationPanelViewController)
-                        .build();
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
-
         mNotificationsController.initialize(
-                this,
-                mBubblesOptional,
                 mPresenter,
-                mStackScrollerController.getNotificationListContainer(),
+                mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter,
-                mPresenter);
+                mStatusBarComponent.getBindRowCallback());
     }
 
     /**
@@ -1576,9 +1521,12 @@ public class StatusBar extends CoreStartable implements
         mStatusBarComponent.getLockIconViewController().init();
         mStackScrollerController = mStatusBarComponent.getNotificationStackScrollLayoutController();
         mStackScroller = mStackScrollerController.getView();
-
+        mNotifListContainer = mStatusBarComponent.getNotificationListContainer();
+        mPresenter = mStatusBarComponent.getNotificationPresenter();
+        mNotificationActivityStarter = mStatusBarComponent.getNotificationActivityStarter();
         mNotificationShelfController = mStatusBarComponent.getNotificationShelfController();
         mAuthRippleController = mStatusBarComponent.getAuthRippleController();
+
         mAuthRippleController.init();
 
         mHeadsUpManager.addListener(mStatusBarComponent.getStatusBarHeadsUpChangeListener());
