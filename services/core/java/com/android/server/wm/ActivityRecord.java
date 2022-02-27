@@ -5084,10 +5084,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (!visible) {
-            final InsetsControlTarget imeInputTarget = mDisplayContent.getImeTarget(
-                    DisplayContent.IME_TARGET_INPUT);
-            mLastImeShown = imeInputTarget != null && imeInputTarget.getWindow() != null
-                    && imeInputTarget.getWindow().mActivityRecord == this
+            final InputTarget imeInputTarget = mDisplayContent.getImeInputTarget();
+            mLastImeShown = imeInputTarget != null && imeInputTarget.getWindowState() != null
+                    && imeInputTarget.getWindowState().mActivityRecord == this
                     && mDisplayContent.mInputMethodWindow != null
                     && mDisplayContent.mInputMethodWindow.isVisible();
             mImeInsetsFrozenUntilStartInput = true;
