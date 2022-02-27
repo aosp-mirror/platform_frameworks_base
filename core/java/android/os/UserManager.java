@@ -1703,12 +1703,40 @@ public class UserManager {
 
     /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
-     * an error occurred that prevented the user from being removed or set as ephemeral.
+     * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
      * @hide
      */
     @SystemApi
-    public static final int REMOVE_RESULT_ERROR = 3;
+    public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the user could not be removed due to a {@link #DISALLOW_REMOVE_MANAGED_PROFILE} or
+     * {@link #DISALLOW_REMOVE_USER} user restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_RESTRICTION = -2;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed does not exist.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3;
+
+    /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed is a {@link UserHandle#SYSTEM} user which can't be removed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4;
 
     /**
      * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
@@ -1719,7 +1747,10 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
-            REMOVE_RESULT_ERROR,
+            REMOVE_RESULT_ERROR_USER_RESTRICTION,
+            REMOVE_RESULT_ERROR_USER_NOT_FOUND,
+            REMOVE_RESULT_ERROR_SYSTEM_USER,
+            REMOVE_RESULT_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RemoveResult {}
@@ -4842,8 +4873,10 @@ public class UserManager {
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
      * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
-     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or
-     * {@link #REMOVE_RESULT_ERROR}.
+     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED},
+     * {@link #REMOVE_RESULT_ERROR_USER_RESTRICTION}, {@link #REMOVE_RESULT_ERROR_USER_NOT_FOUND},
+     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER}, or {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error
+     * codes have negative values.
      *
      * @hide
      */
@@ -4857,6 +4890,19 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check if {@link #removeUserWhenPossible} returned a success code which means that the user
+     * has been removed or is slated for removal.
+     *
+     * @param result is {@link #RemoveResult} code return by {@link #removeUserWhenPossible}.
+     * @return {@code true} if it is a success code.
+     * @hide
+     */
+    @SystemApi
+    public static boolean isRemoveResultSuccessful(@RemoveResult int result) {
+        return result >= 0;
     }
 
     /**

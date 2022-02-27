@@ -9821,6 +9821,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isMediaSharedWithParent();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isPrimaryUser();
+    method public static boolean isRemoveResultSuccessful(int);
     method public boolean isRestrictedProfile();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public boolean isRestrictedProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isSameProfileGroup(@NonNull android.os.UserHandle, @NonNull android.os.UserHandle);
@@ -9838,7 +9839,10 @@ package android.os {
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
     field public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2; // 0x2
     field public static final int REMOVE_RESULT_DEFERRED = 1; // 0x1
-    field public static final int REMOVE_RESULT_ERROR = 3; // 0x3
+    field public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4; // 0xfffffffc
+    field public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1; // 0xffffffff
+    field public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3; // 0xfffffffd
+    field public static final int REMOVE_RESULT_ERROR_USER_RESTRICTION = -2; // 0xfffffffe
     field public static final int REMOVE_RESULT_REMOVED = 0; // 0x0
     field public static final int RESTRICTION_NOT_SET = 0; // 0x0
     field public static final int RESTRICTION_SOURCE_DEVICE_OWNER = 2; // 0x2

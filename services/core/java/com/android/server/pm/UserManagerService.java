@@ -4585,12 +4585,12 @@ public class UserManagerService extends IUserManager.Stub {
             final String restriction = getUserRemovalRestriction(userId);
             if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
                 Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-                return UserManager.REMOVE_RESULT_ERROR;
+                return UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION;
             }
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
-            return UserManager.REMOVE_RESULT_ERROR;
+            return UserManager.REMOVE_RESULT_ERROR_SYSTEM_USER;
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -4602,7 +4602,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userData == null) {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
-                        return UserManager.REMOVE_RESULT_ERROR;
+                        return UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
