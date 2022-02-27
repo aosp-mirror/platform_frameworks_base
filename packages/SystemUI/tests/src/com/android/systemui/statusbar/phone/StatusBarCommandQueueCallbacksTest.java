@@ -158,13 +158,13 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
     @Test
     public void testSuppressAmbientDisplay_suppress() {
         mSbcqCallbacks.suppressAmbientDisplay(true);
-        verify(mDozeServiceHost).setDozeSuppressed(true);
+        verify(mDozeServiceHost).setAlwaysOnSuppressed(true);
     }
 
     @Test
     public void testSuppressAmbientDisplay_unsuppress() {
         mSbcqCallbacks.suppressAmbientDisplay(false);
-        verify(mDozeServiceHost).setDozeSuppressed(false);
+        verify(mDozeServiceHost).setAlwaysOnSuppressed(false);
     }
 
 
