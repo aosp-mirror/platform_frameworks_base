@@ -115,9 +115,10 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowStateController,
                 mLockIconViewController,
-                Optional.of(mLowLightClockController));
+                Optional.of(mLowLightClockController),
+                mStatusBar,
+                mNotificationShadeWindowController);
         mController.setupExpandedStatusBar();
-        mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
     }
 

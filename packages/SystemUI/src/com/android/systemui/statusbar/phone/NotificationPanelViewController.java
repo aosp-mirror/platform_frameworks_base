@@ -184,6 +184,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.MediaContainerView;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -665,6 +666,8 @@ public class NotificationPanelViewController extends PanelViewController
 
     private final ListenerSet<Callbacks> mNotifEventSourceCallbacks = new ListenerSet<>();
 
+    private final NotificationListContainer mNotificationListContainer;
+
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
@@ -792,7 +795,8 @@ public class NotificationPanelViewController extends PanelViewController
             InteractionJankMonitor interactionJankMonitor,
             QsFrameTranslateController qsFrameTranslateController,
             SysUiState sysUiState,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            NotificationListContainer notificationListContainer) {
         super(view,
                 falsingManager,
                 dozeLog,
@@ -823,6 +827,7 @@ public class NotificationPanelViewController extends PanelViewController
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationsQSContainerController = notificationsQSContainerController;
+        mNotificationListContainer = notificationListContainer;
         mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mGroupManager = groupManager;
@@ -4046,8 +4051,7 @@ public class NotificationPanelViewController extends PanelViewController
     }
 
     public boolean hasPulsingNotifications() {
-        return mNotificationStackScrollLayoutController
-                .getNotificationListContainer().hasPulsingNotifications();
+        return mNotificationListContainer.hasPulsingNotifications();
     }
 
     public ActivatableNotificationView getActivatedChild() {
