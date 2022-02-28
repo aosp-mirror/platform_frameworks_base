@@ -31344,6 +31344,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)} when there
      * is stylus movement detected.
      *
+     * Note that this attribute has no effect on the View's children. For example, if a
+     * {@link ViewGroup} disables auto handwriting but its children set auto handwriting to true,
+     * auto handwriting will still work for the children, and vice versa.
+     *
      * @see #onCreateInputConnection(EditorInfo)
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
