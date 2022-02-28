@@ -129,6 +129,7 @@ cc_library_shared {
 cc_library_shared {
     name: "libmedia_jni_utils",
     srcs: [
+        ":libgui_frame_event_aidl",
         "android_media_Utils.cpp",
     ],
 
