@@ -388,12 +388,9 @@
 
     <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
 
-    <dimen name="notification_panel_width">@dimen/match_parent</dimen>
+    <dimen name="notification_panel_margin_horizontal">0dp</dimen>
 
     <dimen name="brightness_mirror_height">48dp</dimen>
-
-    <!-- The width of the panel that holds the quick settings. -->
-    <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
 
@@ -1391,4 +1388,6 @@
 
     <!-- The margin applied between complications -->
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
+
+    <dimen name="status_view_margin_horizontal">0dp</dimen>
 </resources>
