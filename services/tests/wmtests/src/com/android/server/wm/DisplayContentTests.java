@@ -75,7 +75,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
@@ -1117,7 +1116,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         app.removeImmediately();
 
-        assertNull(dc.getImeTarget(IME_TARGET_INPUT));
+        assertNull(dc.getImeInputTarget());
         assertNull(dc.computeImeControlTarget());
     }
 
@@ -1126,19 +1125,19 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
         dc.setImeInputTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
-        dc.setImeLayeringTarget(dc.getImeTarget(IME_TARGET_INPUT).getWindow());
-        assertEquals(dc.getImeTarget(IME_TARGET_INPUT).getWindow(), dc.computeImeControlTarget());
+        dc.setImeLayeringTarget(dc.getImeInputTarget().getWindowState());
+        assertEquals(dc.getImeInputTarget().getWindowState(), dc.computeImeControlTarget());
     }
 
     @Test
     public void testComputeImeControlTarget_splitscreen() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.setImeInputTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
-        dc.getImeTarget(IME_TARGET_INPUT).getWindow().setWindowingMode(
+        dc.getImeInputTarget().getWindowState().setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
-        dc.setImeLayeringTarget(dc.getImeTarget(IME_TARGET_INPUT).getWindow());
+        dc.setImeLayeringTarget(dc.getImeInputTarget().getWindowState());
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
-        assertNotEquals(dc.getImeTarget(IME_TARGET_INPUT).getWindow(),
+        assertNotEquals(dc.getImeInputTarget().getWindowState(),
                 dc.computeImeControlTarget());
     }
 
@@ -1149,7 +1148,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(false).when(mAppWindow.mActivityRecord).matchParentBounds();
         mDisplayContent.setImeInputTarget(mAppWindow);
         mDisplayContent.setImeLayeringTarget(
-                mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow());
+            mDisplayContent.getImeInputTarget().getWindowState());
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
@@ -1927,7 +1926,7 @@ public class DisplayContentTests extends WindowTestsBase {
         child1.removeImmediately();
 
         verify(mDisplayContent).computeImeTarget(true);
-        assertNull(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
+        assertNull(mDisplayContent.getImeInputTarget());
         verify(child1, never()).needsRelativeLayeringToIme();
     }
 
