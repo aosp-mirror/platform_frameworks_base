@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -38,6 +39,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.TimestampedValue;
 import android.provider.Settings;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.TimeUtils;
@@ -94,6 +96,13 @@ public class NetworkTimeUpdateService extends Binder {
     // During bootup, the network may not have been up yet, or it's taking time for the
     // connection to happen.
     private int mTryAgainCounter;
+
+    /**
+     * A log that records the decisions to fetch a network time update.
+     * This is logged in bug reports to assist with debugging issues with network time suggestions.
+     */
+    @NonNull
+    private final LocalLog mLocalLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     public NetworkTimeUpdateService(Context context) {
         mContext = context;
@@ -155,15 +164,29 @@ public class NetworkTimeUpdateService extends Binder {
     }
 
     private void onPollNetworkTimeUnderWakeLock(int event) {
+        long currentElapsedRealtimeMillis = SystemClock.elapsedRealtime();
         // Force an NTP fix when outdated
         NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
-        if (cachedNtpResult == null || cachedNtpResult.getAgeMillis() >= mPollingIntervalMs) {
+        if (cachedNtpResult == null || cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
+                >= mPollingIntervalMs) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
-            mTime.forceRefresh();
+            boolean isSuccessful = mTime.forceRefresh();
+            if (!isSuccessful) {
+                String logMsg = "forceRefresh() returned false: cachedNtpResult=" + cachedNtpResult
+                        + ", currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis;
+
+                if (DBG) {
+                    Log.d(TAG, logMsg);
+                }
+                mLocalLog.log(logMsg);
+            }
+
             cachedNtpResult = mTime.getCachedTimeResult();
         }
 
-        if (cachedNtpResult != null && cachedNtpResult.getAgeMillis() < mPollingIntervalMs) {
+        if (cachedNtpResult != null
+                && cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
+                < mPollingIntervalMs) {
             // Obtained fresh fix; schedule next normal update
             resetAlarm(mPollingIntervalMs);
 
@@ -180,6 +203,11 @@ public class NetworkTimeUpdateService extends Binder {
                 resetAlarm(mPollingIntervalShorterMs);
             } else {
                 // Try much later
+                String logMsg = "mTryAgainTimesMax exceeded, cachedNtpResult=" + cachedNtpResult;
+                if (DBG) {
+                    Log.d(TAG, logMsg);
+                }
+                mLocalLog.log(logMsg);
                 mTryAgainCounter = 0;
                 resetAlarm(mPollingIntervalMs);
             }
@@ -285,6 +313,8 @@ public class NetworkTimeUpdateService extends Binder {
         if (ntpResult != null) {
             pw.println("NTP result age: " + ntpResult.getAgeMillis());
         }
+        pw.println("Local logs:");
+        mLocalLog.dump(fd, pw, args);
         pw.println();
     }
 }
