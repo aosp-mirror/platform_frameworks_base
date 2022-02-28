@@ -18,6 +18,8 @@ package com.android.server.companion.virtual;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.UserHandle;
 import android.util.Slog;
 
 /**
@@ -32,13 +34,15 @@ class PermissionUtils {
      *
      * @param context the context
      * @param callingPackage the calling application package name
-     * @param callingUid the calling application uid
-     * @return {@code true} if the package name matches the calling app uid, {@code false} otherwise
+     * @return {@code true} if the package name matches {@link Binder#getCallingUid()}, or
+     *   {@code false} otherwise
      */
-    public static boolean validatePackageName(Context context, String callingPackage,
-            int callingUid) {
+    public static boolean validateCallingPackageName(Context context, String callingPackage) {
+        final int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
         try {
-            int packageUid = context.getPackageManager().getPackageUid(callingPackage, 0);
+            int packageUid = context.getPackageManager()
+                    .getPackageUidAsUser(callingPackage, UserHandle.getUserId(callingUid));
             if (packageUid != callingUid) {
                 Slog.e(LOG_TAG, "validatePackageName: App with package name " + callingPackage
                         + " is UID " + packageUid + " but caller is " + callingUid);
@@ -48,6 +52,8 @@ class PermissionUtils {
             Slog.e(LOG_TAG, "validatePackageName: App with package name " + callingPackage
                     + " does not exist");
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return true;
     }
