@@ -250,6 +250,7 @@ java_library {
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
     libs: [
         "sdk_module-lib_current_framework-tethering",
+        "sdk_module-lib_current_framework-connectivity-tiramisu",
         "sdk_public_current_framework-bluetooth",
         // NOTE: The below can be removed once the prebuilt stub contains bluetooth.
         "sdk_system_current_android",
