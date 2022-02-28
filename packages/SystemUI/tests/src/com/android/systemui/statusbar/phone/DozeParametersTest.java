@@ -126,6 +126,12 @@ public class DozeParametersTest extends SysuiTestCase {
         setAodEnabledForTest(true);
         setShouldControlUnlockedScreenOffForTest(true);
         setDisplayNeedsBlankingForTest(false);
+
+        // Default to false here (with one test to make sure that when it returns true, we respect
+        // that). We'll test the specific conditions for this to return true/false in the
+        // UnlockedScreenOffAnimationController's tests.
+        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
+                .thenReturn(false);
     }
 
     @Test
@@ -174,9 +180,12 @@ public class DozeParametersTest extends SysuiTestCase {
      */
     @Test
     public void testControlUnlockedScreenOffAnimation_dozeAfterScreenOff_false() {
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+
         // If AOD is disabled, we shouldn't want to control screen off. Also, let's double check
         // that when that value is updated, we called through to PowerManager.
         setAodEnabledForTest(false);
+
         assertFalse(mDozeParameters.shouldControlScreenOff());
         assertTrue(mPowerManagerDozeAfterScreenOff);
 
@@ -188,7 +197,6 @@ public class DozeParametersTest extends SysuiTestCase {
 
     @Test
     public void testControlUnlockedScreenOffAnimationDisabled_dozeAfterScreenOff() {
-        setShouldControlUnlockedScreenOffForTest(true);
         when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(false);
 
         assertFalse(mDozeParameters.shouldControlUnlockedScreenOff());
