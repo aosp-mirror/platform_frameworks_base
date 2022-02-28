@@ -23,12 +23,6 @@
 
 #include <log/log.h>
 
-#include <SkBitmap.h>
-#include <SkBlendMode.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-
 namespace {
 // Time to spend fading out the spot completely.
 const nsecs_t SPOT_FADE_DURATION = 200 * 1000000LL; // 200 ms

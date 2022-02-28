@@ -16,9 +16,14 @@
 
 #include "tests/common/TestUtils.h"
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkColor.h>
 #include <SkColorMatrixFilter.h>
 #include <SkColorSpace.h>
-#include <SkImagePriv.h>
+#include <SkImageInfo.h>
+#include <SkPaint.h>
+#include <SkPath.h>
 #include <SkPathOps.h>
 #include <SkShader.h>
 #include <gtest/gtest.h>

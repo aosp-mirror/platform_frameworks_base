@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-#include <SkImagePriv.h>
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkCanvas.h>
+#include <SkImage.h>
+#include <SkImageInfo.h>
+#include <SkPaint.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkSamplingOptions.h>
+#include <SkShader.h>
+#include <SkTileMode.h>
 #include "hwui/Paint.h"
 #include "TestSceneBase.h"
 #include "tests/common/BitmapAllocationTestUtils.h"

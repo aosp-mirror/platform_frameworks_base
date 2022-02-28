@@ -17,7 +17,7 @@
 #ifndef RENDERPROXY_H_
 #define RENDERPROXY_H_
 
-#include <SkBitmap.h>
+#include <SkRefCnt.h>
 #include <android/native_window.h>
 #include <cutils/compiler.h>
 #include <android/surface_control.h>
@@ -29,6 +29,10 @@
 #include "DrawFrameTask.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
+
+class SkBitmap;
+class SkPicture;
+class SkImage;
 
 namespace android {
 class GraphicBuffer;
