@@ -173,6 +173,10 @@ import java.util.concurrent.TimeUnit;
  */
 @TargetApi(Build.VERSION_CODES.TIRAMISU)
 public class NetworkStatsService extends INetworkStatsService.Stub {
+    static {
+        System.loadLibrary("service-connectivity");
+    }
+
     static final String TAG = "NetworkStats";
     static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
