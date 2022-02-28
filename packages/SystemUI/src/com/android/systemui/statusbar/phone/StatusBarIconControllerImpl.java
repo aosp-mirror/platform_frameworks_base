@@ -245,7 +245,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the call strength icons.
-     * @param slot StatusBar slot for the call strength icons
+     * @param slot statusbar slot for the call strength icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override
@@ -272,7 +272,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /**
      * Accept a list of CallIndicatorIconStates, and show the no calling icons.
-     * @param slot StatusBar slot for the no calling icons
+     * @param slot statusbar slot for the no calling icons
      * @param states All of the no Calling & SMS icon states
      */
     @Override

@@ -59,7 +59,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
@@ -119,9 +119,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     }
 
     protected void setup(
-            @NonNull StatusBar statusBar,
+            @NonNull CentralSurfaces centralSurfaces,
             @NonNull View notificationShadeWindowView) {
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mNotificationShadeWindowView = notificationShadeWindowView;
         mNotificationPanelView = mNotificationShadeWindowView.findViewById(R.id.notification_panel);
     }
@@ -246,7 +246,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             new OnComputeInternalInsetsListener() {
         @Override
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (mIsStatusBarExpanded || mStatusBar.isBouncerShowing()) {
+            if (mIsStatusBarExpanded || mCentralSurfaces.isBouncerShowing()) {
                 // The touchable region is always the full area when expanded
                 return;
             }

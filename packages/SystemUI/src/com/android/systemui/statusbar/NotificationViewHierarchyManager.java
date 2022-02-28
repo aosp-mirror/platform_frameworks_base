@@ -32,7 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -113,7 +113,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public NotificationViewHierarchyManager(
             Context context,

@@ -139,7 +139,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -177,12 +177,12 @@ import dagger.Lazy;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
-public class StatusBarTest extends SysuiTestCase {
+public class CentralSurfacesTest extends SysuiTestCase {
 
     private static final int FOLD_STATE_FOLDED = 0;
     private static final int FOLD_STATE_UNFOLDED = 1;
 
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
     private TestableNotificationInterruptStateProviderImpl mNotificationInterruptStateProvider;
@@ -252,8 +252,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private StatusBarComponent.Factory mStatusBarComponentFactory;
-    @Mock private StatusBarComponent mStatusBarComponent;
+    @Mock private CentralSurfacesComponent.Factory mStatusBarComponentFactory;
+    @Mock private CentralSurfacesComponent mCentralSurfacesComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -364,8 +364,8 @@ public class StatusBarTest extends SysuiTestCase {
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
-        when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
-        when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
+        when(mStatusBarComponentFactory.create()).thenReturn(mCentralSurfacesComponent);
+        when(mCentralSurfacesComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
@@ -375,12 +375,12 @@ public class StatusBarTest extends SysuiTestCase {
         mShadeController = new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
-                () -> Optional.of(mStatusBar), () -> mAssistManager);
+                () -> Optional.of(mCentralSurfaces), () -> mAssistManager);
 
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
 
-        mStatusBar = new StatusBar(
+        mCentralSurfaces = new CentralSurfaces(
                 mContext,
                 mNotificationsController,
                 mock(FragmentService.class),
@@ -475,8 +475,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDeviceStateManager,
                 mDreamOverlayStateController,
                 mWiredChargingRippleController);
-        when(mKeyguardViewMediator.registerStatusBar(
-                any(StatusBar.class),
+        when(mKeyguardViewMediator.registerCentralSurfaces(
+                any(CentralSurfaces.class),
                 any(NotificationPanelViewController.class),
                 any(PanelExpansionStateManager.class),
                 any(BiometricUnlockController.class),
@@ -487,23 +487,23 @@ public class StatusBarTest extends SysuiTestCase {
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
                 mKeyguardVieMediatorCallback);
 
-        // TODO: we should be able to call mStatusBar.start() and have all the below values
+        // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
         // initialized automatically.
-        mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
-        mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
-        mStatusBar.mDozeScrimController = mDozeScrimController;
-        mStatusBar.mPresenter = mNotificationPresenter;
-        mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;
-        mStatusBar.mBarService = mBarService;
-        mStatusBar.mStackScroller = mStackScroller;
-        mStatusBar.startKeyguard();
+        mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
+        mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
+        mCentralSurfaces.mDozeScrimController = mDozeScrimController;
+        mCentralSurfaces.mPresenter = mNotificationPresenter;
+        mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
+        mCentralSurfaces.mBarService = mBarService;
+        mCentralSurfaces.mStackScroller = mStackScroller;
+        mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
         notificationLogger.setUpWithContainer(mNotificationListContainer);
     }
 
     @Test
     public void testSetBouncerShowing_noCrash() {
-        mStatusBar.setBouncerShowing(true);
+        mCentralSurfaces.setBouncerShowing(true);
     }
 
     @Test
@@ -511,7 +511,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
 
-        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
@@ -519,7 +519,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
-        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
@@ -527,7 +527,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
-        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
@@ -539,7 +539,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
-        mStatusBar.onKeyguardViewManagerStatesUpdated();
+        mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing hidden insecure lockscreen log",
                 mMetricsLogger.getLogs(),
@@ -558,7 +558,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
-        mStatusBar.onKeyguardViewManagerStatesUpdated();
+        mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing hidden secure lockscreen log",
                 mMetricsLogger.getLogs(),
@@ -577,7 +577,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
 
-        mStatusBar.onKeyguardViewManagerStatesUpdated();
+        mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing insecure lockscreen showing",
                 mMetricsLogger.getLogs(),
@@ -596,7 +596,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
-        mStatusBar.onKeyguardViewManagerStatesUpdated();
+        mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing secure lockscreen showing log",
                 mMetricsLogger.getLogs(),
@@ -615,7 +615,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
-        mStatusBar.onKeyguardViewManagerStatesUpdated();
+        mCentralSurfaces.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing bouncer log",
                 mMetricsLogger.getLogs(),
@@ -716,7 +716,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testLogHidden() {
         try {
-            mStatusBar.handleVisibleToUserChanged(false);
+            mCentralSurfaces.handleVisibleToUserChanged(false);
             mUiBgExecutor.runAllReady();
             verify(mBarService, times(1)).onPanelHidden();
             verify(mBarService, never()).onPanelRevealed(anyBoolean(), anyInt());
@@ -731,10 +731,10 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(true);
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
 
         try {
-            mStatusBar.handleVisibleToUserChanged(true);
+            mCentralSurfaces.handleVisibleToUserChanged(true);
             mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 1);
@@ -750,10 +750,10 @@ public class StatusBarTest extends SysuiTestCase {
         when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
 
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
 
         try {
-            mStatusBar.handleVisibleToUserChanged(true);
+            mCentralSurfaces.handleVisibleToUserChanged(true);
             mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(true, 5);
@@ -768,10 +768,10 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
 
         try {
-            mStatusBar.handleVisibleToUserChanged(true);
+            mCentralSurfaces.handleVisibleToUserChanged(true);
             mUiBgExecutor.runAllReady();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 5);
@@ -783,18 +783,18 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testDump_DoesNotCrash() {
-        mStatusBar.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
+        mCentralSurfaces.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
     }
 
     @Test
     public void testDumpBarTransitions_DoesNotCrash() {
-        StatusBar.dumpBarTransitions(
+        CentralSurfaces.dumpBarTransitions(
                 new PrintWriter(new ByteArrayOutputStream()), "var", /* transitions= */ null);
     }
 
     @Test
     public void testFingerprintNotification_UpdatesScrims() {
-        mStatusBar.notifyBiometricAuthModeChanged();
+        mCentralSurfaces.notifyBiometricAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
     }
 
@@ -803,81 +803,81 @@ public class StatusBarTest extends SysuiTestCase {
         // Simulate unlocking from AoD with fingerprint.
         when(mBiometricUnlockController.getMode())
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
     public void testTransitionLaunch_goesToUnlocked() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        mStatusBar.showKeyguardImpl();
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
         when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(true);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
     public void testSetExpansionAffectsAlpha_whenKeyguardShowingButGoingAwayForAnyReason() {
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(true));
 
         clearInvocations(mScrimController);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(true));
 
         clearInvocations(mScrimController);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(false));
 
         clearInvocations(mScrimController);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(false));
     }
 
     @Test
     public void testTransitionLaunch_noPreview_doesntGoUnlocked() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        mStatusBar.showKeyguardImpl();
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mNotificationPanelViewController.isLaunchTransitionRunning()).thenReturn(true);
         when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(false);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
     }
 
     @Test
     public void testSetOccluded_propagatesToScrimController() {
-        mStatusBar.setOccluded(true);
+        mCentralSurfaces.setOccluded(true);
         verify(mScrimController).setKeyguardOccluded(eq(true));
 
         reset(mScrimController);
-        mStatusBar.setOccluded(false);
+        mCentralSurfaces.setOccluded(false);
         verify(mScrimController).setKeyguardOccluded(eq(false));
     }
 
     @Test
     public void testPulseWhileDozing_updatesScrimController() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        mStatusBar.showKeyguardImpl();
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mDozeServiceHost.isPulsing()).thenReturn(true);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.PULSING), any());
 
         // Ending a pulse should take it back to keyguard state
         when(mDozeServiceHost.isPulsing()).thenReturn(false);
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
     }
 
@@ -885,45 +885,45 @@ public class StatusBarTest extends SysuiTestCase {
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 
-        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
 
         // By default, showKeyguardImpl sets state to KEYGUARD.
-        mStatusBar.showKeyguardImpl();
+        mCentralSurfaces.showKeyguardImpl();
         verify(mStatusBarStateController).setState(
                 eq(StatusBarState.KEYGUARD), eq(false) /* force */);
     }
 
     @Test
     public void testOnStartedWakingUp_isNotDozing() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
         when(mDozeServiceHost.getDozingRequested()).thenReturn(true);
-        mStatusBar.updateIsKeyguard();
+        mCentralSurfaces.updateIsKeyguard();
         // TODO: mNotificationPanelView.expand(false) gets called twice. Should be once.
         verify(mNotificationPanelViewController, times(2)).expand(eq(false));
         clearInvocations(mNotificationPanelViewController);
 
-        mStatusBar.mWakefulnessObserver.onStartedWakingUp();
+        mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
         verify(mDozeServiceHost).stopDozing();
         verify(mNotificationPanelViewController).expand(eq(false));
     }
 
     @Test
     public void testOnStartedWakingUp_doesNotDismissBouncer_whenPulsing() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
         when(mDozeServiceHost.getDozingRequested()).thenReturn(true);
-        mStatusBar.updateIsKeyguard();
+        mCentralSurfaces.updateIsKeyguard();
         clearInvocations(mNotificationPanelViewController);
 
-        mStatusBar.setBouncerShowing(true);
-        mStatusBar.mWakefulnessObserver.onStartedWakingUp();
+        mCentralSurfaces.setBouncerShowing(true);
+        mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
     }
 
     @Test
     public void testRegisterBroadcastsonDispatcher() {
-        mStatusBar.registerBroadcastReceiver();
+        mCentralSurfaces.registerBroadcastReceiver();
         verify(mBroadcastDispatcher).registerReceiver(
                 any(BroadcastReceiver.class),
                 any(IntentFilter.class),
@@ -933,7 +933,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testUpdateResources_updatesBouncer() {
-        mStatusBar.updateResources();
+        mCentralSurfaces.updateResources();
 
         verify(mStatusBarKeyguardViewManager).updateResources();
     }

@@ -61,7 +61,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mStatusBarStateController: SysuiStatusBarStateController
     @Mock
-    private lateinit var mStatusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var mDockManager: DockManager
     @Mock
@@ -108,7 +108,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             mStatusBarWindowStateController,
             mLockIconViewController,
             Optional.of(mLowLightClockController),
-            mStatusBar,
+            mCentralSurfaces,
             mNotificationShadeWindowController
         )
         mController.setupExpandedStatusBar()
