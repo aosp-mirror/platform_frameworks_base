@@ -108,7 +108,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         if (DEBUG) {
             Slog.d(TAG, "Binder died, cancelling vibration...");
         }
-        cancel();
+        mStepConductor.notifyCancelled(/* immediate= */ false);
     }
 
     @Override
@@ -168,28 +168,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
 
     /** Cancel current vibration and ramp down the vibrators gracefully. */
     public void cancel() {
-        if (mStop) {
-            // Already cancelled, running clean-up steps.
-            return;
-        }
-        mStop = true;
-        if (DEBUG) {
-            Slog.d(TAG, "Vibration cancelled");
-        }
-        mStepConductor.notifyWakeUp();
+        mStepConductor.notifyCancelled(/* immediate= */ false);
     }
 
     /** Cancel current vibration and shuts off the vibrators immediately. */
     public void cancelImmediately() {
-        if (mForceStop) {
-            // Already forced the thread to stop, wait for it to finish.
-            return;
-        }
-        if (DEBUG) {
-            Slog.d(TAG, "Vibration cancelled immediately");
-        }
-        mStop = mForceStop = true;
-        mStepConductor.notifyWakeUp();
+        mStepConductor.notifyCancelled(/* immediate= */ true);
     }
 
     /** Notify current vibration that a synced step has completed. */
@@ -217,13 +201,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
             mStepConductor.prepareToStart();
-
             while (!mStepConductor.isFinished()) {
-                // Skip wait and next step if mForceStop already happened.
-                boolean waited = mForceStop || mStepConductor.waitUntilNextStepIsDue();
-                // If we waited, don't run the next step, but instead re-evaluate cancellation
-                // status
-                if (!waited) {
+                boolean readyToRun = mStepConductor.waitUntilNextStepIsDue();
+                // If we waited, don't run the next step, but instead re-evaluate status.
+                if (readyToRun) {
                     if (DEBUG) {
                         Slog.d(TAG, "Play vibration consuming next step...");
                     }
@@ -232,23 +213,12 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     mStepConductor.runNextStep();
                 }
 
-                if (mForceStop) {
-                    // Cancel every step and stop playing them right away, even clean-up steps.
-                    mStepConductor.cancelImmediately();
-                    clientVibrationCompleteIfNotAlready(Vibration.Status.CANCELLED);
-                    break;
-                }
-
-                Vibration.Status status = mStop ? Vibration.Status.CANCELLED
-                        : mStepConductor.calculateVibrationStatus();
+                Vibration.Status status = mStepConductor.calculateVibrationStatus();
                 // This block can only run once due to mCalledVibrationCompleteCallback.
                 if (status != Vibration.Status.RUNNING && !mCalledVibrationCompleteCallback) {
                     // First time vibration stopped running, start clean-up tasks and notify
                     // callback immediately.
                     clientVibrationCompleteIfNotAlready(status);
-                    if (status == Vibration.Status.CANCELLED) {
-                        mStepConductor.cancel();
-                    }
                 }
             }
         } finally {
