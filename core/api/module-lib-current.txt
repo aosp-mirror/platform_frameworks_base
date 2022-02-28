@@ -51,31 +51,6 @@ package android.app {
 
 }
 
-package android.app.usage {
-
-  public class NetworkStatsManager {
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void forceUpdate();
-    method public static int getCollapsedRatType(int);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
-    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForDevice(@NonNull android.net.NetworkTemplate, long, long);
-    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(@NonNull android.net.NetworkTemplate, long, long, int, int, int) throws java.lang.SecurityException;
-    method @NonNull @WorkerThread public android.app.usage.NetworkStats querySummary(@NonNull android.net.NetworkTemplate, long, long) throws java.lang.SecurityException;
-    method @NonNull @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForDevice(@NonNull android.net.NetworkTemplate, long, long);
-    method @NonNull @WorkerThread public android.app.usage.NetworkStats queryTaggedSummary(@NonNull android.net.NetworkTemplate, long, long) throws java.lang.SecurityException;
-    method public void registerUsageCallback(@NonNull android.net.NetworkTemplate, long, @NonNull java.util.concurrent.Executor, @NonNull android.app.usage.NetworkStatsManager.UsageCallback);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setDefaultGlobalAlert(long);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setPollOnOpen(boolean);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setStatsProviderWarningAndLimitAsync(@NonNull String, long, long);
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setUidForeground(int, boolean);
-    field public static final int NETWORK_TYPE_5G_NSA = -2; // 0xfffffffe
-  }
-
-  public abstract static class NetworkStatsManager.UsageCallback {
-    method public void onThresholdReached(@NonNull android.net.NetworkTemplate);
-  }
-
-}
-
 package android.content {
 
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
@@ -238,32 +213,6 @@ package android.net {
     ctor public LocalSocket(@NonNull java.io.FileDescriptor);
   }
 
-  public class NetworkIdentity {
-    method public int getOemManaged();
-    method public int getRatType();
-    method @Nullable public String getSubscriberId();
-    method public int getType();
-    method @Nullable public String getWifiNetworkKey();
-    method public boolean isDefaultNetwork();
-    method public boolean isMetered();
-    method public boolean isRoaming();
-  }
-
-  public static final class NetworkIdentity.Builder {
-    ctor public NetworkIdentity.Builder();
-    method @NonNull public android.net.NetworkIdentity build();
-    method @NonNull public android.net.NetworkIdentity.Builder clearRatType();
-    method @NonNull public android.net.NetworkIdentity.Builder setDefaultNetwork(boolean);
-    method @NonNull public android.net.NetworkIdentity.Builder setMetered(boolean);
-    method @NonNull public android.net.NetworkIdentity.Builder setNetworkStateSnapshot(@NonNull android.net.NetworkStateSnapshot);
-    method @NonNull public android.net.NetworkIdentity.Builder setOemManaged(int);
-    method @NonNull public android.net.NetworkIdentity.Builder setRatType(int);
-    method @NonNull public android.net.NetworkIdentity.Builder setRoaming(boolean);
-    method @NonNull public android.net.NetworkIdentity.Builder setSubscriberId(@Nullable String);
-    method @NonNull public android.net.NetworkIdentity.Builder setType(int);
-    method @NonNull public android.net.NetworkIdentity.Builder setWifiNetworkKey(@Nullable String);
-  }
-
   public class NetworkPolicyManager {
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getMultipathPreference(@NonNull android.net.Network);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getRestrictBackgroundStatus(int);
@@ -277,94 +226,6 @@ package android.net {
 
   public static interface NetworkPolicyManager.NetworkPolicyCallback {
     method public default void onUidBlockedReasonChanged(int, int);
-  }
-
-  public final class NetworkStateSnapshot implements android.os.Parcelable {
-    ctor public NetworkStateSnapshot(@NonNull android.net.Network, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @Nullable String, int);
-    method public int describeContents();
-    method public int getLegacyType();
-    method @NonNull public android.net.LinkProperties getLinkProperties();
-    method @NonNull public android.net.Network getNetwork();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
-    method @Nullable public String getSubscriberId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
-  }
-
-  public class NetworkStatsCollection {
-    method @NonNull public java.util.Map<android.net.NetworkStatsCollection.Key,android.net.NetworkStatsHistory> getEntries();
-  }
-
-  public static final class NetworkStatsCollection.Builder {
-    ctor public NetworkStatsCollection.Builder(long);
-    method @NonNull public android.net.NetworkStatsCollection.Builder addEntry(@NonNull android.net.NetworkStatsCollection.Key, @NonNull android.net.NetworkStatsHistory);
-    method @NonNull public android.net.NetworkStatsCollection build();
-  }
-
-  public static class NetworkStatsCollection.Key {
-    ctor public NetworkStatsCollection.Key(@NonNull java.util.Set<android.net.NetworkIdentity>, int, int, int);
-  }
-
-  public final class NetworkStatsHistory implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public java.util.List<android.net.NetworkStatsHistory.Entry> getEntries();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStatsHistory> CREATOR;
-  }
-
-  public static final class NetworkStatsHistory.Builder {
-    ctor public NetworkStatsHistory.Builder(long, int);
-    method @NonNull public android.net.NetworkStatsHistory.Builder addEntry(@NonNull android.net.NetworkStatsHistory.Entry);
-    method @NonNull public android.net.NetworkStatsHistory build();
-  }
-
-  public static final class NetworkStatsHistory.Entry {
-    ctor public NetworkStatsHistory.Entry(long, long, long, long, long, long, long);
-    method public long getActiveTime();
-    method public long getBucketStart();
-    method public long getOperations();
-    method public long getRxBytes();
-    method public long getRxPackets();
-    method public long getTxBytes();
-    method public long getTxPackets();
-  }
-
-  public final class NetworkTemplate implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getDefaultNetworkStatus();
-    method public int getMatchRule();
-    method public int getMeteredness();
-    method public int getOemManaged();
-    method public int getRatType();
-    method public int getRoaming();
-    method @NonNull public java.util.Set<java.lang.String> getSubscriberIds();
-    method @NonNull public java.util.Set<java.lang.String> getWifiNetworkKeys();
-    method public boolean matches(@NonNull android.net.NetworkIdentity);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkTemplate> CREATOR;
-    field public static final int MATCH_BLUETOOTH = 8; // 0x8
-    field public static final int MATCH_CARRIER = 10; // 0xa
-    field public static final int MATCH_ETHERNET = 5; // 0x5
-    field public static final int MATCH_MOBILE = 1; // 0x1
-    field public static final int MATCH_WIFI = 4; // 0x4
-    field public static final int NETWORK_TYPE_ALL = -1; // 0xffffffff
-    field public static final int OEM_MANAGED_ALL = -1; // 0xffffffff
-    field public static final int OEM_MANAGED_NO = 0; // 0x0
-    field public static final int OEM_MANAGED_PAID = 1; // 0x1
-    field public static final int OEM_MANAGED_PRIVATE = 2; // 0x2
-    field public static final int OEM_MANAGED_YES = -2; // 0xfffffffe
-  }
-
-  public static final class NetworkTemplate.Builder {
-    ctor public NetworkTemplate.Builder(int);
-    method @NonNull public android.net.NetworkTemplate build();
-    method @NonNull public android.net.NetworkTemplate.Builder setDefaultNetworkStatus(int);
-    method @NonNull public android.net.NetworkTemplate.Builder setMeteredness(int);
-    method @NonNull public android.net.NetworkTemplate.Builder setOemManaged(int);
-    method @NonNull public android.net.NetworkTemplate.Builder setRatType(int);
-    method @NonNull public android.net.NetworkTemplate.Builder setRoaming(int);
-    method @NonNull public android.net.NetworkTemplate.Builder setSubscriberIds(@NonNull java.util.Set<java.lang.String>);
-    method @NonNull public android.net.NetworkTemplate.Builder setWifiNetworkKeys(@NonNull java.util.Set<java.lang.String>);
   }
 
   public class NetworkWatchlistManager {
@@ -383,21 +244,6 @@ package android.net {
 
   public final class Proxy {
     method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
-  }
-
-  public class TrafficStats {
-    method public static void attachSocketTagger();
-    method public static void init(@NonNull android.content.Context);
-  }
-
-  public final class UnderlyingNetworkInfo implements android.os.Parcelable {
-    ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
-    method public int describeContents();
-    method @NonNull public String getInterface();
-    method public int getOwnerUid();
-    method @NonNull public java.util.List<java.lang.String> getUnderlyingInterfaces();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.UnderlyingNetworkInfo> CREATOR;
   }
 
   public class VpnManager {

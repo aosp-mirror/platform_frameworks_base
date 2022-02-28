@@ -170,9 +170,6 @@ Landroid/media/tv/ITvRemoteProvider$Stub;-><init>()V
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkPolicyManager;
 Landroid/net/INetworkScoreService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkScoreService;
-Landroid/net/INetworkStatsService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/net/INetworkStatsService$Stub$Proxy;->getMobileIfaces()[Ljava/lang/String;
-Landroid/net/INetworkStatsService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/net/INetworkStatsService;
 Landroid/os/IBatteryPropertiesRegistrar$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/IDeviceIdentifiersPolicyService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IDeviceIdentifiersPolicyService;
 Landroid/os/IDeviceIdleController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IDeviceIdleController;
