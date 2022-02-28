@@ -635,10 +635,6 @@ package android.app.prediction {
 
 package android.app.usage {
 
-  public class NetworkStatsManager {
-    method public void setPollForce(boolean);
-  }
-
   public class StorageStatsManager {
     method public boolean isQuotaSupported(@NonNull java.util.UUID);
     method public boolean isReservedSupported(@NonNull java.util.UUID);
@@ -1587,13 +1583,6 @@ package android.net {
 
   public class NetworkWatchlistManager {
     method @Nullable public byte[] getWatchlistConfigHash();
-  }
-
-  public class TrafficStats {
-    method public static long getLoopbackRxBytes();
-    method public static long getLoopbackRxPackets();
-    method public static long getLoopbackTxBytes();
-    method public static long getLoopbackTxPackets();
   }
 
 }

@@ -297,8 +297,6 @@ cc_library_shared {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
-                // TODO: delete when ConnectivityT moves to APEX.
-                "libframework-connectivity-tiramisu-jni",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers

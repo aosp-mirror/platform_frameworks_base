@@ -212,7 +212,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
         final long start = proto.start(tag);
 
         for (NetworkIdentity ident : this) {
-            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES);
+            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES_FIELD_NUMBER);
         }
 
         proto.end(start);

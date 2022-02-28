@@ -47,7 +47,6 @@ cc_library_static {
         "com_android_server_lights_LightsService.cpp",
         "com_android_server_location_GnssLocationProvider.cpp",
         "com_android_server_locksettings_SyntheticPasswordManager.cpp",
-        "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_powerstats_PowerStatsService.cpp",
         "com_android_server_hint_HintManagerService.cpp",
@@ -73,7 +72,6 @@ cc_library_static {
         "com_android_server_sensor_SensorService.cpp",
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
-        ":lib_networkStatsFactory_native",
     ],
 
     include_dirs: [
@@ -85,7 +83,6 @@ cc_library_static {
 
     header_libs: [
         "bionic_libc_platform_headers",
-        "bpf_connectivity_headers",
     ],
 }
 
@@ -140,9 +137,6 @@ cc_defaults {
         "libhidlbase",
         "libutils",
         "libhwui",
-        "libbpf_android",
-        "libnetdutils",
-        "libnetworkstats",
         "libpsi",
         "libdataloader",
         "libincfs",
@@ -202,13 +196,6 @@ cc_defaults {
             ],
         },
     },
-}
-
-filegroup {
-    name: "lib_networkStatsFactory_native",
-    srcs: [
-        "com_android_server_net_NetworkStatsFactory.cpp",
-    ],
 }
 
 filegroup {
