@@ -158,7 +158,6 @@ filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
         ":framework-connectivity-ethernet-sources",
-        ":framework-connectivity-netstats-sources",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -167,6 +166,7 @@ filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
         ":framework-connectivity-ipsec-sources",
+        ":framework-connectivity-netstats-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],
@@ -194,15 +194,12 @@ cc_library_shared {
         "jni/onload.cpp",
     ],
     shared_libs: [
+        "libandroid",
         "liblog",
-    ],
-    static_libs: [
-        "libnativehelper_compat_libc++",
+        "libnativehelper",
     ],
     stl: "none",
     apex_available: [
         "com.android.tethering",
-        // TODO: remove when ConnectivityT moves to APEX.
-        "//apex_available:platform",
     ],
 }
