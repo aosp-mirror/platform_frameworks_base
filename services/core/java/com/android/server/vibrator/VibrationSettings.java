@@ -347,24 +347,19 @@ final class VibrationSettings {
      * Return {@code true} if the device should vibrate for current ringer mode.
      *
      * <p>This checks the current {@link AudioManager#getRingerModeInternal()} against user settings
-     * for touch and ringtone usages only. All other usages are allowed by this method.
+     * for ringtone usage only. All other usages are allowed by this method.
      */
     @GuardedBy("mLock")
     private boolean shouldVibrateForRingerModeLocked(@VibrationAttributes.Usage int usageHint) {
+        if (usageHint != USAGE_RINGTONE) {
+            // Only ringtone vibrations are disabled when phone is on silent mode.
+            return true;
+        }
         // If audio manager was not loaded yet then assume most restrictive mode.
         int ringerMode = (mAudioManager == null)
                 ? AudioManager.RINGER_MODE_SILENT
                 : mAudioManager.getRingerModeInternal();
-
-        switch (usageHint) {
-            case USAGE_TOUCH:
-            case USAGE_RINGTONE:
-                // Touch feedback and ringtone disabled when phone is on silent mode.
-                return ringerMode != AudioManager.RINGER_MODE_SILENT;
-            default:
-                // All other usages ignore ringer mode settings.
-                return true;
-        }
+        return ringerMode != AudioManager.RINGER_MODE_SILENT;
     }
 
     /** Updates all vibration settings and triggers registered listeners. */
