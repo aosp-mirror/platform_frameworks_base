@@ -47,7 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -108,17 +108,17 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
 
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            CommandQueue commandQueue, Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
             PowerManager powerManager) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mWarnings = warningsUI;
         mEnhancedEstimates = enhancedEstimates;
         mPowerManager = powerManager;
@@ -712,8 +712,10 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-                if (!statusBarOptional.map(StatusBar::isDeviceInVrMode).orElse(false)) {
+                final Optional<CentralSurfaces> centralSurfacesOptional =
+                        mCentralSurfacesOptionalLazy.get();
+                if (!centralSurfacesOptional.map(CentralSurfaces::isDeviceInVrMode)
+                        .orElse(false)) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

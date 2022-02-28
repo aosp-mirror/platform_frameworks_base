@@ -31,11 +31,11 @@ import com.android.systemui.statusbar.notification.collection.render.StatusBarNo
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
+import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.phone.SplitShadeHeaderController;
-import com.android.systemui.statusbar.phone.StatusBarCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
 import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
@@ -52,7 +52,7 @@ import dagger.Subcomponent;
 
 /**
  * Dagger subcomponent for classes (semi-)related to the status bar. The component is created once
- * inside {@link com.android.systemui.statusbar.phone.StatusBar} and never re-created.
+ * inside {@link com.android.systemui.statusbar.phone.CentralSurfaces} and never re-created.
  *
  * TODO(b/197137564): This should likely be re-factored a bit. It includes classes that aren't
  * directly related to status bar functionality, like multiple notification classes. And, the fact
@@ -66,27 +66,26 @@ import dagger.Subcomponent;
         StatusBarNotificationActivityStarterModule.class,
         StatusBarNotificationPresenterModule.class,
 })
-@StatusBarComponent.StatusBarScope
-public interface StatusBarComponent {
-
+@CentralSurfacesComponent.CentralSurfacesScope
+public interface CentralSurfacesComponent {
     /**
-     * Builder for {@link StatusBarComponent}.
+     * Builder for {@link CentralSurfacesComponent}.
      */
     @Subcomponent.Factory
     interface Factory {
-        StatusBarComponent create();
+        CentralSurfacesComponent create();
     }
 
     /**
-     * Scope annotation for singleton items within the StatusBarComponent.
+     * Scope annotation for singleton items within the CentralSurfacesComponent.
      */
     @Documented
     @Retention(RUNTIME)
     @Scope
-    @interface StatusBarScope {}
+    @interface CentralSurfacesScope {}
 
     /**
-     * Performs initialization logic after {@link StatusBarComponent} has been constructed.
+     * Performs initialization logic after {@link CentralSurfacesComponent} has been constructed.
      */
     interface Startable {
         void start();
@@ -130,9 +129,9 @@ public interface StatusBarComponent {
     StatusBarHeadsUpChangeListener getStatusBarHeadsUpChangeListener();
 
     /**
-     * Creates a StatusBarCommandQueueCallbacks.
+     * Creates a CentralSurfacesCommandQueueCallbacks.
      */
-    StatusBarCommandQueueCallbacks getStatusBarCommandQueueCallbacks();
+    CentralSurfacesCommandQueueCallbacks getCentralSurfacesCommandQueueCallbacks();
 
     /**
      * Creates a SplitShadeHeaderController.
@@ -152,7 +151,7 @@ public interface StatusBarComponent {
     StatusBarInitializer getStatusBarInitializer();
 
     /**
-     * Set of startables to be run after a StatusBarComponent has been constructed.
+     * Set of startables to be run after a CentralSurfacesComponent has been constructed.
      */
     Set<Startable> getStartables();
 

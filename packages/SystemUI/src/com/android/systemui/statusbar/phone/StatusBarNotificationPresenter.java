@@ -14,9 +14,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.StatusBar.CLOSE_PANEL_WHEN_EMPTIED;
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
-import static com.android.systemui.statusbar.phone.StatusBar.MULTIUSER_DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_WHEN_EMPTIED;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -71,7 +71,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSav
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -79,7 +79,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-@StatusBarComponent.StatusBarScope
+@CentralSurfacesComponent.CentralSurfacesScope
 class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
         NotificationRowBinderImpl.BindRowCallback,
@@ -104,7 +104,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final DozeScrimController mDozeScrimController;
     private final ScrimController mScrimController;
     private final KeyguardIndicationController mKeyguardIndicationController;
-    private final StatusBar mStatusBar;
+    private final CentralSurfaces mCentralSurfaces;
     private final ShadeController mShadeController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final CommandQueue mCommandQueue;
@@ -135,7 +135,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
-            StatusBar statusBar,
+            CentralSurfaces centralSurfaces,
             ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
@@ -162,7 +162,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mDynamicPrivacyController = dynamicPrivacyController;
         mKeyguardIndicationController = keyguardIndicationController;
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mShadeController = shadeController;
         mShadeTransitionController = shadeTransitionController;
         mCommandQueue = commandQueue;
@@ -352,7 +352,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             updateNotificationViews("user switched");
         }
         mMediaManager.clearCurrentMediaNotification();
-        mStatusBar.setLockscreenUser(newUserId);
+        mCentralSurfaces.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);
     }
 
@@ -406,7 +406,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     public void onExpandClicked(NotificationEntry clickedEntry, View clickedView,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
-        mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK");
+        mCentralSurfaces.wakeUpIfDozing(
+                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK");
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());
@@ -474,7 +475,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         @Override
         public boolean suppressAwakeHeadsUp(NotificationEntry entry) {
             final StatusBarNotification sbn = entry.getSbn();
-            if (mStatusBar.isOccluded()) {
+            if (mCentralSurfaces.isOccluded()) {
                 boolean devicePublic = mLockscreenUserManager
                         .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
                 boolean userPublic = devicePublic
@@ -497,7 +498,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 // we don't allow head-up on the lockscreen (unless there's a
                 // "showWhenLocked" activity currently showing)  if
                 // the potential HUN has a fullscreen intent
-                if (mKeyguardStateController.isShowing() && !mStatusBar.isOccluded()) {
+                if (mKeyguardStateController.isShowing() && !mCentralSurfaces.isOccluded()) {
                     if (DEBUG) {
                         Log.d(TAG, "No heads up: entry has fullscreen intent on lockscreen "
                                 + sbn.getKey());
@@ -522,7 +523,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
         @Override
         public boolean suppressInterruptions(NotificationEntry entry) {
-            return mStatusBar.areNotificationAlertsDisabled();
+            return mCentralSurfaces.areNotificationAlertsDisabled();
         }
     };
 }

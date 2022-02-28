@@ -59,7 +59,7 @@ import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -70,9 +70,9 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 /** */
-@StatusBarComponent.StatusBarScope
-public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
-    private final StatusBar mStatusBar;
+@CentralSurfacesComponent.CentralSurfacesScope
+public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
+    private final CentralSurfaces mCentralSurfaces;
     private final Context mContext;
     private final ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
@@ -105,8 +105,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     @Inject
-    StatusBarCommandQueueCallbacks(
-            StatusBar statusBar,
+    CentralSurfacesCommandQueueCallbacks(
+            CentralSurfaces centralSurfaces,
             Context context,
             @Main Resources resources,
             ShadeController shadeController,
@@ -133,7 +133,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId) {
 
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mContext = context;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
@@ -172,12 +172,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         if (!containsType(types, ITYPE_STATUS_BAR)) {
             return;
         }
-        mStatusBar.clearTransient();
+        mCentralSurfaces.clearTransient();
     }
 
     @Override
     public void addQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mStatusBar.getQSPanelController();
+        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null && qsPanelController.getHost() != null) {
             qsPanelController.getHost().addTile(tile);
         }
@@ -185,7 +185,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void remQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mStatusBar.getQSPanelController();
+        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null && qsPanelController.getHost() != null) {
             qsPanelController.getHost().removeTile(tile);
         }
@@ -193,7 +193,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void clickTile(ComponentName tile) {
-        QSPanelController qsPanelController = mStatusBar.getQSPanelController();
+        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null) {
             qsPanelController.clickTile(tile);
         }
@@ -207,9 +207,9 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void animateExpandNotificationsPanel() {
-        if (StatusBar.SPEW) {
-            Log.d(StatusBar.TAG,
-                    "animateExpand: mExpandedVisible=" + mStatusBar.isExpandedVisible());
+        if (CentralSurfaces.SPEW) {
+            Log.d(CentralSurfaces.TAG,
+                    "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
             return;
@@ -220,9 +220,9 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void animateExpandSettingsPanel(@Nullable String subPanel) {
-        if (StatusBar.SPEW) {
-            Log.d(StatusBar.TAG,
-                    "animateExpand: mExpandedVisible=" + mStatusBar.isExpandedVisible());
+        if (CentralSurfaces.SPEW) {
+            Log.d(CentralSurfaces.TAG,
+                    "animateExpand: mExpandedVisible=" + mCentralSurfaces.isExpandedVisible());
         }
         if (!mCommandQueue.panelsEnabled()) {
             return;
@@ -244,7 +244,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void dismissKeyboardShortcutsMenu() {
-        mStatusBar.resendMessage(StatusBar.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
+        mCentralSurfaces.resendMessage(CentralSurfaces.MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU);
     }
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
@@ -257,22 +257,22 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
         int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
-        Log.d(StatusBar.TAG,
+        Log.d(CentralSurfaces.TAG,
                 mDisableFlagsLogger.getDisableFlagsString(
                         /* old= */ new DisableFlagsLogger.DisableState(
-                                mStatusBar.getDisabled1(), mStatusBar.getDisabled2()),
+                                mCentralSurfaces.getDisabled1(), mCentralSurfaces.getDisabled2()),
                         /* new= */ new DisableFlagsLogger.DisableState(
                                 state1, state2BeforeAdjustment),
                         /* newStateAfterLocalModification= */ new DisableFlagsLogger.DisableState(
                                 state1, state2)));
 
-        final int old1 = mStatusBar.getDisabled1();
+        final int old1 = mCentralSurfaces.getDisabled1();
         final int diff1 = state1 ^ old1;
-        mStatusBar.setDisabled1(state1);
+        mCentralSurfaces.setDisabled1(state1);
 
-        final int old2 = mStatusBar.getDisabled2();
+        final int old2 = mCentralSurfaces.getDisabled2();
         final int diff2 = state2 ^ old2;
-        mStatusBar.setDisabled2(state2);
+        mCentralSurfaces.setDisabled2(state2);
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
@@ -281,17 +281,17 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         }
 
         if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
-            if (mStatusBar.areNotificationAlertsDisabled()) {
+            if (mCentralSurfaces.areNotificationAlertsDisabled()) {
                 mHeadsUpManager.releaseAllImmediately();
             }
         }
 
         if ((diff2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) {
-            mStatusBar.updateQsExpansionEnabled();
+            mCentralSurfaces.updateQsExpansionEnabled();
         }
 
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
-            mStatusBar.updateQsExpansionEnabled();
+            mCentralSurfaces.updateQsExpansionEnabled();
             if ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
                 mShadeController.animateCollapsePanels();
             }
@@ -304,8 +304,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
      */
     @Override
     public void handleSystemKey(int key) {
-        if (StatusBar.SPEW) {
-            Log.d(StatusBar.TAG, "handleNavigationKey: " + key);
+        if (CentralSurfaces.SPEW) {
+            Log.d(CentralSurfaces.TAG, "handleNavigationKey: " + key);
         }
         if (!mCommandQueue.panelsEnabled() || !mKeyguardUpdateMonitor.isDeviceInteractive()
                 || mKeyguardStateController.isShowing() && !mKeyguardStateController.isOccluded()) {
@@ -341,81 +341,82 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void onCameraLaunchGestureDetected(int source) {
-        mStatusBar.setLastCameraLaunchSource(source);
-        if (mStatusBar.isGoingToSleep()) {
-            if (StatusBar.DEBUG_CAMERA_LIFT) {
-                Slog.d(StatusBar.TAG, "Finish going to sleep before launching camera");
+        mCentralSurfaces.setLastCameraLaunchSource(source);
+        if (mCentralSurfaces.isGoingToSleep()) {
+            if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
+                Slog.d(CentralSurfaces.TAG, "Finish going to sleep before launching camera");
             }
-            mStatusBar.setLaunchCameraOnFinishedGoingToSleep(true);
+            mCentralSurfaces.setLaunchCameraOnFinishedGoingToSleep(true);
             return;
         }
         if (!mNotificationPanelViewController.canCameraGestureBeLaunched()) {
-            if (StatusBar.DEBUG_CAMERA_LIFT) {
-                Slog.d(StatusBar.TAG, "Can't launch camera right now");
+            if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
+                Slog.d(CentralSurfaces.TAG, "Can't launch camera right now");
             }
             return;
         }
-        if (!mStatusBar.isDeviceInteractive()) {
+        if (!mCentralSurfaces.isDeviceInteractive()) {
             mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                     "com.android.systemui:CAMERA_GESTURE");
         }
         vibrateForCameraGesture();
 
         if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP) {
-            Log.v(StatusBar.TAG, "Camera launch");
+            Log.v(CentralSurfaces.TAG, "Camera launch");
             mKeyguardUpdateMonitor.onCameraLaunched();
         }
 
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             final Intent cameraIntent = CameraIntents.getInsecureCameraIntent(mContext);
-            mStatusBar.startActivityDismissingKeyguard(cameraIntent,
+            mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
                     null /* animationController */);
         } else {
-            if (!mStatusBar.isDeviceInteractive()) {
+            if (!mCentralSurfaces.isDeviceInteractive()) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
                 // comes on.
-                mStatusBar.acquireGestureWakeLock(StatusBar.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+                mCentralSurfaces.acquireGestureWakeLock(
+                        CentralSurfaces.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
             }
             if (isWakingUpOrAwake()) {
-                if (StatusBar.DEBUG_CAMERA_LIFT) {
-                    Slog.d(StatusBar.TAG, "Launching camera");
+                if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
+                    Slog.d(CentralSurfaces.TAG, "Launching camera");
                 }
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
                 mNotificationPanelViewController.launchCamera(
-                        mStatusBar.isDeviceInteractive() /* animate */, source);
-                mStatusBar.updateScrimController();
+                        mCentralSurfaces.isDeviceInteractive() /* animate */, source);
+                mCentralSurfaces.updateScrimController();
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
                 // we will dismiss us too early since we are waiting on an activity to be drawn and
                 // incorrectly get notified because of the screen on event (which resumes and pauses
                 // some activities)
-                if (StatusBar.DEBUG_CAMERA_LIFT) {
-                    Slog.d(StatusBar.TAG, "Deferring until screen turns on");
+                if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
+                    Slog.d(CentralSurfaces.TAG, "Deferring until screen turns on");
                 }
-                mStatusBar.setLaunchCameraOnFinishedWaking(true);
+                mCentralSurfaces.setLaunchCameraOnFinishedWaking(true);
             }
         }
     }
 
     @Override
     public void onEmergencyActionLaunchGestureDetected() {
-        Intent emergencyIntent = mStatusBar.getEmergencyActionIntent();
+        Intent emergencyIntent = mCentralSurfaces.getEmergencyActionIntent();
 
         if (emergencyIntent == null) {
-            Log.wtf(StatusBar.TAG, "Couldn't find an app to process the emergency intent.");
+            Log.wtf(CentralSurfaces.TAG, "Couldn't find an app to process the emergency intent.");
             return;
         }
 
         if (isGoingToSleep()) {
-            mStatusBar.setLaunchEmergencyActionOnFinishedGoingToSleep(true);
+            mCentralSurfaces.setLaunchEmergencyActionOnFinishedGoingToSleep(true);
             return;
         }
 
-        if (!mStatusBar.isDeviceInteractive()) {
+        if (!mCentralSurfaces.isDeviceInteractive()) {
             mPowerManager.wakeUp(SystemClock.uptimeMillis(),
                     PowerManager.WAKE_REASON_GESTURE,
                     "com.android.systemui:EMERGENCY_GESTURE");
@@ -424,17 +425,18 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         // app-side haptic experimentation.
 
         if (!mStatusBarKeyguardViewManager.isShowing()) {
-            mStatusBar.startActivityDismissingKeyguard(emergencyIntent,
+            mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
                     null /* animationController */);
             return;
         }
 
-        if (!mStatusBar.isDeviceInteractive()) {
+        if (!mCentralSurfaces.isDeviceInteractive()) {
             // Avoid flickering of the scrim when we instant launch the camera and the bouncer
             // comes on.
-            mStatusBar.acquireGestureWakeLock(StatusBar.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+            mCentralSurfaces.acquireGestureWakeLock(
+                    CentralSurfaces.LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
         }
 
         if (isWakingUpOrAwake()) {
@@ -448,12 +450,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         // we will dismiss us too early since we are waiting on an activity to be drawn and
         // incorrectly get notified because of the screen on event (which resumes and pauses
         // some activities)
-        mStatusBar.setLaunchEmergencyActionOnFinishedWaking(true);
+        mCentralSurfaces.setLaunchEmergencyActionOnFinishedWaking(true);
     }
 
     @Override
     public void onRecentsAnimationStateChanged(boolean running) {
-        mStatusBar.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
+        mCentralSurfaces.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
     }
 
 
@@ -464,12 +466,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         if (displayId != mDisplayId) {
             return;
         }
-        boolean barModeChanged = mStatusBar.setAppearance(appearance);
+        boolean barModeChanged = mCentralSurfaces.setAppearance(appearance);
 
         mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
-                mStatusBar.getBarMode(), navbarColorManagedByIme);
+                mCentralSurfaces.getBarMode(), navbarColorManagedByIme);
 
-        mStatusBar.updateBubblesVisibility();
+        mCentralSurfaces.updateBubblesVisibility();
         mStatusBarStateController.setSystemBarAttributes(
                 appearance, behavior, requestedVisibilities, packageName);
     }
@@ -483,12 +485,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         if (!containsType(types, ITYPE_STATUS_BAR)) {
             return;
         }
-        mStatusBar.showTransientUnchecked();
+        mCentralSurfaces.showTransientUnchecked();
     }
 
     @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
-        mStatusBar.resendMessage(new StatusBar.KeyboardShortcutsMessage(deviceId));
+        mCentralSurfaces.resendMessage(new CentralSurfaces.KeyboardShortcutsMessage(deviceId));
     }
 
     @Override
@@ -504,12 +506,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void showPinningEnterExitToast(boolean entering) {
-        mStatusBar.showPinningEnterExitToast(entering);
+        mCentralSurfaces.showPinningEnterExitToast(entering);
     }
 
     @Override
     public void showPinningEscapeToast() {
-        mStatusBar.showPinningEscapeToast();
+        mCentralSurfaces.showPinningEscapeToast();
     }
 
     @Override
@@ -519,12 +521,12 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             return;
         }
         // Show screen pinning request, since this comes from an app, show 'no thanks', button.
-        mStatusBar.showScreenPinningRequest(taskId, true);
+        mCentralSurfaces.showScreenPinningRequest(taskId, true);
     }
 
     @Override
     public void showWirelessChargingAnimation(int batteryLevel) {
-        mStatusBar.showWirelessChargingAnimation(batteryLevel);
+        mCentralSurfaces.showWirelessChargingAnimation(batteryLevel);
     }
 
     @Override
@@ -539,7 +541,7 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
 
     @Override
     public void togglePanel() {
-        if (mStatusBar.isPanelExpanded()) {
+        if (mCentralSurfaces.isPanelExpanded()) {
             mShadeController.animateCollapsePanels();
         } else {
             animateExpandNotificationsPanel();
@@ -576,8 +578,8 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
             // Make sure to pass -1 for repeat so VibratorManagerService doesn't stop us when going
             // to sleep.
             return VibrationEffect.createWaveform(
-                    StatusBar.CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
-                    StatusBar.CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
+                    CentralSurfaces.CAMERA_LAUNCH_GESTURE_VIBRATION_TIMINGS,
+                    CentralSurfaces.CAMERA_LAUNCH_GESTURE_VIBRATION_AMPLITUDES,
                     /* repeat= */ -1);
         }
 

@@ -113,7 +113,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
@@ -233,7 +233,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(MetricsLogger.class),
                         mock(StatusBarNotificationActivityStarterLogger.class),
                         mOnUserInteractionCallback,
-                        mStatusBar,
+                        mCentralSurfaces,
                         mock(NotificationPresenter.class),
                         mock(NotificationPanelViewController.class),
                         mActivityLaunchAnimator,
@@ -267,7 +267,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         sbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mStatusBar.isOccluded()).thenReturn(true);
+        when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mNotificationRow);
@@ -326,7 +326,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = null;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mStatusBar.isOccluded()).thenReturn(true);
+        when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
@@ -356,7 +356,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mStatusBar.isOccluded()).thenReturn(true);
+        when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
@@ -400,6 +400,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mNotificationActivityStarter.handleFullScreenIntent(entry);
 
         // THEN display should try wake up for the full screen intent
-        verify(mStatusBar).wakeUpForFullScreenIntent();
+        verify(mCentralSurfaces).wakeUpForFullScreenIntent();
     }
 }

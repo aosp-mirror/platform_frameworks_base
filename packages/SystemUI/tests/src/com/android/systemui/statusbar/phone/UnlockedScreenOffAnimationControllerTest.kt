@@ -61,7 +61,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var statusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
@@ -93,8 +93,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 powerManager,
                 handler = handler
         )
-        controller.initialize(statusBar, lightRevealScrim)
-        `when`(statusBar.notificationPanelViewController).thenReturn(
+        controller.initialize(mCentralSurfaces, lightRevealScrim)
+        `when`(mCentralSurfaces.notificationPanelViewController).thenReturn(
             notificationPanelViewController)
 
         // Screen off does not run if the panel is expanded, so we should say it's collapsed to test

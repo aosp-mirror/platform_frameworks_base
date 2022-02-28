@@ -60,10 +60,10 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
@@ -87,12 +87,13 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * This module provides instances needed to construct {@link StatusBar}. These are moved to this
- * separate from {@link StatusBarModule} module so that components that wish to build their own
- * version of StatusBar can include just dependencies, without injecting StatusBar itself.
+ * This module provides instances needed to construct {@link CentralSurfaces}. These are moved to
+ * this separate from {@link CentralSurfacesModule} module so that components that wish to build
+ * their own version of CentralSurfaces can include just dependencies, without injecting
+ * CentralSurfaces itself.
  */
 @Module
-public interface StatusBarDependenciesModule {
+public interface CentralSurfacesDependenciesModule {
     /** */
     @SysUISingleton
     @Provides
@@ -104,7 +105,7 @@ public interface StatusBarDependenciesModule {
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
             RemoteInputNotificationRebuilder rebuilder,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
@@ -119,7 +120,7 @@ public interface StatusBarDependenciesModule {
                 visibilityProvider,
                 notificationEntryManager,
                 rebuilder,
-                statusBarOptionalLazy,
+                centralSurfacesOptionalLazy,
                 statusBarStateController,
                 mainHandler,
                 remoteInputUriController,
@@ -133,7 +134,7 @@ public interface StatusBarDependenciesModule {
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
             Context context,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
@@ -147,7 +148,7 @@ public interface StatusBarDependenciesModule {
             DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
-                statusBarOptionalLazy,
+                centralSurfacesOptionalLazy,
                 notificationShadeWindowController,
                 visibilityProvider,
                 notificationEntryManager,
