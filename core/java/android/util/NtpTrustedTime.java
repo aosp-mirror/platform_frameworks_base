@@ -81,7 +81,16 @@ public class NtpTrustedTime implements TrustedTime {
 
         /** Calculates and returns the age of this result. */
         public long getAgeMillis() {
-            return SystemClock.elapsedRealtime() - mElapsedRealtimeMillis;
+            return getAgeMillis(SystemClock.elapsedRealtime());
+        }
+
+        /**
+         * Calculates and returns the age of this result relative to currentElapsedRealtimeMillis.
+         *
+         * @param currentElapsedRealtimeMillis - reference elapsed real time
+         */
+        public long getAgeMillis(long currentElapsedRealtimeMillis) {
+            return currentElapsedRealtimeMillis - mElapsedRealtimeMillis;
         }
 
         @Override
