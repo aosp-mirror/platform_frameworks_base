@@ -25524,7 +25524,7 @@ package android.net {
     field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
     field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
     field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
-    field public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    field public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
