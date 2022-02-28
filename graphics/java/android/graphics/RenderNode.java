@@ -971,6 +971,23 @@ public final class RenderNode {
     }
 
     /**
+     * Configure the {@link android.graphics.RenderEffect} to apply to the backdrop contents of
+     * this RenderNode. This will apply a visual effect to the result of the backdrop contents
+     * of this RenderNode before the RenderNode is drawn into the destination. For example if
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, Shader.TileMode)}
+     * is provided, the previous content behind this RenderNode will be blurred before the
+     * RenderNode is drawn in to the destination.
+     * @param renderEffect to be applied to the backdrop contents of this RenderNode. Passing
+     *          null clears all previously configured RenderEffects
+     * @return True if the value changed, false if the new value was the same as the previous value.
+     * @hide
+     */
+    public boolean setBackdropRenderEffect(@Nullable RenderEffect renderEffect) {
+        return nSetBackdropRenderEffect(mNativeRenderNode,
+                renderEffect != null ? renderEffect.getNativeInstance() : 0);
+    }
+
+    /**
      * Returns the translucency level of this display list.
      *
      * @return A value between 0.0f and 1.0f
@@ -1795,6 +1812,9 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nSetRenderEffect(long renderNode, long renderEffect);
+
+    @CriticalNative
+    private static native boolean nSetBackdropRenderEffect(long renderNode, long renderEffect);
 
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,
