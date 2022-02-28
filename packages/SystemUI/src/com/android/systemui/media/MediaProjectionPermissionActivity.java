@@ -38,12 +38,10 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
 public class MediaProjectionPermissionActivity extends Activity
@@ -56,7 +54,7 @@ public class MediaProjectionPermissionActivity extends Activity
     private int mUid;
     private IMediaProjectionManager mService;
 
-    private AlertDialog mDialog;
+    private SystemUIDialog mDialog;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -143,25 +141,18 @@ public class MediaProjectionPermissionActivity extends Activity
             dialogTitle = getString(R.string.media_projection_dialog_title, appName);
         }
 
-        View dialogTitleView = View.inflate(this, R.layout.media_projection_dialog_title, null);
-        TextView titleText = (TextView) dialogTitleView.findViewById(R.id.dialog_title);
-        titleText.setText(dialogTitle);
-
-        mDialog = new AlertDialog.Builder(this)
-                .setCustomTitle(dialogTitleView)
-                .setMessage(dialogText)
-                .setPositiveButton(R.string.media_projection_action_text, this)
-                .setNegativeButton(android.R.string.cancel, this)
-                .setOnCancelListener(this)
-                .create();
+        mDialog = new SystemUIDialog(this);
+        mDialog.setTitle(dialogTitle);
+        mDialog.setIcon(R.drawable.ic_media_projection_permission);
+        mDialog.setMessage(dialogText);
+        mDialog.setPositiveButton(R.string.media_projection_action_text, this);
+        mDialog.setNeutralButton(android.R.string.cancel, this);
+        mDialog.setOnCancelListener(this);
 
         mDialog.create();
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
         final Window w = mDialog.getWindow();
-        // QS is not closed when pressing CastTile. Match the type of the dialog shown from the
-        // tile.
-        w.setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mDialog.show();
