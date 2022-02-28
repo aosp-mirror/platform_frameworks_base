@@ -3852,7 +3852,7 @@ public final class Parcel {
      */
     @NonNull
     public <T> List<T> readParcelableList(@NonNull List<T> list,
-            @Nullable ClassLoader cl, @NonNull Class<T> clazz) {
+            @Nullable ClassLoader cl, @NonNull Class<? extends T> clazz) {
         Objects.requireNonNull(list);
         Objects.requireNonNull(clazz);
         return readParcelableListInternal(list, cl, clazz);
@@ -3863,7 +3863,7 @@ public final class Parcel {
      */
     @NonNull
     private <T> List<T> readParcelableListInternal(@NonNull List<T> list,
-            @Nullable ClassLoader cl, @Nullable Class<T> clazz) {
+            @Nullable ClassLoader cl, @Nullable Class<? extends T> clazz) {
         final int n = readInt();
         if (n == -1) {
             list.clear();
