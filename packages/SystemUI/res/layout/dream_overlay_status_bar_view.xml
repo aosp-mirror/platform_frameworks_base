@@ -29,7 +29,6 @@
         android:layout_width="@dimen/dream_overlay_notification_indicator_size"
         android:layout_height="@dimen/dream_overlay_notification_indicator_size"
         android:visibility="gone"
-        android:contentDescription="@string/dream_overlay_status_bar_notification_indicator"
         app:dotColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -68,7 +67,7 @@
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/dream_overlay_status_icon_margin"
-            android:src="@drawable/ic_remove_circle"
+            android:src="@drawable/ic_qs_dnd_on"
             android:tint="@android:color/white"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_priority_mode" />

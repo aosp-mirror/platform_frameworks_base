@@ -592,7 +592,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * The window which receives input from the input method. This is also a candidate of the
      * input method control target.
      */
-    private WindowState mImeInputTarget;
+    private InputTarget mImeInputTarget;
+
+    /**
+     * The last ime input target processed from setImeLayeringTargetInner
+     * this is to ensure we update the control target in the case when the IME
+     * target changes while the IME layering target stays the same, for example
+     * the case of the IME moving to a SurfaceControlViewHost backed EmbeddedWindow
+     */
+    private InputTarget mLastImeInputTarget;
 
     /**
      * This controls the visibility and animation of the input method window.
@@ -608,14 +616,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     static final int IME_TARGET_LAYERING = 0;
 
     /**
-     * Used by {@link #getImeTarget} to return the IME target which received the input connection
-     * from IME.
-     *
-     * @see #mImeInputTarget
-     */
-    static final int IME_TARGET_INPUT = 1;
-
-    /**
      * Used by {@link #getImeTarget} to return the IME target which controls the IME insets
      * visibility and animation.
      *
@@ -625,7 +625,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @IntDef(flag = false, prefix = { "IME_TARGET_" }, value = {
             IME_TARGET_LAYERING,
-            IME_TARGET_INPUT,
             IME_TARGET_CONTROL,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -3308,7 +3307,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mImeLayeringTarget.dumpDebug(proto, INPUT_METHOD_TARGET, logLevel);
         }
         if (mImeInputTarget != null) {
-            mImeInputTarget.dumpDebug(proto, INPUT_METHOD_INPUT_TARGET, logLevel);
+            mImeInputTarget.dumpProto(proto, INPUT_METHOD_INPUT_TARGET, logLevel);
         }
         if (mImeControlTarget != null
                 && mImeControlTarget.getWindow() != null) {
@@ -3871,7 +3870,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private boolean isImeControlledByApp() {
-        return mImeInputTarget != null && !mImeInputTarget.inMultiWindowMode();
+        return mImeInputTarget != null && mImeInputTarget.shouldControlIme();
     }
 
     boolean shouldImeAttachedToApp() {
@@ -3934,17 +3933,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      *
      * @param type The type of the IME target.
      * @see #IME_TARGET_LAYERING
-     * @see #IME_TARGET_INPUT
      * @see #IME_TARGET_CONTROL
      */
     InsetsControlTarget getImeTarget(@InputMethodTarget int type) {
         switch (type) {
             case IME_TARGET_LAYERING: return mImeLayeringTarget;
-            case IME_TARGET_INPUT: return mImeInputTarget;
             case IME_TARGET_CONTROL: return mImeControlTarget;
             default:
                 return null;
         }
+    }
+
+    InputTarget getImeInputTarget() {
+        return mImeInputTarget;
     }
 
     // IMPORTANT: When introducing new dependencies in this method, make sure that
@@ -3995,9 +3996,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      *               placed at its parent's surface.
      */
     private void setImeLayeringTargetInner(@Nullable WindowState target) {
-        if (target == mImeLayeringTarget) {
+        /**
+         * This function is also responsible for updating the IME control target
+         * and so in the case where the IME layering target does not change
+         * but the Input target does (for example, IME moving to a SurfaceControlViewHost
+         * we have to continue executing this function, otherwise there is no work
+         * to do.
+         */
+        if (target == mImeLayeringTarget && mLastImeInputTarget == mImeInputTarget) {
             return;
         }
+        mLastImeInputTarget = mImeInputTarget;
+
         // If the IME target is the input target, before it changes, prepare the IME screenshot
         // for the last IME target when its task is applying app transition. This is for the
         // better IME transition to keep IME visibility when transitioning to the next task.
@@ -4039,9 +4049,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @VisibleForTesting
-    void setImeInputTarget(WindowState target) {
+    void setImeInputTarget(InputTarget target) {
         mImeInputTarget = target;
-        boolean canScreenshot = mImeInputTarget == null || !mImeInputTarget.isSecureLocked();
+        boolean canScreenshot = mImeInputTarget == null || mImeInputTarget.canScreenshotIme();
         if (mImeWindowsContainer.setCanScreenshot(canScreenshot)) {
             mWmService.requestTraversal();
         }
@@ -4157,7 +4167,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * The IME input target is the window which receives input from IME. It is also a candidate
      * which controls the visibility and animation of the input method window.
      */
-    void updateImeInputAndControlTarget(WindowState target) {
+    void updateImeInputAndControlTarget(InputTarget target) {
         if (mImeInputTarget != target) {
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             setImeInputTarget(target);
@@ -4167,8 +4177,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         // Unfreeze IME insets after the new target updated, in case updateAboveInsetsState may
         // deliver unrelated IME insets change to the non-IME requester.
-        if (target != null && target.mActivityRecord != null) {
-            target.mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
+        if (target != null) {
+            target.unfreezeInsetsAfterStartInput();
         }
     }
 
@@ -4226,11 +4236,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     InsetsControlTarget computeImeControlTarget() {
         if (!isImeControlledByApp() && mRemoteInsetsControlTarget != null
                 || (mImeInputTarget != null
-                        && getImeHostOrFallback(mImeInputTarget.getWindow())
-                                == mRemoteInsetsControlTarget)) {
+                        && getImeHostOrFallback(mImeInputTarget.getWindowState())
+                               == mRemoteInsetsControlTarget)) {
             return mRemoteInsetsControlTarget;
         } else {
-            return mImeInputTarget;
+            return mImeInputTarget != null ? mImeInputTarget.getWindowState() : null;
         }
     }
 
@@ -4243,7 +4253,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
         if (shouldImeAttachedToApp()) {
-            if (mImeLayeringTarget.mActivityRecord != mImeInputTarget.mActivityRecord) {
+            if (mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord()) {
                 // Do not change parent if the window hasn't requested IME.
                 return null;
             }
