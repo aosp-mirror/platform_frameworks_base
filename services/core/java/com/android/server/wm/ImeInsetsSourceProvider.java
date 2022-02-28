@@ -21,7 +21,6 @@ import static android.view.InsetsState.ITYPE_IME;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
@@ -249,7 +248,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     }
 
     private boolean isImeInputTarget(InsetsControlTarget target) {
-        return target == mDisplayContent.getImeTarget(IME_TARGET_INPUT);
+        return target == mDisplayContent.getImeInputTarget();
     }
 
     private boolean sameAsImeControlTarget() {

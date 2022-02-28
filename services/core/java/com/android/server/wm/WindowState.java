@@ -120,7 +120,6 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
@@ -1602,14 +1601,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    DisplayContent getDisplayContent() {
+    public DisplayContent getDisplayContent() {
         return mToken.getDisplayContent();
     }
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
         if (dc != null && mDisplayContent != null && dc != mDisplayContent
-                && getImeInputTarget() == this) {
+                && mDisplayContent.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(getImeInputTarget());
             mDisplayContent.setImeInputTarget(null);
         }
@@ -1747,6 +1746,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public int getPid() {
         return mSession.mPid;
+    }
+
+    @Override
+    public int getUid() {
+        return mSession.mUid;
     }
 
     Task getTask() {
@@ -2348,7 +2352,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        if (getDisplayContent().getImeTarget(IME_TARGET_INPUT) != this && !isImeLayeringTarget()) {
+        if (getDisplayContent().getImeInputTarget() != this && !isImeLayeringTarget()) {
             super.onConfigurationChanged(newParentConfig);
             return;
         }
@@ -2424,7 +2428,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeTarget(IME_TARGET_INPUT) == this) {
+        if (dc.getImeInputTarget() == this) {
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -5596,7 +5600,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return {@link InsetsControlTarget} of host that controls the IME.
      *         When window is doesn't have a parent, it is returned as-is.
      */
-    InsetsControlTarget getImeControlTarget() {
+    @Override
+    public InsetsControlTarget getImeControlTarget() {
         return getDisplayContent().getImeHostOrFallback(this);
     }
 
@@ -5731,8 +5736,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState getImeInputTarget() {
-        final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_INPUT);
-        return target != null ? target.getWindow() : null;
+        final InputTarget target = mDisplayContent.getImeInputTarget();
+        return target != null ? target.getWindowState() : null;
     }
 
     void forceReportingResized() {
@@ -6116,5 +6121,38 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void clearClientTouchableRegion() {
         mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
         mGivenTouchableRegion.setEmpty();
+    }
+
+    @Override
+    public boolean shouldControlIme() {
+        return !inMultiWindowMode();
+    }
+
+    @Override
+    public boolean canScreenshotIme() {
+        return !isSecureLocked();
+    }
+
+    @Override
+    public ActivityRecord getActivityRecord() {
+        return mActivityRecord;
+    }
+
+    @Override
+    public void unfreezeInsetsAfterStartInput() {
+        if (mActivityRecord != null) {
+            mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
+        }
+    }
+
+    @Override
+    public boolean isInputMethodClientFocus(int uid, int pid) {
+        return getDisplayContent().isInputMethodClientFocus(uid, pid);
+    }
+
+    @Override
+    public void dumpProto(ProtoOutputStream proto, long fieldId,
+                          @WindowTraceLogLevel int logLevel) {
+        dumpDebug(proto, fieldId, logLevel);
     }
 }
