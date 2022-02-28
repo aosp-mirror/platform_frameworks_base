@@ -40,7 +40,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Slog;
 
-import com.android.server.companion.AssociationStoreImpl;
+import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
 
 import java.util.List;
@@ -65,11 +65,11 @@ public class SystemDataTransferProcessor {
                     ".CompanionDeviceDataTransferActivity");
 
     private final Context mContext;
-    private final AssociationStoreImpl mAssociationStore;
+    private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
 
     SystemDataTransferProcessor(CompanionDeviceManagerService service,
-            AssociationStoreImpl associationStore,
+            AssociationStore associationStore,
             SystemDataTransferRequestStore systemDataTransferRequestStore) {
         mContext = service.getContext();
         mAssociationStore = associationStore;
