@@ -54,9 +54,8 @@ public class WifiStatusTracker {
     private final WifiManager mWifiManager;
     private final NetworkScoreManager mNetworkScoreManager;
     private final ConnectivityManager mConnectivityManager;
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    private final Handler mMainThreadHandler;
     private final Set<Integer> mNetworks = new HashSet<>();
     // Save the previous HISTORY_SIZE states for logging.
     private final String[] mHistory = new String[HISTORY_SIZE];
@@ -170,15 +169,27 @@ public class WifiStatusTracker {
     public WifiStatusTracker(Context context, WifiManager wifiManager,
             NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
             Runnable callback) {
+        this(context, wifiManager, networkScoreManager, connectivityManager, callback, null, null);
+    }
+
+    public WifiStatusTracker(Context context, WifiManager wifiManager,
+            NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
+            Runnable callback, Handler foregroundHandler, Handler backgroundHandler) {
         mContext = context;
         mWifiManager = wifiManager;
         mWifiNetworkScoreCache = new WifiNetworkScoreCache(context);
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
-        mHandlerThread = new HandlerThread("WifiStatusTrackerHandler");
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        if (backgroundHandler == null) {
+            HandlerThread handlerThread = new HandlerThread("WifiStatusTrackerHandler");
+            handlerThread.start();
+            mHandler = new Handler(handlerThread.getLooper());
+        } else {
+            mHandler = backgroundHandler;
+        }
+        mMainThreadHandler = foregroundHandler == null
+                ? new Handler(Looper.getMainLooper()) : foregroundHandler;
         mCacheListener =
                 new WifiNetworkScoreCache.CacheListener(mHandler) {
                     @Override
