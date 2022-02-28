@@ -1808,6 +1808,10 @@ public class AudioService extends IAudioService.Stub
      * @param caller caller of this method
      */
     private void updateVolumeStates(int device, int streamType, String caller) {
+        // Handle device volume aliasing of SPEAKER_SAFE.
+        if (device == AudioSystem.DEVICE_OUT_SPEAKER_SAFE) {
+            device = AudioSystem.DEVICE_OUT_SPEAKER;
+        }
         if (!mStreamStates[streamType].hasIndexForDevice(device)) {
             // set the default value, if device is affected by a full/fix/abs volume rule, it
             // will taken into account in checkFixedVolumeDevices()
@@ -1819,7 +1823,8 @@ public class AudioService extends IAudioService.Stub
 
         // Check if device to be updated is routed for the given audio stream
         List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributesInt(
-                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build(),
+                true /* forVolume */);
         for (AudioDeviceAttributes deviceAttributes : devicesForAttributes) {
             if (deviceAttributes.getType() == AudioDeviceInfo.convertInternalDeviceToDeviceType(
                     device)) {
@@ -2687,7 +2692,7 @@ public class AudioService extends IAudioService.Stub
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         enforceQueryStateOrModifyRoutingPermission();
-        return getDevicesForAttributesInt(attributes);
+        return getDevicesForAttributesInt(attributes, false /* forVolume */);
     }
 
     /** @see AudioManager#getAudioDevicesForAttributes(AudioAttributes)
@@ -2697,7 +2702,7 @@ public class AudioService extends IAudioService.Stub
      */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesUnprotected(
             @NonNull AudioAttributes attributes) {
-        return getDevicesForAttributesInt(attributes);
+        return getDevicesForAttributesInt(attributes, false /* forVolume */);
     }
 
     /**
@@ -2719,9 +2724,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
-            @NonNull AudioAttributes attributes) {
+            @NonNull AudioAttributes attributes, boolean forVolume) {
         Objects.requireNonNull(attributes);
-        return mAudioSystem.getDevicesForAttributes(attributes);
+        return mAudioSystem.getDevicesForAttributes(attributes, forVolume);
     }
 
     /** Indicates no special treatment in the handling of the volume adjustement */
@@ -6490,7 +6495,8 @@ public class AudioService extends IAudioService.Stub
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .build();
         // calling getDevice*Int to bypass permission check
-        final List<AudioDeviceAttributes> devices = getDevicesForAttributesInt(attributes);
+        final List<AudioDeviceAttributes> devices =
+                getDevicesForAttributesInt(attributes, true /* forVolume */);
         for (AudioDeviceAttributes device : devices) {
             if (getDeviceVolumeBehaviorInt(device) == AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED) {
                 return true;
