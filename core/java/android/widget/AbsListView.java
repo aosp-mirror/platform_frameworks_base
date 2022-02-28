@@ -4363,7 +4363,34 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // If we're moving down, we want the top item. If we're moving up, bottom item.
+                    final int motionIndex = delta > 0 ? 0 : getChildCount() - 1;
+
+                    int motionViewPrevTop = 0;
+                    View motionView = this.getChildAt(motionIndex);
+                    if (motionView != null) {
+                        motionViewPrevTop = motionView.getTop();
+                    }
+
+                    final int overscrollMode = getOverScrollMode();
+
                     if (!trackMotionScroll(delta, delta)) {
+                        return true;
+                    } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
+                            && (overscrollMode == OVER_SCROLL_ALWAYS
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS
+                            && !contentFits()))) {
+                        int motionViewRealTop = motionView.getTop();
+                        float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
+                                / ((float) getHeight());
+                        if (delta > 0) {
+                            mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
+                            mEdgeGlowTop.onRelease();
+                        } else {
+                            mEdgeGlowBottom.onPullDistance(-overscroll, 0.5f);
+                            mEdgeGlowBottom.onRelease();
+                        }
+                        invalidate();
                         return true;
                     }
                 }

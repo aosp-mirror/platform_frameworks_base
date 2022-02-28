@@ -872,13 +872,37 @@ public class HorizontalScrollView extends FrameLayout {
                         final int range = getScrollRange();
                         int oldScrollX = mScrollX;
                         int newScrollX = oldScrollX + delta;
+
+                        final int overscrollMode = getOverScrollMode();
+                        boolean canOverscroll = !event.isFromSource(InputDevice.SOURCE_MOUSE)
+                                && (overscrollMode == OVER_SCROLL_ALWAYS
+                                || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0));
+                        boolean absorbed = false;
+
                         if (newScrollX < 0) {
+                            if (canOverscroll) {
+                                mEdgeGlowLeft.onPullDistance(-(float) newScrollX / getWidth(),
+                                        0.5f);
+                                mEdgeGlowLeft.onRelease();
+                                invalidate();
+                                absorbed = true;
+                            }
                             newScrollX = 0;
                         } else if (newScrollX > range) {
+                            if (canOverscroll) {
+                                mEdgeGlowRight.onPullDistance(
+                                        (float) (newScrollX - range) / getWidth(), 0.5f);
+                                mEdgeGlowRight.onRelease();
+                                invalidate();
+                                absorbed = true;
+                            }
                             newScrollX = range;
                         }
                         if (newScrollX != oldScrollX) {
                             super.scrollTo(newScrollX, mScrollY);
+                            return true;
+                        }
+                        if (absorbed) {
                             return true;
                         }
                     }
