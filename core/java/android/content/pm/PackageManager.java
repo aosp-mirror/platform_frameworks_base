@@ -5780,16 +5780,16 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns the package name of the component implementing supplemental process service.
+     * Returns the package name of the component implementing sdk sandbox service.
      *
-     * @return the package name of the component implementing supplemental process service
+     * @return the package name of the component implementing sdk sandbox service
      *
      * @hide
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public String getSupplementalProcessPackageName() {
+    public String getSdkSandboxPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

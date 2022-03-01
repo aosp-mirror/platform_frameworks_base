@@ -38,7 +38,7 @@ package com.android.server {
 package com.android.server.am {
 
   public interface ActivityManagerLocal {
-    method public boolean bindSupplementalProcessService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, int) throws android.os.RemoteException;
+    method public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, int) throws android.os.RemoteException;
     method public boolean canStartForegroundService(int, int, @NonNull String);
   }
 
