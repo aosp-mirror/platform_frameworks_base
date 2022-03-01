@@ -16,10 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
-
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.os.IBinder;
@@ -101,8 +97,7 @@ class ActivityRecordInputSink {
             mToken = inputChannel.getToken();
             mInputEventReceiver = createInputEventReceiver(inputChannel);
         }
-        if (mDisabled || !mIsCompatEnabled || mActivityRecord.isAnimating(TRANSITION | PARENTS,
-                ANIMATION_TYPE_APP_TRANSITION)) {
+        if (mDisabled || !mIsCompatEnabled || mActivityRecord.isInTransition()) {
             // TODO(b/208662670): Investigate if we can have feature active during animations.
             mInputWindowHandleWrapper.setToken(null);
         } else {
