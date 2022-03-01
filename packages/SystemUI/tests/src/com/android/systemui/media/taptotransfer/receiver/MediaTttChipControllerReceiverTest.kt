@@ -31,6 +31,7 @@ import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -60,6 +61,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
+    private lateinit var logger: MediaTttLogger
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -83,6 +86,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         controllerReceiver = MediaTttChipControllerReceiver(
             commandQueue,
             context,
+            logger,
             windowManager,
             viewUtil,
             FakeExecutor(FakeSystemClock()),
@@ -139,6 +143,18 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun receivesNewStateFromCommandQueue_isLogged() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        verify(logger).logStateChange(any(), any())
     }
 
     @Test

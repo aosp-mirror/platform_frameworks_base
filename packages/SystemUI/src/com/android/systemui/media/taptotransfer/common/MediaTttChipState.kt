@@ -52,6 +52,14 @@ open class MediaTttChipState(
             null
         }
     }
+
+    /**
+     * Returns the amount of time this chip should display on the screen before it times out and
+     * disappears. [MediaTttChipControllerCommon] will ensure that the timeout resets each time we
+     * receive a new state.
+     */
+    open fun getTimeoutMs(): Long = DEFAULT_TIMEOUT_MILLIS
 }
 
+private const val DEFAULT_TIMEOUT_MILLIS = 3000L
 private val TAG = MediaTttChipState::class.simpleName!!

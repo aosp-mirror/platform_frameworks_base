@@ -28,6 +28,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -43,6 +44,7 @@ import javax.inject.Inject
 class MediaTttChipControllerReceiver @Inject constructor(
     commandQueue: CommandQueue,
     context: Context,
+    @MediaTttReceiverLogger logger: MediaTttLogger,
     windowManager: WindowManager,
     viewUtil: ViewUtil,
     mainExecutor: DelayableExecutor,
@@ -50,6 +52,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     @Main private val mainHandler: Handler,
 ) : MediaTttChipControllerCommon<ChipStateReceiver>(
     context,
+    logger,
     windowManager,
     viewUtil,
     mainExecutor,
@@ -79,6 +82,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         appIcon: Icon?,
         appName: CharSequence?
     ) {
+        logger.logStateChange(stateIntToString(displayState), routeInfo.id)
         when(displayState) {
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER -> {
                 val packageName = routeInfo.packageName
@@ -97,7 +101,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
                     )
                 }
             }
-            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER -> removeChip()
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER ->
+                removeChip(removalReason = FAR_FROM_SENDER)
             else ->
                 Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
         }
@@ -106,6 +111,16 @@ class MediaTttChipControllerReceiver @Inject constructor(
     override fun updateChipView(chipState: ChipStateReceiver, currentChipView: ViewGroup) {
         setIcon(chipState, currentChipView)
     }
+
+    private fun stateIntToString(@StatusBarManager.MediaTransferReceiverState state: Int): String {
+        return when (state) {
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER -> CLOSE_TO_SENDER
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER -> FAR_FROM_SENDER
+            else -> "INVALID: $state"
+        }
+    }
 }
 
 private const val RECEIVER_TAG = "MediaTapToTransferRcvr"
+private const val CLOSE_TO_SENDER = "CLOSE_TO_SENDER"
+private const val FAR_FROM_SENDER = "FAR_FROM_SENDER"
