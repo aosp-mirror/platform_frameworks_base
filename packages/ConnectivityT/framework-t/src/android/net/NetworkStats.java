@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.annotation.IntDef;
@@ -124,7 +126,6 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
     public @Nullable static final String[] INTERFACES_ALL = null;
 
     /** {@link #tag} value for total data across all tags. */
-    // TODO: Rename TAG_NONE to TAG_ALL.
     public static final int TAG_NONE = 0;
 
     /** {@link #metered} value to account for all metered states. */
@@ -390,77 +391,102 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
 
         /**
          * @return the uid of this entry.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public int getUid() {
             return uid;
         }
 
         /**
          * @return the set state of this entry.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         @State public int getSet() {
             return set;
         }
 
         /**
          * @return the tag value of this entry.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public int getTag() {
             return tag;
         }
 
         /**
          * @return the metered state.
+         * @hide
          */
-        @Meteredness public int getMetered() {
+        @Meteredness
+        @SystemApi(client = MODULE_LIBRARIES)
+        public int getMetered() {
             return metered;
         }
 
         /**
          * @return the roaming state.
+         * @hide
          */
-        @Roaming public int getRoaming() {
+        @Roaming
+        @SystemApi(client = MODULE_LIBRARIES)
+        public int getRoaming() {
             return roaming;
         }
 
         /**
          * @return the default network state.
+         * @hide
          */
-        @DefaultNetwork public int getDefaultNetwork() {
+        @DefaultNetwork
+        @SystemApi(client = MODULE_LIBRARIES)
+        public int getDefaultNetwork() {
             return defaultNetwork;
         }
 
         /**
          * @return the number of received bytes.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public long getRxBytes() {
             return rxBytes;
         }
 
         /**
          * @return the number of received packets.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public long getRxPackets() {
             return rxPackets;
         }
 
         /**
          * @return the number of transmitted bytes.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public long getTxBytes() {
             return txBytes;
         }
 
         /**
          * @return the number of transmitted packets.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public long getTxPackets() {
             return txPackets;
         }
 
         /**
          * @return the count of network operations performed for this entry.
+         * @hide
          */
+        @SystemApi(client = MODULE_LIBRARIES)
         public long getOperations() {
             return operations;
         }
@@ -682,7 +708,7 @@ public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Ent
      * The remove() method is not implemented and will throw UnsupportedOperationException.
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = MODULE_LIBRARIES)
     @NonNull public Iterator<Entry> iterator() {
         return new Iterator<Entry>() {
             int mIndex = 0;
