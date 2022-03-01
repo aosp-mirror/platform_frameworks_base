@@ -30,6 +30,4 @@ oneway interface IBiometricSysuiReceiver {
     void onSystemEvent(int event);
     // Notifies that the dialog has finished animating.
     void onDialogAnimatedIn();
-    // For multi-sensor devices, notifies that the fingerprint should start now.
-    void onStartFingerprintNow();
 }

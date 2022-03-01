@@ -38,11 +38,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.nullable
 import org.mockito.Mockito.never
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val DISPLAY_ID = "" // default display id
 private const val SENSOR_X = 50
