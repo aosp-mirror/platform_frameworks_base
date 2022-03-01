@@ -1886,8 +1886,7 @@ public class AppProfiler {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
-                                                bstats.mapUid(st.uid), st.name,
-                                                elapsedRealtime, uptime);
+                                                st.uid, st.name, elapsedRealtime, uptime);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
