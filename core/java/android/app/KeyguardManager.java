@@ -184,8 +184,17 @@ public class KeyguardManager {
     })
     @interface LockTypes {}
 
-    // TODO(b/220379118): register only one binder listener and keep a map of listener to executor.
-    private final ArrayMap<KeyguardLockedStateListener, IKeyguardLockedStateListener>
+    private final IKeyguardLockedStateListener mIKeyguardLockedStateListener =
+            new IKeyguardLockedStateListener.Stub() {
+                @Override
+                public void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
+                    mKeyguardLockedStateListeners.forEach((listener, executor) -> {
+                        executor.execute(
+                                () -> listener.onKeyguardLockedStateChanged(isKeyguardLocked));
+                    });
+                }
+            };
+    private final ArrayMap<KeyguardLockedStateListener, Executor>
             mKeyguardLockedStateListeners = new ArrayMap<>();
 
     /**
@@ -1102,17 +1111,12 @@ public class KeyguardManager {
     public void addKeyguardLockedStateListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull KeyguardLockedStateListener listener) {
         synchronized (mKeyguardLockedStateListeners) {
+            mKeyguardLockedStateListeners.put(listener, executor);
+            if (mKeyguardLockedStateListeners.size() > 1) {
+                return;
+            }
             try {
-                final IKeyguardLockedStateListener innerListener =
-                        new IKeyguardLockedStateListener.Stub() {
-                    @Override
-                    public void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
-                        executor.execute(
-                                () -> listener.onKeyguardLockedStateChanged(isKeyguardLocked));
-                    }
-                };
-                mWM.addKeyguardLockedStateListener(innerListener);
-                mKeyguardLockedStateListeners.put(listener, innerListener);
+                mWM.addKeyguardLockedStateListener(mIKeyguardLockedStateListener);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1125,17 +1129,15 @@ public class KeyguardManager {
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     public void removeKeyguardLockedStateListener(@NonNull KeyguardLockedStateListener listener) {
         synchronized (mKeyguardLockedStateListeners) {
-            IKeyguardLockedStateListener innerListener = mKeyguardLockedStateListeners.get(
-                    listener);
-            if (innerListener == null) {
+            mKeyguardLockedStateListeners.remove(listener);
+            if (!mKeyguardLockedStateListeners.isEmpty()) {
                 return;
             }
             try {
-                mWM.removeKeyguardLockedStateListener(innerListener);
+                mWM.removeKeyguardLockedStateListener(mIKeyguardLockedStateListener);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-            mKeyguardLockedStateListeners.remove(listener);
         }
     }
 }
