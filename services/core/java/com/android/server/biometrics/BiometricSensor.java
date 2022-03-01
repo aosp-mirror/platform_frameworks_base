@@ -131,8 +131,10 @@ public abstract class BiometricSensor {
 
     void goToStateCancelling(IBinder token, String opPackageName, long requestId)
             throws RemoteException {
-        impl.cancelAuthenticationFromService(token, opPackageName, requestId);
-        mSensorState = STATE_CANCELING;
+        if (mSensorState != STATE_CANCELING) {
+            impl.cancelAuthenticationFromService(token, opPackageName, requestId);
+            mSensorState = STATE_CANCELING;
+        }
     }
 
     void goToStoppedStateIfCookieMatches(int cookie, int error) {
