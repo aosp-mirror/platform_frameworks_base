@@ -7388,8 +7388,8 @@ package android.app.admin {
     method public int getCurrentFailedPasswordAttempts();
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
-    method @Nullable public String getDeviceManagerRoleHolderPackageName();
     method public CharSequence getDeviceOwnerLockScreenInfo();
+    method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
