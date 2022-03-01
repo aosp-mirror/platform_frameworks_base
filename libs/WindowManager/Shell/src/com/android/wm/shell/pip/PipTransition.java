@@ -84,6 +84,7 @@ public class PipTransition extends PipTransitionController {
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
+    private SurfaceControl.Transaction mFinishTransaction;
     private final Rect mExitDestinationBounds = new Rect();
     @Nullable
     private IBinder mExitTransition;
@@ -166,6 +167,7 @@ public class PipTransition extends PipTransitionController {
             if (mFinishCallback != null) {
                 mFinishCallback.onTransitionFinished(null, null);
                 mFinishCallback = null;
+                mFinishTransaction = null;
                 throw new RuntimeException("Previous callback not called, aborting exit PIP.");
             }
 
@@ -267,7 +269,8 @@ public class PipTransition extends PipTransitionController {
     public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             @Nullable SurfaceControl.Transaction tx) {
-        if (isInPipDirection(direction)) {
+        final boolean enteringPip = isInPipDirection(direction);
+        if (enteringPip) {
             mPipTransitionState.setTransitionState(ENTERED_PIP);
         }
         // If there is an expected exit transition, then the exit will be "merged" into this
@@ -279,6 +282,20 @@ public class PipTransition extends PipTransitionController {
             if (tx != null) {
                 wct.setBoundsChangeTransaction(taskInfo.token, tx);
             }
+            final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
+            final int displayRotation = taskInfo.getConfiguration().windowConfiguration
+                    .getDisplayRotation();
+            if (enteringPip && mInFixedRotation && mEndFixedRotation != displayRotation
+                    && leash != null && leash.isValid()) {
+                // Launcher may update the Shelf height during the animation, which will update the
+                // destination bounds. Because this is in fixed rotation, We need to make sure the
+                // finishTransaction is using the updated bounds in the display rotation.
+                final Rect displayBounds = mPipBoundsState.getDisplayBounds();
+                final Rect finishBounds = new Rect(destinationBounds);
+                rotateBounds(finishBounds, displayBounds, mEndFixedRotation, displayRotation);
+                mSurfaceTransactionHelper.crop(mFinishTransaction, leash, finishBounds);
+            }
+            mFinishTransaction = null;
             mFinishCallback.onTransitionFinished(wct, null /* callback */);
             mFinishCallback = null;
         }
@@ -290,6 +307,7 @@ public class PipTransition extends PipTransitionController {
         if (mFinishCallback == null) return;
         mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
         mFinishCallback = null;
+        mFinishTransaction = null;
     }
 
     @Override
@@ -336,6 +354,7 @@ public class PipTransition extends PipTransitionController {
             mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
             finishCallback.onTransitionFinished(wct, wctCB);
         };
+        mFinishTransaction = finishTransaction;
 
         // Check if it is Shell rotation.
         if (Transitions.SHELL_TRANSITIONS_ROTATION) {
@@ -526,6 +545,7 @@ public class PipTransition extends PipTransitionController {
         if (mFinishCallback != null) {
             mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
             mFinishCallback = null;
+            mFinishTransaction = null;
             throw new RuntimeException("Previous callback not called, aborting entering PIP.");
         }
 
@@ -549,6 +569,7 @@ public class PipTransition extends PipTransitionController {
 
         mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
         mFinishCallback = finishCallback;
+        mFinishTransaction = finishTransaction;
         final int endRotation = mInFixedRotation ? mEndFixedRotation : enterPip.getEndRotation();
         return startEnterAnimation(enterPip.getTaskInfo(), enterPip.getLeash(),
                 startTransaction, finishTransaction, enterPip.getStartRotation(),
