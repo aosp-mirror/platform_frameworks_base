@@ -3972,8 +3972,14 @@ public class CentralSurfaces extends CoreStartable implements
 
                 mActivityLaunchAnimator.startPendingIntentWithAnimation(
                         controller, animate, intent.getCreatorPackage(),
-                        (animationAdapter) -> intent.sendAndReturnResult(null, 0, null, null, null,
-                                null, getActivityOptions(mDisplayId, animationAdapter)));
+                        (animationAdapter) -> {
+                            ActivityOptions options = new ActivityOptions(
+                                    getActivityOptions(mDisplayId, animationAdapter));
+                            // TODO b/221255671: restrict this to only be set for notifications
+                            options.setEligibleForLegacyPermissionPrompt(true);
+                            return intent.sendAndReturnResult(null, 0, null, null, null,
+                                    null, options.toBundle());
+                        });
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
                 // Just log the exception message.

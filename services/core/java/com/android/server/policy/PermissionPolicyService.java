@@ -34,6 +34,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.KeyguardManager;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -150,6 +151,7 @@ public final class PermissionPolicyService extends SystemService {
     private Context mContext;
     private PackageManagerInternal mPackageManagerInternal;
     private NotificationManagerInternal mNotificationManager;
+    private final KeyguardManager mKeyguardManager;
     private final PackageManager mPackageManager;
 
     public PermissionPolicyService(@NonNull Context context) {
@@ -157,6 +159,7 @@ public final class PermissionPolicyService extends SystemService {
 
         mContext = context;
         mPackageManager = context.getPackageManager();
+        mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
     }
 
@@ -1046,12 +1049,21 @@ public final class PermissionPolicyService extends SystemService {
                     }
 
                     @Override
-                    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
-                        super.onActivityLaunched(taskInfo, activityInfo);
-                        clearNotificationReviewFlagsIfNeeded(activityInfo.packageName,
-                                UserHandle.of(taskInfo.userId));
-                        showNotificationPromptIfNeeded(activityInfo.packageName,
-                                taskInfo.userId, taskInfo.taskId);
+                    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
+                            ActivityInterceptorInfo info) {
+                        super.onActivityLaunched(taskInfo, activityInfo, info);
+                        if (!shouldShowNotificationDialogOrClearFlags(info.intent,
+                                info.checkedOptions)) {
+                            return;
+                        }
+                        UserHandle user = UserHandle.of(taskInfo.userId);
+                        if (CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID,
+                                activityInfo.packageName, user)) {
+                            clearNotificationReviewFlagsIfNeeded(activityInfo.packageName, user);
+                        } else {
+                            showNotificationPromptIfNeeded(activityInfo.packageName,
+                                    taskInfo.userId, taskInfo.taskId);
+                        }
                     }
                 };
 
@@ -1092,10 +1104,28 @@ public final class PermissionPolicyService extends SystemService {
             launchNotificationPermissionRequestDialog(packageName, user, taskId);
         }
 
+        /**
+         * Determine if we should show a notification dialog, or clear the REVIEW_REQUIRED flag,
+         * from a particular package for a particular intent. Returns true if:
+         * 1. The isEligibleForLegacyPermissionPrompt ActivityOption is set, or
+         * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER)
+         */
+        private boolean shouldShowNotificationDialogOrClearFlags(Intent intent,
+                ActivityOptions options) {
+            if ((options != null && options.isEligibleForLegacyPermissionPrompt())) {
+                return true;
+            }
+
+            return Intent.ACTION_MAIN.equals(intent.getAction())
+                    && intent.getCategories() != null
+                    && (intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)
+                    || intent.getCategories().contains(Intent.CATEGORY_LEANBACK_LAUNCHER)
+                    || intent.getCategories().contains(Intent.CATEGORY_CAR_LAUNCHER));
+        }
+
         private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle user) {
-            if (!CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, packageName, user)
-                    || ((mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, packageName, user)
-                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0)) {
+            if ((mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, packageName, user)
+                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
                 return;
             }
             try {
@@ -1210,8 +1240,8 @@ public final class PermissionPolicyService extends SystemService {
             }
 
             if (!pkg.getRequestedPermissions().contains(POST_NOTIFICATIONS)
-                    || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID,
-                    pkg.getPackageName(), user)) {
+                    || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, pkgName, user)
+                    || mKeyguardManager.isKeyguardLocked()) {
                 return false;
             }
 
@@ -1220,7 +1250,7 @@ public final class PermissionPolicyService extends SystemService {
                 mNotificationManager = LocalServices.getService(NotificationManagerInternal.class);
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
-                    .getNumNotificationChannelsForPackage(pkg.getPackageName(), uid, true) > 0;
+                    .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
