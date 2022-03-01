@@ -488,7 +488,8 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true);
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true)
+                && !injectIsLowRamDevice();
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
