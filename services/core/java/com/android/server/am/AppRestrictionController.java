@@ -398,23 +398,24 @@ public final class AppRestrictionController {
                 return sb.toString();
             }
 
-            @GuardedBy("mSettingsLock")
             void dump(PrintWriter pw, @ElapsedRealtimeLong long nowElapsed) {
-                pw.print(toString());
-                if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
-                    pw.print('/');
-                    pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
-                }
-                pw.print(" levelChange=");
-                TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
-                if (mLastNotificationShownTimeElapsed != null) {
-                    for (int i = 0; i < mLastNotificationShownTimeElapsed.length; i++) {
-                        if (mLastNotificationShownTimeElapsed[i] > 0) {
-                            pw.print(" lastNoti(");
-                            pw.print(mNotificationHelper.notificationTypeToString(i));
-                            pw.print(")=");
-                            TimeUtils.formatDuration(
-                                    mLastNotificationShownTimeElapsed[i] - nowElapsed, pw);
+                synchronized (mSettingsLock) {
+                    pw.print(toString());
+                    if (mLastRestrictionLevel != RESTRICTION_LEVEL_UNKNOWN) {
+                        pw.print('/');
+                        pw.print(ActivityManager.restrictionLevelToName(mLastRestrictionLevel));
+                    }
+                    pw.print(" levelChange=");
+                    TimeUtils.formatDuration(mLevelChangeTimeElapsed - nowElapsed, pw);
+                    if (mLastNotificationShownTimeElapsed != null) {
+                        for (int i = 0; i < mLastNotificationShownTimeElapsed.length; i++) {
+                            if (mLastNotificationShownTimeElapsed[i] > 0) {
+                                pw.print(" lastNoti(");
+                                pw.print(mNotificationHelper.notificationTypeToString(i));
+                                pw.print(")=");
+                                TimeUtils.formatDuration(
+                                        mLastNotificationShownTimeElapsed[i] - nowElapsed, pw);
+                            }
                         }
                     }
                 }
@@ -612,10 +613,11 @@ public final class AppRestrictionController {
             }
         }
 
-        @GuardedBy("mSettingsLock")
-        void dumpLocked(PrintWriter pw, String prefix) {
+        void dump(PrintWriter pw, String prefix) {
             final ArrayList<PkgSettings> settings = new ArrayList<>();
-            mRestrictionLevels.forEach(setting -> settings.add(setting));
+            synchronized (mSettingsLock) {
+                mRestrictionLevels.forEach(setting -> settings.add(setting));
+            }
             Collections.sort(settings, Comparator.comparingInt(PkgSettings::getUid));
             final long nowElapsed = SystemClock.elapsedRealtime();
             for (int i = 0, size = settings.size(); i < size; i++) {
@@ -1322,11 +1324,7 @@ public final class AppRestrictionController {
         prefix = "  " + prefix;
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
-        /*
-        synchronized (mSettingsLock) {
-            mRestrictionSettings.dumpLocked(pw, "  " + prefix);
-        }
-        */
+        mRestrictionSettings.dump(pw, "  " + prefix);
         mConstantsObserver.dump(pw, "  " + prefix);
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             pw.println();
