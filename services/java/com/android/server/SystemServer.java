@@ -422,8 +422,8 @@ public final class SystemServer implements Dumpable {
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
 
-    private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
-            "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
+    private static final String SDK_SANDBOX_MANAGER_SERVICE_CLASS =
+            "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -2605,9 +2605,9 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(IncidentCompanionService.class);
         t.traceEnd();
 
-        // Supplemental Process
-        t.traceBegin("StartSupplementalProcessManagerService");
-        mSystemServiceManager.startService(SUPPLEMENTALPROCESS_SERVICE_CLASS);
+        // SdkSandboxManagerService
+        t.traceBegin("StarSdkSandboxManagerService");
+        mSystemServiceManager.startService(SDK_SANDBOX_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         if (safeMode) {
