@@ -67,7 +67,7 @@ public class InputMethod {
     private InputConnection mStartedInputConnection;
     private EditorInfo mInputEditorInfo;
 
-    protected InputMethod(@NonNull AccessibilityService service) {
+    public InputMethod(@NonNull AccessibilityService service) {
         mService = service;
     }
 
