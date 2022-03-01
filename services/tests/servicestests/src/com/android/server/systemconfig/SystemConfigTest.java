@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
+import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -330,6 +331,164 @@ public class SystemConfigTest {
     }
 
     /**
+     * Tests that readPermissions works correctly for a library with on-bootclasspath-before
+     * and on-bootclasspath-since.
+     */
+    @Test
+    public void readPermissions_allowLibs_parsesSimpleLibrary() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        on-bootclasspath-before=\"10\"\n"
+                + "        on-bootclasspath-since=\"20\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
+        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
+        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+    }
+
+    /**
+     * Tests that readPermissions works correctly for a library using the new
+     * {@code updatable-library} tag.
+     */
+    @Test
+    public void readPermissions_allowLibs_parsesUpdatableLibrary() throws IOException {
+        String contents =
+                "<permissions>\n"
+                        + "    <updatable-library \n"
+                        + "        name=\"foo\"\n"
+                        + "        file=\"foo.jar\"\n"
+                        + "        on-bootclasspath-before=\"10\"\n"
+                        + "        on-bootclasspath-since=\"20\"\n"
+                        + "     />\n\n"
+                        + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
+        assertThat(entry.onBootclasspathBefore).isEqualTo(10);
+        assertThat(entry.onBootclasspathSince).isEqualTo(20);
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code min-device-sdk} lower than the current
+     * SDK results in the library being added to the shared libraries.
+     */
+    @Test
+    public void readPermissions_allowLibs_allowsOldMinSdk() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        min-device-sdk=\"30\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code min-device-sdk} equal to the current
+     * SDK results in the library being added to the shared libraries.
+     */
+    @Test
+    public void readPermissions_allowLibs_allowsCurrentMinSdk() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        min-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code min-device-sdk} greater than the current
+     * SDK results in the library being ignored.
+     */
+    @Test
+    public void readPermissions_allowLibs_ignoresMinSdkInFuture() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        min-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertThat(mSysConfig.getSharedLibraries()).isEmpty();
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code max-device-sdk} less than the current
+     * SDK results in the library being ignored.
+     */
+    @Test
+    public void readPermissions_allowLibs_ignoredOldMaxSdk() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        max-device-sdk=\"30\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertThat(mSysConfig.getSharedLibraries()).isEmpty();
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code max-device-sdk} equal to the current
+     * SDK results in the library being added to the shared libraries.
+     */
+    @Test
+    public void readPermissions_allowLibs_allowsCurrentMaxSdk() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        max-device-sdk=\"" + Build.VERSION.SDK_INT + "\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+    }
+
+    /**
+     * Tests that readPermissions for a library with {@code max-device-sdk} greater than the current
+     * SDK results in the library being added to the shared libraries.
+     */
+    @Test
+    public void readPermissions_allowLibs_allowsMaxSdkInFuture() throws IOException {
+        String contents =
+                "<permissions>\n"
+                + "    <library \n"
+                + "        name=\"foo\"\n"
+                + "        file=\"foo.jar\"\n"
+                + "        max-device-sdk=\"" + (Build.VERSION.SDK_INT + 1) + "\"\n"
+                + "     />\n\n"
+                + " </permissions>";
+        parseSharedLibraries(contents);
+        assertFooIsOnlySharedLibrary();
+    }
+
+    private void parseSharedLibraries(String contents) throws IOException {
+        File folder = createTempSubfolder("permissions_folder");
+        createTempFile(folder, "permissions.xml", contents);
+        readPermissions(folder, /* permissionFlag = ALLOW_LIBS */ 0x02);
+    }
+
+    /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
      *
      * @param folderName subdirectory of mTemporaryFolder to put the file, creating if needed
@@ -365,5 +524,12 @@ public class SystemConfigTest {
         }
 
         return folder;
+    }
+
+    private void assertFooIsOnlySharedLibrary() {
+        assertThat(mSysConfig.getSharedLibraries().size()).isEqualTo(1);
+        SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
+        assertThat(entry.name).isEqualTo("foo");
+        assertThat(entry.filename).isEqualTo("foo.jar");
     }
 }
