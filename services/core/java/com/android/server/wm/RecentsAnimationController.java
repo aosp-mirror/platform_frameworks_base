@@ -122,7 +122,6 @@ public class RecentsAnimationController implements DeathRecipient {
     private final int mDisplayId;
     private boolean mWillFinishToHome = false;
     private final Runnable mFailsafeRunnable = this::onFailsafe;
-    private Runnable mCheckRotationAfterCleanup;
 
     // The recents component app token that is shown behind the visibile tasks
     private ActivityRecord mTargetActivityRecord;
@@ -920,24 +919,6 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     /**
-     * If the display rotation change is ignored while recents animation is running, make sure that
-     * the pending rotation change will be applied after the animation finishes.
-     */
-    void setCheckRotationAfterCleanup() {
-        if (mCheckRotationAfterCleanup != null) return;
-        mCheckRotationAfterCleanup = () -> {
-            synchronized (mService.mGlobalLock) {
-                if (mDisplayContent.getDisplayRotation()
-                        .updateRotationAndSendNewConfigIfChanged()) {
-                    if (mTargetActivityRecord != null) {
-                        mTargetActivityRecord.finishFixedRotationTransform();
-                    }
-                }
-            }
-        };
-    }
-
-    /**
      * @return Whether we should defer the cancel from a root task order change until the next app
      * transition.
      */
@@ -1036,10 +1017,6 @@ public class RecentsAnimationController implements DeathRecipient {
         // Notify that the animation has ended
         if (mStatusBar != null) {
             mStatusBar.onRecentsAnimationStateChanged(false /* running */);
-        }
-        if (mCheckRotationAfterCleanup != null) {
-            mService.mH.post(mCheckRotationAfterCleanup);
-            mCheckRotationAfterCleanup = null;
         }
     }
 
