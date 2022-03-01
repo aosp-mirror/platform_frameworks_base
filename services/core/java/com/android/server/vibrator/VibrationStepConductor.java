@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
+import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -46,7 +47,7 @@ import java.util.Queue;
  * VibrationThread. The only thread-safe methods for calling from other threads are the "notify"
  * methods (which should never be used from the VibrationThread thread).
  */
-final class VibrationStepConductor {
+final class VibrationStepConductor implements IBinder.DeathRecipient {
     private static final boolean DEBUG = VibrationThread.DEBUG;
     private static final String TAG = VibrationThread.TAG;
 
@@ -287,6 +288,19 @@ final class VibrationStepConductor {
             }
             mNextSteps.addAll(nextSteps);
         }
+    }
+
+    /**
+     * Binder death notification. VibrationThread registers this when it's running a conductor.
+     * Note that cancellation could theoretically happen immediately, before the conductor has
+     * started, but in this case it will be processed in the first signals loop.
+     */
+    @Override
+    public void binderDied() {
+        if (DEBUG) {
+            Slog.d(TAG, "Binder died, cancelling vibration...");
+        }
+        notifyCancelled(/* immediate= */ false);
     }
 
     /**

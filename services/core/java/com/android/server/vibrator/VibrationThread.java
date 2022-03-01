@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /** Plays a {@link Vibration} in dedicated thread. */
-final class VibrationThread extends Thread implements IBinder.DeathRecipient {
+final class VibrationThread extends Thread {
     static final String TAG = "VibrationThread";
     static final boolean DEBUG = false;
 
@@ -116,23 +116,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     VibrationThread(PowerManager.WakeLock wakeLock, VibratorManagerHooks vibratorManagerHooks) {
         mWakeLock = wakeLock;
         mVibratorManagerHooks = vibratorManagerHooks;
-    }
-
-    @Override
-    public void binderDied() {
-        if (DEBUG) {
-            Slog.d(TAG, "Binder died, cancelling vibration...");
-        }
-        // The binder death link only exists while the conductor is set.
-        // TODO: move the death linking to be associated with the conductor directly, this
-        // awkwardness will go away.
-        VibrationStepConductor conductor;
-        synchronized (mLock) {
-            conductor = mRequestedActiveConductor;
-        }
-        if (conductor != null) {
-            conductor.notifyCancelled(/* immediate= */ false);
-        }
     }
 
     /**
@@ -268,7 +251,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private void runCurrentVibrationWithWakeLockAndDeathLink() {
         IBinder vibrationBinderToken = mExecutingConductor.getVibration().token;
         try {
-            vibrationBinderToken.linkToDeath(this, 0);
+            vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error linking vibration to token death", e);
             clientVibrationCompleteIfNotAlready(Vibration.Status.IGNORED_ERROR_TOKEN);
@@ -280,7 +263,7 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
             playVibration();
         } finally {
             try {
-                vibrationBinderToken.unlinkToDeath(this, 0);
+                vibrationBinderToken.unlinkToDeath(mExecutingConductor, 0);
             } catch (NoSuchElementException e) {
                 Slog.wtf(TAG, "Failed to unlink token", e);
             }

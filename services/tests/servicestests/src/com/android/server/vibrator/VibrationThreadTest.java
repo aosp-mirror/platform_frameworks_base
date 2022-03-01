@@ -636,14 +636,14 @@ public class VibrationThreadTest {
 
         long vibrationId = 1;
         VibrationEffect effect = VibrationEffect.createWaveform(new long[]{5}, new int[]{100}, 0);
-        startThreadAndDispatcher(vibrationId, effect);
+        VibrationStepConductor conductor = startThreadAndDispatcher(vibrationId, effect);
 
         assertTrue(waitUntil(() -> fakeVibrator.getAmplitudes().size() > 2, TEST_TIMEOUT_MILLIS));
         // Vibration still running after 2 cycles.
         assertTrue(mThread.isRunningVibrationId(vibrationId));
         assertTrue(mControllers.get(VIBRATOR_ID).isVibrating());
 
-        mThread.binderDied();
+        conductor.binderDied();
         waitForCompletion();
         assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
 
@@ -1128,17 +1128,17 @@ public class VibrationThreadTest {
     public void vibrate_binderDied_cancelsVibration() throws Exception {
         long vibrationId = 1;
         VibrationEffect effect = VibrationEffect.createWaveform(new long[]{5}, new int[]{100}, 0);
-        startThreadAndDispatcher(vibrationId, effect);
+        VibrationStepConductor conductor = startThreadAndDispatcher(vibrationId, effect);
 
         assertTrue(waitUntil(() -> mControllers.get(VIBRATOR_ID).isVibrating(),
                 TEST_TIMEOUT_MILLIS));
         assertTrue(mThread.isRunningVibrationId(vibrationId));
 
-        mThread.binderDied();
+        conductor.binderDied();
         waitForCompletion();
 
-        verify(mVibrationToken).linkToDeath(same(mThread), eq(0));
-        verify(mVibrationToken).unlinkToDeath(same(mThread), eq(0));
+        verify(mVibrationToken).linkToDeath(same(conductor), eq(0));
+        verify(mVibrationToken).unlinkToDeath(same(conductor), eq(0));
         verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED);
         assertFalse(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId).isEmpty());
         assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
