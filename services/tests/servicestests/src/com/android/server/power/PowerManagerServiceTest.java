@@ -71,7 +71,6 @@ import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
@@ -144,6 +143,7 @@ public class PowerManagerServiceTest {
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfigurationMock;
     @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
+    @Mock private LowPowerStandbyController mLowPowerStandbyControllerMock;
 
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
@@ -298,8 +298,7 @@ public class PowerManagerServiceTest {
             @Override
             LowPowerStandbyController createLowPowerStandbyController(Context context,
                     Looper looper) {
-                return new LowPowerStandbyController(context, mTestLooper.getLooper(),
-                        SystemClock::elapsedRealtime);
+                return mLowPowerStandbyControllerMock;
             }
 
             @Override
@@ -316,7 +315,6 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-        LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         FakeSettingsProvider.clearSettingsProvider();
     }
 
@@ -1886,6 +1884,18 @@ public class PowerManagerServiceTest {
         mService.setLowPowerStandbyActiveInternal(true);
 
         assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testSetLowPowerStandbyActiveDuringMaintenance_redirectsCallToNativeWrapper() {
+        createService();
+        startSystem();
+
+        mService.getBinderServiceInstance().setLowPowerStandbyActiveDuringMaintenance(true);
+        verify(mLowPowerStandbyControllerMock).setActiveDuringMaintenance(true);
+
+        mService.getBinderServiceInstance().setLowPowerStandbyActiveDuringMaintenance(false);
+        verify(mLowPowerStandbyControllerMock).setActiveDuringMaintenance(false);
     }
 
     private WakeLock acquireWakeLock(String tag, int flags) {
