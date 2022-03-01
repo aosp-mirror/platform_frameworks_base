@@ -174,6 +174,13 @@ public class ActivityOptions extends ComponentOptions {
     public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
 
     /**
+     * Indicates that this activity launch is eligible to show a legacy permission prompt
+     * @hide
+     */
+    public static final String KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE =
+            "android:activity.legacyPermissionPromptEligible";
+
+    /**
      * Callback for when the last frame of the animation is played.
      * @hide
      */
@@ -445,6 +452,7 @@ public class ActivityOptions extends ComponentOptions {
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
     private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+    private boolean mIsEligibleForLegacyPermissionPrompt;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
@@ -1243,6 +1251,8 @@ public class ActivityOptions extends ComponentOptions {
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
         mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
+        mIsEligibleForLegacyPermissionPrompt =
+                opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
     }
 
     /**
@@ -1471,6 +1481,24 @@ public class ActivityOptions extends ComponentOptions {
             mSplashScreenStyle = style;
         }
         return this;
+    }
+
+    /**
+     * Whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public boolean isEligibleForLegacyPermissionPrompt() {
+        return mIsEligibleForLegacyPermissionPrompt;
+    }
+
+    /**
+     * Sets whether the activity is eligible to show a legacy permission prompt
+     * @hide
+     */
+    @TestApi
+    public void setEligibleForLegacyPermissionPrompt(boolean eligible) {
+        mIsEligibleForLegacyPermissionPrompt = eligible;
     }
 
     /**
@@ -1909,6 +1937,7 @@ public class ActivityOptions extends ComponentOptions {
         mSpecsFuture = otherOptions.mSpecsFuture;
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
         mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
+        mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
     }
 
     /**
@@ -2083,6 +2112,10 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mLaunchIntoPipParams != null) {
             b.putParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, mLaunchIntoPipParams);
+        }
+        if (mIsEligibleForLegacyPermissionPrompt) {
+            b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
+                    mIsEligibleForLegacyPermissionPrompt);
         }
         return b;
     }
