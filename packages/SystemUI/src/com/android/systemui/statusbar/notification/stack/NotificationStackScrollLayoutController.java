@@ -117,8 +117,8 @@ import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -141,7 +141,7 @@ import kotlin.Unit;
 /**
  * Controller for {@link NotificationStackScrollLayout}.
  */
-@StatusBarComponent.StatusBarScope
+@CentralSurfacesComponent.CentralSurfacesScope
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
@@ -176,8 +176,8 @@ public class NotificationStackScrollLayoutController {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    // TODO: StatusBar should be encapsulated behind a Controller
-    private final StatusBar mStatusBar;
+    // TODO: CentralSurfaces should be encapsulated behind a Controller
+    private final CentralSurfaces mCentralSurfaces;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
@@ -330,7 +330,7 @@ public class NotificationStackScrollLayoutController {
                     mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
-                    mNotificationEntryManager.updateNotifications("StatusBar state changed");
+                    mNotificationEntryManager.updateNotifications("CentralSurfaces state changed");
                 }
             };
 
@@ -431,7 +431,7 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onSnooze(StatusBarNotification sbn,
                         NotificationSwipeActionHelper.SnoozeOption snoozeOption) {
-                    mStatusBar.setNotificationSnoozed(sbn, snoozeOption);
+                    mCentralSurfaces.setNotificationSnoozed(sbn, snoozeOption);
                 }
 
                 @Override
@@ -484,7 +484,7 @@ public class NotificationStackScrollLayoutController {
                     mView.addSwipedOutView(view);
                     mFalsingCollector.onNotificationDismissed();
                     if (mFalsingCollector.shouldEnforceBouncer()) {
-                        mStatusBar.executeRunnableDismissingKeyguard(
+                        mCentralSurfaces.executeRunnableDismissingKeyguard(
                                 null,
                                 null /* cancelAction */,
                                 false /* dismissShade */,
@@ -557,7 +557,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public float getFalsingThresholdFactor() {
-                    return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+                    return mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
                 }
 
                 @Override
@@ -644,7 +644,7 @@ public class NotificationStackScrollLayoutController {
             FalsingManager falsingManager,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
-            StatusBar statusBar,
+            CentralSurfaces centralSurfaces,
             ScrimController scrimController,
             NotificationGroupManagerLegacy legacyGroupManager,
             GroupExpansionManager groupManager,
@@ -685,7 +685,7 @@ public class NotificationStackScrollLayoutController {
         mFalsingManager = falsingManager;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mScrimController = scrimController;
         mJankMonitor = jankMonitor;
         groupManager.registerGroupExpansionChangeListener(
@@ -693,7 +693,7 @@ public class NotificationStackScrollLayoutController {
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
             @Override
             public void onGroupsChanged() {
-                mStatusBar.requestNotificationUpdate("onGroupsChanged");
+                mCentralSurfaces.requestNotificationUpdate("onGroupsChanged");
             }
         });
         mNotifPipelineFlags = notifPipelineFlags;
@@ -716,7 +716,7 @@ public class NotificationStackScrollLayoutController {
         mView.setController(this);
         mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());
-        mView.setStatusBar(mStatusBar);
+        mView.setCentralSurfaces(mCentralSurfaces);
         mView.setClearAllAnimationListener(this::onAnimationEnd);
         mView.setClearAllListener((selection) -> mUiEventLogger.log(
                 NotificationPanelEvent.fromSelection(selection)));

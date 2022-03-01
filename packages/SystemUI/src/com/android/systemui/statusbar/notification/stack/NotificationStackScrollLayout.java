@@ -101,11 +101,11 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.util.Assert;
@@ -308,7 +308,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     };
     private NotificationStackScrollLogger mLogger;
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
     private HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
@@ -3959,7 +3959,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             resetScrollPosition();
-            mStatusBar.resetUserExpandedStates();
+            mCentralSurfaces.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
             if (mSwipeHelper.isSwiping()) {
@@ -4591,8 +4591,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setStatusBar(StatusBar statusBar) {
-        this.mStatusBar = statusBar;
+    public void setCentralSurfaces(CentralSurfaces centralSurfaces) {
+        this.mCentralSurfaces = centralSurfaces;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5260,7 +5260,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             Intent intent = showHistory
                     ? new Intent(Settings.ACTION_NOTIFICATION_HISTORY)
                     : new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
-            mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            mCentralSurfaces.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);
     }

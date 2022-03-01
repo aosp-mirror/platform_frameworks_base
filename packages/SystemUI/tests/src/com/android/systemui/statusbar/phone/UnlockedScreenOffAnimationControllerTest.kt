@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.GlobalSettings
+import junit.framework.Assert.assertFalse
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -61,7 +62,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var statusBar: StatusBar
+    private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock
     private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
@@ -93,8 +94,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 powerManager,
                 handler = handler
         )
-        controller.initialize(statusBar, lightRevealScrim)
-        `when`(statusBar.notificationPanelViewController).thenReturn(
+        controller.initialize(mCentralSurfaces, lightRevealScrim)
+        `when`(mCentralSurfaces.notificationPanelViewController).thenReturn(
             notificationPanelViewController)
 
         // Screen off does not run if the panel is expanded, so we should say it's collapsed to test
@@ -133,7 +134,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
      */
     @Test
     fun testAodUiShownIfNotInteractive() {
-        `when`(dozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true)
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
         `when`(powerManager.isInteractive).thenReturn(false)
 
         val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
@@ -156,7 +157,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
      */
     @Test
     fun testAodUiNotShownIfInteractive() {
-        `when`(dozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true)
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
         `when`(powerManager.isInteractive).thenReturn(true)
 
         val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
@@ -166,5 +167,14 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         callbackCaptor.value.run()
 
         verify(notificationPanelViewController, never()).showAodUi()
+    }
+
+    @Test
+    fun testNoAnimationPlaying_dozeParamsCanNotControlScreenOff() {
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(false)
+
+        assertFalse(controller.shouldPlayUnlockedScreenOffAnimation())
+        controller.startAnimation()
+        assertFalse(controller.isAnimationPlaying())
     }
 }

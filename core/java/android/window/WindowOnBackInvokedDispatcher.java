@@ -76,9 +76,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Detaches the dispatcher instance from its window. */
     public void detachFromWindow() {
+        clear();
         mWindow = null;
         mWindowSession = null;
-        clear();
     }
 
     // TODO: Take an Executor for the callback to run on.
@@ -165,47 +165,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             } else {
                 int priority = mAllCallbacks.get(callback);
                 mWindowSession.setOnBackInvokedCallback(
-                        mWindow, new OnBackInvokedCallbackWrapper(callback, priority), priority);
+                        mWindow, new OnBackInvokedCallbackWrapper(callback), priority);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
-        }
-    }
-
-    private class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        private final OnBackInvokedCallback mCallback;
-        private final @Priority int mPriority;
-
-        OnBackInvokedCallbackWrapper(
-                @NonNull OnBackInvokedCallback callback, @Priority int priority) {
-            mCallback = callback;
-            mPriority = priority;
-        }
-
-        @NonNull
-        public OnBackInvokedCallback getCallback() {
-            return mCallback;
-        }
-
-        @Override
-        public void onBackStarted() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackStarted());
-        }
-
-        @Override
-        public void onBackProgressed(BackEvent backEvent)
-                throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackProgressed(backEvent));
-        }
-
-        @Override
-        public void onBackCancelled() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackCancelled());
-        }
-
-        @Override
-        public void onBackInvoked() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackInvoked());
         }
     }
 
@@ -221,6 +184,39 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             }
         }
         return null;
+    }
+
+    private static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+        private final OnBackInvokedCallback mCallback;
+
+        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
+            mCallback = callback;
+        }
+
+        @NonNull
+        public OnBackInvokedCallback getCallback() {
+            return mCallback;
+        }
+
+        @Override
+        public void onBackStarted() {
+            Handler.getMain().post(() -> mCallback.onBackStarted());
+        }
+
+        @Override
+        public void onBackProgressed(BackEvent backEvent) {
+            Handler.getMain().post(() -> mCallback.onBackProgressed(backEvent));
+        }
+
+        @Override
+        public void onBackCancelled() {
+            Handler.getMain().post(() -> mCallback.onBackCancelled());
+        }
+
+        @Override
+        public void onBackInvoked() throws RemoteException {
+            Handler.getMain().post(() -> mCallback.onBackInvoked());
+        }
     }
 
     /**

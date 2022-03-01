@@ -37,8 +37,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -91,7 +90,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
-                () -> Optional.of(mock(StatusBar.class)),
+                () -> Optional.of(mock(CentralSurfaces.class)),
                 mNavigationModeController, mUserTracker, mDumpManager);
 
     }

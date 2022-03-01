@@ -154,7 +154,7 @@
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 
-    <!-- Needed for WallpaperManager.getWallpaperDimAmount in StatusBar.updateTheme -->
+    <!-- Needed for WallpaperManager.getWallpaperDimAmount in CentralSurfaces.updateTheme -->
     <uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
 
     <!-- Wifi Display -->

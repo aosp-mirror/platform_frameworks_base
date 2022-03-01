@@ -16,9 +16,9 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
-import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
-import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_MEDIA_FAKE_ARTWORK;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.ENABLE_LOCKSCREEN_WALLPAPER;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -55,7 +55,7 @@ import com.android.systemui.media.MediaData;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.SmartspaceMediaData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -66,11 +66,11 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -131,7 +131,7 @@ public class NotificationMediaManager implements Dumpable {
 
     private final Context mContext;
     private final ArrayList<MediaListener> mMediaListeners;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
     private final Set<AsyncTask<?, ?, ?>> mProcessArtworkTasks = new ArraySet<>();
 
@@ -172,11 +172,11 @@ public class NotificationMediaManager implements Dumpable {
     };
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public NotificationMediaManager(
             Context context,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             NotificationEntryManager notificationEntryManager,
@@ -193,7 +193,7 @@ public class NotificationMediaManager implements Dumpable {
         mKeyguardBypassController = keyguardBypassController;
         mMediaListeners = new ArrayList<>();
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mVisibilityProvider = visibilityProvider;
         mEntryManager = notificationEntryManager;
@@ -575,7 +575,7 @@ public class NotificationMediaManager implements Dumpable {
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
-        Trace.beginSection("StatusBar#updateMediaMetaData");
+        Trace.beginSection("CentralSurfaces#updateMediaMetaData");
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
             Trace.endSection();
             return;
@@ -653,7 +653,8 @@ public class NotificationMediaManager implements Dumpable {
         NotificationShadeWindowController windowController =
                 mNotificationShadeWindowController.get();
         boolean hideBecauseOccluded =
-                mStatusBarOptionalLazy.get().map(StatusBar::isOccluded).orElse(false);
+                mCentralSurfacesOptionalLazy.get()
+                        .map(CentralSurfaces::isOccluded).orElse(false);
 
         final boolean hasArtwork = artworkDrawable != null;
         mColorExtractor.setHasMediaArtwork(hasMediaArtwork);

@@ -26830,7 +26830,7 @@ package android.net {
     field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
     field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
     field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
-    field public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    field public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
@@ -31575,7 +31575,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
-    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
+    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();

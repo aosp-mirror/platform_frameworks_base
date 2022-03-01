@@ -1789,4 +1789,11 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             t.apply();
         }
     }
+
+    /**
+     * @hide
+     */
+    public void syncNextFrame(Transaction t) {
+        mBlastBufferQueue.setSyncTransaction(t);
+    }
 }

@@ -264,7 +264,8 @@ public class SpatializerHelper {
             return;
         }
         mState = STATE_DISABLED_UNAVAILABLE;
-        mASA.getDevicesForAttributes(DEFAULT_ATTRIBUTES).toArray(ROUTING_DEVICES);
+        mASA.getDevicesForAttributes(
+                DEFAULT_ATTRIBUTES, false /* forVolume */).toArray(ROUTING_DEVICES);
         // note at this point mSpat is still not instantiated
     }
 
@@ -298,7 +299,8 @@ public class SpatializerHelper {
             case STATE_DISABLED_AVAILABLE:
                 break;
         }
-        mASA.getDevicesForAttributes(DEFAULT_ATTRIBUTES).toArray(ROUTING_DEVICES);
+        mASA.getDevicesForAttributes(
+                DEFAULT_ATTRIBUTES, false /* forVolume */).toArray(ROUTING_DEVICES);
 
         // is media routed to a new device?
         if (isWireless(ROUTING_DEVICES[0].getType())) {
@@ -865,7 +867,8 @@ public class SpatializerHelper {
         }
         AudioDeviceAttributes[] devices = new AudioDeviceAttributes[1];
         // going through adapter to take advantage of routing cache
-        mASA.getDevicesForAttributes(attributes).toArray(devices);
+        mASA.getDevicesForAttributes(
+                attributes, false /* forVolume */).toArray(devices);
         final boolean able = canBeSpatializedOnDevice(attributes, format, devices);
         logd("canBeSpatialized returning " + able);
         return able;

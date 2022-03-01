@@ -285,7 +285,7 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldIgnoreVibration_withRingerModeSilent_ignoresRingtoneAndTouch() {
+    public void shouldIgnoreVibration_withRingerModeSilent_ignoresRingtoneOnly() {
         // Vibrating settings on are overruled by ringer mode.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
@@ -293,7 +293,7 @@ public class VibrationSettingsTest {
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
 
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_RINGTONE || usage == USAGE_TOUCH) {
+            if (usage == USAGE_RINGTONE) {
                 assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_RINGER_MODE);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
