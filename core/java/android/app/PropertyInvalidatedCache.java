@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -265,13 +264,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the permissions granted to the processes that contain the corresponding caches.
      * @hide
      */
-    @IntDef(prefix = { "MODULE_" }, value = {
-                MODULE_TEST,
-                MODULE_SYSTEM,
-                MODULE_BLUETOOTH
-            })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Module {}
 
     /**
      * The module used for unit tests and cts tests.  It is expected that no process in
@@ -279,7 +271,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     @TestApi
-    public static final int MODULE_TEST = 0;
+    public static final String MODULE_TEST = "test";
 
     /**
      * The module used for system server/framework caches.  This is not visible outside
@@ -287,7 +279,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     @TestApi
-    public static final int MODULE_SYSTEM = 1;
+    public static final String MODULE_SYSTEM = "system_server";
 
     /**
      * The module used for bluetooth caches.
@@ -295,11 +287,12 @@ public class PropertyInvalidatedCache<Query, Result> {
      */
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public static final int MODULE_BLUETOOTH = 2;
+    public static final String MODULE_BLUETOOTH = "bluetooth";
 
-    // A static array mapping module constants to strings.
-    private final static String[] sModuleNames =
-            { "test", "system_server", "bluetooth" };
+    /**
+     * The module used for telephony caches.
+     */
+    public static final String MODULE_TELEPHONY = "telephony";
 
     /**
      * Construct a system property that matches the rules described above.  The module is
@@ -315,7 +308,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     @TestApi
-    public static @NonNull String createPropertyName(@Module int module, @NonNull String apiName) {
+    public static @NonNull String createPropertyName(@NonNull String module,
+            @NonNull String apiName) {
         char[] api = apiName.toCharArray();
         int upper = 0;
         for (int i = 0; i < api.length; i++) {
@@ -338,14 +332,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
-        String moduleName = null;
-        try {
-            moduleName = sModuleNames[module];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("invalid module " + module);
-        }
-
-        return "cache_key." + moduleName + "." + new String(suffix);
+        return "cache_key." + module + "." + new String(suffix);
     }
 
     /**
@@ -548,7 +535,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      */
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public PropertyInvalidatedCache(int maxEntries, @Module int module, @NonNull String api,
+    public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
         mPropertyName = createPropertyName(module, api);
         mCacheName = cacheName;
@@ -989,7 +976,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      */
     @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public static void invalidateCache(@Module int module, @NonNull String api) {
+    public static void invalidateCache(@NonNull String module, @NonNull String api) {
         invalidateCache(createPropertyName(module, api));
     }
 
@@ -1211,8 +1198,10 @@ public class PropertyInvalidatedCache<Query, Result> {
                     getHandlerLocked().sendEmptyMessageAtTime(0, mUncorkDeadlineMs);
                     PropertyInvalidatedCache.corkInvalidations(mPropertyName);
                 } else {
-                    final long count = sCorkedInvalidates.getOrDefault(mPropertyName, (long) 0);
-                    sCorkedInvalidates.put(mPropertyName, count + 1);
+                    synchronized (sCorkLock) {
+                        final long count = sCorkedInvalidates.getOrDefault(mPropertyName, (long) 0);
+                        sCorkedInvalidates.put(mPropertyName, count + 1);
+                    }
                 }
             }
         }
@@ -1341,7 +1330,7 @@ public class PropertyInvalidatedCache<Query, Result> {
         }
     }
 
-    private void dumpContents(PrintWriter pw, String[] args) {
+    private void dumpContents(PrintWriter pw) {
         long invalidateCount;
         long corkedInvalidates;
         synchronized (sCorkLock) {
@@ -1418,7 +1407,7 @@ public class PropertyInvalidatedCache<Query, Result> {
 
             for (int i = 0; i < activeCaches.size(); i++) {
                 PropertyInvalidatedCache currentCache = activeCaches.get(i);
-                currentCache.dumpContents(pw, args);
+                currentCache.dumpContents(pw);
                 pw.flush();
             }
         } catch (IOException e) {
