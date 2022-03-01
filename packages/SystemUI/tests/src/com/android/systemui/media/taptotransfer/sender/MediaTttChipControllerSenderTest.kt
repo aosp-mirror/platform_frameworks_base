@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -62,6 +63,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
+    private lateinit var logger: MediaTttLogger
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -69,6 +72,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
+    private lateinit var fakeClock: FakeSystemClock
+    private lateinit var fakeExecutor: FakeExecutor
 
     @Before
     fun setUp() {
@@ -82,12 +87,16 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        fakeClock = FakeSystemClock()
+        fakeExecutor = FakeExecutor(fakeClock)
+
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
             context,
+            logger,
             windowManager,
             viewUtil,
-            FakeExecutor(FakeSystemClock()),
+            fakeExecutor,
             TapGestureDetector(context)
         )
 
@@ -220,6 +229,17 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun receivesNewStateFromCommandQueue_isLogged() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+
+        verify(logger).logStateChange(any(), any())
     }
 
     @Test
@@ -458,6 +478,52 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(transferFailed())
 
         assertThat(getChipView().getFailureIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenRemoveChip_chipStillDisplayed() {
+        controllerSender.displayChip(transferToReceiverTriggered())
+        fakeClock.advanceTime(1000L)
+
+        controllerSender.removeChip("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenFarFromReceiver_eventuallyTimesOut() {
+        val state = transferToReceiverTriggered()
+        controllerSender.displayChip(state)
+        fakeClock.advanceTime(1000L)
+        controllerSender.removeChip("fakeRemovalReason")
+
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceTriggeredThenRemoveChip_chipStillDisplayed() {
+        controllerSender.displayChip(transferToThisDeviceTriggered())
+        fakeClock.advanceTime(1000L)
+
+        controllerSender.removeChip("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceTriggeredThenFarFromReceiver_eventuallyTimesOut() {
+        val state = transferToThisDeviceTriggered()
+        controllerSender.displayChip(state)
+        fakeClock.advanceTime(1000L)
+        controllerSender.removeChip("fakeRemovalReason")
+
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
+
+        verify(windowManager).removeView(any())
     }
 
     private fun LinearLayout.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
