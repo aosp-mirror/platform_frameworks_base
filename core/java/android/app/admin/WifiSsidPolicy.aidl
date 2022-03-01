@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022 The Android Open Source Project
+
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +15,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.dagger
+package android.app.admin;
 
-import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.phone.StatusBar
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
-
-@Module
-interface StartStatusBarModule {
-    /** Start the StatusBar   */
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBar::class)
-    abstract fun bindsStatusBar(statusBar: StatusBar): CoreStartable
-}
+parcelable WifiSsidPolicy;

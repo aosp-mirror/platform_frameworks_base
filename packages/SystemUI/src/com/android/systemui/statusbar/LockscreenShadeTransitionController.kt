@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Utils
 import java.io.FileDescriptor
@@ -73,7 +73,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var notificationPanelController: NotificationPanelViewController
-    lateinit var statusbar: StatusBar
+    lateinit var centralSurfaces: CentralSurfaces
     lateinit var qS: QS
 
     /**
@@ -197,7 +197,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         // Bind the click listener of the shelf to go to the full shade
         notificationShelfController.setOnClickListener {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                statusbar.wakeUpIfDozing(SystemClock.uptimeMillis(), it, "SHADE_CLICK")
+                centralSurfaces.wakeUpIfDozing(SystemClock.uptimeMillis(), it, "SHADE_CLICK")
                 goToLockedShade(it)
             }
         }
@@ -224,7 +224,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (nsslController.isInLockedDownShade()) {
                 logger.logDraggedDownLockDownShade(startingChild)
                 statusBarStateController.setLeaveOpenOnKeyguardHide(true)
-                statusbar.dismissKeyguardThenExecute(OnDismissAction {
+                centralSurfaces.dismissKeyguardThenExecute(OnDismissAction {
                     nextHideKeyguardNeedsNoAnimation = true
                     false
                 }, cancelRunnable, false /* afterKeyguardGone */)
@@ -361,7 +361,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - scrimProgress)
         depthController.transitionToFullShadeProgress = scrimProgress
         udfpsKeyguardViewController?.setTransitionToFullShadeProgress(scrimProgress)
-        statusbar.setTransitionToFullShadeProgress(scrimProgress)
+        centralSurfaces.setTransitionToFullShadeProgress(scrimProgress)
     }
 
     private fun setDragDownAmountAnimated(
@@ -461,7 +461,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         animationHandler: ((Long) -> Unit)? = null,
         cancelAction: Runnable? = null
     ) {
-        if (statusbar.isShadeDisabled) {
+        if (centralSurfaces.isShadeDisabled) {
             cancelAction?.run()
             logger.logShadeDisabledOnGoToLockedShade()
             return
@@ -503,7 +503,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 cancelAction?.run()
             }
             logger.logShowBouncerOnGoToLockedShade()
-            statusbar.showBouncerWithDimissAndCancelIfKeyguard(onDismissAction, cancelHandler)
+            centralSurfaces.showBouncerWithDimissAndCancelIfKeyguard(onDismissAction, cancelHandler)
             draggedDownEntry = entry
         } else {
             logger.logGoingToLockedShade(animationHandler != null)

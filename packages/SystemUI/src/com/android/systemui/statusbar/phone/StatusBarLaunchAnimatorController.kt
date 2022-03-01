@@ -10,34 +10,34 @@ import com.android.systemui.animation.LaunchAnimator
  */
 class StatusBarLaunchAnimatorController(
     private val delegate: ActivityLaunchAnimator.Controller,
-    private val statusBar: StatusBar,
+    private val centralSurfaces: CentralSurfaces,
     private val isLaunchForActivity: Boolean = true
 ) : ActivityLaunchAnimator.Controller by delegate {
     // Always sync the opening window with the shade, given that we draw a hole punch in the shade
     // of the same size and position as the opening app to make it visible.
     override val openingWindowSyncView: View?
-        get() = statusBar.notificationShadeWindowView
+        get() = centralSurfaces.notificationShadeWindowView
 
     override fun onIntentStarted(willAnimate: Boolean) {
         delegate.onIntentStarted(willAnimate)
         if (!willAnimate) {
-            statusBar.collapsePanelOnMainThread()
+            centralSurfaces.collapsePanelOnMainThread()
         }
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
-        statusBar.notificationPanelViewController.setIsLaunchAnimationRunning(true)
+        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(true)
         if (!isExpandingFullyAbove) {
-            statusBar.collapsePanelWithDuration(
+            centralSurfaces.collapsePanelWithDuration(
                 ActivityLaunchAnimator.TIMINGS.totalDuration.toInt())
         }
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-        statusBar.notificationPanelViewController.setIsLaunchAnimationRunning(false)
-        statusBar.onLaunchAnimationEnd(isExpandingFullyAbove)
+        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(false)
+        centralSurfaces.onLaunchAnimationEnd(isExpandingFullyAbove)
     }
 
     override fun onLaunchAnimationProgress(
@@ -46,11 +46,11 @@ class StatusBarLaunchAnimatorController(
         linearProgress: Float
     ) {
         delegate.onLaunchAnimationProgress(state, progress, linearProgress)
-        statusBar.notificationPanelViewController.applyLaunchAnimationProgress(linearProgress)
+        centralSurfaces.notificationPanelViewController.applyLaunchAnimationProgress(linearProgress)
     }
 
     override fun onLaunchAnimationCancelled() {
         delegate.onLaunchAnimationCancelled()
-        statusBar.onLaunchAnimationCancelled(isLaunchForActivity)
+        centralSurfaces.onLaunchAnimationCancelled(isLaunchForActivity)
     }
 }

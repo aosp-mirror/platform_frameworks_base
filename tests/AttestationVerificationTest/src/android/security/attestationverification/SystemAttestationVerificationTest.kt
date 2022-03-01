@@ -12,8 +12,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import com.google.common.truth.Truth.assertThat
 import android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE
-import android.security.attestationverification.AttestationVerificationManager.PROFILE_PEER_DEVICE
 import android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED
+import android.security.attestationverification.AttestationVerificationManager.PROFILE_UNKNOWN
 import android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE
 import android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS
 import android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN
@@ -52,7 +52,7 @@ class SystemAttestationVerificationTest {
     @Test
     fun verifyAttestation_returnsUnknown() {
         val future = CompletableFuture<Int>()
-        val profile = AttestationProfile(PROFILE_PEER_DEVICE)
+        val profile = AttestationProfile(PROFILE_UNKNOWN)
         avm.verifyAttestation(profile, TYPE_PUBLIC_KEY, Bundle(), ByteArray(0),
                 activity.mainExecutor) { result, _ ->
             future.complete(result)
@@ -137,7 +137,7 @@ class SystemAttestationVerificationTest {
     @Test
     fun verifyToken_returnsUnknown() {
         val future = CompletableFuture<Int>()
-        val profile = AttestationProfile(PROFILE_PEER_DEVICE)
+        val profile = AttestationProfile(PROFILE_SELF_TRUSTED)
         avm.verifyAttestation(profile, TYPE_PUBLIC_KEY, Bundle(), ByteArray(0),
                 activity.mainExecutor) { _, token ->
             val result = avm.verifyToken(profile, TYPE_PUBLIC_KEY, Bundle(), token, null)
@@ -150,7 +150,7 @@ class SystemAttestationVerificationTest {
     @Test
     fun verifyToken_tooBigMaxAgeThrows() {
         val future = CompletableFuture<VerificationToken>()
-        val profile = AttestationProfile(PROFILE_PEER_DEVICE)
+        val profile = AttestationProfile(PROFILE_SELF_TRUSTED)
         avm.verifyAttestation(profile, TYPE_PUBLIC_KEY, Bundle(), ByteArray(0),
                 activity.mainExecutor) { _, token ->
             future.complete(token)

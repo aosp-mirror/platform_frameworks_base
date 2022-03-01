@@ -214,6 +214,7 @@ import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
+import android.app.admin.WifiSsidPolicy;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
 import android.app.role.RoleManager;
@@ -269,6 +270,7 @@ import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -389,6 +391,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -18514,9 +18517,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         );
     }
 
-    private void validateCurrentWifiMeetsAdminRequirements() {
+    private void notifyMinimumRequiredWifiSecurityLevelChanged(int level) {
         mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getWifiManager().validateCurrentWifiMeetsAdminRequirements());
+                () -> mInjector.getWifiManager()
+                        .notifyMinimumRequiredWifiSecurityLevelChanged(level));
+    }
+
+    private void notifyWifiSsidPolicyChanged(int policyType, List<String> ssids) {
+        List<WifiSsid> wifiSsidList = new ArrayList<>();
+        for (String ssid : ssids) {
+            wifiSsidList.add(
+                    WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+        }
+        WifiSsidPolicy policy = new WifiSsidPolicy(policyType, new ArraySet<>(wifiSsidList));
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getWifiManager().notifyWifiSsidPolicyChanged(policy));
     }
 
     @Override
@@ -18536,7 +18551,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 valueChanged = true;
             }
         }
-        if (valueChanged) validateCurrentWifiMeetsAdminRequirements();
+        if (valueChanged) notifyMinimumRequiredWifiSecurityLevelChanged(level);
     }
 
     @Override
@@ -18568,7 +18583,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (changed) saveSettingsLocked(caller.getUserId());
         }
-        if (changed) validateCurrentWifiMeetsAdminRequirements();
+        if (changed && !ssids.isEmpty()) {
+            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
+        }
     }
 
     @Override
@@ -18607,7 +18624,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (changed) saveSettingsLocked(caller.getUserId());
         }
-        if (changed) validateCurrentWifiMeetsAdminRequirements();
+        if (changed) {
+            notifyWifiSsidPolicyChanged(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
+        }
     }
 
     @Override

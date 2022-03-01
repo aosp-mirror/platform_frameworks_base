@@ -44,7 +44,7 @@ import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinde
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.RemoteInputUriController
@@ -64,7 +64,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotificationsControllerImpl @Inject constructor(
-    private val statusBar: Lazy<StatusBar>,
+    private val centralSurfaces: Lazy<CentralSurfaces>,
     private val notifPipelineFlags: NotifPipelineFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,
@@ -109,7 +109,7 @@ class NotificationsControllerImpl @Inject constructor(
 
         notificationRowBinder.setNotificationClicker(
                 clickerBuilder.build(
-                        Optional.of(statusBar.get()), bubblesOptional, notificationActivityStarter))
+                        Optional.of(centralSurfaces.get()), bubblesOptional, notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,

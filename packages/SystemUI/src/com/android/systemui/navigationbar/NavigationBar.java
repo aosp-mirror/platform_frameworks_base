@@ -53,8 +53,8 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
-import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_WINDOW_STATE;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransitions;
 
 import android.annotation.IdRes;
 import android.app.ActivityTaskManager;
@@ -134,9 +134,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
@@ -176,7 +176,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final MetricsLogger mMetricsLogger;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final SysUiState mSysUiFlagsContainer;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final ShadeController mShadeController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
@@ -486,7 +486,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
             Optional<Recents> recentsOptional,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -509,7 +509,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mMetricsLogger = metricsLogger;
         mAssistManagerLazy = assistManagerLazy;
         mSysUiFlagsContainer = sysUiFlagsContainer;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mShadeController = shadeController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
@@ -611,7 +611,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     public void onViewAttachedToWindow(View v) {
         final Display display = v.getDisplay();
         mNavigationBarView.setComponents(mRecentsOptional);
-        mNavigationBarView.setComponents(mStatusBarOptionalLazy.get().get().getPanelController());
+        mNavigationBarView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);
@@ -1166,13 +1166,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // If an incoming call is ringing, HOME is totally disabled.
         // (The user is already on the InCallUI at this point,
         // and their ONLY options are to answer or reject the call.)
-        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
+        final Optional<CentralSurfaces> centralSurfacesOptional = mCentralSurfacesOptionalLazy.get();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHomeBlockedThisTouch = false;
                 if (mTelecomManagerOptional.isPresent()
                         && mTelecomManagerOptional.get().isRinging()) {
-                    if (statusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
+                    if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing)
+                            .orElse(false)) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
                         mHomeBlockedThisTouch = true;
@@ -1188,14 +1189,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
-                statusBarOptional.ifPresent(StatusBar::awakenDreams);
+                centralSurfacesOptional.ifPresent(CentralSurfaces::awakenDreams);
                 break;
         }
         return false;
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        mStatusBarOptionalLazy.get().ifPresent(
+        mCentralSurfacesOptionalLazy.get().ifPresent(
                 statusBar -> statusBar.setQsScrimEnabled(!isVertical));
     }
 
@@ -1222,7 +1223,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 AssistManager.INVOCATION_TYPE_KEY,
                 AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         mAssistManagerLazy.get().startAssist(args);
-        mStatusBarOptionalLazy.get().ifPresent(StatusBar::awakenDreams);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
         mNavigationBarView.abortCurrentGesture();
         return true;
     }
@@ -1248,7 +1249,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
         }
-        mStatusBarOptionalLazy.get().ifPresent(StatusBar::awakenDreams);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
         mCommandQueue.toggleRecentApps();
     }
 
@@ -1432,7 +1433,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private void checkBarModes() {
         // We only have status bar on default display now.
         if (mIsOnDefaultDisplay) {
-            mStatusBarOptionalLazy.get().ifPresent(StatusBar::checkBarModes);
+            mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::checkBarModes);
         } else {
             checkNavBarModes();
         }
@@ -1451,7 +1452,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
      */
     public void checkNavBarModes() {
         final boolean anim =
-                mStatusBarOptionalLazy.get().map(StatusBar::isDeviceInteractive).orElse(false)
+                mCentralSurfacesOptionalLazy.get().map(CentralSurfaces::isDeviceInteractive)
+                        .orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
         mNavigationBarView.getBarTransitions().transitionTo(mNavigationBarMode, anim);
     }
@@ -1628,7 +1630,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         private final CommandQueue mCommandQueue;
         private final Optional<Pip> mPipOptional;
         private final Optional<Recents> mRecentsOptional;
-        private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+        private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
         private final ShadeController mShadeController;
         private final NotificationRemoteInputManager mNotificationRemoteInputManager;
         private final NotificationShadeDepthController mNotificationShadeDepthController;
@@ -1659,7 +1661,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 CommandQueue commandQueue,
                 Optional<Pip> pipOptional,
                 Optional<Recents> recentsOptional,
-                Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
                 ShadeController shadeController,
                 NotificationRemoteInputManager notificationRemoteInputManager,
                 NotificationShadeDepthController notificationShadeDepthController,
@@ -1687,7 +1689,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mCommandQueue = commandQueue;
             mPipOptional = pipOptional;
             mRecentsOptional = recentsOptional;
-            mStatusBarOptionalLazy = statusBarOptionalLazy;
+            mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
             mShadeController = shadeController;
             mNotificationRemoteInputManager = notificationRemoteInputManager;
             mNotificationShadeDepthController = notificationShadeDepthController;
@@ -1712,7 +1714,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mOverviewProxyService, mNavigationModeController,
                     mAccessibilityButtonModeObserver, mStatusBarStateController,
                     mSysUiFlagsContainer, mBroadcastDispatcher, mCommandQueue, mPipOptional,
-                    mRecentsOptional, mStatusBarOptionalLazy,
+                    mRecentsOptional, mCentralSurfacesOptionalLazy,
                     mShadeController, mNotificationRemoteInputManager,
                     mNotificationShadeDepthController, mMainHandler,
                     mNavbarOverlayController, mUiEventLogger, mNavBarHelper,

@@ -1322,9 +1322,11 @@ public final class AppRestrictionController {
         prefix = "  " + prefix;
         pw.print(prefix);
         pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
+        /*
         synchronized (mSettingsLock) {
             mRestrictionSettings.dumpLocked(pw, "  " + prefix);
         }
+        */
         mConstantsObserver.dump(pw, "  " + prefix);
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             pw.println();

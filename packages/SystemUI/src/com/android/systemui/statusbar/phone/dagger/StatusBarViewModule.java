@@ -61,6 +61,9 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.SecureSettings;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -77,7 +80,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShadeWindowView providesNotificationShadeWindowView(
             LayoutInflater layoutInflater) {
         NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
@@ -92,7 +95,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
@@ -100,7 +103,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
             NotificationStackScrollLayout notificationStackScrollLayout) {
         NotificationShelf view = (NotificationShelf) layoutInflater.inflate(
@@ -115,7 +118,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelfController providesStatusBarWindowView(
             NotificationShelfComponent.Builder notificationShelfComponentBuilder,
             NotificationShelf notificationShelf) {
@@ -131,7 +134,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationPanelView getNotificationPanelView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.getNotificationPanelView();
@@ -139,7 +142,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static LockIconView getLockIconView(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.lock_icon_view);
@@ -147,7 +150,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     @Nullable
     public static AuthRippleView getAuthRippleView(
             NotificationShadeWindowView notificationShadeWindowView) {
@@ -157,7 +160,7 @@ public abstract class StatusBarViewModule {
     /** */
     @Provides
     @Named(SPLIT_SHADE_HEADER)
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static View getSplitShadeStatusBarView(
             NotificationShadeWindowView notificationShadeWindowView,
             FeatureFlags featureFlags) {
@@ -172,7 +175,7 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
             @Named(SPLIT_SHADE_HEADER) View header) {
         return header.findViewById(R.id.privacy_chip);
@@ -180,21 +183,21 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     static StatusIconContainer providesStatusIconContainer(@Named(SPLIT_SHADE_HEADER) View header) {
         return header.findViewById(R.id.statusIcons);
     }
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     @Named(SPLIT_SHADE_BATTERY_VIEW)
     static BatteryMeterView getBatteryMeterView(@Named(SPLIT_SHADE_HEADER) View view) {
         return view.findViewById(R.id.batteryRemainingIcon);
     }
 
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     @Named(SPLIT_SHADE_BATTERY_CONTROLLER)
     static BatteryMeterViewController getBatteryMeterViewController(
             @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
@@ -218,14 +221,14 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static TapAgainView getTapAgainView(NotificationPanelView npv) {
         return npv.getTapAgainView();
     }
 
     /** */
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationsQuickSettingsContainer getNotificationsQuickSettingsContainer(
             NotificationShadeWindowView notificationShadeWindowView) {
         return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
@@ -235,9 +238,9 @@ public abstract class StatusBarViewModule {
      * Creates a new {@link CollapsedStatusBarFragment}.
      *
      * **IMPORTANT**: This method intentionally does not have
-     * {@link StatusBarComponent.StatusBarScope}, which means a new fragment *will* be created each
-     * time this method is called. This is intentional because we need fragments to re-created in
-     * certain lifecycle scenarios.
+     * {@link CentralSurfacesComponent.CentralSurfacesScope}, which means a new fragment *will* be
+     * created each time this method is called. This is intentional because we need fragments to
+     * re-created in certain lifecycle scenarios.
      *
      * This provider is {@link Named} such that it does not conflict with the provider inside of
      * {@link StatusBarFragmentComponent}.
@@ -260,7 +263,9 @@ public abstract class StatusBarViewModule {
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
-            OperatorNameViewController.Factory operatorNameViewControllerFactory
+            OperatorNameViewController.Factory operatorNameViewControllerFactory,
+            SecureSettings secureSettings,
+            @Main Executor mainExecutor
     ) {
         return new CollapsedStatusBarFragment(statusBarFragmentComponentFactory,
                 ongoingCallController,
@@ -277,6 +282,8 @@ public abstract class StatusBarViewModule {
                 statusBarStateController,
                 commandQueue,
                 collapsedStatusBarFragmentLogger,
-                operatorNameViewControllerFactory);
+                operatorNameViewControllerFactory,
+                secureSettings,
+                mainExecutor);
     }
 }

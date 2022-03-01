@@ -40,7 +40,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -59,7 +59,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Mock
-    StatusBar mStatusBar;
+    CentralSurfaces mCentralSurfaces;
 
     @Mock
     NotificationShadeWindowController mNotificationShadeWindowController;
@@ -103,7 +103,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         mTouchHandler = new BouncerSwipeTouchHandler(
                 mDisplayMetrics,
                 mStatusBarKeyguardViewManager,
-                mStatusBar,
+                mCentralSurfaces,
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,
@@ -111,7 +111,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION);
 
-        when(mStatusBar.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
+        when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
     }
