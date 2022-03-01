@@ -9663,6 +9663,13 @@ public final class Settings {
                 "lockscreen_use_double_line_clock";
 
         /**
+         * Whether to show the vibrate icon in the Status Bar (default off)
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_VIBRATE_ICON = "status_bar_show_vibrate_icon";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
