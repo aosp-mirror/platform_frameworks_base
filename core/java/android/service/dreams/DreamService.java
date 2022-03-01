@@ -231,7 +231,7 @@ public class DreamService extends Service implements Window.Callback {
      * The default value for whether to show complications on the overlay.
      * @hide
      */
-    public static final boolean DEFAULT_SHOW_COMPLICATIONS = true;
+    public static final boolean DEFAULT_SHOW_COMPLICATIONS = false;
 
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
