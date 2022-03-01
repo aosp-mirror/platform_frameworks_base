@@ -28,6 +28,7 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.testing.AndroidTestingRunner;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
@@ -99,6 +100,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamPreviewComplication mPreviewComplication;
 
+    @Mock
+    ViewGroup mDreamOverlayContainerViewParent;
+
     DreamOverlayService mService;
 
     @Before
@@ -149,6 +153,23 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mMainExecutor.runAllReady();
 
         verify(mDreamOverlayContainerViewController).init();
+    }
+
+    @Test
+    public void testDreamOverlayContainerViewRemovedFromOldParentWhenInitialized()
+            throws Exception {
+        when(mDreamOverlayContainerView.getParent())
+                .thenReturn(mDreamOverlayContainerViewParent)
+                .thenReturn(null);
+
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        verify(mDreamOverlayContainerViewParent).removeView(mDreamOverlayContainerView);
     }
 
     @Test
