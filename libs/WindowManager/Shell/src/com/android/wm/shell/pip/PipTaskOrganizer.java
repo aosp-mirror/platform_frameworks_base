@@ -18,7 +18,6 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.util.RotationUtils.deltaRotation;
 import static android.util.RotationUtils.rotateBounds;
@@ -438,11 +437,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
             // We set to fullscreen here for now, but later it will be set to UNDEFINED for
             // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
-            wct.setActivityWindowingMode(mToken,
-                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
-                            && !requestEnterSplit
-                            ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                            : WINDOWING_MODE_FULLSCREEN);
+            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_FULLSCREEN);
             wct.setBounds(mToken, destinationBounds);
             wct.setBoundsChangeTransaction(mToken, tx);
         }
