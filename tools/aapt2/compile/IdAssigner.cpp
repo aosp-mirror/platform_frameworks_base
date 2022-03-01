@@ -128,7 +128,7 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        const ResourceName name(package->name, type->type, entry->name);
+        const ResourceName name(package->name, type->named_type, entry->name);
         if (entry->id && !assigned_ids.ReserveId(name, entry->id.value(), entry->visibility,
                                                  context->GetDiagnostics())) {
           return false;
@@ -175,7 +175,7 @@ bool IdAssigner::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {
-        const ResourceName name(package->name, type->type, entry->name);
+        const ResourceName name(package->name, type->named_type, entry->name);
         if (entry->id) {
           continue;
         }

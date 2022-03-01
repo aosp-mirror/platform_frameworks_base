@@ -98,7 +98,7 @@ bool ProductFilter::Consume(IAaptContext* context, ResourceTable* table) {
             // End of the array, or we saw a different config,
             // so this must be the end of a range of products.
             // Select the product to keep from the set of products defined.
-            ResourceNameRef name(pkg->name, type->type, entry->name);
+            ResourceNameRef name(pkg->name, type->named_type, entry->name);
             auto value_to_keep = SelectProductToKeep(
                 name, start_range_iter, iter, context->GetDiagnostics());
             if (value_to_keep == iter) {
