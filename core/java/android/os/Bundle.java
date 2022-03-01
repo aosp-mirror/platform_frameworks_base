@@ -1059,7 +1059,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @SuppressLint("NullableCollection")
     @SuppressWarnings("unchecked")
     @Nullable
-    public <T> ArrayList<T> getParcelableArrayList(@Nullable String key, @NonNull Class<T> clazz) {
+    public <T> ArrayList<T> getParcelableArrayList(@Nullable String key,
+            @NonNull Class<? extends T> clazz) {
         // The reason for not using <T extends Parcelable> is because the caller could provide a
         // super class to restrict the children that doesn't implement Parcelable itself while the
         // children do, more details at b/210800751 (same reasoning applies here).
@@ -1107,7 +1108,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> SparseArray<T> getSparseParcelableArray(@Nullable String key,
-            @NonNull Class<T> clazz) {
+            @NonNull Class<? extends T> clazz) {
         // The reason for not using <T extends Parcelable> is because the caller could provide a
         // super class to restrict the children that doesn't implement Parcelable itself while the
         // children do, more details at b/210800751 (same reasoning applies here).
