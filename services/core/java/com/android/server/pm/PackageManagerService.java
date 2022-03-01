@@ -247,8 +247,8 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
-import com.android.server.supplementalprocess.SupplementalProcessManagerLocal;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -934,7 +934,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
-    private final @NonNull String mRequiredSupplementalProcessPackage;
+    private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -1667,7 +1667,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
-        mRequiredSupplementalProcessPackage = testParams.requiredSupplementalProcessPackage;
+        mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
 
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
@@ -2141,8 +2141,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     getPackageInfo(mRequiredPermissionControllerPackage, 0,
                             UserHandle.USER_SYSTEM).getLongVersionCode());
 
-            // Resolve the supplemental process
-            mRequiredSupplementalProcessPackage = getRequiredSupplementalProcessPackageName();
+            // Resolve the sdk sandbox package
+            mRequiredSdkSandboxPackage = getRequiredSdkSandboxPackageName();
 
             // Initialize InstantAppRegistry's Instant App list for all users.
             for (AndroidPackage pkg : mPackages.values()) {
@@ -3143,8 +3143,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getSupplementalProcessPackageName() {
-        return mRequiredSupplementalProcessPackage;
+    public String getSdkSandboxPackageName() {
+        return mRequiredSdkSandboxPackage;
     }
 
     String getPackageInstallerPackageName() {
@@ -5458,8 +5458,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @NonNull String getRequiredSupplementalProcessPackageName() {
-        final Intent intent = new Intent(SupplementalProcessManagerLocal.SERVICE_INTERFACE);
+    private @NonNull String getRequiredSdkSandboxPackageName() {
+        final Intent intent = new Intent(SdkSandboxManagerLocal.SERVICE_INTERFACE);
 
         final List<ResolveInfo> matches = queryIntentServicesInternal(
                 intent,
@@ -5471,7 +5471,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            throw new RuntimeException("There should exactly one supplemental process; found "
+            throw new RuntimeException("There should exactly one sdk sandbox package; found "
                     + matches.size() + ": matches=" + matches);
         }
     }

@@ -65,15 +65,15 @@ public interface ActivityManagerLocal {
     void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
 
     /**
-     * Binds to a supplemental process service, creating it if needed. You can through the arguments
+     * Binds to a sdk sandbox service, creating it if needed. You can through the arguments
      * here have the system bring up multiple concurrent processes hosting their own instance of
      * that service. The {@code processName} you provide here identifies the different instances.
      *
-     * @param service Identifies the supplemental process service to connect to. The Intent must
+     * @param service Identifies the sdk sandbox process service to connect to. The Intent must
      *        specify an explicit component name. This value cannot be null.
      * @param conn Receives information as the service is started and stopped.
      *        This must be a valid ServiceConnection object; it must not be null.
-     * @param userAppUid Uid of the app for which the supplemental process needs to be spawned.
+     * @param clientAppUid Uid of the app for which the sdk sandbox process needs to be spawned.
      * @param processName Unique identifier for the service instance. Each unique name here will
      *        result in a different service instance being created. Identifiers must only contain
      *        ASCII letters, digits, underscores, and periods.
@@ -86,7 +86,7 @@ public interface ActivityManagerLocal {
      * @see Context#bindService(Intent, ServiceConnection, int)
      */
     @SuppressLint("RethrowRemoteException")
-    boolean bindSupplementalProcessService(@NonNull Intent service, @NonNull ServiceConnection conn,
-            int userAppUid, @NonNull String processName, @Context.BindServiceFlags int flags)
+    boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            int clientAppUid, @NonNull String processName, @Context.BindServiceFlags int flags)
             throws RemoteException;
 }

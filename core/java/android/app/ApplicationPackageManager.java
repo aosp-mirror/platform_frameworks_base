@@ -867,9 +867,9 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public String getSupplementalProcessPackageName() {
+    public String getSdkSandboxPackageName() {
         try {
-            return mPM.getSupplementalProcessPackageName();
+            return mPM.getSdkSandboxPackageName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
