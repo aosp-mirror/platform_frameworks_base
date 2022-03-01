@@ -17,8 +17,8 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarScope
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.util.ListenerSet
 import dagger.Binds
 import dagger.Module
@@ -67,18 +67,18 @@ object StatusBarNotifPanelEventSourceModule {
     @JvmStatic
     @Provides
     @IntoSet
-    @StatusBarScope
+    @CentralSurfacesScope
     fun bindStartable(
         manager: NotifPanelEventSourceManager,
         notifPanelController: NotificationPanelViewController
-    ): StatusBarComponent.Startable =
+    ): CentralSurfacesComponent.Startable =
             EventSourceStatusBarStartableImpl(manager, notifPanelController)
 }
 
 /**
- * Management layer that bridges [SysUiSingleton] and [StatusBarScope]. Necessary because code that
- * wants to listen to [NotifPanelEventSource] lives in [SysUiSingleton], but the events themselves
- * come from [NotificationPanelViewController] in [StatusBarScope].
+ * Management layer that bridges [SysUiSingleton] and [CentralSurfacesScope]. Necessary because code
+ * that wants to listen to [NotifPanelEventSource] lives in [SysUiSingleton], but the events
+ * themselves come from [NotificationPanelViewController] in [CentralSurfacesScope].
  */
 interface NotifPanelEventSourceManager : NotifPanelEventSource {
     var eventSource: NotifPanelEventSource?
@@ -116,7 +116,7 @@ private class NotifPanelEventSourceManagerImpl
 private class EventSourceStatusBarStartableImpl(
     private val manager: NotifPanelEventSourceManager,
     private val notifPanelController: NotificationPanelViewController
-) : StatusBarComponent.Startable {
+) : CentralSurfacesComponent.Startable {
 
     override fun start() {
         manager.eventSource = notifPanelController

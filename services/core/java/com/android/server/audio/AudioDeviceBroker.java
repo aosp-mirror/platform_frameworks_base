@@ -396,7 +396,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
             AudioAttributes attr =
                     AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                             AudioSystem.STREAM_VOICE_CALL);
-            List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(attr);
+            List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(
+                    attr, false /* forVolume */);
             if (devices.isEmpty()) {
                 if (mAudioService.isPlatformVoice()) {
                     Log.w(TAG,

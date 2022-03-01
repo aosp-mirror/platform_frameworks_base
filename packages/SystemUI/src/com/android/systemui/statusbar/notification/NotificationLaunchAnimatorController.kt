@@ -8,14 +8,14 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.policy.HeadsUpUtil
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlin.math.max
 
 /** A provider of [NotificationLaunchAnimatorController]. */
-@StatusBarComponent.StatusBarScope
+@CentralSurfacesComponent.CentralSurfacesScope
 class NotificationLaunchAnimatorControllerProvider @Inject constructor(
     private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
     private val notificationListContainer: NotificationListContainer,

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 
 import dagger.Module;
 import dagger.Provides;
@@ -24,7 +24,7 @@ import dagger.Provides;
 @Module
 public abstract class NotificationStackScrollLayoutListContainerModule {
     @Provides
-    @StatusBarComponent.StatusBarScope
+    @CentralSurfacesComponent.CentralSurfacesScope
     static NotificationListContainer provideListContainer(
             NotificationStackScrollLayoutController nsslController) {
         return nsslController.getNotificationListContainer();

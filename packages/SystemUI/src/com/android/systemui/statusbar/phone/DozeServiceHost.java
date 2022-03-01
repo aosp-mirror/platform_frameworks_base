@@ -97,7 +97,7 @@ public final class DozeServiceHost implements DozeHost {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
-    private StatusBar mStatusBar;
+    private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
 
     @Inject
@@ -146,12 +146,12 @@ public final class DozeServiceHost implements DozeHost {
      * Initialize instance with objects only available later during execution.
      */
     public void initialize(
-            StatusBar statusBar,
+            CentralSurfaces centralSurfaces,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
             NotificationPanelViewController notificationPanel,
             View ambientIndicationContainer) {
-        mStatusBar = statusBar;
+        mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationPanel = notificationPanel;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;
@@ -205,7 +205,7 @@ public final class DozeServiceHost implements DozeHost {
             mDozingRequested = true;
             updateDozing();
             mDozeLog.traceDozing(mStatusBarStateController.isDozing());
-            mStatusBar.updateIsKeyguard();
+            mCentralSurfaces.updateIsKeyguard();
         }
     }
 
@@ -247,13 +247,13 @@ public final class DozeServiceHost implements DozeHost {
                         && mWakeLockScreenPerformsAuth;
         // Set the state to pulsing, so ScrimController will know what to do once we ask it to
         // execute the transition. The pulse callback will then be invoked when the scrims
-        // are black, indicating that StatusBar is ready to present the rest of the UI.
+        // are black, indicating that CentralSurfaces is ready to present the rest of the UI.
         mPulsing = true;
         mDozeScrimController.pulse(new PulseCallback() {
             @Override
             public void onPulseStarted() {
                 callback.onPulseStarted();
-                mStatusBar.updateNotificationPanelTouchState();
+                mCentralSurfaces.updateNotificationPanelTouchState();
                 setPulsing(true);
             }
 
@@ -261,7 +261,7 @@ public final class DozeServiceHost implements DozeHost {
             public void onPulseFinished() {
                 mPulsing = false;
                 callback.onPulseFinished();
-                mStatusBar.updateNotificationPanelTouchState();
+                mCentralSurfaces.updateNotificationPanelTouchState();
                 mScrimController.setWakeLockScreenSensorActive(false);
                 setPulsing(false);
             }
@@ -274,14 +274,14 @@ public final class DozeServiceHost implements DozeHost {
                 if (mKeyguardUpdateMonitor != null && passiveAuthInterrupt) {
                     mKeyguardUpdateMonitor.onAuthInterruptDetected(pulsing /* active */);
                 }
-                mStatusBar.updateScrimController();
+                mCentralSurfaces.updateScrimController();
                 mPulseExpansionHandler.setPulsing(pulsing);
                 mNotificationWakeUpCoordinator.setPulsing(pulsing);
             }
         }, reason);
         // DozeScrimController is in pulse state, now let's ask ScrimController to start
         // pulsing and draw the black frame, if necessary.
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
     }
 
     @Override
@@ -403,14 +403,14 @@ public final class DozeServiceHost implements DozeHost {
             Log.w(TAG, "Overlapping onDisplayOffCallback. Ignoring previous one.");
         }
         mPendingScreenOffCallback = onDisplayOffCallback;
-        mStatusBar.updateScrimController();
+        mCentralSurfaces.updateScrimController();
     }
 
     @Override
     public void cancelGentleSleep() {
         mPendingScreenOffCallback = null;
         if (mScrimController.getState() == ScrimState.OFF) {
-            mStatusBar.updateScrimController();
+            mCentralSurfaces.updateScrimController();
         }
     }
 

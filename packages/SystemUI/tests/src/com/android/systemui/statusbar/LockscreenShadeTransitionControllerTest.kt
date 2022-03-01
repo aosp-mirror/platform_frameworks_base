@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -72,7 +72,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var depthController: NotificationShadeDepthController
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var expandHelperCallback: ExpandHelper.Callback
-    @Mock lateinit var statusbar: StatusBar
+    @Mock lateinit var mCentralSurfaces: CentralSurfaces
     @Mock lateinit var qS: QS
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -106,7 +106,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         whenever(nsslController.view).thenReturn(stackscroller)
         whenever(nsslController.expandHelperCallback).thenReturn(expandHelperCallback)
         transitionController.notificationPanelController = notificationPanelController
-        transitionController.statusbar = statusbar
+        transitionController.centralSurfaces = mCentralSurfaces
         transitionController.qS = qS
         transitionController.setStackScroller(nsslController)
         whenever(statusbarStateController.state).thenReturn(StatusBarState.KEYGUARD)
@@ -118,7 +118,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         whenever(lockScreenUserManager.isLockscreenPublicMode(anyInt())).thenReturn(true)
         whenever(falsingCollector.shouldEnforceBouncer()).thenReturn(false)
         whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
-        clearInvocations(statusbar)
+        clearInvocations(mCentralSurfaces)
     }
 
     @After
@@ -175,7 +175,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
     @Test
     fun testDontGoWhenShadeDisabled() {
-        whenever(statusbar.isShadeDisabled).thenReturn(true)
+        whenever(mCentralSurfaces.isShadeDisabled).thenReturn(true)
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
     }
@@ -194,7 +194,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
         verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
-        verify(statusbar).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
+        verify(mCentralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
     }
 
     @Test
@@ -203,7 +203,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
         verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
-        verify(statusbar).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
+        verify(mCentralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
     }
 
     @Test

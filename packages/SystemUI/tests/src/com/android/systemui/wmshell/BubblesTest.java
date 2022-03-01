@@ -1221,7 +1221,7 @@ public class BubblesTest extends SysuiTestCase {
         final Context userContext = setUpContextWithPackageManager(workPkg,
                 mock(ApplicationInfo.class));
 
-        // If things are working correctly, StatusBar.getPackageManagerForUser will call this
+        // If things are working correctly, CentralSurfaces.getPackageManagerForUser will call this
         when(context.createPackageContextAsUser(eq(workPkg), anyInt(), eq(workUser)))
                 .thenReturn(userContext);
 

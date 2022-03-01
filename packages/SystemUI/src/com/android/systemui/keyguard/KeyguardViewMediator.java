@@ -127,7 +127,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -1667,11 +1667,16 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             return;
         }
 
-        // if the keyguard is already showing, don't bother. check flags in both files
-        // to account for the hiding animation which results in a delay and discrepancy
-        // between flags
-        if (mShowing && mKeyguardViewControllerLazy.get().isShowing()) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
+        // If the keyguard is already showing, don't bother unless it was in the process of going
+        // away. If it was going away, keyguard state may be out of sync and we should make sure to
+        // re-show it explicitly. Check flags in both files to account for the hiding animation
+        // which results in a delay and discrepancy between flags.
+        if ((mShowing && mKeyguardViewControllerLazy.get().isShowing())
+                && !mKeyguardStateController.isKeyguardGoingAway()) {
+            if (DEBUG) {
+                Log.d(TAG, "doKeyguard: not showing "
+                        + "because it is already showing and not going away");
+            }
             resetStateLocked();
             return;
         }
@@ -2186,7 +2191,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mKeyguardExitAnimationRunner = null;
             mScreenOnCoordinator.setWakeAndUnlocking(false);
             mPendingLock = false;
-            setShowingLocked(true);
+
+            // If we're asked to re-show while the keyguard is going away, force callbacks to ensure
+            // that state is re-set correctly. Otherwise, we might short circuit since mShowing is
+            // true during the keyguard going away process, despite having partially set some state
+            // to unlocked.
+            setShowingLocked(
+                    true, mKeyguardStateController.isKeyguardGoingAway() /* forceCallbacks */);
+
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
@@ -2356,14 +2368,28 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             @Override
                             public void onAnimationFinished() throws RemoteException {
                                 try {
+                                    // WindowManager always needs to know that this animation
+                                    // finished so it does not wait the 10s until timeout.
                                     finishedCallback.onAnimationFinished();
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "Failed to call onAnimationFinished", e);
                                 }
-                                onKeyguardExitFinished();
-                                mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
-                                        0 /* fadeoutDuration */);
-                                mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+
+                                // If we're not interactive, it means the device is going back to
+                                // sleep. This happens if the power button is pressed during the
+                                // activity launch. If we're going back to sleep, we should *not*
+                                // run keyguard exit finished callbacks and hide the keyguard, since
+                                // we are in the process of locking again and this might result in
+                                // the device staying unlocked when it shouldn't.
+                                // We need to directly query isInteractive rather than mGoingToSleep
+                                // because mGoingToSleep is set in onStartedGoingToSleep, which is
+                                // dispatched asynchronously.
+                                if (mPM.isInteractive()) {
+                                    onKeyguardExitFinished();
+                                    mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
+                                            0 /* fadeoutDuration */);
+                                    mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                                }
                             }
 
                             @Override
@@ -2717,22 +2743,22 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     }
 
     /**
-     * Registers the StatusBar to which the Keyguard View is mounted.
+     * Registers the CentralSurfaces to which the Keyguard View is mounted.
      *
-     * @param statusBar
+     * @param centralSurfaces
      * @param panelView
      * @param biometricUnlockController
      * @param notificationContainer
      * @param bypassController
      * @return the View Controller for the Keyguard View this class is mediating.
      */
-    public KeyguardViewController registerStatusBar(StatusBar statusBar,
+    public KeyguardViewController registerCentralSurfaces(CentralSurfaces centralSurfaces,
             NotificationPanelViewController panelView,
             @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
-        mKeyguardViewControllerLazy.get().registerStatusBar(
-                statusBar,
+        mKeyguardViewControllerLazy.get().registerCentralSurfaces(
+                centralSurfaces,
                 panelView,
                 panelExpansionStateManager,
                 biometricUnlockController,

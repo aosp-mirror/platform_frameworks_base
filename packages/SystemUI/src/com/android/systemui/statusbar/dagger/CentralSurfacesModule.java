@@ -23,7 +23,7 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import dagger.Module;
 
 /** */
-@Module(includes = {StatusBarPhoneModule.class, StatusBarDependenciesModule.class,
+@Module(includes = {StatusBarPhoneModule.class, CentralSurfacesDependenciesModule.class,
         NotificationsModule.class, NotificationRowModule.class})
-public interface StatusBarModule {
+public interface CentralSurfacesModule {
 }

@@ -86,7 +86,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.wmshell.BubblesManager;
@@ -149,7 +149,7 @@ public interface NotificationsModule {
     @Provides
     static NotificationGutsManager provideNotificationGutsManager(
             Context context,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -169,7 +169,7 @@ public interface NotificationsModule {
             DumpManager dumpManager) {
         return new NotificationGutsManager(
                 context,
-                statusBarOptionalLazy,
+                centralSurfacesOptionalLazy,
                 mainHandler,
                 bgHandler,
                 accessibilityManager,

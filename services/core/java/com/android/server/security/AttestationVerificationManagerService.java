@@ -16,6 +16,7 @@
 
 package com.android.server.security;
 
+import static android.security.attestationverification.AttestationVerificationManager.PROFILE_PEER_DEVICE;
 import static android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN;
@@ -44,9 +45,11 @@ import com.android.server.SystemService;
 public class AttestationVerificationManagerService extends SystemService {
 
     private static final String TAG = "AVF";
+    private final AttestationVerificationPeerDeviceVerifier mPeerDeviceVerifier;
 
-    public AttestationVerificationManagerService(final Context context) {
+    public AttestationVerificationManagerService(final Context context) throws Exception {
         super(context);
+        mPeerDeviceVerifier = new AttestationVerificationPeerDeviceVerifier(context);
     }
 
     private final IBinder mService = new IAttestationVerificationManagerService.Stub() {
@@ -83,7 +86,7 @@ public class AttestationVerificationManagerService extends SystemService {
         result.token = null;
         switch (profile.getAttestationProfileId()) {
             case PROFILE_SELF_TRUSTED:
-                Slog.d(TAG, "Verifying Self trusted profile.");
+                Slog.d(TAG, "Verifying Self Trusted profile.");
                 try {
                     result.resultCode =
                             AttestationVerificationSelfTrustedVerifierForTesting.getInstance()
@@ -91,6 +94,11 @@ public class AttestationVerificationManagerService extends SystemService {
                 } catch (Throwable t) {
                     result.resultCode = RESULT_FAILURE;
                 }
+                break;
+            case PROFILE_PEER_DEVICE:
+                Slog.d(TAG, "Verifying Peer Device profile.");
+                result.resultCode = mPeerDeviceVerifier.verifyAttestation(
+                        localBindingType, requirements, attestation);
                 break;
             default:
                 Slog.d(TAG, "No profile found, defaulting.");

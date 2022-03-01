@@ -60,7 +60,7 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -113,7 +113,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private VibratorHelper mVibratorHelper;
-    @Mock private StatusBar mStatusBar;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
 
@@ -158,7 +158,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mRingerModeTracker,
                 mHandler,
                 mPackageManager,
-                Optional.of(mStatusBar),
+                Optional.of(mCentralSurfaces),
                 mKeyguardUpdateMonitor,
                 mDialogLaunchAnimator);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
@@ -227,7 +227,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(true).when(mStatusBar).isKeyguardShowing();
+        doReturn(true).when(mCentralSurfaces).isKeyguardShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -242,7 +242,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mStatusBar).animateExpandSettingsPanel(null);
+        verify(mCentralSurfaces).animateExpandSettingsPanel(null);
     }
 
     @Test
@@ -251,7 +251,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mStatusBar).isKeyguardShowing();
+        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -266,7 +266,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mStatusBar).animateExpandNotificationsPanel();
+        verify(mCentralSurfaces).animateExpandNotificationsPanel();
     }
 
     @Test
@@ -432,7 +432,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mStatusBar).isKeyguardShowing();
+        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,

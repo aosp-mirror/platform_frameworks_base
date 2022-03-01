@@ -73,7 +73,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -116,7 +116,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
-    @Mock private StatusBar mStatusBar;
+    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ScrimController mScrimController;
     @Mock private NotificationGroupManagerLegacy mLegacyGroupManager;
     @Mock private SectionHeaderController mSilentHeaderController;
@@ -168,7 +168,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 mResources,
                 mNotificationSwipeHelperBuilder,
-                mStatusBar,
+                mCentralSurfaces,
                 mScrimController,
                 mLegacyGroupManager,
                 mLegacyGroupManager,
