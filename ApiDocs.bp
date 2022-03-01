@@ -94,7 +94,7 @@ stubs_defaults {
         ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
-        ":framework-supplementalprocess-sources",
+        ":framework-sdksandbox-sources",
         ":framework-tethering-srcs",
         ":framework-uwb-updatable-sources",
         ":framework-wifi-updatable-sources",
