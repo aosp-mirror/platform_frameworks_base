@@ -3301,7 +3301,7 @@
     <!-- @hide @SystemApi -->
     <public name="config_systemSupervision" />
     <!-- @hide @SystemApi -->
-    <public name="config_deviceManager" />
+    <public name="config_devicePolicyManagement" />
     <!-- @hide @SystemApi -->
     <public name="config_systemAppProtectionService" />
     <!-- @hide @SystemApi @TestApi -->
