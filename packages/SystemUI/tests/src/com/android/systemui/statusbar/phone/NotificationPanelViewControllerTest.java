@@ -390,8 +390,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mResources.getBoolean(R.bool.config_enableNotificationShadeDrag)).thenReturn(true);
         when(mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade))
                 .thenReturn(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
-        when(mResources.getDimensionPixelSize(R.dimen.qs_panel_width)).thenReturn(400);
-        when(mResources.getDimensionPixelSize(R.dimen.notification_panel_width)).thenReturn(400);
+        when(mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal))
+                .thenReturn(10);
         when(mView.getContext()).thenReturn(getContext());
         when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
         when(mView.findViewById(R.id.keyguard_user_switcher_view)).thenReturn(mUserSwitcherView);
@@ -790,25 +790,31 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSinglePaneShadeLayout_childrenHaveConstantWidth() {
-        enableSplitShade(/* enabled= */ false);
-
-        mNotificationPanelViewController.updateResources();
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).mWidth)
-                .isEqualTo(mResources.getDimensionPixelSize(R.dimen.qs_panel_width));
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).mWidth)
-                .isEqualTo(mResources.getDimensionPixelSize(R.dimen.notification_panel_width));
-    }
-
-    @Test
-    public void testSplitShadeLayout_childrenHaveZeroWidth() {
+    public void testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
         enableSplitShade(/* enabled= */ true);
 
         mNotificationPanelViewController.updateResources();
 
-        assertThat(getConstraintSetLayout(R.id.qs_frame).mWidth).isEqualTo(0);
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).mWidth).isEqualTo(0);
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(10);
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
+                .isEqualTo(0);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).endMargin)
+                .isEqualTo(10);
+    }
+
+    @Test
+    public void testSinglePaneLayout_childrenHaveEqualMargins() {
+        enableSplitShade(/* enabled= */ false);
+
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).startMargin).isEqualTo(10);
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(10);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
+                .isEqualTo(10);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).endMargin)
+                .isEqualTo(10);
     }
 
     @Test
