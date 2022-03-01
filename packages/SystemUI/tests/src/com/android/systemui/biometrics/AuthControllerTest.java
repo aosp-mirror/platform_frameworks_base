@@ -82,6 +82,7 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,6 +100,7 @@ import java.util.Random;
 
 import javax.inject.Provider;
 
+@Ignore
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
