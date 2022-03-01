@@ -245,10 +245,32 @@ class TransitionController {
 
     /** @return {@code true} if wc is in a participant subtree */
     boolean inTransition(@NonNull WindowContainer wc) {
-        if (isCollecting(wc))  return true;
+        if (isCollecting(wc)) return true;
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             for (WindowContainer p = wc; p != null; p = p.getParent()) {
                 if (mPlayingTransitions.get(i).mParticipants.contains(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean inRecentsTransition(@NonNull WindowContainer wc) {
+        for (WindowContainer p = wc; p != null; p = p.getParent()) {
+            // TODO(b/221417431): replace this with deterministic snapshots
+            if (mCollectingTransition == null) break;
+            if ((mCollectingTransition.getFlags() & TRANSIT_FLAG_IS_RECENTS) != 0
+                    && mCollectingTransition.mParticipants.contains(wc)) {
+                return true;
+            }
+        }
+
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            for (WindowContainer p = wc; p != null; p = p.getParent()) {
+                // TODO(b/221417431): replace this with deterministic snapshots
+                if ((mPlayingTransitions.get(i).getFlags() & TRANSIT_FLAG_IS_RECENTS) != 0
+                        && mPlayingTransitions.get(i).mParticipants.contains(p)) {
                     return true;
                 }
             }
