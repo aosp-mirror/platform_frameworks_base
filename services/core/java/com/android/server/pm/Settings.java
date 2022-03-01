@@ -29,6 +29,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1421,6 +1422,35 @@ public final class Settings implements Watchable, Snappable {
             if (index < size) mAppIds.set(index, obj);
         } else {
             mOtherAppIds.put(appId, obj);
+        }
+    }
+
+    /**
+     * Transparently convert a SharedUserSetting into PackageSettings without changing appId.
+     * The sharedUser passed to this method has to be {@link SharedUserSetting#isSingleUser()}.
+     */
+    void convertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
+        final PackageSetting ps = sharedUser.getPackageSettings().valueAt(0);
+        replaceAppIdLPw(sharedUser.getAppId(), ps);
+
+        // Unlink the SharedUserSetting
+        ps.setSharedUserAppId(INVALID_UID);
+        if (!sharedUser.getDisabledPackageSettings().isEmpty()) {
+            final PackageSetting disabledPs = sharedUser.getDisabledPackageSettings().valueAt(0);
+            disabledPs.setSharedUserAppId(INVALID_UID);
+        }
+        mSharedUsers.remove(sharedUser.getName());
+    }
+
+    /**
+     * Check and convert eligible SharedUserSettings to PackageSettings.
+     */
+    void checkAndConvertSharedUserSettingsLPw(SharedUserSetting sharedUser) {
+        if (!sharedUser.isSingleUser()) return;
+        final AndroidPackage pkg = sharedUser.getPackageSettings().valueAt(0).getPkg();
+        if (pkg != null && pkg.isLeavingSharedUid()
+                && SharedUidMigration.applyStrategy(BEST_EFFORT)) {
+            convertSharedUserSettingsLPw(sharedUser);
         }
     }
 
