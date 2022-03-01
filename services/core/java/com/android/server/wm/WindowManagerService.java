@@ -3217,8 +3217,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (mAtmService.isDreaming()) {
-            mAtmService.mTaskSupervisor.wakeUp("dismissKeyguard");
+        if (mAtmService.mKeyguardController.isShowingDream()) {
+            mAtmService.mTaskSupervisor.wakeUp("leaveDream");
         }
         synchronized (mGlobalLock) {
             mPolicy.dismissKeyguardLw(callback, message);
