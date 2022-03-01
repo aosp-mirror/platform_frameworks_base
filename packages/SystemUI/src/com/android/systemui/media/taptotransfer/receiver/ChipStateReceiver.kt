@@ -16,35 +16,41 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
-import android.content.Context
-import android.graphics.drawable.Drawable
-import com.android.systemui.media.taptotransfer.common.MediaTttChipState
+import android.app.StatusBarManager
+import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
+import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
  * the receiver device.
- *
- * @property appIconDrawable a drawable representing the icon of the app playing the media. If
- *     present, this will be used in [this.getAppIcon] instead of [appPackageName].
- * @property appName a name for the app playing the media. If present, this will be used in
- *     [this.getAppName] instead of [appPackageName].
  */
-class ChipStateReceiver(
-    appPackageName: String?,
-    private val appIconDrawable: Drawable?,
-    private val appName: CharSequence?
-) : MediaTttChipState(appPackageName) {
-    override fun getAppIcon(context: Context): Drawable? {
-        if (appIconDrawable != null) {
-            return appIconDrawable
-        }
-        return super.getAppIcon(context)
-    }
+enum class ChipStateReceiver(
+    @StatusBarManager.MediaTransferSenderState val stateInt: Int,
+) {
+    CLOSE_TO_SENDER(
+        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+    ),
+    FAR_FROM_SENDER(
+        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+    );
 
-    override fun getAppName(context: Context): String? {
-        if (appName != null) {
-            return appName.toString()
-        }
-        return super.getAppName(context)
+    companion object {
+        /**
+         * Returns the receiver state enum associated with the given [displayState] from
+         * [StatusBarManager].
+         */
+        fun getReceiverStateFromId(
+            @StatusBarManager.MediaTransferReceiverState displayState: Int
+        ) : ChipStateReceiver = values().first { it.stateInt == displayState }
+
+
+        /**
+         * Returns the state int from [StatusBarManager] associated with the given sender state
+         * name.
+         *
+         * @param name the name of one of the [ChipStateReceiver] enums.
+         */
+        @StatusBarManager.MediaTransferReceiverState
+        fun getReceiverStateIdFromName(name: String): Int = valueOf(name).stateInt
     }
 }
