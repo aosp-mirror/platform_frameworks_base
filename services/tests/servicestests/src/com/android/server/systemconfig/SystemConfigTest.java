@@ -354,13 +354,13 @@ public class SystemConfigTest {
 
     /**
      * Tests that readPermissions works correctly for a library using the new
-     * {@code updatable-library} tag.
+     * {@code apex-library} tag.
      */
     @Test
     public void readPermissions_allowLibs_parsesUpdatableLibrary() throws IOException {
         String contents =
                 "<permissions>\n"
-                        + "    <updatable-library \n"
+                        + "    <apex-library \n"
                         + "        name=\"foo\"\n"
                         + "        file=\"foo.jar\"\n"
                         + "        on-bootclasspath-before=\"10\"\n"
