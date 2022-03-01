@@ -203,9 +203,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private float mQsExpansionFraction;
     private final int mSplitShadeMinContentHeight;
 
-    /** Whether we are flinging the shade open or closed. */
-    private boolean mIsFlinging;
-
     /**
      * The algorithm which calculates the properties for our children
      */
@@ -1273,13 +1270,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
-     * @return Whether we should skip stack height update for lockscreen swipe-up or unlock hint.
+     * @return Whether we should skip stack height updates.
+     * True when
+     *      1) Unlock hint is running
+     *      2) Swiping up on lockscreen or flinging down after swipe up
      */
     private boolean shouldSkipHeightUpdate() {
-        // After the user swipes up on lockscreen and lets go,
-        // {@link PanelViewController) flings the shade back down.
-        return mAmbientState.isOnKeyguard() && (
-                mAmbientState.isUnlockHintRunning() || mAmbientState.isSwipingUp() || mIsFlinging);
+        return mAmbientState.isOnKeyguard()
+                && (mAmbientState.isUnlockHintRunning()
+                        || mAmbientState.isSwipingUp()
+                        || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
     }
 
     /**
@@ -5017,13 +5017,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setUnlockHintRunning(boolean running) {
         mAmbientState.setUnlockHintRunning(running);
-    }
-
-    /**
-     * @param isFlinging Whether we are flinging the shade open or closed.
-     */
-    public void setIsFlinging(boolean isFlinging) {
-        mIsFlinging = isFlinging;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
