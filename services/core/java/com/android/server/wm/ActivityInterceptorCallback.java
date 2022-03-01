@@ -43,9 +43,13 @@ public abstract class ActivityInterceptorCallback {
     public abstract @Nullable ActivityInterceptResult intercept(ActivityInterceptorInfo info);
 
     /**
-     * Called when an activity is successfully launched.
+     * Called when an activity is successfully launched. The intent included in the
+     * ActivityInterceptorInfo may have changed from the one sent in
+     * {@link #intercept(ActivityInterceptorInfo)}, due to the return from
+     * {@link #intercept(ActivityInterceptorInfo)}.
      */
-    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+    public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
+            ActivityInterceptorInfo info) {
     }
 
     /**
