@@ -171,7 +171,9 @@ public class NetworkTimeUpdateService extends Binder {
                 >= mPollingIntervalMs) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
             boolean isSuccessful = mTime.forceRefresh();
-            if (!isSuccessful) {
+            if (isSuccessful) {
+                mTryAgainCounter = 0;
+            } else {
                 String logMsg = "forceRefresh() returned false: cachedNtpResult=" + cachedNtpResult
                         + ", currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis;
 
@@ -188,7 +190,8 @@ public class NetworkTimeUpdateService extends Binder {
                 && cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
                 < mPollingIntervalMs) {
             // Obtained fresh fix; schedule next normal update
-            resetAlarm(mPollingIntervalMs);
+            resetAlarm(mPollingIntervalMs
+                    - cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis));
 
             // Suggest the time to the time detector. It may choose use it to set the system clock.
             TimestampedValue<Long> timeSignal = new TimestampedValue<>(
