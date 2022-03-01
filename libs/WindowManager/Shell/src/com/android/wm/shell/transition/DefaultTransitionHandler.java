@@ -348,12 +348,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final boolean isTask = change.getTaskInfo() != null;
+            boolean isSeamlessDisplayChange = false;
 
             if (change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                 if (info.getType() == TRANSIT_CHANGE) {
-                    boolean isSeamless = isRotationSeamless(info, mDisplayController);
+                    isSeamlessDisplayChange = isRotationSeamless(info, mDisplayController);
                     final int anim = getRotationAnimation(info);
-                    if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
+                    if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
                                 mTransactionPool, startTransaction, change, info.getRootLeash(),
                                 anim);
@@ -387,6 +388,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 startTransaction.setPosition(change.getLeash(),
                         change.getEndAbsBounds().left - info.getRootOffset().x,
                         change.getEndAbsBounds().top - info.getRootOffset().y);
+                // Seamless display transition doesn't need to animate.
+                if (isSeamlessDisplayChange) continue;
                 if (isTask) {
                     // Skip non-tasks since those usually have null bounds.
                     startTransaction.setWindowCrop(change.getLeash(),

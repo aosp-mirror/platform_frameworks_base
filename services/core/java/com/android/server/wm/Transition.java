@@ -549,7 +549,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = 0; i < mTargetDisplays.size(); ++i) {
             final DisplayContent dc = mTargetDisplays.get(i);
             final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
-            if (asyncRotationController != null) {
+            if (asyncRotationController != null && mTargets.contains(dc)) {
                 asyncRotationController.onTransitionFinished();
             }
             if (mTransientLaunches != null) {
@@ -695,7 +695,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // This is non-null only if display has changes. It handles the visible windows that don't
         // need to be participated in the transition.
         final AsyncRotationController controller = dc.getAsyncRotationController();
-        if (controller != null) {
+        if (controller != null && mTargets.contains(dc)) {
             controller.setupStartTransaction(transaction);
         }
         mStartTransaction = transaction;

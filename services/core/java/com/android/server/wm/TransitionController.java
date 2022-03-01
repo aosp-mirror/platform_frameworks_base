@@ -519,11 +519,6 @@ class TransitionController {
         }
     }
 
-    void setSeamlessRotation(@NonNull WindowContainer wc) {
-        if (mCollectingTransition == null) return;
-        mCollectingTransition.setSeamlessRotation(wc);
-    }
-
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
         final Transition transition = Transition.fromBinder(token);
         if (transition == null || !mPlayingTransitions.contains(transition)) {

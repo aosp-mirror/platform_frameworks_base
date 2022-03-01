@@ -1735,19 +1735,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
-        final boolean useAsyncRotation = !mTransitionController.isShellTransitionsEnabled();
         if (mFixedRotationLaunchingApp == null && r != null) {
-            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this,
-                    rotation);
-            if (useAsyncRotation) {
-                startAsyncRotation(
-                        // Delay the hide animation to avoid blinking by clicking navigation bar
-                        // that may toggle fixed rotation in a short time.
-                        r == mFixedRotationTransitionListener.mAnimatingRecents);
-            }
+            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+            // Delay the hide animation to avoid blinking by clicking navigation bar that may
+            // toggle fixed rotation in a short time.
+            final boolean shouldDebounce = r == mFixedRotationTransitionListener.mAnimatingRecents
+                    || mTransitionController.isTransientLaunch(r);
+            startAsyncRotation(shouldDebounce);
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
-            if (useAsyncRotation) finishAsyncRotationIfPossible();
+            // Keep async rotation controller if the next transition of display is requested.
+            if (!mTransitionController.isCollecting(this)) {
+                finishAsyncRotationIfPossible();
+            }
         }
         mFixedRotationLaunchingApp = r;
     }
@@ -1805,7 +1805,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         // Update directly because the app which will change the orientation of display is ready.
         if (mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */)) {
-            mTransitionController.setSeamlessRotation(this);
             sendNewConfiguration();
             return;
         }
@@ -3234,7 +3233,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            if (isRotationChanging()) {
+            if (mFixedRotationLaunchingApp != null) {
+                // A fixed-rotation transition is done, then continue to start a seamless display
+                // transition. And be fore the start transaction is applied, the non-app windows
+                // need to keep in previous rotation to avoid showing inconsistent content.
+                t.setSeamlessRotation(this);
+                if (mAsyncRotationController != null) {
+                    mAsyncRotationController.keepAppearanceInPreviousRotation();
+                }
+            } else if (isRotationChanging()) {
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));
