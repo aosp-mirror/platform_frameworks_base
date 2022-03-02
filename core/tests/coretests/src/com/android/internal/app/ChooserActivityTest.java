@@ -81,7 +81,6 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
@@ -2072,7 +2071,7 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
-    @Test
+    @Test @Ignore("b/222124533")
     public void testAppTargetLogging() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -2090,6 +2089,10 @@ public class ChooserActivityTest {
         final IChooserWrapper activity = (IChooserWrapper)
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
+
+        // TODO(b/222124533): other test cases use a timeout to make sure that the UI is fully
+        // populated; without one, this test flakes. Ideally we should address the need for a
+        // timeout everywhere instead of introducing one to fix this particular test.
 
         assertThat(activity.getAdapter().getCount(), is(2));
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
@@ -2373,7 +2376,7 @@ public class ChooserActivityTest {
         assertThat(logger.numCalls(), is(6));
     }
 
-    @Test
+    @Test @Ignore("b/222124533")
     public void testSwitchProfileLogging() throws InterruptedException {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
