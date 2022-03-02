@@ -244,27 +244,6 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.providers.media.module">
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.USE_RESERVED_DISK"/>
-        <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
-        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-        <permission name="android.permission.WATCH_APPOPS"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
-        <!-- Permissions required for reading and logging compat changes -->
-        <permission name="android.permission.LOG_COMPAT_CHANGE" />
-        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
-        <permission name="android.permission.REGISTER_STATS_PULL_ATOM" />
-        <!-- Permissions required for reading DeviceConfig -->
-        <permission name="android.permission.READ_DEVICE_CONFIG" />
-        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
-        <permission name="android.permission.MODIFY_QUIET_MODE"/>
-        <!-- Permissions required to check if an app is in the foreground or not during IO -->
-        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.providers.telephony">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
