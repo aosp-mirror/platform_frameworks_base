@@ -39,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -47,7 +46,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -794,7 +792,7 @@ public class LockPatternUtils {
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             LockscreenCredential profilePassword) {
-        if (!isCredentialSharedWithParent(userHandle)) {
+        if (!isCredentialSharableWithParent(userHandle)) {
             return;
         }
         try {
@@ -810,7 +808,7 @@ public class LockPatternUtils {
      * Returns true if {@code userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        return isCredentialSharedWithParent(userHandle) && hasSeparateChallenge(userHandle);
+        return isCredentialSharableWithParent(userHandle) && hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -835,8 +833,8 @@ public class LockPatternUtils {
         return info != null && info.isManagedProfile();
     }
 
-    private boolean isCredentialSharedWithParent(int userHandle) {
-        return getUserManager(userHandle).isCredentialSharedWithParent();
+    private boolean isCredentialSharableWithParent(int userHandle) {
+        return getUserManager(userHandle).isCredentialSharableWithParent();
     }
 
     /**
