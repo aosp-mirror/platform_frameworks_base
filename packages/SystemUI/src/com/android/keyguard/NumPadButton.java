@@ -19,8 +19,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -39,13 +37,8 @@ public class NumPadButton extends AlphaOptimizedImageButton {
     public NumPadButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        Drawable background = getBackground();
-        if (background instanceof RippleDrawable) {
-            mAnimator = new NumPadAnimator(context, (RippleDrawable) getBackground(),
-                    attrs.getStyleAttribute());
-        } else {
-            mAnimator = null;
-        }
+        mAnimator = new NumPadAnimator(context, getBackground().mutate(),
+                attrs.getStyleAttribute());
     }
 
     @Override
@@ -79,8 +72,14 @@ public class NumPadButton extends AlphaOptimizedImageButton {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mAnimator != null) {
-            mAnimator.start();
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (mAnimator != null) mAnimator.expand();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (mAnimator != null) mAnimator.contract();
+                break;
         }
         return super.onTouchEvent(event);
     }
