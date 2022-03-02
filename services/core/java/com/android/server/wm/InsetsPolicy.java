@@ -583,10 +583,10 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (mPolicy.isForceShowNavigationBarEnabled()
+        if (mPolicy.isForceShowNavigationBarEnabled() && focusedWin != null
                 && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
-            // When "force show navigation bar" is enabled, it means we are in kid navigation bar
-            // and 3-button navigation bar mode. In this mode, the navigation bar is forcibly shown
+            // When "force show navigation bar" is enabled, it means both force visible is true, and
+            // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
             // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
             // still control the navigation bar in this mode.
             return null;
