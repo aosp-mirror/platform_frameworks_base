@@ -10294,6 +10294,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_ADSERVICES = "adservices";
     field public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE = "ambient_context_manager_service";
     field public static final String NAMESPACE_APPSEARCH = "appsearch";
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
@@ -10338,7 +10339,6 @@ package android.provider {
     field public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
     field @Deprecated public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
-    field public static final String NAMESPACE_SUPPLEMENTAL_API = "supplemental_api";
     field public static final String NAMESPACE_SURFACE_FLINGER_NATIVE_BOOT = "surface_flinger_native_boot";
     field public static final String NAMESPACE_SWCODEC_NATIVE = "swcodec_native";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
