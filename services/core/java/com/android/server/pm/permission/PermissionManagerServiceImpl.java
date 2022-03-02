@@ -2611,8 +2611,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         // the runtime ones are written only if changed. The only cases of
                         // changed runtime permissions here are promotion of an install to
                         // runtime and revocation of a runtime from a shared user.
-                        if (revokeUnusedSharedUserPermissionsLocked(
-                                mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId()),
+                        if (revokeUnusedSharedUserPermissionsLocked(uidRequestedPermissions,
                                 uidState)) {
                             updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                             runtimePermissionsRevoked = true;
@@ -3828,27 +3827,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @GuardedBy("mLock")
     private boolean revokeUnusedSharedUserPermissionsLocked(
-            ArraySet<PackageStateInternal> pkgList, UidPermissionState uidState) {
-        // Collect all used permissions in the UID
-        final ArraySet<String> usedPermissions = new ArraySet<>();
-        if (pkgList == null || pkgList.size() == 0) {
-            return false;
-        }
-        for (PackageStateInternal pkgState : pkgList) {
-            final AndroidPackageApi pkg = pkgState.getAndroidPackage();
-            if (pkg.getRequestedPermissions().isEmpty()) {
-                continue;
-            }
-            final int requestedPermCount = pkg.getRequestedPermissions().size();
-            for (int j = 0; j < requestedPermCount; j++) {
-                String permission = pkg.getRequestedPermissions().get(j);
-                Permission bp = mRegistry.getPermission(permission);
-                if (bp != null) {
-                    usedPermissions.add(permission);
-                }
-            }
-        }
-
+            @NonNull Collection<String> uidRequestedPermissions,
+            @NonNull UidPermissionState uidState) {
         boolean runtimePermissionChanged = false;
 
         // Prune permissions
@@ -3856,7 +3836,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int permissionStatesSize = permissionStates.size();
         for (int i = permissionStatesSize - 1; i >= 0; i--) {
             PermissionState permissionState = permissionStates.get(i);
-            if (!usedPermissions.contains(permissionState.getName())) {
+            if (!uidRequestedPermissions.contains(permissionState.getName())) {
                 Permission bp = mRegistry.getPermission(permissionState.getName());
                 if (bp != null) {
                     if (uidState.removePermissionState(bp.getName()) && bp.isRuntime()) {
