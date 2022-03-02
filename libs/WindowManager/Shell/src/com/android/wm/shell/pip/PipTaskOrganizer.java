@@ -249,7 +249,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * An optional overlay used to mask content changing between an app in/out of PiP, only set if
      * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true.
      */
-    private SurfaceControl mSwipePipToHomeOverlay;
+    @Nullable
+    SurfaceControl mSwipePipToHomeOverlay;
 
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
@@ -356,12 +357,24 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Callback when launcher finishes swipe-pip-to-home operation.
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
-    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+    public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
         // do nothing if there is no startSwipePipToHome being called before
-        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
-            mPipBoundsState.setBounds(destinationBounds);
-            mSwipePipToHomeOverlay = overlay;
+        if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
+            return;
+        }
+        mPipBoundsState.setBounds(destinationBounds);
+        mSwipePipToHomeOverlay = overlay;
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // With Shell transition, the overlay was attached to the remote transition leash, which
+            // will be removed when the current transition is finished, so we need to reparent it
+            // to the actual Task surface now.
+            // PipTransition is responsible to fade it out and cleanup when finishing the enter PIP
+            // transition.
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, t);
+            t.setLayer(overlay, Integer.MAX_VALUE);
+            t.apply();
         }
     }
 
@@ -671,7 +684,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mSwipePipToHomeOverlay = null;
             return;
         }
 
@@ -823,6 +835,24 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
+        if (mTaskInfo == null || mLeash == null || mTaskInfo.taskId != taskId) {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+        return mLeash;
+    }
+
+    @Override
     public void onFixedRotationStarted(int displayId, int newRotation) {
         mNextRotation = newRotation;
         mWaitForFixedRotation = true;
@@ -877,9 +907,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         clearWaitForFixedRotation();
     }
 
-    /** Called when exiting PIP tranisiton is finished to do the state cleanup. */
+    /** Called when exiting PIP transition is finished to do the state cleanup. */
     void onExitPipFinished(TaskInfo info) {
         clearWaitForFixedRotation();
+        if (mSwipePipToHomeOverlay != null) {
+            removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
+            mSwipePipToHomeOverlay = null;
+        }
         mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
