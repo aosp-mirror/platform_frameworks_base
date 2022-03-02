@@ -10288,6 +10288,14 @@ public final class Settings {
                 "theme_customization_overlay_packages";
 
         /**
+         * Indicates whether the nav bar is forced to always be visible, even in immersive mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_FORCE_VISIBLE = "nav_bar_force_visible";
+
+        /**
          * Indicates whether the device is in kids nav mode.
          * <p>Type: int (0 for false, 1 for true)
          *
