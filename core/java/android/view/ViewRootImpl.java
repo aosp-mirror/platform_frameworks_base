@@ -829,6 +829,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mRelayoutRequested;
 
+    private int mLastTransformHint = Integer.MIN_VALUE;
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -2886,16 +2888,6 @@ public final class ViewRootImpl implements ViewParent,
                             host.getMeasuredHeight() + ", params=" + params);
                 }
 
-                if (mAttachInfo.mThreadedRenderer != null) {
-                    // relayoutWindow may decide to destroy mSurface. As that decision
-                    // happens in WindowManager service, we need to be defensive here
-                    // and stop using the surface in case it gets destroyed.
-                    if (mAttachInfo.mThreadedRenderer.pause()) {
-                        // Animations were running so we need to push a frame
-                        // to resume them
-                        mDirty.set(0, 0, mWidth, mHeight);
-                    }
-                }
                 if (mFirst || viewVisibilityChanged) {
                     mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
                 }
@@ -8055,13 +8047,29 @@ public final class ViewRootImpl implements ViewParent,
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
-        mSurfaceControl.setTransformHint(transformHint);
 
         final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
         final boolean dragResizing = (relayoutResult
                 & (RELAYOUT_RES_DRAG_RESIZING_DOCKED | RELAYOUT_RES_DRAG_RESIZING_FREEFORM)) != 0;
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
                 requestedHeight, mTmpFrames.frame, dragResizing, mSurfaceSize);
+      
+        final boolean transformHintChanged = transformHint != mLastTransformHint;
+        final boolean sizeChanged = !mLastSurfaceSize.equals(mSurfaceSize);
+        final boolean surfaceControlChanged =
+                (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED) == RELAYOUT_RES_SURFACE_CHANGED;
+        if (mAttachInfo.mThreadedRenderer != null &&
+                (transformHintChanged || sizeChanged || surfaceControlChanged)) {
+            if (mAttachInfo.mThreadedRenderer.pause()) {
+                // Animations were running so we need to push a frame
+                // to resume them
+                mDirty.set(0, 0, mWidth, mHeight);
+            }
+        }
+
+        mLastTransformHint = transformHint;
+      
+        mSurfaceControl.setTransformHint(transformHint);
 
         if (mAttachInfo.mContentCaptureManager != null) {
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
@@ -8086,6 +8094,9 @@ public final class ViewRootImpl implements ViewParent,
                 dispatchTransformHintChanged(transformHint);
             }
         } else {
+            if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.pause()) {
+                mDirty.set(0, 0, mWidth, mHeight);
+            }
             destroySurface();
         }
 
