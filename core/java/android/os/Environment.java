@@ -101,6 +101,7 @@ public class Environment {
     private static final File DIR_ANDROID_EXPAND = getDirectory(ENV_ANDROID_EXPAND, "/mnt/expand");
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
     private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
+    private static final File DIR_METADATA = new File("/metadata");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
@@ -1095,6 +1096,15 @@ public class Environment {
      */
     public static File getDownloadCacheDirectory() {
         return DIR_DOWNLOAD_CACHE;
+    }
+
+    /**
+     * Return the metadata directory.
+     *
+     * @hide
+     */
+    public static @NonNull File getMetadataDirectory() {
+        return DIR_METADATA;
     }
 
     /**
