@@ -5521,11 +5521,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final float[] tmpFloat9 = new float[9];
         forAllWindows(w -> {
             if (w.isVisible() && !w.inPinnedWindowingMode()) {
-                if (w.mSession.mSetsUnrestrictedKeepClearAreas) {
-                    outUnrestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
-                } else {
-                    outRestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
-                }
+                w.getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
             }
 
             // We stop traversing when we reach the base of a fullscreen app.
