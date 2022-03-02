@@ -6692,6 +6692,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public IPackageInstaller getPackageInstaller() {
+        // Return installer service for internal calls.
+        if (PackageManagerServiceUtils.isSystemOrRoot()) {
+            return mInstallerService;
+        }
+        // Return null for InstantApps.
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
