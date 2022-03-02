@@ -3766,6 +3766,7 @@ public class DevicePolicyManager {
      * for the user.
      * @hide
      */
+    @TestApi
     public boolean isRemovingAdmin(@NonNull ComponentName admin, int userId) {
         if (mService != null) {
             try {
