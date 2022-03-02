@@ -52,6 +52,9 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
  */
 public class BackAnimationController implements RemoteCallable<BackAnimationController> {
 
+    private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
+    public static final boolean IS_ENABLED = SystemProperties
+            .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
     private static final String BACK_PREDICTABILITY_PROGRESS_THRESHOLD_PROP =
             "persist.debug.back_predictability_progress_threshold";
     private static final int PROGRESS_THRESHOLD = SystemProperties
