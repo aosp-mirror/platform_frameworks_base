@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Juster, hvordan farverne vises på din enhed. Dette kan være nyttigt, når du vil:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fjerne farver, så du bedre kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Farvekorrigering kan være en nyttig funktion, når du vil:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fjerne farver, så du nemmere kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Oplader ikke"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Tilsluttet, oplader ikke"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Opladet"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Fuldt opladet"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolleret af administratoren"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Styres af en begrænset indstilling"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiveret"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Tillad, at denne app indstiller alarmer og planlægger tidsbestemte handlinger. Appen vil køre i baggrunden, hvor den muligvis bruger mere batteri.\n\nHvis denne tilladelse er deaktiveret, vil eksisterende alarmer og tidsbestemte handlinger, der er planlagt af denne app, ikke fungere."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planlæg, alarm, påmindelse, ur"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivér"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktivér Forstyr ikke"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Aldrig"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Kun prioritet"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

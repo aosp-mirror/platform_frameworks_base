@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koreksi warna"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Sesuaikan cara warna ditampilkan di perangkat Anda. Ini dapat bermanfaat saat Anda ingin:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih akurat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Menghapus warna untuk membantu Anda fokus&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Koreksi warna dapat berguna jika Anda ingin:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih akurat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Menghapus warna untuk membantu Anda fokus&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Digantikan oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Sekitar <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengisi daya"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Terhubung, tidak mengisi daya"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Terisi"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Baterai Terisi Penuh"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Dikontrol oleh admin"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Dikontrol oleh Setelan Terbatas"</string>
     <string name="disabled" msgid="8017887509554714950">"Dinonaktifkan"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Izinkan aplikasi ini menyetel alarm dan menjadwalkan tindakan yang sensitif waktu. Hal ini memungkinkan aplikasi berjalan di latar belakang, sehingga mungkin menggunakan lebih banyak daya baterai.\n\nJika izin ini dinonaktifkan, alarm dan acara berbasis waktu yang dijadwalkan oleh aplikasi ini tidak akan berfungsi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"jadwal, alarm, pengingat, jam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktifkan"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktifkan mode Jangan Ganggu"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Tidak pernah"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Hanya untuk prioritas"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

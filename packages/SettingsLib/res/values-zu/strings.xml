@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"I-Protanomaly (bomvu-luhlaza)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"I-Tritanomaly (luhlaza okwesibhakabhaka-phuzi)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Ukulungiswa kombala"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Lungisa indlela imibala eboniswa ngayo kudivayisi yakkho. Lokhu kungasiza uma ufuna ukwenza lokhu:<br/><br/> <ol> <li>&amp;nbsp;Ukubona imibala ngokunembe kakhulu</li> <li>&amp;nbsp;Ukususa imibala ukukusiza ukuthi ugxile</li> </ol>"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Ukulungiswa kombala kungasiza uma ufuna ukwenza lokhu:<br/><br/> <ol> <li>&amp;nbsp;Ukubona imibala ngokunembe kakhulu</li> <li>&amp;nbsp;Ukususa imibala ukukusiza ukuthi ugxile</li> </ol>"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Igitshezwe ngaphezulu yi-<xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Cishe u-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> osele"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ayishaji"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ixhunyiwe, ayishaji"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Kushajiwe"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Ishaje Ngokuphelele"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kulawulwa umqondisi"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kulawulwe Isethingi Elikhawulelwe"</string>
     <string name="disabled" msgid="8017887509554714950">"Akusebenzi"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Vumela le app isethe ama-alamu futhi ushejule izenzo zesikhathi esizwelayo. Lokhu kuvumela i-app iqhubeke ngemuva okungasebenzisa ibhethri lakho eliningi.\n\nUma le mvume ivaliwe, ama-alamu asele nemicimbi esekelwe esikhathini ehlelwe yile app ngeke kusebenze."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ishejuli, i-alamu, isikhumbuzi, iwashi"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Vula"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Vula ukungaphazamisi"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Soze"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Okubalulekile kuphela"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
