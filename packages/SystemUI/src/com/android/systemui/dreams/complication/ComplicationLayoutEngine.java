@@ -16,8 +16,8 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.COMPLICATION_MARGIN;
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.SCOPED_COMPLICATIONS_LAYOUT;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
 import android.util.Log;
 import android.view.View;

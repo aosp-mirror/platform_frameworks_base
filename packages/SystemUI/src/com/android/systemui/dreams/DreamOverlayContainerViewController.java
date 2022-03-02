@@ -27,7 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
-import com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.util.ViewController;
@@ -69,7 +68,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
-            ComplicationHostViewComponent.Factory complicationHostViewFactory,
+            ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
             @Main Handler handler,
@@ -84,7 +83,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 mView.getResources().getDimensionPixelSize(
                         R.dimen.dream_overlay_notifications_drag_area_height);
 
-        mComplicationHostViewController = complicationHostViewFactory.create().getController();
+        mComplicationHostViewController = complicationHostViewController;
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,

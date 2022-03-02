@@ -35,9 +35,10 @@ import dagger.Provides;
 /**
  * Module for housing components related to rendering complications.
  */
-@Module(subcomponents = {
+@Module(includes = {
+        ComplicationHostViewModule.class,
+        }, subcomponents = {
         ComplicationViewModelComponent.class,
-        ComplicationHostViewComponent.class,
 })
 public interface ComplicationModule {
     String SCOPED_COMPLICATIONS_MODEL = "scoped_complications_model";
