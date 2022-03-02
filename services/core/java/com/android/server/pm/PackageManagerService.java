@@ -840,6 +840,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
             mNoKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
 
+    private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
+            mPendingKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
+
     // Internal interface for permission manager
     final PermissionManagerServiceInternal mPermissionManager;
 
@@ -887,9 +890,11 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
+    static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
+    private static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS = 1000;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1166,13 +1171,14 @@ public class PackageManagerService extends IPackageManager.Stub
         Computer computer = snapshotComputer();
         ArraySet<String> packagesToNotify = computer.getNotifyPackagesForReplacedReceived(packages);
         for (int index = 0; index < packagesToNotify.size(); index++) {
-            notifyInstallObserver(packagesToNotify.valueAt(index));
+            notifyInstallObserver(packagesToNotify.valueAt(index), false /* killApp */);
         }
     }
 
-    void notifyInstallObserver(String packageName) {
-        Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
-                mNoKillInstallObservers.remove(packageName);
+    void notifyInstallObserver(String packageName, boolean killApp) {
+        final Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
+                killApp ? mPendingKillInstallObservers.remove(packageName)
+                        : mNoKillInstallObservers.remove(packageName);
 
         if (pair != null) {
             notifyInstallObserver(pair.first, pair.second);
@@ -1209,6 +1215,15 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
         mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
                 delay ? getPruneUnusedSharedLibrariesDelay() : 0);
+    }
+
+    void scheduleDeferredPendingKillInstallObserver(PackageInstalledInfo info,
+            IPackageInstallObserver2 observer) {
+        final String packageName = info.mPkg.getPackageName();
+        mPendingKillInstallObservers.put(packageName, Pair.create(info, observer));
+        final Message message = mHandler.obtainMessage(DEFERRED_PENDING_KILL_INSTALL_OBSERVER,
+                packageName);
+        mHandler.sendMessageDelayed(message, DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
     private static long getPruneUnusedSharedLibrariesDelay() {
@@ -7390,6 +7405,12 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 PackageManagerService.this.notifyPackageUseInternal(packageName, reason);
             }
+        }
+
+        @Override
+        public void onPackageProcessKilledForUninstall(String packageName) {
+            mHandler.post(() -> PackageManagerService.this.notifyInstallObserver(packageName,
+                    true /* killApp */));
         }
 
         @Override
