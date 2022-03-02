@@ -153,6 +153,9 @@ public class Flags {
     public static final BooleanFlag SIMULATE_DOCK_THROUGH_CHARGING =
             new BooleanFlag(1000, true);
 
+    // 1100 - windowing
+    public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
+            new SysPropBooleanFlag(1100, "persist.debug.shell_transit", false);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
