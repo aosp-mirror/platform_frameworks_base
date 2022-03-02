@@ -38080,6 +38080,7 @@ package android.service.autofill {
   }
 
   public final class Field {
+    method @Nullable public java.util.regex.Pattern getFilter();
     method @Nullable public android.service.autofill.Presentations getPresentations();
     method @Nullable public android.view.autofill.AutofillValue getValue();
   }

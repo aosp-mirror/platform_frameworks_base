@@ -44,6 +44,7 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
@@ -3247,7 +3248,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // the best capture timing (e.g. IME window capture),
                 // No need additional task capture while task is controlled by RecentsAnimation.
                 if (mAtmService.mWindowManager.mTaskSnapshotController != null
-                        && !task.isAnimatingByRecents()) {
+                        && !(task.isAnimatingByRecents()
+                                || mTransitionController.inRecentsTransition(task))) {
                     final ArraySet<Task> tasks = Sets.newArraySet(task);
                     mAtmService.mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
                     mAtmService.mWindowManager.mTaskSnapshotController
@@ -8211,6 +8213,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        // We want to collect the ActivityRecord if the windowing mode is changed, so that it will
+        // dispatch app transition finished event correctly at the end.
+        // Check #isVisible() because we don't want to animate for activity that stays invisible.
+        // Activity with #isVisibleRequested() changed should be collected when that is requested.
+        if (mTransitionController.isShellTransitionsEnabled() && isVisible()
+                && isVisibleRequested()) {
+            final int projectedWindowingMode =
+                    getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED
+                            ? newParentConfig.windowConfiguration.getWindowingMode()
+                            : getRequestedOverrideWindowingMode();
+            if (getWindowingMode() != projectedWindowingMode) {
+                mTransitionController.collect(this);
+            }
+        }
         if (mCompatDisplayInsets != null) {
             Configuration overrideConfig = getRequestedOverrideConfiguration();
             // Adapt to changes in orientation locking. The app is still non-resizable, but

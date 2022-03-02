@@ -1735,19 +1735,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
-        final boolean useAsyncRotation = !mTransitionController.isShellTransitionsEnabled();
         if (mFixedRotationLaunchingApp == null && r != null) {
-            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this,
-                    rotation);
-            if (useAsyncRotation) {
-                startAsyncRotation(
-                        // Delay the hide animation to avoid blinking by clicking navigation bar
-                        // that may toggle fixed rotation in a short time.
-                        r == mFixedRotationTransitionListener.mAnimatingRecents);
-            }
+            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+            // Delay the hide animation to avoid blinking by clicking navigation bar that may
+            // toggle fixed rotation in a short time.
+            final boolean shouldDebounce = r == mFixedRotationTransitionListener.mAnimatingRecents
+                    || mTransitionController.isTransientLaunch(r);
+            startAsyncRotation(shouldDebounce);
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
-            if (useAsyncRotation) finishAsyncRotationIfPossible();
+            // Keep async rotation controller if the next transition of display is requested.
+            if (!mTransitionController.isCollecting(this)) {
+                finishAsyncRotationIfPossible();
+            }
         }
         mFixedRotationLaunchingApp = r;
     }
@@ -1805,7 +1805,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         // Update directly because the app which will change the orientation of display is ready.
         if (mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */)) {
-            mTransitionController.setSeamlessRotation(this);
             sendNewConfiguration();
             return;
         }
@@ -3234,7 +3233,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            if (isRotationChanging()) {
+            if (mFixedRotationLaunchingApp != null) {
+                // A fixed-rotation transition is done, then continue to start a seamless display
+                // transition. And be fore the start transaction is applied, the non-app windows
+                // need to keep in previous rotation to avoid showing inconsistent content.
+                t.setSeamlessRotation(this);
+                if (mAsyncRotationController != null) {
+                    mAsyncRotationController.keepAppearanceInPreviousRotation();
+                }
+            } else if (isRotationChanging()) {
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));
@@ -6361,13 +6368,28 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         /**
-         * Return {@code true} if there is an ongoing animation to the "Recents" activity and this
-         * activity as a fixed orientation so shouldn't be rotated.
+         * Returns the fixed orientation requested by a transient launch (e.g. recents animation).
+         * If it doesn't return SCREEN_ORIENTATION_UNSET, the rotation change should be deferred.
          */
-        boolean isTopFixedOrientationRecentsAnimating() {
-            return mAnimatingRecents != null
-                    && mAnimatingRecents.getRequestedConfigurationOrientation(true /* forDisplay */)
-                    != ORIENTATION_UNDEFINED && !hasTopFixedRotationLaunchingApp();
+        @ActivityInfo.ScreenOrientation int getTransientFixedOrientation() {
+            ActivityRecord source = null;
+            if (mTransitionController.isShellTransitionsEnabled()) {
+                final ActivityRecord r = mFixedRotationLaunchingApp;
+                if (r != null && mTransitionController.isTransientLaunch(r)) {
+                    source = r;
+                }
+            } else if (mAnimatingRecents != null && !hasTopFixedRotationLaunchingApp()) {
+                source = mAnimatingRecents;
+            }
+            if (source == null || source.getRequestedConfigurationOrientation(
+                    true /* forDisplay */) == ORIENTATION_UNDEFINED) {
+                return SCREEN_ORIENTATION_UNSET;
+            }
+            if (!mWmService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
+                // If screen is off or the device is going to sleep, then still allow to update.
+                return SCREEN_ORIENTATION_UNSET;
+            }
+            return source.mOrientation;
         }
 
         @Override

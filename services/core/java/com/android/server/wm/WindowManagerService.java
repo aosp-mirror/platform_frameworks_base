@@ -25,6 +25,7 @@ import static android.Manifest.permission.MODIFY_TOUCH_MODE_STATE;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
@@ -8982,5 +8983,25 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         return Bitmap.wrapHardwareBuffer(taskSnapshot.getHardwareBuffer(),
                 taskSnapshot.getColorSpace());
+    }
+
+    @Override
+    public void setRecentsAppBehindSystemBars(boolean behindSystemBars) {
+        if (!checkCallingPermission(START_TASKS_FROM_RECENTS, "setRecentsAppBehindSystemBars()")) {
+            throw new SecurityException("Requires START_TASKS_FROM_RECENTS permission");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final Task recentsApp = mRoot.getTask(task -> task.isActivityTypeHomeOrRecents()
+                        && task.getTopVisibleActivity() != null);
+                if (recentsApp != null) {
+                    recentsApp.getTask().setCanAffectSystemUiFlags(behindSystemBars);
+                    mWindowPlacerLocked.requestTraversal();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 }

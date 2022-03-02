@@ -1,9 +1,10 @@
-# Always-on Display (AOD)
+# Doze
 
-AOD provides an alternatative 'screen-off' experience. Instead, of completely turning the display off, it provides a distraction-free, glanceable experience for the phone in a low-powered mode. In this low-powered mode, the display will have a lower refresh rate and the UI should frequently shift its displayed contents in order to prevent burn-in.
+Always-on Display (AOD) provides an alternative 'screen-off' experience. Instead, of completely turning the display off, it provides a distraction-free, glanceable experience for the phone in a low-powered mode. In this low-powered mode, the display will have a lower refresh rate and the UI should frequently shift its displayed contents in order to prevent burn-in. The recommended max on-pixel-ratio (OPR) is 5% to reduce battery consumption.
 
-The default doze component is specified by `config_dozeComponent` in the [framework config][1]. SystemUI provides a default Doze Component: [DozeService][2]. [DozeService][2] builds a [DozeMachine][3] with dependencies specified in [DozeModule][4] and configurations in [AmbientDisplayConfiguration][13] and [DozeParameters][14].
+The default doze component controls AOD and is specified by `config_dozeComponent` in the [framework config][1]. SystemUI provides a default Doze Component: [DozeService][2]. [DozeService][2] builds a [DozeMachine][3] with dependencies specified in [DozeModule][4] and configurations in [AmbientDisplayConfiguration][13] and [DozeParameters][14].
 
+Note: The default UI used in AOD shares views with the Lock Screen and does not create its own new views. Once dozing begins, [DozeUI][17] informs SystemUI's [DozeServiceHost][18] that dozing has begun - which sends this signal to relevant SystemUI Lock Screen views to animate accordingly. Within SystemUI, [StatusBarStateController][19] #isDozing and #getDozeAmount can be used to query dozing state.
 [DozeMachine][3] handles the following main states:
 * AOD - persistently showing UI when the device is in a low-powered state
 * Pulsing - waking up the screen to show notifications (from AOD and screen off)
@@ -42,6 +43,22 @@ Relevant sensors include:
 
 And are configured in the [AmbientDisplayConfiguration][13] with some related configurations specified in [DozeParameters][14].
 
+## Doze Suppressors
+When Dozing is enabled, it can still be suppressed based on the device state. On a high-level, doze and/or AOD may be suppressed if the device is:
+* in CAR_MODE
+* not provisioned
+* in power saver mode
+* being suppressed by an app (see [PowerManager#suppressAmbientDisplay][16])
+
+Refer to the documentation in [DozeSuppressors][15] for more information.
+
+## AOD burn-in and image retention
+Because AOD will show an image on the screen for an elogated period of time, AOD designs must take into consideration burn-in (leaving a permanent mark on the screen). Temporary burn-in is called image-retention.
+
+To prevent burn-in, it is recommended to often shift UI on the screen. [DozeUi][17] schedules a call to dozeTimeTick every minute to request a shift in UI for all elements on AOD. The amount of shift can be determined by undergoing simulated AOD testing since this may vary depending on the display.
+
+For manual local testing, set [DozeUI][17]#BURN_IN_TESTING_ENABLED to true, and then manual time broadcasts (ie: `adb shell 'date 022202222022.00 ; am broadcast -a android.intent.action.TIME_SET'`) will update the burn-in translations of the views. For a general idea where burn-in may be an issue, run the [software burn-in script][20].
+
 ## Debugging Tips
 Enable DozeLog to print directly to logcat:
 ```
@@ -75,3 +92,9 @@ Other helpful dumpsys commands (`adb shell dumpsys <service>`):
 [12]: /frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeSensors.java
 [13]: /frameworks/base/core/java/android/hardware/display/AmbientDisplayConfiguration.java
 [14]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java
+[15]: /frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeSuppressor.java
+[16]: /frameworks/base/core/java/android/os/PowerManager.java
+[17]: /frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeUi.java
+[18]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeServiceHost.java
+[19]: /frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/statusbar/StatusBarStateController.java
+[20]: /frameworks/base/packages/SystemUI/docs/clock-plugins.md

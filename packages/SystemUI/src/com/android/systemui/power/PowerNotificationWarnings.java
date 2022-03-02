@@ -118,6 +118,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_AUTO_SAVER_NO_THANKS =
             "PNW.autoSaverNoThanks";
 
+    private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
+
     private static final String SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING =
             "android.settings.BATTERY_SAVER_SETTINGS";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
@@ -253,19 +255,24 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     protected void showWarningNotification() {
-        final String percentage = NumberFormat.getPercentInstance()
-                .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
-
-        // get shared standard notification copy
-        String title = mContext.getString(R.string.battery_low_title);
-        String contentText;
-
-        // get correct content text if notification is hybrid or not
-        if (mCurrentBatterySnapshot.isHybrid()) {
-            contentText = getHybridContentString(percentage);
-        } else {
-            contentText = mContext.getString(R.string.battery_low_percent_format, percentage);
+        if (showSevereLowBatteryDialog()) {
+            mContext.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
+                    .setPackage(mContext.getPackageName())
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND));
+            // Reset the state once dialog been enabled
+            dismissLowBatteryNotification();
+            mPlaySound = false;
+            return;
         }
+
+        final int warningLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        final String percentage = NumberFormat.getPercentInstance()
+                .format((double) warningLevel / 100.0);
+        final String title = mContext.getString(R.string.battery_low_title);
+        final String contentText = mContext.getString(
+                R.string.battery_low_description, percentage);
 
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.BATTERY)
@@ -284,7 +291,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         // Make the notification red if the percentage goes below a certain amount or the time
         // remaining estimate is disabled
-        if (!mCurrentBatterySnapshot.isHybrid() || mBucket < 0
+        if (!mCurrentBatterySnapshot.isHybrid() || mBucket < -1
                 || mCurrentBatterySnapshot.getTimeRemainingMillis()
                         < mCurrentBatterySnapshot.getSevereThresholdMillis()) {
             nb.setColor(Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorError));
@@ -301,6 +308,13 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
+    }
+
+    private boolean showSevereLowBatteryDialog() {
+        final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
+        final boolean useSevereDialog = mContext.getResources().getBoolean(
+                R.bool.config_severe_battery_dialog);
+        return isSevereState && useSevereDialog;
     }
 
     private void showAutoSaverSuggestionNotification() {
@@ -662,8 +676,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
         // If there's no link, use the string with no "learn more".
         if (TextUtils.isEmpty(learnMoreUrl)) {
-            return mContext.getText(
-                    com.android.internal.R.string.battery_saver_description);
+            return mContext.getText(R.string.battery_low_intro);
         }
 
         // If we have a link, use the string with the "learn more" link.

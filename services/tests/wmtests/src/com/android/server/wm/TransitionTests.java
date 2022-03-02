@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -32,13 +34,17 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.isIndependent;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -557,11 +563,20 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testAppTransitionWithRotationChange() {
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        final boolean useFixedRotation = !player.mController.useShellTransitionsRotation();
+        if (useFixedRotation) {
+            testFixedRotationOpen(player);
+        } else {
+            testShellRotationOpen(player);
+        }
+    }
+
+    private void testShellRotationOpen(TestTransitionPlayer player) {
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         final ActivityRecord app = createActivityRecord(mDisplayContent);
-        final TestTransitionPlayer player = registerTestTransitionPlayer();
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
                 null /* remoteTransition */, null /* displayChange */);
@@ -603,6 +618,85 @@ public class TransitionTests extends WindowTestsBase {
         // fade-in animation.
         verify(mDisplayContent.getPendingTransaction()).merge(eq(postDrawTransaction));
         assertNull(mDisplayContent.getAsyncRotationController());
+    }
+
+    private void testFixedRotationOpen(TestTransitionPlayer player) {
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        makeWindowVisible(statusBar);
+        mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
+        app.mTransitionController.requestStartTransition(transition, app.getTask(),
+                null /* remoteTransition */, null /* displayChange */);
+        app.mTransitionController.collectExistenceChange(app.getTask());
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        assertNotNull(asyncRotationController);
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
+        assertTrue(app.getTask().inTransition());
+
+        player.start();
+        player.finish();
+        app.getTask().clearSyncState();
+
+        // The open transition is finished. Continue to play seamless display change transition,
+        // so the previous async rotation controller should still exist.
+        mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
+        mDisplayContent.setLastHasContent();
+        mDisplayContent.requestChangeTransitionIfNeeded(1 /* changes */, null /* displayChange */);
+        assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
+        assertNotNull(mDisplayContent.getAsyncRotationController());
+
+        statusBar.setOrientationChanging(true);
+        player.startTransition();
+        // Non-app windows should not be collected.
+        assertFalse(statusBar.mToken.inTransition());
+
+        onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
+        assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(
+                mDisplayContent.mRemoteToken.toWindowContainerToken()).getRotationAnimation());
+        player.finish();
+
+        // The controller should be cleared if the target windows are drawn.
+        statusBar.finishDrawing(mWm.mTransactionFactory.get());
+        statusBar.setOrientationChanging(false);
+        assertNull(mDisplayContent.getAsyncRotationController());
+    }
+
+    @Test
+    public void testDeferRotationForTransientLaunch() {
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        assumeFalse(mDisplayContent.mTransitionController.useShellTransitionsRotation());
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord home = new ActivityBuilder(mAtm)
+                .setTask(mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask())
+                .setScreenOrientation(SCREEN_ORIENTATION_NOSENSOR).setVisible(false).build();
+        final Transition transition = home.mTransitionController.createTransition(TRANSIT_OPEN);
+        final int prevRotation = mDisplayContent.getRotation();
+        transition.setTransientLaunch(home, null /* restoreBelow */);
+        home.mTransitionController.requestStartTransition(transition, home.getTask(),
+                null /* remoteTransition */, null /* displayChange */);
+        transition.collectExistenceChange(home);
+        home.mVisibleRequested = true;
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(home);
+        doReturn(true).when(home).hasFixedRotationTransform(any());
+        player.startTransition();
+        player.onTransactionReady(mDisplayContent.getSyncTransaction());
+
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
+        doReturn(true).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn(prevRotation + 1).when(displayRotation).rotationForOrientation(
+                anyInt() /* orientation */, anyInt() /* lastRotation */);
+        // Rotation update is skipped while the recents animation is running.
+        assertFalse(mDisplayContent.updateRotationUnchecked());
+        assertEquals(SCREEN_ORIENTATION_NOSENSOR, displayRotation.getLastOrientation());
+        // Return to the app without fixed orientation from recents.
+        app.moveFocusableActivityToTop("test");
+        player.finish();
+        // The display should be updated to the changed orientation after the animation is finish.
+        assertNotEquals(mDisplayContent.getRotation(), prevRotation);
     }
 
     @Test
