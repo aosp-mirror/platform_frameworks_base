@@ -7388,8 +7388,8 @@ package android.app.admin {
     method public int getCurrentFailedPasswordAttempts();
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
-    method @Nullable public String getDeviceManagerRoleHolderPackageName();
     method public CharSequence getDeviceOwnerLockScreenInfo();
+    method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
@@ -26830,7 +26830,7 @@ package android.net {
     field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
     field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
     field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
-    field public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    field public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
@@ -31575,7 +31575,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
-    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
+    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
@@ -31858,7 +31858,7 @@ package android.os {
     method public static final boolean is64Bit();
     method public static boolean isApplicationUid(int);
     method public static final boolean isIsolated();
-    method public static final boolean isSupplemental();
+    method public static final boolean isSdkSandbox();
     method public static final void killProcess(int);
     method public static final int myPid();
     method @NonNull public static String myProcessName();
@@ -38080,6 +38080,7 @@ package android.service.autofill {
   }
 
   public final class Field {
+    method @Nullable public java.util.regex.Pattern getFilter();
     method @Nullable public android.service.autofill.Presentations getPresentations();
     method @Nullable public android.view.autofill.AutofillValue getValue();
   }

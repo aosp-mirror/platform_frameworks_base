@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -440,16 +441,26 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     public void testCheckRotationAfterCleanup() {
         mWm.setRecentsAnimationController(mController);
         spyOn(mDisplayContent.mFixedRotationTransitionListener);
-        doReturn(true).when(mDisplayContent.mFixedRotationTransitionListener)
-                .isTopFixedOrientationRecentsAnimating();
+        final ActivityRecord recents = mock(ActivityRecord.class);
+        recents.mOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        doReturn(ORIENTATION_PORTRAIT).when(recents)
+                .getRequestedConfigurationOrientation(anyBoolean());
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recents);
+
         // Rotation update is skipped while the recents animation is running.
-        assertFalse(mDisplayContent.getDisplayRotation().updateOrientation(DisplayContentTests
-                .getRotatedOrientation(mDefaultDisplay), false /* forceUpdate */));
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final int topOrientation = DisplayContentTests.getRotatedOrientation(mDefaultDisplay);
+        assertFalse(displayRotation.updateOrientation(topOrientation, false /* forceUpdate */));
+        assertEquals(recents.mOrientation, displayRotation.getLastOrientation());
         final int prevRotation = mDisplayContent.getRotation();
         mWm.cleanupRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
-        waitHandlerIdle(mWm.mH);
+
+        // In real case, it is called from RecentsAnimation#finishAnimation -> continueWindowLayout
+        // -> handleAppTransitionReady -> add FINISH_LAYOUT_REDO_CONFIG, and DisplayContent#
+        // applySurfaceChangesTransaction will call updateOrientation for FINISH_LAYOUT_REDO_CONFIG.
+        assertTrue(displayRotation.updateOrientation(topOrientation, false  /* forceUpdate */));
         // The display should be updated to the changed orientation after the animation is finished.
-        assertNotEquals(mDisplayContent.getRotation(), prevRotation);
+        assertNotEquals(displayRotation.getRotation(), prevRotation);
     }
 
     @Test

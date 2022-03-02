@@ -752,6 +752,14 @@ public final class WindowManagerGlobal {
     public void removeWindowlessRoot(ViewRootImpl impl) {
         synchronized (mLock) {
             mWindowlessRoots.remove(impl);
+	}
+    }
+
+    public void setRecentsAppBehindSystemBars(boolean behindSystemBars) {
+        try {
+            getWindowManagerService().setRecentsAppBehindSystemBars(behindSystemBars);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

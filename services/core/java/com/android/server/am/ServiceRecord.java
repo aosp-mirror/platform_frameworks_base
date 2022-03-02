@@ -94,8 +94,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
     final long createRealTime;  // when this service was created
-    final boolean supplemental; // whether this is a supplemental service
-    final int supplementedAppUid; // the app uid for which this supplemental service is running
+    final boolean isSdkSandbox; // whether this is a sdk sandbox service
+    final int sdkSandboxClientAppUid; // the app uid for which this sdk sandbox service is running
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
                             // All active bindings to the service.
@@ -105,7 +105,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolationHostProc; // process which we've started for this service (used for
-                                     // isolated and supplemental processes)
+                                     // isolated and sdk sandbox processes)
     ServiceState tracker; // tracking service execution, may be null
     ServiceState restartTracker; // tracking service restart
     boolean allowlistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
@@ -579,7 +579,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter, String supplementalProcessName, int supplementedAppUid) {
+            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -590,12 +590,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        supplemental = supplementalProcessName != null;
-        this.supplementedAppUid = supplementedAppUid;
+        isSdkSandbox = sdkSandboxProcessName != null;
+        this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
         if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
             processName = sInfo.processName + ":" + instanceName.getClassName();
-        } else if (supplementalProcessName != null) {
-            processName = supplementalProcessName;
+        } else if (sdkSandboxProcessName != null) {
+            processName = sdkSandboxProcessName;
         } else {
             processName = sInfo.processName;
         }

@@ -352,6 +352,6 @@ public class ActivityStartInterceptorTest {
         spyOn(callback);
         mInterceptor.onActivityLaunched(null, null);
 
-        verify(callback, times(1)).onActivityLaunched(any(), any());
+        verify(callback, times(1)).onActivityLaunched(any(), any(), any());
     }
 }

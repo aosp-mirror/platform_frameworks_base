@@ -49,7 +49,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -59,7 +59,7 @@ import java.util.List;
  *  A CompanionDevice activity response for showing the available
  *  nearby devices to be associated with.
  */
-public class CompanionDeviceActivity extends AppCompatActivity {
+public class CompanionDeviceActivity extends FragmentActivity {
     private static final boolean DEBUG = false;
     private static final String TAG = CompanionDeviceActivity.class.getSimpleName();
 

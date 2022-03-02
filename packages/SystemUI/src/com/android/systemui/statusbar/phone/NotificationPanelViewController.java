@@ -1144,8 +1144,9 @@ public class NotificationPanelViewController extends PanelViewController
         mSplitShadeNotificationsScrimMarginBottom =
                 mResources.getDimensionPixelSize(
                         R.dimen.split_shade_notifications_scrim_margin_bottom);
-        int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
-        int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
+
+        int panelMarginHorizontal = mResources.getDimensionPixelSize(
+                R.dimen.notification_panel_margin_horizontal);
 
         final boolean newShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mResources);
@@ -1167,11 +1168,12 @@ public class NotificationPanelViewController extends PanelViewController
         ensureAllViewsHaveIds(mNotificationContainerParent);
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(mNotificationContainerParent);
-
+        int statusViewMarginHorizontal = mResources.getDimensionPixelSize(
+                R.dimen.status_view_margin_horizontal);
+        constraintSet.setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal);
+        constraintSet.setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal);
         if (mShouldUseSplitNotificationShade) {
             // width = 0 to take up all available space within constraints
-            qsWidth = 0;
-            panelWidth = 0;
             constraintSet.connect(R.id.qs_frame, END, R.id.qs_edge_guideline, END);
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
@@ -1184,11 +1186,15 @@ public class NotificationPanelViewController extends PanelViewController
                 constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT);
             }
         }
-        constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
-        constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
+        constraintSet.setMargin(R.id.notification_stack_scroller, START,
+                mShouldUseSplitNotificationShade ? 0 : panelMarginHorizontal);
+        constraintSet.setMargin(R.id.notification_stack_scroller, END, panelMarginHorizontal);
         constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
         constraintSet.setMargin(R.id.notification_stack_scroller, BOTTOM,
                 notificationsBottomMargin);
+        constraintSet.setMargin(R.id.qs_frame, START, panelMarginHorizontal);
+        constraintSet.setMargin(R.id.qs_frame, END,
+                mShouldUseSplitNotificationShade ? 0 : panelMarginHorizontal);
         constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
         constraintSet.applyTo(mNotificationContainerParent);
         mAmbientState.setStackTopMargin(topMargin);

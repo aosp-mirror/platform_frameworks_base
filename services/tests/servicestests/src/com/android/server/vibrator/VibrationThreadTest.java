@@ -35,7 +35,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
@@ -60,6 +62,8 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
+
+import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
@@ -94,17 +98,13 @@ public class VibrationThreadTest {
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
     private static final int TEST_RAMP_STEP_DURATION = 5;
 
-    @Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    @Mock
-    private VibrationThread.VibratorManagerHooks mManagerHooks;
-    @Mock
-    private VibratorController.OnVibrationCompleteListener mControllerCallbacks;
-    @Mock
-    private IBinder mVibrationToken;
-    @Mock
-    private VibrationConfig mVibrationConfigMock;
+    @Mock private PackageManagerInternal mPackageManagerInternalMock;
+    @Mock private VibrationThread.VibratorManagerHooks mManagerHooks;
+    @Mock private VibratorController.OnVibrationCompleteListener mControllerCallbacks;
+    @Mock private IBinder mVibrationToken;
+    @Mock private VibrationConfig mVibrationConfigMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
@@ -123,6 +123,11 @@ public class VibrationThreadTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(anyInt()))
                 .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         when(mVibrationConfigMock.getRampStepDurationMs()).thenReturn(TEST_RAMP_STEP_DURATION);
+        when(mPackageManagerInternalMock.getSystemUiServiceComponent())
+                .thenReturn(new ComponentName("", ""));
+
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
 
         Context context = InstrumentationRegistry.getContext();
         mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),

@@ -43,6 +43,7 @@ import com.android.systemui.util.view.ViewUtil
  */
 abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     internal val context: Context,
+    internal val logger: MediaTttLogger,
     private val windowManager: WindowManager,
     private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
@@ -93,18 +94,26 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 
         // Cancel and re-set the chip timeout each time we get a new state.
         cancelChipViewTimeout?.run()
-        cancelChipViewTimeout = mainExecutor.executeDelayed(this::removeChip, TIMEOUT_MILLIS)
+        cancelChipViewTimeout = mainExecutor.executeDelayed(
+            { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
+            chipState.getTimeoutMs()
+        )
     }
 
-    /** Hides the chip. */
-    fun removeChip() {
-        // TODO(b/203800347): We may not want to hide the chip if we're currently in a
-        //  TransferTriggered state: Once the user has initiated the transfer, they should be able
-        //  to move away from the receiver device but still see the status of the transfer.
+    /**
+     * Hides the chip.
+     *
+     * @param removalReason a short string describing why the chip was removed (timeout, state
+     *     change, etc.)
+     */
+    open fun removeChip(removalReason: String) {
         if (chipView == null) { return }
+        logger.logChipRemoval(removalReason)
         tapGestureDetector.removeOnGestureDetectedCallback(TAG)
         windowManager.removeView(chipView)
         chipView = null
+        // No need to time the chip out since it's already gone
+        cancelChipViewTimeout?.run()
     }
 
     /**
@@ -136,7 +145,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         // If the tap is within the chip bounds, we shouldn't hide the chip (in case users think the
         // chip is tappable).
         if (!viewUtil.touchIsWithinView(view, e.x, e.y)) {
-            removeChip()
+            removeChip(MediaTttRemovalReason.REASON_SCREEN_TAP)
         }
     }
 }
@@ -145,5 +154,9 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 // UpdateMediaTapToTransferReceiverDisplayTest
 private const val WINDOW_TITLE = "Media Transfer Chip View"
 private val TAG = MediaTttChipControllerCommon::class.simpleName!!
-@VisibleForTesting
-const val TIMEOUT_MILLIS = 3000L
+
+object MediaTttRemovalReason {
+    const val REASON_TIMEOUT = "TIMEOUT"
+    const val REASON_SCREEN_TAP = "SCREEN_TAP"
+}
+

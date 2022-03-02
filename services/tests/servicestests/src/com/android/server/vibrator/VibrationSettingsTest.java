@@ -47,13 +47,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -87,6 +90,7 @@ import org.mockito.junit.MockitoRule;
 public class VibrationSettingsTest {
 
     private static final int UID = 1;
+    private static final String SYSUI_PACKAGE_NAME = "sysui";
     private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
     private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
             .setBatterySaverEnabled(true).build();
@@ -104,17 +108,13 @@ public class VibrationSettingsTest {
             USAGE_TOUCH,
     };
 
-    @Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
-    @Rule
-    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+    @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
-    @Mock
-    private VibrationSettings.OnVibratorSettingsChanged mListenerMock;
-    @Mock
-    private PowerManagerInternal mPowerManagerInternalMock;
-    @Mock
-    private VibrationConfig mVibrationConfigMock;
+    @Mock private VibrationSettings.OnVibratorSettingsChanged mListenerMock;
+    @Mock private PowerManagerInternal mPowerManagerInternalMock;
+    @Mock private PackageManagerInternal mPackageManagerInternalMock;
+    @Mock private VibrationConfig mVibrationConfigMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
@@ -129,14 +129,17 @@ public class VibrationSettingsTest {
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
-
         doAnswer(invocation -> {
             mRegisteredPowerModeListener = invocation.getArgument(0);
             return null;
         }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
+        when(mPackageManagerInternalMock.getSystemUiServiceComponent())
+                .thenReturn(new ComponentName(SYSUI_PACKAGE_NAME, ""));
 
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
         mAudioManager = mContextSpy.getSystemService(AudioManager.class);
@@ -285,7 +288,7 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldIgnoreVibration_withRingerModeSilent_ignoresRingtoneAndTouch() {
+    public void shouldIgnoreVibration_withRingerModeSilent_ignoresRingtoneOnly() {
         // Vibrating settings on are overruled by ringer mode.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
@@ -293,7 +296,7 @@ public class VibrationSettingsTest {
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
 
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_RINGTONE || usage == USAGE_TOUCH) {
+            if (usage == USAGE_RINGTONE) {
                 assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_RINGER_MODE);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
@@ -469,6 +472,55 @@ public class VibrationSettingsTest {
 
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0);
         assertFalse(mVibrationSettings.shouldVibrateInputDevices());
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withNonSystemPackageAndUid_returnsAlwaysTrue() {
+        for (int usage : ALL_USAGES) {
+            assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(UID, "some.app", usage));
+        }
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForTouchAndHardware() {
+        for (int usage : ALL_USAGES) {
+            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
+                    || usage == USAGE_PHYSICAL_EMULATION) {
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        /* uid= */ 0, "", usage));
+            } else {
+                assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        /* uid= */ 0, "", usage));
+            }
+        }
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withSystemUid_returnsFalseForTouchAndHardware() {
+        for (int usage : ALL_USAGES) {
+            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
+                    || usage == USAGE_PHYSICAL_EMULATION) {
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        Process.SYSTEM_UID, "", usage));
+            } else {
+                assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        Process.SYSTEM_UID, "", usage));
+            }
+        }
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withSysUi_returnsFalseForTouchAndHardware() {
+        for (int usage : ALL_USAGES) {
+            if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
+                    || usage == USAGE_PHYSICAL_EMULATION) {
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        UID, SYSUI_PACKAGE_NAME, usage));
+            } else {
+                assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        UID, SYSUI_PACKAGE_NAME, usage));
+            }
+        }
     }
 
     @Test
