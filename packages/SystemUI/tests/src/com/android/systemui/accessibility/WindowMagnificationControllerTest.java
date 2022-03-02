@@ -88,6 +88,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @LargeTest
@@ -96,12 +98,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     private static final int LAYOUT_CHANGE_TIMEOUT_MS = 5000;
+    private static final long ANIMATION_DURATION_MS = 300;
+    private final long mWaitingAnimationPeriod = 2 * ANIMATION_DURATION_MS;
     @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     @Mock
     private MirrorWindowControl mMirrorWindowControl;
     @Mock
     private WindowMagnifierCallback mWindowMagnifierCallback;
+    @Mock
+    IRemoteMagnificationAnimationCallback mAnimationCallback;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
@@ -284,6 +290,82 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
+    }
+
+    @Test
+    public void moveWindowMagnifierToPositionWithAnimation_expectedValuesAndInvokeCallback()
+            throws InterruptedException {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN, 0, 0, null);
+        });
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+        final ArgumentCaptor<Rect> sourceBoundsCaptor = ArgumentCaptor.forClass(Rect.class);
+        verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
+                .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
+        final float targetCenterX = sourceBoundsCaptor.getValue().exactCenterX() + 10;
+        final float targetCenterY = sourceBoundsCaptor.getValue().exactCenterY() + 10;
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.moveWindowMagnifierToPosition(
+                    targetCenterX, targetCenterY, animationCallback);
+        });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        assertEquals(1, animationCallback.getSuccessCount());
+        assertEquals(0, animationCallback.getFailedCount());
+        verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
+                .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
+        assertEquals(mWindowMagnificationController.getCenterX(),
+                sourceBoundsCaptor.getValue().exactCenterX(), 0);
+        assertEquals(mWindowMagnificationController.getCenterY(),
+                sourceBoundsCaptor.getValue().exactCenterY(), 0);
+        assertEquals(mWindowMagnificationController.getCenterX(), targetCenterX, 0);
+        assertEquals(mWindowMagnificationController.getCenterY(), targetCenterY, 0);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPositionMultipleTimes_expectedValuesAndInvokeCallback()
+            throws InterruptedException {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN, 0, 0, null);
+        });
+        final CountDownLatch countDownLatch = new CountDownLatch(4);
+        final MockMagnificationAnimationCallback animationCallback =
+                new MockMagnificationAnimationCallback(countDownLatch);
+        final ArgumentCaptor<Rect> sourceBoundsCaptor = ArgumentCaptor.forClass(Rect.class);
+        verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
+                .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
+        final float centerX = sourceBoundsCaptor.getValue().exactCenterX();
+        final float centerY = sourceBoundsCaptor.getValue().exactCenterY();
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.moveWindowMagnifierToPosition(
+                    centerX + 10, centerY + 10, animationCallback);
+            mWindowMagnificationController.moveWindowMagnifierToPosition(
+                    centerX + 20, centerY + 20, animationCallback);
+            mWindowMagnificationController.moveWindowMagnifierToPosition(
+                    centerX + 30, centerY + 30, animationCallback);
+            mWindowMagnificationController.moveWindowMagnifierToPosition(
+                    centerX + 40, centerY + 40, animationCallback);
+        });
+
+        assertTrue(countDownLatch.await(mWaitingAnimationPeriod, TimeUnit.MILLISECONDS));
+        // only the last one callback will return true
+        assertEquals(1, animationCallback.getSuccessCount());
+        // the others will return false
+        assertEquals(3, animationCallback.getFailedCount());
+        verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS))
+                .onSourceBoundsChanged((eq(mContext.getDisplayId())), sourceBoundsCaptor.capture());
+        assertEquals(mWindowMagnificationController.getCenterX(),
+                sourceBoundsCaptor.getValue().exactCenterX(), 0);
+        assertEquals(mWindowMagnificationController.getCenterY(),
+                sourceBoundsCaptor.getValue().exactCenterY(), 0);
+        assertEquals(mWindowMagnificationController.getCenterX(), centerX + 40, 0);
+        assertEquals(mWindowMagnificationController.getCenterY(), centerY + 40, 0);
     }
 
     @Test

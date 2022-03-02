@@ -985,6 +985,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
     }
 
+    void moveWindowMagnifierToPosition(float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        if (mMirrorSurfaceView == null) {
+            return;
+        }
+        mAnimationController.moveWindowMagnifierToPosition(positionX, positionY, callback);
+    }
+
     /**
      * Gets the scale.
      *
