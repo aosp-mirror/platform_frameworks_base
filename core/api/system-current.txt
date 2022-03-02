@@ -6332,7 +6332,6 @@ package android.media {
     method public int describeContents();
     method @NonNull public String getMediaRoute2Id();
     method public int getRangeZone();
-    method @NonNull public static String rangeZoneToString(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.NearbyDevice> CREATOR;
     field public static final int RANGE_CLOSE = 3; // 0x3
