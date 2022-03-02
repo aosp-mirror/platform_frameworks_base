@@ -17,10 +17,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
             android:paddingMode="stack"
-            android:paddingStart="24dp"
-            android:paddingEnd="44dp"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp">
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp">
     <item>
         <shape android:shape="rectangle">
           <solid android:color="?androidprv:attr/colorSurface" />
