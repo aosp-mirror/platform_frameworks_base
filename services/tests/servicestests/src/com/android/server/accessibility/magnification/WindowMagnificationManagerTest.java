@@ -54,6 +54,8 @@ import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -99,17 +101,31 @@ public class WindowMagnificationManagerTest {
                 mMockCallback, mMockTrace, new MagnificationScaleProvider(mContext));
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
-        doAnswer((InvocationOnMock invocation) -> {
-            final boolean connect = (Boolean) invocation.getArguments()[0];
-            mWindowMagnificationManager.setConnection(
-                    connect ? mMockConnection.getConnection() : null);
-            return null;
-        }).when(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(anyBoolean());
+        stubSetConnection(false);
 
         mResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         Settings.Secure.putFloatForUser(mResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.5f,
                 CURRENT_USER_ID);
+    }
+
+    private void stubSetConnection(boolean needDelay) {
+        doAnswer((InvocationOnMock invocation) -> {
+            final boolean connect = (Boolean) invocation.getArguments()[0];
+            // Simulates setConnection() called by another process.
+            if (needDelay) {
+                final Context context = ApplicationProvider.getApplicationContext();
+                context.getMainThreadHandler().postDelayed(
+                        () -> {
+                            mWindowMagnificationManager.setConnection(
+                                    connect ? mMockConnection.getConnection() : null);
+                        }, 10);
+            } else {
+                mWindowMagnificationManager.setConnection(
+                        connect ? mMockConnection.getConnection() : null);
+            }
+            return true;
+        }).when(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(anyBoolean());
     }
 
     @Test
@@ -464,7 +480,7 @@ public class WindowMagnificationManagerTest {
     public void
             requestConnectionToNull_disableAllMagnifiersAndRequestWindowMagnificationConnection()
             throws RemoteException {
-        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        assertTrue(mWindowMagnificationManager.requestConnection(true));
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, NaN, NaN);
 
         assertTrue(mWindowMagnificationManager.requestConnection(false));
@@ -499,7 +515,7 @@ public class WindowMagnificationManagerTest {
 
     @Test
     public void requestConnectionToNull_expectedGetterResults() {
-        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.requestConnection(true);
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, 1, 1);
 
         mWindowMagnificationManager.requestConnection(false);
@@ -510,6 +526,20 @@ public class WindowMagnificationManagerTest {
         final Region bounds = new Region();
         mWindowMagnificationManager.getMagnificationSourceBounds(TEST_DISPLAY, bounds);
         assertTrue(bounds.isEmpty());
+    }
+
+    @Test
+    public void enableWindowMagnification_connecting_invokeConnectionMethodAfterConnected()
+            throws RemoteException {
+        stubSetConnection(true);
+        mWindowMagnificationManager.requestConnection(true);
+
+        assertTrue(mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3f, 1, 1));
+
+        // Invoke enableWindowMagnification if the connection is connected.
+        verify(mMockConnection.getConnection()).enableWindowMagnification(
+                eq(TEST_DISPLAY), eq(3f),
+                eq(1f), eq(1f), eq(0f), eq(0f), notNull());
     }
 
     @Test
