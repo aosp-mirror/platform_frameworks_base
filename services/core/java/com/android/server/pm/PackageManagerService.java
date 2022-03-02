@@ -2573,8 +2573,9 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)) {
-                Slog.wtf(TAG, "Package Manager Crash", e);
+            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)
+                    && !(e instanceof ParcelableException)) {
+                Slog.wtf(TAG, "Package Manager Unexpected Exception", e);
             }
             throw e;
         }
