@@ -4595,7 +4595,7 @@ public class Editor {
 
             if (includeEditorBounds) {
                 final RectF bounds = new RectF();
-                mTextView.getBoundsOnScreen(bounds, false /* clipToParent */);
+                bounds.set(0 /* left */, 0 /* top */, mTextView.getWidth(), mTextView.getHeight());
                 EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
                 //TODO(b/210039666): add Handwriting bounds once they're available.
                 builder.setEditorBoundsInfo(
