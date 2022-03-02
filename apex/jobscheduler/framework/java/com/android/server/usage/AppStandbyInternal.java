@@ -143,6 +143,11 @@ public interface AppStandbyInternal {
     void setAppStandbyBuckets(@NonNull List<AppStandbyInfo> appBuckets, int userId, int callingUid,
             int callingPid);
 
+    /** Return the lowest bucket this app can enter. */
+    @StandbyBuckets
+    int getAppMinStandbyBucket(String packageName, int appId, int userId,
+            boolean shouldObfuscateInstantApps);
+
     /**
      * Put the specified app in the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
