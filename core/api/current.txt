@@ -8,6 +8,9 @@ package android {
   public static final class Manifest.permission {
     ctor public Manifest.permission();
     field public static final String ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
+    field public static final String ACCESS_ADSERVICES_ATTRIBUTION = "android.permission.ACCESS_ADSERVICES_ATTRIBUTION";
+    field public static final String ACCESS_ADSERVICES_CUSTOM_AUDIENCES = "android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES";
+    field public static final String ACCESS_ADSERVICES_TOPICS = "android.permission.ACCESS_ADSERVICES_TOPICS";
     field public static final String ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
     field public static final String ACCESS_BLOBS_ACROSS_USERS = "android.permission.ACCESS_BLOBS_ACROSS_USERS";
     field public static final String ACCESS_CHECKIN_PROPERTIES = "android.permission.ACCESS_CHECKIN_PROPERTIES";
@@ -17,7 +20,6 @@ package android {
     field public static final String ACCESS_MEDIA_LOCATION = "android.permission.ACCESS_MEDIA_LOCATION";
     field public static final String ACCESS_NETWORK_STATE = "android.permission.ACCESS_NETWORK_STATE";
     field public static final String ACCESS_NOTIFICATION_POLICY = "android.permission.ACCESS_NOTIFICATION_POLICY";
-    field public static final String ACCESS_SUPPLEMENTAL_APIS = "android.permission.ACCESS_SUPPLEMENTAL_APIS";
     field public static final String ACCESS_WIFI_STATE = "android.permission.ACCESS_WIFI_STATE";
     field public static final String ACCOUNT_MANAGER = "android.permission.ACCOUNT_MANAGER";
     field public static final String ACTIVITY_RECOGNITION = "android.permission.ACTIVITY_RECOGNITION";
