@@ -13595,6 +13595,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1)),
                                                 false, true, true, false, fullUninstall, userId,
                                                 removed ? "pkg removed" : "pkg changed");
+                                        getPackageManagerInternal()
+                                                .onPackageProcessKilledForUninstall(ssp);
                                     } else {
                                         // Kill any app zygotes always, since they can't fork new
                                         // processes with references to the old code
