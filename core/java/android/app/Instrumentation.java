@@ -1986,7 +1986,7 @@ public class Instrumentation {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ActivityResult execStartActivityAsCaller(
             Context who, IBinder contextThread, IBinder token, Activity target,
-            Intent intent, int requestCode, Bundle options, IBinder permissionToken,
+            Intent intent, int requestCode, Bundle options,
             boolean ignoreTargetSecurity, int userId) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
@@ -2021,7 +2021,7 @@ public class Instrumentation {
                     .startActivityAsCaller(whoThread, who.getOpPackageName(), intent,
                             intent.resolveTypeIfNeeded(who.getContentResolver()),
                             token, target != null ? target.mEmbeddedID : null,
-                            requestCode, 0, null, options, permissionToken,
+                            requestCode, 0, null, options,
                             ignoreTargetSecurity, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
