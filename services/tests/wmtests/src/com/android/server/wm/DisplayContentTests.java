@@ -1914,7 +1914,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState nextImeTargetApp = createWindow(null /* parent */,
                 TYPE_BASE_APPLICATION, "nextImeTargetApp");
         spyOn(child1);
-        doReturn(true).when(child1).inSplitScreenWindowingMode();
+        doReturn(false).when(mDisplayContent).shouldImeAttachedToApp();
         mDisplayContent.setImeLayeringTarget(child1);
 
         spyOn(nextImeTargetApp);
