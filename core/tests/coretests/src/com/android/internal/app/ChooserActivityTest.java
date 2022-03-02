@@ -1307,55 +1307,6 @@ public class ChooserActivityTest {
                 is(testBaseScore * SHORTCUT_TARGET_SCORE_BOOST));
     }
 
-    /**
-     * The case when AppPrediction service is not defined in PackageManager is already covered
-     * as a test parameter {@link ChooserActivityTest#packageManagers}. This test is checking the
-     * case when the prediction service is defined but the component is not available on the device.
-     */
-    @Test
-    public void testIsAppPredictionServiceAvailable() {
-        Intent sendIntent = createSendTextIntent();
-        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
-        when(
-                ChooserActivityOverrideData
-                        .getInstance()
-                        .resolverListController
-                        .getResolversForIntent(
-                                Mockito.anyBoolean(),
-                                Mockito.anyBoolean(),
-                                Mockito.isA(List.class)))
-                .thenReturn(resolvedComponentInfos);
-
-        final ChooserActivity activity =
-                mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
-        waitForIdle();
-        if (activity.getPackageManager().getAppPredictionServicePackageName() == null) {
-            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
-        } else {
-            if (!shouldTestTogglingAppPredictionServiceAvailabilityAtRuntime()) {
-                return;
-            }
-
-            // This isn't a toggle per-se, but isAppPredictionServiceAvailable only works in
-            // system (see comment in the method).
-            assertThat(activity.isAppPredictionServiceAvailable(), is(true));
-
-            ChooserActivityOverrideData.getInstance().resources =
-                    Mockito.spy(activity.getResources());
-            when(
-                    ChooserActivityOverrideData
-                            .getInstance()
-                            .resources
-                            .getString(
-                                    getRuntimeResourceId(
-                                            "config_defaultAppPredictionService",
-                                            "string")))
-                    .thenReturn("ComponentNameThatDoesNotExist");
-
-            assertThat(activity.isAppPredictionServiceAvailable(), is(false));
-        }
-    }
-
     @Test
     public void testConvertToChooserTarget_predictionService() {
         Intent sendIntent = createSendTextIntent();
