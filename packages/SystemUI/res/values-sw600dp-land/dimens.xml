@@ -47,11 +47,11 @@
 
     <!-- Distance that the full shade transition takes in order for scrim to fully transition to
          the shade (in alpha) -->
-    <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for the keyguard content on
          NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
-    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">80dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for the notification shell to fully
          expand. -->
