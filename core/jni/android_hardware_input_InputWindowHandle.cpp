@@ -325,8 +325,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
                         "Failed to create new InputWindowHandle object.");
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
                         javaObjectForIBinder(env, windowInfo.token));
-    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name,
-                        env->NewStringUTF(windowInfo.name.data()));
+    ScopedLocalRef<jstring> name(env, env->NewStringUTF(windowInfo.name.data()));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name, name.get());
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsFlags,
                      static_cast<uint32_t>(windowInfo.layoutParamsFlags.get()));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.layoutParamsType,
@@ -374,8 +374,9 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
                      static_cast<int32_t>(windowInfo.touchOcclusionMode));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerPid, windowInfo.ownerPid);
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerUid, windowInfo.ownerUid);
+    ScopedLocalRef<jstring> packageName(env, env->NewStringUTF(windowInfo.packageName.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.packageName,
-                        env->NewStringUTF(windowInfo.packageName.data()));
+                        packageName.get());
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.inputFeatures,
                      static_cast<int32_t>(windowInfo.inputFeatures.get()));
 
