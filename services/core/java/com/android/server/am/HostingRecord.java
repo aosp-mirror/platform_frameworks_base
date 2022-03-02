@@ -56,19 +56,27 @@ public final class HostingRecord {
     private final String mDefiningPackageName;
     private final int mDefiningUid;
     private final boolean mIsTopApp;
+    private final String mDefiningProcessName;
 
     public HostingRecord(String hostingType) {
         this(hostingType, null /* hostingName */, REGULAR_ZYGOTE, null /* definingPackageName */,
-                -1 /* mDefiningUid */, false /* isTopApp */);
+                -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */);
     }
 
     public HostingRecord(String hostingType, ComponentName hostingName) {
         this(hostingType, hostingName, REGULAR_ZYGOTE);
     }
 
+    public HostingRecord(String hostingType, ComponentName hostingName, String definingPackageName,
+            int definingUid, String definingProcessName) {
+        this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE, definingPackageName,
+                definingUid, false /* isTopApp */, definingProcessName);
+    }
+
     public HostingRecord(String hostingType, ComponentName hostingName, boolean isTopApp) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
-                null /* definingPackageName */, -1 /* mDefiningUid */, isTopApp /* isTopApp */);
+                null /* definingPackageName */, -1 /* mDefiningUid */, isTopApp /* isTopApp */,
+                null /* definingProcessName */);
     }
 
     public HostingRecord(String hostingType, String hostingName) {
@@ -81,17 +89,19 @@ public final class HostingRecord {
 
     private HostingRecord(String hostingType, String hostingName, int hostingZygote) {
         this(hostingType, hostingName, hostingZygote, null /* definingPackageName */,
-                -1 /* mDefiningUid */, false /* isTopApp */);
+                -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */);
     }
 
     private HostingRecord(String hostingType, String hostingName, int hostingZygote,
-            String definingPackageName, int definingUid, boolean isTopApp) {
+            String definingPackageName, int definingUid, boolean isTopApp,
+            String definingProcessName) {
         mHostingType = hostingType;
         mHostingName = hostingName;
         mHostingZygote = hostingZygote;
         mDefiningPackageName = definingPackageName;
         mDefiningUid = definingUid;
         mIsTopApp = isTopApp;
+        mDefiningProcessName = definingProcessName;
     }
 
     public String getType() {
@@ -127,12 +137,24 @@ public final class HostingRecord {
     }
 
     /**
+     * Returns the processName of the component we want to start as specified in the defining app's
+     * manifest.
+     *
+     * @return the processName of the process in the hosting application
+     */
+    public String getDefiningProcessName() {
+        return mDefiningProcessName;
+    }
+
+    /**
      * Creates a HostingRecord for a process that must spawn from the webview zygote
      * @param hostingName name of the component to be hosted in this process
      * @return The constructed HostingRecord
      */
-    public static HostingRecord byWebviewZygote(ComponentName hostingName) {
-        return new HostingRecord("", hostingName.toShortString(), WEBVIEW_ZYGOTE);
+    public static HostingRecord byWebviewZygote(ComponentName hostingName,
+            String definingPackageName, int definingUid, String definingProcessName) {
+        return new HostingRecord("", hostingName.toShortString(), WEBVIEW_ZYGOTE,
+                definingPackageName, definingUid, false /* isTopApp */, definingProcessName);
     }
 
     /**
@@ -143,9 +165,9 @@ public final class HostingRecord {
      * @return The constructed HostingRecord
      */
     public static HostingRecord byAppZygote(ComponentName hostingName, String definingPackageName,
-            int definingUid) {
+            int definingUid, String definingProcessName) {
         return new HostingRecord("", hostingName.toShortString(), APP_ZYGOTE,
-                definingPackageName, definingUid, false /* isTopApp */);
+                definingPackageName, definingUid, false /* isTopApp */, definingProcessName);
     }
 
     /**

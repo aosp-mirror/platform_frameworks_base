@@ -492,24 +492,33 @@ class ProcessRecord implements WindowProcessListener {
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
             int _uid) {
+        this(_service, _info, _processName, _uid, -1, null);
+    }
+
+    ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
+            int _uid, int _definingUid, String _definingProcessName) {
         mService = _service;
         mProcLock = _service.mProcLock;
         info = _info;
         ProcessInfo procInfo = null;
         if (_service.mPackageManagerInt != null) {
-            ArrayMap<String, ProcessInfo> processes =
-                    _service.mPackageManagerInt.getProcessesForUid(_uid);
-            if (processes != null) {
-                procInfo = processes.get(_processName);
-                if (procInfo != null && procInfo.deniedPermissions == null
-                        && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
-                        && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
-                        && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
-                    // If this process hasn't asked for permissions to be denied, or for a
-                    // non-default GwpAsan mode, or any other non-default setting, then we don't
-                    // care about it.
-                    procInfo = null;
-                }
+            if (_definingUid > 0) {
+                ArrayMap<String, ProcessInfo> processes =
+                        _service.mPackageManagerInt.getProcessesForUid(_definingUid);
+                if (processes != null) procInfo = processes.get(_definingProcessName);
+            } else {
+                ArrayMap<String, ProcessInfo> processes =
+                        _service.mPackageManagerInt.getProcessesForUid(_uid);
+                if (processes != null) procInfo = processes.get(_processName);
+            }
+            if (procInfo != null && procInfo.deniedPermissions == null
+                    && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
+                    && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
+                    && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
+                // If this process hasn't asked for permissions to be denied, or for a
+                // non-default GwpAsan mode, or any other non-default setting, then we don't
+                // care about it.
+                procInfo = null;
             }
         }
         processInfo = procInfo;
