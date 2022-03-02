@@ -17,6 +17,7 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
+import static android.content.pm.PackageManager.FEATURE_WINDOW_MAGNIFICATION;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -91,6 +92,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     private FullScreenMagnificationController mFullScreenMagnificationController;
     private WindowMagnificationManager mWindowMagnificationMgr;
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+    /** Whether the platform supports window magnification feature. */
+    private final boolean mSupportWindowMagnification;
 
     @GuardedBy("mLock")
     private int mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -129,6 +132,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mScaleProvider = scaleProvider;
         LocalServices.getService(WindowManagerInternal.class)
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
+        mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
+                FEATURE_WINDOW_MAGNIFICATION);
     }
 
     @VisibleForTesting
@@ -183,6 +188,11 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         } else {
             getWindowMagnificationMgr().removeMagnificationButton(displayId);
         }
+    }
+
+    /** Returns {@code true} if the platform supports window magnification feature. */
+    public boolean supportWindowMagnification() {
+        return mSupportWindowMagnification;
     }
 
     /**

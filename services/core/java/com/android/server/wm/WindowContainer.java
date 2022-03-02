@@ -47,6 +47,7 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -1171,6 +1172,27 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     boolean inTransition() {
         return mTransitionController.inTransition(this);
+    }
+
+    boolean inAppOrRecentsTransition() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(PARENTS | TRANSITION,
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        }
+        for (WindowContainer p = this; p != null; p = p.getParent()) {
+            if (mTransitionController.isCollecting(p)) {
+                return true;
+            }
+        }
+        if (inTransition() || mTransitionController.inRecentsTransition(this)) return true;
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            WindowContainer child = mChildren.get(i);
+            if (child.inAppOrRecentsTransition()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void sendAppVisibilityToClients() {

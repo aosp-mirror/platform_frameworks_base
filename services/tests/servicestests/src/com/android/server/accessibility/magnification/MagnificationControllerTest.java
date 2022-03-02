@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.MagnificationConfig;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -100,6 +101,8 @@ public class MagnificationControllerTest {
     @Mock
     private Context mContext;
     @Mock
+    PackageManager mPackageManager;
+    @Mock
     private FullScreenMagnificationController mScreenMagnificationController;
     private MagnificationScaleProvider mScaleProvider;
     @Captor
@@ -136,6 +139,7 @@ public class MagnificationControllerTest {
         mMockResolver = new MockContentResolver();
         mMockResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mMockResolver);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
         Settings.Secure.putFloatForUser(mMockResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, DEFAULT_SCALE,
                 CURRENT_USER_ID);

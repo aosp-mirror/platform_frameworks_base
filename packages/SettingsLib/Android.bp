@@ -19,6 +19,7 @@ android_library {
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
         "androidx.mediarouter_mediarouter-nodeps",
+        "com.google.android.material_material",
         "iconloader",
 
         "WifiTrackerLibRes",

@@ -70,7 +70,7 @@ import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
-import com.android.server.supplementalprocess.SupplementalProcessManagerLocal
+import com.android.server.sdksandbox.SdkSandboxManagerLocal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
@@ -577,7 +577,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 1L, systemPartitions[0].privAppFolder,
                 withPackage = { pkg: PackageImpl ->
                     val applicationInfo: ApplicationInfo = createBasicApplicationInfo(pkg)
-                    mockQueryServices(SupplementalProcessManagerLocal.SERVICE_INTERFACE,
+                    mockQueryServices(SdkSandboxManagerLocal.SERVICE_INTERFACE,
                             createBasicServiceInfo(
                                     pkg, applicationInfo, "SupplementalProcessService"))
                     pkg

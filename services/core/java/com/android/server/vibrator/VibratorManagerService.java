@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.IVibrator;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -62,7 +61,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import libcore.util.NativeAllocationRegistry;
@@ -120,7 +118,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     private final Object mLock = new Object();
     private final Context mContext;
-    private final String mSystemUiPackage;
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
     private final Handler mHandler;
@@ -153,17 +150,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 synchronized (mLock) {
-                    // When the system is entering a non-interactive state, we want
-                    // to cancel vibrations in case a misbehaving app has abandoned
-                    // them.  However it may happen that the system is currently playing
-                    // haptic feedback as part of the transition.  So we don't cancel
-                    // system vibrations.
-                    if (mNextVibration != null
-                            && !isSystemHapticFeedback(mNextVibration.getVibration())) {
+                    // When the system is entering a non-interactive state, we want to cancel
+                    // vibrations in case a misbehaving app has abandoned them.
+                    if (shouldCancelOnScreenOffLocked(mNextVibration)) {
                         clearNextVibrationLocked(Vibration.Status.CANCELLED);
                     }
-                    if (mCurrentVibration != null
-                            && !isSystemHapticFeedback(mCurrentVibration.getVibration())) {
+                    if (shouldCancelOnScreenOffLocked(mCurrentVibration)) {
                         mCurrentVibration.cancel();
                     }
                 }
@@ -202,9 +194,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         int dumpLimit = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_previousVibrationsDumpLimit);
         mVibratorManagerRecords = new VibratorManagerRecords(dumpLimit);
-
-        mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
-                .getSystemUiServiceComponent().getPackageName();
 
         mBatteryStatsService = injector.getBatteryStatsService();
 
@@ -1074,11 +1063,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean isSystemHapticFeedback(Vibration vib) {
-        if (vib.attrs.getUsage() != VibrationAttributes.USAGE_TOUCH) {
+    @GuardedBy("mLock")
+    private boolean shouldCancelOnScreenOffLocked(@Nullable VibrationThread vibrationThread) {
+        if (vibrationThread == null) {
             return false;
         }
-        return vib.uid == Process.SYSTEM_UID || vib.uid == 0 || mSystemUiPackage.equals(vib.opPkg);
+        Vibration vib = vibrationThread.getVibration();
+        return mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                vib.uid, vib.opPkg, vib.attrs.getUsage());
     }
 
     @GuardedBy("mLock")

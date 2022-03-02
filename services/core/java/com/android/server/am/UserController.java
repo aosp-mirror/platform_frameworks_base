@@ -2613,7 +2613,7 @@ class UserController implements Handler.Callback {
         if (getStartedUserState(userId) == null) {
             return false;
         }
-        if (!getUserInfo(userId).isManagedProfile()) {
+        if (!mInjector.getUserManager().isCredentialSharedWithParent(userId)) {
             return false;
         }
         if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {

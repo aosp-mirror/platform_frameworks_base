@@ -31,8 +31,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.IExternalVibratorService;
 import android.os.PowerManagerInternal;
@@ -76,6 +78,7 @@ public class VibrationScalerTest {
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
+    @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private VibrationConfig mVibrationConfigMock;
 
     private TestLooper mTestLooper;
@@ -90,7 +93,11 @@ public class VibrationScalerTest {
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
+        when(mPackageManagerInternalMock.getSystemUiServiceComponent())
+                .thenReturn(new ComponentName("", ""));
 
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
 

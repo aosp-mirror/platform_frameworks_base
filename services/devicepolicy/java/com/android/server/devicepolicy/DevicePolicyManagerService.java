@@ -8610,20 +8610,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.getPackageName(), userId, "set-device-owner");
 
             Slogf.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
-
-            if (setProfileOwnerOnCurrentUserIfNecessary
-                    && mInjector.userManagerIsHeadlessSystemUserMode()) {
-                int currentForegroundUser = getCurrentForegroundUserId();
-                Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
-                        + " as profile owner on user " + currentForegroundUser);
-                // Sets profile owner on current foreground user since
-                // the human user will complete the DO setup workflow from there.
-                manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                        /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
-                        /* showDisclaimer= */ false);
-            }
-            return true;
         }
+
+        if (setProfileOwnerOnCurrentUserIfNecessary
+                && mInjector.userManagerIsHeadlessSystemUserMode()) {
+            int currentForegroundUser;
+            synchronized (getLockObject()) {
+                currentForegroundUser = getCurrentForegroundUserId();
+            }
+            Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
+                    + " as profile owner on user " + currentForegroundUser);
+            // Sets profile owner on current foreground user since
+            // the human user will complete the DO setup workflow from there.
+            manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                    /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
+                    /* showDisclaimer= */ false);
+        }
+        return true;
     }
 
     @Override
@@ -10853,7 +10856,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = user.getIdentifier();
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            maybeInstallDeviceManagerRoleHolderInUser(userHandle);
+            maybeInstallDevicePolicyManagementRoleHolderInUser(userHandle);
 
             manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
                     /* showDisclaimer= */ true);
@@ -17732,7 +17735,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     startTime,
                     callerPackage);
 
-            maybeInstallDeviceManagerRoleHolderInUser(userInfo.id);
+            maybeInstallDevicePolicyManagementRoleHolderInUser(userInfo.id);
 
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
             if (!enableAdminAndSetProfileOwner(
@@ -17800,24 +17803,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void onCreateAndProvisionManagedProfileCompleted(
             ManagedProfileProvisioningParams provisioningParams) {}
 
-    private void maybeInstallDeviceManagerRoleHolderInUser(int targetUserId) {
-        String deviceManagerRoleHolderPackageName = getDeviceManagerRoleHolderPackageName(mContext);
-        if (deviceManagerRoleHolderPackageName == null) {
-            Slogf.d(LOG_TAG, "No device manager role holder specified.");
+    private void maybeInstallDevicePolicyManagementRoleHolderInUser(int targetUserId) {
+        String devicePolicyManagerRoleHolderPackageName =
+                getDevicePolicyManagementRoleHolderPackageName(mContext);
+        if (devicePolicyManagerRoleHolderPackageName == null) {
+            Slogf.d(LOG_TAG, "No device policy management role holder specified.");
             return;
         }
         try {
             if (mIPackageManager.isPackageAvailable(
-                    deviceManagerRoleHolderPackageName, targetUserId)) {
-                Slogf.d(LOG_TAG, "The device manager role holder "
-                        + deviceManagerRoleHolderPackageName + " is already installed in "
+                    devicePolicyManagerRoleHolderPackageName, targetUserId)) {
+                Slogf.d(LOG_TAG, "The device policy management role holder "
+                        + devicePolicyManagerRoleHolderPackageName + " is already installed in "
                         + "user " + targetUserId);
                 return;
             }
-            Slogf.d(LOG_TAG, "Installing the device manager role holder "
-                    + deviceManagerRoleHolderPackageName + " in user " + targetUserId);
+            Slogf.d(LOG_TAG, "Installing the device policy management role holder "
+                    + devicePolicyManagerRoleHolderPackageName + " in user " + targetUserId);
             mIPackageManager.installExistingPackageAsUser(
-                    deviceManagerRoleHolderPackageName,
+                    devicePolicyManagerRoleHolderPackageName,
                     targetUserId,
                     PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                     PackageManager.INSTALL_REASON_POLICY,
@@ -17827,10 +17831,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private String getDeviceManagerRoleHolderPackageName(Context context) {
+    private String getDevicePolicyManagementRoleHolderPackageName(Context context) {
         RoleManager roleManager = context.getSystemService(RoleManager.class);
         List<String> roleHolders =
-                roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_MANAGER);
+                roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
         if (roleHolders.isEmpty()) {
             return null;
         }

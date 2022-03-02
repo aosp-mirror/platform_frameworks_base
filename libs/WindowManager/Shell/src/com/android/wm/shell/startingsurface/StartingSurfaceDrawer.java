@@ -364,6 +364,12 @@ public class StartingSurfaceDrawer {
                 final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
                 final SplashScreenView contentView = viewSupplier.get();
                 record.mBGColor = contentView.getInitBackgroundColor();
+            } else {
+                // release the icon view host
+                final SplashScreenView contentView = viewSupplier.get();
+                if (contentView.getSurfaceHost() != null) {
+                    SplashScreenView.releaseIconHost(contentView.getSurfaceHost());
+                }
             }
         } catch (RuntimeException e) {
             // don't crash if something else bad happens, for example a

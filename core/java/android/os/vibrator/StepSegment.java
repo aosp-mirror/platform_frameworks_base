@@ -95,11 +95,8 @@ public final class StepSegment extends VibrationEffectSegment {
     /** @hide */
     @Override
     public void validate() {
-        Preconditions.checkArgumentNonNegative(mFrequencyHz,
-                "Frequencies must all be >= 0, got " + mFrequencyHz);
-        Preconditions.checkArgumentFinite(mFrequencyHz, "frequencyHz");
-        Preconditions.checkArgumentNonnegative(mDuration,
-                "Durations must all be >= 0, got " + mDuration);
+        VibrationEffectSegment.checkFrequencyArgument(mFrequencyHz, "frequencyHz");
+        VibrationEffectSegment.checkDurationArgument(mDuration, "duration");
         if (Float.compare(mAmplitude, VibrationEffect.DEFAULT_AMPLITUDE) != 0) {
             Preconditions.checkArgumentInRange(mAmplitude, 0f, 1f, "amplitude");
         }

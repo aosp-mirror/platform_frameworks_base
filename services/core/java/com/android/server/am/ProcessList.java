@@ -70,7 +70,6 @@ import android.app.IApplicationThread;
 import android.app.IProcessObserver;
 import android.app.IUidObserver;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -361,59 +360,6 @@ public final class ProcessList {
 
     // lmkd reconnect delay in msecs
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
-
-    /**
-     * Native heap allocations will now have a non-zero tag in the most significant byte.
-     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
-     * Pointers</a>
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
-
-    /**
-     * Native heap allocations in AppZygote process and its descendants will now have a
-     * non-zero tag in the most significant byte.
-     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
-     * Pointers</a>
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
-    private static final long NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE = 207557677;
-
-    /**
-     * Enable asynchronous (ASYNC) memory tag checking in this process. This
-     * flag will only have an effect on hardware supporting the ARM Memory
-     * Tagging Extension (MTE).
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_MEMTAG_ASYNC = 135772972; // This is a bug id.
-
-    /**
-     * Enable synchronous (SYNC) memory tag checking in this process. This flag
-     * will only have an effect on hardware supporting the ARM Memory Tagging
-     * Extension (MTE). If both NATIVE_MEMTAG_ASYNC and this option is selected,
-     * this option takes preference and MTE is enabled in SYNC mode.
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_MEMTAG_SYNC = 177438394; // This is a bug id.
-
-    /**
-     * Enable automatic zero-initialization of native heap memory allocations.
-     */
-    @ChangeId
-    @Disabled
-    private static final long NATIVE_HEAP_ZERO_INIT = 178038272; // This is a bug id.
-
-    /**
-     * Enable sampled memory bug detection in the app.
-     * @see <a href="https://source.android.com/devices/tech/debug/gwp-asan">GWP-ASan</a>.
-     */
-    @ChangeId
-    @Disabled
-    private static final long GWP_ASAN = 135634846; // This is a bug id.
 
     /**
      * Apps have no access to the private data directories of any other app, even if the other
@@ -1681,136 +1627,6 @@ public final class ProcessList {
         return gidArray;
     }
 
-    private int memtagModeToZygoteMemtagLevel(int memtagMode) {
-        switch (memtagMode) {
-            case ApplicationInfo.MEMTAG_ASYNC:
-                return Zygote.MEMORY_TAG_LEVEL_ASYNC;
-            case ApplicationInfo.MEMTAG_SYNC:
-                return Zygote.MEMORY_TAG_LEVEL_SYNC;
-            default:
-                return Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-    }
-
-    // Returns the requested memory tagging level.
-    private int getRequestedMemtagLevel(ProcessRecord app) {
-        // Look at the process attribute first.
-        if (app.processInfo != null
-                && app.processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
-            return memtagModeToZygoteMemtagLevel(app.processInfo.memtagMode);
-        }
-
-        // Then at the application attribute.
-        if (app.info.getMemtagMode() != ApplicationInfo.MEMTAG_DEFAULT) {
-            return memtagModeToZygoteMemtagLevel(app.info.getMemtagMode());
-        }
-
-        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_SYNC, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_SYNC;
-        }
-
-        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_ASYNC, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
-        }
-
-        // Check to ensure the app hasn't explicitly opted-out of TBI via. the manifest attribute.
-        if (!app.info.allowsNativeHeapPointerTagging()) {
-            return Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-
-        String defaultLevel = SystemProperties.get("persist.arm64.memtag.app_default");
-        if ("sync".equals(defaultLevel)) {
-            return Zygote.MEMORY_TAG_LEVEL_SYNC;
-        } else if ("async".equals(defaultLevel)) {
-            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
-        }
-
-        // Check to see that the compat feature for TBI is enabled.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_TBI;
-        }
-
-        return Zygote.MEMORY_TAG_LEVEL_NONE;
-    }
-
-    private int decideTaggingLevel(ProcessRecord app) {
-        // Get the desired tagging level (app manifest + compat features).
-        int level = getRequestedMemtagLevel(app);
-
-        // Take into account the hardware capabilities.
-        if (Zygote.nativeSupportsMemoryTagging()) {
-            // MTE devices can not do TBI, because the Zygote process already has live MTE
-            // allocations. Downgrade TBI to NONE.
-            if (level == Zygote.MEMORY_TAG_LEVEL_TBI) {
-                level = Zygote.MEMORY_TAG_LEVEL_NONE;
-            }
-        } else if (Zygote.nativeSupportsTaggedPointers()) {
-            // TBI-but-not-MTE devices downgrade MTE modes to TBI.
-            // The idea is that if an app opts into full hardware tagging (MTE), it must be ok with
-            // the "fake" pointer tagging (TBI).
-            if (level == Zygote.MEMORY_TAG_LEVEL_ASYNC || level == Zygote.MEMORY_TAG_LEVEL_SYNC) {
-                level = Zygote.MEMORY_TAG_LEVEL_TBI;
-            }
-        } else {
-            // Otherwise disable all tagging.
-            level = Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-
-        return level;
-    }
-
-    private int decideTaggingLevelForAppZygote(ProcessRecord app) {
-        int level = decideTaggingLevel(app);
-        // TBI ("fake" pointer tagging) in AppZygote is controlled by a separate compat feature.
-        if (!mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING_APP_ZYGOTE, app.info)
-                && level == Zygote.MEMORY_TAG_LEVEL_TBI) {
-            level = Zygote.MEMORY_TAG_LEVEL_NONE;
-        }
-        return level;
-    }
-
-    private int decideGwpAsanLevel(ProcessRecord app) {
-        // Look at the process attribute first.
-       if (app.processInfo != null
-                && app.processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
-            return app.processInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_ALWAYS
-                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                    : Zygote.GWP_ASAN_LEVEL_NEVER;
-        }
-        // Then at the application attribute.
-        if (app.info.getGwpAsanMode() != ApplicationInfo.GWP_ASAN_DEFAULT) {
-            return app.info.getGwpAsanMode() == ApplicationInfo.GWP_ASAN_ALWAYS
-                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                    : Zygote.GWP_ASAN_LEVEL_NEVER;
-        }
-        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
-        // system apps, and disabled for user apps, unless overwritten by the compat feature.
-        if (mPlatformCompat.isChangeEnabled(GWP_ASAN, app.info)) {
-            return Zygote.GWP_ASAN_LEVEL_ALWAYS;
-        }
-        if ((app.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            return Zygote.GWP_ASAN_LEVEL_LOTTERY;
-        }
-        return Zygote.GWP_ASAN_LEVEL_NEVER;
-    }
-
-    private boolean enableNativeHeapZeroInit(ProcessRecord app) {
-        // Look at the process attribute first.
-        if (app.processInfo != null
-                && app.processInfo.nativeHeapZeroInitialized != ApplicationInfo.ZEROINIT_DEFAULT) {
-            return app.processInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_ENABLED;
-        }
-        // Then at the application attribute.
-        if (app.info.getNativeHeapZeroInitialized() != ApplicationInfo.ZEROINIT_DEFAULT) {
-            return app.info.getNativeHeapZeroInitialized() == ApplicationInfo.ZEROINIT_ENABLED;
-        }
-        // Compat feature last.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_ZERO_INIT, app.info)) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
@@ -1992,8 +1808,6 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
-            runtimeFlags |= decideGwpAsanLevel(app);
-
             String invokeWith = null;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 // Debuggable apps may include a wrapper script with their library directory.
@@ -2024,23 +1838,21 @@ public final class ProcessList {
             app.setRequiredAbi(requiredAbi);
             app.setInstructionSet(instructionSet);
 
-            // If instructionSet is non-null, this indicates that the system_server is spawning a
-            // process with an ISA that may be different from its own. System (kernel and hardware)
-            // compatibility for these features is checked in the decideTaggingLevel in the
-            // system_server process (not the child process). As both MTE and TBI are only supported
-            // in aarch64, we can simply ensure that the new process is also aarch64. This prevents
-            // the mismatch where a 64-bit system server spawns a 32-bit child that thinks it should
-            // enable some tagging variant. Theoretically, a 32-bit system server could exist that
-            // spawns 64-bit processes, in which case the new process won't get any tagging. This is
-            // fine as we haven't seen this configuration in practice, and we can reasonable assume
-            // that if tagging is desired, the system server will be 64-bit.
-            if (instructionSet == null || instructionSet.equals("arm64")) {
-                runtimeFlags |= decideTaggingLevel(app);
+            // If this was an external service, the package name and uid in the passed in
+            // ApplicationInfo have been changed to match those of the calling package;
+            // that will incorrectly apply compat feature overrides for the calling package instead
+            // of the defining one.
+            ApplicationInfo definingAppInfo;
+            if (hostingRecord.getDefiningPackageName() != null) {
+                definingAppInfo = new ApplicationInfo(app.info);
+                definingAppInfo.packageName = hostingRecord.getDefiningPackageName();
+                definingAppInfo.uid = uid;
+            } else {
+                definingAppInfo = app.info;
             }
 
-            if (enableNativeHeapZeroInit(app)) {
-                runtimeFlags |= Zygote.NATIVE_HEAP_ZERO_INIT;
-            }
+            runtimeFlags |= Zygote.getMemorySafetyRuntimeFlags(
+                    definingAppInfo, app.processInfo, instructionSet, mPlatformCompat);
 
             // the per-user SELinux context must be set
             if (TextUtils.isEmpty(app.info.seInfoUser)) {
@@ -2299,8 +2111,7 @@ public final class ProcessList {
                 // not the calling one.
                 appInfo.packageName = app.getHostingRecord().getDefiningPackageName();
                 appInfo.uid = uid;
-                int runtimeFlags = decideTaggingLevelForAppZygote(app);
-                appZygote = new AppZygote(appInfo, uid, firstUid, lastUid, runtimeFlags);
+                appZygote = new AppZygote(appInfo, app.processInfo, uid, firstUid, lastUid);
                 mAppZygotes.put(app.info.processName, uid, appZygote);
                 zygoteProcessList = new ArrayList<ProcessRecord>();
                 mAppZygoteProcesses.put(appZygote, zygoteProcessList);
@@ -2532,7 +2343,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
-            boolean supplemental, int supplementalUid,
+            boolean isSdkSandbox, int sdkSandboxUid,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2626,8 +2437,8 @@ public final class ProcessList {
 
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
-            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, supplemental,
-                    supplementalUid, hostingRecord);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, isSdkSandbox,
+                    sdkSandboxUid, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -3122,13 +2933,13 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated, int isolatedUid, boolean supplemental, int supplementalUid,
+            boolean isolated, int isolatedUid, boolean isSdkSandbox, int sdkSandboxUid,
             HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
-        if (supplemental) {
-            uid = supplementalUid;
+        if (isSdkSandbox) {
+            uid = sdkSandboxUid;
         }
         if (isolated) {
             if (isolatedUid == 0) {
@@ -3158,7 +2969,8 @@ public final class ProcessList {
             FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
+                hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
         if (!mService.mBooted && !mService.mBooting

@@ -757,7 +757,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         mOrientationParams.setTitle("SecondaryHomeHandle" + mContext.getDisplayId());
-        mOrientationParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        mOrientationParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION
+                | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         mWindowManager.addView(mOrientationHandle, mOrientationParams);
         mOrientationHandle.setVisibility(View.GONE);
         mOrientationParams.setFitInsetsTypes(0 /* types*/);
@@ -1565,7 +1566,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         lp.token = new Binder();
         lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC
+                | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.windowAnimations = 0;
         lp.setTitle("NavigationBar" + mContext.getDisplayId());
