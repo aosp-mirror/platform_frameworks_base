@@ -1402,7 +1402,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 }
             } else {
                 if (ps.getUserStateOrDefault(userId).isInstantApp() && !bp.isInstant()) {
-                    throw new SecurityException("Cannot grant non-ephemeral permission" + permName
+                    throw new SecurityException("Cannot grant non-ephemeral permission " + permName
                             + " for package " + packageName);
                 }
 
@@ -3523,8 +3523,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final Boolean granted =
                 SystemConfig.getInstance().getOemPermissions(pkg.getPackageName()).get(permission);
         if (granted == null) {
-            throw new IllegalStateException("OEM permission" + permission + " requested by package "
-                    + pkg.getPackageName() + " must be explicitly declared granted or not");
+            throw new IllegalStateException("OEM permission " + permission
+                    + " requested by package " + pkg.getPackageName()
+                    + " must be explicitly declared granted or not");
         }
         return Boolean.TRUE == granted;
     }
