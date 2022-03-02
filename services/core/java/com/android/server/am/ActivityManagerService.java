@@ -79,6 +79,7 @@ import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS;
 import static android.os.Process.ZYGOTE_PROCESS;
 import static android.os.Process.getTotalMemory;
+import static android.os.Process.isSdkSandboxUid;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
 import static android.os.Process.killProcessQuiet;
@@ -8560,6 +8561,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             });
             if (process.info.isInstantApp()) {
                 sb.append("Instant-App: true\n");
+            }
+            if (isSdkSandboxUid(process.uid)) {
+                sb.append("SdkSandbox: true\n");
             }
         }
     }
