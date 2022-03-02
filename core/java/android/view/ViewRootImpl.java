@@ -4178,7 +4178,7 @@ public final class ViewRootImpl implements ViewParent,
                         + " didProduceBuffer=" + didProduceBuffer);
             }
 
-            Transaction tmpTransaction = new Transaction();
+            final Transaction tmpTransaction = new Transaction();
             tmpTransaction.merge(mRtBLASTSyncTransaction);
 
             // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
@@ -4209,6 +4209,7 @@ public final class ViewRootImpl implements ViewParent,
                         blastSyncConsumer.accept(mSurfaceChangedTransaction);
                     }
                 }
+                tmpTransaction.close();
 
                 if (reportNextDraw) {
                     pendingDrawFinished();
