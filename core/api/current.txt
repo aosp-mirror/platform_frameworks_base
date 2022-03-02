@@ -30872,6 +30872,7 @@ package android.os {
     field public static final int PREVIEW_SDK_INT;
     field public static final String RELEASE;
     field @NonNull public static final String RELEASE_OR_CODENAME;
+    field @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY;
     field @Deprecated public static final String SDK;
     field public static final int SDK_INT;
     field public static final String SECURITY_PATCH;
