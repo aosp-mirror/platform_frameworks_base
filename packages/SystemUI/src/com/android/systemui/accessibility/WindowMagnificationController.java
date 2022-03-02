@@ -852,6 +852,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Override
     public void move(int xOffset, int yOffset) {
         moveWindowMagnifier(xOffset, yOffset);
+        mWindowMagnifierCallback.onMove(mDisplayId);
     }
 
     /**
@@ -1045,8 +1046,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     @Override
     public boolean onDrag(float offsetX, float offsetY) {
-        moveWindowMagnifier(offsetX, offsetY);
-        mWindowMagnifierCallback.onDrag(mDisplayId);
+        move((int) offsetX, (int) offsetY);
         return true;
     }
 

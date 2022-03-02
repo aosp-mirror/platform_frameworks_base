@@ -150,10 +150,10 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
         }
     }
 
-    void onDrag(int displayId) {
+    void onMove(int displayId) {
         if (mConnectionCallback != null) {
             try {
-                mConnectionCallback.onDrag(displayId);
+                mConnectionCallback.onMove(displayId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to inform taking control by a user", e);
             }
