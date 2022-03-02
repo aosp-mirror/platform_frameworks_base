@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -23,9 +25,12 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.util.Slog;
-import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /** Plays a {@link Vibration} in dedicated thread. */
 final class VibrationThread extends Thread implements IBinder.DeathRecipient {
@@ -76,31 +81,41 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
          * Tells the manager that the VibrationThread is finished with the previous vibration and
          * all of its cleanup tasks, and the vibrators can now be used for another vibration.
          */
-        void onVibrationThreadReleased();
+        void onVibrationThreadReleased(long vibrationId);
     }
 
     private final PowerManager.WakeLock mWakeLock;
     private final VibrationThread.VibratorManagerHooks mVibratorManagerHooks;
 
-    private final VibrationStepConductor mStepConductor;
+    // mLock is used here to communicate that the thread's work status has changed. The
+    // VibrationThread is expected to wait until work arrives, and other threads may wait until
+    // work has finished. Therefore, any changes to the conductor must be followed by a notifyAll
+    // so that threads check if their desired state is achieved.
+    private final Object mLock = new Object();
 
-    private volatile boolean mStop;
-    private volatile boolean mForceStop;
-    // Variable only set and read in main thread.
+    /**
+     * The conductor that is intended to be active. Null value means that a new conductor can
+     * be set to run. Note that this field is only reset to null when mExecutingConductor has
+     * completed, so the two fields should be in sync.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private VibrationStepConductor mRequestedActiveConductor;
+
+    /**
+     * The conductor being executed by this thread, should only be accessed within this thread's
+     * execution. i.e. not thread-safe. {@link #mRequestedActiveConductor} is for cross-thread
+     * signalling.
+     */
+    @Nullable
+    private VibrationStepConductor mExecutingConductor;
+
+    // Variable only set and read in main thread, no need to lock.
     private boolean mCalledVibrationCompleteCallback = false;
 
-    VibrationThread(Vibration vib, VibrationSettings vibrationSettings,
-            DeviceVibrationEffectAdapter effectAdapter,
-            SparseArray<VibratorController> availableVibrators, PowerManager.WakeLock wakeLock,
-            VibratorManagerHooks vibratorManagerHooks) {
-        mVibratorManagerHooks = vibratorManagerHooks;
+    VibrationThread(PowerManager.WakeLock wakeLock, VibratorManagerHooks vibratorManagerHooks) {
         mWakeLock = wakeLock;
-        mStepConductor = new VibrationStepConductor(vib, vibrationSettings, effectAdapter,
-                availableVibrators, vibratorManagerHooks);
-    }
-
-    Vibration getVibration() {
-        return mStepConductor.getVibration();
+        mVibratorManagerHooks = vibratorManagerHooks;
     }
 
     @Override
@@ -108,32 +123,138 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         if (DEBUG) {
             Slog.d(TAG, "Binder died, cancelling vibration...");
         }
-        mStepConductor.notifyCancelled(/* immediate= */ false);
+        // The binder death link only exists while the conductor is set.
+        // TODO: move the death linking to be associated with the conductor directly, this
+        // awkwardness will go away.
+        VibrationStepConductor conductor;
+        synchronized (mLock) {
+            conductor = mRequestedActiveConductor;
+        }
+        if (conductor != null) {
+            conductor.notifyCancelled(/* immediate= */ false);
+        }
+    }
+
+    /**
+     * Sets/activates the current vibration. Must only be called after receiving
+     * onVibratorsReleased from the previous vibration.
+     *
+     * @return false if VibrationThread couldn't accept it, which shouldn't happen unless called
+     *  before the release callback.
+     */
+    boolean runVibrationOnVibrationThread(VibrationStepConductor conductor) {
+        synchronized (mLock) {
+            if (mRequestedActiveConductor != null) {
+                Slog.wtf(TAG, "Attempt to start vibration when one already running");
+                return false;
+            }
+            mRequestedActiveConductor = conductor;
+            mLock.notifyAll();
+        }
+        return true;
     }
 
     @Override
     public void run() {
-        // Structured to guarantee the vibrators completed and released callbacks at the end of
-        // thread execution. Both of these callbacks are exclusively called from this thread.
-        try {
-            try {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
-                runWithWakeLock();
-            } finally {
-                clientVibrationCompleteIfNotAlready(Vibration.Status.FINISHED_UNEXPECTED);
+        Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+        while (true) {
+            // mExecutingConductor is only modified in this loop.
+            mExecutingConductor = Objects.requireNonNull(waitForVibrationRequest());
+
+            mCalledVibrationCompleteCallback = false;
+            runCurrentVibrationWithWakeLock();
+            if (!mExecutingConductor.isFinished()) {
+                Slog.wtf(TAG, "VibrationThread terminated with unfinished vibration");
             }
-        } finally {
-            mVibratorManagerHooks.onVibrationThreadReleased();
+            synchronized (mLock) {
+                // Allow another vibration to be requested.
+                mRequestedActiveConductor = null;
+            }
+            // The callback is run without holding the lock, as it may initiate another vibration.
+            // It's safe to notify even if mVibratorConductor has been re-written, as the "wait"
+            // methods all verify their waited state before returning. In reality though, if the
+            // manager is waiting for the thread to finish, then there is no pending vibration
+            // for this thread.
+            // No point doing this in finally, as if there's an exception, this thread will die
+            // and be unusable anyway.
+            mVibratorManagerHooks.onVibrationThreadReleased(mExecutingConductor.getVibration().id);
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
+            mExecutingConductor = null;
+        }
+    }
+
+    /**
+     * Waits until the VibrationThread has finished processing, timing out after the given
+     * number of milliseconds. In general, external locking will manage the ordering of this
+     * with calls to {@link #runVibrationOnVibrationThread}.
+     *
+     * @return true if the vibration completed, or false if waiting timed out.
+     */
+    public boolean waitForThreadIdle(long maxWaitMillis) {
+        long now = System.currentTimeMillis();
+        long deadline = now + maxWaitMillis;
+        synchronized (mLock) {
+            while (true) {
+                if (mRequestedActiveConductor == null) {
+                    return true;  // Done
+                }
+                if (now >= deadline) {  // Note that thread.wait(0) waits indefinitely.
+                    return false;  // Timed out.
+                }
+                try {
+                    mLock.wait(deadline - now);
+                } catch (InterruptedException e) {
+                    Slog.w(TAG, "VibrationThread interrupted waiting to stop, continuing");
+                }
+                now = System.currentTimeMillis();
+            }
+        }
+    }
+
+    /** Waits for a signal indicating a vibration is ready to run, then returns its conductor. */
+    @NonNull
+    private VibrationStepConductor waitForVibrationRequest() {
+        while (true) {
+            synchronized (mLock) {
+                if (mRequestedActiveConductor != null) {
+                    return mRequestedActiveConductor;
+                }
+                try {
+                    mLock.wait();
+                } catch (InterruptedException e) {
+                    Slog.w(TAG, "VibrationThread interrupted waiting to start, continuing");
+                }
+            }
+        }
+    }
+
+    /**
+     * Only for testing: this method relies on the requested-active conductor, rather than
+     * the executing conductor that's not intended for other threads.
+     *
+     * @return true if the vibration that's currently desired to be active has the given id.
+     */
+    @VisibleForTesting
+    boolean isRunningVibrationId(long id) {
+        synchronized (mLock) {
+            return (mRequestedActiveConductor != null
+                    && mRequestedActiveConductor.getVibration().id == id);
         }
     }
 
     /** Runs the VibrationThread ensuring that the wake lock is acquired and released. */
-    private void runWithWakeLock() {
-        WorkSource workSource = new WorkSource(mStepConductor.getVibration().uid);
+    private void runCurrentVibrationWithWakeLock() {
+        WorkSource workSource = new WorkSource(mExecutingConductor.getVibration().uid);
         mWakeLock.setWorkSource(workSource);
         mWakeLock.acquire();
         try {
-            runWithWakeLockAndDeathLink();
+            try {
+                runCurrentVibrationWithWakeLockAndDeathLink();
+            } finally {
+                clientVibrationCompleteIfNotAlready(Vibration.Status.FINISHED_UNEXPECTED);
+            }
         } finally {
             mWakeLock.release();
             mWakeLock.setWorkSource(null);
@@ -144,8 +265,8 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
      * Runs the VibrationThread with the binder death link, handling link/unlink failures.
      * Called from within runWithWakeLock.
      */
-    private void runWithWakeLockAndDeathLink() {
-        IBinder vibrationBinderToken = mStepConductor.getVibration().token;
+    private void runCurrentVibrationWithWakeLockAndDeathLink() {
+        IBinder vibrationBinderToken = mExecutingConductor.getVibration().token;
         try {
             vibrationBinderToken.linkToDeath(this, 0);
         } catch (RemoteException e) {
@@ -166,26 +287,6 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         }
     }
 
-    /** Cancel current vibration and ramp down the vibrators gracefully. */
-    public void cancel() {
-        mStepConductor.notifyCancelled(/* immediate= */ false);
-    }
-
-    /** Cancel current vibration and shuts off the vibrators immediately. */
-    public void cancelImmediately() {
-        mStepConductor.notifyCancelled(/* immediate= */ true);
-    }
-
-    /** Notify current vibration that a synced step has completed. */
-    public void syncedVibrationComplete() {
-        mStepConductor.notifySyncedVibrationComplete();
-    }
-
-    /** Notify current vibration that a step has completed on given vibrator. */
-    public void vibratorComplete(int vibratorId) {
-        mStepConductor.notifyVibratorComplete(vibratorId);
-    }
-
     // Indicate that the vibration is complete. This can be called multiple times only for
     // convenience of handling error conditions - an error after the client is complete won't
     // affect the status.
@@ -193,16 +294,16 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
         if (!mCalledVibrationCompleteCallback) {
             mCalledVibrationCompleteCallback = true;
             mVibratorManagerHooks.onVibrationCompleted(
-                    mStepConductor.getVibration().id, completedStatus);
+                    mExecutingConductor.getVibration().id, completedStatus);
         }
     }
 
     private void playVibration() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
         try {
-            mStepConductor.prepareToStart();
-            while (!mStepConductor.isFinished()) {
-                boolean readyToRun = mStepConductor.waitUntilNextStepIsDue();
+            mExecutingConductor.prepareToStart();
+            while (!mExecutingConductor.isFinished()) {
+                boolean readyToRun = mExecutingConductor.waitUntilNextStepIsDue();
                 // If we waited, don't run the next step, but instead re-evaluate status.
                 if (readyToRun) {
                     if (DEBUG) {
@@ -210,10 +311,10 @@ final class VibrationThread extends Thread implements IBinder.DeathRecipient {
                     }
                     // Run the step without holding the main lock, to avoid HAL interactions from
                     // blocking the thread.
-                    mStepConductor.runNextStep();
+                    mExecutingConductor.runNextStep();
                 }
 
-                Vibration.Status status = mStepConductor.calculateVibrationStatus();
+                Vibration.Status status = mExecutingConductor.calculateVibrationStatus();
                 // This block can only run once due to mCalledVibrationCompleteCallback.
                 if (status != Vibration.Status.RUNNING && !mCalledVibrationCompleteCallback) {
                     // First time vibration stopped running, start clean-up tasks and notify
