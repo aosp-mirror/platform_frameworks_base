@@ -97,7 +97,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -992,14 +994,18 @@ public class WindowStateTests extends WindowTestsBase {
         final Rect keepClearArea1 = new Rect(0, 0, 10, 10);
         final Rect keepClearArea2 = new Rect(5, 10, 15, 20);
         final List<Rect> keepClearAreas = Arrays.asList(keepClearArea1, keepClearArea2);
-        window.setKeepClearAreas(keepClearAreas);
+        window.setKeepClearAreas(keepClearAreas, Collections.emptyList());
 
         // Test that the keep-clear rects are stored and returned
-        assertEquals(new ArraySet(keepClearAreas), new ArraySet(window.getKeepClearAreas()));
+        final List<Rect> windowKeepClearAreas = new ArrayList();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
+        assertEquals(new ArraySet(keepClearAreas), new ArraySet(windowKeepClearAreas));
 
         // Test that keep-clear rects are overwritten
-        window.setKeepClearAreas(Arrays.asList());
-        assertEquals(0, window.getKeepClearAreas().size());
+        window.setKeepClearAreas(Collections.emptyList(), Collections.emptyList());
+        windowKeepClearAreas.clear();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
+        assertEquals(0, windowKeepClearAreas.size());
 
         // Move the window position
         final SurfaceControl.Transaction t = spy(StubTransaction.class);
@@ -1010,13 +1016,60 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(new Point(frame.left, frame.top), window.mLastSurfacePosition);
 
         // Test that the returned keep-clear rects are translated to display space
-        window.setKeepClearAreas(keepClearAreas);
+        window.setKeepClearAreas(keepClearAreas, Collections.emptyList());
         Rect expectedArea1 = new Rect(keepClearArea1);
         expectedArea1.offset(frame.left, frame.top);
         Rect expectedArea2 = new Rect(keepClearArea2);
         expectedArea2.offset(frame.left, frame.top);
 
+        windowKeepClearAreas.clear();
+        window.getKeepClearAreas(windowKeepClearAreas, new ArrayList());
         assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
-                     new ArraySet(window.getKeepClearAreas()));
+                     new ArraySet(windowKeepClearAreas));
+    }
+
+    @Test
+    public void testUnrestrictedKeepClearAreas() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(window);
+
+        final Rect keepClearArea1 = new Rect(0, 0, 10, 10);
+        final Rect keepClearArea2 = new Rect(5, 10, 15, 20);
+        final List<Rect> keepClearAreas = Arrays.asList(keepClearArea1, keepClearArea2);
+        window.setKeepClearAreas(Collections.emptyList(), keepClearAreas);
+
+        // Test that the keep-clear rects are stored and returned
+        final List<Rect> restrictedKeepClearAreas = new ArrayList();
+        final List<Rect> unrestrictedKeepClearAreas = new ArrayList();
+        window.getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
+        assertEquals(new ArraySet(keepClearAreas), new ArraySet(unrestrictedKeepClearAreas));
+
+        // Test that keep-clear rects are overwritten
+        window.setKeepClearAreas(Collections.emptyList(), Collections.emptyList());
+        unrestrictedKeepClearAreas.clear();
+        window.getKeepClearAreas(unrestrictedKeepClearAreas, new ArrayList());
+        assertEquals(0, unrestrictedKeepClearAreas.size());
+
+        // Move the window position
+        final SurfaceControl.Transaction t = spy(StubTransaction.class);
+        window.mSurfaceControl = mock(SurfaceControl.class);
+        final Rect frame = window.getFrame();
+        frame.set(10, 20, 60, 80);
+        window.updateSurfacePosition(t);
+        assertEquals(new Point(frame.left, frame.top), window.mLastSurfacePosition);
+
+        // Test that the returned keep-clear rects are translated to display space
+        window.setKeepClearAreas(Collections.emptyList(), keepClearAreas);
+        Rect expectedArea1 = new Rect(keepClearArea1);
+        expectedArea1.offset(frame.left, frame.top);
+        Rect expectedArea2 = new Rect(keepClearArea2);
+        expectedArea2.offset(frame.left, frame.top);
+
+        unrestrictedKeepClearAreas.clear();
+        window.getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
+        assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
+                     new ArraySet(unrestrictedKeepClearAreas));
     }
 }
