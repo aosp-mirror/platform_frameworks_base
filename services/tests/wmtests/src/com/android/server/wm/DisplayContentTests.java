@@ -2418,10 +2418,10 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testKeepClearAreasMultipleWindows() {
         final WindowState w1 = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent, "w1");
         final Rect rect1 = new Rect(0, 0, 10, 10);
-        w1.setKeepClearAreas(Arrays.asList(rect1));
+        w1.setKeepClearAreas(Arrays.asList(rect1), Collections.emptyList());
         final WindowState w2 = createWindow(null, TYPE_NOTIFICATION_SHADE, mDisplayContent, "w2");
         final Rect rect2 = new Rect(10, 10, 20, 20);
-        w2.setKeepClearAreas(Arrays.asList(rect2));
+        w2.setKeepClearAreas(Arrays.asList(rect2), Collections.emptyList());
 
         // No keep clear areas on display, because the windows are not visible
         assertEquals(Arrays.asList(), mDisplayContent.getKeepClearAreas());
