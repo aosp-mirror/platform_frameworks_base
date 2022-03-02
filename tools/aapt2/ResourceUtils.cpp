@@ -40,6 +40,23 @@ using ::android::base::StringPrintf;
 namespace aapt {
 namespace ResourceUtils {
 
+static std::optional<ResourceNamedType> ToResourceNamedType(const char16_t* type16,
+                                                            const char* type, size_t type_len) {
+  std::optional<ResourceNamedTypeRef> parsed_type;
+  if (type16) {
+    auto converted = util::Utf16ToUtf8(StringPiece16(type16, type_len));
+    parsed_type = ParseResourceNamedType(converted);
+  } else if (type) {
+    parsed_type = ParseResourceNamedType(StringPiece(type, type_len));
+  } else {
+    return {};
+  }
+  if (!parsed_type) {
+    return {};
+  }
+  return parsed_type->ToResourceNamedType();
+}
+
 std::optional<ResourceName> ToResourceName(const android::ResTable::resource_name& name_in) {
   // TODO: Remove this when ResTable and AssetManager(1) are removed from AAPT2
   ResourceName name_out;
@@ -50,20 +67,12 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
   name_out.package =
       util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
 
-  std::optional<ResourceNamedTypeRef> type;
-  if (name_in.type) {
-    type = ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
-  } else if (name_in.type8) {
-    type = ParseResourceNamedType(StringPiece(name_in.type8, name_in.typeLen));
-  } else {
-    return {};
-  }
-
+  std::optional<ResourceNamedType> type =
+      ToResourceNamedType(name_in.type, name_in.name8, name_in.typeLen);
   if (!type) {
     return {};
   }
-
-  name_out.type = type->ToResourceNamedType();
+  name_out.type = *type;
 
   if (name_in.name) {
     name_out.entry =
@@ -84,21 +93,12 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
 
   name_out.package = std::string(name_in.package, name_in.package_len);
 
-  std::optional<ResourceNamedTypeRef> type;
-  if (name_in.type16) {
-    type =
-        ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
-  } else if (name_in.type) {
-    type = ParseResourceNamedType(StringPiece(name_in.type, name_in.type_len));
-  } else {
-    return {};
-  }
-
+  std::optional<ResourceNamedType> type =
+      ToResourceNamedType(name_in.type16, name_in.type, name_in.type_len);
   if (!type) {
     return {};
   }
-
-  name_out.type = type->ToResourceNamedType();
+  name_out.type = *type;
 
   if (name_in.entry16) {
     name_out.entry =

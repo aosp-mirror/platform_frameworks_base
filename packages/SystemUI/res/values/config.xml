@@ -487,6 +487,9 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
+    <!-- Whether to show a severe low battery dialog. -->
+    <bool name="config_severe_battery_dialog">false</bool>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then

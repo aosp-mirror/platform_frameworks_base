@@ -2721,7 +2721,7 @@ public final class ActiveServices {
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, final IServiceConnection connection, int flags,
-            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
+            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
             String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
@@ -2807,7 +2807,7 @@ public final class ActiveServices {
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
 
         ServiceLookupResult res = retrieveServiceLocked(service, instanceName,
-                isSupplementalProcessService, supplementedAppUid, resolvedType, callingPackage,
+                isSdkSandboxService, sdkSandboxClientAppUid, resolvedType, callingPackage,
                 callingPid, callingUid, userId, true, callerFg, isBindExternal, allowInstant);
         if (res == null) {
             return 0;
@@ -3234,13 +3234,13 @@ public final class ActiveServices {
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
+            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
             String resolvedType,
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
-        if (isSupplementalProcessService && instanceName == null) {
-            throw new IllegalArgumentException("No instanceName provided for supplemental process");
+        if (isSdkSandboxService && instanceName == null) {
+            throw new IllegalArgumentException("No instanceName provided for sdk sandbox process");
         }
 
         ServiceRecord r = null;
@@ -3319,13 +3319,13 @@ public final class ActiveServices {
                 }
                 if (instanceName != null
                         && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0
-                        && !isSupplementalProcessService) {
+                        && !isSdkSandboxService) {
                     throw new IllegalArgumentException("Can't use instance name '" + instanceName
-                            + "' with non-isolated non-supplemental service '" + sInfo.name + "'");
+                            + "' with non-isolated non-sdk sandbox service '" + sInfo.name + "'");
                 }
-                if (isSupplementalProcessService
+                if (isSdkSandboxService
                         && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
-                    throw new IllegalArgumentException("Service cannot be both supplemental and "
+                    throw new IllegalArgumentException("Service cannot be both sdk sandbox and "
                             + "isolated");
                 }
 
@@ -3412,11 +3412,11 @@ public final class ActiveServices {
                     final Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
-                    String supplementalProcessName = isSupplementalProcessService ? instanceName
+                    String sdkSandboxProcessName = isSdkSandboxService ? instanceName
                                                                                   : null;
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
-                            supplementalProcessName, supplementedAppUid);
+                            sdkSandboxProcessName, sdkSandboxClientAppUid);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -4190,9 +4190,9 @@ public final class ActiveServices {
         if (app == null && !permissionsReviewRequired && !packageFrozen) {
             // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
             //  was initiated from a notification tap or not.
-            if (r.supplemental) {
-                final int uid = Process.toSupplementalUid(r.supplementedAppUid);
-                app = mAm.startSupplementalProcessLocked(procName, r.appInfo, true, intentFlags,
+            if (r.isSdkSandbox) {
+                final int uid = Process.toSdkSandboxUid(r.sdkSandboxClientAppUid);
+                app = mAm.startSdkSandboxProcessLocked(procName, r.appInfo, true, intentFlags,
                         hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, uid);
                 r.isolationHostProc = app;
             } else {

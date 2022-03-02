@@ -197,6 +197,7 @@ package android {
     field public static final String MANAGE_WEAK_ESCROW_TOKEN = "android.permission.MANAGE_WEAK_ESCROW_TOKEN";
     field public static final String MANAGE_WIFI_COUNTRY_CODE = "android.permission.MANAGE_WIFI_COUNTRY_CODE";
     field public static final String MARK_DEVICE_ORGANIZATION_OWNED = "android.permission.MARK_DEVICE_ORGANIZATION_OWNED";
+    field public static final String MEDIA_RESOURCE_OVERRIDE_PID = "android.permission.MEDIA_RESOURCE_OVERRIDE_PID";
     field public static final String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
@@ -416,7 +417,7 @@ package android {
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultSms = 17039396; // 0x1040024
-    field public static final int config_deviceManager;
+    field public static final int config_devicePolicyManagement;
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
     field public static final int config_helpIntentExtraKey = 17039389; // 0x104001d
@@ -3174,6 +3175,7 @@ package android.content.pm {
   }
 
   public class CrossProfileApps {
+    method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_PROFILES, android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES}) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle, @Nullable android.app.Activity, @Nullable android.os.Bundle);
     method @RequiresPermission(anyOf={android.Manifest.permission.INTERACT_ACROSS_PROFILES, android.Manifest.permission.START_CROSS_PROFILE_ACTIVITIES}) public void startActivity(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
   }
 
@@ -6289,7 +6291,7 @@ package android.media {
   }
 
   public final class MediaCodec {
-    method @NonNull @RequiresPermission("android.permission.MEDIA_RESOURCE_OVERRIDE_PID") public static android.media.MediaCodec createByCodecNameForClient(@NonNull String, int, int) throws java.io.IOException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_RESOURCE_OVERRIDE_PID) public static android.media.MediaCodec createByCodecNameForClient(@NonNull String, int, int) throws java.io.IOException;
   }
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
@@ -8533,12 +8535,19 @@ package android.net {
   }
 
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
-    ctor public EthernetNetworkUpdateRequest(@NonNull android.net.StaticIpConfiguration, @NonNull android.net.NetworkCapabilities);
     method public int describeContents();
-    method @NonNull public android.net.StaticIpConfiguration getIpConfig();
+    method @NonNull public android.net.IpConfiguration getIpConfiguration();
     method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
+  }
+
+  public static final class EthernetNetworkUpdateRequest.Builder {
+    ctor public EthernetNetworkUpdateRequest.Builder();
+    ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest build();
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {

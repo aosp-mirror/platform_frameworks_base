@@ -29,7 +29,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
@@ -1333,7 +1332,7 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
         // Isolated processes and Instant apps are never allowed to be in scoped storage
-        if (Process.isIsolated(uid) || Process.isSupplemental(uid)) {
+        if (Process.isIsolated(uid) || Process.isSdkSandboxUid(uid)) {
             return false;
         }
 

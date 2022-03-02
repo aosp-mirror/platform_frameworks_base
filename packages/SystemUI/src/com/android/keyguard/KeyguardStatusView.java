@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -27,7 +25,6 @@ import android.widget.GridLayout;
 
 import androidx.core.graphics.ColorUtils;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
@@ -44,9 +41,6 @@ public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
 
-    private final LockPatternUtils mLockPatternUtils;
-    private final IActivityManager mIActivityManager;
-
     private ViewGroup mStatusViewContainer;
     private KeyguardClockSwitch mClockView;
     private KeyguardSliceView mKeyguardSlice;
@@ -55,14 +49,6 @@ public class KeyguardStatusView extends GridLayout {
     private float mDarkAmount = 0;
     private int mTextColor;
     private float mChildrenAlphaExcludingSmartSpace = 1f;
-
-    /**
-     * Bottom margin that defines the margin between bottom of smart space and top of notification
-     * icons on AOD.
-     */
-    private int mIconTopMargin;
-    private int mIconTopMarginWithHeader;
-    private boolean mShowingHeader;
 
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
@@ -74,8 +60,6 @@ public class KeyguardStatusView extends GridLayout {
 
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mIActivityManager = ActivityManager.getService();
-        mLockPatternUtils = new LockPatternUtils(getContext());
     }
 
     @Override
@@ -91,23 +75,9 @@ public class KeyguardStatusView extends GridLayout {
         mKeyguardSlice = findViewById(R.id.keyguard_slice_view);
         mTextColor = mClockView.getCurrentTextColor();
 
-        mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
-        onSliceContentChanged();
-
         mMediaHostContainer = findViewById(R.id.status_view_media_container);
 
         updateDark();
-    }
-
-    /**
-     * Moves clock, adjusting margins when slice content changes.
-     */
-    private void onSliceContentChanged() {
-        final boolean hasHeader = mKeyguardSlice.hasHeader();
-        if (mShowingHeader == hasHeader) {
-            return;
-        }
-        mShowingHeader = hasHeader;
     }
 
     void setDarkAmount(float darkAmount) {
@@ -157,11 +127,5 @@ public class KeyguardStatusView extends GridLayout {
         if (mKeyguardSlice != null) {
             mKeyguardSlice.dump(fd, pw, args);
         }
-    }
-
-    private void loadBottomMargin() {
-        mIconTopMargin = getResources().getDimensionPixelSize(R.dimen.widget_vertical_padding);
-        mIconTopMarginWithHeader = getResources().getDimensionPixelSize(
-                R.dimen.widget_vertical_padding_with_header);
     }
 }

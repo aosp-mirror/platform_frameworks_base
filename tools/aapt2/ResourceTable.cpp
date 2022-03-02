@@ -43,8 +43,9 @@ namespace aapt {
 const char* Overlayable::kActorScheme = "overlay";
 
 namespace {
-bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs, ResourceType rhs) {
-  return lhs->type < rhs;
+bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
+                    const ResourceNamedTypeRef& rhs) {
+  return lhs->named_type < rhs;
 }
 
 template <typename T>
@@ -115,18 +116,24 @@ ResourceTablePackage* ResourceTable::FindOrCreatePackage(const android::StringPi
 }
 
 template <typename Func, typename Elements>
-static ResourceTableType* FindTypeRunAction(ResourceType type, Elements& entries, Func action) {
+static ResourceTableType* FindTypeRunAction(const ResourceNamedTypeRef& type, Elements& entries,
+                                            Func action) {
   const auto iter = std::lower_bound(entries.begin(), entries.end(), type, less_than_type);
-  const bool found = iter != entries.end() && type == (*iter)->type;
+  const bool found = iter != entries.end() && type == (*iter)->named_type;
   return action(found, iter);
 }
 
-ResourceTableType* ResourceTablePackage::FindType(ResourceType type) const {
+ResourceTableType* ResourceTablePackage::FindTypeWithDefaultName(const ResourceType type) const {
+  auto named_type = ResourceNamedTypeWithDefaultName(type);
+  return FindType(named_type);
+}
+
+ResourceTableType* ResourceTablePackage::FindType(const ResourceNamedTypeRef& type) const {
   return FindTypeRunAction(type, types,
                            [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceTableType* ResourceTablePackage::FindOrCreateType(ResourceType type) {
+ResourceTableType* ResourceTablePackage::FindOrCreateType(const ResourceNamedTypeRef& type) {
   return FindTypeRunAction(type, types, [&](bool found, auto& iter) {
     return found ? iter->get() : types.emplace(iter, new ResourceTableType(type))->get();
   });
@@ -329,7 +336,7 @@ struct PackageViewComparer {
 
 struct TypeViewComparer {
   bool operator()(const ResourceTableTypeView& lhs, const ResourceTableTypeView& rhs) {
-    return lhs.id != rhs.id ? lhs.id < rhs.id : lhs.type < rhs.type;
+    return lhs.id != rhs.id ? lhs.id < rhs.id : lhs.named_type < rhs.named_type;
   }
 };
 
@@ -355,7 +362,8 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
                                        id ? id.value().package_id() : std::optional<uint8_t>{}};
   auto view_package = package_inserter.Insert(table.packages, std::move(new_package));
 
-  ResourceTableTypeView new_type{type->type, id ? id.value().type_id() : std::optional<uint8_t>{}};
+  ResourceTableTypeView new_type{type->named_type,
+                                 id ? id.value().type_id() : std::optional<uint8_t>{}};
   auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
 
   if (visibility.level == Visibility::Level::kPublic) {
@@ -420,13 +428,14 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
     // we can reuse those packages for other types that need to be extracted from this package.
     // `start_index` is the index of the first newly created package that can be reused.
     const size_t start_index = new_packages.size();
-    std::map<ResourceType, size_t> type_new_package_index;
+    std::map<ResourceNamedType, size_t> type_new_package_index;
     for (auto type_it = package.types.begin(); type_it != package.types.end();) {
       auto& type = *type_it;
-      auto type_index_iter = type_new_package_index.find(type.type);
+      auto type_index_iter = type_new_package_index.find(type.named_type);
       if (type_index_iter == type_new_package_index.end()) {
         // First occurrence of the resource type in this package. Keep it in this package.
-        type_new_package_index.insert(type_index_iter, std::make_pair(type.type, start_index));
+        type_new_package_index.insert(type_index_iter,
+                                      std::make_pair(type.named_type, start_index));
         ++type_it;
         continue;
       }
@@ -440,7 +449,7 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
 
       // Move the type into a new package
       auto& other_package = new_packages[index];
-      type_new_package_index[type.type] = index + 1;
+      type_new_package_index[type.named_type] = index + 1;
       type_inserter.Insert(other_package.types, std::move(type));
       type_it = package.types.erase(type_it);
     }
@@ -473,7 +482,7 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   }
 
   auto package = FindOrCreatePackage(res.name.package);
-  auto type = package->FindOrCreateType(res.name.type.type);
+  auto type = package->FindOrCreateType(res.name.type);
   auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), res.name.entry,
                                    NameEqualRange<ResourceEntry>{});
   const size_t entry_count = std::distance(entry_it.first, entry_it.second);
@@ -593,7 +602,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -612,7 +621,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(const Res
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -633,7 +642,7 @@ bool ResourceTable::RemoveResource(const ResourceNameRef& name, ResourceId id) c
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -655,7 +664,7 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
   for (const auto& pkg : packages) {
     ResourceTablePackage* new_pkg = new_table->FindOrCreatePackage(pkg->name);
     for (const auto& type : pkg->types) {
-      ResourceTableType* new_type = new_pkg->FindOrCreateType(type->type);
+      ResourceTableType* new_type = new_pkg->FindOrCreateType(type->named_type);
       new_type->visibility_level = type->visibility_level;
 
       for (const auto& entry : type->entries) {

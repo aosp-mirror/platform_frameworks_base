@@ -113,7 +113,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
-import com.android.server.pm.pkg.component.ParsedAttribution;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -178,6 +177,7 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedAttribution;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -4551,15 +4551,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             return new PackageVerificationResult(null,
                     /* isAttributionTagValid */ true);
         }
-        if (Process.isSupplemental(uid)) {
-            // Supplemental processes run in their own UID range, but their associated
-            // UID for checks should always be the UID of the supplemental package.
+        if (Process.isSdkSandboxUid(uid)) {
+            // SDK sandbox processes run in their own UID range, but their associated
+            // UID for checks should always be the UID of the package implementing SDK sandbox
+            // service.
             // TODO: We will need to modify the callers of this function instead, so
             // modifications and checks against the app ops state are done with the
             // correct UID.
             try {
                 final PackageManager pm = mContext.getPackageManager();
-                final String supplementalPackageName = pm.getSupplementalProcessPackageName();
+                final String supplementalPackageName = pm.getSdkSandboxPackageName();
                 if (Objects.equals(packageName, supplementalPackageName)) {
                     int supplementalAppId = pm.getPackageUid(supplementalPackageName,
                             PackageManager.PackageInfoFlags.of(0));

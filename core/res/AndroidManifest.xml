@@ -1903,14 +1903,16 @@
          to improve wifi performance.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MANAGE_WIFI_AUTO_JOIN"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|knownSigner"
+                android:knownCerts="@array/wifi_known_signers" />
 
     <!-- Allows applications to get notified when a Wi-Fi interface request cannot
          be satisfied without tearing down one or more other interfaces, and provide a decision
          whether to approve the request or reject it.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MANAGE_WIFI_INTERFACES"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|knownSigner"
+                android:knownCerts="@array/wifi_known_signers" />
 
     <!-- @SystemApi @hide Allows apps to create and manage IPsec tunnels.
          <p>Only granted to applications that are currently bound by the
@@ -1948,7 +1950,8 @@
      modifications.
      <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
-        android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|knownSigner"
+                android:knownCerts="@array/wifi_known_signers" />
 
     <!-- @deprecated Allows applications to act as network scorers. @hide @SystemApi-->
     <permission android:name="android.permission.SCORE_NETWORKS"
@@ -4318,13 +4321,13 @@
     <permission android:name="android.permission.TUNER_RESOURCE_ACCESS"
          android:protectionLevel="signature|privileged|vendorPrivileged" />
 
-    <!-- This permission is required by Media Resource Manager Service when
-         accessing its overridePid Api.
-         <p>Protection level: signature
+    <!-- @SystemApi This permission is required by Media Resource Manager Service when
+         system services create MediaCodecs on behalf of other processes and apps.
+         <p>Protection level: signature|privileged|vendorPrivileged
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID"
-         android:protectionLevel="signature" />
+         android:protectionLevel="signature|privileged|vendorPrivileged" />
     <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
 
     <!-- This permission is required by Media Resource Observer Service when

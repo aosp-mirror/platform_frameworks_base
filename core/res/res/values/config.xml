@@ -1207,13 +1207,13 @@
 
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
-    <integer name="config_criticalBatteryWarningLevel">5</integer>
+    <integer name="config_criticalBatteryWarningLevel">10</integer>
 
     <!-- Shutdown if the battery temperature exceeds (this value * 0.1) Celsius. -->
     <integer name="config_shutdownBatteryTemperature">680</integer>
 
     <!-- Display low battery warning when battery level dips to this value -->
-    <integer name="config_lowBatteryWarningLevel">15</integer>
+    <integer name="config_lowBatteryWarningLevel">20</integer>
 
     <!-- The default suggested battery % at which we enable battery saver automatically.  -->
     <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
@@ -2113,7 +2113,7 @@
         TODO(b/189347385) make this a @SystemAPI -->
     <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
     <!-- The name of the package that will hold the device management role -->
-    <string name="config_deviceManager" translatable="false"></string>
+    <string name="config_devicePolicyManagement" translatable="false"></string>
     <!-- The name of the package that will hold the app protection service role. -->
     <string name="config_systemAppProtectionService" translatable="false"></string>
     <!-- The name of the package that will hold the system calendar sync manager role. -->
@@ -2122,7 +2122,7 @@
     <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
-    <string name="config_deviceManagerUpdater" translatable="false"></string>
+    <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>

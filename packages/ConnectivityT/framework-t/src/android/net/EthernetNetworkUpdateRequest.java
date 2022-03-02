@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,13 +28,13 @@ import java.util.Objects;
 @SystemApi
 public final class EthernetNetworkUpdateRequest implements Parcelable {
     @NonNull
-    private final StaticIpConfiguration mIpConfig;
+    private final IpConfiguration mIpConfig;
     @NonNull
     private final NetworkCapabilities mNetworkCapabilities;
 
     @NonNull
-    public StaticIpConfiguration getIpConfig() {
-        return new StaticIpConfiguration(mIpConfig);
+    public IpConfiguration getIpConfiguration() {
+        return new IpConfiguration(mIpConfig);
     }
 
     @NonNull
@@ -41,18 +42,73 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
         return new NetworkCapabilities(mNetworkCapabilities);
     }
 
-    public EthernetNetworkUpdateRequest(@NonNull final StaticIpConfiguration ipConfig,
+    private EthernetNetworkUpdateRequest(@NonNull final IpConfiguration ipConfig,
             @NonNull final NetworkCapabilities networkCapabilities) {
         Objects.requireNonNull(ipConfig);
         Objects.requireNonNull(networkCapabilities);
-        mIpConfig = new StaticIpConfiguration(ipConfig);
+        mIpConfig = new IpConfiguration(ipConfig);
         mNetworkCapabilities = new NetworkCapabilities(networkCapabilities);
     }
 
     private EthernetNetworkUpdateRequest(@NonNull final Parcel source) {
         Objects.requireNonNull(source);
-        mIpConfig = StaticIpConfiguration.CREATOR.createFromParcel(source);
+        mIpConfig = IpConfiguration.CREATOR.createFromParcel(source);
         mNetworkCapabilities = NetworkCapabilities.CREATOR.createFromParcel(source);
+    }
+
+    /**
+     * Builder used to create {@link EthernetNetworkUpdateRequest} objects.
+     */
+    public static final class Builder {
+        @Nullable
+        private IpConfiguration mBuilderIpConfig;
+        @Nullable
+        private NetworkCapabilities mBuilderNetworkCapabilities;
+
+        public Builder(){}
+
+        /**
+         * Constructor to populate the builder's values with an already built
+         * {@link EthernetNetworkUpdateRequest}.
+         * @param request the {@link EthernetNetworkUpdateRequest} to populate with.
+         */
+        public Builder(@NonNull final EthernetNetworkUpdateRequest request) {
+            Objects.requireNonNull(request);
+            mBuilderIpConfig = new IpConfiguration(request.mIpConfig);
+            mBuilderNetworkCapabilities = new NetworkCapabilities(request.mNetworkCapabilities);
+        }
+
+        /**
+         * Set the {@link IpConfiguration} to be used with the {@code Builder}.
+         * @param ipConfig the {@link IpConfiguration} to set.
+         * @return The builder to facilitate chaining.
+         */
+        @NonNull
+        public Builder setIpConfiguration(@NonNull final IpConfiguration ipConfig) {
+            Objects.requireNonNull(ipConfig);
+            mBuilderIpConfig = new IpConfiguration(ipConfig);
+            return this;
+        }
+
+        /**
+         * Set the {@link NetworkCapabilities} to be used with the {@code Builder}.
+         * @param nc the {@link NetworkCapabilities} to set.
+         * @return The builder to facilitate chaining.
+         */
+        @NonNull
+        public Builder setNetworkCapabilities(@NonNull final NetworkCapabilities nc) {
+            Objects.requireNonNull(nc);
+            mBuilderNetworkCapabilities = new NetworkCapabilities(nc);
+            return this;
+        }
+
+        /**
+         * Build {@link EthernetNetworkUpdateRequest} return the current update request.
+         */
+        @NonNull
+        public EthernetNetworkUpdateRequest build() {
+            return new EthernetNetworkUpdateRequest(mBuilderIpConfig, mBuilderNetworkCapabilities);
+        }
     }
 
     @Override
@@ -68,7 +124,7 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         EthernetNetworkUpdateRequest that = (EthernetNetworkUpdateRequest) o;
 
-        return Objects.equals(that.getIpConfig(), mIpConfig)
+        return Objects.equals(that.getIpConfiguration(), mIpConfig)
                 && Objects.equals(that.getNetworkCapabilities(), mNetworkCapabilities);
     }
 

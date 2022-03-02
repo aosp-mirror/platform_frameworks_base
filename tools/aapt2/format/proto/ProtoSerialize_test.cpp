@@ -951,4 +951,76 @@ TEST(ProtoSerializeTest, StagedId) {
   EXPECT_THAT(result.value().entry->staged_id.value().id, Eq(ResourceId(0x01ff0001)));
 }
 
+TEST(ProtoSerializeTest, CustomResourceTypes) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_2_two_id = 0x7f030000;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t integer_1_four_id = 0x7f030000;
+  const uint32_t layout_bar_id = 0x7f050000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id.2/two", ResourceId(id_2_two_id))
+          .AddValue(
+              "com.app.test:integer/one", ResourceId(integer_three_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 10u))
+          .AddValue(
+              "com.app.test:integer.1/one", ResourceId(integer_1_four_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue(
+              "com.app.test:integer.1/one", test::ParseConfigOrDie("v1"),
+              ResourceId(integer_1_four_id),
+              util::make_unique<BinaryPrimitive>(uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddFileReference("com.app.test:layout.custom/bar", ResourceId(layout_bar_id),
+                            "res/layout/bar.xml")
+          .Build();
+
+  test::TestFile file_a("res/layout/bar.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/bar.xml"))).WillRepeatedly(::testing::Return(&file_a));
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  DeserializeTableFromPb(pb_table, &files, &new_table, &error);
+  ASSERT_THAT(error, IsEmpty());
+
+  auto bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "com.app.test:integer.1/one", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("1")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer.1/one",
+                                                          test::ParseConfigOrDie("v1"), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("2")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer/one",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("10")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "com.app.test:integer/one",
+                                                          test::ParseConfigOrDie("v1"), "");
+  ASSERT_THAT(bp, IsNull());
+
+  auto id = test::GetValueForConfigAndProduct<Id>(&new_table, "com.app.test:id/one",
+                                                  ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(id, NotNull());
+
+  id = test::GetValueForConfigAndProduct<Id>(&new_table, "com.app.test:id.2/two",
+                                             ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(id, NotNull());
+
+  auto custom_layout = test::GetValueForConfigAndProduct<FileReference>(
+      &new_table, "com.app.test:layout.custom/bar", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(custom_layout, NotNull());
+  EXPECT_THAT(*(custom_layout->path), Eq("res/layout/bar.xml"));
+}
+
 }  // namespace aapt

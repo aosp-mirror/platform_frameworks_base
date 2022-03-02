@@ -2789,13 +2789,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final ProcessRecord startSupplementalProcessLocked(String processName,
+    final ProcessRecord startSdkSandboxProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            HostingRecord hostingRecord, int zygotePolicyFlags, int supplementalUid) {
+            HostingRecord hostingRecord, int zygotePolicyFlags, int sdkSandboxUid) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, false /* allowWhileBooting */,
                 false /* isolated */, 0 /* isolatedUid */,
-                true /* supplemental */, supplementalUid,
+                true /* isSdkSandbox */, sdkSandboxUid,
                 null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
@@ -2807,7 +2807,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean isolated) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
-                false /* supplemental */, 0 /* supplementalUid */,
+                false /* isSdkSandbox */, 0 /* sdkSandboxClientdAppUid */,
                 null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
@@ -12396,7 +12396,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
-            boolean isSupplementalProcessService, int supplementedAppUid, String callingPackage,
+            boolean isSdkSandboxService, int sdkSandboxClientdAppUid, String callingPackage,
             int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
@@ -12410,7 +12410,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("callingPackage cannot be null");
         }
 
-        if (isSupplementalProcessService && instanceName == null) {
+        if (isSdkSandboxService && instanceName == null) {
             throw new IllegalArgumentException("No instance name provided for isolated process");
         }
 
@@ -12428,7 +12428,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service, resolvedType, connection,
-                    flags, instanceName, isSupplementalProcessService, supplementedAppUid,
+                    flags, instanceName, isSdkSandboxService, sdkSandboxClientdAppUid,
                     callingPackage, userId);
         }
     }
@@ -16008,7 +16008,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean bindSupplementalProcessService(Intent service, ServiceConnection conn,
+        public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
                 int userAppUid, String processName, int flags) throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");

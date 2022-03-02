@@ -429,8 +429,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
   ResourceTablePackage* pkg = out_table->FindOrCreatePackage(pb_package.package_name());
   for (const pb::Type& pb_type : pb_package.type()) {
-    const ResourceType* res_type = ParseResourceType(pb_type.name());
-    if (res_type == nullptr) {
+    auto res_type = ParseResourceNamedType(pb_type.name());
+    if (!res_type) {
       std::ostringstream error;
       error << "unknown type '" << pb_type.name() << "'";
       *out_error = error.str();
@@ -515,7 +515,7 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),
                        pb_entry.entry_id().id());
       if (resid.is_valid()) {
-        id_index[resid] = ResourceNameRef(pkg->name, type->type, entry->name);
+        id_index[resid] = ResourceNameRef(pkg->name, type->named_type, entry->name);
       }
 
       for (const pb::ConfigValue& pb_config_value : pb_entry.config_value()) {

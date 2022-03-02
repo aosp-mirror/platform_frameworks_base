@@ -150,7 +150,15 @@ public class WallpaperEffectsGenerationPerUserService extends
 
     @GuardedBy("mLock")
     private void updateRemoteServiceLocked() {
-        destroyAndRebindRemoteService();
+        if (mRemoteService != null) {
+            mRemoteService.destroy();
+            mRemoteService = null;
+        }
+        // End existing response and clean up listener for next request.
+        if (mCinematicEffectListenerWrapper != null) {
+            invokeCinematicListenerAndCleanup(
+                    createErrorCinematicEffectResponse(mCinematicEffectListenerWrapper.mTaskId));
+        }
     }
 
     void onPackageUpdatedLocked() {

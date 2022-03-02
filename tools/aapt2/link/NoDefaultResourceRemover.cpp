@@ -76,7 +76,7 @@ bool NoDefaultResourceRemover::Consume(IAaptContext* context, ResourceTable* tab
       });
 
       for (auto iter = remove_iter; iter != end_iter; ++iter) {
-        const ResourceName name(pkg->name, type->type, (*iter)->name);
+        const ResourceName name(pkg->name, type->named_type, (*iter)->name);
         IDiagnostics* diag = context->GetDiagnostics();
         diag->Warn(DiagMessage() << "removing resource " << name
                                  << " without required default value");

@@ -360,7 +360,7 @@ class PackageFlattener {
       if (!FlattenValue(&flat_entry, &values_buffer)) {
         diag_->Error(DiagMessage()
                      << "failed to flatten resource '"
-                     << ResourceNameRef(package_.name, type.type, flat_entry.entry->name)
+                     << ResourceNameRef(package_.name, type.named_type, flat_entry.entry->name)
                      << "' for configuration '" << config << "'");
         return false;
       }
@@ -447,7 +447,7 @@ class PackageFlattener {
         ResourceId id = android::make_resid(package_.id.value(), type.id.value(), entry.id.value());
         CHECK(seen_ids.find(id) == seen_ids.end())
             << "multiple overlayable definitions found for resource "
-            << ResourceName(package_.name, type.type, entry.name).to_string();
+            << ResourceName(package_.name, type.named_type, entry.name).to_string();
         seen_ids.insert(id);
 
         // Find the overlayable chunk with the specified name
@@ -592,7 +592,8 @@ class PackageFlattener {
   bool FlattenTypes(BigBuffer* buffer) {
     size_t expected_type_id = 1;
     for (const ResourceTableTypeView& type : package_.types) {
-      if (type.type == ResourceType::kStyleable || type.type == ResourceType::kMacro) {
+      if (type.named_type.type == ResourceType::kStyleable ||
+          type.named_type.type == ResourceType::kMacro) {
         // Styleables and macros are not real resource types.
         continue;
       }
@@ -606,7 +607,7 @@ class PackageFlattener {
         expected_type_id++;
       }
       expected_type_id++;
-      type_pool_.MakeRef(to_string(type.type));
+      type_pool_.MakeRef(type.named_type.to_string());
 
       if (!FlattenTypeSpec(type, type.entries, buffer)) {
         return false;
@@ -634,7 +635,7 @@ class PackageFlattener {
         }
 
         uint32_t local_key_index;
-        ResourceName resource_name({}, type.type, entry.name);
+        ResourceName resource_name({}, type.named_type, entry.name);
         if (!collapse_key_stringpool_ ||
             name_collapse_exemptions_.find(resource_name) != name_collapse_exemptions_.end()) {
           local_key_index = (uint32_t)key_pool_.MakeRef(entry.name).index();

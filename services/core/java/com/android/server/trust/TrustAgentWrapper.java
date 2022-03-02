@@ -671,6 +671,7 @@ public class TrustAgentWrapper {
         mContext.unbindService(mConnection);
         mBound = false;
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mTrustableDowngradeReceiver);
         mTrustAgentService = null;
         mSetTrustAgentFeaturesToken = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);

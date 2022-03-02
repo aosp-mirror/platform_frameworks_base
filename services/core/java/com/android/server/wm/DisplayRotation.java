@@ -419,11 +419,8 @@ public class DisplayRotation {
      *         THE SCREEN.
      */
     boolean updateRotationUnchecked(boolean forceUpdate) {
-        final boolean useShellTransitions =
-                mDisplayContent.mTransitionController.isShellTransitionsEnabled();
-
         final int displayId = mDisplayContent.getDisplayId();
-        if (!forceUpdate && !useShellTransitions) {
+        if (!forceUpdate) {
             if (mDeferredRotationPauseCount > 0) {
                 // Rotation updates have been paused temporarily. Defer the update until updates
                 // have been resumed.
@@ -449,17 +446,16 @@ public class DisplayRotation {
                 return false;
             }
 
-            final RecentsAnimationController recentsAnimController =
-                    mService.getRecentsAnimationController();
-            if (recentsAnimController != null && mDisplayContent.mFixedRotationTransitionListener
-                    .isTopFixedOrientationRecentsAnimating()
-                    // If screen is off or the device is going to sleep, then still allow to update.
-                    && mService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
+            final int transientFixedOrientation =
+                    mDisplayContent.mFixedRotationTransitionListener.getTransientFixedOrientation();
+            if (transientFixedOrientation != SCREEN_ORIENTATION_UNSET) {
+                // Makes sure that after the transition is finished, updateOrientation() can see
+                // the difference from the latest orientation source.
+                mLastOrientation = transientFixedOrientation;
                 // During the recents animation, the closing app might still be considered on top.
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
                 // rotation update while the animation is running.
-                recentsAnimController.setCheckRotationAfterCleanup();
                 return false;
             }
         }
@@ -513,7 +509,7 @@ public class DisplayRotation {
 
         mDisplayContent.setLayoutNeeded();
 
-        if (useShellTransitions) {
+        if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             final boolean wasCollecting = mDisplayContent.mTransitionController.isCollecting();
             final TransitionRequestInfo.DisplayChange change = wasCollecting ? null
                     : new TransitionRequestInfo.DisplayChange(mDisplayContent.getDisplayId(),

@@ -545,15 +545,16 @@ public class DevicePolicyManager {
             = "android.app.action.PROVISION_FINALIZATION";
 
     /**
-     * Activity action: starts the managed profile provisioning flow inside the device management
-     * role holder.
+     * Activity action: starts the managed profile provisioning flow inside the device policy
+     * management role holder.
      *
      * <p>During the managed profile provisioning flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
      * of the role holder to restore its state from this extra. This is the same {@link Bundle}
@@ -596,15 +597,16 @@ public class DevicePolicyManager {
     public static final int RESULT_DEVICE_OWNER_SET = 123;
 
     /**
-     * Activity action: starts the trusted source provisioning flow inside the device management
-     * role holder.
+     * Activity action: starts the trusted source provisioning flow inside the device policy
+     * management role holder.
      *
      * <p>During the trusted source provisioning flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>If {@link #EXTRA_ROLE_HOLDER_STATE} is supplied to this intent, it is the responsibility
      * of the role holder to restore its state from this extra. This is the same {@link Bundle}
@@ -624,15 +626,16 @@ public class DevicePolicyManager {
             "android.app.action.ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
 
     /**
-     * Activity action: starts the provisioning finalization flow inside the device management
-     * role holder.
+     * Activity action: starts the provisioning finalization flow inside the device policy
+     * management role holder.
      *
      * <p>During the provisioning finalization flow, the platform-provided provisioning handler
-     * will delegate provisioning to the device management role holder, by firing this intent.
-     * Third-party mobile device management applications attempting to fire this intent will
+     * will delegate provisioning to the device policy management role holder, by firing this
+     * intent. Third-party mobile device management applications attempting to fire this intent will
      * receive a {@link SecurityException}.
      *
-     * <p>Device management role holders are required to have a handler for this intent action.
+     * <p>Device policy management role holders are required to have a handler for this intent
+     * action.
      *
      * <p>This handler forwards the result from the admin app's {@link
      * #ACTION_ADMIN_POLICY_COMPLIANCE} handler. Result code {@link Activity#RESULT_CANCELED}
@@ -697,9 +700,9 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether offline provisioning is allowed.
      *
      * <p>For the online provisioning flow, there will be an attempt to download and install
-     * the latest version of the device management role holder. The platform will then delegate
-     * provisioning to the device management role holder via role holder-specific provisioning
-     * actions.
+     * the latest version of the device policy management role holder. The platform will then
+     * delegate provisioning to the device policy management role holder via role holder-specific
+     * provisioning actions.
      *
      * <p>For the offline provisioning flow, the provisioning flow will always be handled by
      * the platform.
@@ -720,8 +723,8 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
 
     /**
-     * A String extra holding a url that specifies the download location of the device manager
-     * role holder package.
+     * A String extra holding a url that specifies the download location of the device policy
+     * management role holder package.
      *
      * <p>This is only meant to be used in cases when a specific variant of the role holder package
      * is needed (such as a debug variant). If not provided, the default variant of the device
@@ -777,13 +780,13 @@ public class DevicePolicyManager {
 
     /**
      * An extra of type {@link android.os.PersistableBundle} that allows the provisioning initiator
-     * to pass data to the device manager role holder.
+     * to pass data to the device policy management role holder.
      *
-     * <p>The device manager role holder will receive this extra via the {@link
+     * <p>The device policy management role holder will receive this extra via the {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
      *
      * <p>The contents of this extra are up to the contract between the provisioning initiator
-     * and the device manager role holder.
+     * and the device policy management role holder.
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
      * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
@@ -814,18 +817,19 @@ public class DevicePolicyManager {
      * <p>If {@link #EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT} is set to {@code false},
      * this result will be supplied as part of the result {@link Intent} for provisioning actions
      * such as {@link #ACTION_PROVISION_MANAGED_PROFILE}. This result will also be supplied as
-     * part of the result {@link Intent} for the device manager role holder provisioning actions.
+     * part of the result {@link Intent} for the device policy management role holder provisioning
+     * actions.
      */
     public static final String EXTRA_RESULT_LAUNCH_INTENT =
             "android.app.extra.RESULT_LAUNCH_INTENT";
 
     /**
      * A boolean extra that determines whether the provisioning flow should launch the resulting
-     * launch intent, if one is supplied by the device manager role holder via {@link
+     * launch intent, if one is supplied by the device policy management role holder via {@link
      * #EXTRA_RESULT_LAUNCH_INTENT}. Default value is {@code false}.
      *
      * <p>If {@code true}, the resulting intent will be launched by the provisioning flow, if one
-     * is supplied by the device manager role holder.
+     * is supplied by the device policy management role holder.
      *
      * <p>If {@code false}, the resulting intent will be returned as {@link
      * #EXTRA_RESULT_LAUNCH_INTENT} to the provisioning initiator, if one is supplied by the device
@@ -3220,10 +3224,10 @@ public class DevicePolicyManager {
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
 
     /**
-     * Activity action: Starts the device management role holder updater.
+     * Activity action: Starts the device policy management role holder updater.
      *
-     * <p>The activity must handle the device management role holder update and set the intent
-     * result to either {@link Activity#RESULT_OK} if the update was successful, {@link
+     * <p>The activity must handle the device policy management role holder update and set the
+     * intent result to either {@link Activity#RESULT_OK} if the update was successful, {@link
      * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_RECOVERABLE_ERROR} if it encounters a problem
      * that may be solved by relaunching it again, or {@link
      * #RESULT_UPDATE_DEVICE_MANAGEMENT_ROLE_HOLDER_UNRECOVERABLE_ERROR} if it encounters a problem
@@ -3261,9 +3265,9 @@ public class DevicePolicyManager {
     /**
      * An {@link Intent} extra which resolves to a custom user consent screen.
      *
-     * <p>If this extra is provided to the device management role holder via either {@link
+     * <p>If this extra is provided to the device policy management role holder via either {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} or {@link
-     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE}, the device management role holder must
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE}, the device policy management role holder must
      * launch this intent which shows the custom user consent screen, replacing its own standard
      * consent screen.
      *
@@ -3279,9 +3283,9 @@ public class DevicePolicyManager {
      * </ul>
      *
      * <p>If the custom consent screens are granted by the user {@link Activity#RESULT_OK} is
-     * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device management
-     * role holder should ensure that the provisioning flow terminates immediately if consent
-     * is not granted by the user.
+     * returned, otherwise {@link Activity#RESULT_CANCELED} is returned. The device policy
+     * management role holder should ensure that the provisioning flow terminates immediately if
+     * consent is not granted by the user.
      *
      * @hide
      */
@@ -15647,14 +15651,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the package name of the device manager role holder.
+     * Returns the package name of the device policy management role holder.
      *
-     * <p>If the device manager role holder is not configured for this device, returns {@code null}.
+     * <p>If the device policy management role holder is not configured for this device, returns
+     * {@code null}.
      */
     @Nullable
-    public String getDeviceManagerRoleHolderPackageName() {
-        String deviceManagerConfig =
-                mContext.getString(com.android.internal.R.string.config_deviceManager);
+    public String getDevicePolicyManagementRoleHolderPackage() {
+        String deviceManagerConfig = mContext.getString(
+                com.android.internal.R.string.config_devicePolicyManagement);
         return extractPackageNameFromDeviceManagerConfig(deviceManagerConfig);
     }
 

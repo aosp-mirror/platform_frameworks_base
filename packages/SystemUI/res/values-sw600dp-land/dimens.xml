@@ -46,4 +46,5 @@
      the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">200dp</dimen>
 
+    <dimen name="notification_panel_margin_horizontal">12dp</dimen>
 </resources>

@@ -3906,13 +3906,17 @@ public final class Settings implements Watchable, Snappable {
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     final LegacyPermissionState legacyState;
                     if (packageSetting.hasSharedUser()) {
-                        legacyState = getSettingLPr(
-                                packageSetting.getSharedUserAppId()).getLegacyPermissionState();
+                        final SettingBase sharedUserSettings = getSettingLPr(
+                                packageSetting.getSharedUserAppId());
+                        legacyState = sharedUserSettings != null
+                                ? sharedUserSettings.getLegacyPermissionState() : null;
                     } else {
                         legacyState = packageSetting.getLegacyPermissionState();
                     }
-                    readInstallPermissionsLPr(parser, legacyState, users);
-                    packageSetting.setInstallPermissionsFixed(true);
+                    if (legacyState != null) {
+                        readInstallPermissionsLPr(parser, legacyState, users);
+                        packageSetting.setInstallPermissionsFixed(true);
+                    }
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
                     Integer refCt = mKeySetRefs.get(id);

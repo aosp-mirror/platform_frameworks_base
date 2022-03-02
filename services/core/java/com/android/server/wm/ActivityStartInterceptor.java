@@ -188,10 +188,7 @@ class ActivityStartInterceptor {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
         final ActivityInterceptorCallback.ActivityInterceptorInfo interceptorInfo =
-                new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
-                        mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
-                        mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
-                        mActivityOptions);
+                getInterceptorInfo();
 
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
@@ -412,9 +409,17 @@ class ActivityStartInterceptor {
     void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
+        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo();
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
-            callback.onActivityLaunched(taskInfo, activityInfo);
+            callback.onActivityLaunched(taskInfo, activityInfo, info);
         }
+    }
+
+    private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo() {
+        return new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
+                mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
+                mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
+                mActivityOptions);
     }
 }

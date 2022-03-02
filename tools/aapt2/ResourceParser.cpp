@@ -981,12 +981,14 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
     return false;
   }
 
-  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(maybe_type.value());
-  if (!parsed_type) {
+  std::optional<ResourceNamedTypeRef> maybe_parsed_type =
+      ParseResourceNamedType(maybe_type.value());
+  if (!maybe_parsed_type) {
     diag->Error(DiagMessage(out_resource->source)
                 << "invalid resource type '" << maybe_type.value() << "' in <" << tag_name << ">");
     return false;
   }
+  auto parsed_type = maybe_parsed_type->ToResourceNamedType();
 
   std::optional<StringPiece> maybe_id_str = xml::FindNonEmptyAttribute(parser, "first-id");
   if (!maybe_id_str) {
@@ -1039,7 +1041,7 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
       }
 
       ParsedResource& entry_res = out_resource->child_resources.emplace_back(ParsedResource{
-          .name = ResourceName{{}, *parsed_type, maybe_name.value().to_string()},
+          .name = ResourceName{{}, parsed_type, maybe_name.value().to_string()},
           .source = item_source,
           .comment = std::move(comment),
       });
