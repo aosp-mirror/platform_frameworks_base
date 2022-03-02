@@ -6362,10 +6362,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         /**
-         * Returns the fixed orientation requested by a transient launch (e.g. recents animation).
-         * If it doesn't return SCREEN_ORIENTATION_UNSET, the rotation change should be deferred.
+         * Returns {@code true} if the transient launch (e.g. recents animation) requested a fixed
+         * orientation, then the rotation change should be deferred.
          */
-        @ActivityInfo.ScreenOrientation int getTransientFixedOrientation() {
+        boolean shouldDeferRotation() {
             ActivityRecord source = null;
             if (mTransitionController.isShellTransitionsEnabled()) {
                 final ActivityRecord r = mFixedRotationLaunchingApp;
@@ -6377,13 +6377,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             if (source == null || source.getRequestedConfigurationOrientation(
                     true /* forDisplay */) == ORIENTATION_UNDEFINED) {
-                return SCREEN_ORIENTATION_UNSET;
+                return false;
             }
-            if (!mWmService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
-                // If screen is off or the device is going to sleep, then still allow to update.
-                return SCREEN_ORIENTATION_UNSET;
-            }
-            return source.mOrientation;
+            // If screen is off or the device is going to sleep, then still allow to update.
+            return mWmService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
         }
 
         @Override
