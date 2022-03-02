@@ -2579,7 +2579,7 @@ public final class DisplayManagerService extends SystemService {
 
         boolean getAllowNonNativeRefreshRateOverride() {
             return DisplayProperties
-                    .debug_allow_non_native_refresh_rate_override().orElse(false);
+                    .debug_allow_non_native_refresh_rate_override().orElse(true);
         }
 
         @NonNull
