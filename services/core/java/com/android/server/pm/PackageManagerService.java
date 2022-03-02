@@ -12907,7 +12907,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DexoptOptions.DEXOPT_BOOT_COMPLETE |
                 (force ? DexoptOptions.DEXOPT_FORCE : 0);
-        return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
+        return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
+                compilerFilter, /* splitName */ null, flags));
     }
 
     /*package*/ boolean performDexOpt(DexoptOptions options) {
