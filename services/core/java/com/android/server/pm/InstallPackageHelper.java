@@ -958,10 +958,6 @@ final class InstallPackageHelper {
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
-                    if (result.needsNewAppId()) {
-                        request.mInstallResult.mRemovedInfo.mNewAppId =
-                                result.mPkgSetting.getAppId();
-                    }
                 } catch (PackageManagerException e) {
                     request.mInstallResult.setError("Scanning Failed.", e);
                     return;
@@ -2594,8 +2590,6 @@ final class InstallPackageHelper {
         final int dataLoaderType = installArgs.mDataLoaderType;
         final boolean succeeded = res.mReturnCode == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = res.mRemovedInfo != null && res.mRemovedInfo.mRemovedPackage != null;
-        final int previousAppId = (res.mRemovedInfo != null && res.mRemovedInfo.mNewAppId >= 0)
-                ? res.mRemovedInfo.mUid : Process.INVALID_UID;
         final String packageName = res.mName;
         final PackageStateInternal pkgSetting =
                 succeeded ? mPm.getPackageStateInternal(packageName) : null;
@@ -2703,10 +2697,7 @@ final class InstallPackageHelper {
                 // Send added for users that don't see the package for the first time
                 Bundle extras = new Bundle();
                 extras.putInt(Intent.EXTRA_UID, res.mUid);
-                if (previousAppId != Process.INVALID_UID) {
-                    extras.putBoolean(Intent.EXTRA_UID_CHANGING, true);
-                    extras.putInt(Intent.EXTRA_PREVIOUS_UID, previousAppId);
-                } else if (update) {
+                if (update) {
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
                 }
                 extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
@@ -2749,27 +2740,24 @@ final class InstallPackageHelper {
 
                 // Send replaced for users that don't see the package for the first time
                 if (update) {
-                    // Only send PACKAGE_REPLACED if appId has not changed
-                    if (previousAppId == Process.INVALID_UID) {
-                        mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
-                                packageName, extras, 0 /*flags*/,
-                                null /*targetPackage*/, null /*finishedReceiver*/,
-                                updateUserIds, instantUserIds, res.mRemovedInfo.mBroadcastAllowList,
+                    mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED,
+                            packageName, extras, 0 /*flags*/,
+                            null /*targetPackage*/, null /*finishedReceiver*/,
+                            updateUserIds, instantUserIds, res.mRemovedInfo.mBroadcastAllowList,
+                            null);
+                    if (installerPackageName != null) {
+                        mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
+                                extras, 0 /*flags*/,
+                                installerPackageName, null /*finishedReceiver*/,
+                                updateUserIds, instantUserIds, null /*broadcastAllowList*/,
                                 null);
-                        if (installerPackageName != null) {
-                            mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
-                                    extras, 0 /*flags*/,
-                                    installerPackageName, null /*finishedReceiver*/,
-                                    updateUserIds, instantUserIds, null /*broadcastAllowList*/,
-                                    null);
-                        }
-                        if (notifyVerifier) {
-                            mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
-                                    extras, 0 /*flags*/,
-                                    mPm.mRequiredVerifierPackage, null /*finishedReceiver*/,
-                                    updateUserIds, instantUserIds, null /*broadcastAllowList*/,
-                                    null);
-                        }
+                    }
+                    if (notifyVerifier) {
+                        mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_REPLACED, packageName,
+                                extras, 0 /*flags*/,
+                                mPm.mRequiredVerifierPackage, null /*finishedReceiver*/,
+                                updateUserIds, instantUserIds, null /*broadcastAllowList*/,
+                                null);
                     }
                     mPm.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED,
                             null /*package*/, null /*extras*/, 0 /*flags*/,
