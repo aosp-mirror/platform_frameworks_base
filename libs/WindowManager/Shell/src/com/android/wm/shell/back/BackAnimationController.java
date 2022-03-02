@@ -19,9 +19,6 @@ package com.android.wm.shell.back;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
@@ -223,14 +220,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void initAnimation(MotionEvent event) {
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "initAnimation mMotionStarted=%b", mBackGestureStarted);
-        if (mBackGestureStarted) {
+        if (mBackGestureStarted || mBackNavigationInfo != null) {
             Log.e(TAG, "Animation is being initialized but is already started.");
-            return;
-        }
-
-        if (mBackNavigationInfo != null) {
             finishAnimation();
         }
+
         mInitTouchLocation.set(event.getX(), event.getY());
         mBackGestureStarted = true;
 
@@ -304,8 +298,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         int deltaX = Math.round(event.getX() - mInitTouchLocation.x);
-        int deltaY = Math.round(event.getY() - mInitTouchLocation.y);
-        ProtoLog.v(WM_SHELL_BACK_PREVIEW, "Runner move: %d %d", deltaX, deltaY);
         float progressThreshold = PROGRESS_THRESHOLD >= 0 ? PROGRESS_THRESHOLD : mProgressThreshold;
         float progress = Math.min(Math.max(Math.abs(deltaX) / progressThreshold, 0), 1);
         int backType = mBackNavigationInfo.getType();
@@ -317,11 +309,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             targetCallback = mBackToLauncherCallback;
         } else if (backType == BackNavigationInfo.TYPE_CROSS_TASK
                 || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY) {
-            if (animationTarget != null) {
-                mTransaction.setPosition(animationTarget.leash, deltaX, deltaY);
-                mTouchEventDelta.set(deltaX, deltaY);
-                mTransaction.apply();
-            }
+            // TODO(208427216) Run the actual animation
         } else if (backType == BackNavigationInfo.TYPE_CALLBACK) {
             targetCallback = mBackNavigationInfo.getOnBackInvokedCallback();
         }
@@ -343,19 +331,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } else {
             dispatchOnBackCancelled(targetCallback);
         }
-        if (backType == BackNavigationInfo.TYPE_CALLBACK) {
-            finishAnimation();
-        } else if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
-                && !shouldDispatchToLauncher) {
+        if (backType != BackNavigationInfo.TYPE_RETURN_TO_HOME || !shouldDispatchToLauncher) {
             // Launcher callback missing. Simply finish animation.
             finishAnimation();
-        } else if (backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY
-                || backType == BackNavigationInfo.TYPE_CROSS_TASK) {
-            if (mTriggerBack) {
-                prepareTransition();
-            } else {
-                resetPositionAnimated();
-            }
         }
     }
 
@@ -403,8 +381,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
-    private static void dispatchOnBackProgressed(
-            IOnBackInvokedCallback callback, BackEvent backEvent) {
+    private static void dispatchOnBackProgressed(IOnBackInvokedCallback callback,
+            BackEvent backEvent) {
         if (callback == null) {
             return;
         }
@@ -413,48 +391,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackProgressed error: ", e);
         }
-    }
-
-    /**
-     * Animate the top window leash to its initial position.
-     */
-    private void resetPositionAnimated() {
-        mBackGestureStarted = false;
-        // TODO(208786853) Handle overlap with a new coming gesture.
-        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Runner: Back not triggered, cancelling animation "
-                + "mLastPos=%s mInitTouch=%s", mTouchEventDelta, mInitTouchLocation);
-
-        // TODO(208427216) : Replace placeholder animation with an actual one.
-        ValueAnimator animation = ValueAnimator.ofFloat(0f, 1f).setDuration(200);
-        animation.addUpdateListener(animation1 -> {
-            if (mBackNavigationInfo == null) {
-                return;
-            }
-            float fraction = animation1.getAnimatedFraction();
-            int deltaX = Math.round(mTouchEventDelta.x - (mTouchEventDelta.x * fraction));
-            int deltaY = Math.round(mTouchEventDelta.y - (mTouchEventDelta.y * fraction));
-            RemoteAnimationTarget animationTarget =
-                    mBackNavigationInfo.getDepartingAnimationTarget();
-            if (animationTarget != null) {
-                mTransaction.setPosition(animationTarget.leash, deltaX, deltaY);
-                mTransaction.apply();
-            }
-        });
-
-        animation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: onAnimationEnd");
-                finishAnimation();
-            }
-        });
-        animation.start();
-    }
-
-    private void prepareTransition() {
-        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "prepareTransition()");
-        mTriggerBack = false;
-        mBackGestureStarted = false;
     }
 
     /**
