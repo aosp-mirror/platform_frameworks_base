@@ -30947,7 +30947,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
     method @Nullable public <T> T[] getParcelableArray(@Nullable String, @NonNull Class<T>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
-    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<? extends T>);
     method @Deprecated @Nullable public java.io.Serializable getSerializable(@Nullable String);
     method @Nullable public <T extends java.io.Serializable> T getSerializable(@Nullable String, @NonNull Class<T>);
     method public short getShort(String);
@@ -30956,7 +30956,7 @@ package android.os {
     method @Nullable public android.util.Size getSize(@Nullable String);
     method @Nullable public android.util.SizeF getSizeF(@Nullable String);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
-    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<? extends T>);
     method @Nullable public java.util.ArrayList<java.lang.String> getStringArrayList(@Nullable String);
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);
