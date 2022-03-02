@@ -26,6 +26,8 @@ import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
+import static com.android.companiondevicemanager.Utils.getVendorHeaderIcon;
+import static com.android.companiondevicemanager.Utils.getVendorHeaderName;
 import static com.android.companiondevicemanager.Utils.prepareResultReceiverForIpc;
 
 import static java.util.Objects.requireNonNull;
@@ -38,6 +40,7 @@ import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.MacAddress;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,9 +50,14 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -59,7 +67,8 @@ import java.util.List;
  *  A CompanionDevice activity response for showing the available
  *  nearby devices to be associated with.
  */
-public class CompanionDeviceActivity extends FragmentActivity {
+public class CompanionDeviceActivity extends FragmentActivity implements
+        CompanionVendorHelperDialogFragment.CompanionVendorHelperDialogListener {
     private static final boolean DEBUG = false;
     private static final String TAG = CompanionDeviceActivity.class.getSimpleName();
 
@@ -71,6 +80,8 @@ public class CompanionDeviceActivity extends FragmentActivity {
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
     private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
+
+    private static final String FRAGMENT_DIALOG_TAG = "fragment_dialog";
 
     // Activity result: Internal Error.
     private static final int RESULT_INTERNAL_ERROR = 2;
@@ -91,6 +102,11 @@ public class CompanionDeviceActivity extends FragmentActivity {
     private TextView mTitle;
     private TextView mSummary;
 
+    // Only present for selfManaged devices.
+    private ImageView mVendorHeaderImage;
+    private TextView mVendorHeaderName;
+    private ImageButton mVendorHeaderButton;
+
     // Progress indicator is only shown while we are looking for the first suitable device for a
     // "regular" (ie. not self-managed) association.
     private View mProgressIndicator;
@@ -98,6 +114,11 @@ public class CompanionDeviceActivity extends FragmentActivity {
     // Present for self-managed association requests and "single-device" regular association
     // regular.
     private Button mButtonAllow;
+    // Present for all associations.
+    private Button mButtonNotAllow;
+
+    private LinearLayout mAssociationConfirmationDialog;
+    private RelativeLayout mVendorHeader;
 
     // The recycler view is only shown for multiple-device regular association request, after
     // at least one matching device is found.
@@ -211,15 +232,25 @@ public class CompanionDeviceActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_confirmation);
 
+        mAssociationConfirmationDialog = findViewById(R.id.activity_confirmation);
+        mVendorHeader = findViewById(R.id.vendor_header);
+
         mTitle = findViewById(R.id.title);
         mSummary = findViewById(R.id.summary);
+
+        mVendorHeaderImage = findViewById(R.id.vendor_header_image);
+        mVendorHeaderName = findViewById(R.id.vendor_header_name);
+        mVendorHeaderButton = findViewById(R.id.vendor_header_button);
 
         mRecyclerView = findViewById(R.id.device_list);
         mAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         mButtonAllow = findViewById(R.id.btn_positive);
+        mButtonNotAllow = findViewById(R.id.btn_negative);
+
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
-        findViewById(R.id.btn_negative).setOnClickListener(this::onNegativeButtonClick);
+        mButtonNotAllow.setOnClickListener(this::onNegativeButtonClick);
+        mVendorHeaderButton.setOnClickListener(this::onShowHelperDialog);
 
         if (mRequest.isSelfManaged()) {
             initUiForSelfManagedAssociation(appLabel);
@@ -321,11 +352,24 @@ public class CompanionDeviceActivity extends FragmentActivity {
     private void initUiForSelfManagedAssociation(CharSequence appLabel) {
         if (DEBUG) Log.i(TAG, "initUiFor_SelfManaged_Association()");
 
-        final CharSequence deviceName = mRequest.getDisplayName(); // "<device>";
-        final String deviceProfile = mRequest.getDeviceProfile(); // DEVICE_PROFILE_APP_STREAMING;
-
+        final CharSequence deviceName = mRequest.getDisplayName();
+        final String deviceProfile = mRequest.getDeviceProfile();
+        final String packageName = mRequest.getPackageName();
+        final int userId = mRequest.getUserId();
+        final Drawable vendorIcon;
+        final CharSequence vendorName;
         final Spanned title;
         final Spanned summary;
+
+        try {
+            vendorIcon = getVendorHeaderIcon(this, packageName, userId);
+            vendorName = getVendorHeaderName(this, packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
+            setResultAndFinish(null, RESULT_INTERNAL_ERROR);
+            return;
+        }
+
         switch (deviceProfile) {
             case DEVICE_PROFILE_APP_STREAMING:
                 title = getHtmlFromResources(this, R.string.title_app_streaming, appLabel);
@@ -348,10 +392,14 @@ public class CompanionDeviceActivity extends FragmentActivity {
             default:
                 throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
+
         mTitle.setText(title);
         mSummary.setText(summary);
+        mVendorHeaderImage.setImageDrawable(vendorIcon);
+        mVendorHeaderName.setText(vendorName);
 
         mRecyclerView.setVisibility(View.GONE);
+        mVendorHeader.setVisibility(View.VISIBLE);
     }
 
     private void initUiForSingleDevice(CharSequence appLabel) {
@@ -370,6 +418,7 @@ public class CompanionDeviceActivity extends FragmentActivity {
             String deviceProfile, CharSequence appLabel) {
         // Ignore "empty" scan reports.
         if (deviceFilterPairs.isEmpty()) return;
+
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
 
         final String deviceName = mSelectedDevice.getDisplayName();
@@ -464,6 +513,17 @@ public class CompanionDeviceActivity extends FragmentActivity {
         cancel(false);
     }
 
+    private void onShowHelperDialog(View view) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        CompanionVendorHelperDialogFragment fragmentDialog =
+                CompanionVendorHelperDialogFragment.newInstance(mRequest.getPackageName(),
+                        mRequest.getUserId(), mRequest.getDeviceProfile());
+
+        mAssociationConfirmationDialog.setVisibility(View.GONE);
+
+        fragmentDialog.show(fragmentManager, /* Tag */ FRAGMENT_DIALOG_TAG);
+    }
+
     private boolean isDone() {
         return mApproved || mCancelled;
     }
@@ -482,4 +542,14 @@ public class CompanionDeviceActivity extends FragmentActivity {
                     onAssociationCreated(association);
                 }
             };
+
+    @Override
+    public void onShowHelperDialogFailed() {
+        setResultAndFinish(null, RESULT_INTERNAL_ERROR);
+    }
+
+    @Override
+    public void onHelperDialogDismissed() {
+        mAssociationConfirmationDialog.setVisibility(View.VISIBLE);
+    }
 }

@@ -15,14 +15,10 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/activity_confirmation"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@drawable/dialog_background"
-              android:elevation="16dp"
-              android:maxHeight="400dp"
-              android:orientation="vertical"
-              android:padding="18dp"
-              android:layout_gravity="center">
+              style="@style/ContainerLayout">
+
+    <!-- A header for selfManaged devices only. -->
+    <include layout="@layout/vendor_header" />
 
     <!-- Do NOT change the ID of the root LinearLayout above: it's referenced in CTS tests. -->
 
@@ -51,9 +47,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/device_list"
-                style="@android:style/Widget.Material.ListView"
-                android:layout_width="match_parent"
-                android:layout_height="200dp" />
+            android:layout_width="match_parent"
+            android:scrollbars="vertical"
+            android:layout_height="200dp" />
 
     </RelativeLayout>
 
