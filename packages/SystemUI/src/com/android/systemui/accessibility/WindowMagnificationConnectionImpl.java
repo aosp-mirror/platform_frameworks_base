@@ -77,6 +77,13 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
+    public void moveWindowMagnifierToPosition(int displayId, float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        mHandler.post(() -> mWindowMagnification.moveWindowMagnifierToPositionInternal(
+                displayId, positionX, positionY, callback));
+    }
+
+    @Override
     public void showMagnificationButton(int displayId, int magnificationMode) {
         mHandler.post(
                 () -> mModeSwitchesController.showButton(displayId, magnificationMode));
