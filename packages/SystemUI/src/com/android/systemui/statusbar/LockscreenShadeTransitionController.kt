@@ -424,8 +424,11 @@ class LockscreenShadeTransitionController @Inject constructor(
             MathUtils.saturate(dragDownAmount / npvcKeyguardContentAlphaTransitionDistance)
         notificationPanelController.setKeyguardOnlyContentAlpha(1.0f - npvcProgress)
 
-        val depthProgress = MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
-        depthController.transitionToFullShadeProgress = depthProgress
+        if (depthControllerTransitionDistance > 0) {
+            val depthProgress =
+                MathUtils.saturate(dragDownAmount / depthControllerTransitionDistance)
+            depthController.transitionToFullShadeProgress = depthProgress
+        }
 
         val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
         udfpsKeyguardViewController?.setTransitionToFullShadeProgress(udfpsProgress)

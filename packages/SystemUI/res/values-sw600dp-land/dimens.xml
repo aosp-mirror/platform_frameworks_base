@@ -62,8 +62,9 @@
     <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
     <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
-         change.  -->
-    <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+         change.
+         On split-shade, there should be no depth effect, so setting the value to 0. -->
+    <dimen name="lockscreen_shade_depth_controller_transition_distance">0dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for the UDFPS Keyguard View to fully
          fade. -->
