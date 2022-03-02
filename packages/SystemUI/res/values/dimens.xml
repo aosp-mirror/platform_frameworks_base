@@ -1122,13 +1122,40 @@
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
     <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
 
-    <!-- Distance that the full shade transition takes in order for qs to fully transition to the
-         shade -->
-    <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
+    <!-- Distance that the full shade transition takes in order to complete by tapping on a button
+         like "expand". -->
+    <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order to complete.  -->
+    <dimen name="lockscreen_shade_full_transition_distance">80dp</dimen>
 
     <!-- Distance that the full shade transition takes in order for scrim to fully transition to
          the shade (in alpha) -->
-    <dimen name="lockscreen_shade_scrim_transition_distance">80dp</dimen>
+    <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the keyguard content on
+         NotificationPanelViewController to fully fade (e.g. Clock & Smartspace) -->
+    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the notification shelf to fully
+         expand. -->
+    <dimen name="lockscreen_shade_notif_shelf_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the Quick Settings to fully
+         fade and expand. -->
+    <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for depth of the wallpaper to fully
+         change.  -->
+    <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Distance that the full shade transition takes in order for the UDFPS Keyguard View to fully
+         fade. -->
+    <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+
+    <!-- Used for StatusBar to know that a transition is in progress. At the moment it only checks
+         whether the progress is > 0, therefore this value is not very important. -->
+    <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
 
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
