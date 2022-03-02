@@ -203,6 +203,7 @@ import com.android.internal.util.Preconditions;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.PackageWatchdog;
@@ -1537,6 +1538,7 @@ public class PackageManagerService extends IPackageManager.Stub
         ServiceManager.addService("package", m);
         final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
+        LocalManagerRegistry.addManager(PackageManagerLocal.class, m.new PackageManagerLocalImpl());
         return m;
     }
 
@@ -6766,6 +6768,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean canQueryPackage(int callingUid, @Nullable String targetPackageName) {
         return mComputer.canQueryPackage(callingUid, targetPackageName);
+    }
+
+    private class PackageManagerLocalImpl implements PackageManagerLocal {
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
