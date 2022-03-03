@@ -11807,8 +11807,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
      * <p>
-     * Note: while this is set to {@code true}, the system will ignore the {@code Rect}s provided
-     * through {@link #setPreferKeepClearRects} (but not clear them).
+     * Note: This is independent from {@link #setPreferKeepClearRects}. If both are set, both will
+     * be taken into account.
      * <p>
      * @see #setPreferKeepClearRects
      * @see #isPreferKeepClear
@@ -11842,8 +11842,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * The system will try to respect this preference, but when not possible will ignore it.
      * <p>
-     * Note: While {@link #isPreferKeepClear} is {@code true}, the {@code Rect}s set here are
-     * ignored.
+     * Note: This is independent from {@link #setPreferKeepClear}. If both are set, both will be
+     * taken into account.
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
@@ -11939,7 +11939,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final List<Rect> list = new ArrayList();
             if (info.mPreferKeepClear) {
                 list.add(new Rect(0, 0, getWidth(), getHeight()));
-            } else if (info.mKeepClearRects != null) {
+            }
+            if (info.mKeepClearRects != null) {
                 list.addAll(info.mKeepClearRects);
             }
             return list;
