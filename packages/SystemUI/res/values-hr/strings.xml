@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI sustava"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Baterija bi se uskoro mogla isprazniti"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Preostalo <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili s uređajem"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Lice je autentificirano"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrđeno"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Dodirnite Potvrdi za dovršetak"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentičnost provjerena"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristite PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristite uzorak"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvaranje"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Ne uznemiravaj."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth uključen."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Vrijeme alarma: <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -206,6 +214,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Izlog za slastice"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Čuvar zaslona"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne uznemiravaj"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Upareni uređaji nisu dostupni"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> baterije"</string>
@@ -351,6 +360,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obavijesti"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Izbriši sve bešumne obavijesti"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Značajka Ne uznemiravaj pauzirala je Obavijesti"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Započni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obavijesti"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Ovim uređajem upravlja tvoj roditelj"</string>
@@ -494,6 +504,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; niže rangirana"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, izgleda kao oblačić"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, prekida Ne uznemiravaj"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se pri vrhu obavijesti razgovora i kao profilna slika na zaključanom zaslonu, izgleda kao oblačić, prekida Ne uznemiravaj"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava značajke razgovora"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Te se obavijesti ne mogu izmijeniti."</string>
@@ -571,6 +583,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Glazba"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne uznemiravaj"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Prečac tipki za glasnoću"</string>
     <string name="battery" msgid="769686279459897127">"Baterija"</string>
     <string name="headset" msgid="4485892374984466437">"Slušalice"</string>
@@ -689,6 +702,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je isključen"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je isključen"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Način Ne uznemiravaj isključen"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Način Ne uznemiravaj uključilo je automatsko pravilo (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način Ne uznemiravaj uključila je aplikacija (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne uznemiravaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Izvođenje aplikacija u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite da biste vidjeli pojedinosti o potrošnji baterije i podatkovnom prometu"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti mobilne podatke?"</string>
@@ -713,6 +730,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(posao)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonski poziv"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(putem apl. <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparat"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokaciju"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
@@ -812,6 +831,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije prebačeno. Dodirnite da biste pokušali ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da biste emitirali ovu sesiju, otvorite aplikaciju."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj međuverzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj međuverzije kopiran je u međuspremnik."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
@@ -845,6 +866,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Pogledajte nedavne poruke, propuštene pozive i ažuriranja statusa"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Razgovor"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pauzirala značajka Ne uznemiravaj"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> šalje poruku: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Korisnik <xliff:g id="NAME">%1$s</xliff:g> poslao je sliku"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ima ažuriranje statusa: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -884,8 +906,7 @@
       <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacija</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zaustavi"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zaustavljeno"</string>
@@ -893,14 +914,16 @@
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopirano"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Iz aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Odbaci kopiranje korisničkog sučelja"</string>
-    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
-    <skip />
-    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
-    <skip />
-    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
-    <skip />
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"Uredi kopirani tekst"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Uredi kopiranu sliku"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Pošalji uređaju u blizini"</string>
+    <string name="add" msgid="81036585205287996">"Dodaj"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Upravljanje korisnicima"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Ova obavijest ne podržava povlačenje na podijeljeni zaslon."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nije dostupan"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritetni način rada"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm je postavljen"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Omogućen je način rada za goste u Asistentu"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Fotoaparat i mikrofon su isključeni"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obavijest}one{# obavijest}few{# obavijesti}other{# obavijesti}}"</string>
 </resources>
