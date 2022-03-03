@@ -166,7 +166,7 @@ public class ClipboardOverlayController {
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
         mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
 
-        mView.setOnDismissCallback(this::hideImmediate);
+        mView.setOnDismissEndCallback(this::hideImmediate);
         mView.setOnInteractionCallback(mTimeoutHandler::resetTimeout);
 
         mDismissButton.setOnClickListener(view -> animateOut());
