@@ -18,13 +18,16 @@ package android.telephony.data;
 
 import static android.telephony.data.ApnSetting.ProtocolType;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.NetworkCapabilities;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.NetCapability;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.NetworkTypeBitMask;
 import android.telephony.data.ApnSetting.AuthType;
@@ -66,7 +69,13 @@ public final class DataProfile implements Parcelable {
 
     private final @Nullable TrafficDescriptor mTrafficDescriptor;
 
-    private final boolean mPreferred;
+    private boolean mPreferred;
+
+    /**
+     * The last timestamp of this data profile being used for data network setup. Never add this
+     * to {@link #equals(Object)} and {@link #hashCode()}.
+     */
+    private @ElapsedRealtimeLong long mSetupTimestamp;
 
     private DataProfile(@NonNull Builder builder) {
         mApnSetting = builder.mApnSetting;
@@ -99,6 +108,7 @@ public final class DataProfile implements Parcelable {
         mApnSetting = source.readParcelable(ApnSetting.class.getClassLoader());
         mTrafficDescriptor = source.readParcelable(TrafficDescriptor.class.getClassLoader());
         mPreferred = source.readBoolean();
+        mSetupTimestamp = source.readLong();
     }
 
     /**
@@ -291,6 +301,16 @@ public final class DataProfile implements Parcelable {
     }
 
     /**
+     * Set the preferred flag for the data profile.
+     *
+     * @param preferred {@code true} if this data profile is preferred for internet.
+     * @hide
+     */
+    public void setPreferred(boolean preferred) {
+        mPreferred = preferred;
+    }
+
+    /**
      * @return {@code true} if this data profile was used to bring up the last default
      * (i.e internet) data connection successfully, or the one chosen by the user in Settings'
      * APN editor. For one carrier there can be only one profiled preferred.
@@ -315,6 +335,94 @@ public final class DataProfile implements Parcelable {
         return mTrafficDescriptor;
     }
 
+    /**
+     * Check if this data profile can satisfy certain network capabilities
+     *
+     * @param networkCapabilities The network capabilities. Note that the non-APN-type capabilities
+     * will be ignored.
+     *
+     * @return {@code true} if this data profile can satisfy the given network capabilities.
+     * @hide
+     */
+    public boolean canSatisfy(@NonNull @NetCapability int[] networkCapabilities) {
+        if (mApnSetting != null) {
+            for (int netCap : networkCapabilities) {
+                if (!canSatisfy(netCap)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if this data profile can satisfy a certain network capability.
+     *
+     * @param networkCapability The network capability. Note that the non-APN-type capability
+     * will always be satisfied.
+     * @return {@code true} if this data profile can satisfy the given network capability.
+     * @hide
+     */
+    public boolean canSatisfy(@NetCapability int networkCapability) {
+        return mApnSetting != null && mApnSetting.canHandleType(
+                networkCapabilityToApnType(networkCapability));
+    }
+
+    /**
+     * Convert network capability into APN type.
+     *
+     * @param networkCapability Network capability.
+     * @return APN type.
+     * @hide
+     */
+    private static @ApnType int networkCapabilityToApnType(@NetCapability int networkCapability) {
+        switch (networkCapability) {
+            case NetworkCapabilities.NET_CAPABILITY_MMS:
+                return ApnSetting.TYPE_MMS;
+            case NetworkCapabilities.NET_CAPABILITY_SUPL:
+                return ApnSetting.TYPE_SUPL;
+            case NetworkCapabilities.NET_CAPABILITY_DUN:
+                return ApnSetting.TYPE_DUN;
+            case NetworkCapabilities.NET_CAPABILITY_FOTA:
+                return ApnSetting.TYPE_FOTA;
+            case NetworkCapabilities.NET_CAPABILITY_IMS:
+                return ApnSetting.TYPE_IMS;
+            case NetworkCapabilities.NET_CAPABILITY_CBS:
+                return ApnSetting.TYPE_CBS;
+            case NetworkCapabilities.NET_CAPABILITY_XCAP:
+                return ApnSetting.TYPE_XCAP;
+            case NetworkCapabilities.NET_CAPABILITY_EIMS:
+                return ApnSetting.TYPE_EMERGENCY;
+            case NetworkCapabilities.NET_CAPABILITY_INTERNET:
+                return ApnSetting.TYPE_DEFAULT;
+            case NetworkCapabilities.NET_CAPABILITY_MCX:
+                return ApnSetting.TYPE_MCX;
+            case NetworkCapabilities.NET_CAPABILITY_IA:
+                return ApnSetting.TYPE_IA;
+            default:
+                return ApnSetting.TYPE_NONE;
+        }
+    }
+
+    /**
+     * Set the timestamp of this data profile being used for data network setup.
+     *
+     * @hide
+     */
+    public void setLastSetupTimestamp(@ElapsedRealtimeLong long timestamp) {
+        mSetupTimestamp = timestamp;
+    }
+
+    /**
+     * @return the timestamp of this data profile being used for data network setup.
+     *
+     * @hide
+     */
+    public @ElapsedRealtimeLong long getLastSetupTimestamp() {
+        return mSetupTimestamp;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -323,8 +431,8 @@ public final class DataProfile implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "DataProfile=" + mApnSetting + ", " + mTrafficDescriptor + ", preferred="
-                + mPreferred;
+        return "[DataProfile=" + mApnSetting + ", " + mTrafficDescriptor + ", preferred="
+                + mPreferred + "]";
     }
 
     @Override
@@ -333,6 +441,7 @@ public final class DataProfile implements Parcelable {
         dest.writeParcelable(mApnSetting, flags);
         dest.writeParcelable(mTrafficDescriptor, flags);
         dest.writeBoolean(mPreferred);
+        dest.writeLong(mSetupTimestamp);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataProfile> CREATOR =
