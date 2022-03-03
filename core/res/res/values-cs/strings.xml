@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Konference tří účastníků"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Odmítnutí nevyžádaných obtěžujících hovorů"</string>
     <string name="CndMmi" msgid="185136449405618437">"Doručení volaného čísla"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Nerušit"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
@@ -306,10 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"přístup ke kalendáři"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"odesílání a zobrazování zpráv SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Soubory a dokumenty"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"přístup k souborům a dokumentům v zařízení"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Hudba a ostatní zvuk"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"přístup ke zvukovým souborům v zařízení"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotky a videa"</string>
@@ -590,12 +589,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadáním zámku obrazovky"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Byla zjištěna jen část otisku prstu"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně zatlačte na senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -603,10 +599,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Pokaždé lehce změňte polohu prstu"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Otisk prstu nebyl rozpoznán"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Pevně zatlačte na senzor"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisk byl ověřen"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Obličej byl ověřen"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Obličej byl ověřen, stiskněte tlačítko pro potvrzení"</string>
@@ -745,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"navázat se na služby operátora"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Umožňuje držiteli oprávnění navázat se na služby operátora. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"přístup k režimu Nerušit"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"zahájení zobrazení využití oprávnění"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umožňuje přístup zahájit využití oprávnění jiné aplikace. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"zobrazit rozhodnutí o oprávnění"</string>
@@ -1510,8 +1506,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Přeskočit"</string>
     <string name="no_matches" msgid="6472699895759164599">"Žádné shody"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Hledat na stránce"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# shoda}few{# z {total}}many{# z {total}}other{# z {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Hotovo"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Mazání sdíleného úložiště…"</string>
     <string name="share" msgid="4157615043345227321">"Sdílet"</string>
@@ -1876,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (příští budík)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dokud funkci nevypnete"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Sbalit"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nerušit"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Doba klidu"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Večer v pracovním týdnu"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
@@ -2042,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Volání a oznámení budou vibrovat"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Volání a oznámení budou ztlumena"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Změny nastavení systému"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nerušit"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novinka: Režim Nerušit skrývá oznámení"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím zobrazíte další informace a provedete změny."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Nastavení režimu Nerušit se změnilo"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavení"</string>
@@ -2059,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Vypnout"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Další informace"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Adaptivní oznámení pro Android byla v systému Android 12 nahrazena vylepšenými oznámeními. Tato funkce ukazuje navrhované akce a odpovědi a uspořádává oznámení.\n\nVylepšená oznámení mají přístup k obsahu oznámení, včetně osobních údajů, jako jsou jména kontaktů a zprávy. Tato funkce také může zavírat oznámení nebo na ně odpovídat, například přijímat telefonní hovory a ovládat režim Nerušit."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informační oznámení režimu sledu činností"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterie se možná vybije před obvyklým časem nabití"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Byl aktivován spořič baterie za účelem prodloužení výdrže"</string>
@@ -2265,6 +2266,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikace <xliff:g id="APP">%1$s</xliff:g> je spuštěna na pozadí a vybíjí baterii. Klepnutím ji zkontrolujete."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikace <xliff:g id="APP">%1$s</xliff:g> je už dlouhou dobu spuštěna na pozadí. Klepnutím ji zkontrolujete."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Zkontrolujte aktivní aplikace"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Z tohoto zařízení nelze získat přístup k fotoaparátu"</string>
 </resources>

@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"การโทรสามสาย"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"การปฏิเสธสายรบกวนที่ไม่ต้องการ"</string>
     <string name="CndMmi" msgid="185136449405618437">"การส่งหมายเลขที่โทร"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ห้ามรบกวน"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ไฟล์และเอกสาร"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"เข้าถึงไฟล์และเอกสารในอุปกรณ์"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"เพลงและเสียงอื่นๆ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"เข้าถึงไฟล์เสียงในอุปกรณ์"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"รูปภาพและวิดีโอ"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ป้อนข้อมูลการล็อกหน้าจอเพื่อดำเนินการต่อ"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ตรวจพบลายนิ้วมือบางส่วน"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ทำความสะอาดเซ็นเซอร์ลายนิ้วมือแล้วลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ทำความสะอาดเซ็นเซอร์แล้วลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"กดเซ็นเซอร์ให้แน่น"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"นิ้วเคลื่อนที่ช้าเกินไป โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ลองลายนิ้วมืออื่น"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"สว่างเกินไป"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"เปลี่ยนตำแหน่งของนิ้วเล็กน้อยไปเรื่อยๆ ทุกครั้ง"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ไม่รู้จักลายนิ้วมือ"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"กดเซ็นเซอร์ให้แน่น"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการรับส่งข้อความของผู้ให้บริการ ไม่ควรใช้สำหรับแอปธรรมดาทั่วไป"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"เชื่อมโยงกับบริการของผู้ให้บริการ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"อนุญาตให้เจ้าของเชื่อมโยงกับบริการของผู้ให้บริการ ไม่ควรต้องใช้สำหรับแอปทั่วไป"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"เข้าถึงโหมดห้ามรบกวน"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"เริ่มการใช้สิทธิ์การดู"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"เริ่มดูสิทธิ์ที่เลือกไว้"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ข้าม"</string>
     <string name="no_matches" msgid="6472699895759164599">"ไม่พบรายการที่ตรงกัน"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ค้นหาบนหน้า"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ตรงกัน # รายการ}other{ตรงกัน # รายการจาก {total} รายการ}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"เสร็จสิ้น"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"กำลังลบพื้นที่เก็บข้อมูลที่แชร์…"</string>
     <string name="share" msgid="4157615043345227321">"แชร์"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (การปลุกครั้งถัดไป)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"จนกว่าคุณจะปิด"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"จนกว่าคุณจะปิดห้ามรบกวน"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ยุบ"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ห้ามรบกวน"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ช่วงเวลาเครื่องไม่ทำงาน"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"คืนวันธรรมดา"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"สุดสัปดาห์"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"สายเรียกเข้าและการแจ้งเตือนจะสั่น"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"การเปลี่ยนแปลงระบบ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ห้ามรบกวน"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ใหม่: โหมดห้ามรบกวนซ่อนการแจ้งเตือนไว้"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"แตะเพื่อดูข้อมูลเพิ่มเติมและเปลี่ยนแปลง"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"การตั้งค่า"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ตกลง"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ปิด"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ดูข้อมูลเพิ่มเติม"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"การแจ้งเตือนที่เพิ่มประสิทธิภาพมาแทนที่การแจ้งเตือนแบบปรับอัตโนมัติของ Android ใน Android 12 ฟีเจอร์นี้จะแสดงการดำเนินการและการตอบกลับที่แนะนำ ตลอดจนจัดระเบียบการแจ้งเตือน\n\nการแจ้งเตือนที่เพิ่มประสิทธิภาพจะเข้าถึงเนื้อหาของการแจ้งเตือนได้ ซึ่งรวมถึงข้อมูลส่วนบุคคล เช่น ชื่อผู้ติดต่อและข้อความ ฟีเจอร์นี้ยังปิดหรือตอบสนองต่อการแจ้งเตือนได้ด้วย เช่น การรับสายโทรศัพท์และการควบคุมโหมดห้ามรบกวน"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงานอยู่ในเบื้องหลังและทำให้เปลืองแบตเตอรี่ แตะเพื่อตรวจสอบ"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่ในเบื้องหลังเป็นเวลานาน แตะเพื่อตรวจสอบ"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ตรวจสอบแอปที่ใช้งานอยู่"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"เข้าถึงกล้องจากอุปกรณ์นี้ไม่ได้"</string>
 </resources>

@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Вызов с участием трех абонентов"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Отклонение нежелательных звонков"</string>
     <string name="CndMmi" msgid="185136449405618437">"Доставка номера вызывающего абонента"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Не беспокоить"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Идентификация абонента по умолчанию запрещена. След. вызов: запрещена"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Идентификация абонента по умолчанию запрещена. След. вызов: разрешена"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Идентификация абонента по умолчанию не запрещена. След. вызов: запрещена"</string>
@@ -306,10 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"отправлять и просматривать SMS-сообщения"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файлы и документы"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"Доступ к файлам и документам на вашем устройстве"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музыка и другие аудиозаписи"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"доступ к аудиофайлам на вашем устройстве"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фото и видео"</string>
@@ -343,7 +342,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Регистрировать жесты на сканере отпечатков пальцев"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Использовать сканер отпечатков пальцев для дополнительных жестов."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Создавать скриншоты"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать скриншоты экрана."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать снимки экрана."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Замена строки состояния"</string>
@@ -590,12 +589,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Чтобы продолжить, разблокируйте экран."</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Отсканирована только часть отпечатка."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистите сканер отпечатков пальцев и повторите попытку."</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистите сканер и повторите попытку."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Плотно прижмите палец к сканеру."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Попробуйте сохранить отпечаток другого пальца."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Слишком светло."</string>
@@ -603,10 +599,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Каждый раз немного меняйте положение пальца."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечаток не распознан."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Плотно прижмите палец к сканеру."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицо распознано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицо распознано, нажмите кнопку \"Подтвердить\""</string>
@@ -745,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Подключение к базовому интерфейсу службы обмена сообщениями, предоставляемой оператором связи. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"Подключение к сервисам оператора связи"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Приложение сможет подключаться к сервисам оператора связи. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Доступ к режиму \"Не беспокоить\""</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Открывает приложению доступ к настройкам режима \"Не беспокоить\" и позволяет изменять их."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Просмотр данных об используемых разрешениях"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Приложение получит доступ к данным об используемых разрешениях. Это разрешение не требуется обычным приложениям."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Просмотр действий с разрешениями"</string>
@@ -1510,8 +1506,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Пропустить"</string>
     <string name="no_matches" msgid="6472699895759164599">"Нет совпадений"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Найти на странице"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# совпадение}one{# совпадение из {total}}few{# совпадения из {total}}many{# совпадений из {total}}other{# совпадения из {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Готово"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Очистка единого хранилища…"</string>
     <string name="share" msgid="4157615043345227321">"Поделиться"</string>
@@ -1876,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (будильник)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Пока вы не отключите"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Свернуть"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не беспокоить"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Режим уведомления"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Будний вечер"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Выходные"</string>
@@ -2042,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для звонков и уведомлений включен вибросигнал."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для звонков и уведомлений отключен звук."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системные изменения"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не беспокоить"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Теперь в режиме \"Не беспокоить\" уведомления не приходят"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Нажмите, чтобы узнать больше и изменить настройки."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройки режима \"Не беспокоить\" изменены"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Нажмите, чтобы проверить настройки."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Настройки"</string>
@@ -2059,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Отключить"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Подробнее"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 доступны улучшенные уведомления. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе имена контактов, сообщения и другие личные данные. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки и управлять режимом \"Не беспокоить\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>
@@ -2265,6 +2266,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме и расходует заряд батареи. Нажмите, чтобы узнать подробности."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме уже длительное время. Нажмите, чтобы узнать подробности."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Камера на этом устройстве недоступна."</string>
 </resources>

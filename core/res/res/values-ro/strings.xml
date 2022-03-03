@@ -71,6 +71,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Apelare de tip conferință"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Respingere apeluri supărătoare nedorite"</string>
     <string name="CndMmi" msgid="185136449405618437">"Se apelează serviciul de furnizare a numerelor"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Nu deranjați"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID-ul apelantului este restricționat în mod prestabilit. Apelul următor: restricționat"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ul apelantului este restricționat în mod prestabilit. Apelul următor: nerestricționat"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ul apelantului este nerestricționat în mod prestabilit. Apelul următor: Restricționat."</string>
@@ -542,12 +543,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite aplicației să descopere și să asocieze dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"să se conecteze la dispozitive Bluetooth asociate"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite aplicației să se conecteze la dispozitive Bluetooth asociate"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"să transmită anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite aplicației să difuzeze anunțuri pe dispozitive Bluetooth din apropiere"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permiteți-i aplicației să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"să interacționeze cu dispozitive Wi‑Fi din apropiere"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la, să afișeze date și să stabilească poziția relativă pentru dispozitive Wi-Fi din apropiere"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la dispozitive Wi-Fi din apropiere, să transmită anunțuri și să stabilească poziția relativă a acestora"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>
@@ -737,6 +738,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de mesagerie oferit de operator. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"se conectează la serviciile operatorului"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accesează Nu deranja"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"porniți folosirea permisiunii de vizualizare"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite proprietarului să pornească folosirea permisiunii pentru o aplicație. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"să înceapă să examineze deciziile privind permisiunile"</string>
@@ -1502,8 +1505,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omiteți"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nicio potrivire"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Găsiți pe pagină"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# potrivire}few{# din {total}}other{# din {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Terminat"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Se șterge spațiul de stocare distribuit..."</string>
     <string name="share" msgid="4157615043345227321">"Distribuiți"</string>
@@ -1868,8 +1870,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (următoarea alarmă)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Până când dezactivați"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Până când dezactivați „Nu deranja”"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Restrângeți"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nu deranja"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Inactivitate"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Nopțile din zilele lucrătoare"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2034,7 +2038,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Apelurile și notificările vor vibra"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Apelurile și notificările vor avea sunetul dezactivat"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modificări de sistem"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nu deranja"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Funcția nouă Nu deranja ascunde notificările"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Atingeți ca să aflați mai multe și să modificați"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atingeți pentru a verifica ce este blocat."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Setări"</string>
@@ -2051,6 +2058,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Dezactivați"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Aflați mai multe"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Notificările optimizate au înlocuit Notificările adaptive Android de pe Android 12. Această funcție afișează acțiuni și răspunsuri sugerate și vă organizează notificările.\n\nNotificările optimizate pot accesa conținutul notificărilor, inclusiv informații cu caracter personal, precum mesajele și numele persoanelor de contact. În plus, funcția poate să închidă sau să răspundă la notificări, de exemplu, să răspundă la apeluri telefonice și să gestioneze opțiunea Nu deranja."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificare pentru informații despre modul Rutină"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>
@@ -2257,6 +2265,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal și consumă bateria. Atingeți pentru a examina."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal mult timp. Atingeți pentru a examina."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nu se poate accesa camera foto de pe acest dispozitiv"</string>
 </resources>

@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Three-way calling"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rejection of undesired annoying calls"</string>
     <string name="CndMmi" msgid="185136449405618437">"Calling number delivery"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Do not disturb"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Caller ID defaults to restricted. Next call: Restricted"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Caller ID defaults to restricted. Next call: Not restricted"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID defaults to not restricted. Next call: Restricted"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Allows the holder to bind to the top-level interface of an operator messaging service. Should never be needed for normal apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bind to operator services"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Allows the holder to bind to operator services. Should never be needed for normal apps."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"access Do Not Disturb"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Allows the app to read and write Do Not Disturb configuration."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start view permission usage"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Allows the holder to start the permission usage for an app. Should never be needed for normal apps."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"start view permission decisions"</string>
@@ -1319,7 +1322,7 @@
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancel"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Remember my choice"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"You can change this later in Settings &gt; Apps"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Always Allow*"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Always allow"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Never Allow"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM card removed"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"The mobile network will be unavailable until you restart with a valid SIM card inserted."</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Skip"</string>
     <string name="no_matches" msgid="6472699895759164599">"No matches"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Find on page"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# match}other{# of {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Done"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Erasing shared storage…"</string>
     <string name="share" msgid="4157615043345227321">"Share"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (next alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Until you turn off"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Until you turn off Do not disturb"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Collapse"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Do not disturb"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Calls and notifications will vibrate"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Calls and notifications will be muted"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"System changes"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Do not disturb"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"New: Do Not Disturb is hiding notifications"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tap to find out more and change."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Do Not Disturb has changed"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tap to check what\'s blocked."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Settings"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Turn off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Learn more"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Enhanced notifications replaced Android adaptive notifications in Android 12. This feature shows suggested actions and replies, and organises your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Do Not Disturb."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Routine Mode info notification"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery may run out before usual charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Battery Saver activated to extend battery life"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> is running in the background and draining battery. Tap to review."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> is running in the background for a long time. Tap to review."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Check active apps"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Cannot access camera from this device"</string>
 </resources>

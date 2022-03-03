@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"3자 통화"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"원하지 않는 통화 수신 거부"</string>
     <string name="CndMmi" msgid="185136449405618437">"통화 번호 전달"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"방해 금지 모드"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"파일 및 문서"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"기기의 파일 및 문서에 액세스"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"음악 및 기타 오디오"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"기기에 있는 오디오 파일에 액세스"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"사진 및 동영상"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"지문의 일부만 감지됨"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"이동통신사 서비스 사용"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"방해 금지 모드에 접근"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"권한 사용 보기 시작"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"앱의 권한 사용을 시작하려면 보유자를 허용하세요. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"권한 결정 보기 시작"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"건너뛰기"</string>
     <string name="no_matches" msgid="6472699895759164599">"검색결과 없음"</string>
     <string name="find_on_page" msgid="5400537367077438198">"페이지에서 찾기"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{#개 일치}other{총 {total}개 중 #번째}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"완료"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"공유 저장공간 지우는 중…"</string>
     <string name="share" msgid="4157615043345227321">"공유"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>(다음 알람)까지"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"사용 중지할 때까지"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"방해 금지 모드를 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"접기"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"방해 금지 모드"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"주말"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"전화 및 알림이 오면 진동이 사용됩니다."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"시스템 변경사항"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"방해 금지 모드"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"새로운 기능: 방해 금지 모드로 알림 숨기기"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"자세히 알아보고 변경하려면 탭하세요."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"시스템"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"설정"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"확인"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"사용 중지"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 또한 전화를 받고 방해 금지 모드를 제어하는 등 알림을 닫거나 처리하는 것도 가능합니다."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중이며 배터리를 소모하고 있습니다. 확인하려면 탭하세요."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"이 기기에서 카메라에 액세스할 수 없습니다."</string>
 </resources>
