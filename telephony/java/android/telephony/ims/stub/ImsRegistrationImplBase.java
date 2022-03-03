@@ -517,4 +517,16 @@ public class ImsRegistrationImplBase {
             mExecutor = executor;
         }
     }
+
+    /**
+     * Clear the cached data when the subscription is no longer valid
+     * such as when a sim is removed.
+     * @hide
+     */
+    public final void clearRegistrationCache() {
+        synchronized (mLock) {
+            mUris = null;
+            mUrisSet = false;
+        }
+    }
 }
