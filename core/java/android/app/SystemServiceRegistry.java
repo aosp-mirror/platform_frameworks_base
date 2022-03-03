@@ -18,6 +18,7 @@ package android.app;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
+import android.adservices.AdServicesFrameworkInitializer;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -1565,6 +1566,7 @@ public final class SystemServiceRegistry {
             RoleFrameworkInitializer.registerServiceWrappers();
             SchedulingFrameworkInitializer.registerServiceWrappers();
             SdkSandboxManagerFrameworkInitializer.registerServiceWrappers();
+            AdServicesFrameworkInitializer.registerServiceWrappers();
             UwbFrameworkInitializer.registerServiceWrappers();
             SafetyCenterFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();

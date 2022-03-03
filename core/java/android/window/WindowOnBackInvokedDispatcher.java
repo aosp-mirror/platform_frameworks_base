@@ -54,7 +54,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private static final String TAG = "WindowOnBackDispatcher";
     private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
     private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
-            .getInt(BACK_PREDICTABILITY_PROP, 1) > 0;
+            .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
 
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();

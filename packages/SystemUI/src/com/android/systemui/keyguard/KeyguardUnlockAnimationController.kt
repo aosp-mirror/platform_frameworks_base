@@ -23,6 +23,7 @@ import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Handler
+import android.util.Log
 import android.view.RemoteAnimationTarget
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
@@ -46,6 +47,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlin.math.min
+
+const val TAG = "KeyguardUnlock"
 
 /**
  * Starting scale factor for the app/launcher surface behind the keyguard, when it's animating
@@ -584,8 +587,16 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animation.
      */
     fun hideKeyguardViewAfterRemoteAnimation() {
-        // Hide the keyguard, with no fade out since we animated it away during the unlock.
-        keyguardViewController.hide(surfaceBehindRemoteAnimationStartTime, 0 /* fadeOutDuration */)
+        if (keyguardViewController.isShowing) {
+            // Hide the keyguard, with no fade out since we animated it away during the unlock.
+            keyguardViewController.hide(
+                surfaceBehindRemoteAnimationStartTime,
+                0 /* fadeOutDuration */
+            )
+        } else {
+            Log.e(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
+                    "showing. Ignoring...")
+        }
     }
 
     private fun applyParamsToSurface(params: SyncRtSurfaceTransactionApplier.SurfaceParams) {

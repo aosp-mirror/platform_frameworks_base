@@ -1767,8 +1767,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // Resolve override windowing mode to fullscreen for home task (even on freeform
         // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
-            windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
-                    ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
+            windowingMode = WINDOWING_MODE_FULLSCREEN;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 

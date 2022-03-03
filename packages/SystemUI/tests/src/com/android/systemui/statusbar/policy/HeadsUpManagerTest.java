@@ -36,6 +36,7 @@ import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -73,8 +74,8 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Mock private HeadsUpManagerLogger mLogger;
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
-        TestableHeadsUpManager(Context context, HeadsUpManagerLogger logger) {
-            super(context, logger);
+        TestableHeadsUpManager(Context context, HeadsUpManagerLogger logger, Handler handler) {
+            super(context, logger, handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -91,10 +92,9 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
         when(mEntry.getSbn()).thenReturn(mSbn);
         when(mSbn.getNotification()).thenReturn(mNotification);
-        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger);
+
         super.setUp();
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = mTestHandler;
+        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger, mTestHandler);
     }
 
     @After

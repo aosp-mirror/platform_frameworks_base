@@ -19,6 +19,8 @@ package com.android.systemui.dreams;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -177,9 +179,26 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
 
         mDreamOverlayContainerViewController.init();
+        // Make extra sure the container view has been removed from its old parent (otherwise we
+        // risk an IllegalStateException in some cases when setting the container view as the
+        // window's content view and the container view hasn't been properly removed previously).
+        removeContainerViewFromParent();
         mWindow.setContentView(mDreamOverlayContainerViewController.getContainerView());
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
+    }
+
+    private void removeContainerViewFromParent() {
+        View containerView = mDreamOverlayContainerViewController.getContainerView();
+        if (containerView == null) {
+            return;
+        }
+        ViewGroup parentView = (ViewGroup) containerView.getParent();
+        if (parentView == null) {
+            return;
+        }
+        Log.w(TAG, "Removing dream overlay container view parent!");
+        parentView.removeView(containerView);
     }
 }

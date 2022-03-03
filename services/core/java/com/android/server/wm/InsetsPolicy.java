@@ -449,11 +449,8 @@ class InsetsPolicy {
             boolean copyState) {
         final WindowState roundedCornerWindow = mPolicy.getRoundedCornerWindow();
         final Task task = w.getTask();
-        final boolean isInSplitScreenMode = task != null && task.inMultiWindowMode()
-                && task.getRootTask() != null
-                && task.getRootTask().getAdjacentTaskFragment() != null;
         if (task != null && !task.getWindowConfiguration().tasksAreFloating()
-                && (roundedCornerWindow != null || isInSplitScreenMode)) {
+                && (roundedCornerWindow != null || task.inSplitScreen())) {
             // Instead of using display frame to calculating rounded corner, for the fake rounded
             // corners drawn by divider bar or task bar, we need to re-calculate rounded corners
             // based on task bounds and if the task bounds is intersected with task bar, we should

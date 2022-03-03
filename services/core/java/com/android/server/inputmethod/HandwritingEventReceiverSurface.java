@@ -82,13 +82,14 @@ final class HandwritingEventReceiverSurface {
         mIsIntercepting = false;
     }
 
-    void startIntercepting() {
-        // TODO(b/210978621): Update the spy window's PID and UID to be associated with the IME so
-        //  that ANRs are correctly attributed to the IME.
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+    void startIntercepting(int imePid, int imeUid) {
+        mWindowHandle.ownerPid = imePid;
+        mWindowHandle.ownerUid = imeUid;
         mWindowHandle.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.apply();
+
+        new SurfaceControl.Transaction()
+                .setInputWindowInfo(mInputSurface, mWindowHandle)
+                .apply();
         mIsIntercepting = true;
     }
 

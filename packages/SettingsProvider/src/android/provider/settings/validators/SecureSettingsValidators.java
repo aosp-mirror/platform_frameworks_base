@@ -231,6 +231,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.SKIP_DIRECTION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SILENCE_GESTURE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES, JSON_OBJECT_VALIDATOR);
+        VALIDATORS.put(Secure.NAV_BAR_FORCE_VISIBLE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.NAV_BAR_KIDS_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.NAVIGATION_MODE, new DiscreteValueValidator(new String[] {"0", "1", "2"}));

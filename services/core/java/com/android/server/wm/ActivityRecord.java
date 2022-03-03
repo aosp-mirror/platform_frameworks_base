@@ -46,7 +46,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
-import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -7515,8 +7514,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
         final boolean isFixedOrientationLetterboxAllowed =
-                isSplitScreenWindowingMode(parentWindowingMode)
-                        || parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN;
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.

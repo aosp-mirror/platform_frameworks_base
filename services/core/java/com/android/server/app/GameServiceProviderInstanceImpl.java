@@ -50,6 +50,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.infra.ServiceConnector.ServiceLifecycleCallbacks;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -63,6 +64,40 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private static final String TAG = "GameServiceProviderInstance";
     private static final int CREATE_GAME_SESSION_TIMEOUT_MS = 10_000;
     private static final boolean DEBUG = false;
+
+    private final ServiceLifecycleCallbacks<IGameService> mGameServiceLifecycleCallbacks =
+            new ServiceLifecycleCallbacks<IGameService>() {
+                @Override
+                public void onConnected(@NonNull IGameService service) {
+                    try {
+                        service.connected(mGameServiceController);
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to send connected event", ex);
+                    }
+                }
+
+                @Override
+                public void onDisconnected(@NonNull IGameService service) {
+                    try {
+                        service.disconnected();
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to send disconnected event", ex);
+                    }
+                }
+            };
+
+    private final ServiceLifecycleCallbacks<IGameSessionService>
+            mGameSessionServiceLifecycleCallbacks =
+            new ServiceLifecycleCallbacks<IGameSessionService>() {
+                @Override
+                public void onBinderDied() {
+                    mBackgroundExecutor.execute(() -> {
+                        synchronized (mLock) {
+                            destroyAndClearAllGameSessionsLocked();
+                        }
+                    });
+                }
+            };
 
     private final TaskSystemBarsListener mTaskSystemBarsVisibilityListener =
             new TaskSystemBarsListener() {
@@ -206,11 +241,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
         mIsRunning = true;
 
-        // TODO(b/204503192): In cases where the connection to the game service fails retry with
-        //  back off mechanism.
-        AndroidFuture<Void> unusedPostConnectedFuture = mGameServiceConnector.post(gameService -> {
-            gameService.connected(mGameServiceController);
-        });
+        mGameServiceConnector.setServiceLifecycleCallbacks(mGameServiceLifecycleCallbacks);
+        mGameSessionServiceConnector.setServiceLifecycleCallbacks(
+                mGameSessionServiceLifecycleCallbacks);
+
+        AndroidFuture<?> unusedConnectFuture = mGameServiceConnector.connect();
 
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
@@ -237,19 +272,14 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mWindowManagerInternal.unregisterTaskSystemBarsListener(
                 mTaskSystemBarsVisibilityListener);
 
-        for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
-            destroyGameSessionFromRecordLocked(gameSessionRecord);
-        }
-        mGameSessions.clear();
+        destroyAndClearAllGameSessionsLocked();
 
-        // TODO(b/204503192): It is possible that the game service is disconnected. In this
-        //  case we should avoid rebinding just to shut it down again.
-        mGameServiceConnector.post(gameService -> {
-            gameService.disconnected();
-        }).whenComplete((result, t) -> {
-            mGameServiceConnector.unbind();
-        });
+        mGameServiceConnector.unbind();
         mGameSessionServiceConnector.unbind();
+
+        mGameServiceConnector.setServiceLifecycleCallbacks(null);
+        mGameSessionServiceConnector.setServiceLifecycleCallbacks(null);
+
     }
 
     private void onTaskCreated(int taskId, @NonNull ComponentName componentName) {
@@ -488,6 +518,14 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                         createGameSessionResult.getSurfacePackage()));
     }
 
+    @GuardedBy("mLock")
+    private void destroyAndClearAllGameSessionsLocked() {
+        for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
+            destroyGameSessionFromRecordLocked(gameSessionRecord);
+        }
+        mGameSessions.clear();
+    }
+
     private void destroyGameSessionDuringAttach(
             int taskId,
             CreateGameSessionResult createGameSessionResult) {
@@ -544,9 +582,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 Slog.d(TAG, "No active game sessions. Disconnecting GameSessionService");
             }
 
-            if (mGameSessionServiceConnector != null) {
-                mGameSessionServiceConnector.unbind();
-            }
+            mGameSessionServiceConnector.unbind();
         }
     }
 

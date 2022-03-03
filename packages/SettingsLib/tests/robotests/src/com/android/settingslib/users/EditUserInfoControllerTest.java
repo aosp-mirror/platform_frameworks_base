@@ -37,9 +37,9 @@ import android.widget.ImageView;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.settingslib.R;
+import com.android.settingslib.RestrictedLockUtils;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(RobolectricTestRunner.class)
-@Ignore
 public class EditUserInfoControllerTest {
     private static final int MAX_USER_NAME_LENGTH = 100;
 
@@ -87,6 +86,11 @@ public class EditUserInfoControllerTest {
         }
 
         @Override
+        RestrictedLockUtils.EnforcedAdmin getChangePhotoAdminRestriction(Context context) {
+            return null;
+        }
+
+        @Override
         boolean isChangePhotoRestrictedByBase(Context context) {
             return mPhotoRestrictedByBase;
         }
@@ -98,7 +102,7 @@ public class EditUserInfoControllerTest {
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
         mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
         mController = new TestEditUserInfoController();
-        mPhotoRestrictedByBase = true;
+        mPhotoRestrictedByBase = false;
     }
 
     @Test
@@ -262,7 +266,7 @@ public class EditUserInfoControllerTest {
 
     @Test
     public void createDialog_canNotChangePhoto_nullPhotoController() {
-        mPhotoRestrictedByBase = false;
+        mPhotoRestrictedByBase = true;
 
         mController.createDialog(mActivity, mActivityStarter, mCurrentIcon,
                 "test", "title", null, null);

@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -76,7 +77,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 VisualStabilityProvider visualStabilityProvider,
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
-                ConfigurationController configurationController
+                ConfigurationController configurationController,
+                Handler handler
         ) {
             super(
                     context,
@@ -85,7 +87,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     keyguardBypassController,
                     groupManager,
                     visualStabilityProvider,
-                    configurationController
+                    configurationController,
+                    handler
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -105,6 +108,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
+        super.setUp();
+
         mHeadsUpManager = new TestableHeadsUpManagerPhone(
                 mContext,
                 mHeadsUpManagerLogger,
@@ -112,11 +117,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mVSProvider,
                 mStatusBarStateController,
                 mBypassController,
-                mConfigurationController
+                mConfigurationController,
+                mTestHandler
         );
-        super.setUp();
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = mTestHandler;
     }
 
     @After

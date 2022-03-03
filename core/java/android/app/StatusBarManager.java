@@ -335,7 +335,7 @@ public class StatusBarManager {
      * Constant for {@link #setNavBarMode(int)} indicating kids navbar mode.
      *
      * <p>When used, back and home icons will change drawables and layout, recents will be hidden,
-     * and the navbar will remain visible when apps are in immersive mode.
+     * and enables the setting to force navbar visible, even when apps are in immersive mode.
      *
      * @hide
      */

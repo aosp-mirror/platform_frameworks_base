@@ -65,6 +65,7 @@ import com.android.internal.util.ContrastColorUtil;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 /**
  * <p>The view which allows an activity to customize its splash screen exit animation.</p>
@@ -234,7 +235,7 @@ public final class SplashScreenView extends FrameLayout {
         /**
          * Set the animation duration if icon is animatable.
          */
-        public Builder setAnimationDurationMillis(int duration) {
+        public Builder setAnimationDurationMillis(long duration) {
             mIconAnimationDuration = Duration.ofMillis(duration);
             return this;
         }
@@ -521,8 +522,11 @@ public final class SplashScreenView extends FrameLayout {
         });
     }
 
-    private void animationStartCallback() {
+    private void animationStartCallback(long animDuration) {
         mIconAnimationStart = Instant.now();
+        if (animDuration > 0) {
+            mIconAnimationDuration = Duration.ofMillis(animDuration);
+        }
     }
 
     /**
@@ -693,9 +697,8 @@ public final class SplashScreenView extends FrameLayout {
          * Prepare the animation if this drawable also be animatable.
          * @param duration The animation duration.
          * @param startListener The callback listener used to receive the start of the animation.
-         * @return true if this drawable object can also be animated and it can be played now.
          */
-        boolean prepareAnimate(long duration, Runnable startListener);
+        void prepareAnimate(long duration, LongConsumer startListener);
 
         /**
          * Stop animation.

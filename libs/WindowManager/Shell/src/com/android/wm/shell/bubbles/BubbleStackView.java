@@ -1608,7 +1608,9 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, "addBubble: " + bubble);
         }
 
-        if (getBubbleCount() == 0 && shouldShowStackEdu()) {
+        final boolean firstBubble = getBubbleCount() == 0;
+
+        if (firstBubble && shouldShowStackEdu()) {
             // Override the default stack position if we're showing user education.
             mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
         }
@@ -1621,7 +1623,7 @@ public class BubbleStackView extends FrameLayout
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
                         mPositioner.getBubbleSize()));
 
-        if (getBubbleCount() == 0) {
+        if (firstBubble) {
             mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
         }
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
@@ -1652,6 +1654,10 @@ public class BubbleStackView extends FrameLayout
                     bubble.cleanupViews();
                 }
                 updateExpandedView();
+                if (getBubbleCount() == 0 && !isExpanded()) {
+                    // This is the last bubble and the stack is collapsed
+                    updateStackPosition();
+                }
                 logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;
             }

@@ -36,12 +36,15 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.TimestampedValue;
 import android.provider.Settings;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.NtpTrustedTime;
+import android.util.NtpTrustedTime.TimeResult;
 import android.util.TimeUtils;
 
 import com.android.internal.util.DumpUtils;
@@ -152,6 +155,42 @@ public class NetworkTimeUpdateService extends Binder {
                 }, new IntentFilter(ACTION_POLL));
     }
 
+    /**
+     * Clears the cached NTP time. For use during tests to simulate when no NTP time is available.
+     *
+     * <p>This operation takes place in the calling thread rather than the service's handler thread.
+     */
+    void clearTimeForTests() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME, "clear latest network time");
+
+        mTime.clearCachedTimeResult();
+
+        mLocalLog.log("clearTimeForTests");
+    }
+
+    /**
+     * Forces the service to refresh the NTP time.
+     *
+     * <p>This operation takes place in the calling thread rather than the service's handler thread.
+     * This method does not affect currently scheduled refreshes. If the NTP request is successful
+     * it will make an (asynchronously handled) suggestion to the time detector.
+     */
+    boolean forceRefreshForTests() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME, "force network time refresh");
+
+        boolean success = mTime.forceRefresh();
+        mLocalLog.log("forceRefreshForTests: success=" + success);
+
+        if (success) {
+            makeNetworkTimeSuggestion(mTime.getCachedTimeResult(),
+                    "Origin: NetworkTimeUpdateService: forceRefreshForTests");
+        }
+
+        return success;
+    }
+
     private void onPollNetworkTime(int event) {
         // If we don't have any default network, don't bother.
         if (mDefaultNetwork == null) return;
@@ -193,12 +232,8 @@ public class NetworkTimeUpdateService extends Binder {
             resetAlarm(mPollingIntervalMs
                     - cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis));
 
-            // Suggest the time to the time detector. It may choose use it to set the system clock.
-            TimestampedValue<Long> timeSignal = new TimestampedValue<>(
-                    cachedNtpResult.getElapsedRealtimeMillis(), cachedNtpResult.getTimeMillis());
-            NetworkTimeSuggestion timeSuggestion = new NetworkTimeSuggestion(timeSignal);
-            timeSuggestion.addDebugInfo("Origin: NetworkTimeUpdateService. event=" + event);
-            mTimeDetector.suggestNetworkTime(timeSuggestion);
+            makeNetworkTimeSuggestion(cachedNtpResult,
+                    "Origin: NetworkTimeUpdateService. event=" + event);
         } else {
             // No fresh fix; schedule retry
             mTryAgainCounter++;
@@ -215,6 +250,15 @@ public class NetworkTimeUpdateService extends Binder {
                 resetAlarm(mPollingIntervalMs);
             }
         }
+    }
+
+    /** Suggests the time to the time detector. It may choose use it to set the system clock. */
+    private void makeNetworkTimeSuggestion(TimeResult ntpResult, String debugInfo) {
+        TimestampedValue<Long> timeSignal = new TimestampedValue<>(
+                ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
+        NetworkTimeSuggestion timeSuggestion = new NetworkTimeSuggestion(timeSignal);
+        timeSuggestion.addDebugInfo(debugInfo);
+        mTimeDetector.suggestNetworkTime(timeSuggestion);
     }
 
     /**
@@ -319,5 +363,12 @@ public class NetworkTimeUpdateService extends Binder {
         pw.println("Local logs:");
         mLocalLog.dump(fd, pw, args);
         pw.println();
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new NetworkTimeUpdateServiceShellCommand(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
     }
 }

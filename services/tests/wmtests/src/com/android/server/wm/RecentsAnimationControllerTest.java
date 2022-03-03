@@ -451,7 +451,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
         final int topOrientation = DisplayContentTests.getRotatedOrientation(mDefaultDisplay);
         assertFalse(displayRotation.updateOrientation(topOrientation, false /* forceUpdate */));
-        assertEquals(recents.mOrientation, displayRotation.getLastOrientation());
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSET, displayRotation.getLastOrientation());
         final int prevRotation = mDisplayContent.getRotation();
         mWm.cleanupRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
 

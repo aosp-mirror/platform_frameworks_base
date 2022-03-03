@@ -141,10 +141,9 @@ public class NotificationTestHelper {
                 mock(KeyguardBypassController.class),
                 mock(NotificationGroupManagerLegacy.class),
                 mock(VisualStabilityProvider.class),
-                mock(ConfigurationControllerImpl.class)
+                mock(ConfigurationControllerImpl.class),
+                new Handler(mTestLooper.getLooper())
         );
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = new Handler(mTestLooper.getLooper());
         mGroupMembershipManager.setHeadsUpManager(mHeadsUpManager);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),

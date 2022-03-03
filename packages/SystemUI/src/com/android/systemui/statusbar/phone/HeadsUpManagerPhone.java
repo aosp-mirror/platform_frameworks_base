@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Region;
+import android.os.Handler;
 import android.util.Pools;
 
 import androidx.collection.ArraySet;
@@ -29,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -105,8 +107,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController) {
-        super(context, logger);
+            ConfigurationController configurationController,
+            @Main Handler handler) {
+        super(context, logger, handler);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         statusBarStateController.addCallback(mStatusBarStateListener);

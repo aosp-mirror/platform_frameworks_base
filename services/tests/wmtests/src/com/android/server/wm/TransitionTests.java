@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -691,7 +692,7 @@ public class TransitionTests extends WindowTestsBase {
                 anyInt() /* orientation */, anyInt() /* lastRotation */);
         // Rotation update is skipped while the recents animation is running.
         assertFalse(mDisplayContent.updateRotationUnchecked());
-        assertEquals(SCREEN_ORIENTATION_NOSENSOR, displayRotation.getLastOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSET, displayRotation.getLastOrientation());
         // Return to the app without fixed orientation from recents.
         app.moveFocusableActivityToTop("test");
         player.finish();

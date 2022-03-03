@@ -396,6 +396,10 @@ public class MagnificationProcessor {
 
             dumpTrackingTypingFocusEnabledState(pw, displayId, config.getMode());
         }
+        pw.append("    SupportWindowMagnification="
+                + mController.supportWindowMagnification()).println();
+        pw.append("    WindowMagnificationConnectionState="
+                + mController.getWindowMagnificationMgr().getConnectionState()).println();
     }
 
     private int getIdOfLastServiceToMagnify(int mode, int displayId) {

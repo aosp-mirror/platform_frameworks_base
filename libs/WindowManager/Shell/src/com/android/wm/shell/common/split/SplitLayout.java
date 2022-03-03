@@ -502,14 +502,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
             wct.setBounds(task1.token, mBounds1);
+            wct.setSmallestScreenWidthDp(task1.token, getSmallestWidthDp(mBounds1));
             mWinBounds1.set(mBounds1);
             mWinToken1 = task1.token;
         }
         if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
             wct.setBounds(task2.token, mBounds2);
+            wct.setSmallestScreenWidthDp(task2.token, getSmallestWidthDp(mBounds2));
             mWinBounds2.set(mBounds2);
             mWinToken2 = task2.token;
         }
+    }
+
+    private int getSmallestWidthDp(Rect bounds) {
+        final int minWidth = Math.min(bounds.width(), bounds.height());
+        final float density = mContext.getResources().getDisplayMetrics().density;
+        return (int) (minWidth / density);
     }
 
     /**

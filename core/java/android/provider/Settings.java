@@ -240,6 +240,20 @@ public final class Settings {
             "android.settings.TETHER_PROVISIONING_UI";
 
     /**
+     * Activity Action: Show a dialog activity to notify tethering is NOT supported by carrier.
+     *
+     * When {@link android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTS_TETHERING_BOOL}
+     * is false, and tethering is started by Settings, this dialog activity will be started to
+     * tell the user that tethering is not supported by carrier.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI =
+            "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
+
+    /**
      * Activity Action: Show settings to allow entering/exiting airplane mode.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -10272,6 +10286,14 @@ public final class Settings {
         @Readable
         public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES =
                 "theme_customization_overlay_packages";
+
+        /**
+         * Indicates whether the nav bar is forced to always be visible, even in immersive mode.
+         * <p>Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String NAV_BAR_FORCE_VISIBLE = "nav_bar_force_visible";
 
         /**
          * Indicates whether the device is in kids nav mode.

@@ -40,15 +40,16 @@ class ShadeViewManager @AssistedInject constructor(
     mediaContainerController: MediaContainerController,
     featureManager: NotificationSectionsFeatureManager,
     sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
-    logger: ShadeViewDifferLogger,
+    nodeSpecBuilderLogger: NodeSpecBuilderLogger,
+    shadeViewDifferLogger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
     private val rootController = RootNodeController(listContainer, View(context))
     private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager,
-            sectionHeaderVisibilityProvider, viewBarn)
-    private val viewDiffer = ShadeViewDiffer(rootController, logger)
+            sectionHeaderVisibilityProvider, viewBarn, nodeSpecBuilderLogger)
+    private val viewDiffer = ShadeViewDiffer(rootController, shadeViewDifferLogger)
 
     /** Method for attaching this manager to the pipeline. */
     fun attach(renderStageManager: RenderStageManager) {

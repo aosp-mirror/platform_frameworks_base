@@ -134,6 +134,16 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void moveWindowMagnifierToPosition() throws RemoteException {
+        mIWindowMagnificationConnection.moveWindowMagnifierToPosition(TEST_DISPLAY,
+                100f, 200f, mAnimationCallback);
+        waitForIdleSync();
+
+        verify(mWindowMagnificationController).moveWindowMagnifierToPosition(
+                eq(100f), eq(200f), any(IRemoteMagnificationAnimationCallback.class));
+    }
+
+    @Test
     public void showMagnificationButton() throws RemoteException {
         mIWindowMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);

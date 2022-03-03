@@ -16,8 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
@@ -62,6 +63,7 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
@@ -71,6 +73,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -79,6 +82,8 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
@@ -86,7 +91,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,10 +100,14 @@ import java.util.Random;
 
 import javax.inject.Provider;
 
+@Ignore
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class AuthControllerTest extends SysuiTestCase {
+
+    @Rule
+    public final MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     @Mock
     private PackageManager mPackageManager;
@@ -128,6 +138,10 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
+    private UserManager mUserManager;
+    @Mock
+    private LockPatternUtils mLockPatternUtils;
+    @Mock
     private StatusBarStateController mStatusBarStateController;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
@@ -144,8 +158,6 @@ public class AuthControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws RemoteException {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(mContext);
         mExecution = new FakeExecution();
         mTestableLooper = TestableLooper.get(this);
@@ -343,8 +355,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testOnAuthenticationSucceededInvoked_whenSystemRequested() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        mAuthController.onBiometricAuthenticated();
-        verify(mDialog1).onAuthenticationSucceeded();
+        mAuthController.onBiometricAuthenticated(TYPE_FINGERPRINT);
+        verify(mDialog1).onAuthenticationSucceeded(eq(TYPE_FINGERPRINT));
     }
 
     @Test
@@ -528,8 +540,7 @@ public class AuthControllerTest extends SysuiTestCase {
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             Bundle savedState = (Bundle) args[0];
-            savedState.putInt(
-                    AuthDialog.KEY_CONTAINER_STATE, AuthContainerView.STATE_SHOWING);
+            savedState.putBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false);
             return null; // onSaveState returns void
         }).when(mDialog1).onSaveState(any());
 
@@ -558,8 +569,7 @@ public class AuthControllerTest extends SysuiTestCase {
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             Bundle savedState = (Bundle) args[0];
-            savedState.putInt(
-                    AuthDialog.KEY_CONTAINER_STATE, AuthContainerView.STATE_SHOWING);
+            savedState.putBoolean(AuthDialog.KEY_CONTAINER_GOING_AWAY, false);
             savedState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, true);
             return null; // onSaveState returns void
         }).when(mDialog1).onSaveState(any());
@@ -697,7 +707,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 0 /* operationId */,
                 "testPackage",
                 1 /* requestId */,
-                BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT);
+                BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE);
     }
 
     private PromptInfo createTestPromptInfo() {
@@ -739,15 +749,16 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
-                    statusBarStateController, mHandler);
+                    mUserManager, mLockPatternUtils, statusBarStateController, mHandler);
         }
 
         @Override
         protected AuthDialog buildDialog(PromptInfo promptInfo,
-                boolean requireConfirmation, int userId, int[] sensorIds, boolean credentialAllowed,
+                boolean requireConfirmation, int userId, int[] sensorIds,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
                 @BiometricManager.BiometricMultiSensorMode int multiSensorConfig,
-                WakefulnessLifecycle wakefulnessLifecycle) {
+                WakefulnessLifecycle wakefulnessLifecycle, UserManager userManager,
+                LockPatternUtils lockPatternUtils) {
 
             mLastBiometricPromptInfo = promptInfo;
 

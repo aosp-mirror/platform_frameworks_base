@@ -15,9 +15,6 @@
       "name": "CtsClassloaderSplitsHostTestCases"
     },
     {
-      "name": "CtsCompilationTestCases"
-    },
-    {
       "name": "CtsAppEnumerationTestCases"
     },
     {
@@ -111,6 +108,9 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
+    },
+    {
+      "name": "CtsCompilationTestCases"
     }
   ],
   "imports": [

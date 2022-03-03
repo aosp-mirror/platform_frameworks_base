@@ -230,9 +230,8 @@ public class InlineContentView extends ViewGroup {
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mSurfaceView = new SurfaceView(context, attrs, defStyleAttr, defStyleRes) {
-            // b/219807628
             @Override
-            protected void onSetSurfacePositionAndScale(
+            protected void onSetSurfacePositionAndScaleRT(
                     @NonNull SurfaceControl.Transaction transaction,
                     @NonNull SurfaceControl surface, int positionLeft, int positionTop,
                     float postScaleX, float postScaleY) {
@@ -249,7 +248,7 @@ public class InlineContentView extends ViewGroup {
                 postScaleX = InlineContentView.this.getScaleX();
                 postScaleY = InlineContentView.this.getScaleY();
 
-                super.onSetSurfacePositionAndScale(transaction, surface, positionLeft,
+                super.onSetSurfacePositionAndScaleRT(transaction, surface, positionLeft,
                         positionTop, postScaleX, postScaleY);
             }
         };

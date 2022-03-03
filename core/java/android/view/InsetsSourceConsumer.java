@@ -98,6 +98,13 @@ public class InsetsSourceConsumer {
      */
     private boolean mIsAnimationPending;
 
+    /**
+     * @param type The {@link InternalInsetsType} of the consumed insets.
+     * @param state The current {@link InsetsState} of the consumed insets.
+     * @param transactionSupplier The source of new {@link Transaction} instances. The supplier
+     *         must provide *new* instances, which will be explicitly closed by this class.
+     * @param controller The {@link InsetsController} to use for insets interaction.
+     */
     public InsetsSourceConsumer(@InternalInsetsType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
         mType = type;
@@ -390,16 +397,17 @@ public class InsetsSourceConsumer {
             return;
         }
 
-        final Transaction t = mTransactionSupplier.get();
-        if (DEBUG) Log.d(TAG, "applyRequestedVisibilityToControl: " + mRequestedVisible);
-        if (mRequestedVisible) {
-            t.show(mSourceControl.getLeash());
-        } else {
-            t.hide(mSourceControl.getLeash());
+        try (Transaction t = mTransactionSupplier.get()) {
+            if (DEBUG) Log.d(TAG, "applyRequestedVisibilityToControl: " + mRequestedVisible);
+            if (mRequestedVisible) {
+                t.show(mSourceControl.getLeash());
+            } else {
+                t.hide(mSourceControl.getLeash());
+            }
+            // Ensure the alpha value is aligned with the actual requested visibility.
+            t.setAlpha(mSourceControl.getLeash(), mRequestedVisible ? 1 : 0);
+            t.apply();
         }
-        // Ensure the alpha value is aligned with the actual requested visibility.
-        t.setAlpha(mSourceControl.getLeash(), mRequestedVisible ? 1 : 0);
-        t.apply();
         onPerceptible(mRequestedVisible);
     }
 

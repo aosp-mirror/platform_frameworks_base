@@ -31,6 +31,7 @@ import android.window.ClientWindowFrames;
 import android.window.IOnBackInvokedCallback;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -473,12 +474,12 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void reportSystemGestureExclusionChanged(android.view.IWindow window,
-            java.util.List<android.graphics.Rect> exclusionRects) {
+            List<Rect> exclusionRects) {
     }
 
     @Override
-    public void reportKeepClearAreasChanged(android.view.IWindow window,
-            java.util.List<android.graphics.Rect> exclusionRects) {
+    public void reportKeepClearAreasChanged(android.view.IWindow window, List<Rect> restrictedRects,
+            List<Rect> unrestrictedRects) {
     }
 
     @Override

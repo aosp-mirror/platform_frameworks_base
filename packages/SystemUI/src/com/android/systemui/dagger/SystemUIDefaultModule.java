@@ -178,7 +178,8 @@ public abstract class SystemUIDefaultModule {
             KeyguardBypassController bypassController,
             GroupMembershipManager groupManager,
             VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            @Main Handler handler) {
         return new HeadsUpManagerPhone(
                 context,
                 headsUpManagerLogger,
@@ -186,7 +187,8 @@ public abstract class SystemUIDefaultModule {
                 bypassController,
                 groupManager,
                 visualStabilityProvider,
-                configurationController
+                configurationController,
+                handler
         );
     }
 

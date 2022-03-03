@@ -2070,8 +2070,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mPrepareAppDataFuture = mAppDataHelper.fixAppsDataOnBoot();
-
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
             // Note that we do *not* clear the application profiles. These remain valid
@@ -2091,6 +2089,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
+
+            // Defer the app data fixup until we are done with app data clearing above.
+            mPrepareAppDataFuture = mAppDataHelper.fixAppsDataOnBoot();
 
             // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
@@ -2572,8 +2573,9 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)) {
-                Slog.wtf(TAG, "Package Manager Crash", e);
+            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)
+                    && !(e instanceof ParcelableException)) {
+                Slog.wtf(TAG, "Package Manager Unexpected Exception", e);
             }
             throw e;
         }
@@ -6690,6 +6692,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public IPackageInstaller getPackageInstaller() {
+        // Return installer service for internal calls.
+        if (PackageManagerServiceUtils.isSystemOrRoot()) {
+            return mInstallerService;
+        }
+        // Return null for InstantApps.
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }

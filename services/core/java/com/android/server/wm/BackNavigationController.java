@@ -53,7 +53,7 @@ class BackNavigationController {
      * Returns true if the back predictability feature is enabled
      */
     static boolean isEnabled() {
-        return SystemProperties.getInt(BACK_PREDICTABILITY_PROP, 1) > 0;
+        return SystemProperties.getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
     }
 
     static boolean isScreenshotEnabled() {

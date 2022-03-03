@@ -53,8 +53,8 @@ import java.io.PrintWriter;
  * Base class that handle common task org. related for split-screen stages.
  * Note that this class and its sub-class do not directly perform hierarchy operations.
  * They only serve to hold a collection of tasks and provide APIs like
- * {@link #setBounds(Rect, WindowContainerTransaction)} for the centralized {@link StageCoordinator}
- * to perform operations in-sync with other containers.
+ * {@link #addTask(ActivityManager.RunningTaskInfo, WindowContainerTransaction)} for the centralized
+ * {@link StageCoordinator} to perform hierarchy operations in-sync with other containers.
  *
  * @see StageCoordinator
  */
@@ -310,13 +310,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         wct.reparent(task.token, mRootTaskInfo.token, true /* onTop*/);
     }
 
-    void moveToTop(Rect rootBounds, WindowContainerTransaction wct) {
+    void moveToTop(WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds).reorder(rootToken, true /* onTop */);
-    }
-
-    void setBounds(Rect bounds, WindowContainerTransaction wct) {
-        wct.setBounds(mRootTaskInfo.token, bounds);
+        wct.reorder(rootToken, true /* onTop */);
     }
 
     void reorderChild(int taskId, boolean onTop, WindowContainerTransaction wct) {

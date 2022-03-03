@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -51,7 +52,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -89,7 +89,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mHeadsUpManager = new HeadsUpManager(mContext, mock(HeadsUpManagerLogger.class)) {};
+        mHeadsUpManager = new HeadsUpManager(mContext, mock(HeadsUpManagerLogger.class),
+                mock(Handler.class)) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
@@ -112,11 +113,6 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         verify(mNotificationEntryManager).addNotificationEntryListener(mListenerCaptor.capture());
         mNotificationEntryListener = mListenerCaptor.getValue();
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
-    }
-
-    @After
-    public void tearDown() {
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
     }
 
     private void mockHasHeadsUpContentView(NotificationEntry entry,

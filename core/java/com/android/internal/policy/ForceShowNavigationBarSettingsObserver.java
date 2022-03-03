@@ -26,7 +26,7 @@ import android.provider.Settings;
 /**
  * A ContentObserver for listening force show navigation bar relative setting keys:
  *  - {@link Settings.Secure#NAVIGATION_MODE}
- *  - {@link Settings.Secure#NAV_BAR_KIDS_MODE}
+ *  - {@link Settings.Secure#NAV_BAR_FORCE_VISIBLE}
  *
  * @hide
  */
@@ -52,7 +52,7 @@ public class ForceShowNavigationBarSettingsObserver extends ContentObserver {
                 Settings.Secure.getUriFor(Settings.Secure.NAVIGATION_MODE),
                 false, this, UserHandle.USER_ALL);
         r.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.NAV_BAR_KIDS_MODE),
+                Settings.Secure.getUriFor(Settings.Secure.NAV_BAR_FORCE_VISIBLE),
                 false, this, UserHandle.USER_ALL);
     }
 
@@ -78,6 +78,6 @@ public class ForceShowNavigationBarSettingsObserver extends ContentObserver {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NAVIGATION_MODE, 0, UserHandle.USER_CURRENT) == 0
                 && Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NAV_BAR_KIDS_MODE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.Secure.NAV_BAR_FORCE_VISIBLE, 0, UserHandle.USER_CURRENT) == 1;
     }
 }

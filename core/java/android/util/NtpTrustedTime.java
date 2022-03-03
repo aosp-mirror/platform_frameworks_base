@@ -265,6 +265,13 @@ public class NtpTrustedTime implements TrustedTime {
         return mTimeResult;
     }
 
+    /** Clears the last received NTP. Intended for use during tests. */
+    public void clearCachedTimeResult() {
+        synchronized (this) {
+            mTimeResult = null;
+        }
+    }
+
     private static class NtpConnectionInfo {
 
         @NonNull private final String mServer;

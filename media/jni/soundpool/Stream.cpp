@@ -15,6 +15,7 @@
  */
 
 //#define LOG_NDEBUG 0
+#include <utility>
 #define LOG_TAG "SoundPool::Stream"
 #include <utils/Log.h>
 #include <android/content/AttributionSourceState.h>
@@ -309,13 +310,11 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
     }
     if (mAudioTrack == nullptr) {
         // mToggle toggles each time a track is started on a given stream.
-        // The toggle is concatenated with the Stream address and passed to AudioTrack
-        // as callback user data. This enables the detection of callbacks received from the old
+        // This enables the detection of callbacks received from the old
         // audio track while the new one is being started and avoids processing them with
         // wrong audio audio buffer size  (mAudioBufferSize)
         auto toggle = mToggle ^ 1;
         // NOLINTNEXTLINE(performance-no-int-to-ptr)
-        void* userData = reinterpret_cast<void*>((uintptr_t)this | toggle);
         audio_channel_mask_t soundChannelMask = sound->getChannelMask();
         // When sound contains a valid channel mask, use it as is.
         // Otherwise, use stream count to calculate channel mask.
@@ -327,10 +326,11 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         android::content::AttributionSourceState attributionSource;
         attributionSource.packageName = mStreamManager->getOpPackageName();
         attributionSource.token = sp<BBinder>::make();
+        mCallback =  sp<StreamCallback>::make(this, toggle),
         // TODO b/182469354 make consistent with AudioRecord, add util for native source
         mAudioTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
                 channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
-                staticCallback, userData,
+                mCallback,
                 0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
                 AudioTrack::TRANSFER_DEFAULT,
                 nullptr /*offloadInfo*/, attributionSource,
@@ -375,16 +375,55 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
     mStreamID = nextStreamID;  // prefer this to be the last, as it is an atomic sync point
 }
 
-/* static */
-void Stream::staticCallback(int event, void* user, void* info)
-{
-    const auto userAsInt = (uintptr_t)user;
-    // NOLINTNEXTLINE(performance-no-int-to-ptr)
-    auto stream = reinterpret_cast<Stream*>(userAsInt & ~1);
-    stream->callback(event, info, int(userAsInt & 1), 0 /* tries */);
+int Stream::getCorrespondingStreamID() {
+    std::lock_guard lock(mLock);
+    return static_cast<int>(mAudioTrack ? mStreamID : getPairStream()->mStreamID);
+}
+size_t Stream::StreamCallback::onMoreData(const AudioTrack::Buffer&) {
+    ALOGW("%s streamID %d Unexpected EVENT_MORE_DATA for static track",
+            __func__, mStream->getCorrespondingStreamID());
+    return 0;
 }
 
-void Stream::callback(int event, void* info, int toggle, int tries)
+void Stream::StreamCallback::onUnderrun() {
+    ALOGW("%s streamID %d Unexpected EVENT_UNDERRUN for static track",
+            __func__, mStream->getCorrespondingStreamID());
+}
+
+void Stream::StreamCallback::onLoopEnd(int32_t) {
+    ALOGV("%s streamID %d EVENT_LOOP_END", __func__, mStream->getCorrespondingStreamID());
+}
+
+void Stream::StreamCallback::onMarker(uint32_t) {
+    ALOGW("%s streamID %d Unexpected EVENT_MARKER for static track",
+            __func__, mStream->getCorrespondingStreamID());
+}
+
+void Stream::StreamCallback::onNewPos(uint32_t) {
+    ALOGW("%s streamID %d Unexpected EVENT_NEW_POS for static track",
+            __func__, mStream->getCorrespondingStreamID());
+}
+
+void Stream::StreamCallback::onBufferEnd() {
+    mStream->onBufferEnd(mToggle, 0);
+}
+
+void Stream::StreamCallback::onNewIAudioTrack() {
+    ALOGV("%s streamID %d NEW_IAUDIOTRACK", __func__, mStream->getCorrespondingStreamID());
+}
+
+void Stream::StreamCallback::onStreamEnd() {
+    ALOGW("%s streamID %d Unexpected EVENT_STREAM_END for static track",
+            __func__, mStream->getCorrespondingStreamID());
+}
+
+size_t Stream::StreamCallback::onCanWriteMoreData(const AudioTrack::Buffer&) {
+    ALOGW("%s streamID %d Unexpected EVENT_CAN_WRITE_MORE_DATA for static track",
+            __func__, mStream->getCorrespondingStreamID());
+    return 0;
+}
+
+void Stream::onBufferEnd(int toggle, int tries)
 {
     int32_t activeStreamIDToRestart = 0;
     {
@@ -400,7 +439,7 @@ void Stream::callback(int event, void* info, int toggle, int tries)
             if (tries < 3) {
                 lock.unlock();
                 ALOGV("%s streamID %d going to pair stream", __func__, (int)mStreamID);
-                getPairStream()->callback(event, info, toggle, tries + 1);
+                getPairStream()->onBufferEnd(toggle, tries + 1);
             } else {
                 ALOGW("%s streamID %d cannot find track", __func__, (int)mStreamID);
             }
@@ -410,31 +449,10 @@ void Stream::callback(int event, void* info, int toggle, int tries)
             ALOGD("%s streamID %d wrong toggle", __func__, (int)mStreamID);
             return;
         }
-        switch (event) {
-        case AudioTrack::EVENT_MORE_DATA:
-            ALOGW("%s streamID %d Invalid EVENT_MORE_DATA for static track",
-                    __func__, (int)mStreamID);
-            break;
-        case AudioTrack::EVENT_UNDERRUN:
-            ALOGW("%s streamID %d Invalid EVENT_UNDERRUN for static track",
-                    __func__, (int)mStreamID);
-            break;
-        case AudioTrack::EVENT_BUFFER_END:
-            ALOGV("%s streamID %d EVENT_BUFFER_END", __func__, (int)mStreamID);
-            if (mState != IDLE) {
-                activeStreamIDToRestart = mStreamID;
-                mStopTimeNs = systemTime();
-            }
-            break;
-        case AudioTrack::EVENT_LOOP_END:
-            ALOGV("%s streamID %d EVENT_LOOP_END", __func__, (int)mStreamID);
-            break;
-        case AudioTrack::EVENT_NEW_IAUDIOTRACK:
-            ALOGV("%s streamID %d NEW_IAUDIOTRACK", __func__, (int)mStreamID);
-            break;
-        default:
-            ALOGW("%s streamID %d Invalid event %d", __func__, (int)mStreamID, event);
-            break;
+        ALOGV("%s streamID %d EVENT_BUFFER_END", __func__, (int)mStreamID);
+        if (mState != IDLE) {
+            activeStreamIDToRestart = mStreamID;
+            mStopTimeNs = systemTime();
         }
     } // lock ends here.  This is on the callback thread, no need to be precise.
     if (activeStreamIDToRestart > 0) {

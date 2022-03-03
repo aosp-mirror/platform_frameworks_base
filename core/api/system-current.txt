@@ -6332,7 +6332,6 @@ package android.media {
     method public int describeContents();
     method @NonNull public String getMediaRoute2Id();
     method public int getRangeZone();
-    method @NonNull public static String rangeZoneToString(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.NearbyDevice> CREATOR;
     field public static final int RANGE_CLOSE = 3; // 0x3
@@ -10295,6 +10294,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_ADSERVICES = "adservices";
     field public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE = "ambient_context_manager_service";
     field public static final String NAMESPACE_APPSEARCH = "appsearch";
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
@@ -10339,7 +10339,6 @@ package android.provider {
     field public static final String NAMESPACE_STATSD_NATIVE_BOOT = "statsd_native_boot";
     field @Deprecated public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
-    field public static final String NAMESPACE_SUPPLEMENTAL_API = "supplemental_api";
     field public static final String NAMESPACE_SURFACE_FLINGER_NATIVE_BOOT = "surface_flinger_native_boot";
     field public static final String NAMESPACE_SWCODEC_NATIVE = "swcodec_native";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
@@ -10527,6 +10526,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -15704,6 +15704,11 @@ package android.util {
 }
 
 package android.view {
+
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @NonNull public final java.util.List<android.graphics.Rect> getUnrestrictedPreferKeepClearRects();
+    method @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS) public final void setUnrestrictedPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
+  }
 
   public abstract class Window {
     method public void addSystemFlags(@android.view.WindowManager.LayoutParams.SystemFlags int);

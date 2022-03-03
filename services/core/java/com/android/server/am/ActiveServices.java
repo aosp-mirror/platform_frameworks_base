@@ -4139,7 +4139,8 @@ public final class ActiveServices {
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String procName = r.processName;
-        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName);
+        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName,
+                r.definingPackageName, r.definingUid, r.serviceInfo.processName);
         ProcessRecord app;
 
         if (!isolated) {
@@ -4177,11 +4178,12 @@ public final class ActiveServices {
             app = r.isolationHostProc;
             if (WebViewZygote.isMultiprocessEnabled()
                     && r.serviceInfo.packageName.equals(WebViewZygote.getPackageName())) {
-                hostingRecord = HostingRecord.byWebviewZygote(r.instanceName);
+                hostingRecord = HostingRecord.byWebviewZygote(r.instanceName, r.definingPackageName,
+                        r.definingUid, r.serviceInfo.processName);
             }
             if ((r.serviceInfo.flags & ServiceInfo.FLAG_USE_APP_ZYGOTE) != 0) {
                 hostingRecord = HostingRecord.byAppZygote(r.instanceName, r.definingPackageName,
-                        r.definingUid);
+                        r.definingUid, r.serviceInfo.processName);
             }
         }
 

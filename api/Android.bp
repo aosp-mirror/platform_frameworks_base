@@ -131,7 +131,6 @@ combined_apis {
     ],
     conditional_bootclasspath: [
         "framework-auxiliary",
-        "framework-supplementalapi",
     ],
     system_server_classpath: [
         "service-media-s",

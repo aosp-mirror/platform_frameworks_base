@@ -2749,6 +2749,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateWindowMagnificationConnectionIfNeeded(AccessibilityUserState userState) {
+        if (!mMagnificationController.supportWindowMagnification()) {
+            return;
+        }
         final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isDisplayMagnificationEnabledLocked())
                 && (userState.getMagnificationCapabilitiesLocked()

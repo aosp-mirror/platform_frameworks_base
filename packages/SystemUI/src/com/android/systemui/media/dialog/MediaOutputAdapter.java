@@ -174,7 +174,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         onCheckBoxClicked(false, device);
                     });
                     setCheckBoxColor(mCheckBox, mController.getColorActiveItem());
-                    initSessionSeekbar();
+                    initSeekbar(device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));

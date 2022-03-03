@@ -1437,6 +1437,18 @@ public class AppStandbyController
     }
 
     @Override
+    @StandbyBuckets
+    public int getAppMinStandbyBucket(String packageName, int appId, int userId,
+            boolean shouldObfuscateInstantApps) {
+        if (shouldObfuscateInstantApps && mInjector.isPackageEphemeral(userId, packageName)) {
+            return STANDBY_BUCKET_NEVER;
+        }
+        synchronized (mAppIdleLock) {
+            return getAppMinBucket(packageName, appId, userId);
+        }
+    }
+
+    @Override
     public void restrictApp(@NonNull String packageName, int userId,
             @ForcedReasons int restrictReason) {
         restrictApp(packageName, userId, REASON_MAIN_FORCED_BY_SYSTEM, restrictReason);

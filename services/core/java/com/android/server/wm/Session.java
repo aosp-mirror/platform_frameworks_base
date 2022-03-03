@@ -84,6 +84,7 @@ import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -521,10 +522,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void reportKeepClearAreasChanged(IWindow window, List<Rect> keepClearAreas) {
+    public void reportKeepClearAreasChanged(IWindow window, List<Rect> restricted,
+            List<Rect> unrestricted) {
+        if (!mSetsUnrestrictedKeepClearAreas && !unrestricted.isEmpty()) {
+            unrestricted = Collections.emptyList();
+        }
+
         final long ident = Binder.clearCallingIdentity();
         try {
-            mService.reportKeepClearAreasChanged(this, window, keepClearAreas);
+            mService.reportKeepClearAreasChanged(this, window, restricted, unrestricted);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

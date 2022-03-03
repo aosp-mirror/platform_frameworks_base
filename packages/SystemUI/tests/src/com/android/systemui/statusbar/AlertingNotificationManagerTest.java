@@ -83,12 +83,10 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     private final class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
-        private TestableAlertingNotificationManager() {
-            super(mock(HeadsUpManagerLogger.class));
+        private TestableAlertingNotificationManager(Handler handler) {
+            super(mock(HeadsUpManagerLogger.class), handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mHandler.removeCallbacksAndMessages(null);
-            mHandler = mTestHandler;
         }
 
         @Override
@@ -109,8 +107,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         }
     }
 
-    protected AlertingNotificationManager createAlertingNotificationManager() {
-        return new TestableAlertingNotificationManager();
+    protected AlertingNotificationManager createAlertingNotificationManager(Handler handler) {
+        return new TestableAlertingNotificationManager(handler);
     }
 
     protected StatusBarNotification createNewSbn(int id, Notification.Builder n) {
@@ -144,7 +142,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
                 .build();
         mEntry.setRow(mRow);
 
-        mAlertingNotificationManager = createAlertingNotificationManager();
+        mAlertingNotificationManager = createAlertingNotificationManager(mTestHandler);
     }
 
     @After

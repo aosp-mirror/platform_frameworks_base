@@ -1158,7 +1158,7 @@ public class FullScreenMagnificationControllerTest {
         MagnificationCallbacks callbacks = getMagnificationCallbacks(DISPLAY_0);
         callbacks.onImeWindowVisibilityChanged(true);
         mMessageCapturingHandler.sendAllMessages();
-        verify(mRequestObserver).onImeWindowVisibilityChanged(eq(true));
+        verify(mRequestObserver).onImeWindowVisibilityChanged(eq(DISPLAY_0), eq(true));
     }
 
     private void setScaleToMagnifying() {

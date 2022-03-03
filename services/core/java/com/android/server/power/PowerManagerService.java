@@ -1176,14 +1176,14 @@ public final class PowerManagerService extends SystemService
 
     @Override
     public void onBootPhase(int phase) {
-        synchronized (mLock) {
-            if (phase == PHASE_SYSTEM_SERVICES_READY) {
-                systemReady();
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            systemReady();
 
-            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-                incrementBootCount();
+        } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            incrementBootCount();
 
-            } else if (phase == PHASE_BOOT_COMPLETED) {
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            synchronized (mLock) {
                 final long now = mClock.uptimeMillis();
                 mBootCompleted = true;
                 mDirty |= DIRTY_BOOT_COMPLETED;

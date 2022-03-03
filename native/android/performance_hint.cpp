@@ -48,6 +48,7 @@ private:
     static APerformanceHintManager* create(sp<IHintManager> iHintManager);
 
     sp<IHintManager> mHintManager;
+    const sp<IBinder> mToken = sp<BBinder>::make();
     const int64_t mPreferredRateNanos;
 };
 
@@ -119,11 +120,10 @@ APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manage
 
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos) {
-    sp<IBinder> token = sp<BBinder>::make();
     std::vector<int32_t> tids(threadIds, threadIds + size);
     sp<IHintSession> session;
     binder::Status ret =
-            mHintManager->createHintSession(token, tids, initialTargetWorkDurationNanos, &session);
+            mHintManager->createHintSession(mToken, tids, initialTargetWorkDurationNanos, &session);
     if (!ret.isOk() || !session) {
         return nullptr;
     }

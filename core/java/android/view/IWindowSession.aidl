@@ -290,7 +290,8 @@ interface IWindowSession {
     /**
      * Called when the keep-clear areas for this window have changed.
      */
-    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> keepClearRects);
+    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
+           in List<Rect> unrestricted);
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return

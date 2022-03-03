@@ -159,7 +159,7 @@ oneway interface IStatusBar
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */
-    void onBiometricAuthenticated();
+    void onBiometricAuthenticated(int modality);
     /**
     * Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc.
     */
