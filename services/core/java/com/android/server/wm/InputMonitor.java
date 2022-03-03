@@ -522,6 +522,8 @@ final class InputMonitor {
                 layer = layer != null ? layer : activeRecents;
                 // Handle edge-case for SUW where windows don't exist yet
                 if (layer.getSurfaceControl() != null) {
+                    mRecentsAnimationInputConsumer.mWindowHandle
+                            .replaceTouchableRegionWithCrop(layer.getSurfaceControl());
                     mRecentsAnimationInputConsumer.show(mInputTransaction, layer);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
