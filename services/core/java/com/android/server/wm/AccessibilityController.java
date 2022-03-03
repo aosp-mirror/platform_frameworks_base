@@ -267,6 +267,8 @@ final class AccessibilityController {
                     FLAGS_MAGNIFICATION_CALLBACK | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
                     "displayId=" + displayId + "; spec={" + spec + "}");
         }
+        mAccessibilityWindowsPopulator.setMagnificationSpec(displayId, spec);
+
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.setMagnificationSpec(spec);
@@ -456,19 +458,6 @@ final class AccessibilityController {
             return displayMagnifier.getMagnificationSpecForWindow(windowState);
         }
         return null;
-    }
-
-    boolean getMagnificationSpecForDisplay(int displayId, MagnificationSpec outSpec) {
-        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-            mAccessibilityTracing.logTrace(TAG + ".getMagnificationSpecForDisplay",
-                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId);
-        }
-        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
-        if (displayMagnifier == null) {
-            return false;
-        }
-
-        return displayMagnifier.getMagnificationSpec(outSpec);
     }
 
     boolean hasCallbacks() {
@@ -773,25 +762,6 @@ final class AccessibilityController {
                 }
             }
             return spec;
-        }
-
-        boolean getMagnificationSpec(MagnificationSpec outSpec) {
-            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpec",
-                        FLAGS_MAGNIFICATION_CALLBACK);
-            }
-            MagnificationSpec spec = mMagnifedViewport.getMagnificationSpec();
-            if (spec == null) {
-                return false;
-            }
-
-            outSpec.setTo(spec);
-            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
-                mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpec",
-                        FLAGS_MAGNIFICATION_CALLBACK, "outSpec={" + outSpec + "}");
-            }
-
-            return true;
         }
 
         void getMagnificationRegion(Region outMagnificationRegion) {
