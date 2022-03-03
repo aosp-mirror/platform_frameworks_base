@@ -5623,6 +5623,7 @@ package android.app {
     method public boolean onException(Object, Throwable);
     method public void onStart();
     method public void removeMonitor(android.app.Instrumentation.ActivityMonitor);
+    method public void resetInTouchMode();
     method public void runOnMainSync(Runnable);
     method public void sendCharacterSync(int);
     method public void sendKeyDownUpSync(int);
