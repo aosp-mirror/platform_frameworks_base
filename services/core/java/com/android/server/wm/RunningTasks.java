@@ -82,7 +82,8 @@ class RunningTasks {
         mRecentTasks = root.mService.getRecentTasks();
         mKeepIntentExtra = (flags & FLAG_KEEP_INTENT_EXTRA) == FLAG_KEEP_INTENT_EXTRA;
 
-        if (mTopDisplayFocusRootTask.getAdjacentTaskFragment() != null) {
+        if (mTopDisplayFocusRootTask != null
+                && mTopDisplayFocusRootTask.getAdjacentTaskFragment() != null) {
             mTopDisplayAdjacentTask = mTopDisplayFocusRootTask.getAdjacentTaskFragment().asTask();
         } else {
             mTopDisplayAdjacentTask = null;
