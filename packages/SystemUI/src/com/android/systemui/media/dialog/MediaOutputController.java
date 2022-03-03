@@ -92,7 +92,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
-    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
     private final CommonNotifCollection mNotifCollection;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
@@ -131,8 +130,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
         mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_active_item_main_content);
         mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
@@ -621,10 +618,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
+    private boolean isPlayBackInfoLocal() {
+        return mMediaController.getPlaybackInfo() != null
+                && mMediaController.getPlaybackInfo().getPlaybackType()
+                == MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+    }
+
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
-        // TODO(b/202500642): Also enable volume control for remote non-group sessions.
-        return !isActiveRemoteDevice(device)
-            || mVolumeAdjustmentForRemoteGroupSessions;
+        return isPlayBackInfoLocal()
+                || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
     }
 
     private final MediaController.Callback mCb = new MediaController.Callback() {
