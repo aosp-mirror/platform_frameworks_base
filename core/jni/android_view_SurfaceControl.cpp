@@ -1950,8 +1950,10 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
                                         jlong frameTimelineVsyncId) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    transaction->setFrameTimelineInfo(
-            {frameTimelineVsyncId, android::os::IInputConstants::INVALID_INPUT_EVENT_ID});
+    FrameTimelineInfo ftInfo;
+    ftInfo.vsyncId = frameTimelineVsyncId;
+    ftInfo.inputEventId = android::os::IInputConstants::INVALID_INPUT_EVENT_ID;
+    transaction->setFrameTimelineInfo(ftInfo);
 }
 
 static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
