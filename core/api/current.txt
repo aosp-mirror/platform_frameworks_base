@@ -52951,6 +52951,7 @@ package android.view.inputmethod {
     method public default boolean performSpellCheck();
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
+    method public default boolean requestCursorUpdates(int, int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);

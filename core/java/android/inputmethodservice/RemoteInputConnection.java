@@ -433,6 +433,26 @@ public final class RemoteInputConnection implements InputConnection {
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
 
+    @Override
+    @AnyThread
+    public boolean requestCursorUpdates(@CursorUpdateMode int cursorUpdateMode,
+            @CursorUpdateFilter int cursorUpdateFilter) {
+        if (mCancellationGroup.isCanceled()) {
+            return false;
+        }
+
+        final InputMethodServiceInternal ims = mImsInternal.getAndWarnIfNull();
+        if (ims == null) {
+            return false;
+        }
+
+        final int displayId = ims.getContext().getDisplayId();
+        final CompletableFuture<Boolean> value =
+                mInvoker.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter, displayId);
+        return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
+                mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+    }
+
     @AnyThread
     public Handler getHandler() {
         // Nothing should happen when called from input method.

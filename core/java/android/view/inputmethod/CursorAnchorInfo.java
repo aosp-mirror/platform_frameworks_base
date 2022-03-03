@@ -575,7 +575,9 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
-     * Returns {@link EditorBoundsInfo} editor related bounds.
+     * Returns {@link EditorBoundsInfo} for the current editor, or {@code null} if IME is not
+     * subscribed with {@link InputConnection#CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}
+     * or {@link InputConnection#CURSOR_UPDATE_MONITOR}.
      */
     @Nullable
     public EditorBoundsInfo getEditorBoundsInfo() {
