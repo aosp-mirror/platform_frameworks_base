@@ -3372,6 +3372,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.e(TAG, "Stylus handwriting was not initialized.");
                     return;
                 }
+                if (!mHwController.isStylusGestureOngoing()) {
+                    Slog.e(TAG, "There is no ongoing stylus gesture to start stylus handwriting.");
+                    return;
+                }
                 if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
                 final IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
@@ -4764,8 +4768,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_RESET_HANDWRITING: {
                 synchronized (ImfLock.class) {
                     if (mBindingController.supportsStylusHandwriting()
-                            && getCurMethodLocked() != null) {
-                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                            && getCurMethodLocked() != null && mCurFocusedWindow != null) {
+                        mHwController.initializeHandwritingSpy(
+                                mCurTokenDisplayId, mCurFocusedWindow);
                     } else {
                         mHwController.reset();
                     }
@@ -4793,7 +4798,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             session.getHandwritingChannel(), session.getRecordedEvents())) {
                         // When failed to issue IPCs, re-initialize handwriting state.
                         Slog.w(TAG, "Resetting handwriting mode.");
-                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                        scheduleResetStylusHandwriting();
                     }
                 }
                 return true;
