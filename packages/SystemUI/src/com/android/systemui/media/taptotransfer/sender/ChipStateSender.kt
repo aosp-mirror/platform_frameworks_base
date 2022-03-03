@@ -21,6 +21,7 @@ import android.content.Context
 import android.media.MediaRoute2Info
 import android.view.View
 import androidx.annotation.StringRes
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
@@ -39,6 +40,7 @@ import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
  */
 enum class ChipStateSender(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
+    val uiEvent: UiEventLogger.UiEventEnum,
     @StringRes val stringResId: Int?,
     val isMidTransfer: Boolean = false,
     val isTransferFailure: Boolean = false,
@@ -51,6 +53,7 @@ enum class ChipStateSender(
      */
     ALMOST_CLOSE_TO_START_CAST(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST,
         R.string.media_move_closer_to_start_cast,
     ),
 
@@ -62,6 +65,7 @@ enum class ChipStateSender(
      */
     ALMOST_CLOSE_TO_END_CAST(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST,
         R.string.media_move_closer_to_end_cast,
     ),
 
@@ -71,6 +75,7 @@ enum class ChipStateSender(
      */
     TRANSFER_TO_RECEIVER_TRIGGERED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED,
         R.string.media_transfer_playing_different_device,
         isMidTransfer = true,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
@@ -82,6 +87,7 @@ enum class ChipStateSender(
      */
     TRANSFER_TO_THIS_DEVICE_TRIGGERED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
         R.string.media_transfer_playing_this_device,
         isMidTransfer = true,
         timeout = TRANSFER_TRIGGERED_TIMEOUT_MILLIS
@@ -92,17 +98,22 @@ enum class ChipStateSender(
      */
     TRANSFER_TO_RECEIVER_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED,
         R.string.media_transfer_playing_different_device
     ) {
         override fun undoClickListener(
             controllerSender: MediaTttChipControllerSender,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
+            uiEventLogger: MediaTttSenderUiEventLogger
         ): View.OnClickListener? {
             if (undoCallback == null) {
                 return null
             }
             return View.OnClickListener {
+                uiEventLogger.logUndoClicked(
+                    MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED
+                )
                 undoCallback.onUndoTriggered()
                 // The external service should eventually send us a TransferToThisDeviceTriggered
                 // state, but that may take too long to go through the binder and the user may be
@@ -122,17 +133,22 @@ enum class ChipStateSender(
      */
     TRANSFER_TO_THIS_DEVICE_SUCCEEDED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
         R.string.media_transfer_playing_this_device
     ) {
         override fun undoClickListener(
             controllerSender: MediaTttChipControllerSender,
             routeInfo: MediaRoute2Info,
             undoCallback: IUndoMediaTransferCallback?,
+            uiEventLogger: MediaTttSenderUiEventLogger
         ): View.OnClickListener? {
             if (undoCallback == null) {
                 return null
             }
             return View.OnClickListener {
+                uiEventLogger.logUndoClicked(
+                    MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED
+                )
                 undoCallback.onUndoTriggered()
                 // The external service should eventually send us a TransferToReceiverTriggered
                 // state, but that may take too long to go through the binder and the user may be
@@ -150,6 +166,7 @@ enum class ChipStateSender(
     /** A state representing that a transfer to the receiver device has failed. */
     TRANSFER_TO_RECEIVER_FAILED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED,
         R.string.media_transfer_failed,
         isTransferFailure = true
     ),
@@ -157,6 +174,7 @@ enum class ChipStateSender(
     /** A state representing that a transfer back to this device has failed. */
     TRANSFER_TO_THIS_DEVICE_FAILED(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED,
         R.string.media_transfer_failed,
         isTransferFailure = true
     ),
@@ -164,6 +182,7 @@ enum class ChipStateSender(
     /** A state representing that this device is far away from any receiver device. */
     FAR_FROM_RECEIVER(
         StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+        MediaTttSenderUiEvents.MEDIA_TTT_SENDER_FAR_FROM_RECEIVER,
         stringResId = null
     );
 
@@ -191,7 +210,8 @@ enum class ChipStateSender(
     open fun undoClickListener(
         controllerSender: MediaTttChipControllerSender,
         routeInfo: MediaRoute2Info,
-        undoCallback: IUndoMediaTransferCallback?
+        undoCallback: IUndoMediaTransferCallback?,
+        uiEventLogger: MediaTttSenderUiEventLogger
     ): View.OnClickListener? = null
 
     companion object {

@@ -51,6 +51,7 @@ class MediaTttChipControllerSender @Inject constructor(
     viewUtil: ViewUtil,
     @Main mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
+    private val uiEventLogger: MediaTttSenderUiEventLogger
 ) : MediaTttChipControllerCommon<ChipSenderInfo>(
     context,
     logger,
@@ -91,6 +92,7 @@ class MediaTttChipControllerSender @Inject constructor(
             Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
             return
         }
+        uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
             removeChip(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
@@ -123,7 +125,7 @@ class MediaTttChipControllerSender @Inject constructor(
         // Undo
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
         val undoClickListener = chipState.undoClickListener(
-                this, chipInfo.routeInfo, chipInfo.undoCallback
+                this, chipInfo.routeInfo, chipInfo.undoCallback, uiEventLogger
         )
         undoView.setOnClickListener(undoClickListener)
         undoView.visibility = (undoClickListener != null).visibleIfTrue()
