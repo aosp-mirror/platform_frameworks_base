@@ -783,6 +783,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void finishEnterSplitScreen(SurfaceControl.Transaction t) {
         mSplitLayout.init();
         setDividerVisibility(true, t);
+        updateSurfaceBounds(mSplitLayout, t);
         setSplitsVisible(true);
         mShouldUpdateRecents = true;
         updateRecentTasksSplitPair();
