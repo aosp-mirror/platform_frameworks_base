@@ -87,6 +87,7 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.STATE_USER_SETUP_FINALIZED;
 import static android.app.admin.DevicePolicyManager.STATE_USER_UNMANAGED;
 import static android.app.admin.DevicePolicyManager.STATUS_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PROFILE;
@@ -9213,7 +9214,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     // directly setting profile-owner or device-owner.
                     if (getUserProvisioningState(userHandle)
                             != DevicePolicyManager.STATE_USER_UNMANAGED
-                            || newState != DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
+                            || newState != STATE_USER_SETUP_FINALIZED) {
                         throw new IllegalStateException("Not allowed to change provisioning state "
                                 + "unless current provisioning state is unmanaged, and new state"
                                 + "is finalized.");
@@ -9247,7 +9248,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             case DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE:
             case DevicePolicyManager.STATE_USER_SETUP_COMPLETE:
                 // Can only move to finalized from these states.
-                if (newState == DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
+                if (newState == STATE_USER_SETUP_FINALIZED) {
                     return;
                 }
                 break;
@@ -9259,7 +9260,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return;
                 }
                 break;
-            case DevicePolicyManager.STATE_USER_SETUP_FINALIZED:
+            case STATE_USER_SETUP_FINALIZED:
                 // Cannot transition out of finalized.
                 break;
             case DevicePolicyManager.STATE_USER_PROFILE_FINALIZED:
@@ -18067,7 +18068,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+                        || (hasCallingOrSelfPermission(permission.PROVISION_DEMO_DEVICE)
+                        && provisioningParams.isDemoDevice()));
 
         provisioningParams.logParams(callerPackage);
 
@@ -18104,8 +18107,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             disallowAddUser();
-            setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
-                    provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            setAdminCanGrantSensorsPermissionForUserUnchecked(
+                    deviceOwnerUserId, provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            setDemoDeviceStateUnchecked(deviceOwnerUserId, provisioningParams.isDemoDevice());
             onProvisionFullyManagedDeviceCompleted(provisioningParams);
             sendProvisioningCompletedBroadcast(
                     deviceOwnerUserId,
@@ -18302,6 +18306,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
             saveSettingsLocked(userId);
         }
+    }
+
+    private void setDemoDeviceStateUnchecked(@UserIdInt int userId, boolean isDemoDevice) {
+        Slogf.d(LOG_TAG, "setDemoDeviceStateUnchecked(%d, %b)",
+                userId, isDemoDevice);
+        if (!isDemoDevice) {
+            return;
+        }
+        synchronized (getLockObject()) {
+            mInjector.settingsGlobalPutStringForUser(
+                    Settings.Global.DEVICE_DEMO_MODE, Integer.toString(/* value= */ 1), userId);
+        }
+        setUserProvisioningState(STATE_USER_SETUP_FINALIZED, userId);
     }
 
     private void updateAdminCanGrantSensorsPermissionCache(@UserIdInt int userId) {
