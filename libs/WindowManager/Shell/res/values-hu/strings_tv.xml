@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"PIP bezárása"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Teljes képernyő"</string>
     <string name="pip_move" msgid="1544227837964635439">"PIP áthelyezése"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Kép a képben kibontása"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Kép a képben összecsukása"</string>
 </resources>
