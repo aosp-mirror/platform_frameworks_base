@@ -36,6 +36,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -56,7 +57,6 @@ import com.android.internal.util.ArrayUtils;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -94,7 +94,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      * lifecycle order since we may be updating the visibility of task surface controls in a pending
      * transaction before they are presented to the task org.
      */
-    private class TaskOrganizerCallbacks {
+    private static class TaskOrganizerCallbacks {
         final ITaskOrganizer mTaskOrganizer;
         final Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
@@ -122,7 +122,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
             }
         }
-
 
         void onTaskVanished(Task task) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Task vanished taskId=%d", task.mTaskId);
@@ -173,11 +172,160 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
+    /**
+     * Maintains a list of all the pending events for a given {@link android.window.TaskOrganizer}
+     */
+    static final class TaskOrganizerPendingEventsQueue {
+        private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
+        private final TaskOrganizerState mOrganizerState;
+        private RunningTaskInfo mTmpTaskInfo;
+        // Pending task events due to layout deferred.
+        private final ArrayList<PendingTaskEvent> mPendingTaskEvents = new ArrayList<>();
+
+        TaskOrganizerPendingEventsQueue(TaskOrganizerState taskOrganizerState) {
+            mOrganizerState = taskOrganizerState;
+        }
+
+        @VisibleForTesting
+        public ArrayList<PendingTaskEvent> getPendingEventList() {
+            return mPendingTaskEvents;
+        }
+
+        int numPendingTaskEvents() {
+            return mPendingTaskEvents.size();
+        }
+
+        void clearPendingTaskEvents() {
+            mPendingTaskEvents.clear();
+        }
+
+        void addPendingTaskEvent(PendingTaskEvent event) {
+            mPendingTaskEvents.add(event);
+        }
+
+        void removePendingTaskEvent(PendingTaskEvent event) {
+            mPendingTaskEvents.remove(event);
+        }
+
+        /**
+         * Removes all the pending task events for the given {@code task}.
+         *
+         * @param task
+         * @return true if a {@link PendingTaskEvent#EVENT_APPEARED} is still pending for the given
+         * {code task}.
+         */
+        boolean removePendingTaskEvents(Task task) {
+            boolean foundPendingAppearedEvents = false;
+            for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
+                PendingTaskEvent entry = mPendingTaskEvents.get(i);
+                if (task.mTaskId == entry.mTask.mTaskId) {
+                    // This task is vanished so remove all pending event of it.
+                    mPendingTaskEvents.remove(i);
+
+                    if (entry.mEventType == PendingTaskEvent.EVENT_APPEARED) {
+                        foundPendingAppearedEvents = true;
+                    }
+                }
+            }
+            return foundPendingAppearedEvents;
+        }
+
+        @Nullable
+        private PendingTaskEvent getPendingTaskEvent(Task task, int type) {
+            for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
+                PendingTaskEvent entry = mPendingTaskEvents.get(i);
+                if (task.mTaskId == entry.mTask.mTaskId && type == entry.mEventType) {
+                    return entry;
+                }
+            }
+            return null;
+        }
+
+        @VisibleForTesting
+        @Nullable
+        PendingTaskEvent getPendingLifecycleTaskEvent(Task task) {
+            for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
+                PendingTaskEvent entry = mPendingTaskEvents.get(i);
+                if (task.mTaskId == entry.mTask.mTaskId && entry.isLifecycleEvent()) {
+                    return entry;
+                }
+            }
+            return null;
+        }
+
+        void dispatchPendingEvents() {
+            if (mPendingTaskEvents.isEmpty()) {
+                return;
+            }
+            for (int i = 0, n = mPendingTaskEvents.size(); i < n; i++) {
+                dispatchPendingEvent(mPendingTaskEvents.get(i));
+            }
+            mPendingTaskEvents.clear();
+        }
+
+        private void dispatchPendingEvent(PendingTaskEvent event) {
+            final Task task = event.mTask;
+            switch (event.mEventType) {
+                case PendingTaskEvent.EVENT_APPEARED:
+                    if (task.taskAppearedReady()) {
+                        mOrganizerState.mOrganizer.onTaskAppeared(task);
+                    }
+                    break;
+                case PendingTaskEvent.EVENT_VANISHED:
+                    mOrganizerState.mOrganizer.onTaskVanished(task);
+                    mLastSentTaskInfos.remove(task);
+                    break;
+                case PendingTaskEvent.EVENT_INFO_CHANGED:
+                    dispatchTaskInfoChanged(event.mTask, event.mForce);
+                    break;
+                case PendingTaskEvent.EVENT_ROOT_BACK_PRESSED:
+                    mOrganizerState.mOrganizer.onBackPressedOnTaskRoot(task);
+                    break;
+            }
+        }
+
+        private void dispatchTaskInfoChanged(Task task, boolean force) {
+            RunningTaskInfo lastInfo = mLastSentTaskInfos.get(task);
+            if (mTmpTaskInfo == null) {
+                mTmpTaskInfo = new RunningTaskInfo();
+            }
+            mTmpTaskInfo.configuration.unset();
+            task.fillTaskInfo(mTmpTaskInfo);
+
+            boolean changed = !mTmpTaskInfo
+                    .equalsForTaskOrganizer(lastInfo)
+                    || !configurationsAreEqualForOrganizer(
+                    mTmpTaskInfo.configuration,
+                    lastInfo.configuration);
+            if (!(changed || force)) {
+                // mTmpTaskInfo will be reused next time.
+                return;
+            }
+            final RunningTaskInfo newInfo = mTmpTaskInfo;
+            mLastSentTaskInfos.put(task,
+                    mTmpTaskInfo);
+            // Since we've stored this, clean up the reference so a new one will be created next
+            // time.
+            // Transferring it this way means we only have to construct new RunningTaskInfos when
+            // they change.
+            mTmpTaskInfo = null;
+
+            if (task.isOrganized()) {
+                // Because we defer sending taskAppeared() until the app has drawn, we may receive a
+                // configuration change before the state actually has the task registered. As such
+                // we should ignore these change events to the organizer until taskAppeared(). If
+                // the task was created by the organizer, then we always send the info change.
+                mOrganizerState.mOrganizer.onTaskInfoChanged(task, newInfo);
+            }
+        }
+    }
+
     @VisibleForTesting
     class TaskOrganizerState {
         private final TaskOrganizerCallbacks mOrganizer;
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
+        private final TaskOrganizerPendingEventsQueue mPendingEventsQueue;
         private final int mUid;
 
         TaskOrganizerState(ITaskOrganizer organizer, int uid) {
@@ -187,6 +335,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                             : mService.mWindowManager.mAnimator::addAfterPrepareSurfacesRunnable;
             mOrganizer = new TaskOrganizerCallbacks(organizer, deferTaskOrgCallbacksConsumer);
             mDeathRecipient = new DeathRecipient(organizer);
+            mPendingEventsQueue = new TaskOrganizerPendingEventsQueue(this);
             try {
                 organizer.asBinder().linkToDeath(mDeathRecipient, 0);
             } catch (RemoteException e) {
@@ -198,6 +347,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @VisibleForTesting
         DeathRecipient getDeathRecipient() {
             return mDeathRecipient;
+        }
+
+        @VisibleForTesting
+        TaskOrganizerPendingEventsQueue getPendingEventsQueue() {
+            return mPendingEventsQueue;
         }
 
         /**
@@ -263,8 +417,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     // updateTaskOrganizerState should remove the task from the list, but still
                     // check it again to avoid while-loop isn't terminate.
                     if (removeTask(t, t.mRemoveWithTaskOrganizer)) {
-                        TaskOrganizerController.this.onTaskVanishedInternal(
-                                mOrganizer.mTaskOrganizer, t);
+                        TaskOrganizerController.this.onTaskVanishedInternal(this, t);
                     }
                 }
                 if (mService.getTransitionController().isShellTransitionsEnabled()) {
@@ -278,8 +431,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 }
             }
 
-            // Remove organizer state after removing tasks so we get a chance to send
-            // onTaskVanished.
+            // Pending events queue for this organizer need to be cleared because this organizer
+            // has either died or unregistered itself.
+            mPendingEventsQueue.clearPendingTaskEvents();
             mTaskOrganizerStates.remove(mOrganizer.getBinder());
         }
 
@@ -320,14 +474,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     // List of task organizers by priority
     private final ArrayDeque<ITaskOrganizer> mTaskOrganizers = new ArrayDeque<>();
-    private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
-    private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
-    // Pending task events due to layout deferred.
-    private final ArrayList<PendingTaskEvent> mPendingTaskEvents = new ArrayList<>();
+    private final ArrayMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new ArrayMap<>();
     // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
     private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet<>();
 
-    private RunningTaskInfo mTmpTaskInfo;
     private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
     TaskOrganizerController(ActivityTaskManagerService atm) {
@@ -352,11 +502,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     @VisibleForTesting
     public void setDeferTaskOrgCallbacksConsumer(Consumer<Runnable> consumer) {
         mDeferTaskOrgCallbacksConsumer = consumer;
-    }
-
-    @VisibleForTesting
-    ArrayList<PendingTaskEvent> getPendingEventList() {
-        return mPendingTaskEvents;
     }
 
     /**
@@ -592,10 +737,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         if (state != null && state.addTask(task)) {
-            PendingTaskEvent pending = getPendingTaskEvent(task, PendingTaskEvent.EVENT_APPEARED);
+            final TaskOrganizerPendingEventsQueue pendingEvents =
+                    state.mPendingEventsQueue;
+            PendingTaskEvent pending = pendingEvents.getPendingTaskEvent(task,
+                    PendingTaskEvent.EVENT_APPEARED);
             if (pending == null) {
-                pending = new PendingTaskEvent(task, PendingTaskEvent.EVENT_APPEARED);
-                mPendingTaskEvents.add(pending);
+                pendingEvents.addPendingTaskEvent(new PendingTaskEvent(task,
+                        PendingTaskEvent.EVENT_APPEARED));
             }
         }
     }
@@ -603,26 +751,25 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         if (state != null && state.removeTask(task, task.mRemoveWithTaskOrganizer)) {
-            onTaskVanishedInternal(organizer, task);
+            onTaskVanishedInternal(state, task);
         }
     }
 
-    private void onTaskVanishedInternal(ITaskOrganizer organizer, Task task) {
-        for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
-            PendingTaskEvent entry = mPendingTaskEvents.get(i);
-            if (task.mTaskId == entry.mTask.mTaskId && entry.mTaskOrg == organizer) {
-                // This task is vanished so remove all pending event of it.
-                mPendingTaskEvents.remove(i);
-                if (entry.mEventType == PendingTaskEvent.EVENT_APPEARED) {
-                    // If task appeared callback still pend, ignore this callback too.
-                    return;
-                }
-            }
+    private void onTaskVanishedInternal(TaskOrganizerState organizerState, Task task) {
+        if (organizerState == null) {
+            Slog.i(TAG, "cannot send onTaskVanished because organizer state is not "
+                    + "present for this organizer");
+            return;
         }
-
-        PendingTaskEvent pending =
-                new PendingTaskEvent(task, organizer, PendingTaskEvent.EVENT_VANISHED);
-        mPendingTaskEvents.add(pending);
+        TaskOrganizerPendingEventsQueue pendingEventsQueue =
+                organizerState.mPendingEventsQueue;
+        boolean hadPendingAppearedEvents =
+                pendingEventsQueue.removePendingTaskEvents(task);
+        if (hadPendingAppearedEvents) {
+            return;
+        }
+        pendingEventsQueue.addPendingTaskEvent(new PendingTaskEvent(task,
+                organizerState.mOrganizer.mTaskOrganizer, PendingTaskEvent.EVENT_VANISHED));
     }
 
     @Override
@@ -690,48 +837,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     void dispatchPendingEvents() {
-        if (mService.mWindowManager.mWindowPlacerLocked.isLayoutDeferred()
-                || mPendingTaskEvents.isEmpty()) {
+        if (mService.mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
             return;
         }
-
-        for (int i = 0, n = mPendingTaskEvents.size(); i < n; i++) {
-            PendingTaskEvent event = mPendingTaskEvents.get(i);
-            final Task task = event.mTask;
-            final TaskOrganizerState state;
-            switch (event.mEventType) {
-                case PendingTaskEvent.EVENT_APPEARED:
-                    state = mTaskOrganizerStates.get(event.mTaskOrg.asBinder());
-                    if (state != null && task.taskAppearedReady()) {
-                        state.mOrganizer.onTaskAppeared(task);
-                    }
-                    break;
-                case PendingTaskEvent.EVENT_VANISHED:
-                    // TaskOrganizerState cannot be used here because it might have already been
-                    // removed.
-                    // The state is removed when an organizer dies or is unregistered. In order to
-                    // send the pending vanished task events, the mTaskOrg from event is used.
-                    // These events should not ideally be sent and will be removed as part of
-                    // b/224812558.
-                    try {
-                        event.mTaskOrg.onTaskVanished(task.getTaskInfo());
-                    } catch (RemoteException ex) {
-                        Slog.e(TAG, "Exception sending onTaskVanished callback", ex);
-                    }
-                    mLastSentTaskInfos.remove(task);
-                    break;
-                case PendingTaskEvent.EVENT_INFO_CHANGED:
-                    dispatchTaskInfoChanged(event.mTask, event.mForce);
-                    break;
-                case PendingTaskEvent.EVENT_ROOT_BACK_PRESSED:
-                    state = mTaskOrganizerStates.get(event.mTaskOrg.asBinder());
-                    if (state != null) {
-                        state.mOrganizer.onBackPressedOnTaskRoot(task);
-                    }
-                    break;
-            }
+        for (int taskOrgIdx = 0; taskOrgIdx < mTaskOrganizerStates.size(); taskOrgIdx++) {
+            TaskOrganizerState taskOrganizerState = mTaskOrganizerStates.valueAt(taskOrgIdx);
+            taskOrganizerState.mPendingEventsQueue.dispatchPendingEvents();
         }
-        mPendingTaskEvents.clear();
     }
 
     void reportImeDrawnOnTask(Task task) {
@@ -750,20 +862,30 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // Skip if task still not appeared.
             return;
         }
-        if (force && mPendingTaskEvents.isEmpty()) {
+        final TaskOrganizerState taskOrganizerState =
+                mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
+        final TaskOrganizerPendingEventsQueue pendingEventsQueue =
+                taskOrganizerState.mPendingEventsQueue;
+        if (pendingEventsQueue == null) {
+            Slog.i(TAG, "cannot send onTaskInfoChanged because pending events queue is not "
+                    + "present for this organizer");
+            return;
+        }
+        if (force && pendingEventsQueue.numPendingTaskEvents() == 0) {
             // There are task-info changed events do not result in
             // - RootWindowContainer#performSurfacePlacementNoTrace OR
             // - WindowAnimator#animate
             // For instance, when an app requesting aspect ratio change when in PiP mode.
             // To solve this, we directly dispatch the pending event if there are no events queued (
             // otherwise, all pending events should be dispatched on next drawn).
-            dispatchTaskInfoChanged(task, true /* force */);
+            pendingEventsQueue.dispatchTaskInfoChanged(task, true /* force */);
             return;
         }
 
         // Defer task info reporting while layout is deferred. This is because layout defer
         // blocks tend to do lots of re-ordering which can mess up animations in receivers.
-        PendingTaskEvent pending = getPendingLifecycleTaskEvent(task);
+        PendingTaskEvent pending = pendingEventsQueue
+                .getPendingLifecycleTaskEvent(task);
         if (pending == null) {
             pending = new PendingTaskEvent(task, PendingTaskEvent.EVENT_INFO_CHANGED);
         } else {
@@ -774,45 +896,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 return;
             }
             // Remove and add for re-ordering.
-            mPendingTaskEvents.remove(pending);
+            pendingEventsQueue.removePendingTaskEvent(pending);
         }
         pending.mForce |= force;
-        mPendingTaskEvents.add(pending);
-    }
-
-    private void dispatchTaskInfoChanged(Task task, boolean force) {
-        RunningTaskInfo lastInfo = mLastSentTaskInfos.get(task);
-        if (mTmpTaskInfo == null) {
-            mTmpTaskInfo = new RunningTaskInfo();
-        }
-        mTmpTaskInfo.configuration.unset();
-        task.fillTaskInfo(mTmpTaskInfo);
-
-        boolean changed = !mTmpTaskInfo.equalsForTaskOrganizer(lastInfo)
-                || !configurationsAreEqualForOrganizer(
-                        mTmpTaskInfo.configuration, lastInfo.configuration);
-        if (!(changed || force)) {
-            // mTmpTaskInfo will be reused next time.
-            return;
-        }
-        final RunningTaskInfo newInfo = mTmpTaskInfo;
-        mLastSentTaskInfos.put(task, mTmpTaskInfo);
-        // Since we've stored this, clean up the reference so a new one will be created next time.
-        // Transferring it this way means we only have to construct new RunningTaskInfos when they
-        // change.
-        mTmpTaskInfo = null;
-
-        if (task.isOrganized()) {
-            // Because we defer sending taskAppeared() until the app has drawn, we may receive a
-            // configuration change before the state actually has the task registered. As such we
-            // should ignore these change events to the organizer until taskAppeared(). If the task
-            // was created by the organizer, then we always send the info change.
-            final TaskOrganizerState state = mTaskOrganizerStates.get(
-                    task.mTaskOrganizer.asBinder());
-            if (state != null) {
-                state.mOrganizer.onTaskInfoChanged(task, newInfo);
-            }
-        }
+        pendingEventsQueue.addPendingTaskEvent(pending);
     }
 
     @Override
@@ -1018,48 +1105,34 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 || !mInterceptBackPressedOnRootTasks.contains(task.mTaskId)) {
             return false;
         }
+        final TaskOrganizerPendingEventsQueue pendingEventsQueue =
+                mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder())
+                        .mPendingEventsQueue;
+        if (pendingEventsQueue == null) {
+            Slog.w(TAG, "cannot get handle BackPressedOnTaskRoot because organizerState is "
+                    + "not present");
+            return false;
+        }
 
         PendingTaskEvent pendingVanished =
-                getPendingTaskEvent(task, PendingTaskEvent.EVENT_VANISHED);
+                pendingEventsQueue.getPendingTaskEvent(task,
+                        PendingTaskEvent.EVENT_VANISHED);
         if (pendingVanished != null) {
             // This task will vanish before this callback so just ignore.
             return false;
         }
 
-        PendingTaskEvent pending = getPendingTaskEvent(
+        PendingTaskEvent pending = pendingEventsQueue.getPendingTaskEvent(
                 task, PendingTaskEvent.EVENT_ROOT_BACK_PRESSED);
         if (pending == null) {
             pending = new PendingTaskEvent(task, PendingTaskEvent.EVENT_ROOT_BACK_PRESSED);
         } else {
             // Pending already exist, remove and add for re-ordering.
-            mPendingTaskEvents.remove(pending);
+            pendingEventsQueue.removePendingTaskEvent(pending);
         }
-        mPendingTaskEvents.add(pending);
+        pendingEventsQueue.addPendingTaskEvent(pending);
         mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
         return true;
-    }
-
-    @Nullable
-    private PendingTaskEvent getPendingTaskEvent(Task task, int type) {
-        for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
-            PendingTaskEvent entry = mPendingTaskEvents.get(i);
-            if (task.mTaskId == entry.mTask.mTaskId && type == entry.mEventType) {
-                return entry;
-            }
-        }
-        return null;
-    }
-
-    @VisibleForTesting
-    @Nullable
-    PendingTaskEvent getPendingLifecycleTaskEvent(Task task) {
-        for (int i = mPendingTaskEvents.size() - 1; i >= 0; i--) {
-            PendingTaskEvent entry = mPendingTaskEvents.get(i);
-            if (task.mTaskId == entry.mTask.mTaskId && entry.isLifecycleEvent()) {
-                return entry;
-            }
-        }
-        return null;
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -1083,5 +1156,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     @VisibleForTesting
     TaskOrganizerState getTaskOrganizerState(IBinder taskOrganizer) {
         return mTaskOrganizerStates.get(taskOrganizer);
+    }
+
+    @VisibleForTesting
+    TaskOrganizerPendingEventsQueue getTaskOrganizerPendingEvents(IBinder taskOrganizer) {
+        return mTaskOrganizerStates.get(taskOrganizer).mPendingEventsQueue;
     }
 }

@@ -223,7 +223,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
-        assertTaskVanished(organizer, false /* expectVanished */, rootTask);
+        verify(organizer, times(0)).onTaskVanished(any());
         assertFalse(rootTask.isOrganized());
     }
 
@@ -297,7 +297,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
 
-        assertTaskVanished(organizer, true /* expectVanished */, rootTask);
+        verify(organizer, times(0)).onTaskVanished(any());
         assertFalse(rootTask.isOrganized());
     }
 
@@ -341,7 +341,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, times(3))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-        assertTaskVanished(organizer2, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+        verify(organizer2, times(0)).onTaskVanished(any());
     }
 
     @Test
@@ -395,6 +395,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertFalse(task2.isAttached());
         // Normal task should keep.
         assertTrue(task.isAttached());
+        verify(organizer2, times(0)).onTaskVanished(any());
     }
 
     @Test
@@ -439,7 +440,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, times(3))
                 .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
-        assertTaskVanished(organizer2, true /* expectVanished */, rootTask, rootTask2, rootTask3);
+        verify(organizer2, times(0)).onTaskVanished(any());
     }
 
     @Test
@@ -1264,7 +1265,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_APPEARED, pendingEvents.get(0).mEventType);
         assertEquals("TestDescription",
@@ -1284,7 +1285,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         rootTask.removeImmediately();
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(0, pendingEvents.size());
     }
 
@@ -1302,7 +1303,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_INFO_CHANGED, pendingEvents.get(0).mEventType);
         assertEquals("TestDescription",
@@ -1311,7 +1312,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription2"));
         waitUntilHandlersIdle();
 
-        pendingEvents = getTaskPendingEvent(rootTask);
+        pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_INFO_CHANGED, pendingEvents.get(0).mEventType);
         assertEquals("TestDescription2",
@@ -1334,7 +1335,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         rootTask.removeImmediately();
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_VANISHED, pendingEvents.get(0).mEventType);
         assertEquals("TestDescription",
@@ -1355,7 +1356,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         rootTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_VANISHED, pendingEvents.get(0).mEventType);
     }
@@ -1375,14 +1376,16 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 new IRequestFinishCallback.Default());
         waitUntilHandlersIdle();
 
-        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(rootTask);
+        ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(organizer, rootTask);
         assertEquals(1, pendingEvents.size());
         assertEquals(PendingTaskEvent.EVENT_VANISHED, pendingEvents.get(0).mEventType);
     }
 
-    private ArrayList<PendingTaskEvent> getTaskPendingEvent(Task task) {
+    private ArrayList<PendingTaskEvent> getTaskPendingEvent(ITaskOrganizer organizer, Task task) {
         ArrayList<PendingTaskEvent> total =
-                mWm.mAtmService.mTaskOrganizerController.getPendingEventList();
+                mWm.mAtmService.mTaskOrganizerController
+                        .getTaskOrganizerPendingEvents(organizer.asBinder())
+                        .getPendingEventList();
         ArrayList<PendingTaskEvent> result = new ArrayList();
 
         for (int i = 0; i < total.size(); i++) {
