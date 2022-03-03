@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"ಸಿಸ್ಟಂ UI"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"ಬ್ಯಾಟರಿ ಸದ್ಯದಲ್ಲೇ ಖಾಲಿಯಾಗಬಹುದು"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB ಮೂಲಕ ಚಾರ್ಜ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ನಿಮ್ಮ ಸಾಧನದೊಂದಿಗೆ ನೀಡಲಾಗಿರುವ ಚಾರ್ಜರ್‌ ಬಳಸಿ"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ಪಿನ್ ಬಳಸಿ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ಪ್ಯಾಟರ್ನ್ ಬಳಸಿ"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚು"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ಅಡಚಣೆ ಮಾಡಬೇಡ."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ಬ್ಲೂಟೂತ್."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಮ್ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="9131802557946276718">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ಇಥರ್ನೆಟ್"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ಯಾವುದೇ ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ಎಲ್ಲಾ ನಿಶ್ಶಬ್ಧ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಎನ್ನುವ ಮೂಲಕ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ಸ್ಥಿತಿ:&lt;/b&gt; ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಅಡಚಣೆ ಮಾಡಬೇಡ ಮೋಡ್‌ಗೆ ಅಡ್ಡಿಯುಂಟುಮಾಡುತ್ತದೆ"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ಹಾಗೂ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವಾಗಿ ತೋರಿಸುತ್ತದೆ, ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸುತ್ತದೆ, ಅಡಚಣೆ ಮಾಡಬೇಡ ಮೋಡ್‌ಗೆ ಅಡ್ಡಿಯುಂಟುಮಾಡುತ್ತದೆ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
@@ -537,7 +549,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"ಬಿತ್ತರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"ಮುಂದೆ"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"ಹಿಂದೆ"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"ಎಸ್ಎಂಎಸ್"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ಸಂಗೀತ"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌"</string>
     <string name="battery" msgid="769686279459897127">"ಬ್ಯಾಟರಿ"</string>
     <string name="headset" msgid="4485892374984466437">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"ವೈ-ಫೈ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ಬ್ಲೂಟೂತ್‌ ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"(<xliff:g id="ID_1">%s</xliff:g>) ಸ್ವಯಂಚಾಲಿತ ನಿಯಮದ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"(<xliff:g id="ID_1">%s</xliff:g>) ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ಸ್ವಯಂಚಾಲಿತ ನಿಯಮ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್ ಮಾಡಬೇಕೆ?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ಉದ್ಯೋಗ)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ಫೋನ್ ಕರೆ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> ಮೂಲಕ)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ಕ್ಯಾಮರಾ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ಸ್ಥಳ"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"ಮೈಕ್ರೋಫೋನ್‌"</string>
@@ -806,10 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ಡಿಸ್‌ಕನೆಕ್ಟ್ ಆಗಿದೆ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ಬದಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
-    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
-    <skip />
-    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
-    <skip />
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ಈ ಸೆಶನ್ ಕಾಸ್ಟ್ ಮಾಡಲು, ಆ್ಯಪ್ ಅನ್ನು ತೆರೆಯಿರಿ."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ಅಪರಿಚಿತ ಆ್ಯಪ್"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ಬಿಲ್ಡ್ ಸಂಖ್ಯೆಯನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ನಕಲಿಸಲಾಗಿದೆ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ಸಂಭಾಷಣೆಯನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -843,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ಸಂಭಾಷಣೆ"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ಅಡಚಣೆ ಮಾಡಬೇಡಿ\' ನಿಂದ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಿದ್ದಾರೆ"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರು ಸ್ಥಿತಿಯ ಅಪ್‌ಡೇಟ್ ಹೊಂದಿದ್ದಾರೆ: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -894,4 +912,11 @@
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಕ್ಕೆ ಕಳುಹಿಸಿ"</string>
     <string name="add" msgid="81036585205287996">"ಸೇರಿಸಿ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡುವುದನ್ನು ಈ ಅಧಿಸೂಚನೆಯು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ವೈ-ಫೈ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ಆದ್ಯತೆ ಮೋಡ್"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Assistant ಅತಿಥಿ ಮೋಡ್‌ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ಅಧಿಸೂಚನೆ}one{# ಅಧಿಸೂಚನೆಗಳು}other{# ಅಧಿಸೂಚನೆಗಳು}}"</string>
 </resources>

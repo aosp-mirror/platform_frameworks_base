@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Sistemaren interfazea"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Laster agortuko da bateria"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Ezin da USB bidez kargatu"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Erabili gailuaren kargagailua"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Autentifikatu da aurpegia"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Berretsita"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Amaitzeko, sakatu \"Berretsi\""</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentifikatuta"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Erabili PINa"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Erabili eredua"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Itxi"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"isiltasun osoa"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"alarmak soilik"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Ez molestatzeko modua."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth-a."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth bidezko konexioa aktibatuta dago."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarma ordu honetarako ezarri da: <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Postreen kutxa"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Pantaila-babeslea"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ez molestatzeko modua"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth-a"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Ez dago parekatutako gailurik erabilgarri"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Jakinarazpenak"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Elkarrizketak"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Garbitu soinurik gabeko jakinarazpen guztiak"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ez molestatzeko moduak pausatu egin ditu jakinarazpenak"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Hasi"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ez dago jakinarazpenik"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Zure gurasoak kudeatzen du gailua"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"Mailaz jaitsi da &lt;b&gt;egoera:&lt;/b&gt;"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Elkarrizketen jakinarazpenen goialdean eta profileko argazki gisa agertzen da pantaila blokeatuan"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Elkarrizketen jakinarazpenen goialdean eta profileko argazki gisa agertzen da pantaila blokeatuan, burbuila batean"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Elkarrizketen jakinarazpenen goialdean eta profileko argazki gisa agertzen da pantaila blokeatuan, eta ez molestatzeko modua eteten du"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Elkarrizketen jakinarazpenen goialdean eta profileko argazki gisa agertzen da pantaila blokeatuan, burbuila batean, eta ez molestatzeko modua eteten du"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Lehentasuna"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak ez ditu onartzen elkarrizketetarako eginbideak"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Jakinarazpen horiek ezin dira aldatu."</string>
@@ -537,7 +549,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Sartu"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Atzera"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Erreproduzitu/Pausatu"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Gelditu"</string>
+    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"Utzi igortzeari"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Hurrengoa"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Aurrekoa"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Atzeratu"</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ez molestatzeko modua"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Bolumen-botoietarako lasterbidea"</string>
     <string name="battery" msgid="769686279459897127">"Bateria"</string>
     <string name="headset" msgid="4485892374984466437">"Mikrofonodun entzungailua"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> (<xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>)"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi konexioa desaktibatuta dago"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth bidezko konexioa desaktibatuta dago"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Ez molestatzeko modua desaktibatuta dago"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Ez molestatzeko modua aktibatu du arau automatiko batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Ez molestatzeko modua aktibatu du aplikazio batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Ez molestatzeko modua aktibatu du arau automatiko edo aplikazio batek."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikazioak abian dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Datu-konexioa desaktibatu nahi duzu?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(lanekoa)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefono-deia"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> aplikazioaren bidez)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"kokapena"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofonoa"</string>
@@ -806,10 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(deskonektatuta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Ezin da aldatu. Berriro saiatzeko, sakatu hau."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parekatu beste gailu batekin"</string>
-    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
-    <skip />
-    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
-    <skip />
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Saioa ireki nahi baduzu, ireki aplikazioa."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikazio ezezaguna"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Konpilazio-zenbakia"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
@@ -843,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azken mezuak, dei galduak eta egoerari buruzko informazio eguneratua"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Elkarrizketa"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Ez molestatzeko moduak pausatu du"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak mezu bat bidali du: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak irudi bat bidali du"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak egoera eguneratu du: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -894,4 +912,12 @@
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Bidali inguruko gailu batera"</string>
     <string name="add" msgid="81036585205287996">"Gehitu"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kudeatu erabiltzaileak"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Jakinarazpen hau ezin da arrastatu pantaila zatitura."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wifi-konexioa ez dago erabilgarri"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Lehentasun modua"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarma ezarrita dago"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Laguntzailea zerbitzuaren gonbidatu modua gaituta dago"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera eta mikrofonoa desaktibatuta daude"</string>
+    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
+    <skip />
 </resources>

@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Інтэрфейс сістэмы"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Акумулятар хутка разрадзіцца"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Твар распазнаны"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Пацверджана"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Націсніце \"Пацвердзіць\", каб завяршыць"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Распазнана"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Увесці PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Выкарыстаць узор разблакіроўкі"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрыць"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"поўная цішыня"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"толькі будзільнікі"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Не турбаваць."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth уключаны."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Наладжаны будзiльнiк: <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -207,6 +215,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Вітрына з дэсертамі"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Экранная застаўка"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не турбаваць"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Няма даступных спалучаных прылад"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -354,6 +363,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Апавяшчэнні"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Размовы"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Выдаліць усе апавяшчэнні без гуку"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Паказ апавяшчэнняў прыпынены ў рэжыме \"Не турбаваць\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Апавяшчэнняў няма"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
@@ -497,6 +507,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як няважнае"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З\'яўляецца ўверсе раздзела размоў і паказвае на экране блакіроўкі відарыс профілю"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З\'яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З\'яўляецца ўверсе раздзела размоў, перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З\'яўляецца ўверсе раздзела размоў як усплывальнае апавяшчэнне, якое перарывае рэжым \"Не турбаваць\" і паказвае на экране блакіроўкі відарыс профілю"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Гэтыя апавяшчэнні нельга змяніць."</string>
@@ -547,7 +559,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Прайграванне/Паўза"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Спыніць"</string>
+    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"Спыніць трансляцыю"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Наступны"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Папярэдні"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Перамотка назад"</string>
@@ -576,6 +588,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS-паведамленні"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Каляндар"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не турбаваць"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Доступ праз кнопкі рэгулявання гучнасці"</string>
     <string name="battery" msgid="769686279459897127">"Акумулятар"</string>
     <string name="headset" msgid="4485892374984466437">"Гарнітура"</string>
@@ -694,6 +707,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi выключаны"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth выключаны"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Рэжым \"Не турбаваць\" выключаны"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Рэжым \"Не турбаваць\" быў уключаны праграмай (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам ці праграмай."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Выключыць мабільную перадачу даных?"</string>
@@ -718,6 +735,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(працоўная)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Тэлефонны выклік"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(праз праграму \"<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>\")"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"геалакацыя"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"мікрафон"</string>
@@ -818,10 +837,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(адключана)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не ўдалося пераключыцца. Дакраніцеся, каб паўтарыць спробу."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Спалучыць з новай прыладай"</string>
-    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
-    <skip />
-    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
-    <skip />
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Для трансляцыі гэтага сеанса адкрыйце праграму."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Нумар зборкі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Нумар зборкі скапіраваны ў буфер абмену."</string>
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
@@ -855,6 +872,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Глядзець нядаўнія паведамленні, прапушчаныя выклікі і абнаўленні стану"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Размова"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Прыпынена функцыяй \"Не турбаваць\""</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> прыслаў паведамленне: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> адправіў відарыс"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"Карыстальнік <xliff:g id="NAME">%1$s</xliff:g> абнавіў стан: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -908,4 +926,12 @@
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Адправіць на прыладу паблізу"</string>
     <string name="add" msgid="81036585205287996">"Дадаць"</string>
     <string name="manage_users" msgid="1823875311934643849">"Кіраванне карыстальнікамі"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Гэта апавяшчэнне нельга перацягнуць на падзелены экран."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Сетка Wi‑Fi недаступная"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Прыярытэтны рэжым"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будзільнік зададзены"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Гасцявы рэжым для Памочніка ўключаны"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камера і мікрафон выключаны"</string>
+    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
+    <skip />
 </resources>
