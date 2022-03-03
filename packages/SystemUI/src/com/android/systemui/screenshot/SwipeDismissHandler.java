@@ -49,9 +49,14 @@ public class SwipeDismissHandler implements View.OnTouchListener {
         void onInteraction();
 
         /**
+         * Run when the view is dismissed (the distance threshold is met), pre-dismissal animation
+         */
+        void onSwipeDismissInitiated(Animator animator);
+
+        /**
          * Run when the view is dismissed (the distance threshold is met), post-dismissal animation
          */
-        void onDismiss();
+        void onDismissComplete();
     }
 
     private final View mView;
@@ -89,7 +94,9 @@ public class SwipeDismissHandler implements View.OnTouchListener {
                 return true;
             }
             if (isPastDismissThreshold()) {
-                dismiss();
+                ValueAnimator dismissAnimator = createSwipeDismissAnimation(1);
+                mCallbacks.onSwipeDismissInitiated(dismissAnimator);
+                dismiss(dismissAnimator);
             } else {
                 // if we've moved, but not past the threshold, start the return animation
                 if (DEBUG_DISMISS) {
@@ -117,7 +124,10 @@ public class SwipeDismissHandler implements View.OnTouchListener {
                 float velocityY) {
             if (mView.getTranslationX() * velocityX > 0
                     && (mDismissAnimation == null || !mDismissAnimation.isRunning())) {
-                dismiss(velocityX / (float) 1000);
+                ValueAnimator dismissAnimator =
+                        createSwipeDismissAnimation(velocityX / (float) 1000);
+                mCallbacks.onSwipeDismissInitiated(dismissAnimator);
+                dismiss(dismissAnimator);
                 return true;
             }
             return false;
@@ -160,11 +170,11 @@ public class SwipeDismissHandler implements View.OnTouchListener {
      * Start dismissal animation (will run onDismiss callback when animation complete)
      */
     public void dismiss() {
-        dismiss(1);
+        dismiss(createSwipeDismissAnimation(1));
     }
 
-    private void dismiss(float velocity) {
-        mDismissAnimation = createSwipeDismissAnimation(velocity);
+    private void dismiss(ValueAnimator animator) {
+        mDismissAnimation = animator;
         mDismissAnimation.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
@@ -178,7 +188,7 @@ public class SwipeDismissHandler implements View.OnTouchListener {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 if (!mCancelled) {
-                    mCallbacks.onDismiss();
+                    mCallbacks.onDismissComplete();
                 }
             }
         });
