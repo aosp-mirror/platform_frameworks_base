@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Sulje PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Koko näyttö"</string>
     <string name="pip_move" msgid="1544227837964635439">"Siirrä PIP"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Laajenna PIP"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Tiivistä PIP"</string>
 </resources>

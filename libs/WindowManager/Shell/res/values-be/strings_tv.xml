@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Закрыць PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Поўнаэкранны рэжым"</string>
     <string name="pip_move" msgid="1544227837964635439">"Перамясціць PIP"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Разгарнуць відарыс у відарысе"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Згарнуць відарыс у відарысе"</string>
 </resources>

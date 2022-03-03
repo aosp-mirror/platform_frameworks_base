@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Փակել PIP-ն"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Լիէկրան"</string>
     <string name="pip_move" msgid="1544227837964635439">"Տեղափոխել PIP-ը"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Ծավալել PIP-ը"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Ծալել PIP-ը"</string>
 </resources>

@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Tanca PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Pantalla completa"</string>
     <string name="pip_move" msgid="1544227837964635439">"Mou pantalla en pantalla"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Desplega pantalla en pantalla"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Replega pantalla en pantalla"</string>
 </resources>
