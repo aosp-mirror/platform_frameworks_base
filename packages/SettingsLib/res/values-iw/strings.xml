@@ -493,8 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"לא בטעינה"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"מחובר, לא בטעינה"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
-    <!-- no translation found for battery_info_status_full_charged (3536054261505567948) -->
-    <skip />
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"טעונה במלואה"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"בשליטה של הגדרה מוגבלת"</string>
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
@@ -540,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ההרשאה הזו מתירה לאפליקציה להגדיר שעון מעורר ולתזמן פעולות דחופות. האפליקציה תוכל לפעול ברקע ובכך להגביר את צריכת הסוללה.\n\nאם ההרשאה מושבתת, ההתראות והאירועים מבוססי-הזמן שהוגדרו ותוזמנו על ידי האפליקציה לא יפעלו."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"תזמון, שעון מעורר, תזכורת, שעון"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"הפעלה"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"הפעלת מצב נא לא להפריע"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"אף פעם"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"עדיפות בלבד"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
