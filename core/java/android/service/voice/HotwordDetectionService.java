@@ -243,13 +243,26 @@ public abstract class HotwordDetectionService extends Service {
     /**
      * Called when the device hardware (such as a DSP) detected the hotword, to request second stage
      * validation before handing over the audio to the {@link AlwaysOnHotwordDetector}.
-     * <p>
-     * After {@code callback} is invoked or {@code timeoutMillis} has passed, and invokes the
+     *
+     * <p>After {@code callback} is invoked or {@code timeoutMillis} has passed, and invokes the
      * appropriate {@link AlwaysOnHotwordDetector.Callback callback}.
      *
+     * <p>When responding to a detection event, the
+     * {@link HotwordDetectedResult#getHotwordPhraseId()} must match a keyphrase ID listed
+     * in the eventPayload's
+     * {@link AlwaysOnHotwordDetector.EventPayload#getKeyphraseRecognitionExtras()} list. This is
+     * forcing the intention of the {@link HotwordDetectionService} to validate an event from the
+     * voice engine and not augment its result.
+     *
      * @param eventPayload Payload data for the hardware detection event. This may contain the
-     *                     trigger audio, if requested when calling
-     *                     {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+     *             trigger audio, if requested when calling
+     *             {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+     *             Each {@link AlwaysOnHotwordDetector} will be associated with at minimum a unique
+     *             keyphrase ID indicated by
+     *             {@link AlwaysOnHotwordDetector.EventPayload#getKeyphraseRecognitionExtras()}[0].
+     *             Any extra
+     *             {@link android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra}'s
+     *             in the eventPayload represent additional phrases detected by the voice engine.
      * @param timeoutMillis Timeout in milliseconds for the operation to invoke the callback. If
      *                      the application fails to abide by the timeout, system will close the
      *                      microphone and cancel the operation.
