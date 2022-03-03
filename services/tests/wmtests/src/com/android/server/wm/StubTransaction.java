@@ -28,6 +28,8 @@ import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import java.util.concurrent.Executor;
+
 /**
  * Stubbed {@link android.view.SurfaceControl.Transaction} class that can be used when unit
  * testing to avoid calls to native code.
@@ -215,6 +217,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction remove(SurfaceControl sc) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction addTransactionCommittedListener(Executor executor,
+            SurfaceControl.TransactionCommittedListener listener) {
         return this;
     }
 
