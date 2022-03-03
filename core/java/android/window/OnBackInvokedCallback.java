@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.window;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.window.BackEvent;
+import android.view.View;
 
 /**
  * Interface for applications to register back invocation callbacks. This allows the client

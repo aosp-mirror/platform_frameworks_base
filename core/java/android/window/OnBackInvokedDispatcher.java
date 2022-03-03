@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.window;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -39,7 +39,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface OnBackInvokedDispatcher {
     /**
-     * Enables dispatching the "back" action via {@link android.view.OnBackInvokedDispatcher}.
+     * Enables dispatching the "back" action via {@link OnBackInvokedDispatcher}.
      *
      * When enabled, the following APIs are no longer invoked:
      * <ul>
@@ -100,7 +100,7 @@ public interface OnBackInvokedDispatcher {
      * @param priority The priority of the callback.
      * @throws {@link IllegalArgumentException} if the priority is negative.
      */
-    @SuppressLint("SamShouldBeLast")
+    @SuppressLint({"SamShouldBeLast", "ExecutorRegistration"})
     void registerOnBackInvokedCallback(
             @NonNull OnBackInvokedCallback callback, @Priority @IntRange(from = 0) int priority);
 
