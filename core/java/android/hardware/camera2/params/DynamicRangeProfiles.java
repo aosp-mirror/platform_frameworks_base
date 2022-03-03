@@ -230,6 +230,7 @@ public final class DynamicRangeProfiles {
         }
 
         mProfileMap.put(STANDARD, standardConstraints);
+        mLookahedLatencyMap.put(STANDARD, false);
     }
 
 
