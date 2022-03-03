@@ -55,12 +55,13 @@ package android.app {
   }
 
   public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
     method public final void disableForCurrentProcess();
     method public final void invalidateCache();
-    method public static void invalidateCache(int, @NonNull String);
+    method public static void invalidateCache(@NonNull String, @NonNull String);
     method @Nullable public final Result query(@NonNull Query);
-    field public static final int MODULE_BLUETOOTH = 2; // 0x2
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_TELEPHONY = "telephony";
   }
 
   public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
