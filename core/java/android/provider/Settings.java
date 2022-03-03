@@ -10692,14 +10692,6 @@ public final class Settings {
                 "communal_mode_trusted_networks";
 
         /**
-         * Setting to allow Fast Pair scans to be enabled.
-         * @hide
-         */
-        @SystemApi
-        @Readable
-        public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
-
-        /**
          * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
          * confirmation dialog.
          *
