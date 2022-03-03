@@ -57912,8 +57912,8 @@ package android.window {
     method public void clearOnExitAnimationListener();
     method public void setOnExitAnimationListener(@NonNull android.window.SplashScreen.OnExitAnimationListener);
     method public void setSplashScreenTheme(@StyleRes int);
-    field public static final int SPLASH_SCREEN_STYLE_EMPTY = 0; // 0x0
     field public static final int SPLASH_SCREEN_STYLE_ICON = 1; // 0x1
+    field public static final int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0; // 0x0
   }
 
   public static interface SplashScreen.OnExitAnimationListener {
