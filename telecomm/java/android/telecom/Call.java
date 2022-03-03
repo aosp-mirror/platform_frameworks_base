@@ -701,15 +701,8 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
-        /**
-         * Connection is a tethered external call.
-         * Indicates that the {@link Connection} is fixed on this device but the audio streams are
-         * re-routed to another device.
-         */
-        public static final int PROPERTY_TETHERED_CALL = 0x00008000;
-
         //******************************************************************************************
-        // Next PROPERTY value: 0x00010000
+        // Next PROPERTY value: 0x00004000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -905,9 +898,6 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
-            }
-            if (hasProperty(properties, PROPERTY_TETHERED_CALL)) {
-                builder.append(" PROPERTY_TETHERED_CALL");
             }
             builder.append("]");
             return builder.toString();
