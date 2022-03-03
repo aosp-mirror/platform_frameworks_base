@@ -24,8 +24,10 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_VR;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN;
+import static android.os.PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_TIMEOUT;
 import static android.os.PowerManager.WAKE_REASON_GESTURE;
+import static android.os.PowerManager.WAKE_REASON_PLUGGED_IN;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -37,15 +39,21 @@ import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIG
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.view.Display;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.internal.util.LatencyTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,12 +97,87 @@ public class PowerGroupTest {
     }
 
     @Test
-    public void testDreamPowerGroupTriggersOnWakefulnessChangedCallback() {
+    public void testWakePowerGroup() {
+        mPowerGroup.sleepLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_APPLICATION);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_ASLEEP), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_APPLICATION),
+                eq(UID), /* opUid= */anyInt(), /* opPackageName= */ isNull(), /* details= */
+                isNull());
+        String details = "wake PowerGroup1";
+        LatencyTracker latencyTracker = LatencyTracker.getInstance(
+                InstrumentationRegistry.getInstrumentation().getContext());
+        mPowerGroup.wakeUpLocked(TIMESTAMP2, WAKE_REASON_PLUGGED_IN, details, UID,
+                /* opPackageName= */ null, /* opUid= */ 0, latencyTracker);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_AWAKE), eq(TIMESTAMP2), eq(WAKE_REASON_PLUGGED_IN), eq(UID),
+                /* opUid= */ anyInt(), /* opPackageName= */ isNull(), eq(details));
+    }
+
+    @Test
+    public void testDreamPowerGroup() {
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mPowerGroup.dreamLocked(TIMESTAMP1, UID);
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+        assertThat(mPowerGroup.isSandmanSummonedLocked()).isTrue();
         verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
                 eq(WAKEFULNESS_DREAMING), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_APPLICATION),
                 eq(UID), /* opUid= */anyInt(), /* opPackageName= */ isNull(), /* details= */
                 isNull());
+    }
+
+    @Test
+    public void testDozePowerGroup() {
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        mPowerGroup.dozeLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mPowerGroup.isSandmanSummonedLocked()).isTrue();
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_DOZING), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_TIMEOUT),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
+                /* details= */ isNull());
+    }
+
+    @Test
+    public void testDozePowerGroupWhenNonInteractiveHasNoEffect() {
+        mPowerGroup.sleepLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_ASLEEP), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_TIMEOUT),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
+                /* details= */ isNull());
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mPowerGroup.dozeLocked(TIMESTAMP2, UID, GO_TO_SLEEP_REASON_TIMEOUT)).isFalse();
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        verify(mWakefulnessCallbackMock, never()).onWakefulnessChangedLocked(
+                eq(GROUP_ID), eq(WAKEFULNESS_DOZING), eq(TIMESTAMP2), /* reason= */ anyInt(),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ any(), /* details= */ any());
+    }
+
+    @Test
+    public void testSleepPowerGroup() {
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        mPowerGroup.sleepLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_DEVICE_FOLD);
+        assertThat(mPowerGroup.isSandmanSummonedLocked()).isTrue();
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_ASLEEP), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_DEVICE_FOLD),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
+                /* details= */ isNull());
+    }
+
+    @Test
+    public void testDreamPowerGroupWhenNotAwakeHasNoEffect() {
+        mPowerGroup.dozeLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_DOZING), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_TIMEOUT),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
+                /* details= */ isNull());
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mPowerGroup.dreamLocked(TIMESTAMP2, UID)).isFalse();
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+        verify(mWakefulnessCallbackMock, never()).onWakefulnessChangedLocked(
+                eq(GROUP_ID), /* wakefulness= */ eq(WAKEFULNESS_DREAMING), eq(TIMESTAMP2),
+                /* reason= */ anyInt(), eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ any(),
+                /* details= */ any());
     }
 
     @Test
