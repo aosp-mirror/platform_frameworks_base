@@ -406,6 +406,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -13534,6 +13535,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            }
+
+            if (Process.isSdkSandboxUid(realCallingUid)) {
+                SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                        SdkSandboxManagerLocal.class);
+                if (sdkSandboxManagerLocal == null) {
+                    throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
+                            + " a broadcast from an SDK sandbox uid.");
+                }
+                sdkSandboxManagerLocal.enforceAllowedToSendBroadcast(intent);
             }
 
             switch (action) {
