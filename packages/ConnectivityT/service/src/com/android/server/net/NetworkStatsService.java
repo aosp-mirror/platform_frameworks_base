@@ -1285,7 +1285,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(
+            normalizedRequest = mStatsObservers.register(mContext,
                     request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
