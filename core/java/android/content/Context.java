@@ -2011,9 +2011,9 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @SystemApi
-    public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
-            @Nullable Bundle options, @NonNull UserHandle userId) {
+    @UnsupportedAppUsage
+    public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
+            UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
