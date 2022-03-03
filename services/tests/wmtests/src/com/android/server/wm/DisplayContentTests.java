@@ -2388,19 +2388,18 @@ public class DisplayContentTests extends WindowTestsBase {
         w2.setKeepClearAreas(Arrays.asList(rect2), Collections.emptyList());
 
         // No keep clear areas on display, because the windows are not visible
-        assertEquals(Arrays.asList(), mDisplayContent.getKeepClearAreas());
+        assertEquals(Collections.emptySet(), mDisplayContent.getKeepClearAreas());
 
         makeWindowVisible(w1);
 
         // The returned keep-clear areas contain the areas just from the visible window
-        assertEquals(new ArraySet(Arrays.asList(rect1)),
-                new ArraySet(mDisplayContent.getKeepClearAreas()));
+        assertEquals(new ArraySet(Arrays.asList(rect1)), mDisplayContent.getKeepClearAreas());
 
         makeWindowVisible(w1, w2);
 
         // The returned keep-clear areas contain the areas from all visible windows
         assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
-                new ArraySet(mDisplayContent.getKeepClearAreas()));
+                mDisplayContent.getKeepClearAreas());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

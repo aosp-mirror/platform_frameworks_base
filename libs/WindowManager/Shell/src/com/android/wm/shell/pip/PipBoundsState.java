@@ -28,6 +28,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
@@ -43,6 +44,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -90,6 +92,24 @@ public class PipBoundsState {
     private int mShelfHeight;
     /** Whether the user has resized the PIP manually. */
     private boolean mHasUserResizedPip;
+    /**
+     * Areas defined by currently visible apps that they prefer to keep clear from overlays such as
+     * the PiP. Restricted areas may only move the PiP a limited amount from its anchor position.
+     * The system will try to respect these areas, but when not possible will ignore them.
+     *
+     * @see android.view.View#setPreferKeepClearRects
+     */
+    private final Set<Rect> mRestrictedKeepClearAreas = new ArraySet<>();
+    /**
+     * Areas defined by currently visible apps holding
+     * {@link android.Manifest.permission#SET_UNRESTRICTED_KEEP_CLEAR_AREAS} that they prefer to
+     * keep clear from overlays such as the PiP.
+     * Unrestricted areas can move the PiP farther than restricted areas, and the system will try
+     * harder to respect these areas.
+     *
+     * @see android.view.View#setPreferKeepClearRects
+     */
+    private final Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
@@ -365,6 +385,25 @@ public class PipBoundsState {
             mOnShelfVisibilityChangeCallback.accept(mIsShelfShowing, mShelfHeight,
                     updateMovementBounds);
         }
+    }
+
+    /** Set the keep clear areas onscreen. The PiP should ideally not cover them. */
+    public void setKeepClearAreas(@NonNull Set<Rect> restrictedAreas,
+            @NonNull Set<Rect> unrestrictedAreas) {
+        mRestrictedKeepClearAreas.clear();
+        mRestrictedKeepClearAreas.addAll(restrictedAreas);
+        mUnrestrictedKeepClearAreas.clear();
+        mUnrestrictedKeepClearAreas.addAll(unrestrictedAreas);
+    }
+
+    @NonNull
+    public Set<Rect> getRestrictedKeepClearAreas() {
+        return mRestrictedKeepClearAreas;
+    }
+
+    @NonNull
+    public Set<Rect> getUnrestrictedKeepClearAreas() {
+        return mUnrestrictedKeepClearAreas;
     }
 
     /**
