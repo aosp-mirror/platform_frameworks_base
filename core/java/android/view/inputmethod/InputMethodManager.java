@@ -1936,8 +1936,8 @@ public final class InputMethodManager {
                 // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
                 //  instead of mDisplayId.
                 mServedInputConnection.requestCursorUpdatesFromImm(
-                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR
-                                | CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
+                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR,
+                                CURSOR_UPDATE_FILTER_EDITOR_BOUNDS,
                         mDisplayId);
             }
 
