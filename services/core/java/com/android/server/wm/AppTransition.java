@@ -1305,6 +1305,8 @@ public class AppTransition implements Dump {
             pw.print(Integer.toHexString(mNextAppTransitionEnter));
             pw.print(" mNextAppTransitionExit=0x");
             pw.println(Integer.toHexString(mNextAppTransitionExit));
+            pw.print(" mNextAppTransitionBackgroundColor=0x");
+            pw.println(Integer.toHexString(mNextAppTransitionBackgroundColor));
         }
         switch (mNextAppTransitionType) {
             case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:
