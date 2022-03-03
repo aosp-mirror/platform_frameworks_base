@@ -2301,6 +2301,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         });
     }
 
+    private static class InstallResult {
+        public final PackageInstallerSession session;
+        public final Bundle extras;
+        InstallResult(PackageInstallerSession session, Bundle extras) {
+            this.session = session;
+            this.extras = extras;
+        }
+    }
+
     /**
      * Stages installs and do cleanup accordingly depending on whether the installation is
      * successful or not.
@@ -2308,11 +2317,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return a future that will be completed when the whole process is completed.
      */
     private CompletableFuture<Void> install() {
-        return installNonStaged().whenComplete((r, t) -> {
+        List<CompletableFuture<InstallResult>> futures = installNonStaged();
+        CompletableFuture<InstallResult>[] arr = new CompletableFuture[futures.size()];
+        return CompletableFuture.allOf(futures.toArray(arr)).whenComplete((r, t) -> {
             if (t == null) {
                 setSessionApplied();
-                dispatchSessionFinished(INSTALL_SUCCEEDED, "Session installed", null);
-                maybeFinishChildSessions(INSTALL_SUCCEEDED, "Session installed");
+                for (CompletableFuture<InstallResult> f : futures) {
+                    InstallResult result = f.join();
+                    result.session.dispatchSessionFinished(
+                            INSTALL_SUCCEEDED, "Session installed", result.extras);
+                }
             } else {
                 PackageManagerException e = (PackageManagerException) t.getCause();
                 setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
@@ -2326,13 +2340,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Stages sessions (including child sessions if any) for install.
      *
-     * @return a future that will be completed when the whole session is completed (could be
-     *         success or failure).
+     * @return a list of futures to indicate the install results of each session.
      */
-    private CompletableFuture<Void> installNonStaged() {
+    private List<CompletableFuture<InstallResult>> installNonStaged() {
         try {
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-            CompletableFuture<Void> future = new CompletableFuture<>();
+            List<CompletableFuture<InstallResult>> futures = new ArrayList<>();
+            CompletableFuture<InstallResult> future = new CompletableFuture<>();
             futures.add(future);
             final InstallParams installingSession = makeInstallParams(future);
             if (isMultiPackage()) {
@@ -2354,12 +2367,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installingSession.installStage();
             }
 
-            CompletableFuture<Void>[] arr = new CompletableFuture[futures.size()];
-            return CompletableFuture.allOf(futures.toArray(arr));
+            return futures;
         } catch (PackageManagerException e) {
-            CompletableFuture<Void> future = new CompletableFuture<>();
-            future.completeExceptionally(e);
-            return future;
+            List<CompletableFuture<InstallResult>> futures = new ArrayList<>();
+            futures.add(CompletableFuture.failedFuture(e));
+            return futures;
         }
     }
 
@@ -2395,7 +2407,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @param future a future that will be completed when this session is completed.
      */
     @Nullable
-    private InstallParams makeInstallParams(CompletableFuture<Void> future)
+    private InstallParams makeInstallParams(CompletableFuture<InstallResult> future)
             throws PackageManagerException {
         synchronized (mLock) {
             if (!mSealed) {
@@ -2407,10 +2419,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (isMultiPackage()) {
             // Always treat parent session as success for it has nothing to install
-            future.complete(null);
+            future.complete(new InstallResult(this, null));
         } else if (isApexSession() && params.isStaged) {
             // Staged apex sessions have been handled by apexd
-            future.complete(null);
+            future.complete(new InstallResult(this, null));
             return null;
         }
 
@@ -2424,7 +2436,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
                 if (returnCode == INSTALL_SUCCEEDED) {
-                    future.complete(null);
+                    future.complete(new InstallResult(PackageInstallerSession.this, extras));
                 } else {
                     future.completeExceptionally(new PackageManagerException(returnCode, msg));
                 }
