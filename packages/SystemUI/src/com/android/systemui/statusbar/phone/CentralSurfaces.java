@@ -1505,7 +1505,7 @@ public class CentralSurfaces extends CoreStartable implements
         return (v, event) -> {
             mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (mExpandedVisible) {
                     mShadeController.animateCollapsePanels();
                 }
