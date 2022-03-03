@@ -1387,7 +1387,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean isUserOfType(@UserIdInt int userId, String userType) {
-        checkManageUsersPermission("check user type");
+        checkQueryOrCreateUsersPermission("check user type");
         return userType != null && userType.equals(getUserTypeNoChecks(userId));
     }
 
@@ -1643,7 +1643,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (!hasQueryOrCreateUsersPermission()
                 && !hasPermissionGranted(
                         android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid)) {
-            throw new SecurityException("You need MANAGE_USERS or CREATE_USERS or "
+            throw new SecurityException("You need MANAGE_USERS, CREATE_USERS, QUERY_USERS, or "
                     + "GET_ACCOUNTS_PRIVILEGED permissions to: get user name");
         }
         final int userId = UserHandle.getUserId(callingUid);
@@ -5064,9 +5064,13 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isUserNameSet(@UserIdInt int userId) {
-        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
-            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
-                    + "permissions to: get whether user name is set");
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (!hasQueryOrCreateUsersPermission()
+                && !(callingUserId == userId && hasPermissionGranted(
+                android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid))) {
+            throw new SecurityException("You need MANAGE_USERS, CREATE_USERS, QUERY_USERS, or "
+                    + "GET_ACCOUNTS_PRIVILEGED permissions to: get whether user name is set");
         }
         synchronized (mUsersLock) {
             final UserInfo userInfo = getUserInfoLU(userId);
