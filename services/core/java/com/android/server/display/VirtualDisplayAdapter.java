@@ -33,7 +33,6 @@ import static com.android.server.display.DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -235,7 +234,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private Display.Mode mMode;
         private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
-        private IBinder mWindowTokenClientToMirror;
+        private boolean mIsWindowManagerMirroring;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -258,7 +257,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mUniqueIndex = uniqueIndex;
             mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
-            mWindowTokenClientToMirror = virtualDisplayConfig.getWindowTokenClientToMirror();
+            mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroring();
         }
 
         @Override
@@ -289,15 +288,14 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        @Nullable
-        public IBinder getWindowTokenClientToMirrorLocked() {
-            return mWindowTokenClientToMirror;
+        public boolean isWindowManagerMirroringLocked() {
+            return mIsWindowManagerMirroring;
         }
 
         @Override
-        public void setWindowTokenClientToMirrorLocked(IBinder windowToken) {
-            if (mWindowTokenClientToMirror != windowToken) {
-                mWindowTokenClientToMirror = windowToken;
+        public void setWindowManagerMirroringLocked(boolean mirroring) {
+            if (mIsWindowManagerMirroring != mirroring) {
+                mIsWindowManagerMirroring = mirroring;
                 sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
                 sendTraversalRequestLocked();
             }
@@ -391,7 +389,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             pw.println("mDisplayState=" + Display.stateToString(mDisplayState));
             pw.println("mStopped=" + mStopped);
             pw.println("mDisplayIdToMirror=" + mDisplayIdToMirror);
-            pw.println("mWindowTokenClientToMirror=" + mWindowTokenClientToMirror);
+            pw.println("mWindowManagerMirroring=" + mIsWindowManagerMirroring);
         }
 
 
