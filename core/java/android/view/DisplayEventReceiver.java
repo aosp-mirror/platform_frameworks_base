@@ -84,6 +84,7 @@ public abstract class DisplayEventReceiver {
     private static native void nativeDispose(long receiverPtr);
     @FastNative
     private static native void nativeScheduleVsync(long receiverPtr);
+    private static native VsyncEventData nativeGetLatestVsyncEventData(long receiverPtr);
 
     /**
      * Creates a display event receiver.
@@ -277,6 +278,13 @@ public abstract class DisplayEventReceiver {
         } else {
             nativeScheduleVsync(mReceiverPtr);
         }
+    }
+
+    /**
+     * Gets the latest vsync event data from surface flinger.
+     */
+    VsyncEventData getLatestVsyncEventData() {
+        return nativeGetLatestVsyncEventData(mReceiverPtr);
     }
 
     // Called from native code.
