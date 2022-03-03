@@ -193,12 +193,6 @@
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
-    "-1898316768": {
-      "message": "Unable to retrieve window container to start layer mirroring for display %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-1895337367": {
       "message": "Delete root task display=%d winMode=%d",
       "level": "VERBOSE",
@@ -348,6 +342,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
+    },
+    "-1734445525": {
+      "message": "Display %d has content (%b) so pause recording",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-1730156332": {
       "message": "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
@@ -510,6 +510,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1542296596": {
+      "message": "Going ahead with updating recording for display %d to new bounds %s and\/or orientation %d.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-1539974875": {
       "message": "removeAppToken: %s delayed=%b Callers=%s",
@@ -733,6 +739,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1323003327": {
+      "message": "Unexpectedly null window container; unable to update recording for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-1311436264": {
       "message": "Unregister task fragment organizer=%s uid=%d pid=%d",
       "level": "VERBOSE",
@@ -846,6 +858,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_WINDOW_INSETS",
       "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
+    "-1179559337": {
+      "message": "Unable to start recording due to invalid region for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-1176488860": {
       "message": "SURFACE isSecure=%b: %s",
@@ -1027,6 +1045,12 @@
       "group": "WM_DEBUG_DRAW",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
+    "-992111757": {
+      "message": "Unable to retrieve window container to start recording for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-986746907": {
       "message": "Starting window removed %s",
       "level": "DEBUG",
@@ -1087,6 +1111,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-922507769": {
+      "message": "Display %d has no content and is on, so start recording for state %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-917215012": {
       "message": "%s: caller %d is using old GET_TASKS but privileged; allowing",
       "level": "WARN",
@@ -1104,12 +1134,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-904499590": {
-      "message": "Provided surface for layer mirroring on display %d is not present, so do not update the surface",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
@@ -1345,12 +1369,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
-    "-663411559": {
-      "message": "Going ahead with updating layer mirroring for display %d to new bounds %s and\/or orientation %d.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-655104359": {
       "message": "Frontmost changed immersion: %s",
       "level": "DEBUG",
@@ -1531,6 +1549,18 @@
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-479990726": {
+      "message": "Unable to start recording due to null token for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "-473911359": {
+      "message": "Display %d was already recording, so apply transformations if necessary",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-463348344": {
       "message": "Removing and adding activity %s to root task at top callers=%s",
       "level": "INFO",
@@ -1609,10 +1639,10 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-384564722": {
-      "message": "Unable to start layer mirroring for display %d since the surface is not available.",
+    "-381522987": {
+      "message": "Display %d state is now (%d), so update recording?",
       "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-381475323": {
@@ -1638,6 +1668,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "-370641936": {
+      "message": "Unable to update recording for display %d to new bounds %s and\/or orientation %d, since the surface is not available.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-360208282": {
       "message": "Animating wallpapers: old: %s hidden=%b new: %s hidden=%b",
@@ -1699,12 +1735,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
-    "-309399422": {
-      "message": "Display %d state is now (%d), so update layer mirroring?",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-304728471": {
       "message": "New wallpaper: target=%s prev=%s",
       "level": "DEBUG",
@@ -1753,6 +1783,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "-237664290": {
+      "message": "Pause the recording session on display %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
+    },
     "-235225312": {
       "message": "Skipping config check for initializing activity: %s",
       "level": "VERBOSE",
@@ -1788,12 +1824,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_MOVEMENT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-190034097": {
-      "message": "Unable to retrieve window container to update layer mirroring for display %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-182877285": {
       "message": "Wallpaper layer changed: assigning layers + relayout",
@@ -1902,12 +1932,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
-    },
-    "-79877120": {
-      "message": "Display %d has content (%b) so disable layer mirroring",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-70719599": {
       "message": "Unregister remote animations for organizer=%s uid=%d pid=%d",
@@ -2472,12 +2496,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
-    },
-    "504397469": {
-      "message": "Unable to update layer mirroring for display %d to new bounds %s and\/or orientation %d, since the surface is not available.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "508887531": {
       "message": "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s",
@@ -3253,6 +3271,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
+    "1401287081": {
+      "message": "Handle incoming session on display %d, with a pre-existing session %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
+    },
     "1401295262": {
       "message": "Mode default, asking user",
       "level": "WARN",
@@ -3264,12 +3288,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1407569006": {
-      "message": "Display %d was already layer mirroring, so apply transformations if necessary",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1422781269": {
       "message": "Resuming rotation after re-position",
@@ -3517,12 +3535,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1687376052": {
-      "message": "Display %d has no content and is on, so start layer mirroring for state %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_LAYER_MIRRORING",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "1689989893": {
       "message": "SyncGroup %d: Set ready",
       "level": "VERBOSE",
@@ -3534,6 +3546,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
+    "1707558369": {
+      "message": "Unable to start recording for display %d since the surface is not available.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1720229827": {
       "message": "Creating animation bounds layer",
@@ -3666,6 +3684,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1854279309": {
+      "message": "Provided surface for recording on display %d is not present, so do not update the surface",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1856211951": {
       "message": "moveFocusableActivityToTop: already on top, activity=%s",
@@ -3942,6 +3966,9 @@
     "WM_DEBUG_CONTAINERS": {
       "tag": "WindowManager"
     },
+    "WM_DEBUG_CONTENT_RECORDING": {
+      "tag": "WindowManager"
+    },
     "WM_DEBUG_DRAW": {
       "tag": "WindowManager"
     },
@@ -3958,9 +3985,6 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_KEEP_SCREEN_ON": {
-      "tag": "WindowManager"
-    },
-    "WM_DEBUG_LAYER_MIRRORING": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_LOCKTASK": {
