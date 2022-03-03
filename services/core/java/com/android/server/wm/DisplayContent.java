@@ -26,7 +26,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -5521,11 +5520,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final float[] tmpFloat9 = new float[9];
         forAllWindows(w -> {
             if (w.isVisible() && !w.inPinnedWindowingMode()) {
-                if (w.mSession.mSetsUnrestrictedKeepClearAreas) {
-                    outUnrestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
-                } else {
-                    outRestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
-                }
+                w.getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
             }
 
             // We stop traversing when we reach the base of a fullscreen app.
@@ -5583,13 +5578,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     static boolean alwaysCreateRootTask(int windowingMode, int activityType) {
-        // Always create a root task for fullscreen, freeform, and split-screen-secondary windowing
+        // Always create a root task for fullscreen, freeform, and multi windowing
         // modes so that we can manage visual ordering and return types correctly.
         return activityType == ACTIVITY_TYPE_STANDARD
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_FREEFORM
                 || windowingMode == WINDOWING_MODE_PINNED
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW);
     }
 
@@ -6368,10 +6362,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         /**
-         * Returns the fixed orientation requested by a transient launch (e.g. recents animation).
-         * If it doesn't return SCREEN_ORIENTATION_UNSET, the rotation change should be deferred.
+         * Returns {@code true} if the transient launch (e.g. recents animation) requested a fixed
+         * orientation, then the rotation change should be deferred.
          */
-        @ActivityInfo.ScreenOrientation int getTransientFixedOrientation() {
+        boolean shouldDeferRotation() {
             ActivityRecord source = null;
             if (mTransitionController.isShellTransitionsEnabled()) {
                 final ActivityRecord r = mFixedRotationLaunchingApp;
@@ -6383,13 +6377,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             if (source == null || source.getRequestedConfigurationOrientation(
                     true /* forDisplay */) == ORIENTATION_UNDEFINED) {
-                return SCREEN_ORIENTATION_UNSET;
+                return false;
             }
-            if (!mWmService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
-                // If screen is off or the device is going to sleep, then still allow to update.
-                return SCREEN_ORIENTATION_UNSET;
-            }
-            return source.mOrientation;
+            // If screen is off or the device is going to sleep, then still allow to update.
+            return mWmService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
         }
 
         @Override

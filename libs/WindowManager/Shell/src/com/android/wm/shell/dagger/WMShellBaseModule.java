@@ -699,7 +699,10 @@ public abstract class WMShellBaseModule {
             Context context,
             @ShellMainThread ShellExecutor shellExecutor
     ) {
-        return Optional.of(
-                new BackAnimationController(shellExecutor, context));
+        if (BackAnimationController.IS_ENABLED) {
+            return Optional.of(
+                    new BackAnimationController(shellExecutor, context));
+        }
+        return Optional.empty();
     }
 }

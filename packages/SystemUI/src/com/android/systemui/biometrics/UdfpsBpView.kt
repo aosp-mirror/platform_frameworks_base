@@ -23,7 +23,7 @@ import android.util.AttributeSet
  *
  * Currently doesn't draw anything.
  *
- * Note that [AuthBiometricUdfpsView] also shows UDFPS animations. At some point we should
+ * Note that [AuthBiometricFingerprintViewController] also shows UDFPS animations. At some point we should
  * de-dupe this if necessary.
  */
 class UdfpsBpView(context: Context, attrs: AttributeSet?) : UdfpsAnimationView(context, attrs) {

@@ -249,7 +249,7 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setMin(0);
             final int currentVolume = device.getCurrentVolume();
             if (mSeekBar.getProgress() != currentVolume) {
-                mSeekBar.setProgress(currentVolume);
+                mSeekBar.setProgress(currentVolume, true);
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -278,7 +278,7 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setMin(0);
             final int currentVolume = mController.getSessionVolume();
             if (mSeekBar.getProgress() != currentVolume) {
-                mSeekBar.setProgress(currentVolume);
+                mSeekBar.setProgress(currentVolume, true);
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override

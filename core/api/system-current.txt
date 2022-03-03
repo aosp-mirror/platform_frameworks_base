@@ -6329,7 +6329,6 @@ package android.media {
     method public int describeContents();
     method @NonNull public String getMediaRoute2Id();
     method public int getRangeZone();
-    method @NonNull public static String rangeZoneToString(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.NearbyDevice> CREATOR;
     field public static final int RANGE_CLOSE = 3; // 0x3
@@ -10524,6 +10523,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -15700,6 +15700,11 @@ package android.util {
 }
 
 package android.view {
+
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @NonNull public final java.util.List<android.graphics.Rect> getUnrestrictedPreferKeepClearRects();
+    method @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS) public final void setUnrestrictedPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
+  }
 
   public abstract class Window {
     method public void addSystemFlags(@android.view.WindowManager.LayoutParams.SystemFlags int);

@@ -173,18 +173,13 @@ public class CoexCoordinator {
     }
 
     // SensorType to AuthenticationClient map
-    private final Map<Integer, AuthenticationClient<?>> mClientMap;
-    @VisibleForTesting final LinkedList<SuccessfulAuth> mSuccessfulAuths;
+    private final Map<Integer, AuthenticationClient<?>> mClientMap = new HashMap<>();
+    @VisibleForTesting final LinkedList<SuccessfulAuth> mSuccessfulAuths = new LinkedList<>();
     private boolean mAdvancedLogicEnabled;
     private boolean mFaceHapticDisabledWhenNonBypass;
-    private final Handler mHandler;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    private CoexCoordinator() {
-        // Singleton
-        mClientMap = new HashMap<>();
-        mSuccessfulAuths = new LinkedList<>();
-        mHandler = new Handler(Looper.getMainLooper());
-    }
+    private CoexCoordinator() {}
 
     public void addAuthenticationClient(@BiometricScheduler.SensorType int sensorType,
             @NonNull AuthenticationClient<?> client) {
@@ -221,8 +216,14 @@ public class CoexCoordinator {
     public void onAuthenticationSucceeded(long currentTimeMillis,
             @NonNull AuthenticationClient<?> client,
             @NonNull Callback callback) {
+        final boolean isUsingSingleModality = isSingleAuthOnly(client);
+
         if (client.isBiometricPrompt()) {
-            callback.sendHapticFeedback();
+            if (!isUsingSingleModality && hasMultipleSuccessfulAuthentications()) {
+                // only send feedback on the first one
+            } else {
+                callback.sendHapticFeedback();
+            }
             // For BP, BiometricService will add the authToken to Keystore.
             callback.sendAuthenticationResult(false /* addAuthTokenIfStrong */);
             callback.handleLifecycleAfterAuth();
@@ -234,7 +235,7 @@ public class CoexCoordinator {
             callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
             callback.handleLifecycleAfterAuth();
         } else if (mAdvancedLogicEnabled && client.isKeyguard()) {
-            if (isSingleAuthOnly(client)) {
+            if (isUsingSingleModality) {
                 // Single sensor authentication
                 callback.sendHapticFeedback();
                 callback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
@@ -295,10 +296,10 @@ public class CoexCoordinator {
             @NonNull AuthenticationClient<?> client,
             @LockoutTracker.LockoutMode int lockoutMode,
             @NonNull Callback callback) {
-        final boolean keyguardAdvancedLogic = mAdvancedLogicEnabled && client.isKeyguard();
+        final boolean isUsingSingleModality = isSingleAuthOnly(client);
 
-        if (keyguardAdvancedLogic) {
-            if (isSingleAuthOnly(client)) {
+        if (mAdvancedLogicEnabled && client.isKeyguard()) {
+            if (isUsingSingleModality) {
                 callback.sendHapticFeedback();
                 callback.handleLifecycleAfterAuth();
             } else {
@@ -319,8 +320,7 @@ public class CoexCoordinator {
                         // also done now.
                         callback.sendHapticFeedback();
                         callback.handleLifecycleAfterAuth();
-                    }
-                    else {
+                    } else {
                         // UDFPS auth has never been attempted.
                         if (mFaceHapticDisabledWhenNonBypass && !face.isKeyguardBypassEnabled()) {
                             Slog.w(TAG, "Skipping face reject haptic");
@@ -360,6 +360,11 @@ public class CoexCoordinator {
                     callback.handleLifecycleAfterAuth();
                 }
             }
+        } else if (client.isBiometricPrompt() && !isUsingSingleModality) {
+            if (!isCurrentFaceAuth(client)) {
+                callback.sendHapticFeedback();
+            }
+            callback.handleLifecycleAfterAuth();
         } else {
             callback.sendHapticFeedback();
             callback.handleLifecycleAfterAuth();
@@ -380,6 +385,8 @@ public class CoexCoordinator {
      */
     public void onAuthenticationError(@NonNull AuthenticationClient<?> client,
             @BiometricConstants.Errors int error, @NonNull ErrorCallback callback) {
+        final boolean isUsingSingleModality = isSingleAuthOnly(client);
+
         // Figure out non-coex state
         final boolean shouldUsuallyVibrate;
         if (isCurrentFaceAuth(client)) {
@@ -401,25 +408,26 @@ public class CoexCoordinator {
         }
 
         // Figure out coex state
-        final boolean keyguardAdvancedLogic = mAdvancedLogicEnabled && client.isKeyguard();
         final boolean hapticSuppressedByCoex;
-
-        if (keyguardAdvancedLogic) {
-            if (isSingleAuthOnly(client)) {
+        if (mAdvancedLogicEnabled && client.isKeyguard()) {
+            if (isUsingSingleModality) {
                 hapticSuppressedByCoex = false;
             } else {
                 hapticSuppressedByCoex = isCurrentFaceAuth(client)
                         && !client.isKeyguardBypassEnabled();
             }
+        } else if (client.isBiometricPrompt() && !isUsingSingleModality) {
+            hapticSuppressedByCoex = isCurrentFaceAuth(client);
         } else {
             hapticSuppressedByCoex = false;
         }
 
         // Combine and send feedback if appropriate
-        Slog.d(TAG, "shouldUsuallyVibrate: " + shouldUsuallyVibrate
-                + ", hapticSuppressedByCoex: " + hapticSuppressedByCoex);
         if (shouldUsuallyVibrate && !hapticSuppressedByCoex) {
             callback.sendHapticFeedback();
+        } else {
+            Slog.v(TAG, "no haptic shouldUsuallyVibrate: " + shouldUsuallyVibrate
+                    + ", hapticSuppressedByCoex: " + hapticSuppressedByCoex);
         }
     }
 
@@ -502,6 +510,19 @@ public class CoexCoordinator {
             }
         }
         return true;
+    }
+
+    private boolean hasMultipleSuccessfulAuthentications() {
+        int count = 0;
+        for (AuthenticationClient<?> c : mClientMap.values()) {
+            if (c.wasAuthSuccessful()) {
+                count++;
+            }
+            if (count > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
+import static android.content.pm.PackageManager.FEATURE_WINDOW_MAGNIFICATION;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -38,6 +39,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
@@ -91,6 +93,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     private FullScreenMagnificationController mFullScreenMagnificationController;
     private WindowMagnificationManager mWindowMagnificationMgr;
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+    /** Whether the platform supports window magnification feature. */
+    private final boolean mSupportWindowMagnification;
 
     @GuardedBy("mLock")
     private int mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -99,7 +103,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     // Track the active user to reset the magnification and get the associated user settings.
     private @UserIdInt int mUserId = UserHandle.USER_SYSTEM;
     @GuardedBy("mLock")
-    private boolean mImeWindowVisible = false;
+    private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     private long mWindowModeEnabledTime = 0;
     private long mFullScreenModeEnabledTime = 0;
 
@@ -129,6 +133,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mScaleProvider = scaleProvider;
         LocalServices.getService(WindowManagerInternal.class)
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
+        mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
+                FEATURE_WINDOW_MAGNIFICATION);
     }
 
     @VisibleForTesting
@@ -183,6 +189,11 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         } else {
             getWindowMagnificationMgr().removeMagnificationButton(displayId);
         }
+    }
+
+    /** Returns {@code true} if the platform supports window magnification feature. */
+    public boolean supportWindowMagnification() {
+        return mSupportWindowMagnification;
     }
 
     /**
@@ -377,7 +388,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
                 mLastActivatedMode = mActivatedMode;
             }
-            logMagnificationModeWithImeOnIfNeeded();
+            logMagnificationModeWithImeOnIfNeeded(displayId);
             disableFullScreenMagnificationIfNeeded(displayId);
         } else {
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
@@ -432,7 +443,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 setActivatedModeAndSwitchDelegate(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
                 mLastActivatedMode = mActivatedMode;
             }
-            logMagnificationModeWithImeOnIfNeeded();
+            logMagnificationModeWithImeOnIfNeeded(displayId);
             disableWindowMagnificationIfNeeded(displayId);
         } else {
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
@@ -454,12 +465,12 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     @Override
-    public void onImeWindowVisibilityChanged(boolean shown) {
+    public void onImeWindowVisibilityChanged(int displayId, boolean shown) {
         synchronized (mLock) {
-            mImeWindowVisible = shown;
+            mIsImeVisibleArray.put(displayId, shown);
         }
-        getWindowMagnificationMgr().onImeWindowVisibilityChanged(shown);
-        logMagnificationModeWithImeOnIfNeeded();
+        getWindowMagnificationMgr().onImeWindowVisibilityChanged(displayId, shown);
+        logMagnificationModeWithImeOnIfNeeded(displayId);
     }
 
     /**
@@ -575,11 +586,12 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         }
     }
 
-    private void logMagnificationModeWithImeOnIfNeeded() {
+    private void logMagnificationModeWithImeOnIfNeeded(int displayId) {
         final int mode;
 
         synchronized (mLock) {
-            if (!mImeWindowVisible || mActivatedMode == ACCESSIBILITY_MAGNIFICATION_MODE_NONE) {
+            if (!mIsImeVisibleArray.get(displayId, false)
+                    || mActivatedMode == ACCESSIBILITY_MAGNIFICATION_MODE_NONE) {
                 return;
             }
             mode = mActivatedMode;

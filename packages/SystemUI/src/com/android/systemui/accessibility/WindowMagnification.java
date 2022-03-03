@@ -172,6 +172,17 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @MainThread
+    void moveWindowMagnifierToPositionInternal(int displayId, float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        final WindowMagnificationController windowMagnificationController =
+                mMagnificationControllerSupplier.get(displayId);
+        if (windowMagnificationController != null) {
+            windowMagnificationController.moveWindowMagnifierToPosition(positionX, positionY,
+                    callback);
+        }
+    }
+
+    @MainThread
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
@@ -210,9 +221,9 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @Override
-    public void onDrag(int displayId) {
+    public void onMove(int displayId) {
         if (mWindowMagnificationConnectionImpl != null) {
-            mWindowMagnificationConnectionImpl.onDrag(displayId);
+            mWindowMagnificationConnectionImpl.onMove(displayId);
         }
     }
 
