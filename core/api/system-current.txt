@@ -2851,19 +2851,31 @@ package android.companion.virtual {
 package android.companion.virtual.audio {
 
   public final class AudioCapture {
-    ctor public AudioCapture();
+    method @NonNull public android.media.AudioFormat getFormat();
     method public int getRecordingState();
+    method public int read(@NonNull byte[], int, int);
+    method public int read(@NonNull byte[], int, int, int);
     method public int read(@NonNull java.nio.ByteBuffer, int);
+    method public int read(@NonNull java.nio.ByteBuffer, int, int);
+    method public int read(@NonNull float[], int, int, int);
+    method public int read(@NonNull short[], int, int);
+    method public int read(@NonNull short[], int, int, int);
     method public void startRecording();
     method public void stop();
   }
 
   public final class AudioInjection {
-    ctor public AudioInjection();
+    method @NonNull public android.media.AudioFormat getFormat();
     method public int getPlayState();
     method public void play();
     method public void stop();
+    method public int write(@NonNull byte[], int, int);
+    method public int write(@NonNull byte[], int, int, int);
     method public int write(@NonNull java.nio.ByteBuffer, int, int);
+    method public int write(@NonNull java.nio.ByteBuffer, int, int, long);
+    method public int write(@NonNull float[], int, int, int);
+    method public int write(@NonNull short[], int, int);
+    method public int write(@NonNull short[], int, int, int);
   }
 
   public final class VirtualAudioDevice implements java.io.Closeable {
