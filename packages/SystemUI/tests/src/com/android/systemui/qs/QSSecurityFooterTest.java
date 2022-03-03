@@ -53,6 +53,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -102,6 +103,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     private TestableLooper mTestableLooper;
 
@@ -115,7 +118,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .replace("ImageView", TestableImageView.class)
                 .build().inflate(R.layout.quick_settings_security_footer, null, false);
         mFooter = new QSSecurityFooter(mRootView, mUserTracker, new Handler(looper),
-                mActivityStarter, mSecurityController, mDialogLaunchAnimator, looper);
+                mActivityStarter, mSecurityController, mDialogLaunchAnimator, looper,
+                mFeatureFlags);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
 
