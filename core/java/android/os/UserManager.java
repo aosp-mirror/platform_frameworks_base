@@ -2574,6 +2574,9 @@ public class UserManager {
     /**
      * Checks if the context user is a managed profile.
      *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
+     *
      * @return whether the context user is a managed profile.
      */
     @UserHandleAware(
@@ -2592,6 +2595,9 @@ public class UserManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or
      * {@link android.Manifest.permission#QUERY_USERS} permission, otherwise the caller
      * must be in the same profile group of specified user.
+     *
+     * Note that this applies specifically to <em>managed</em> profiles. For profiles in general,
+     * use {@link #isProfile()} instead.
      *
      * @return whether the specified user is a managed profile.
      * @hide
