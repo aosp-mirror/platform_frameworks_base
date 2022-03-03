@@ -6965,6 +6965,19 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            if (packageName == null) {
+                return false;
+            }
+
+            if (Process.isSdkSandboxUid(callingUid)) {
+                return packageName.equals(getSdkSandboxPackageName());
+            }
+            int uid = getPackageUid(packageName, 0, userId);
+            return UserHandle.isSameApp(uid, callingUid);
+        }
+
+        @Override
         public boolean isResolveActivityComponent(ComponentInfo component) {
             return mResolveActivity.packageName.equals(component.packageName)
                     && mResolveActivity.name.equals(component.name);

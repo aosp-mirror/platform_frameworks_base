@@ -2232,18 +2232,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Return true if callingUid is system, or packageName belongs to that callingUid.
      */
     private boolean isSameApp(int callingUid, @Nullable String packageName) {
-        try {
-            if (callingUid != 0 && callingUid != SYSTEM_UID) {
-                if (packageName == null) {
-                    return false;
-                }
-                final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        UserHandle.getUserId(callingUid));
-                return UserHandle.isSameApp(callingUid, uid);
-            }
-        } catch (RemoteException e) {
-            // Should not happen
+        if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            return mPmInternal.isSameApp(packageName, callingUid, UserHandle.getUserId(callingUid));
         }
         return true;
     }
