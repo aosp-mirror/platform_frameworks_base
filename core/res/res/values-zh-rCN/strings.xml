@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"三方通话"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"拒绝不想接听的骚扰电话"</string>
     <string name="CndMmi" msgid="185136449405618437">"主叫号码传送"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"勿扰"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"默认不显示本机号码，在下一次通话中也不显示"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"默认不显示本机号码，但在下一次通话中显示"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"默认显示本机号码，但在下一次通话中不显示"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"绑定到运营商服务"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"允许应用绑定到运营商服务。普通应用绝不需要此权限。"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"“勿扰”模式使用权限"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"开始查看权限决策"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"直到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（闹钟下次响铃时）"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直到您将其关闭"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"直到您关闭“勿扰”模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"收起"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"勿扰"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"休息时间"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"周一至周五夜间"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"周末"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有来电和通知时会振动"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有来电和通知时会静音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系统变更"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"勿扰"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新功能：勿扰模式目前可隐藏通知"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"点按即可了解详情以及进行更改。"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系统"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"设置"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
@@ -2252,8 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"已将消息内容从<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>翻译成<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"后台活动"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"后台活动"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 已在后台运行较长时间。点按即可查看。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"“<xliff:g id="APP">%1$s</xliff:g>”正在后台运行，并且消耗了大量电池电量。点按即可查看。"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"“<xliff:g id="APP">%1$s</xliff:g>”已在后台运行较长时间。点按即可查看。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"无法使用此设备的摄像头"</string>
 </resources>

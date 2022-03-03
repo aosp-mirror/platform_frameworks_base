@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"שיחה עם שלושה משתתפים"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"דחיית שיחות מטרידות ולא רצויות"</string>
     <string name="CndMmi" msgid="185136449405618437">"שליחת מספר מתקשר"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"נא לא להפריע"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"השירות \'שיחה מזוהה\' עובר כברירת מחדל למצב מוגבל. השיחה הבאה: מוגבלת"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"שירות השיחה המזוהה עובר כברירת מחדל למצב מוגבל. השיחה הבאה: לא מוגבלת"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"שירות \'שיחה מזוהה\' עובר כברירת מחדל למצב לא מוגבל. השיחה הבאה: מוגבלת"</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות העברת הודעות של ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"איגוד לשירותי ספק"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"מאפשרת לבעלים לאגד לשירות ספק. לא נחוצה לאפליקציות רגילות בדרך כלל."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"גישה אל \'נא לא להפריע\'"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"מאפשרת לאפליקציה לקרוא ולכתוב את התצורה של התכונה \'נא לא להפריע\'."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"התחלת צפייה בהרשאות השימוש"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ההחלטות לגבי ההרשאות להפעלת התצוגה"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ההתראה הבאה)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"עד הכיבוי"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"עד להשבתת התכונה \'נא לא להפריע\'"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"כיווץ"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"נא לא להפריע"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"זמן השבתה"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ערב ביום חול"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"סוף השבוע"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"שיחות והודעות ירטטו"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"שיחות והתראות יושתקו"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"שינויים במערכת"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"נא לא להפריע"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"חדש: מצב \'נא לא להפריע\' מסתיר התראות"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"אפשר להקיש כדי לקבל מידע נוסף ולבצע שינויים."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"יש להקיש כדי לבדוק מה חסום."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"מערכת"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"הגדרות"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"אישור"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"השבתה"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏התכונה \'התראות משופרות\' החליפה את \'התראות מותאמות ל-Android\' ב-‏Android 12. התכונה הזו מציגה הצעות לפעולות ולתשובות ומארגנת את ההתראות שלך.\n\nל\'התראות משופרות\' יש גישה לתוכן של התראות, כולל מידע אישי כמו שמות אנשי קשר והודעות. התכונה הזו יכולה גם לסגור התראות או להגיב עליהן (למשל לענות לשיחות טלפון) ולשלוט בתכונה \'נא לא להפריע\'."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>

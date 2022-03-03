@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"மும்முனை அழைப்பு"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"விரும்பத்தகாத தொல்லைதரும் அழைப்புகளை நிராகரித்தல்"</string>
     <string name="CndMmi" msgid="185136449405618437">"அழைப்பின் விவரங்கள்"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"தொந்தரவு செய்யாதே"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்பட்டது என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்பட்டது"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்பட்டது என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்படவில்லை"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்படவில்லை என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்பட்டது"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"மொபைல் நிறுவனச் செய்தியிடல் சேவையின் உயர்-நிலை இடைமுகத்துடன் ஹோல்டரை இணைக்க அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"மொபைல் நிறுவன சேவைகளுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"மொபைல் நிறுவன சேவைகளுடன் இணைக்க, ஹோல்டரை அனுமதிக்கும். சாதாரணப் பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தை அணுகுதல்"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"அனுமதி உபயோகத்தை அணுகுதல்"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"அனுமதி முடிவுகளைப் பார்க்கத் தொடங்குதல்"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> மணி (அடுத்த அலாரம்) வரை"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ஆஃப் செய்யும் வரை"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\'தொந்தரவு செய்யாதே\' என்பதை முடக்கும் வரை"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"சுருக்கு"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"தொந்தரவு செய்யாதே"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"செயலற்ற நேரம்"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"வார இரவு"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"வார இறுதி"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு அதிரும்"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு ஒலியை முடக்கும்"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"சிஸ்டம் மாற்றங்கள்"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"தொந்தரவு செய்ய வேண்டாம்"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"புதியது: \'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறையானது அறிவிப்புகளைக் காட்டாமல் மறைக்கிறது"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"மேலும் அறிந்து மாற்ற, தட்டவும்."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"சிஸ்டம்"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"அமைப்புகள்"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"சரி"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ஆஃப் செய்"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"மேலும் அறிக"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 பதிப்பில் \'Android சூழலுக்கேற்ற அறிவிப்புகள்\' அம்சத்திற்குப் பதிலாக \'மேம்பட்ட அறிவிப்புகள்\' மாற்றப்பட்டுள்ளது. இந்த அம்சம், பரிந்துரைக்கப்படும் செயல்களையும் பதில்களையும் காட்டுவதுடன் உங்கள் அறிவிப்புகளையும் ஒழுங்கமைக்கும்.\n\nதொடர்புகளின் பெயர்கள், மெசேஜ்கள் போன்ற தனிப்பட்ட தகவல்கள் உட்பட அனைத்து அறிவிப்பு உள்ளடக்கத்தையும் \'மேம்பட்ட அறிவிப்புகள்\' அணுக முடியும். மேலும் இந்த அம்சத்தால் அறிவிப்புகளை நிராகரிக்கவும் அவற்றுக்குப் பதிலளிக்கவும் முடியும் (அழைப்புகளுக்குப் பதிலளிப்பது, \'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் கட்டுப்படுத்துவது போன்றவை)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>

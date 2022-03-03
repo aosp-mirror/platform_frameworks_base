@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Drierigtingbel"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Verwerping van ongewenste, irriterende oproepe"</string>
     <string name="CndMmi" msgid="185136449405618437">"Oproepnommer-lewering"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Moenie Steur Nie"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Beller-ID se verstek is beperk. Volgende oproep: beperk"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Beller-ID se verstek is beperk. Volgende oproep: nie beperk nie"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Beller-ID se verstek is nie beperk nie. Volgende oproep: beperk"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Dit laat die houer toe om aan die top-koppelvlak van \'n diensverskaffer-boodskapdiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"verbind aan diensverskafferdienste"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Laat die houer toe om aan diensverskafferdienste te verbind. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"verkry toegang tot Moenie Steur Nie"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"begin kyk van toestemminggebruik"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Laat die houer toe om die toestemminggebruik vir \'n program te begin. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"begin Bekyk Toestemmingbesluite"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Totdat jy dit afskakel"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Totdat jy Moenie Steur Nie afskakel"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Vou in"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Moenie Steur Nie"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Staantyd"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeksaand"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Naweek"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Oproepe en kennisgewings sal vibreer"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Oproepe en kennisgewings sal gedemp wees"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Stelselveranderinge"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Moenie Steur Nie"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nuut: Moenie Steur Nie versteek tans kennisgewings"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik om meer te wete te kom en te verander."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Moenie Steur Nie het verander"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te kyk wat geblokkeer word."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Stelsel"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Instellings"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Skakel af"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Kom meer te wete"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Verbeterde kennisgewings het Android se aanpasbare kennisgewings in Android 12 vervang. Hierdie kenmerk wys voorgestelde handelinge en antwoorde en organiseer jou kennisgewings.\n\nVerbeterde kennisgewings het toegang tot kennisgewinginhoud, insluitend persoonlike inligting soos kontakname en boodskappe. Hierdie kenmerk kan ook kennisgewings toemaak of daarop antwoord, soos om foonoproepe te beantwoord en Moenie Steur Nie te beheer."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>

@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Trismerno klicanje"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Zavrnitev neželenih, motečih klicev"</string>
     <string name="CndMmi" msgid="185136449405618437">"Dostava na klicno številko"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ne moti"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID klicatelja je ponastavljen na omejeno. Naslednji klic: omejeno"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID klicatelja je ponastavljen na omejeno. Naslednji klic: ni omejeno"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: omejeno"</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Imetniku omogoča povezovanje z vmesnikom operaterjeve sporočilne storitve najvišje ravni. To naj ne bi bilo nikoli potrebno za navadne aplikacije."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"povezovanje z operaterjevimi storitvami"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Imetniku omogoča povezovanje z operaterjevimi storitvami. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"dostop do načina »ne moti«"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Aplikaciji omogoča branje in pisanje konfiguracije načina »ne moti«."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"začetek uporabe dovoljenja za ogledovanje"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Imetniku omogoča začetek uporabe dovoljenj za aplikacijo. Nikoli ni potrebno za navadne aplikacije."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"prikaz odločitev o dovoljenjih"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (naslednji alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dokler ne izklopite"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokler ne izklopite načina »ne moti«"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Strni"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ne moti"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Čas nedelovanja"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noč med tednom"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Konec tedna"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibriranje bo vklopljeno za klice in obvestila"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske spremembe"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne moti"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novi način »ne moti« skriva obvestila"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Dotaknite se, če želite izvedeti več in spremeniti."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Način »ne moti« je spremenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dotaknite se, da preverite, kaj je blokirano."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavitve"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"V redu"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Izklopi"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Več o tem"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pametna obvestila so v Androidu 12 zamenjala prilagodljiva obvestila Android. Ta funkcija prikazuje predlagana dejanja in odgovore ter organizira vaša obvestila.\n\nPametna obvestila lahko preberejo vso vsebino obvestil, vključno z osebnimi podatki, kot so imena in sporočila stikov. Ta funkcija lahko tudi opusti obvestila ali se odziva nanje (npr. sprejema telefonske klice in upravlja način Ne moti)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>

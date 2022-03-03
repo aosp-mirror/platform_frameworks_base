@@ -71,6 +71,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Тросмерно позивање"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Одбијање непожељних позива"</string>
     <string name="CndMmi" msgid="185136449405618437">"Испорука броја за позивање"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Не узнемиравај"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ИД позиваоца је подразумевано ограничен. Следећи позив: ограничен."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ИД позиваоца је подразумевано ограничен. Следећи позив: Није ограничен."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ИД позиваоца подразумевано није ограничен. Следећи позив: ограничен."</string>
@@ -737,6 +738,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Дозвољава власнику да се повеже са интерфејсом највишег нивоа за услугу за размену порука мобилног оператера. Никада не би требало да буде потребно за стандардне апликације."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"повезивање са услугама оператера"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Дозвољава власнику да се повеже са услугама оператера. Никада не би требало да буде потребно за обичне апликације."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"приступај подешавању Не узнемиравај"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дозвољава апликацији да чита и уписује конфигурацију подешавања Не узнемиравај."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"почетак коришћења дозволе за преглед"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозвољава власнику да започне коришћење дозволе за апликацију. Никада не би требало да буде потребна за уобичајене апликације."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"покретање прегледа одлука о дозволама"</string>
@@ -1867,8 +1870,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (следећи аларм)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Док не искључите"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Док не искључите режим Не узнемиравај"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Скупи"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не узнемиравај"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Одмор"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Радни дан увече"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Викенд"</string>
@@ -2033,7 +2038,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Вибрација за позиве и обавештења је укључена"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Мелодија звона за позиве и обавештење је искључена"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системске промене"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не узнемиравај"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Ново: Режим Не узнемиравај крије обавештења"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Додирните да бисте сазнали више и променили подешавање."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Режим Не узнемиравај је промењен"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Додирните да бисте проверили шта је блокирано."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Подешавања"</string>
@@ -2050,6 +2058,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Потврди"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Искључи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Сазнајте више"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Побољшана обавештења су заменила Android прилагодљива обавештења у Android-у 12. Ова функција показује предложене радње и одговоре, и организује обавештења.\n\nПобољшана обавештења могу да приступају садржају обавештења, укључујући личне податке попут имена контаката и порука. Ова функција може и да одбацује обавештења или да одговара на њих, на пример, да се јавља на телефонске позиве и контролише режим Не узнемиравај."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>
@@ -2253,7 +2262,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Порука је преведена са језика <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност у позадини"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Активност у позадини"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Апликација <xliff:g id="APP">%1$s</xliff:g> је покренута у позадини и троши батерију. Додирните да бисте прегледали."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Апликација <xliff:g id="APP">%1$s</xliff:g> троши батерију у позадини. Додирните да бисте прегледали."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Апликација <xliff:g id="APP">%1$s</xliff:g> је предуго покренута у позадини. Додирните да бисте прегледали."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверите активне апликације"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не можете да приступите камери са овог уређаја"</string>

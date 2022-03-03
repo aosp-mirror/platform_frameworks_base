@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Трохбаковы выклік"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Адмова ад непажаданых раздражняючых выклікаў"</string>
     <string name="CndMmi" msgid="185136449405618437">"Дастаўка нумару выкліку"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Не турбаваць"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Налады ідэнтыфікатару АВН па змаўчанні абмежаваныя. Наступны выклік: абмежавана"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Ідэнтыфікатар АВН па змаўчанні абмежаваны. Наступны выклік: не абмежавана"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Па змаўчанні ідэнтыфікатар АВН не абмежаваны. Наступны выклік: абмежаваны"</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Дазваляе ўладальніку выконваць падключэнне да базавага інтэрфейсу сэрвісу абмену паведамленнямі аператара. Звычайныя праграмы ніколі не выкарыстоўваюць гэты дазвол."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"прывязвацца з сэрвісаў аператара"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Дазваляе ўладальніку ажыццяўляць прывязку да сэрвісаў аператара. Ніколі не павінна патрабавацца для звычайных праграм."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"атрымліваць доступ да рэжыму «Не турбаваць»"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дазваляе праграме чытаць і выконваць запіс у канфігурацыю рэжыму «Не турбаваць»."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"запусціць выкарыстанне дазволаў на прагляд"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дазваляе трымальніку запусціць выкарыстанне дазволаў праграмай. Не патрэбна для звычайных праграм."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"запускаць прагляд рашэнняў наконт дазволаў"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Да <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Да <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (наступны будзільнік)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Пакуль не выключыце"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Пакуль вы не выключыце рэжым «Не турбаваць»"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Згарнуць"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не турбаваць"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Час бяздзеяння"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Будні вечар"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Выхадныя"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для выклікаў і апавяшчэнняў уключаны вібрасігнал"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для выклікаў і апавяшчэнняў гук выключаны"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Сістэмныя змены"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбаваць"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Новае: у рэжыме \"Не турбаваць\" апавяшчэнні не паказваюцца"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Дакраніцеся, каб даведацца больш і змяніць."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Зменены налады рэжыму \"Не турбаваць\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Націсніце, каб паглядзець заблакіраванае."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Сістэма"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Налады"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ОК"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Выключыць"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Даведацца больш"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"У версіі Android 12 Адаптыўныя апавяшчэнні Android заменены Палепшанымі апавяшчэннямі. Гэта функцыя ўпарадкоўвае вашы апавяшчэнні і паказвае прапановы дзеянняў і адказаў.\n\nПалепшаныя апавяшчэнні маюць доступ да змесціва ўсіх апавяшчэнняў, у тым ліку да асабістай інфармацыі – імён кантактаў і паведамленняў. Яшчэ гэта функцыя можа адхіляць апавяшчэнні ці адказваць на іх, напрыклад рэагаваць на тэлефонныя выклікі і кіраваць функцыяй \"Не турбаваць\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>

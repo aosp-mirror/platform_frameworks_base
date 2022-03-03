@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Τριμερής κλήση"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Απόρριψη ανεπιθύμητων, ενοχλητικών κλήσεων"</string>
     <string name="CndMmi" msgid="185136449405618437">"Παράδοση καλούμενου αριθμού"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Μην ενοχλείτε"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"δεσμεύεται σε υπηρεσίες του παρόχου κινητής τηλεφωνίας"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Δίνει στον κάτοχο τη δυνατότητα δέσμευσης σε υπηρεσίες εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"έχει πρόσβαση στη λειτουργία \"Μην ενοχλείτε\""</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Επιτρέπει στην εφαρμογή την εγγραφή και τη σύνταξη διαμόρφωσης για τη λειτουργία \"Μην ενοχλείτε\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"έναρξη χρήσης άδειας προβολής"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Επιτρέπει στον κάτοχο να ξεκινήσει τη χρήση της άδειας για μια εφαρμογή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"έναρξη προβολής αποφάσεων για άδειες"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Μέχρι την απενεργοποίηση"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Σύμπτυξη"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Μην ενοχλείτε"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Διακοπή λειτουργίας"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Νύχτα καθημερινής"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Σαββατοκύριακο"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Θα υπάρχει δόνηση για κλήσεις και ειδοποιήσεις"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Οι κλήσεις και οι ειδοποιήσεις θα τεθούν σε παύση"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Αλλαγές στο σύστημα"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Μην ενοχλείτε"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Νέο: Η λειτουργία \"Μην ενοχλείτε\" αποκρύπτει ειδοποιήσεις"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Σύστημα"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ρυθμίσεις"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ΟΚ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Απενεργοποίηση"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Μάθετε περισσότερα"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Στο Android 12, οι Βελτιωμένες ειδοποιήσεις αντικατέστησαν τις Προσαρμοστικές ειδοποιήσεις Android. Αυτή η λειτουργία εμφανίζει προτεινόμενες ενέργειες και απαντήσεις και οργανώνει τις ειδοποιήσεις σας.\n\nΟι Βελτιωμένες ειδοποιήσεις μπορούν να αποκτήσουν πρόσβαση σε περιεχόμενο ειδοποιήσεων, συμπεριλαμβανομένων προσωπικών στοιχείων, όπως ονομάτων επαφών και μηνυμάτων Αυτή η λειτουργία παρέχει επίσης τη δυνατότητα παράβλεψης ειδοποιήσεων ή απάντησης σε αυτές, όπως η απάντηση σε τηλεφωνικές κλήσεις και ο έλεγχος της λειτουργίας Μην ενοχλείτε."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Μήνυμα που έχει μεταφραστεί από τα <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> στα <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Δραστηριότητα στο παρασκήνιο"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Δραστηριότητα στο παρασκήνιο"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Πατήστε για έλεγχο."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Το <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Έλεγχος."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Δεν είναι δυνατή η πρόσβαση στην κάμερα από αυτήν τη συσκευή."</string>

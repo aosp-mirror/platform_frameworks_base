@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Telefonata me tre drejtime"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Refuzimi i telefonatave të padëshirueshme e të bezdisshme"</string>
     <string name="CndMmi" msgid="185136449405618437">"Dërgimi i numrit të telefonit"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Mos shqetëso"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të kufizuar. Telefonata e radhës: E kufizuar!"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të kufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e kufizuar!"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Lejon zotëruesin të lidhet me ndërfaqen e nivelit të lartë të shërbimit të mesazheve të operatorit. Nuk nevojitet për aplikacione normale."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"lidhu me shërbimet e operatorit celular"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Lejon që mbajtësi të lidhet me shërbimet e operatorit celular. Nuk nevojitet për aplikacionet normale."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"qasje te \"Mos shqetëso\""</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"nisë shikimin e vendimeve për lejet"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Deri në <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarmi tjetër)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Derisa ta çaktivizosh"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Deri sa të çaktivizosh gjendjen \"Mos shqetëso\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Shpalos"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Mos shqetëso"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"periudha joaktive"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Netët e javës"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fundjava"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Do të lëshojë dridhje për telefonatat dhe njoftimet"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Do të hiqet zëri për telefonatat dhe njoftimet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Ndryshimet e sistemit"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Mos shqetëso"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"E re: Modaliteti \"Mos shqetëso\" po fsheh njoftimet"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Trokit për të mësuar më shumë dhe për të ndryshuar."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Mos shqetëso\" ka ndryshuar"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trokit për të shënuar atë që është bllokuar"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistemi"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cilësimet"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Në rregull"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Çaktivizo"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Mëso më shumë"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Njoftimet e përmirësuara kanë zëvendësuar \"Njoftimet me përshtatje të Android\" në Android 12. Kjo veçori shfaq veprimet dhe përgjigjet e sugjeruara dhe organizon njoftimet e tua.\n\nNjoftimet e përmirësuara mund të kenë qasje te përmbajtja e njoftimeve, duke përfshirë informacionet personale si emrat e kontakteve dhe mesazhet. Kjo veçori mund t\'i heqë ose të përgjigjet po ashtu për njoftimet, si p.sh. t\'u përgjigjet telefonatave, dhe të kontrollojë modalitetin \"Mos shqetëso\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të rritur kohëzgjatjen e baterisë"</string>

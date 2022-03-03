@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Panggilan bertiga"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Penolakan panggilan yang tidak diinginkan"</string>
     <string name="CndMmi" msgid="185136449405618437">"Pengiriman nomor panggilan"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Jangan ganggu"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Nomor penelepon default \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nomor pengguna default \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Mengizinkan operator untuk mengikat ke antarmuka tingkat tinggi dari suatu layanan perpesanan operator. Fitur ini seharusnya tidak diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"mengikat ke layanan operator"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Memungkinkan pemegang untuk mengikat ke layanan operator. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Akses status Jangan Ganggu"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"mulai melihat penggunaan izin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Memungkinkan pemegang memulai penggunaan izin untuk aplikasi. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"mulai melihat keputusan izin"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarm berikutnya)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Sampai Anda menonaktifkannya"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hingga status Jangan Ganggu dinonaktifkan"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Ciutkan"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Jangan ganggu"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Waktu non-operasional"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Malam hari kerja"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Akhir pekan"</string>
@@ -1952,7 +1957,7 @@
     <string name="demo_restarting_message" msgid="1160053183701746766">"Mereset perangkat..."</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> dinonaktifkan"</string>
     <string name="conference_call" msgid="5731633152336490471">"Konferensi Telepon"</string>
-    <string name="tooltip_popup_title" msgid="7863719020269945722">"Keterangan alat"</string>
+    <string name="tooltip_popup_title" msgid="7863719020269945722">"Tooltip"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Game"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Musik &amp; Audio"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Film &amp; Video"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Panggilan dan notifikasi akan bergetar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Suara panggilan dan notifikasi akan dinonaktifkan"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Perubahan sistem"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Jangan Ganggu"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Baru: Mode Jangan Ganggu menyembunyikan notifikasi"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ketuk untuk mempelajari lebih lanjut dan mengubah."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketuk untuk memeriksa item yang diblokir."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Setelan"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Oke"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Nonaktifkan"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Pelajari lebih lanjut"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Notifikasi yang ditingkatkan menggantikan Notifikasi Adaptif Android di Android 12. Fitur ini menunjukkan tindakan dan balasan yang disarankan, serta mengatur notifikasi.\n\nNotifikasi yang ditingkatkan dapat mengakses konten notifikasi, termasuk informasi pribadi seperti nama kontak dan pesan. Fitur ini juga dapat menutup atau merespons notifikasi, seperti menjawab panggilan telepon dan mengontrol fitur Jangan Ganggu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikasi info Mode Rutinitas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterai mungkin habis sebelum pengisian daya biasanya"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penghemat Baterai diaktifkan untuk memperpanjang masa pakai baterai"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Pesan diterjemahkan dari bahasa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ke <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktivitas Latar Belakang"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktivitas Latar Belakang"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> berjalan di latar belakang dan menghabiskan daya baterai. Ketuk untuk meninjau."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> mengonsumsi banyak daya di latar belakang. Ketuk untuk meninjau."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> berjalan di latar belakang dalam waktu yang lama. Ketuk untuk meninjau."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Periksa aplikasi aktif"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Tidak dapat mengakses kamera dari perangkat ini"</string>

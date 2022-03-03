@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Konference tří účastníků"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Odmítnutí nevyžádaných obtěžujících hovorů"</string>
     <string name="CndMmi" msgid="185136449405618437">"Doručení volaného čísla"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Nerušit"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"navázat se na služby operátora"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Umožňuje držiteli oprávnění navázat se na služby operátora. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"přístup k režimu Nerušit"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"zahájení zobrazení využití oprávnění"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umožňuje přístup zahájit využití oprávnění jiné aplikace. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"zobrazit rozhodnutí o oprávnění"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (příští budík)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dokud funkci nevypnete"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Sbalit"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nerušit"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Doba klidu"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Večer v pracovním týdnu"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Volání a oznámení budou vibrovat"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Volání a oznámení budou ztlumena"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Změny nastavení systému"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nerušit"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novinka: Režim Nerušit skrývá oznámení"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím zobrazíte další informace a provedete změny."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Nastavení režimu Nerušit se změnilo"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavení"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Vypnout"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Další informace"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Adaptivní oznámení pro Android byla v systému Android 12 nahrazena vylepšenými oznámeními. Tato funkce ukazuje navrhované akce a odpovědi a uspořádává oznámení.\n\nVylepšená oznámení mají přístup k obsahu oznámení, včetně osobních údajů, jako jsou jména kontaktů a zprávy. Tato funkce také může zavírat oznámení nebo na ně odpovídat, například přijímat telefonní hovory a ovládat režim Nerušit."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informační oznámení režimu sledu činností"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterie se možná vybije před obvyklým časem nabití"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Byl aktivován spořič baterie za účelem prodloužení výdrže"</string>

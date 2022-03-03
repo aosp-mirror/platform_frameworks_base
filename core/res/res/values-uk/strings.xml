@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Конференція"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Відхил. небажаних надокучливих дзвінків"</string>
     <string name="CndMmi" msgid="185136449405618437">"Отрим. номера абонента"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Не турбувати"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Ідентиф. абонента за умовч. обмеж. Наст. дзвінок: обмеж."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Ідентиф. абонента за умовч. обмеж. Наст. дзвінок: не обмеж."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Ідентиф. абонента за умовч. не обмеж. Наст. дзвінок: обмеж."</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби надсилання повідомлень через оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"підключатися до служб оператора"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Власник може підключатися до служб оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"доступ до режиму \"Не турбувати\""</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"перегляньте дані про використання дозволів"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Власник зможе використовувати дозволи для цього додатка. Цей дозвіл не потрібен для звичайних додатків."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"почати перегляд рішень щодо дозволів"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (наступний будильник)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Доки ви не вимкнете"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Доки ввімкнено режим \"Не турбувати\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Згорнути"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не турбувати"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Простій"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Увечері в будні"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"На вихідних"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Вібросигнал для викликів і сповіщень увімкнено"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Звуковий сигнал для викликів і сповіщень вимкнено"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системні зміни"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбувати"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Нове: у режимі \"Не турбувати\" сповіщення ховаються"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Торкніться, щоб дізнатися більше та змінити."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Налаштування"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>

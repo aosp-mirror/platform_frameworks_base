@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"三方通話"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"拒接不想接聽的騷擾電話"</string>
     <string name="CndMmi" msgid="185136449405618437">"顯示發話號碼"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"勿干擾"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"預設不顯示本機號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"預設不顯示本機號碼，但下一通電話顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"預設顯示本機號碼，但下一通電話不顯示。"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"允許應用程式與電信業者簡訊服務的頂層介面繫結 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"與電信業者服務繫結"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"允許應用程式繫結至電信業者服務 (一般應用程式並不需要)。"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"存取「零打擾」模式"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允許應用程式讀取及寫入「零打擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"啟動檢視權限用途"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允許應用程式開始使用其他應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"開始檢視權限決定"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 為止 (下一個鬧鐘)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"直到你關閉為止"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"直到你關閉「零打擾」模式"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"收合"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"零打擾"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"停機"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"週間晚上"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有來電和通知時會震動"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有來電和通知時會靜音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系統變更"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"零打擾"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新功能：「零打擾」模式現在可以隱藏通知"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"輕觸即可瞭解詳情及進行變更。"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"「零打擾」設定已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系統"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"設定"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"確定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"關閉"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，加強型通知功能已取代 Android 自動調整通知。這項功能可以顯示建議的操作和回覆內容，也可以幫你整理通知訊息。\n\n加強型通知功能可存取通知內容，包括聯絡人名稱和訊息內文等個人資訊。此外，這項功能還能關閉或回覆通知，例如接聽來電及控管「零打擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>

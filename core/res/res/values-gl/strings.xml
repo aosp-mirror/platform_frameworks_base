@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Chamada a tres"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rexeitamento de chamadas molestas non desexadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Entrega de número de chamada entrante"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Non molestar"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: restrinxido"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O valor predeterminado do identificador de chamada é non restrinxido. Próxima chamada: restrinxido"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxaría. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular aos servizos do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acceso a Non molestar"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"iniciar vista das decisións sobre os permisos"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Ata a desactivación"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Ata que desactives o modo Non molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Contraer"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Non molestar"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Tempo de descanso"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noite da semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"As chamadas e as notificacións vibrarán"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"As chamadas e as notificacións estarán silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios no sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non molestar"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novidade! O modo Non molestar oculta as notificacións"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca para obter máis información e facer cambios."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Non molestar cambiou"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para comprobar o contido bloqueado."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Configuración"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Máis información"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"En Android 12, as notificacións melloradas substitúen as notificacións intelixentes. Esta función ofréceche suxestións de accións e respostas, ademais de organizar as notificacións.\n\nEste servizo pode acceder ao contido das notificacións, mesmo á información persoal, como os nomes dos contactos e as mensaxes. Ademais, esta función pode ignorar ou responder as notificacións (por exemplo, coller chamadas telefónicas e controlar o modo Non molestar)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>
