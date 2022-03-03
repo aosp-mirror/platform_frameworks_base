@@ -410,7 +410,7 @@ public final class Settings implements Watchable, Snappable {
         int[] excludedUserIds;
     }
 
-    private static int mFirstAvailableUid = 0;
+    private static int mFirstAvailableUid = Process.FIRST_APPLICATION_UID;
 
     /** Map from volume UUID to {@link VersionInfo} */
     @Watched
@@ -4275,7 +4275,7 @@ public final class Settings implements Watchable, Snappable {
     private int acquireAndRegisterNewAppIdLPw(SettingBase obj) {
         // Let's be stupidly inefficient for now...
         final int size = mAppIds.size();
-        for (int i = mFirstAvailableUid; i < size; i++) {
+        for (int i = mFirstAvailableUid - Process.FIRST_APPLICATION_UID; i < size; i++) {
             if (mAppIds.get(i) == null) {
                 mAppIds.set(i, obj);
                 return Process.FIRST_APPLICATION_UID + i;
