@@ -53,6 +53,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
     @Main private val mainHandler: Handler,
+    private val uiEventLogger: MediaTttReceiverUiEventLogger,
 ) : MediaTttChipControllerCommon<ChipReceiverInfo>(
     context,
     logger,
@@ -93,6 +94,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
             Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
             return
         }
+        uiEventLogger.logReceiverStateChange(chipState)
+
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
             removeChip(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
             return
