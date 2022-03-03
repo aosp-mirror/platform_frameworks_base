@@ -414,6 +414,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final Region mSystemGestureExclusionUnrestricted = new Region();
     private int mSystemGestureExclusionLimit;
 
+    private Set<Rect> mRestrictedKeepClearAreas = new ArraySet<>();
+    private Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
+
     /**
      * For default display it contains real metrics, empty for others.
      * @see WindowManagerService#createWatermark()
@@ -3351,7 +3354,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             pw.println(mSystemGestureExclusion);
         }
 
-        final List<Rect> keepClearAreas = getKeepClearAreas();
+        final Set<Rect> keepClearAreas = getKeepClearAreas();
         if (!keepClearAreas.isEmpty()) {
             pw.println();
             pw.print("  keepClearAreas=");
@@ -5453,11 +5456,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateKeepClearAreas() {
-        final List<Rect> restrictedKeepClearAreas = new ArrayList();
-        final List<Rect> unrestrictedKeepClearAreas = new ArrayList();
+        final Set<Rect> restrictedKeepClearAreas = new ArraySet<>();
+        final Set<Rect> unrestrictedKeepClearAreas = new ArraySet<>();
         getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
-        mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
-                this, restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+
+        if (!mRestrictedKeepClearAreas.equals(restrictedKeepClearAreas)
+                || !mUnrestrictedKeepClearAreas.equals(unrestrictedKeepClearAreas)) {
+            mRestrictedKeepClearAreas = restrictedKeepClearAreas;
+            mUnrestrictedKeepClearAreas = unrestrictedKeepClearAreas;
+            mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
+                    this, restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        }
     }
 
     /**
@@ -5469,7 +5478,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * For context on restricted vs unrestricted keep-clear areas, see
      * {@link android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS}.
      */
-    void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted) {
+    void getKeepClearAreas(Set<Rect> outRestricted, Set<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
         forAllWindows(w -> {
@@ -5486,8 +5495,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * Returns all keep-clear areas from visible, relevant windows on this display.
      */
-    ArrayList<Rect> getKeepClearAreas() {
-        final ArrayList<Rect> keepClearAreas = new ArrayList<Rect>();
+    Set<Rect> getKeepClearAreas() {
+        final Set<Rect> keepClearAreas = new ArraySet<>();
         getKeepClearAreas(keepClearAreas, keepClearAreas);
         return keepClearAreas;
     }
