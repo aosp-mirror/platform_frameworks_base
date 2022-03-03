@@ -68,7 +68,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
@@ -97,7 +96,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -150,8 +148,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2281,98 +2277,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testVirtualDisplayContent() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .spyStatic(SurfaceControl.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
-
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        surfaceControlMirrors(surfaceSize);
-
-        // WHEN creating the DisplayContent for a new virtual display.
-        final DisplayContent virtualDisplay = new TestDisplayContent.Builder(mAtm,
-                mDisplayInfo).build();
-
-        // GIVEN a session is set up to capture a DisplayContent.
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                tokenToMirror);
-        session.setDisplayId(virtualDisplay.getDisplayId());
-        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
-
-        // WHEN attempting to mirror on the virtual display.
-        virtualDisplay.updateRecording();
-
-        // THEN mirroring is initiated for the default display's DisplayArea.
-        assertThat(virtualDisplay.isCurrentlyRecording()).isTrue();
-        assertThat(virtualDisplay.getContentRecordingSession()).isEqualTo(session);
-
-        mockSession.finishMocking();
-    }
-
-    @Test
-    public void testVirtualDisplayContent_capturedAreaResized() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .spyStatic(SurfaceControl.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
-
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        SurfaceControl mirroredSurface = surfaceControlMirrors(surfaceSize);
-
-        // WHEN creating the DisplayContent for a new virtual display.
-        final DisplayContent virtualDisplay = new TestDisplayContent.Builder(mAtm,
-                mDisplayInfo).build();
-
-        // GIVEN a session is set up to capture a DisplayContent.
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                tokenToMirror);
-        session.setDisplayId(virtualDisplay.getDisplayId());
-        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
-
-        // WHEN attempting to mirror on the virtual display, and the captured content is resized.
-        virtualDisplay.updateRecording();
-        float xScale = 0.7f;
-        float yScale = 2f;
-        Rect displayAreaBounds = new Rect(0, 0, Math.round(surfaceSize.x * xScale),
-                Math.round(surfaceSize.y * yScale));
-        virtualDisplay.updateMirroredSurface(mTransaction, displayAreaBounds, surfaceSize);
-
-        // THEN content in the captured DisplayArea is scaled to fit the surface size.
-        verify(mTransaction, atLeastOnce()).setMatrix(mirroredSurface, 1.0f / yScale, 0, 0,
-                1.0f / yScale);
-        // THEN captured content is positioned in the centre of the output surface.
-        float scaledWidth = displayAreaBounds.width() / xScale;
-        float xInset = (surfaceSize.x - scaledWidth) / 2;
-        verify(mTransaction, atLeastOnce()).setPosition(mirroredSurface, xInset, 0);
-
-        mockSession.finishMocking();
-    }
-
-    @Test
     public void testVirtualDisplayContent_withoutSurface() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .spyStatic(SurfaceControl.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
         final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
@@ -2392,25 +2297,17 @@ public class DisplayContentTests extends WindowTestsBase {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 tokenToMirror);
         session.setDisplayId(displayId);
-        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
+        mWm.setContentRecordingSession(session);
         actualDC.updateRecording();
 
         // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
         assertThat(actualDC.isCurrentlyRecording()).isFalse();
-        assertThat(actualDC.getContentRecordingSession()).isEqualTo(session);
 
         display.release();
-        mockSession.finishMocking();
     }
 
     @Test
     public void testVirtualDisplayContent_withSurface() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .spyStatic(SurfaceControl.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
         final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
@@ -2438,10 +2335,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // THEN mirroring is initiated for the default display's DisplayArea.
         assertThat(actualDC.isCurrentlyRecording()).isTrue();
-        assertThat(actualDC.getContentRecordingSession()).isEqualTo(session);
 
         display.release();
-        mockSession.finishMocking();
     }
 
     private static class MirroringTestToken extends Binder {
