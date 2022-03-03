@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -185,35 +186,58 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     private static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        private final OnBackInvokedCallback mCallback;
+        private final WeakReference<OnBackInvokedCallback> mCallback;
 
         OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
-            mCallback = callback;
-        }
-
-        @NonNull
-        public OnBackInvokedCallback getCallback() {
-            return mCallback;
+            mCallback = new WeakReference<>(callback);
         }
 
         @Override
         public void onBackStarted() {
-            Handler.getMain().post(() -> mCallback.onBackStarted());
+            Handler.getMain().post(() -> {
+                final OnBackInvokedCallback callback = mCallback.get();
+                if (callback == null) {
+                    return;
+                }
+
+                callback.onBackStarted();
+            });
         }
 
         @Override
         public void onBackProgressed(BackEvent backEvent) {
-            Handler.getMain().post(() -> mCallback.onBackProgressed(backEvent));
+            Handler.getMain().post(() -> {
+                final OnBackInvokedCallback callback = mCallback.get();
+                if (callback == null) {
+                    return;
+                }
+
+                callback.onBackProgressed(backEvent);
+            });
         }
 
         @Override
         public void onBackCancelled() {
-            Handler.getMain().post(() -> mCallback.onBackCancelled());
+            Handler.getMain().post(() -> {
+                final OnBackInvokedCallback callback = mCallback.get();
+                if (callback == null) {
+                    return;
+                }
+
+                callback.onBackCancelled();
+            });
         }
 
         @Override
         public void onBackInvoked() throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackInvoked());
+            Handler.getMain().post(() -> {
+                final OnBackInvokedCallback callback = mCallback.get();
+                if (callback == null) {
+                    return;
+                }
+
+                callback.onBackInvoked();
+            });
         }
     }
 
