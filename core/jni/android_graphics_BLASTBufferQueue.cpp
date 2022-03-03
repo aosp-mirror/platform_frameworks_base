@@ -35,6 +35,18 @@ static struct {
     jmethodID ctor;
 } gTransactionClassInfo;
 
+struct {
+    jmethodID accept;
+} gTransactionConsumer;
+
+static JNIEnv* getenv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,
                           jboolean updateDestinationFrame) {
     ScopedUtfChars name(env, jName);
@@ -55,11 +67,51 @@ static jobject nativeGetSurface(JNIEnv* env, jclass clazz, jlong ptr,
                                                   queue->getSurface(includeSurfaceControlHandle));
 }
 
-static void nativeSetSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong transactionPtr,
-                                     jboolean acquireSingleBuffer) {
+class JGlobalRefHolder {
+public:
+    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
+
+    virtual ~JGlobalRefHolder() {
+        getenv(mVm)->DeleteGlobalRef(mObject);
+        mObject = nullptr;
+    }
+
+    jobject object() { return mObject; }
+    JavaVM* vm() { return mVm; }
+
+private:
+    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
+    void operator=(const JGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mObject;
+};
+
+static void nativeSyncNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jobject callback,
+                                      jboolean acquireSingleBuffer) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->setSyncTransaction(transaction, acquireSingleBuffer);
+    JavaVM* vm = nullptr;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+    if (!callback) {
+        queue->syncNextTransaction(nullptr, acquireSingleBuffer);
+    } else {
+        auto globalCallbackRef =
+                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
+        queue->syncNextTransaction(
+                [globalCallbackRef](SurfaceComposerClient::Transaction* t) {
+                    JNIEnv* env = getenv(globalCallbackRef->vm());
+                    env->CallVoidMethod(globalCallbackRef->object(), gTransactionConsumer.accept,
+                                        env->NewObject(gTransactionClassInfo.clazz,
+                                                       gTransactionClassInfo.ctor,
+                                                       reinterpret_cast<jlong>(t)));
+                },
+                acquireSingleBuffer);
+    }
+}
+
+static void nativeStopContinuousSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->stopContinuousSyncTransaction();
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
@@ -104,7 +156,8 @@ static const JNINativeMethod gMethods[] = {
         {"nativeCreate", "(Ljava/lang/String;Z)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeSetSyncTransaction", "(JJZ)V", (void*)nativeSetSyncTransaction},
+        {"nativeSyncNextTransaction", "(JLjava/util/function/Consumer;Z)V", (void*)nativeSyncNextTransaction},
+        {"nativeStopContinuousSyncTransaction", "(J)V", (void*)nativeStopContinuousSyncTransaction},
         {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
@@ -123,6 +176,10 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     gTransactionClassInfo.clazz = MakeGlobalRefOrDie(env, transactionClazz);
     gTransactionClassInfo.ctor =
             GetMethodIDOrDie(env, gTransactionClassInfo.clazz, "<init>", "(J)V");
+
+    jclass consumer = FindClassOrDie(env, "java/util/function/Consumer");
+    gTransactionConsumer.accept =
+            GetMethodIDOrDie(env, consumer, "accept", "(Ljava/lang/Object;)V");
     return 0;
 }
 

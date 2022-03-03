@@ -804,15 +804,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * This is only used on the RenderThread when handling a blast sync. Specifically, it's only
-     * used when calling {@link BLASTBufferQueue#setSyncTransaction(Transaction)} and then merged
-     * with a tmp transaction on the Render Thread. The tmp transaction is then merged into
-     * {@link #mSurfaceChangedTransaction} on the UI Thread, avoiding any threading issues.
-     */
-    private final SurfaceControl.Transaction mRtBLASTSyncTransaction =
-            new SurfaceControl.Transaction();
-
-    /**
      * Keeps track of the last frame number that was attempted to draw. Should only be accessed on
      * the RenderThread.
      */
@@ -4175,43 +4166,49 @@ public final class ViewRootImpl implements ViewParent,
                         + " didProduceBuffer=" + didProduceBuffer);
             }
 
-            final Transaction tmpTransaction = new Transaction();
-            tmpTransaction.merge(mRtBLASTSyncTransaction);
-
             // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
             // draw attempt. The next transaction and transaction complete callback were only set
             // for the current draw attempt.
+            final Transaction pendingTransactions;
             if (!didProduceBuffer) {
-                mBlastBufferQueue.setSyncTransaction(null);
+                mBlastBufferQueue.syncNextTransaction(null);
                 // Get the transactions that were sent to mergeWithNextTransaction since the
                 // frame didn't draw on this vsync. It's possible the frame will draw later, but
                 // it's better to not be sync than to block on a frame that may never come.
-                Transaction pendingTransactions = mBlastBufferQueue.gatherPendingTransactions(
+                pendingTransactions = mBlastBufferQueue.gatherPendingTransactions(
                         mRtLastAttemptedDrawFrameNum);
-                tmpTransaction.merge(pendingTransactions);
+                if (!useBlastSync && !reportNextDraw) {
+                    pendingTransactions.apply();
+                }
+            } else {
+                pendingTransactions = null;
             }
-            if (!useBlastSync && !reportNextDraw) {
-                tmpTransaction.apply();
-            }
-
             // Post at front of queue so the buffer can be processed immediately and allow RT
             // to continue processing new buffers. If RT tries to process buffers before the sync
             // buffer is applied, the new buffers will not get acquired and could result in a
             // deadlock. UI thread would wait on RT, but RT would be blocked waiting for a free
             // buffer.
             mHandler.postAtFrontOfQueue(() -> {
-                if (useBlastSync) {
-                    mSurfaceChangedTransaction.merge(tmpTransaction);
+                if (!didProduceBuffer && useBlastSync) {
+                    mSurfaceChangedTransaction.merge(pendingTransactions);
                     if (blastSyncConsumer != null) {
                         blastSyncConsumer.accept(mSurfaceChangedTransaction);
                     }
                 }
-                tmpTransaction.close();
 
-                if (reportNextDraw) {
+                // This is to ensure pendingDrawFinished is only called exactly one time per draw
+                // attempt when reportNextDraw is true. Since, we sometimes create a sync
+                // transaction callback, the callback will handle calling pendingDrawFinished.
+                // However, there are cases where the transaction callback may not be called.
+                // 1. If useBlastSync is false, then we know that a sync transaction callback was
+                // not created so we won't invoke pendingDrawFinished there.
+                // 2. If the draw didn't produce a frame, didProduceBuffer == false, then we know
+                // the sync transaction callback will not be invoked even if one was set up.
+                if (reportNextDraw && (!didProduceBuffer || !useBlastSync)) {
                     pendingDrawFinished();
                 }
             });
+
         };
     }
 
@@ -4294,7 +4291,19 @@ public final class ViewRootImpl implements ViewParent,
                     // Frame callbacks will always occur after submitting draw requests and before
                     // the draw actually occurs. This will ensure that we set the next transaction
                     // for the frame that's about to get drawn and not on a previous frame.
-                    mBlastBufferQueue.setSyncTransaction(mRtBLASTSyncTransaction);
+                    mBlastBufferQueue.syncNextTransaction(
+                            t -> {
+                                mHandler.postAtFrontOfQueue(() -> {
+                                    mSurfaceChangedTransaction.merge(t);
+                                    if (blastSyncConsumer != null) {
+                                        blastSyncConsumer.accept(mSurfaceChangedTransaction);
+                                    }
+
+                                    if (reportNextDraw) {
+                                        pendingDrawFinished();
+                                    }
+                                });
+                            });
                 }
 
                 return createFrameCommitCallbackForSync(useBlastSync, reportNextDraw,
@@ -10928,23 +10937,22 @@ public final class ViewRootImpl implements ViewParent,
                                     + frame + ".");
                 }
 
-                final Transaction t = new Transaction();
-
                 // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
                 // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
                 // any blast sync or commit callback, and the code should directly call
                 // pendingDrawFinished.
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
-                    t.merge(mBlastBufferQueue.gatherPendingTransactions(frame));
-                    syncBufferCallback.onBufferReady(t);
+                    syncBufferCallback.onBufferReady(
+                            mBlastBufferQueue.gatherPendingTransactions(frame));
                     return null;
                 }
 
-                mBlastBufferQueue.setSyncTransaction(t);
                 if (DEBUG_BLAST) {
                     Log.d(mTag, "Setting up sync and frameCommitCallback");
                 }
+
+                mBlastBufferQueue.syncNextTransaction(t -> syncBufferCallback.onBufferReady(t));
 
                 return didProduceBuffer -> {
                     if (DEBUG_BLAST) {
@@ -10957,15 +10965,14 @@ public final class ViewRootImpl implements ViewParent,
                     // the next draw attempt. The next transaction and transaction complete callback
                     // were only set for the current draw attempt.
                     if (!didProduceBuffer) {
-                        mBlastBufferQueue.setSyncTransaction(null);
+                        mBlastBufferQueue.syncNextTransaction(null);
                         // Gather the transactions that were sent to mergeWithNextTransaction
                         // since the frame didn't draw on this vsync. It's possible the frame will
                         // draw later, but it's better to not be sync than to block on a frame that
                         // may never come.
-                        t.merge(mBlastBufferQueue.gatherPendingTransactions(frame));
+                        syncBufferCallback.onBufferReady(
+                                mBlastBufferQueue.gatherPendingTransactions(frame));
                     }
-
-                    syncBufferCallback.onBufferReady(t);
                 };
             }
         });

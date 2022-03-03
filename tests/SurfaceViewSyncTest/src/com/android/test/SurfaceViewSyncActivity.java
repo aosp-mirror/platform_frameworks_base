@@ -19,6 +19,9 @@ package com.android.test;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +54,8 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     private Button mExpandButton;
     private Switch mEnableSyncSwitch;
 
+    private int mLastSyncId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +76,10 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     }
 
     private void updateSurfaceViewSize(Rect bounds, View container) {
+        if (mLastSyncId >= 0) {
+            return;
+        }
+
         final float height;
         if (mLastExpanded) {
             height = bounds.height() / 2f;
@@ -82,13 +91,8 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
         mLastExpanded = !mLastExpanded;
 
         if (mEnableSyncSwitch.isChecked()) {
-            int syncId = mSurfaceSyncer.setupSync(() -> { });
-            mSurfaceSyncer.addToSync(syncId, mSurfaceView, frameCallback ->
-                    mRenderingThread.setFrameCallback(frameCallback));
-            mSurfaceSyncer.addToSync(syncId, container);
-            mSurfaceSyncer.markSyncReady(syncId);
-        } else {
-            mRenderingThread.renderSlow();
+            mLastSyncId = mSurfaceSyncer.setupSync(() -> { });
+            mSurfaceSyncer.addToSync(mLastSyncId, container);
         }
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();
@@ -99,13 +103,26 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         final Canvas canvas = holder.lockCanvas();
-        canvas.drawARGB(255, 100, 100, 100);
+        canvas.drawARGB(255, 255, 0, 0);
         holder.unlockCanvasAndPost(canvas);
         mRenderingThread.startRendering();
+        mRenderingThread.renderFrame(null, mSurfaceView.getWidth(), mSurfaceView.getHeight());
     }
 
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+        if (mEnableSyncSwitch.isChecked()) {
+            if (mLastSyncId < 0) {
+                mRenderingThread.renderFrame(null, width, height);
+                return;
+            }
+            mSurfaceSyncer.addToSync(mLastSyncId, mSurfaceView, frameCallback ->
+                    mRenderingThread.renderFrame(frameCallback, width, height));
+            mSurfaceSyncer.markSyncReady(mLastSyncId);
+            mLastSyncId = -1;
+        } else {
+            mRenderingThread.renderFrame(null, width, height);
+        }
     }
 
     @Override
@@ -117,28 +134,27 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
         private final SurfaceHolder mSurfaceHolder;
         private Handler mHandler;
         private SurfaceSyncer.SurfaceViewFrameCallback mFrameCallback;
-        private boolean mRenderSlow;
+        private final Point mSurfaceSize = new Point();
 
         int mColorValue = 0;
         int mColorDelta = 10;
+        private final Paint mPaint = new Paint();
 
         RenderingThread(SurfaceHolder holder) {
             super("RenderingThread");
             mSurfaceHolder = holder;
+            mPaint.setColor(Color.BLACK);
+            mPaint.setTextSize(100);
         }
 
-        public void setFrameCallback(SurfaceSyncer.SurfaceViewFrameCallback frameCallback) {
+        public void renderFrame(SurfaceSyncer.SurfaceViewFrameCallback frameCallback, int width,
+                int height) {
             if (mHandler != null) {
                 mHandler.post(() -> {
                     mFrameCallback = frameCallback;
-                    mRenderSlow = true;
+                    mSurfaceSize.set(width, height);
+                    mRunnable.run();
                 });
-            }
-        }
-
-        public void renderSlow() {
-            if (mHandler != null) {
-                mHandler.post(() -> mRenderSlow = true);
             }
         }
 
@@ -149,13 +165,10 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
                     mFrameCallback.onFrameStarted();
                 }
 
-                if (mRenderSlow) {
-                    try {
-                        // Long delay from start to finish to mimic slow draw
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                    mRenderSlow = false;
+                try {
+                    // Long delay from start to finish to mimic slow draw
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
                 }
 
                 mColorValue += mColorDelta;
@@ -164,27 +177,21 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
                 }
 
                 Canvas c = mSurfaceHolder.lockCanvas();
-                c.drawRGB(255, mColorValue, 255 - mColorValue);
+                c.drawRGB(255, 0, 0);
+                c.drawText("RENDERED CONTENT", 0, mSurfaceSize.y / 2, mPaint);
                 mSurfaceHolder.unlockCanvasAndPost(c);
-
-                if (mFrameCallback != null) {
-                    mFrameCallback.onFrameComplete();
-                }
                 mFrameCallback = null;
-
-                mHandler.postDelayed(this, 50);
             }
         };
 
         public void startRendering() {
             start();
             mHandler = new Handler(getLooper());
-            mHandler.post(mRunnable);
         }
 
         public void stopRendering() {
             if (mHandler != null) {
-                mHandler.post(() -> mHandler.removeCallbacks(mRunnable));
+                mHandler.removeCallbacks(mRunnable);
             }
         }
     }

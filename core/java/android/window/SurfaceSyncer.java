@@ -343,35 +343,20 @@ public class SurfaceSyncer {
 
         @Override
         public void onReadyToSync(SyncBufferCallback syncBufferCallback) {
-            Transaction mTransaction = sTransactionFactory.get();
-            mFrameCallbackConsumer.accept(new SurfaceViewFrameCallback() {
-                @Override
-                public void onFrameStarted() {
-                    mSurfaceView.syncNextFrame(mTransaction);
-                }
-
-                @Override
-                public void onFrameComplete() {
-                    syncBufferCallback.onBufferReady(mTransaction);
-                }
-            });
+            mFrameCallbackConsumer.accept(
+                    () -> mSurfaceView.syncNextFrame(syncBufferCallback::onBufferReady));
         }
     }
 
     /**
      * A frame callback that is used to synchronize SurfaceViews. The owner of the SurfaceView must
-     * implement onFrameStarted and onFrameComplete when trying to sync the SurfaceView. This is to
-     * ensure the sync knows when the frame is ready to add to the sync.
+     * implement onFrameStarted when trying to sync the SurfaceView. This is to ensure the sync
+     * knows when the frame is ready to add to the sync.
      */
     public interface SurfaceViewFrameCallback {
         /**
          * Called when the SurfaceView is going to render a frame
          */
         void onFrameStarted();
-
-        /**
-         * Called when the SurfaceView has finished rendering a frame.
-         */
-        void onFrameComplete();
     }
 }
