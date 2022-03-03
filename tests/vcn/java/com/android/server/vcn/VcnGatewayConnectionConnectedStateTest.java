@@ -252,6 +252,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
         verify(mNetworkAgent)
                 .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_2.network)));
+
+        // Verify revalidation is triggered on VCN network
+        verify(mConnMgr).reportNetworkConnectivity(eq(mNetworkAgent.getNetwork()), eq(false));
     }
 
     private void triggerChildOpened() {
@@ -424,6 +427,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         // Trigger a failed validation, and the subsequent safemode timeout.
         triggerValidation(NetworkAgent.VALIDATION_STATUS_NOT_VALID);
         mTestLooper.dispatchAll();
+
+        verify(mConnMgr)
+                .reportNetworkConnectivity(eq(TEST_UNDERLYING_NETWORK_RECORD_1.network), eq(false));
 
         final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(mDeps, times(2))

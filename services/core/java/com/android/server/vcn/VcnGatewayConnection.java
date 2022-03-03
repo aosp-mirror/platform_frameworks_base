@@ -544,6 +544,7 @@ public class VcnGatewayConnection extends StateMachine {
     private final boolean mIsMobileDataEnabled;
 
     @NonNull private final IpSecManager mIpSecManager;
+    @NonNull private final ConnectivityManager mConnectivityManager;
 
     @Nullable private IpSecTunnelInterface mTunnelIface = null;
 
@@ -701,6 +702,7 @@ public class VcnGatewayConnection extends StateMachine {
                         mLastSnapshot,
                         mUnderlyingNetworkControllerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
+        mConnectivityManager = mVcnContext.getContext().getSystemService(ConnectivityManager.class);
 
         addState(mDisconnectedState);
         addState(mDisconnectingState);
@@ -1683,6 +1685,14 @@ public class VcnGatewayConnection extends StateMachine {
                                         clearFailedAttemptCounterAndSafeModeAlarm();
                                         break;
                                     case NetworkAgent.VALIDATION_STATUS_NOT_VALID:
+                                        // Trigger re-validation of underlying networks; if it
+                                        // fails, the VCN will attempt to migrate away.
+                                        if (mUnderlying != null) {
+                                            mConnectivityManager.reportNetworkConnectivity(
+                                                    mUnderlying.network,
+                                                    false /* hasConnectivity */);
+                                        }
+
                                         // Will only set a new alarm if no safe mode alarm is
                                         // currently scheduled.
                                         setSafeModeAlarm();
@@ -1869,6 +1879,10 @@ public class VcnGatewayConnection extends StateMachine {
                     IpSecManager.DIRECTION_OUT);
 
             updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig);
+
+            // Trigger re-validation after migration events.
+            mConnectivityManager.reportNetworkConnectivity(
+                    mNetworkAgent.getNetwork(), false /* hasConnectivity */);
         }
 
         private void handleUnderlyingNetworkChanged(@NonNull Message msg) {
