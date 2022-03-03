@@ -562,15 +562,6 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_CROSS_SIM = 1 << 13;
 
-    /**
-     * Connection is a tethered external call.
-     * <p>
-     * Indicates that the {@link Connection} is fixed on this device but the audio streams are
-     * re-routed to another device.
-     * <p>
-     */
-    public static final int PROPERTY_TETHERED_CALL = 1 << 14;
-
     //**********************************************************************************************
     // Next PROPERTY value: 1<<14
     //**********************************************************************************************
