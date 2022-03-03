@@ -38,6 +38,9 @@ import dagger.Provides;
 public abstract class ComplicationHostViewModule {
     public static final String SCOPED_COMPLICATIONS_LAYOUT = "scoped_complications_layout";
     public static final String COMPLICATION_MARGIN = "complication_margin";
+    public static final String COMPLICATIONS_FADE_OUT_DURATION = "complications_fade_out_duration";
+    public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
+    public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
 
     /**
      * Generates a {@link ConstraintLayout}, which can host
@@ -59,5 +62,35 @@ public abstract class ComplicationHostViewModule {
     @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationPadding(@Main Resources resources) {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
+    }
+
+    /**
+     * Provides the fade out duration for complications.
+     */
+    @Provides
+    @Named(COMPLICATIONS_FADE_OUT_DURATION)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesComplicationsFadeOutDuration(@Main Resources resources) {
+        return resources.getInteger(R.integer.complicationFadeOutMs);
+    }
+
+    /**
+     * Provides the fade in duration for complications.
+     */
+    @Provides
+    @Named(COMPLICATIONS_FADE_IN_DURATION)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesComplicationsFadeInDuration(@Main Resources resources) {
+        return resources.getInteger(R.integer.complicationFadeInMs);
+    }
+
+    /**
+     * Provides the timeout for restoring complication visibility.
+     */
+    @Provides
+    @Named(COMPLICATIONS_RESTORE_TIMEOUT)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesComplicationsRestoreTimeout(@Main Resources resources) {
+        return resources.getInteger(R.integer.complicationRestoreMs);
     }
 }

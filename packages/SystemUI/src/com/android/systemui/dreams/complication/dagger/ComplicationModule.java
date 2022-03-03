@@ -21,7 +21,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 
+import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.ComplicationCollectionViewModel;
+import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -61,5 +63,14 @@ public interface ComplicationModule {
                 new DaggerViewModelProviderFactory(() -> viewModel));
 
         return provider.get(ComplicationCollectionViewModel.class);
+    }
+
+    /**
+     * Provides the visibility controller for display complications.
+     */
+    @Provides
+    static Complication.VisibilityController providesVisibilityController(
+            ComplicationLayoutEngine engine) {
+        return engine;
     }
 }
