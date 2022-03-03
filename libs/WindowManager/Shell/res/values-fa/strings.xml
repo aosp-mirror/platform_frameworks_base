@@ -76,13 +76,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"دوربین مشکل دارد؟\nبرای تنظیم مجدد اندازه ضربه بزنید"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"مشکل برطرف نشد؟\nبرای برگرداندن ضربه بزنید"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"دوربین مشکلی ندارد؟ برای بستن ضربه بزنید."</string>
-    <!-- no translation found for letterbox_education_dialog_title (6688664582871779215) -->
-    <skip />
-    <!-- no translation found for letterbox_education_dialog_subtext (4853542518367719562) -->
-    <skip />
-    <!-- no translation found for letterbox_education_screen_rotation_text (5085786687366339027) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (1068293354123934727) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"برخی‌از برنامه‌ها در حالت عمودی عملکرد بهتری دارند"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"با امتحان کردن یکی از این گزینه‌ها، بیشترین بهره را از فضایتان ببرید"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"برای رفتن به حالت تمام صفحه، دستگاهتان را بچرخانید"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"در کنار برنامه دوضربه بزنید تا جابه‌جا شود"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجه‌ام"</string>
 </resources>
