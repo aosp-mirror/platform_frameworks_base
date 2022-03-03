@@ -1056,7 +1056,9 @@ public final class CachedAppOptimizer {
         if(wakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE) {
             // Remove any pending compaction we may have scheduled to happen while screen was off
             Slog.e(TAG_AM, "Cancel pending or running compactions as system is awake");
-            mPendingCompactionProcesses.clear();
+            synchronized(mProcLock) {
+                mPendingCompactionProcesses.clear();
+            }
             cancelCompaction();
         }
     }
