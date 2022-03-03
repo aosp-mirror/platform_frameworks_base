@@ -43,8 +43,6 @@ import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -64,7 +62,7 @@ public class CloudSearchManagerService extends
 
     public CloudSearchManagerService(Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
-                        R.array.config_defaultCloudSearchServices, true), null,
+                        R.string.config_defaultCloudSearchService), null,
                 PACKAGE_UPDATE_POLICY_NO_REFRESH | PACKAGE_RESTART_POLICY_NO_REFRESH);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mContext = context;
@@ -72,25 +70,7 @@ public class CloudSearchManagerService extends
 
     @Override
     protected CloudSearchPerUserService newServiceLocked(int resolvedUserId, boolean disabled) {
-        return new CloudSearchPerUserService(this, mLock, resolvedUserId, "");
-    }
-
-    @Override
-    protected List<CloudSearchPerUserService> newServiceListLocked(int resolvedUserId,
-            boolean disabled, String[] serviceNames) {
-        if (serviceNames == null) {
-            return new ArrayList<>();
-        }
-        List<CloudSearchPerUserService> serviceList =
-                new ArrayList<>(serviceNames.length);
-        for (int i = 0; i < serviceNames.length; i++) {
-            if (serviceNames[i] == null) {
-                continue;
-            }
-            serviceList.add(new CloudSearchPerUserService(this, mLock, resolvedUserId,
-                    serviceNames[i]));
-        }
-        return serviceList;
+        return new CloudSearchPerUserService(this, mLock, resolvedUserId);
     }
 
     @Override
@@ -131,28 +111,19 @@ public class CloudSearchManagerService extends
                 @NonNull ICloudSearchManagerCallback callBack) {
             searchRequest.setCallerPackageName(
                     mContext.getPackageManager().getNameForUid(Binder.getCallingUid()));
-            runForUser("search", (service) -> {
-                synchronized (service.mLock) {
-                    service.onSearchLocked(searchRequest, callBack);
-                }
-            });
+            runForUserLocked("search", searchRequest.getRequestId(), (service) ->
+                    service.onSearchLocked(searchRequest, callBack));
         }
 
         @Override
         public void returnResults(IBinder token, String requestId, SearchResponse response) {
-            runForUser("returnResults", (service) -> {
-                synchronized (service.mLock) {
-                    service.onReturnResultsLocked(token, requestId, response);
-                }
-            });
+            runForUserLocked("returnResults", requestId, (service) ->
+                    service.onReturnResultsLocked(token, requestId, response));
         }
 
         public void destroy(@NonNull SearchRequest searchRequest) {
-            runForUser("destroyCloudSearchSession", (service) -> {
-                synchronized (service.mLock) {
-                    service.onDestroyLocked(searchRequest.getRequestId());
-                }
-            });
+            runForUserLocked("destroyCloudSearchSession", searchRequest.getRequestId(),
+                    (service) -> service.onDestroyLocked(searchRequest.getRequestId()));
         }
 
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
@@ -163,7 +134,8 @@ public class CloudSearchManagerService extends
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
-        private void runForUser(@NonNull final String func,
+        private void runForUserLocked(@NonNull final String func,
+                @NonNull final String  requestId,
                 @NonNull final Consumer<CloudSearchPerUserService> c) {
             ActivityManagerInternal am = LocalServices.getService(ActivityManagerInternal.class);
             final int userId = am.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
@@ -171,7 +143,7 @@ public class CloudSearchManagerService extends
                     null, null);
 
             if (DEBUG) {
-                Slog.d(TAG, "runForUser:" + func + " from pid=" + Binder.getCallingPid()
+                Slog.d(TAG, "runForUserLocked:" + func + " from pid=" + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid());
             }
             Context ctx = getContext();
@@ -188,11 +160,8 @@ public class CloudSearchManagerService extends
             final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    final List<CloudSearchPerUserService> services =
-                            getServiceListForUserLocked(userId);
-                    for (int i = 0; i < services.size(); i++) {
-                        c.accept(services.get(i));
-                    }
+                    final CloudSearchPerUserService service = getServiceForUserLocked(userId);
+                    c.accept(service);
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);

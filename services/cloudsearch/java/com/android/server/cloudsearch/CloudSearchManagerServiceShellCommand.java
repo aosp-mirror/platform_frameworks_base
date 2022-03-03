@@ -54,12 +54,7 @@ public class CloudSearchManagerServiceShellCommand extends ShellCommand {
                             return 0;
                         }
                         final int duration = Integer.parseInt(getNextArgRequired());
-                        String[] services = serviceName.split(";");
-                        if (services.length == 0) {
-                            return 0;
-                        } else {
-                            mService.setTemporaryServices(userId, services, duration);
-                        }
+                        mService.setTemporaryService(userId, serviceName, duration);
                         pw.println("CloudSearchService temporarily set to " + serviceName
                                 + " for " + duration + "ms");
                         break;

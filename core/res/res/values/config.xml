@@ -4130,9 +4130,9 @@
           This service must be trusted, as it can be activated without explicit consent of the user.
           If no service with the specified name exists on the device, cloudsearch will be disabled.
           Example: "com.android.intelligence/.CloudSearchService"
-          config_defaultCloudSearchServices is for the multiple provider case.
+          config_defaultCloudSearchService is for the single provider case.
     -->
-    <string-array name="config_defaultCloudSearchServices"></string-array>
+    <string name="config_defaultCloudSearchService" translatable="false"></string>
 
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.
