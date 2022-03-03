@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Conférence téléphonique à trois"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rejeter les appels indésirables"</string>
     <string name="CndMmi" msgid="185136449405618437">"Livraison du numéro d\'appel"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ne pas déranger"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et consulter des SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fichiers et documents"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"accéder aux fichiers et documents sur votre appareil"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musique et autres contenus audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"accès aux fichiers audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Photos et vidéos"</string>
@@ -548,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"déterminer position relative entre appareils ultra-wideband à proximité"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autoriser l\'appli à déterminer la position relative entre des appareils ultra-wideband à proximité"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir avec les appareils Wi-Fi à proximité"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet à l\'appli de déterminer la position relative des appareils Wi‑Fi à proximité, vous en informer et s\'y connecter"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet à l\'appli de déterminer la position approximative des appareils Wi‑Fi à proximité, de les afficher et de s\'y connecter"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informations sur le service de paiement NFC préféré"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir des informations sur le service de paiement NFC préféré, y compris les ID d\'applications et les destinations de routage enregistrés."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"contrôler la communication en champ proche"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Utilisez le verrouillage de l\'écran pour continuer"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Empreinte partielle détectée"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nettoyez le lecteur d\'empreinte digitale et réessayez"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nettoyez le lecteur et réessayez"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Appuyez bien sur le lecteur"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Essayez une autre empreinte"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Trop de lumière"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Changez légèrement de position chaque fois"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Appuyez bien sur le lecteur"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permettre à l\'application de s\'associer à l\'interface de niveau supérieur du service SMS/MMS d\'un opérateur. Ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"associer aux services de l\'opérateur"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permet à l\'application autorisée de s\'associer aux services d\'un opérateur. Ne devrait pas être nécessaire pour les applications standards."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accéder au mode Ne pas déranger"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"activer l\'utilisation de l\'autorisation d\'affichage"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet à l\'application autorisée d\'activer l\'utilisation de l\'autorisation pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"activer l\'affichage des décisions liées aux autorisations"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ignorer"</string>
     <string name="no_matches" msgid="6472699895759164599">"Aucune correspondance"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# correspondance}one{# sur {total}}other{# sur {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"OK"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Suppression de l\'espace de stockage partagé…"</string>
     <string name="share" msgid="4157615043345227321">"Partager"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarme suivante)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Jusqu\'à ce que vous désactiviez la fonctionnalité \"Ne pas déranger\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Réduire"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ne pas déranger"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Temps d\'arrêt"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Soirée de semaine"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Week-end"</string>
@@ -1967,7 +1964,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Photos et images"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Réseaux sociaux et communication"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Actualités et magazines"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Plans et navigation"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Cartes et navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productivité"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Accessibilité"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Mémoire de l\'appareil"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibreur pour les appels et les notifications"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Sons désactivés pour les appels et les notifications"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifications du système"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Appuyez pour en savoir plus et pour modifier les paramètres."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Paramètres"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan et décharge la batterie. Appuyez ici pour en savoir plus."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan depuis longtemps. Appuyez ici pour en savoir plus."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applis actives"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Impossible d\'accéder à l\'appareil photo depuis cet appareil"</string>
 </resources>

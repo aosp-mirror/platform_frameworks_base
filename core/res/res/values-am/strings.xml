@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"የሦስትዮሽ ጥሪ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"የሚያበሳጭ የማይፈለጉ ጥሪዎች አለመቀበል።"</string>
     <string name="CndMmi" msgid="185136449405618437">"መደወያ ቁጥር አስረከበ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"አትረብሽ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"የደዋይID  ወደ ተከልክሏል ነባሪዎች።ጥሪ ቀጥሎ ተከልክሏል፡"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች።ቀጥሎ ጥሪ፡ አልተከለከለም"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"የደዋይ  ID  ወደ አልተከለከለም ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ከአገልግሎት አቅራቢ አገልግሎቶች ጋር እሰር"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ያዢው የአገልግሎት አቅራቢ አገልግሎቶችን እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"አትረብሽን ድረስበት"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"የእይታ ፈቃድ መጠቀምን መጀመር"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ያዢው ለአንድ መተግበሪያ የፈቃድ አጠቃቀሙን እንዲያስጀምር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"የእይታ ፈቃድ ውሳኔዎችን ይጀምሩ"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ዝለል"</string>
     <string name="no_matches" msgid="6472699895759164599">"ምንም ተመሳሳይ የለም።"</string>
     <string name="find_on_page" msgid="5400537367077438198">"በገፅ ላይ አግኝ"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# ተዛማጅ}one{# ከ{total}}other{# ከ{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ተከናውኗል"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"የተጋራ ማከማቻን በመደምሰስ ላይ…"</string>
     <string name="share" msgid="4157615043345227321">"አጋራ"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ድረስ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ቀጣይ ማንቂያ)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"እስኪያጠፉት ድረስ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"አትረብሽን እስኪያጠፉ ድረስ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ሰብስብ"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"አትረብሽ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"የማይገኝበት ጊዜ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"የሳምንት ለሊት"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"የሳምንት እረፍት ቀናት"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ጥሪዎች እና ማሳወቂያዎች ይነዝራሉ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ጥሪዎች እና ማሳወቂያዎች ድምፀ-ከል ይሆናሉ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"የሥርዓት ለውጦች"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"አትረብሽ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"አዲስ፦ አትረብሽ ማሳወቂያዎችን እየደበቀ ነው"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"የበለጠ ለመረዳት እና ለመለወጥ መታ ያድርጉ።"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"አትረብሽ ተቀይሯል"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ምን እንደታገደ ለመፈተሽ መታ ያድርጉ።"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ሥርዓት"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ቅንብሮች"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"እሺ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"አጥፋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"የበለጠ ለመረዳት"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"የተሻሻሉ ማሳወቂያዎች በAndroid 12 ውስጥ Android ራስ-አስማሚ ማሳወቂያዎችን ተክተዋል። ይህ ባህሪ የተጠቆሙ እርምጃዎችን እና ምላሾችን ያሳያል እንዲሁም ማሳወቂያዎችዎን ያደራጃል።\n\nየተሻሻሉ ማሳወቂያዎች እንደ የእውቂያ ስሞች እና መልዕክቶች ያሉ የግል መረጃዎችን ጨምሮ የማሳወቂያ ይዘቶችን መድረስ ይችላሉ። ይህ ባህሪ እንደ የስልክ ጥሪዎችን መመለስ እና አትረብሽን መቆጣጠርን ያሉ ማሳወቂያዎችን ማሰናበት ወይም ምላሽ መስጠት ይችላል።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ከበስተጀርባ በማሄድ ላይ ነው እና ባትሪ እየጨረሰ ነው። ለመገምገም መታ ያድርጉ።"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ከበስተጀርባ ለረጅም ጊዜ በማሄድ ላይ ነው። ለመገምገም መታ ያድርጉ።"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ንቁ መተግበሪያዎችን ይፈትሹ"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ከዚህ መሣሪያ ሆኖ ካሜራን መድረስ አይቻልም"</string>
 </resources>

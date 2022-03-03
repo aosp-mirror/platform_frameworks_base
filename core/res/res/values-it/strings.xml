@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Chiamata a tre"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rifiuto di chiamate fastidiose non desiderate"</string>
     <string name="CndMmi" msgid="185136449405618437">"Recapito numero chiamante"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Non disturbare"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID chiamante generalmente limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
@@ -537,11 +538,11 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul tablet e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Consente all\'app di visualizzare la configurazione del Bluetooth del dispositivo Android TV, nonché di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul telefono e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento/accopp. dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento e accoppiamento di dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"trasmettere annunci a dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Trasmissione di annunci a dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di trasmettere annunci ai dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Possibilità di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
@@ -682,7 +683,7 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Consente a un\'applicazione di modificare le impostazioni di sincronizzazione per un account. Ad esempio, può servire per attivare la sincronizzazione dell\'applicazione Persone con un account."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"lettura statistiche di sincronizz."</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Consente a un\'applicazione di leggere le statistiche di sincronizzazione per un account, incluse la cronologia degli eventi di sincronizzazione e la quantità di dati sincronizzati."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"lettura dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Lettura dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Consente all\'app di leggere i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_readMediaAudio" msgid="8723513075731763810">"Lettura dei file audio dallo spazio di archiviazione condiviso"</string>
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Consente all\'app di leggere i file audio dal tuo spazio di archiviazione condiviso."</string>
@@ -690,7 +691,7 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Consente all\'app di leggere i file video dal tuo spazio di archiviazione condiviso."</string>
     <string name="permlab_readMediaImage" msgid="1507059005825769856">"Lettura dei file immagine dallo spazio di archiviazione condiviso"</string>
     <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Consente all\'app di leggere i file immagine dal tuo spazio di archiviazione condiviso."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"invio/ricezione di chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Consente l\'associazione di un servizio di messaggi dell\'operatore all\'interfaccia principale. Non dovrebbe mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"associazione a servizi dell\'operatore"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Consente al titolare di collegarsi a servizi dell\'operatore. Non dovrebbe mai essere necessaria per le normali app."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accesso alla funzione Non disturbare"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Consente all\'app di leggere e modificare la configurazione della funzione Non disturbare."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"avvio dell\'uso dell\'autorizzazione di visualizzazione"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Consente al titolare di avviare l\'uso delle autorizzazioni per un\'app. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Inizio della visualizzazione delle decisioni relative all\'autorizzazione"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Salta"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# corrispondenza}one{# di {total}}other{# di {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fine"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Cancellazione archivio condiviso…"</string>
     <string name="share" msgid="4157615043345227321">"Condividi"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Fino a <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fino a <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (prossima sveglia)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Fino alla disattivazione"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fino alla disattivazione di Non disturbare"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Comprimi"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Non disturbare"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Tempo di riposo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fine settimana"</string>
@@ -2023,22 +2027,20 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DISINSTALLA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"APRI COMUNQUE"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"App dannosa rilevata"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Richiesta di accesso al log di sistema"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Solo questa volta"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Non consentire"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> richiede i log di sistema per eseguire debug funzionali. Questi log potrebbero contenere informazioni scritte dalle app e dai servizi sul tuo dispositivo."</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Non mostrare più"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"L\'app <xliff:g id="APP_0">%1$s</xliff:g> vuole mostrare porzioni dell\'app <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifica"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"La vibrazione sarà attiva per chiamate e notifiche"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifiche al sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non disturbare"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tocca per avere ulteriori informazioni e modificare."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Impostazioni"</string>
@@ -2055,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Disattiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Scopri di più"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Le notifiche adattive Android sono state sostituite dalle notifiche avanzate in Android 12. Questa funzionalità mostra risposte e azioni suggerite e organizza le tue notifiche.\n\nLe notifiche avanzate possono accedere ai contenuti di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o rispondervi, ad esempio accettando le telefonate, e controllare la modalità Non disturbare."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>
@@ -2125,10 +2128,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Tocca per attivare"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo personale?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Aprire <xliff:g id="APP">%s</xliff:g> nel tuo profilo di lavoro?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Messaggio tradotto dalla lingua <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> alla lingua <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Attività in background"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Attività in background"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> è in esecuzione in background e sta consumando la batteria. Tocca per controllare."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> è in esecuzione in background e consuma batteria. Tocca per controllare."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> è in esecuzione in background da molto tempo. Tocca per controllare."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verifica le app attive"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Impossibile accedere alla fotocamera da questo dispositivo"</string>
 </resources>

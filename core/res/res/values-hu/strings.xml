@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Háromutas hívás"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"A nem kívánt bosszantó hívások elutasítása"</string>
     <string name="CndMmi" msgid="185136449405618437">"Hívószám-kézbesítés"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ne zavarjanak"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"A hívóazonosító alapértelmezett értéke korlátozott. Következő hívás: korlátozott"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"A hívóazonosító alapértelmezett értéke korlátozott. Következő hívás: nem korlátozott"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"A hívóazonosító alapértelmezett értéke nem korlátozott. Következő hívás: korlátozott"</string>
@@ -545,7 +546,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lehetővé teszi az alkalmazás számára, hogy közzétegye jelenlétét a közeli Bluetooth-eszközök számára"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"közeli, ultraszélessávú eszközök közötti relatív pozíció meghatározása"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Az alkalmazás meghatározhatja a közeli, ultraszélessávú eszközök közötti relatív pozíciót"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveleteket végezhet a közeli Wi‑Fi-eszközökkel"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveletek végrehajtása a közeli Wi‑Fi-eszközökkel"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Engedélyezi az alkalmazás számára, hogy közzétegye és meghatározza a közeli Wi-Fi-eszközök viszonylagos helyzetét, és csatlakozzon hozzájuk."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferált NFC fizetési szolgáltatási információk"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lehetővé teszi az alkalmazás számára preferált NFC fizetési szolgáltatási információk (pl. regisztrált alkalmazásazonosítók és útvonali cél) lekérését."</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"kapcsolódás szolgáltatókhoz"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Lehetővé teszi a tulajdonos számára a szolgáltatókhoz való kapcsolódást. A normál alkalmazások esetében erre nincs szükség."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"hozzáférés a „Ne zavarjanak” funkcióhoz"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"engedélyhasználat megtekintésének elindítása"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"engedélyezési döntések megtekintésének elindítása"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Kihagyás"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nincs találat"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Keresés az oldalon"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# egyezés}other{{total}/#}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Kész"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Közös tárhely tartalmának törlése…"</string>
     <string name="share" msgid="4157615043345227321">"Megosztás"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő ébresztés)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kikapcsolásig"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Amíg ki nem kapcsolja a „Ne zavarjanak” lehetőséget"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Összecsukás"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ne zavarjanak"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Inaktivitás"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Hétköznap éjszaka"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hétvége"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"A hívások és az értesítések rezegnek"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"A hívások és az értesítések némák"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Rendszermódosítások"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne zavarjanak"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Újdonság: A Ne zavarjanak mód elrejti az értesítéseket"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Koppintással további információhoz juthat, és elvégezheti a módosítást."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Módosultak a Ne zavarjanak mód beállításai"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Koppintson a letiltott elemek megtekintéséhez."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Rendszer"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Beállítások"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kikapcsolás"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"További információ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció javasolt műveleteket és válaszokat mutat, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
@@ -2253,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sikerült lefordítani az üzenetet <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> nyelvről <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> nyelvre."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Háttértevékenység"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Háttértevékenység"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"A(z) <xliff:g id="APP">%1$s</xliff:g> fut a háttérben, és meríti az akkumulátort. Koppintson az áttekintéshez."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás már hosszú ideje fut a háttérben. Koppintson az áttekintéshez."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktív alkalmazások ellenőrzése"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezen az eszközön nem lehet hozzáférni a kamerához"</string>
 </resources>
