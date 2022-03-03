@@ -1558,6 +1558,11 @@ public class NotificationPanelViewController extends PanelViewController
             constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
             if (animate) {
                 ChangeBounds transition = new ChangeBounds();
+                if (mShouldUseSplitNotificationShade) {
+                    // Excluding media from the transition on split-shade, as it doesn't transition
+                    // horizontally properly.
+                    transition.excludeTarget(R.id.status_view_media_container, true);
+                }
                 transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 TransitionManager.beginDelayedTransition(mNotificationContainerParent, transition);
