@@ -6420,6 +6420,12 @@
     <permission android:name="android.permission.WRITE_SECURITY_LOG"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an UID to be visible to the application based on an interaction between the
+         two apps. This permission is not intended to be held by apps.
+         @hide @TestApi  -->
+    <permission android:name="android.permission.MAKE_UID_VISIBLE"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
