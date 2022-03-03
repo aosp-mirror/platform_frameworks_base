@@ -914,6 +914,26 @@ public class DisplayPolicy {
                 break;
         }
 
+        if (LayoutParams.isSystemAlertWindowType(attrs.type)) {
+            float maxOpacity = mService.mMaximumObscuringOpacityForTouch;
+            if (attrs.alpha > maxOpacity
+                    && (attrs.flags & FLAG_NOT_TOUCHABLE) != 0
+                    && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+                // The app is posting a SAW with the intent of letting touches pass through, but
+                // they are going to be deemed untrusted and will be blocked. Try to honor the
+                // intent of letting touches pass through at the cost of 0.2 opacity for app
+                // compatibility reasons. More details on b/218777508.
+                Slog.w(TAG, String.format(
+                        "App %s has a system alert window (type = %d) with FLAG_NOT_TOUCHABLE and "
+                                + "LayoutParams.alpha = %.2f > %.2f, setting alpha to %.2f to "
+                                + "let touches pass through (if this is isn't desirable, remove "
+                                + "flag FLAG_NOT_TOUCHABLE).",
+                        attrs.packageName, attrs.type, attrs.alpha, maxOpacity, maxOpacity));
+                attrs.alpha = maxOpacity;
+                win.mWinAnimator.mAlpha = maxOpacity;
+            }
+        }
+
         // Check if alternate bars positions were updated.
         if (mStatusBarAlt == win) {
             mStatusBarAltPosition = getAltBarPosition(attrs);
