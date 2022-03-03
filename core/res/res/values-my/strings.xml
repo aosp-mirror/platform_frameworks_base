@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"(၃)ယောက်ဆိုင်ပြောဆိုခြင်း"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"စိတ်အနှောက်အယှက်ဖြစ်သော မလိုလားသည့်ခေါ်ဆိုမှုများအား ငြင်းဖယ်ခြင်း"</string>
     <string name="CndMmi" msgid="185136449405618437">"ခေါ်ဆိုသောနံပါတ် ပေးပို့မှု"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"မနှောင့်ယှက်ရ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်ထားသည်။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်ထားသည်။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"စာပို့စာယူဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခု၏ ထိပ်ဆုံးရှိအင်တာဖေ့စ်ဖြင့် ပူးပေါင်းရန် ပိုင်ရှင်အားခွင့်ပြုပါ။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"မိုဘိုင်းဖုန်းဝန်ဆောင်မှုပေးသူများနှင့် ပူးပေါင်းခွင့်ပြုရန်"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"မိုဘိုင်းဖုန်းဝန်ဆောင်မှုစနစ်တစ်ခုအား ပူးပေါင်းခွင့်ပြုရန် ကိုင်ဆောင်ထားသူအား ခွင့်ပြုပါ။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"မနှောင့်ယှက်ရန်ကို အသုံးပြုမည်"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ခွင့်ပြုသည့် ဆုံးဖြတ်ချက်များကို စတင်ကြည့်ခြင်း"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ (လာမည့် နှိုးစက်)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"သင်ပိတ်လိုက်သည် အထိ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"မနှောင့်ယှက်ရန် ကိုသင်ပိတ်သည်အထိ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ခေါက်ရန်"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"မနှောင့်ယှက်ရ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"စနေ၊ တနင်္ဂနွေ"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"စနစ် အပြောင်းအလဲများ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"မနှောင့်ယှက်ရ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ပိတ်ရန်"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 တွင် ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို အဆင့်မြင့် အကြောင်းကြားချက်များဖြင့် အစားထိုးထားသည်။ ဤဝန်ဆောင်မှုက အကြံပြုထားသော လုပ်ဆောင်ချက်နှင့် ပြန်စာများကို ပြပေးပြီး သင်၏အကြောင်းကြားချက်များကို စီစဉ်ပေးသည်။\n\nအဆင့်မြင့် အကြောင်းကြားချက်များက အဆက်အသွယ်အမည်နှင့် မက်ဆေ့ဂျ်များကဲ့သို့ ကိုယ်ရေးကိုယ်တာအချက်လက်များ အပါအဝင် အကြောင်းကြားချက် အကြောင်းအရာကို သုံးနိုင်သည်။ ဤဝန်ဆောင်မှုက ဖုန်းခေါ်ဆိုမှုများ ဖြေခြင်းနှင့် ‘မနှောင့်ယှက်ရ’ ကို ထိန်းချုပ်ခြင်းကဲ့သို့ အကြောင်းကြားချက်များကို ပယ်နိုင်သည် (သို့) တုံ့ပြန်နိုင်သည်။"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>

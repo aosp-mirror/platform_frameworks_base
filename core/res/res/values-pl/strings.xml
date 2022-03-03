@@ -72,6 +72,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Połączenie dla trzech abonentów"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Odrzucanie niepożądanych, irytujących połączeń"</string>
     <string name="CndMmi" msgid="185136449405618437">"Dostarczanie numeru telefonującego"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Nie przeszkadzać"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
@@ -738,6 +739,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Zezwala posiadaczowi na tworzenie powiązania z interfejsem najwyższego poziomu w usłudze przesyłania wiadomości przez operatora. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"powiązanie z usługami operatora"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Umożliwia właścicielowi powiązanie z usługami operatora. Nie powinno być nigdy potrzebne w normalnych aplikacjach."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"dostęp do trybu Nie przeszkadzać"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rozpocząć wyświetlanie użycia uprawnień"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"rozpoczęcie wyświetlania decyzji dotyczących uprawnień"</string>
@@ -1868,8 +1871,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (następny alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Dopóki nie wyłączysz"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Do wyłączenia Nie przeszkadzać"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Zwiń"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nie przeszkadzać"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Powiadomienia wyłączone"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noc poza weekendem"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2034,7 +2039,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Wibracje przy połączeniach i powiadomieniach"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Wyciszenie połączeń i powiadomień"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmiany w systemie"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nie przeszkadzać"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nowość: w trybie Nie przeszkadzać powiadomienia są ukrywane"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ustawienia"</string>
@@ -2051,6 +2059,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Wyłącz"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje osobiste takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>

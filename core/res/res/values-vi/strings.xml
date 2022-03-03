@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Gọi ba chiều"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Từ chối các cuộc gọi làm phiền không mong muốn"</string>
     <string name="CndMmi" msgid="185136449405618437">"Gửi số đang gọi"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Không làm phiền"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo: Bị giới hạn"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Bị giới hạn"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ nhắn tin của nhà cung cấp dịch vụ. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"liên kết với dịch vụ của nhà cung cấp"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Cho phép chủ sở hữu liên kết với các dịch vụ của nhà cung cấp. Không bao giờ cần cho các ứng dụng thông thường."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"quyền truy cập chế độ Không làm phiền"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bắt đầu xem các quyết định cấp quyền"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (cảnh báo tiếp theo)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Cho đến khi bạn tắt"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Thu gọn"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Không làm phiền"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Thời gian ngừng hoạt động"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Đêm trong tuần"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cuối tuần"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Cuộc gọi và thông báo sẽ rung"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Cuộc gọi và thông báo sẽ tắt tiếng"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Thay đổi hệ thống"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Không làm phiền"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mới: Chế độ Không làm phiền sẽ ẩn thông báo"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Nhấn để tìm hiểu thêm và thay đổi."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Cài đặt Không làm phiền đã thay đổi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cài đặt"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Tắt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Đã dịch thông báo từ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> sang <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hoạt động trong nền"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Hoạt động trong nền"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem lại."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền trong thời gian dài. Nhấn để xem lại."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Xem các ứng dụng đang hoạt động"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Không sử dụng được máy ảnh trên thiết bị này"</string>

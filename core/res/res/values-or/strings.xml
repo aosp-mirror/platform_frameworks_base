@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ତିନି ପ୍ରକାରରେ କଲିଙ୍ଗ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ଅବାଞ୍ଛିତ ଅଜଣା କଲ୍‌ଗୁଡ଼ିକର ପ୍ରତ୍ୟାଖ୍ୟାନ"</string>
     <string name="CndMmi" msgid="185136449405618437">"କଲିଙ୍ଗ ନମ୍ବର୍ ଡେଲିଭରୀ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ ନୁହେଁ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"କଲର୍ ଆଇଡି ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିବନ୍ଧିତ ନୁହେଁ। ପରବର୍ତ୍ତୀ କଲ୍: ପ୍ରତିବନ୍ଧିତ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ଏକ କେରିଅର୍‍ ମେସେଜିଙ୍ଗ ସେବାର ଶୀର୍ଷ-ସ୍ତରୀୟ ଇଣ୍ଟରଫେସ୍‍ ବାନ୍ଧିରଖିବାକୁ ହୋଲ୍ଡରଙ୍କୁ ଅନୁମତି ଦିଏ। ସାମାନ୍ୟ ଆପ୍‍ ପାଇଁ ଆବଶ୍ୟକ କରାଯିବା ଉଚିତ ନୁହେଁ।"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"କେରିଅର୍‍ ସେବାଗୁଡ଼ିକ ସହ ଯୋଡ଼ି ହୁଅନ୍ତୁ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"କେରିଅର୍‌ ସେବାଗୁଡ଼ିକ ସହିତ ଧାରକଙ୍କୁ ଯୋଡ଼ିଥାଏ। ସାମାନ୍ୟ ଆପ୍‍ ପାଇଁ କଦାପି ଆବଶ୍ୟକ ହୁଏନାହିଁ।"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" କନଫିଗରେଶନ୍‍ ପଢ଼ିବା ତଥା ଲେଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ଅନୁମତି ବ୍ୟବହାର ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ଏକ ଆପ୍ ପାଇଁ ଅନୁମତିର ବ୍ୟବହାର ଆରମ୍ଭ କରିବାକୁ ଧାରକକୁ ଅନୁମତି ଦେଇଥାଏ। ସାଧାରଣ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ ଏହା ଆବଶ୍ୟକ ନୁହେଁ।"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ଅନୁମତି ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ପରବର୍ତ୍ତୀ ଆଲାର୍ମ) ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"ଆପଣ \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅଫ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ଛୋଟ କରନ୍ତୁ"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ବନ୍ଦ ରହିବାର ସମୟ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ସପ୍ତାହରାତି"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ସପ୍ତାହାନ୍ତ"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଭାଇବ୍ରେଟ୍ ହେବ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିଃଶବ୍ଦ କରିଦିଆଯିବ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ସିଷ୍ଟମ୍‌ରେ ପରିବର୍ତ୍ତନ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ନୂଆ: \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବା ଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ଅଧିକ ଜାଣିବାକୁ ଟ୍ୟାପ୍‌ କରନ୍ତୁ ଏବଂ ବଦଳାନ୍ତୁ।"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ୍‌"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ସେଟିଂସ୍"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ୍ ଅଛି"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ରେ Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର୍ ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଯୋଗାଯୋଗ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ୍ କରିପାରିବ। ଏହି ଫିଚର୍ ଫୋନ୍ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ମେସେଜ୍, <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>ରୁ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>କୁ ଅନୁବାଦ କରାଯାଇଛି।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ପୃଷ୍ଠପଟରେ ଚାଲୁଛି ଏବଂ ବ୍ୟାଟେରୀର ଚାର୍ଜ ସମାପ୍ତ ହେଉଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g>ଟି ପୃଷ୍ଠପଟରେ ଚାଲୁଥିବା ଯୋଗୁଁ ବ୍ୟାଟେରୀର ଚାର୍ଜ ସରିଯାଉଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ଦୀର୍ଘ ସମୟ ଧରି ପୃଷ୍ଠପଟରେ ଚାଲୁଛି। ସମୀକ୍ଷା କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ଏହି ଡିଭାଇସରୁ କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>

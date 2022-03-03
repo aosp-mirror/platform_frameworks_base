@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Driewegs bellen"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ongewenste, vervelende gesprekken weigeren"</string>
     <string name="CndMmi" msgid="185136449405618437">"Weergave van nummer van beller"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Niet storen"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: beperkt."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: onbeperkt."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: beperkt."</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"toegang tot Niet storen"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bekijken van rechtenbeslissingen starten"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Totdat je uitzet"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Totdat je Niet storen uitzet"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Samenvouwen"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Niet storen"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Trillen bij gesprekken en meldingen"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Telefoon- en meldingsgeluid wordt uitgezet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systeemwijzigingen"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Niet storen"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nieuw: \'Niet storen\' verbergt meldingen"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik voor meer informatie en om te wijzigen."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Instellingen"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Uitzetten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie laat voorgestelde acties en antwoorden zien en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen, en Niet storen beheren."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>

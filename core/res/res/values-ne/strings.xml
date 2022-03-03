@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"कल गर्ने तिन तरिका"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"नचाहिएका रिसउठ्दा कलहरूको अस्वीकार"</string>
     <string name="CndMmi" msgid="185136449405618437">"कलिङ नम्बर प्रदान गर्ने"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"बाधा नगर्नुहोस्"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"सीमति गर्न डिफल्ट कलर ID, अर्को कल: सीमति गरिएको"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कलर ID पूर्वनिर्धारितको लागि रोकावट छ। अर्को कल: रोकावट छैन"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कलर ID पूर्वनिर्धारितदेखि प्रतिबन्धित छैन। अर्को कल: प्रतिबन्धित छ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"वाहक सेवाहरु बाँध्न"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"होल्डरलाई वाहक सेवाहरु बाँध्न अनुमति दिनुहोस्। सामान्य अनुप्रयोगहरूको लागि यो कहिल्यै आवश्यक पर्दैन।"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"बाधा नपुर्याउँनुहोस् पहुँच गर्नुहोस्"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"अनुमतिसम्बन्धी निर्णयहरू हेर्न सुरु गर्नुहोस्"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अर्को अलार्म) सम्म"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"तपाईंले निष्क्रिय नपार्नुभएसम्म"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"तपाईँले बन्द नगरे सम्म बाधा नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"संक्षिप्त पार्नुहोस्"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"अवरोध नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"डाउनटाइम"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिबार"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कल तथा सूचनाहरू आउँदा कम्पन हुने छ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"बाधा नपुऱ्याउनुहोस्"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नयाँ: बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"थप जान्न र परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"प्रणाली"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिङहरू"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ठिक छ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"अफ गर्नुहोस्"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"थप जान्नुहोस्"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
@@ -2252,8 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"म्यासेज <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> भाषाबाट <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> भाषामा अनुवाद गरिएको छ।"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको हुनाले ब्याट्री खपत भइरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको हुनाले ब्याट्री खपत भइरहेको छ। समीक्षा गर्न ट्याप गर्नुहोस्।"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। समीक्षा गर्न ट्याप गर्नुहोस्।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"यो डिभाइसमा भएको क्यामेरा प्रयोग गर्न सकिएन"</string>
 </resources>

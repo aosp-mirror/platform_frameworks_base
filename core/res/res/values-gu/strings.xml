@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ત્રણ રીતે કૉલિંગ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"અનિચ્છિત પજવણીકારક કૉલ્સનો અસ્વીકાર"</string>
     <string name="CndMmi" msgid="185136449405618437">"કૉલિંગ નંબર વિતરણ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ખલેલ પાડશો નહીં"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત છે"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ધારકને કેરીઅર મેસેજિંગ સેવાના ઉચ્ચ-સ્તર ઇન્ટરફેસથી પ્રતિબદ્ધ થવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો માટે ક્યારેય જરૂરી હોતું નથી."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"કેરીઅર સેવાઓથી પ્રતિબદ્ધ થાઓ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ધારકને કેરીઅર સેવાઓ સાથે પ્રતિબદ્ધ થવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો માટે ક્યારેય જરૂરી હોતું નથી."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ખલેલ પાડશો નહીં ઍક્સેસ કરો"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"પરવાનગી સંબંધિત નિર્ણયો જોવાનું શરૂ કરો"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> સુધી"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (આગલા એલાર્મ) સુધી"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"તમે બંધ ન કરો ત્યાં સુધી"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"તમે ખલેલ પાડશો નહીં બંધ ન કરો ત્યાં સુધી"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"સંકુચિત કરો"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ડાઉનટાઇમ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"સપ્તાહાંત રાત્રિ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"સપ્તાહાંત"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"કૉલ અને નોટિફિકેશન માટે ઉપકરણ વાઇબ્રેટ થશે"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"કૉલ અને નોટિફિકેશન મ્યૂટ કરવામાં આવશે"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"સિસ્ટમના ફેરફારો"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ખલેલ પાડશો નહીં"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"નવું: ખલેલ પાડશો નહીં હવે નોટિફિકેશન છુપાવી શકે છે"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"સેટિંગ"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ઓકે"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"બંધ કરો"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
