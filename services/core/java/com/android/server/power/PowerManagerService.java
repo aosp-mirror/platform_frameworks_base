@@ -246,7 +246,7 @@ public final class PowerManagerService extends SystemService
     private static final String REASON_LOW_BATTERY = "shutdown,battery";
     private static final String REASON_BATTERY_THERMAL_STATE = "shutdown,thermal,battery";
 
-    private static final String TRACE_SCREEN_ON = "Screen turning on";
+    static final String TRACE_SCREEN_ON = "Screen turning on";
 
     /** If turning screen on takes more than this long, we show a warning on logcat. */
     private static final int SCREEN_ON_LATENCY_WARNING_MS = 200;
@@ -1945,45 +1945,15 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private void wakePowerGroupLocked(final PowerGroup powerGroup, long eventTime,
             @WakeReason int reason, String details, int uid, String opPackageName, int opUid) {
-        final int groupId = powerGroup.getGroupId();
         if (DEBUG_SPEW) {
             Slog.d(TAG, "wakePowerGroupLocked: eventTime=" + eventTime
-                    + ", groupId=" + groupId + ", uid=" + uid);
+                    + ", groupId=" + powerGroup.getGroupId() + ", uid=" + uid);
         }
-
-        if (eventTime < powerGroup.getLastSleepTimeLocked() || mForceSuspendActive
-                || !mSystemReady) {
+        if (mForceSuspendActive || !mSystemReady) {
             return;
         }
-
-        final int currentWakefulness = powerGroup.getWakefulnessLocked();
-        if (currentWakefulness == WAKEFULNESS_AWAKE) {
-            if (!mBootCompleted && sQuiescent) {
-                mDirty |= DIRTY_QUIESCENT;
-                updatePowerStateLocked();
-            }
-            return;
-        }
-
-        Trace.traceBegin(Trace.TRACE_TAG_POWER, "powerOnDisplay");
-        try {
-            Slog.i(TAG, "Waking up power group from "
-                    + PowerManagerInternal.wakefulnessToString(currentWakefulness)
-                    + " (groupId=" + groupId
-                    + ", uid=" + uid
-                    + ", reason=" + PowerManager.wakeReasonToString(reason)
-                    + ", details=" + details
-                    + ")...");
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
-            // The instrument will be timed out automatically after 2 seconds.
-            LatencyTracker.getInstance(mContext)
-                    .onActionStart(ACTION_TURN_ON_SCREEN, String.valueOf(groupId));
-
-            powerGroup.setWakefulnessLocked(WAKEFULNESS_AWAKE, eventTime, uid, reason, opUid,
-                    opPackageName, details);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_POWER);
-        }
+        powerGroup.wakeUpLocked(eventTime, reason, details, uid, opPackageName, opUid,
+                LatencyTracker.getInstance(mContext));
     }
 
     @GuardedBy("mLock")
@@ -5531,6 +5501,11 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    if (!mBootCompleted && sQuiescent) {
+                        mDirty |= DIRTY_QUIESCENT;
+                        updatePowerStateLocked();
+                        return;
+                    }
                     wakePowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP), eventTime,
                             reason, details, uid, opPackageName, uid);
                 }

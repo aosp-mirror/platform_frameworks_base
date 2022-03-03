@@ -22,6 +22,8 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static android.os.PowerManagerInternal.isInteractive;
 
+import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
+import static com.android.server.power.PowerManagerService.TRACE_SCREEN_ON;
 import static com.android.server.power.PowerManagerService.USER_ACTIVITY_SCREEN_BRIGHT;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DOZE;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_DRAW;
@@ -30,12 +32,14 @@ import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIG
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.LatencyTracker;
 
 /**
  * Used to store power related requests to every display in a
@@ -195,6 +199,32 @@ public class PowerGroup {
      */
     void setSandmanSummonedLocked(boolean isSandmanSummoned) {
         mIsSandmanSummoned = isSandmanSummoned;
+    }
+
+    void wakeUpLocked(long eventTime, @PowerManager.WakeReason int reason, String details, int uid,
+            String opPackageName, int opUid, LatencyTracker latencyTracker) {
+        if (eventTime < mLastSleepTime || mWakefulness == WAKEFULNESS_AWAKE) {
+            return;
+        }
+
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "wakePowerGroup" + mGroupId);
+        try {
+            Slog.i(TAG, "Waking up power group from "
+                    + PowerManagerInternal.wakefulnessToString(mWakefulness)
+                    + " (groupId=" + mGroupId
+                    + ", uid=" + uid
+                    + ", reason=" + PowerManager.wakeReasonToString(reason)
+                    + ", details=" + details
+                    + ")...");
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, mGroupId);
+            // The instrument will be timed out automatically after 2 seconds.
+            latencyTracker.onActionStart(ACTION_TURN_ON_SCREEN, String.valueOf(mGroupId));
+
+            setWakefulnessLocked(WAKEFULNESS_AWAKE, eventTime, uid, reason, opUid,
+                    opPackageName, details);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+        }
     }
 
     boolean dreamLocked(long eventTime, int uid) {
