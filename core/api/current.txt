@@ -26621,9 +26621,9 @@ package android.net {
 
   public abstract class PlatformVpnProfile {
     method public final boolean areLocalRoutesExcluded();
-    method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
+    method public final boolean isInternetValidationRequired();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
     field public static final int TYPE_IKEV2_IPSEC_RSA = 8; // 0x8
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
