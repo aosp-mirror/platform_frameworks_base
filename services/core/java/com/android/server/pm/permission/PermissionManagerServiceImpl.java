@@ -2554,6 +2554,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             for (int i = 0; i < packagesSize; i++) {
                 AndroidPackageApi sharedUserPackage =
                         packages.valueAt(i).getAndroidPackage();
+                if (sharedUserPackage == null) {
+                    continue;
+                }
                 uidRequestedPermissions.addAll(
                         sharedUserPackage.getRequestedPermissions());
                 uidImplicitPermissions.addAll(
