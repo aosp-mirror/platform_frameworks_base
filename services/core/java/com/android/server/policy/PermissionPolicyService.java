@@ -21,6 +21,8 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
+import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
@@ -1016,7 +1018,7 @@ public final class PermissionPolicyService extends SystemService {
                             ActivityInterceptorInfo info) {
                         String action = info.intent.getAction();
                         ActivityInterceptResult result = null;
-                        if (!PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)
+                        if (!ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)
                                 && !PackageManager.ACTION_REQUEST_PERMISSIONS.equals(action)) {
                             return null;
                         }
@@ -1033,7 +1035,7 @@ public final class PermissionPolicyService extends SystemService {
                                 && !mContinueNotifGrantMessageUids.contains(info.realCallingUid)) {
                             return result;
                         }
-                        if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)) {
+                        if (ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)) {
                             String otherPkg = info.intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
                             if (otherPkg == null || (mPackageManager.getPermissionFlags(
                                     POST_NOTIFICATIONS, otherPkg, UserHandle.of(info.userId))
@@ -1052,8 +1054,8 @@ public final class PermissionPolicyService extends SystemService {
                     public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
                             ActivityInterceptorInfo info) {
                         super.onActivityLaunched(taskInfo, activityInfo, info);
-                        if (!shouldShowNotificationDialogOrClearFlags(info.intent,
-                                info.checkedOptions)) {
+                        if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
+                                activityInfo.packageName, info.intent, info.checkedOptions, true)) {
                             return;
                         }
                         UserHandle user = UserHandle.of(taskInfo.userId);
@@ -1085,7 +1087,7 @@ public final class PermissionPolicyService extends SystemService {
                 return false;
             }
 
-            if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(intent.getAction())
+            if (ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(intent.getAction())
                     && (callingUid != Process.SYSTEM_UID || !SYSTEM_PKG.equals(callingPackage))) {
                 return false;
             }
@@ -1104,18 +1106,48 @@ public final class PermissionPolicyService extends SystemService {
             launchNotificationPermissionRequestDialog(packageName, user, taskId);
         }
 
+        @Override
+        public boolean isIntentToPermissionDialog(@NonNull Intent intent) {
+            return Objects.equals(intent.getPackage(),
+                    mPackageManager.getPermissionControllerPackageName())
+                    && (Objects.equals(intent.getAction(), ACTION_REQUEST_PERMISSIONS_FOR_OTHER)
+                    || Objects.equals(intent.getAction(), ACTION_REQUEST_PERMISSIONS));
+        }
+
+        @Override
+        public boolean shouldShowNotificationDialogForTask(TaskInfo taskInfo, String currPkg,
+                Intent intent) {
+            return shouldShowNotificationDialogOrClearFlags(
+                    taskInfo, currPkg, intent, null, false);
+        }
+
         /**
-         * Determine if we should show a notification dialog, or clear the REVIEW_REQUIRED flag,
-         * from a particular package for a particular intent. Returns true if:
+         * Determine if a particular task is in the proper state to show a system-triggered
+         * permission prompt. A prompt can be shown if the task is just starting, or the task is
+         * currently focused, visible, and running, and,
          * 1. The isEligibleForLegacyPermissionPrompt ActivityOption is set, or
-         * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER)
+         * 2. The intent is a launcher intent (action is ACTION_MAIN, category is LAUNCHER), or
+         * 3. The activity belongs to the same package as the one which launched the task
+         * originally, and the task was started with a launcher intent
+         * @param taskInfo The task to be checked
+         * @param currPkg The package of the current top visible activity
+         * @param intent The intent of the current top visible activity
          */
-        private boolean shouldShowNotificationDialogOrClearFlags(Intent intent,
-                ActivityOptions options) {
-            if ((options != null && options.isEligibleForLegacyPermissionPrompt())) {
-                return true;
+        private boolean shouldShowNotificationDialogOrClearFlags(TaskInfo taskInfo, String currPkg,
+                Intent intent, ActivityOptions options, boolean activityStart) {
+            if (intent == null || currPkg == null || taskInfo == null
+                    || (!(taskInfo.isFocused && taskInfo.isVisible && taskInfo.isRunning)
+                    && !activityStart)) {
+                return false;
             }
 
+            return isLauncherIntent(intent)
+                    || (options != null && options.isEligibleForLegacyPermissionPrompt())
+                    || (currPkg.equals(taskInfo.baseActivity.getPackageName())
+                    && isLauncherIntent(taskInfo.baseIntent));
+        }
+
+        private boolean isLauncherIntent(Intent intent) {
             return Intent.ACTION_MAIN.equals(intent.getAction())
                     && intent.getCategories() != null
                     && (intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)
@@ -1144,7 +1176,7 @@ public final class PermissionPolicyService extends SystemService {
             Intent grantPermission = mPackageManager
                     .buildRequestPermissionsIntent(new String[] { POST_NOTIFICATIONS });
             grantPermission.setAction(
-                    PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
+                    ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
 
             ActivityOptions options = new ActivityOptions(new Bundle());
@@ -1168,12 +1200,6 @@ public final class PermissionPolicyService extends SystemService {
             synchronized (mLock) {
                 mOnInitializedCallback = callback;
             }
-        }
-
-        @Override
-        public boolean canShowPermissionPromptForTask(@Nullable TaskInfo taskInfo) {
-            return taskInfo != null && taskInfo.isFocused && taskInfo.isVisible
-                    && taskInfo.isRunning;
         }
 
         /**
