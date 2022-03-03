@@ -60,10 +60,6 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
-            apex: "com.android.auxiliary",
-            module: "com.android.auxiliary-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.bluetooth",
             module: "com.android.bluetooth-bootclasspath-fragment",
         },
