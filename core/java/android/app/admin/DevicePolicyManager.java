@@ -15643,7 +15643,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns a boolean for whether the DPC has been downloaded during provisioning.
+     * Returns a boolean for whether the DPC
+     * (Device Policy Controller, the agent responsible for enforcing policy)
+     * has been downloaded during provisioning.
      *
      * <p>If true is returned, then any attempts to begin setup again should result in factory reset
      *
@@ -15664,9 +15666,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Use to indicate that the DPC has or has not been downloaded during provisioning.
+     * Indicates that the DPC (Device Policy Controller, the agent responsible for enforcing policy)
+     * has or has not been downloaded during provisioning.
      *
-     * @param downloaded {@code true} if the dpc has been downloaded during provisioning. false otherwise.
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning.
+     *                               {@code false} otherwise.
      *
      * @hide
      */
