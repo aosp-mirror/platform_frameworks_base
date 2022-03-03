@@ -604,10 +604,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         List<S> services = mServicesCacheList.get(resolvedUserId);
         if (services == null || services.size() == 0) {
             final boolean disabled = isDisabledLocked(userId);
-            if (mServiceNameResolver == null) {
-                return null;
-            }
-            if (mServiceNameResolver.isConfiguredInMultipleMode()) {
+            if (mServiceNameResolver != null && mServiceNameResolver.isConfiguredInMultipleMode()) {
                 services = newServiceListLocked(resolvedUserId, disabled,
                         mServiceNameResolver.getServiceNameList(userId));
             } else {
