@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색상 보정"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"기기에 색상이 표시되는 방식을 조정합니다. 다음과 같은 상황에서 유용합니다.&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 더욱 정확하게 보고 싶을 때&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중을 위해 색상을 제거하고 싶을 때&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"색상 보정은 다음과 같은 경우에 유용할 수 있습니다.&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;색상을 보다 정확하게 확인하려는 경우&lt;/li&gt; &lt;li&gt;&amp;nbsp;집중에 도움이 되도록 색상을 제거하려는 경우&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간: 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"완전히 충전됨"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"관리자가 제어"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"제한된 설정으로 제어됨"</string>
     <string name="disabled" msgid="8017887509554714950">"사용 안함"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"이 앱이 알람을 설정하고 시간 기반 작업을 예약할 수 있도록 허용합니다. 이렇게 하면 백그라운드에서 앱 실행이 허용되어 배터리 사용량이 증가할 수 있습니다.\n\n이 권한을 사용 중지하면 이 앱에서 예약한 기존의 알람 및 시간 기반 일정이 작동하지 않습니다."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"일정 예약, 알람, 리마인더, 시계"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"중요 알림만 허용"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
