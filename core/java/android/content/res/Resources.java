@@ -2674,9 +2674,8 @@ public class Resources {
         // Putting into a map keyed on the apk assets to deduplicate resources that are different
         // objects but ultimately represent the same assets
         Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
-        for (Resources r : sResourcesHistory) {
-            history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r);
-        }
+        sResourcesHistory.forEach(
+                r -> history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r));
         int i = 0;
         for (Resources r : history.values()) {
             if (r != null) {

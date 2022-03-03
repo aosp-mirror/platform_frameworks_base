@@ -55,6 +55,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     private lateinit var appIconDrawable: Drawable
     @Mock
+    private lateinit var logger: MediaTttLogger
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -69,7 +71,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(fakeClock)
 
         controllerCommon = TestControllerCommon(
-            context, windowManager, viewUtil, fakeExecutor, tapGestureDetector
+            context, logger, windowManager, viewUtil, fakeExecutor, tapGestureDetector
         )
     }
 
@@ -94,20 +96,22 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipDoesNotDisappearsBeforeTimeout() {
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
         reset(windowManager)
 
-        fakeClock.advanceTime(TIMEOUT_MILLIS - 1)
+        fakeClock.advanceTime(state.getTimeoutMs() - 1)
 
         verify(windowManager, never()).removeView(any())
     }
 
     @Test
     fun displayChip_chipDisappearsAfterTimeout() {
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
         reset(windowManager)
 
-        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
 
         verify(windowManager).removeView(any())
     }
@@ -115,7 +119,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Test
     fun displayChip_calledAgainBeforeTimeout_timeoutReset() {
         // First, display the chip
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
 
         // After some time, re-display the chip
         val waitTime = 1000L
@@ -123,7 +128,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.displayChip(getState())
 
         // Wait until the timeout for the first display would've happened
-        fakeClock.advanceTime(TIMEOUT_MILLIS - waitTime + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() - waitTime + 1)
 
         // Verify we didn't hide the chip
         verify(windowManager, never()).removeView(any())
@@ -132,33 +137,36 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Test
     fun displayChip_calledAgainBeforeTimeout_eventuallyTimesOut() {
         // First, display the chip
-        controllerCommon.displayChip(getState())
+        val state = getState()
+        controllerCommon.displayChip(state)
 
         // After some time, re-display the chip
         fakeClock.advanceTime(1000L)
         controllerCommon.displayChip(getState())
 
         // Ensure we still hide the chip eventually
-        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+        fakeClock.advanceTime(state.getTimeoutMs() + 1)
 
         verify(windowManager).removeView(any())
     }
 
     @Test
-    fun removeChip_chipRemovedAndGestureDetectionStopped() {
+    fun removeChip_chipRemovedAndGestureDetectionStoppedAndRemovalLogged() {
         // First, add the chip
         controllerCommon.displayChip(getState())
 
         // Then, remove it
-        controllerCommon.removeChip()
+        val reason = "test reason"
+        controllerCommon.removeChip(reason)
 
         verify(windowManager).removeView(any())
         verify(tapGestureDetector).removeOnGestureDetectedCallback(any())
+        verify(logger).logChipRemoval(reason)
     }
 
     @Test
     fun removeChip_noAdd_viewNotRemoved() {
-        controllerCommon.removeChip()
+        controllerCommon.removeChip("reason")
 
         verify(windowManager, never()).removeView(any())
     }
@@ -222,12 +230,19 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     inner class TestControllerCommon(
         context: Context,
+        logger: MediaTttLogger,
         windowManager: WindowManager,
         viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         tapGestureDetector: TapGestureDetector,
     ) : MediaTttChipControllerCommon<MediaTttChipState>(
-        context, windowManager, viewUtil, mainExecutor, tapGestureDetector, R.layout.media_ttt_chip
+        context,
+        logger,
+        windowManager,
+        viewUtil,
+        mainExecutor,
+        tapGestureDetector,
+        R.layout.media_ttt_chip
     ) {
         override fun updateChipView(chipState: MediaTttChipState, currentChipView: ViewGroup) {
         }

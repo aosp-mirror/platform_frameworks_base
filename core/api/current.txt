@@ -7388,8 +7388,8 @@ package android.app.admin {
     method public int getCurrentFailedPasswordAttempts();
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
-    method @Nullable public String getDeviceManagerRoleHolderPackageName();
     method public CharSequence getDeviceOwnerLockScreenInfo();
+    method @Nullable public String getDevicePolicyManagementRoleHolderPackage();
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.function.Supplier<android.graphics.drawable.Drawable>);
     method @Nullable public android.graphics.drawable.Icon getDrawableAsIcon(@NonNull String, @NonNull String, @NonNull String, @Nullable android.graphics.drawable.Icon);
@@ -30867,6 +30867,7 @@ package android.os {
     field public static final int PREVIEW_SDK_INT;
     field public static final String RELEASE;
     field @NonNull public static final String RELEASE_OR_CODENAME;
+    field @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY;
     field @Deprecated public static final String SDK;
     field public static final int SDK_INT;
     field public static final String SECURITY_PATCH;
@@ -31858,7 +31859,7 @@ package android.os {
     method public static final boolean is64Bit();
     method public static boolean isApplicationUid(int);
     method public static final boolean isIsolated();
-    method public static final boolean isSupplemental();
+    method public static final boolean isSdkSandbox();
     method public static final void killProcess(int);
     method public static final int myPid();
     method @NonNull public static String myProcessName();
@@ -40754,8 +40755,9 @@ package android.telecom {
     method public String getDefaultDialerPackage();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS) public java.util.List<android.telecom.PhoneAccountHandle> getOwnSelfManagedPhoneAccounts();
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
-    method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_OWN_CALLS}) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
     method @Nullable public android.telecom.PhoneAccountHandle getSimCallManagerForSubscription(int);
     method @Nullable public String getSystemDialerPackage();

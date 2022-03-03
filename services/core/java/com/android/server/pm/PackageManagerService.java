@@ -247,8 +247,8 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.storage.DeviceStorageMonitorInternal;
-import com.android.server.supplementalprocess.SupplementalProcessManagerLocal;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -840,6 +840,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
             mNoKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
 
+    private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
+            mPendingKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
+
     // Internal interface for permission manager
     final PermissionManagerServiceInternal mPermissionManager;
 
@@ -887,9 +890,11 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
+    static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
+    private static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS = 1000;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -934,7 +939,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
-    private final @NonNull String mRequiredSupplementalProcessPackage;
+    private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -1166,13 +1171,14 @@ public class PackageManagerService extends IPackageManager.Stub
         Computer computer = snapshotComputer();
         ArraySet<String> packagesToNotify = computer.getNotifyPackagesForReplacedReceived(packages);
         for (int index = 0; index < packagesToNotify.size(); index++) {
-            notifyInstallObserver(packagesToNotify.valueAt(index));
+            notifyInstallObserver(packagesToNotify.valueAt(index), false /* killApp */);
         }
     }
 
-    void notifyInstallObserver(String packageName) {
-        Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
-                mNoKillInstallObservers.remove(packageName);
+    void notifyInstallObserver(String packageName, boolean killApp) {
+        final Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
+                killApp ? mPendingKillInstallObservers.remove(packageName)
+                        : mNoKillInstallObservers.remove(packageName);
 
         if (pair != null) {
             notifyInstallObserver(pair.first, pair.second);
@@ -1209,6 +1215,15 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.removeMessages(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES);
         mHandler.sendEmptyMessageDelayed(PRUNE_UNUSED_STATIC_SHARED_LIBRARIES,
                 delay ? getPruneUnusedSharedLibrariesDelay() : 0);
+    }
+
+    void scheduleDeferredPendingKillInstallObserver(PackageInstalledInfo info,
+            IPackageInstallObserver2 observer) {
+        final String packageName = info.mPkg.getPackageName();
+        mPendingKillInstallObservers.put(packageName, Pair.create(info, observer));
+        final Message message = mHandler.obtainMessage(DEFERRED_PENDING_KILL_INSTALL_OBSERVER,
+                packageName);
+        mHandler.sendMessageDelayed(message, DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
     private static long getPruneUnusedSharedLibrariesDelay() {
@@ -1667,7 +1682,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
-        mRequiredSupplementalProcessPackage = testParams.requiredSupplementalProcessPackage;
+        mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
 
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
@@ -2055,8 +2070,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mPrepareAppDataFuture = mAppDataHelper.fixAppsDataOnBoot();
-
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
             // Note that we do *not* clear the application profiles. These remain valid
@@ -2076,6 +2089,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
+
+            // Defer the app data fixup until we are done with app data clearing above.
+            mPrepareAppDataFuture = mAppDataHelper.fixAppsDataOnBoot();
 
             // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
@@ -2141,8 +2157,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     getPackageInfo(mRequiredPermissionControllerPackage, 0,
                             UserHandle.USER_SYSTEM).getLongVersionCode());
 
-            // Resolve the supplemental process
-            mRequiredSupplementalProcessPackage = getRequiredSupplementalProcessPackageName();
+            // Resolve the sdk sandbox package
+            mRequiredSdkSandboxPackage = getRequiredSdkSandboxPackageName();
 
             // Initialize InstantAppRegistry's Instant App list for all users.
             for (AndroidPackage pkg : mPackages.values()) {
@@ -2557,8 +2573,9 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)) {
-                Slog.wtf(TAG, "Package Manager Crash", e);
+            if (!(e instanceof SecurityException) && !(e instanceof IllegalArgumentException)
+                    && !(e instanceof ParcelableException)) {
+                Slog.wtf(TAG, "Package Manager Unexpected Exception", e);
             }
             throw e;
         }
@@ -3143,8 +3160,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getSupplementalProcessPackageName() {
-        return mRequiredSupplementalProcessPackage;
+    public String getSdkSandboxPackageName() {
+        return mRequiredSdkSandboxPackage;
     }
 
     String getPackageInstallerPackageName() {
@@ -5458,8 +5475,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private @NonNull String getRequiredSupplementalProcessPackageName() {
-        final Intent intent = new Intent(SupplementalProcessManagerLocal.SERVICE_INTERFACE);
+    private @NonNull String getRequiredSdkSandboxPackageName() {
+        final Intent intent = new Intent(SdkSandboxManagerLocal.SERVICE_INTERFACE);
 
         final List<ResolveInfo> matches = queryIntentServicesInternal(
                 intent,
@@ -5471,7 +5488,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            throw new RuntimeException("There should exactly one supplemental process; found "
+            throw new RuntimeException("There should exactly one sdk sandbox package; found "
                     + matches.size() + ": matches=" + matches);
         }
     }
@@ -6675,6 +6692,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public IPackageInstaller getPackageInstaller() {
+        // Return installer service for internal calls.
+        if (PackageManagerServiceUtils.isSystemOrRoot()) {
+            return mInstallerService;
+        }
+        // Return null for InstantApps.
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
@@ -7390,6 +7412,12 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 PackageManagerService.this.notifyPackageUseInternal(packageName, reason);
             }
+        }
+
+        @Override
+        public void onPackageProcessKilledForUninstall(String packageName) {
+            mHandler.post(() -> PackageManagerService.this.notifyInstallObserver(packageName,
+                    true /* killApp */));
         }
 
         @Override

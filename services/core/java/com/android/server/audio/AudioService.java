@@ -195,6 +195,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1822,6 +1823,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // Check if device to be updated is routed for the given audio stream
+        // This may include devices such as SPEAKER_SAFE.
         List<AudioDeviceAttributes> devicesForAttributes = getDevicesForAttributesInt(
                 new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build(),
                 true /* forVolume */);
@@ -3693,8 +3695,7 @@ public class AudioService extends IAudioService.Stub
 
         int streamType = getBluetoothContextualVolumeStream(newMode);
 
-        final Set<Integer> deviceTypes = AudioSystem.generateAudioDeviceTypesSet(
-                mAudioSystem.getDevicesForStream(streamType));
+        final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
         final Set<Integer> absVolumeMultiModeCaseDevices = AudioSystem.intersectionAudioDeviceTypes(
                 mAbsVolumeMultiModeCaseDevices, deviceTypes);
         if (absVolumeMultiModeCaseDevices.isEmpty()) {
@@ -6258,55 +6259,107 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /** only public for mocking/spying, do not call outside of AudioService */
+    /**
+     * Returns device associated with the stream volume.
+     *
+     * Only public for mocking/spying, do not call outside of AudioService.
+     * Device volume aliasing means DEVICE_OUT_SPEAKER may be returned for
+     * DEVICE_OUT_SPEAKER_SAFE.
+     */
     @VisibleForTesting
     public int getDeviceForStream(int stream) {
-        int device = getDevicesForStreamInt(stream);
-        if ((device & (device - 1)) != 0) {
+        return selectOneAudioDevice(getDeviceSetForStream(stream));
+    }
+
+    /*
+     * Must match native apm_extract_one_audio_device() used in getDeviceForVolume()
+     * or the wrong device volume may be adjusted.
+     */
+    private int selectOneAudioDevice(Set<Integer> deviceSet) {
+        if (deviceSet.isEmpty()) {
+            return AudioSystem.DEVICE_NONE;
+        } else if (deviceSet.size() == 1) {
+            return deviceSet.iterator().next();
+        } else {
             // Multiple device selection is either:
             //  - speaker + one other device: give priority to speaker in this case.
             //  - one A2DP device + another device: happens with duplicated output. In this case
             // retain the device on the A2DP output as the other must not correspond to an active
             // selection if not the speaker.
             //  - HDMI-CEC system audio mode only output: give priority to available item in order.
-            // FIXME: Haven't applied audio device type refactor to this API
-            //  as it is going to be deprecated.
-            if ((device & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
-                device = AudioSystem.DEVICE_OUT_SPEAKER;
-            } else if ((device & AudioSystem.DEVICE_OUT_HDMI_ARC) != 0) {
-                // FIXME(b/184944421): DEVICE_OUT_HDMI_EARC has two bits set,
-                // so it must be handled correctly as it aliases
-                // with DEVICE_OUT_HDMI_ARC | DEVICE_OUT_EARPIECE.
-                device = AudioSystem.DEVICE_OUT_HDMI_ARC;
-            } else if ((device & AudioSystem.DEVICE_OUT_SPDIF) != 0) {
-                device = AudioSystem.DEVICE_OUT_SPDIF;
-            } else if ((device & AudioSystem.DEVICE_OUT_AUX_LINE) != 0) {
-                device = AudioSystem.DEVICE_OUT_AUX_LINE;
+
+            if (deviceSet.contains(AudioSystem.DEVICE_OUT_SPEAKER)) {
+                return AudioSystem.DEVICE_OUT_SPEAKER;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_SPEAKER_SAFE)) {
+                // Note: DEVICE_OUT_SPEAKER_SAFE not present in getDeviceSetForStreamDirect
+                return AudioSystem.DEVICE_OUT_SPEAKER_SAFE;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_HDMI_ARC)) {
+                return AudioSystem.DEVICE_OUT_HDMI_ARC;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_HDMI_EARC)) {
+                return AudioSystem.DEVICE_OUT_HDMI_EARC;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_AUX_LINE)) {
+                return AudioSystem.DEVICE_OUT_AUX_LINE;
+            } else if (deviceSet.contains(AudioSystem.DEVICE_OUT_SPDIF)) {
+                return AudioSystem.DEVICE_OUT_SPDIF;
             } else {
-                for (int deviceType : AudioSystem.DEVICE_OUT_ALL_A2DP_SET) {
-                    if ((deviceType & device) == deviceType) {
+                // At this point, deviceSet should contain exactly one A2DP device;
+                // regardless, return the first A2DP device in numeric order.
+                // If there is no A2DP device, this falls through to log an error.
+                for (int deviceType : deviceSet) {
+                    if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(deviceType)) {
                         return deviceType;
                     }
                 }
             }
         }
-        return device;
+        Log.w(TAG, "selectOneAudioDevice returning DEVICE_NONE from invalid device combination "
+                + AudioSystem.deviceSetToString(deviceSet));
+        return AudioSystem.DEVICE_NONE;
     }
 
     /**
      * @see AudioManager#getDevicesForStream(int)
+     * @deprecated on {@link android.os.Build.VERSION_CODES#T} as new devices
+     *              will have multi-bit device types since S.
+     *              Use {@link #getDevicesForAttributes()} instead.
      */
-    public int getDevicesForStream(int streamType) {
+    @Override
+    @Deprecated
+    public int getDeviceMaskForStream(int streamType) {
         ensureValidStreamType(streamType);
+        // no permission required
         final long token = Binder.clearCallingIdentity();
         try {
-            return mAudioSystem.getDevicesForStream(streamType);
+            return AudioSystem.getDeviceMaskFromSet(
+                    getDeviceSetForStreamDirect(streamType));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    private int getDevicesForStreamInt(int stream) {
+    /**
+     * Returns the devices associated with a stream type.
+     *
+     * SPEAKER_SAFE will alias to SPEAKER.
+     */
+    @NonNull
+    private Set<Integer> getDeviceSetForStreamDirect(int stream) {
+        final AudioAttributes attr =
+                AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(stream);
+        Set<Integer> deviceSet =
+                AudioSystem.generateAudioDeviceTypesSet(
+                        getDevicesForAttributesInt(attr, true /* forVolume */));
+        return deviceSet;
+    }
+
+    /**
+     * Returns a reference to the list of devices for the stream, do not modify.
+     *
+     * The device returned may be aliased to the actual device whose volume curve
+     * will be used.  For example DEVICE_OUT_SPEAKER_SAFE aliases to DEVICE_OUT_SPEAKER.
+     */
+    @NonNull
+    public Set<Integer> getDeviceSetForStream(int stream) {
         ensureValidStreamType(stream);
         synchronized (VolumeStreamState.class) {
             return mStreamStates[stream].observeDevicesForStream_syncVSS(true);
@@ -6318,11 +6371,10 @@ public class AudioService extends IAudioService.Stub
             synchronized (VolumeStreamState.class) {
                 for (int stream = 0; stream < mStreamStates.length; stream++) {
                     if (stream != skipStream) {
-                        int devices = mStreamStates[stream].observeDevicesForStream_syncVSS(
-                                false /*checkOthers*/);
-
-                        Set<Integer> devicesSet = AudioSystem.generateAudioDeviceTypesSet(devices);
-                        for (Integer device : devicesSet) {
+                        Set<Integer> deviceSet =
+                                mStreamStates[stream].observeDevicesForStream_syncVSS(
+                                        false /*checkOthers*/);
+                        for (Integer device : deviceSet) {
                             // Update volume states for devices routed for the stream
                             updateVolumeStates(device, stream,
                                     "AudioService#onObserveDevicesForAllStreams");
@@ -6643,7 +6695,7 @@ public class AudioService extends IAudioService.Stub
                 && DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.contains(newDevice)
                 && mStreamStates[AudioSystem.STREAM_MUSIC].mIsMuted
                 && mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(newDevice) != 0
-                && (newDevice & mAudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC)) != 0) {
+                && getDeviceSetForStreamDirect(AudioSystem.STREAM_MUSIC).contains(newDevice)) {
             if (DEBUG_VOL) {
                 Log.i(TAG, String.format("onAccessoryPlugMediaUnmute unmuting device=%d [%s]",
                         newDevice, AudioSystem.getOutputDeviceName(newDevice)));
@@ -7031,7 +7083,7 @@ public class AudioService extends IAudioService.Stub
         private boolean mIsMuted;
         private boolean mIsMutedInternally;
         private String mVolumeIndexSettingName;
-        private int mObservedDevices;
+        @NonNull private Set<Integer> mObservedDeviceSet = new TreeSet<>();
 
         private final SparseIntArray mIndexMap = new SparseIntArray(8) {
             @Override
@@ -7098,17 +7150,30 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        /**
+         * Returns a list of devices associated with the stream type.
+         *
+         * This is a reference to the local list, do not modify.
+         */
         @GuardedBy("VolumeStreamState.class")
-        public int observeDevicesForStream_syncVSS(boolean checkOthers) {
+        @NonNull
+        public Set<Integer> observeDevicesForStream_syncVSS(
+                boolean checkOthers) {
             if (!mSystemServer.isPrivileged()) {
-                return AudioSystem.DEVICE_NONE;
+                return new TreeSet<Integer>();
             }
-            final int devices = mAudioSystem.getDevicesForStream(mStreamType);
-            if (devices == mObservedDevices) {
-                return devices;
+            final Set<Integer> deviceSet =
+                    getDeviceSetForStreamDirect(mStreamType);
+            if (deviceSet.equals(mObservedDeviceSet)) {
+                return mObservedDeviceSet;
             }
-            final int prevDevices = mObservedDevices;
-            mObservedDevices = devices;
+
+            // Use legacy bit masks for message signalling.
+            // TODO(b/185386781): message needs update since it uses devices bit-mask.
+            final int devices = AudioSystem.getDeviceMaskFromSet(deviceSet);
+            final int prevDevices = AudioSystem.getDeviceMaskFromSet(mObservedDeviceSet);
+
+            mObservedDeviceSet = deviceSet;
             if (checkOthers) {
                 // one stream's devices have changed, check the others
                 postObserveDevicesForAllStreams(mStreamType);
@@ -7124,7 +7189,7 @@ public class AudioService extends IAudioService.Stub
                     SENDMSG_QUEUE, prevDevices /*arg1*/, devices /*arg2*/,
                     // ok to send reference to this object, it is final
                     mStreamDevicesChanged /*obj*/, 0 /*delay*/);
-            return devices;
+            return mObservedDeviceSet;
         }
 
         public @Nullable String getSettingNameForDevice(int device) {
@@ -7555,19 +7620,7 @@ public class AudioService extends IAudioService.Stub
             }
             pw.println();
             pw.print("   Devices: ");
-            final int devices = getDevicesForStreamInt(mStreamType);
-            int device, i = 0, n = 0;
-            // iterate all devices from 1 to DEVICE_OUT_DEFAULT exclusive
-            // (the default device is not returned by getDevicesForStreamInt)
-            while ((device = 1 << i) != AudioSystem.DEVICE_OUT_DEFAULT) {
-                if ((devices & device) != 0) {
-                    if (n++ > 0) {
-                        pw.print(", ");
-                    }
-                    pw.print(AudioSystem.getOutputDeviceName(device));
-                }
-                i++;
-            }
+            pw.print(AudioSystem.deviceSetToString(getDeviceSetForStream(mStreamType)));
         }
     }
 
@@ -9324,7 +9377,9 @@ public class AudioService extends IAudioService.Stub
                     mDeviceBroker.setForceUse_Async(AudioSystem.FOR_HDMI_SYSTEM_AUDIO, config,
                             "setHdmiSystemAudioSupported");
                 }
-                device = getDevicesForStreamInt(AudioSystem.STREAM_MUSIC);
+                // TODO(b/185386781): Update AudioManager API to use device list.
+                // So far, this value appears to be advisory for debug log.
+                device = getDeviceMaskForStream(AudioSystem.STREAM_MUSIC);
             }
         }
         return device;

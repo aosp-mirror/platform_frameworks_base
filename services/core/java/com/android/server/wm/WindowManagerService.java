@@ -3035,7 +3035,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void onKeyguardShowingAndNotOccludedChanged() {
         mH.sendEmptyMessage(H.RECOMPUTE_FOCUS);
-        dispatchKeyguardLockedStateState();
+        dispatchKeyguardLockedState();
     }
 
     @Override
@@ -3249,7 +3249,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " permission required to read keyguard visibility");
     }
 
-    private void dispatchKeyguardLockedStateState() {
+    private void dispatchKeyguardLockedState() {
         mH.post(() -> {
             final boolean isKeyguardLocked = mPolicy.isKeyguardShowing();
             if (mDispatchedKeyguardLockedState == isKeyguardLocked) {
@@ -4412,10 +4412,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void reportKeepClearAreasChanged(Session session, IWindow window, List<Rect> keepClearAreas) {
+    void reportKeepClearAreasChanged(Session session, IWindow window,
+            List<Rect> restricted, List<Rect> unrestricted) {
         synchronized (mGlobalLock) {
             final WindowState win = windowForClientLocked(session, window, true);
-            if (win.setKeepClearAreas(keepClearAreas)) {
+            if (win.setKeepClearAreas(restricted, unrestricted)) {
                 win.getDisplayContent().updateKeepClearAreas();
             }
         }

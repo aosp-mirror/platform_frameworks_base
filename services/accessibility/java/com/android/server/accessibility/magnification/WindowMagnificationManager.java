@@ -36,8 +36,10 @@ import android.graphics.Region;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
@@ -87,6 +89,30 @@ public class WindowMagnificationManager implements
     })
     public @interface WindowPosition {}
 
+    /** Window magnification connection is connecting. */
+    private static final int CONNECTING = 0;
+    /** Window magnification connection is connected. */
+    private static final int CONNECTED = 1;
+    /** Window magnification connection is disconnecting. */
+    private static final int DISCONNECTING = 2;
+    /** Window magnification connection is disconnected. */
+    private static final int DISCONNECTED = 3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CONNECTION_STATE"}, value = {
+            CONNECTING,
+            CONNECTED,
+            DISCONNECTING,
+            DISCONNECTED
+    })
+    private @interface ConnectionState {
+    }
+
+    @ConnectionState
+    private int mConnectionState = DISCONNECTED;
+
+    private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 100;
+
     private final Object mLock;
     private final Context mContext;
     @VisibleForTesting
@@ -99,6 +125,7 @@ public class WindowMagnificationManager implements
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -178,7 +205,7 @@ public class WindowMagnificationManager implements
      */
     public void setConnection(@Nullable IWindowMagnificationConnection connection) {
         if (DBG) {
-            Slog.d(TAG, "setConnection :" + connection);
+            Slog.d(TAG, "setConnection :" + connection + " ,mConnectionState=" + mConnectionState);
         }
         synchronized (mLock) {
             // Reset connectionWrapper.
@@ -189,6 +216,13 @@ public class WindowMagnificationManager implements
                 }
                 mConnectionWrapper.unlinkToDeath(mConnectionCallback);
                 mConnectionWrapper = null;
+                // The connection is still connecting so it is no need to reset the
+                // connection state to disconnected.
+                // TODO b/220086369 will reset the connection immediately when requestConnection
+                //  is called
+                if (mConnectionState != CONNECTING) {
+                    setConnectionState(DISCONNECTED);
+                }
             }
             if (connection != null) {
                 mConnectionWrapper = new WindowMagnificationConnectionWrapper(connection, mTrace);
@@ -199,9 +233,13 @@ public class WindowMagnificationManager implements
                     mConnectionCallback = new ConnectionCallback();
                     mConnectionWrapper.linkToDeath(mConnectionCallback);
                     mConnectionWrapper.setConnectionCallback(mConnectionCallback);
+                    setConnectionState(CONNECTED);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "setConnection failed", e);
                     mConnectionWrapper = null;
+                    setConnectionState(DISCONNECTED);
+                } finally {
+                    mLock.notify();
                 }
             }
         }
@@ -229,10 +267,20 @@ public class WindowMagnificationManager implements
         if (DBG) {
             Slog.d(TAG, "requestConnection :" + connect);
         }
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".requestWindowMagnificationConnection",
+                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "connect=" + connect);
+        }
         synchronized (mLock) {
-            if (connect == isConnected()) {
+            if ((connect && (mConnectionState == CONNECTED || mConnectionState == CONNECTING))
+                    || (!connect && (mConnectionState == DISCONNECTED
+                    || mConnectionState == DISCONNECTING))) {
+                Slog.w(TAG,
+                        "requestConnection duplicated request: connect=" + connect
+                                + " ,mConnectionState=" + mConnectionState);
                 return false;
             }
+
             if (connect) {
                 final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 if (!mReceiverRegistered) {
@@ -247,19 +295,42 @@ public class WindowMagnificationManager implements
                 }
             }
         }
-        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
-            mTrace.logTrace(TAG + ".requestWindowMagnificationConnection",
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "connect=" + connect);
+        if (requestConnectionInternal(connect)) {
+            setConnectionState(connect ? CONNECTING : DISCONNECTING);
+            return true;
+        } else {
+            setConnectionState(DISCONNECTED);
+            return false;
         }
+    }
+
+    private boolean requestConnectionInternal(boolean connect) {
         final long identity = Binder.clearCallingIdentity();
         try {
             final StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
-            service.requestWindowMagnificationConnection(connect);
+            if (service != null) {
+                return service.requestWindowMagnificationConnection(connect);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return true;
+        return false;
+    }
+
+    /**
+     * Returns window magnification connection state.
+     */
+    public int getConnectionState() {
+        return mConnectionState;
+    }
+
+    private void setConnectionState(@ConnectionState int state) {
+        if (DBG) {
+            Slog.d(TAG, "setConnectionState : state=" + state + " ,mConnectionState="
+                    + mConnectionState);
+        }
+        mConnectionState = state;
     }
 
     /**
@@ -314,9 +385,13 @@ public class WindowMagnificationManager implements
         float toCenterX = (float) (left + right) / 2;
         float toCenterY = (float) (top + bottom) / 2;
 
-        if (!isPositionInSourceBounds(displayId, toCenterX, toCenterY)
-                && isTrackingTypingFocusEnabled(displayId)) {
-            enableWindowMagnification(displayId, Float.NaN, toCenterX, toCenterY);
+        synchronized (mLock) {
+            if (mIsImeVisibleArray.get(displayId, false)
+                    && !isPositionInSourceBounds(displayId, toCenterX, toCenterY)
+                    && isTrackingTypingFocusEnabled(displayId)) {
+                moveWindowMagnifierToPositionInternal(displayId, toCenterX, toCenterY,
+                        STUB_ANIMATION_CALLBACK);
+            }
         }
     }
 
@@ -357,7 +432,7 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @param trackingTypingFocusEnabled Enabled or disable the function of tracking typing focus.
      */
-    private void setTrackingTypingFocusEnabled(int displayId, boolean trackingTypingFocusEnabled) {
+    void setTrackingTypingFocusEnabled(int displayId, boolean trackingTypingFocusEnabled) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
             if (magnifier == null) {
@@ -384,7 +459,8 @@ public class WindowMagnificationManager implements
      *
      * @param shown {@code true} means the IME window shows on the screen. Otherwise, it's hidden.
      */
-    void onImeWindowVisibilityChanged(boolean shown) {
+    void onImeWindowVisibilityChanged(int displayId, boolean shown) {
+        mIsImeVisibleArray.put(displayId, shown);
         if (shown) {
             enableAllTrackingTypingFocus();
         }
@@ -500,8 +576,11 @@ public class WindowMagnificationManager implements
                     animationCallback, windowPosition, id);
         }
 
-        if (enabled && !previousEnabled) {
-            mCallback.onWindowMagnificationActivationState(displayId, true);
+        if (enabled) {
+            setTrackingTypingFocusEnabled(displayId, true);
+            if (!previousEnabled) {
+                mCallback.onWindowMagnificationActivationState(displayId, true);
+            }
         }
         return enabled;
     }
@@ -563,14 +642,13 @@ public class WindowMagnificationManager implements
         }
     }
 
+    @GuardedBy("mLock")
     boolean isPositionInSourceBounds(int displayId, float x, float y) {
-        synchronized (mLock) {
-            WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
-            if (magnifier == null) {
-                return false;
-            }
-            return magnifier.isPositionInSourceBounds(x, y);
+        WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
+        if (magnifier == null) {
+            return false;
         }
+        return magnifier.isPositionInSourceBounds(x, y);
     }
 
     /**
@@ -829,10 +907,10 @@ public class WindowMagnificationManager implements
         }
 
         @Override
-        public void onDrag(int displayId) {
+        public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
                     FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
-                mTrace.logTrace(TAG + "ConnectionCallback.onDrag",
+                mTrace.logTrace(TAG + "ConnectionCallback.onMove",
                         FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId);
             }
@@ -849,6 +927,7 @@ public class WindowMagnificationManager implements
                 mConnectionWrapper.unlinkToDeath(this);
                 mConnectionWrapper = null;
                 mConnectionCallback = null;
+                setConnectionState(DISCONNECTED);
                 resetWindowMagnifiers();
             }
         }
@@ -884,7 +963,6 @@ public class WindowMagnificationManager implements
             mWindowMagnificationManager = windowMagnificationManager;
         }
 
-        @GuardedBy("mLock")
         boolean enableWindowMagnificationInternal(float scale, float centerX, float centerY,
                 @Nullable MagnificationAnimationCallback animationCallback,
                 @WindowPosition int windowPosition, int id) {
@@ -962,7 +1040,6 @@ public class WindowMagnificationManager implements
             return mIdOfLastServiceToControl;
         }
 
-        @GuardedBy("mLock")
         int pointersInWindow(MotionEvent motionEvent) {
             int count = 0;
             final int pointerCount = motionEvent.getPointerCount();
@@ -1025,11 +1102,22 @@ public class WindowMagnificationManager implements
             float centerY, float magnificationFrameOffsetRatioX,
             float magnificationFrameOffsetRatioY,
             MagnificationAnimationCallback animationCallback) {
+        // Wait for the connection with a timeout.
+        final long endMillis = SystemClock.uptimeMillis() + WAIT_CONNECTION_TIMEOUT_MILLIS;
+        while (mConnectionState == CONNECTING && (SystemClock.uptimeMillis() < endMillis)) {
+            try {
+                mLock.wait(endMillis - SystemClock.uptimeMillis());
+            } catch (InterruptedException ie) {
+                /* ignore */
+            }
+        }
         if (mConnectionWrapper == null) {
-            Slog.w(TAG, "enableWindowMagnificationInternal mConnectionWrapper is null");
+            Slog.w(TAG,
+                    "enableWindowMagnificationInternal mConnectionWrapper is null. "
+                            + "mConnectionState=" + mConnectionState);
             return false;
         }
-        return  mConnectionWrapper.enableWindowMagnification(
+        return mConnectionWrapper.enableWindowMagnification(
                 displayId, scale, centerX, centerY,
                 magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY,
                 animationCallback);
@@ -1050,8 +1138,16 @@ public class WindowMagnificationManager implements
                 displayId, animationCallback);
     }
 
+    @GuardedBy("mLock")
     private boolean moveWindowMagnifierInternal(int displayId, float offsetX, float offsetY) {
         return mConnectionWrapper != null && mConnectionWrapper.moveWindowMagnifier(
                 displayId, offsetX, offsetY);
+    }
+
+    @GuardedBy("mLock")
+    private boolean moveWindowMagnifierToPositionInternal(int displayId, float positionX,
+            float positionY, MagnificationAnimationCallback animationCallback) {
+        return mConnectionWrapper != null && mConnectionWrapper.moveWindowMagnifierToPosition(
+                displayId, positionX, positionY, animationCallback);
     }
 }

@@ -446,6 +446,7 @@ message WindowStateProto {
     optional bool has_compat_scale = 43;
     optional float global_scale = 44;
     repeated .android.graphics.RectProto keep_clear_areas = 45;
+    repeated .android.graphics.RectProto unrestricted_keep_clear_areas = 46;
 }
 
 message IdentifierProto {

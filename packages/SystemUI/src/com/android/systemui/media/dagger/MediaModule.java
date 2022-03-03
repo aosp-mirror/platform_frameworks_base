@@ -17,6 +17,9 @@
 package com.android.systemui.media.dagger;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.dagger.MediaTttReceiverLogBuffer;
+import com.android.systemui.log.dagger.MediaTttSenderLogBuffer;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -27,8 +30,11 @@ import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
+import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger;
 
 import java.util.Optional;
 
@@ -110,6 +116,24 @@ public interface MediaModule {
             return Optional.empty();
         }
         return Optional.of(controllerReceiverLazy.get());
+    }
+
+    @Provides
+    @SysUISingleton
+    @MediaTttSenderLogger
+    static MediaTttLogger providesMediaTttSenderLogger(
+            @MediaTttSenderLogBuffer LogBuffer buffer
+    ) {
+        return new MediaTttLogger("Sender", buffer);
+    }
+
+    @Provides
+    @SysUISingleton
+    @MediaTttReceiverLogger
+    static MediaTttLogger providesMediaTttReceiverLogger(
+            @MediaTttReceiverLogBuffer LogBuffer buffer
+    ) {
+        return new MediaTttLogger("Receiver", buffer);
     }
 
     /** */

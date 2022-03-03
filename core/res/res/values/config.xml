@@ -2113,7 +2113,7 @@
         TODO(b/189347385) make this a @SystemAPI -->
     <string name="config_systemTelevisionRemoteService" translatable="false">@string/config_tvRemoteServicePackage</string>
     <!-- The name of the package that will hold the device management role -->
-    <string name="config_deviceManager" translatable="false"></string>
+    <string name="config_devicePolicyManagement" translatable="false"></string>
     <!-- The name of the package that will hold the app protection service role. -->
     <string name="config_systemAppProtectionService" translatable="false"></string>
     <!-- The name of the package that will hold the system calendar sync manager role. -->
@@ -2122,7 +2122,7 @@
     <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
-    <string name="config_deviceManagerUpdater" translatable="false"></string>
+    <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
@@ -4130,9 +4130,9 @@
           This service must be trusted, as it can be activated without explicit consent of the user.
           If no service with the specified name exists on the device, cloudsearch will be disabled.
           Example: "com.android.intelligence/.CloudSearchService"
-          config_defaultCloudSearchService is for the single provider case.
+          config_defaultCloudSearchServices is for the multiple provider case.
     -->
-    <string name="config_defaultCloudSearchService" translatable="false"></string>
+    <string-array name="config_defaultCloudSearchServices"></string-array>
 
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.

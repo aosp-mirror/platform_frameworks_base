@@ -125,7 +125,7 @@ interface IStatusBarService
             int multiSensorConfig);
 
     // Used to notify the authentication dialog that a biometric has been authenticated
-    void onBiometricAuthenticated();
+    void onBiometricAuthenticated(int modality);
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(int modality, String message);
     // Used to show an error - the dialog will dismiss after a certain amount of time

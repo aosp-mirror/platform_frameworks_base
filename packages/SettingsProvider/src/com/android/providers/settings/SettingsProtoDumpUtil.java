@@ -2253,8 +2253,11 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
 
         dumpSetting(s, p,
+                Settings.Secure.NAV_BAR_FORCE_VISIBLE,
+                SecureSettingsProto.NavBar.NAV_BAR_FORCE_VISIBLE);
+        dumpSetting(s, p,
                 Settings.Secure.NAV_BAR_KIDS_MODE,
-                SecureSettingsProto.NAV_BAR_KIDS_MODE);
+                SecureSettingsProto.NavBar.NAV_BAR_KIDS_MODE);
 
         dumpSetting(s, p,
                 Settings.Secure.NAVIGATION_MODE,

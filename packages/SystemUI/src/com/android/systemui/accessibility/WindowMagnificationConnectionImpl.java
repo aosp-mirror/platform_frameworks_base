@@ -77,6 +77,13 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
+    public void moveWindowMagnifierToPosition(int displayId, float positionX, float positionY,
+            IRemoteMagnificationAnimationCallback callback) {
+        mHandler.post(() -> mWindowMagnification.moveWindowMagnifierToPositionInternal(
+                displayId, positionX, positionY, callback));
+    }
+
+    @Override
     public void showMagnificationButton(int displayId, int magnificationMode) {
         mHandler.post(
                 () -> mModeSwitchesController.showButton(displayId, magnificationMode));
@@ -143,10 +150,10 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
         }
     }
 
-    void onDrag(int displayId) {
+    void onMove(int displayId) {
         if (mConnectionCallback != null) {
             try {
-                mConnectionCallback.onDrag(displayId);
+                mConnectionCallback.onMove(displayId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to inform taking control by a user", e);
             }

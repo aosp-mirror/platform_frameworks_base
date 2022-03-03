@@ -24,8 +24,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
@@ -475,33 +473,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
-    /** Returns true if this container is currently in split-screen windowing mode. */
-    public boolean inSplitScreenWindowingMode() {
-        /*@WindowConfiguration.WindowingMode*/ int windowingMode =
-                mFullConfiguration.windowConfiguration.getWindowingMode();
-
-        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-    }
-
-    /** Returns true if this container is currently in split-screen secondary windowing mode. */
-    public boolean inSplitScreenSecondaryWindowingMode() {
-        /*@WindowConfiguration.WindowingMode*/ int windowingMode =
-                mFullConfiguration.windowConfiguration.getWindowingMode();
-
-        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-    }
-
-    public boolean inSplitScreenPrimaryWindowingMode() {
-        return mFullConfiguration.windowConfiguration.getWindowingMode()
-                == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-    }
-
     /**
-     * Returns true if this container can be put in either
-     * {@link WindowConfiguration#WINDOWING_MODE_SPLIT_SCREEN_PRIMARY} or
-     * {@link WindowConfiguration##WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} windowing modes based on
-     * its current state.
+     * Returns true if this container supports split-screen multi-window and can be put in
+     * split-screen based on its current state.
      */
     public boolean supportsSplitScreenWindowingMode() {
         return mFullConfiguration.windowConfiguration.supportSplitScreenWindowingMode();

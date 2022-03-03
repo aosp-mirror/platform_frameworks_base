@@ -416,7 +416,7 @@ package android {
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultSms = 17039396; // 0x1040024
-    field public static final int config_deviceManager;
+    field public static final int config_devicePolicyManagement;
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
     field public static final int config_helpIntentExtraKey = 17039389; // 0x104001d
@@ -10524,6 +10524,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -15700,6 +15701,11 @@ package android.util {
 }
 
 package android.view {
+
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @NonNull public final java.util.List<android.graphics.Rect> getUnrestrictedPreferKeepClearRects();
+    method @RequiresPermission(android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS) public final void setUnrestrictedPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
+  }
 
   public abstract class Window {
     method public void addSystemFlags(@android.view.WindowManager.LayoutParams.SystemFlags int);

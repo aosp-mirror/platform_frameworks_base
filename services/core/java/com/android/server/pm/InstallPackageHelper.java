@@ -2893,9 +2893,13 @@ final class InstallPackageHelper {
             }
         }
 
-        final boolean deferInstallObserver = succeeded && update && !killApp;
+        final boolean deferInstallObserver = succeeded && update;
         if (deferInstallObserver) {
-            mPm.scheduleDeferredNoKillInstallObserver(res, installObserver);
+            if (killApp) {
+                mPm.scheduleDeferredPendingKillInstallObserver(res, installObserver);
+            } else {
+                mPm.scheduleDeferredNoKillInstallObserver(res, installObserver);
+            }
         } else {
             mPm.notifyInstallObserver(res, installObserver);
         }

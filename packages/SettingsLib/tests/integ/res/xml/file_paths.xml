@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
   ~ limitations under the License.
   -->
 
-<com.android.systemui.biometrics.AuthBiometricFaceToFingerprintView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <include layout="@layout/auth_biometric_contents"/>
-
-</com.android.systemui.biometrics.AuthBiometricFaceToFingerprintView>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Offer access to files under Context.getCacheDir() -->
+    <cache-path name="my_cache" />
+</paths>

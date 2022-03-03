@@ -2161,8 +2161,8 @@ public class ComputerEngine implements Computer {
     private String[] getPackagesForUidInternal(int uid, int callingUid) {
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int appId = UserHandle.getAppId(uid);
         return getPackagesForUidInternalBody(callingUid, userId, appId, isCallerInstantApp);
@@ -2401,9 +2401,9 @@ public class ComputerEngine implements Computer {
     }
 
     public final boolean isCallerSameApp(String packageName, int uid) {
-        if (Process.isSupplemental(uid)) {
+        if (Process.isSdkSandboxUid(uid)) {
             return (packageName != null
-                    && packageName.equals(mService.getSupplementalProcessPackageName()));
+                    && packageName.equals(mService.getSdkSandboxPackageName()));
         }
         AndroidPackage pkg = mPackages.get(packageName);
         return pkg != null
@@ -2812,8 +2812,8 @@ public class ComputerEngine implements Computer {
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission");
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0
                 && isCallerSystemUser
-                && mUserManager.hasManagedProfile(UserHandle.USER_SYSTEM)) {
-            // If the caller wants all packages and has a restricted profile associated with it,
+                && mUserManager.hasProfile(UserHandle.USER_SYSTEM)) {
+            // If the caller wants all packages and has a profile associated with it,
             // then match all users. This is to make sure that launchers that need to access
             //work
             // profile apps don't start breaking. TODO: Remove this hack when launchers stop
@@ -4326,8 +4326,8 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
@@ -4362,8 +4362,8 @@ public class ComputerEngine implements Computer {
         final String[] names = new String[uids.length];
         for (int i = uids.length - 1; i >= 0; i--) {
             int uid = uids[i];
-            if (Process.isSupplemental(uid)) {
-                uid = getSupplementalProcessUid();
+            if (Process.isSdkSandboxUid(uid)) {
+                uid = getBaseSdkSandboxUid();
             }
             final int appId = UserHandle.getAppId(uid);
             final Object obj = mSettings.getSettingBase(appId);
@@ -4411,8 +4411,8 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
@@ -4439,8 +4439,8 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
@@ -4466,8 +4466,8 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
         }
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -5597,8 +5597,8 @@ public class ComputerEngine implements Computer {
 
     @Override
     public int getUidTargetSdkVersion(int uid) {
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int appId = UserHandle.getAppId(uid);
         final SettingBase settingBase = mSettings.getSettingBase(appId);
@@ -5628,8 +5628,8 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ArrayMap<String, ProcessInfo> getProcessesForUid(int uid) {
-        if (Process.isSupplemental(uid)) {
-            uid = getSupplementalProcessUid();
+        if (Process.isSdkSandboxUid(uid)) {
+            uid = getBaseSdkSandboxUid();
         }
         final int appId = UserHandle.getAppId(uid);
         final SettingBase settingBase = mSettings.getSettingBase(appId);
@@ -5661,8 +5661,8 @@ public class ComputerEngine implements Computer {
         }
     }
 
-    private int getSupplementalProcessUid() {
-        return getPackage(mService.getSupplementalProcessPackageName()).getUid();
+    private int getBaseSdkSandboxUid() {
+        return getPackage(mService.getSdkSandboxPackageName()).getUid();
     }
 
     @Nullable

@@ -144,6 +144,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -2915,48 +2916,17 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     @SuppressWarnings("unused")
-    private void notifyWindowUnresponsive(IBinder token, String reason) {
-        int gestureMonitorPid = -1;
-        synchronized (mInputMonitors) {
-            final GestureMonitorSpyWindow gestureMonitor = mInputMonitors.get(token);
-            if (gestureMonitor != null) {
-                gestureMonitorPid = gestureMonitor.mWindowHandle.ownerPid;
-            }
-        }
-        if (gestureMonitorPid != -1) {
-            mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(gestureMonitorPid, reason);
-            return;
-        }
-        mWindowManagerCallbacks.notifyWindowUnresponsive(token, reason);
+    private void notifyWindowUnresponsive(IBinder token, int pid, boolean isPidValid,
+            String reason) {
+        mWindowManagerCallbacks.notifyWindowUnresponsive(token,
+                isPidValid ? OptionalInt.of(pid) : OptionalInt.empty(), reason);
     }
 
     // Native callback
     @SuppressWarnings("unused")
-    private void notifyMonitorUnresponsive(int pid, String reason) {
-        mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(pid, reason);
-    }
-
-    // Native callback
-    @SuppressWarnings("unused")
-    private void notifyWindowResponsive(IBinder token) {
-        int gestureMonitorPid = -1;
-        synchronized (mInputMonitors) {
-            final GestureMonitorSpyWindow gestureMonitor = mInputMonitors.get(token);
-            if (gestureMonitor != null) {
-                gestureMonitorPid = gestureMonitor.mWindowHandle.ownerPid;
-            }
-        }
-        if (gestureMonitorPid != -1) {
-            mWindowManagerCallbacks.notifyGestureMonitorResponsive(gestureMonitorPid);
-            return;
-        }
-        mWindowManagerCallbacks.notifyWindowResponsive(token);
-    }
-
-    // Native callback
-    @SuppressWarnings("unused")
-    private void notifyMonitorResponsive(int pid) {
-        mWindowManagerCallbacks.notifyGestureMonitorResponsive(pid);
+    private void notifyWindowResponsive(IBinder token, int pid, boolean isPidValid) {
+        mWindowManagerCallbacks.notifyWindowResponsive(token,
+                isPidValid ? OptionalInt.of(pid) : OptionalInt.empty());
     }
 
     // Native callback.
@@ -3329,34 +3299,22 @@ public class InputManagerService extends IInputManager.Stub
         void notifyNoFocusedWindowAnr(InputApplicationHandle applicationHandle);
 
         /**
-         * Notify the window manager about a gesture monitor that is unresponsive.
-         *
-         * @param pid the pid of the gesture monitor process
-         * @param reason the reason why this connection is unresponsive
-         */
-        void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason);
-
-        /**
          * Notify the window manager about a window that is unresponsive.
          *
          * @param token the token that can be used to look up the window
+         * @param pid the pid of the window owner, if known
          * @param reason the reason why this connection is unresponsive
          */
-        void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull String reason);
-
-        /**
-         * Notify the window manager about a gesture monitor that has become responsive.
-         *
-         * @param pid the pid of the gesture monitor process
-         */
-        void notifyGestureMonitorResponsive(int pid);
+        void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+                @NonNull String reason);
 
         /**
          * Notify the window manager about a window that has become responsive.
          *
          * @param token the token that can be used to look up the window
+         * @param pid the pid of the window owner, if known
          */
-        void notifyWindowResponsive(@NonNull IBinder token);
+        void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid);
 
         /**
          * This callback is invoked when an event first arrives to InputDispatcher and before it is

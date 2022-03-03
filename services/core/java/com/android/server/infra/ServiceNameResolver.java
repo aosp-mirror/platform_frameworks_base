@@ -34,7 +34,7 @@ public interface ServiceNameResolver {
     /**
      * Listener for name changes.
      */
-    public interface NameResolverListener {
+    interface NameResolverListener {
 
         /**
          * The name change callback.
@@ -64,6 +64,30 @@ public interface ServiceNameResolver {
     String getDefaultServiceName(@UserIdInt int userId);
 
     /**
+     * Gets the default list of names of the services for the given user.
+     *
+     * <p>Typically implemented by reading a Settings property or framework resource.
+     */
+    @Nullable
+    default String[] getDefaultServiceNameList(@UserIdInt int userId) {
+        if (isConfiguredInMultipleMode()) {
+            throw new UnsupportedOperationException("getting default service list not supported");
+        } else {
+            return new String[] { getDefaultServiceName(userId) };
+        }
+    }
+
+    /**
+     * Returns whether the resolver is configured to connect to multiple backend services.
+     * The default return type is false.
+     *
+     * <p>Typically implemented by reading a Settings property or framework resource.
+     */
+    default boolean isConfiguredInMultipleMode() {
+        return false;
+    }
+
+    /**
      * Gets the current name of the service for the given user
      *
      * @return either the temporary name (set by
@@ -76,6 +100,18 @@ public interface ServiceNameResolver {
     }
 
     /**
+     * Gets the current name of the service for the given user
+     *
+     * @return either the temporary name (set by
+     * {@link #setTemporaryService(int, String, int)}, or the
+     * {@link #getDefaultServiceName(int) default name}.
+     */
+    @Nullable
+    default String[] getServiceNameList(@UserIdInt int userId) {
+        return getDefaultServiceNameList(userId);
+    }
+
+    /**
      * Checks whether the current service is temporary for the given user.
      */
     default boolean isTemporary(@SuppressWarnings("unused") @UserIdInt int userId) {
@@ -85,11 +121,11 @@ public interface ServiceNameResolver {
     /**
      * Temporarily sets the service implementation for the given user.
      *
-     * @param userId user handle
+     * @param userId        user handle
      * @param componentName name of the new component
-     * @param durationMs how long the change will be valid (the service will be automatically reset
-     *            to the default component after this timeout expires).
-     *
+     * @param durationMs    how long the change will be valid (the service will be automatically
+     *                      reset
+     *                      to the default component after this timeout expires).
      * @throws UnsupportedOperationException if not implemented.
      */
     default void setTemporaryService(@UserIdInt int userId, @NonNull String componentName,
@@ -98,10 +134,24 @@ public interface ServiceNameResolver {
     }
 
     /**
+     * Temporarily sets the service implementation for the given user.
+     *
+     * @param userId         user handle
+     * @param componentNames list of the names of the new component
+     * @param durationMs     how long the change will be valid (the service will be automatically
+     *                       reset
+     *                       to the default component after this timeout expires).
+     * @throws UnsupportedOperationException if not implemented.
+     */
+    default void setTemporaryServices(@UserIdInt int userId, @NonNull String[] componentNames,
+            int durationMs) {
+        throw new UnsupportedOperationException("temporary user not supported");
+    }
+
+    /**
      * Resets the temporary service implementation to the default component for the given user.
      *
      * @param userId user handle
-     *
      * @throws UnsupportedOperationException if not implemented.
      */
     default void resetTemporaryService(@UserIdInt int userId) {
@@ -114,11 +164,11 @@ public interface ServiceNameResolver {
      * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
      * with the test results.
      *
-     * @param userId user handle
+     * @param userId  user handle
      * @param enabled whether the default service should be used when the temporary service is not
-     * set. If the service enabled state is already that value, the command is ignored and this
-     * method return {@code false}.
-     *
+     *                set. If the service enabled state is already that value, the command is
+     *                ignored and this
+     *                method return {@code false}.
      * @return whether the enabled state changed.
      * @throws UnsupportedOperationException if not implemented.
      */
@@ -133,7 +183,6 @@ public interface ServiceNameResolver {
      * with the test results.
      *
      * @param userId user handle
-     *
      * @throws UnsupportedOperationException if not implemented.
      */
     default boolean isDefaultServiceEnabled(@UserIdInt int userId) {

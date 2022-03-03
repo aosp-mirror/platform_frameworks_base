@@ -39,9 +39,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -137,13 +139,14 @@ public class SystemConfigTest {
                 new ArraySet<>(Arrays.asList("GUEST", "PROFILE")));
 
         final File folder1 = createTempSubfolder("folder1");
-        createTempFile(folder1, "permFile1.xml", contents1);
+        createTempFile(folder1, "permissionFile1.xml", contents1);
 
         final File folder2 = createTempSubfolder("folder2");
-        createTempFile(folder2, "permFile2.xml", contents2);
+        createTempFile(folder2, "permissionFile2.xml", contents2);
 
-        // Also, make a third file, but with the name folder1/permFile2.xml, to prove no conflicts.
-        createTempFile(folder1, "permFile2.xml", contents3);
+        // Also, make a third file, but with the name folder1/permissionFile2.xml, to prove no
+        // conflicts.
+        createTempFile(folder1, "permissionFile2.xml", contents3);
 
         readPermissions(folder1, /* No permission needed anyway */ 0);
         readPermissions(folder2, /* No permission needed anyway */ 0);
@@ -333,6 +336,91 @@ public class SystemConfigTest {
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
 
+    @Test
+    public void readApexPrivAppPermissions_addAllPermissions()
+            throws Exception {
+        final String contents =
+                "<privapp-permissions package=\"com.android.apk_in_apex\">"
+                        + "<permission name=\"android.permission.FOO\"/>"
+                        + "<deny-permission name=\"android.permission.BAR\"/>"
+                        + "</privapp-permissions>";
+        File apexDir = createTempSubfolder("apex");
+        File permissionFile = createTempFile(
+                createTempSubfolder("apex/com.android.my_module/etc/permissions"),
+                    "permissions.xml", contents);
+        XmlPullParser parser = readXmlUntilStartTag(permissionFile);
+
+        mSysConfig.readApexPrivAppPermissions(parser, permissionFile, apexDir.toPath());
+
+        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.my_module",
+                "com.android.apk_in_apex"))
+            .containsExactly("android.permission.FOO");
+        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.my_module",
+                "com.android.apk_in_apex"))
+            .containsExactly("android.permission.BAR");
+    }
+
+    @Test
+    public void pruneVendorApexPrivappAllowlists_removeVendor()
+            throws Exception {
+        File apexDir = createTempSubfolder("apex");
+
+        // Read non-vendor apex permission allowlists
+        final String allowlistNonVendorContents =
+                "<privapp-permissions package=\"com.android.apk_in_non_vendor_apex\">"
+                        + "<permission name=\"android.permission.FOO\"/>"
+                        + "<deny-permission name=\"android.permission.BAR\"/>"
+                        + "</privapp-permissions>";
+        File nonVendorPermDir =
+                createTempSubfolder("apex/com.android.non_vendor/etc/permissions");
+        File nonVendorPermissionFile =
+                createTempFile(nonVendorPermDir, "permissions.xml", allowlistNonVendorContents);
+        XmlPullParser nonVendorParser = readXmlUntilStartTag(nonVendorPermissionFile);
+        mSysConfig.readApexPrivAppPermissions(nonVendorParser, nonVendorPermissionFile,
+                apexDir.toPath());
+
+        // Read vendor apex permission allowlists
+        final String allowlistVendorContents =
+                "<privapp-permissions package=\"com.android.apk_in_vendor_apex\">"
+                        + "<permission name=\"android.permission.BAZ\"/>"
+                        + "<deny-permission name=\"android.permission.BAT\"/>"
+                        + "</privapp-permissions>";
+        File vendorPermissionFile =
+                createTempFile(createTempSubfolder("apex/com.android.vendor/etc/permissions"),
+                        "permissions.xml", allowlistNonVendorContents);
+        XmlPullParser vendorParser = readXmlUntilStartTag(vendorPermissionFile);
+        mSysConfig.readApexPrivAppPermissions(vendorParser, vendorPermissionFile,
+                apexDir.toPath());
+
+        // Read allowed vendor apex list
+        final String allowedVendorContents =
+                "<config>\n"
+                        + "    <allowed-vendor-apex package=\"com.android.vendor\" "
+                        + "installerPackage=\"com.installer\" />\n"
+                        + "</config>";
+        final File allowedVendorFolder = createTempSubfolder("folder");
+        createTempFile(allowedVendorFolder, "vendor-apex-allowlist.xml", allowedVendorContents);
+        readPermissions(allowedVendorFolder, /* Grant all permission flags */ ~0);
+
+        // Finally, prune non-vendor allowlists.
+        // There is no guarantee in which order the above reads will be done, however pruning
+        // will always happen last.
+        mSysConfig.pruneVendorApexPrivappAllowlists();
+
+        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.non_vendor",
+                "com.android.apk_in_non_vendor_apex"))
+            .containsExactly("android.permission.FOO");
+        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.non_vendor",
+                "com.android.apk_in_non_vendor_apex"))
+            .containsExactly("android.permission.BAR");
+        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.vendor",
+                "com.android.apk_in_vendor_apex"))
+            .isNull();
+        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.vendor",
+                "com.android.apk_in_vendor_apex"))
+            .isNull();
+    }
+
     /**
      * Tests that readPermissions works correctly for a library with on-bootclasspath-before
      * and on-bootclasspath-since.
@@ -492,6 +580,25 @@ public class SystemConfigTest {
     }
 
     /**
+     * Create an {@link XmlPullParser} for {@param permissionFile} and begin parsing it until
+     * reaching the root tag.
+     */
+    private XmlPullParser readXmlUntilStartTag(File permissionFile)
+            throws IOException, XmlPullParserException {
+        FileReader permReader = new FileReader(permissionFile);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(permReader);
+        int type;
+        do {
+            type = parser.next();
+        } while (type != parser.START_TAG && type != parser.END_DOCUMENT);
+        if (type != parser.START_TAG) {
+            throw new XmlPullParserException("No start tag found");
+        }
+        return parser;
+    }
+
+    /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
      *
      * @param folderName subdirectory of mTemporaryFolder to put the file, creating if needed
@@ -500,7 +607,7 @@ public class SystemConfigTest {
     private File createTempSubfolder(String folderName)
             throws IOException {
         File folder = new File(mTemporaryFolder.getRoot(), folderName);
-        folder.mkdir();
+        folder.mkdirs();
         return folder;
     }
 

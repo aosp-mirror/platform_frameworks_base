@@ -657,6 +657,11 @@ public abstract class PackageManagerInternal {
     public abstract void notifyPackageUse(String packageName, int reason);
 
     /**
+     * Notify the package is force stopped.
+     */
+    public abstract void onPackageProcessKilledForUninstall(String packageName);
+
+    /**
      * Returns a package object for the given package name.
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);

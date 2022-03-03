@@ -154,6 +154,7 @@ public class AccessibilityManagerServiceTest {
                 mMockWindowMagnificationMgr);
         when(mMockMagnificationController.getFullScreenMagnificationController()).thenReturn(
                 mMockFullScreenMagnificationController);
+        when(mMockMagnificationController.supportWindowMagnification()).thenReturn(true);
         when(mMockWindowManagerService.getAccessibilityController()).thenReturn(
                 mMockA11yController);
         when(mMockA11yController.isAccessibilityTracingEnabled()).thenReturn(false);

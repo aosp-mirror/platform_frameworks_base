@@ -30,6 +30,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 
 import static org.junit.Assert.assertEquals;
 
@@ -327,6 +328,23 @@ public class WindowLayoutTests {
         assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mDisplayFrame);
         assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mParentFrame);
         assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrame);
+    }
+
+    @Test
+    public void layoutExtendedToDisplayCutout() {
+        addDisplayCutout();
+        final int height = DISPLAY_HEIGHT / 2;
+        mRequestedHeight = UNSPECIFIED_LENGTH;
+        mAttrs.height = height;
+        mAttrs.gravity = Gravity.TOP;
+        mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mAttrs.setFitInsetsTypes(0);
+        mAttrs.privateFlags |= PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+        computeFrames();
+
+        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayFrame);
+        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mParentFrame);
+        assertRect(0, 0, DISPLAY_WIDTH, height + DISPLAY_CUTOUT_HEIGHT, mFrame);
     }
 
     @Test
