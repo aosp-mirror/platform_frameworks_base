@@ -402,7 +402,7 @@ public class SliceManagerService extends ISliceManager.Stub {
             String providerName = getUriWithoutUserId(uri).getAuthority();
             ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
                     providerName, 0, getUserIdFromUri(uri, user));
-            return provider.packageName;
+            return provider == null ? null : provider.packageName;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -627,7 +627,7 @@ public class SliceManagerService extends ISliceManager.Stub {
                 .scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority)
                 .build(), 0);
-        return mPermissions.getAllPackagesGranted(pkg);
+        return pkg == null ? new String[0] : mPermissions.getAllPackagesGranted(pkg);
     }
 
     /**
