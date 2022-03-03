@@ -2535,33 +2535,38 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
 
+        Collection<String> uidRequestedPermissions;
+        Collection<String> uidImplicitPermissions;
+        int uidTargetSdkVersion;
+        if (!ps.hasSharedUser()) {
+            uidRequestedPermissions = pkg.getRequestedPermissions();
+            uidImplicitPermissions = pkg.getImplicitPermissions();
+            uidTargetSdkVersion = pkg.getTargetSdkVersion();
+        } else {
+            uidRequestedPermissions = new ArraySet<>();
+            uidImplicitPermissions = new ArraySet<>();
+            uidTargetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+            final ArraySet<PackageStateInternal> packages =
+                    mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId());
+            int packagesSize = packages.size();
+            for (int i = 0; i < packagesSize; i++) {
+                AndroidPackageApi sharedUserPackage =
+                        packages.valueAt(i).getAndroidPackage();
+                uidRequestedPermissions.addAll(
+                        sharedUserPackage.getRequestedPermissions());
+                uidImplicitPermissions.addAll(
+                        sharedUserPackage.getImplicitPermissions());
+                uidTargetSdkVersion = Math.min(uidTargetSdkVersion,
+                        sharedUserPackage.getTargetSdkVersion());
+            }
+        }
+
         synchronized (mLock) {
             for (final int userId : userIds) {
                 final UserPermissionState userState = mState.getOrCreateUserState(userId);
                 final UidPermissionState uidState = userState.getOrCreateUidState(ps.getAppId());
 
                 if (uidState.isMissing()) {
-                    Collection<String> uidRequestedPermissions;
-                    int targetSdkVersion;
-                    if (!ps.hasSharedUser()) {
-                        uidRequestedPermissions = pkg.getRequestedPermissions();
-                        targetSdkVersion = pkg.getTargetSdkVersion();
-                    } else {
-                        uidRequestedPermissions = new ArraySet<>();
-                        targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-                        final ArraySet<PackageStateInternal> packages =
-                                mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId());
-                        int packagesSize = packages.size();
-                        for (int i = 0; i < packagesSize; i++) {
-                            AndroidPackageApi sharedUserPackage =
-                                    packages.valueAt(i).getAndroidPackage();
-                            uidRequestedPermissions.addAll(
-                                    sharedUserPackage.getRequestedPermissions());
-                            targetSdkVersion = Math.min(targetSdkVersion,
-                                    sharedUserPackage.getTargetSdkVersion());
-                        }
-                    }
-
                     for (String permissionName : uidRequestedPermissions) {
                         Permission permission = mRegistry.getPermission(permissionName);
                         if (permission == null) {
@@ -2575,7 +2580,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                         FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
                                         FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT);
                             }
-                            if (targetSdkVersion < Build.VERSION_CODES.M) {
+                            if (uidTargetSdkVersion < Build.VERSION_CODES.M) {
                                 uidState.updatePermissionFlags(permission,
                                         PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
                                                 | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
@@ -2605,8 +2610,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         // the runtime ones are written only if changed. The only cases of
                         // changed runtime permissions here are promotion of an install to
                         // runtime and revocation of a runtime from a shared user.
-                        if (revokeUnusedSharedUserPermissionsLocked(
-                                mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId()),
+                        if (revokeUnusedSharedUserPermissionsLocked(uidRequestedPermissions,
                                 uidState)) {
                             updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                             runtimePermissionsRevoked = true;
@@ -2908,8 +2912,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     userState.setInstallPermissionsFixed(ps.getPackageName(), true);
                 }
 
-                updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState, pkg,
-                        userId, updatedUserIds);
+                updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState,
+                        pkg.getPackageName(), uidImplicitPermissions, uidTargetSdkVersion, userId,
+                        updatedUserIds);
                 updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origState,
                         uidState, pkg, newImplicitPermissions, userId, updatedUserIds);
             }
@@ -2946,7 +2951,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
      * {@link PackageManager#FLAG_PERMISSION_REVOKE_WHEN_REQUESTED} set.
      *
      * @param ps The state of the permissions of the package
-     * @param pkg The package that is currently looked at
+     * @param packageName The name of the package
+     * @param uidImplicitPermissions The implicit permissions of all packages in the UID
+     * @param uidTargetSdkVersion The lowest target SDK version of all packages in the UID
      * @param userIds All user IDs in the system, must be passed in because this method is locked
      * @param updatedUserIds a list of user ids that needs to be amended if the permission state
      *                       for a user is changed.
@@ -2956,14 +2963,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     @NonNull
     @GuardedBy("mLock")
     private int[] revokePermissionsNoLongerImplicitLocked(@NonNull UidPermissionState ps,
-            @NonNull AndroidPackage pkg, int userId, @NonNull int[] updatedUserIds) {
-        String pkgName = pkg.getPackageName();
-        boolean supportsRuntimePermissions = pkg.getTargetSdkVersion()
-                >= Build.VERSION_CODES.M;
+            @NonNull String packageName, @NonNull Collection<String> uidImplicitPermissions,
+            int uidTargetSdkVersion, int userId, @NonNull int[] updatedUserIds) {
+        boolean supportsRuntimePermissions = uidTargetSdkVersion >= Build.VERSION_CODES.M;
 
         for (String permission : ps.getGrantedPermissions()) {
-            if (pkg.getRequestedPermissions().contains(permission)
-                    && !pkg.getImplicitPermissions().contains(permission)) {
+            if (!uidImplicitPermissions.contains(permission)) {
                 Permission bp = mRegistry.getPermission(permission);
                 if (bp != null && bp.isRuntime()) {
                     int flags = ps.getPermissionFlags(permission);
@@ -2990,7 +2995,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             if (ps.revokePermission(bp)) {
                                 if (DEBUG_PERMISSIONS) {
                                     Slog.i(TAG, "Revoking runtime permission "
-                                            + permission + " for " + pkgName
+                                            + permission + " for " + packageName
                                             + " as it is now requested");
                                 }
                             }
@@ -3821,27 +3826,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @GuardedBy("mLock")
     private boolean revokeUnusedSharedUserPermissionsLocked(
-            ArraySet<PackageStateInternal> pkgList, UidPermissionState uidState) {
-        // Collect all used permissions in the UID
-        final ArraySet<String> usedPermissions = new ArraySet<>();
-        if (pkgList == null || pkgList.size() == 0) {
-            return false;
-        }
-        for (PackageStateInternal pkgState : pkgList) {
-            final AndroidPackageApi pkg = pkgState.getAndroidPackage();
-            if (pkg.getRequestedPermissions().isEmpty()) {
-                continue;
-            }
-            final int requestedPermCount = pkg.getRequestedPermissions().size();
-            for (int j = 0; j < requestedPermCount; j++) {
-                String permission = pkg.getRequestedPermissions().get(j);
-                Permission bp = mRegistry.getPermission(permission);
-                if (bp != null) {
-                    usedPermissions.add(permission);
-                }
-            }
-        }
-
+            @NonNull Collection<String> uidRequestedPermissions,
+            @NonNull UidPermissionState uidState) {
         boolean runtimePermissionChanged = false;
 
         // Prune permissions
@@ -3849,7 +3835,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int permissionStatesSize = permissionStates.size();
         for (int i = permissionStatesSize - 1; i >= 0; i--) {
             PermissionState permissionState = permissionStates.get(i);
-            if (!usedPermissions.contains(permissionState.getName())) {
+            if (!uidRequestedPermissions.contains(permissionState.getName())) {
                 Permission bp = mRegistry.getPermission(permissionState.getName());
                 if (bp != null) {
                     if (uidState.removePermissionState(bp.getName()) && bp.isRuntime()) {
