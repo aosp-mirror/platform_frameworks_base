@@ -186,6 +186,19 @@ public interface Complication {
     }
 
     /**
+     * The implementation of this interface is in charge of managing the visible state of
+     * the shown complication.
+     */
+    interface VisibilityController {
+        /**
+         * Called to set the visibility of all shown and future complications.
+         * @param visibility The desired future visibility.
+         * @param animate whether the change should be animated.
+         */
+        void setVisibility(@View.Visibility int visibility, boolean animate);
+    }
+
+    /**
      * Returned through {@link Complication#createView(ComplicationViewModel)}, {@link ViewHolder}
      * is a container for a single {@link Complication} instance. The {@link Host} guarantees that
      * the {@link ViewHolder} will be retained for the lifetime of the {@link Complication}

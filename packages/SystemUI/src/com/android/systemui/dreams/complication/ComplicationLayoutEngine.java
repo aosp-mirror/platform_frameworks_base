@@ -16,17 +16,23 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_IN_DURATION;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DURATION;
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN;
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
 import com.android.systemui.R;
+import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.touch.TouchInsetManager;
 
 import java.util.ArrayList;
@@ -43,7 +49,8 @@ import javax.inject.Named;
  * their layout parameters and attributes. The management of this set is done by
  * {@link ComplicationHostViewController}.
  */
-public class ComplicationLayoutEngine  {
+@DreamOverlayComponent.DreamOverlayScope
+public class ComplicationLayoutEngine implements Complication.VisibilityController {
     public static final String TAG = "ComplicationLayoutEngine";
 
     /**
@@ -454,15 +461,45 @@ public class ComplicationLayoutEngine  {
     private final HashMap<ComplicationId, ViewEntry> mEntries = new HashMap<>();
     private final HashMap<Integer, PositionGroup> mPositions = new HashMap<>();
     private final TouchInsetManager.TouchInsetSession mSession;
+    private final int mFadeInDuration;
+    private final int mFadeOutDuration;
+    private ViewPropertyAnimator mViewPropertyAnimator;
 
     /** */
     @Inject
     public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
             @Named(COMPLICATION_MARGIN) int margin,
-            TouchInsetManager.TouchInsetSession session) {
+            TouchInsetManager.TouchInsetSession session,
+            @Named(COMPLICATIONS_FADE_IN_DURATION) int fadeInDuration,
+            @Named(COMPLICATIONS_FADE_OUT_DURATION) int fadeOutDuration) {
         mLayout = layout;
         mMargin = margin;
         mSession = session;
+        mFadeInDuration = fadeInDuration;
+        mFadeOutDuration = fadeOutDuration;
+    }
+
+    @Override
+    public void setVisibility(int visibility, boolean animate) {
+        final boolean appearing = visibility == View.VISIBLE;
+
+        if (mViewPropertyAnimator != null) {
+            mViewPropertyAnimator.cancel();
+        }
+
+        if (appearing) {
+            mLayout.setVisibility(View.VISIBLE);
+        }
+
+        mViewPropertyAnimator = mLayout.animate()
+                .alpha(appearing ? 1f : 0f)
+                .setDuration(appearing ? mFadeInDuration : mFadeOutDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLayout.setVisibility(visibility);
+                    }
+                });
     }
 
     /**
@@ -477,6 +514,8 @@ public class ComplicationLayoutEngine  {
      */
     public void addComplication(ComplicationId id, View view,
             ComplicationLayoutParams lp, @Complication.Category int category) {
+        Log.d(TAG, "engine: " + this + " addComplication");
+
         // If the complication is present, remove.
         if (mEntries.containsKey(id)) {
             removeComplication(id);
