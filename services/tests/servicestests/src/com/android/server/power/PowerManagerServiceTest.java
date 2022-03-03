@@ -123,7 +123,6 @@ public class PowerManagerServiceTest {
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
     private static final String SYSTEM_PROPERTY_REBOOT_REASON = "sys.boot.reason";
 
-    private static final float PRECISION = 0.001f;
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final boolean BATTERY_SAVER_ENABLED = true;
 
@@ -146,7 +145,6 @@ public class PowerManagerServiceTest {
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
 
     private PowerManagerService mService;
-    private DisplayPowerRequest mDisplayPowerRequest;
     private ContextWrapper mContextSpy;
     private BatteryReceiver mBatteryReceiver;
     private UserSwitchedReceiver mUserSwitchedReceiver;
@@ -195,7 +193,6 @@ public class PowerManagerServiceTest {
         when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), anyString())).thenReturn("");
         when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(true);
 
-        mDisplayPowerRequest = new DisplayPowerRequest();
         addLocalServiceMock(LightsManager.class, mLightsManagerMock);
         addLocalServiceMock(DisplayManagerInternal.class, mDisplayManagerInternalMock);
         addLocalServiceMock(BatteryManagerInternal.class, mBatteryManagerInternalMock);
@@ -418,15 +415,6 @@ public class PowerManagerServiceTest {
         verify(mNativeWrapperMock).nativeInit(same(service));
         verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.INTERACTIVE), eq(true));
         verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.DOUBLE_TAP_TO_WAKE), eq(false));
-    }
-
-    @Test
-    public void testUpdatePowerScreenPolicy_UpdateDisplayPowerRequest() {
-        createService();
-        mService.updatePowerRequestFromBatterySaverPolicy(mDisplayPowerRequest);
-        assertThat(mDisplayPowerRequest.lowPowerMode).isEqualTo(BATTERY_SAVER_ENABLED);
-        assertThat(mDisplayPowerRequest.screenLowPowerBrightnessFactor)
-                .isWithin(PRECISION).of(BRIGHTNESS_FACTOR);
     }
 
     @Test
