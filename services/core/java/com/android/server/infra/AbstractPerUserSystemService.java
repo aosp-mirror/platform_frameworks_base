@@ -43,13 +43,14 @@ import java.io.PrintWriter;
  *
  * @param <M> "main" service class.
  * @param <S> "real" service class.
+ *
  * @hide
  */
 public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSystemService<S, M>,
         M extends AbstractMasterSystemService<M, S>> {
 
-    @UserIdInt protected final int mUserId;
-    public final Object mLock;
+    protected final @UserIdInt int mUserId;
+    protected final Object mLock;
     protected final String mTag = getClass().getSimpleName();
 
     protected final M mMaster;
@@ -90,14 +91,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * <p><b>MUST</b> be overridden by subclasses that bind to an
      * {@link com.android.internal.infra.AbstractRemoteService}.
      *
-     * @return new {@link ServiceInfo},
-     * @throws NameNotFoundException         if the service does not exist.
-     * @throws SecurityException             if the service does not have the proper permissions to
-     *                                       be bound to.
+     * @throws NameNotFoundException if the service does not exist.
+     * @throws SecurityException if the service does not have the proper permissions to be bound to.
      * @throws UnsupportedOperationException if subclass binds to a remote service but does not
-     *                                       overrides it.
+     * overrides it.
+     *
+     * @return new {@link ServiceInfo},
      */
-    @NonNull protected ServiceInfo newServiceInfoLocked(
+    protected @NonNull ServiceInfo newServiceInfoLocked(
             @SuppressWarnings("unused") @NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
         throw new UnsupportedOperationException("not overridden");
@@ -136,6 +137,7 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * previous state.
      *
      * @param disabled whether the service is disabled (due to {@link UserManager} restrictions).
+     *
      * @return whether the disabled state changed.
      */
     @GuardedBy("mLock")
@@ -152,48 +154,18 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
         updateIsSetupComplete(mUserId);
         mDisabled = disabled;
 
-        if (mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
-            updateServiceInfoListLocked();
-        } else {
-            updateServiceInfoLocked();
-        }
+        updateServiceInfoLocked();
         return wasEnabled != isEnabledLocked();
     }
 
     /**
      * Updates the internal reference to the service info, and returns the service's component.
      */
-    @GuardedBy("mLock")
     protected final ComponentName updateServiceInfoLocked() {
-        ComponentName[] componentNames = updateServiceInfoListLocked();
-        return componentNames == null || componentNames.length == 0 ? null : componentNames[0];
-    }
-
-    /**
-     * Updates the internal reference to the service info, and returns the service's component.
-     */
-    @GuardedBy("mLock")
-    protected final ComponentName[] updateServiceInfoListLocked() {
-        if (mMaster.mServiceNameResolver == null) {
-            return null;
-        }
-        if (!mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
-            final String componentName = getComponentNameLocked();
-            return new ComponentName[] { getServiceComponent(componentName) };
-        }
-        final String[] componentNames = mMaster.mServiceNameResolver.getServiceNameList(
-                mUserId);
-        ComponentName[] serviceComponents = new ComponentName[componentNames.length];
-        for (int i = 0; i < componentNames.length; i++) {
-            serviceComponents[i] = getServiceComponent(componentNames[i]);
-        }
-        return serviceComponents;
-    }
-
-    private ComponentName getServiceComponent(String componentName) {
-        synchronized (mLock) {
+        ComponentName serviceComponent = null;
+        if (mMaster.mServiceNameResolver != null) {
             ServiceInfo serviceInfo = null;
-            ComponentName serviceComponent = null;
+            final String componentName = getComponentNameLocked();
             if (!TextUtils.isEmpty(componentName)) {
                 try {
                     serviceComponent = ComponentName.unflattenFromString(componentName);
@@ -224,14 +196,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
                 Slog.e(mTag, "Bad ServiceInfo for '" + componentName + "': " + e);
                 mServiceInfo = null;
             }
-            return serviceComponent;
         }
+        return serviceComponent;
     }
 
     /**
      * Gets the user associated with this service.
      */
-    @UserIdInt public final int getUserId() {
+    public final @UserIdInt int getUserId() {
         return mUserId;
     }
 
@@ -257,34 +229,15 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
     /**
      * Gets the current name of the service, which is either the default service or the
-     * {@link AbstractMasterSystemService#setTemporaryService(int, String, int) temporary one}.
+     *  {@link AbstractMasterSystemService#setTemporaryService(int, String, int) temporary one}.
      */
-    @Nullable
-    @GuardedBy("mLock")
-    protected final String getComponentNameLocked() {
+    protected final @Nullable String getComponentNameLocked() {
         return mMaster.mServiceNameResolver.getServiceName(mUserId);
-    }
-
-    /**
-     * Gets the current name of the service, which is either the default service or the
-     * {@link AbstractMasterSystemService#setTemporaryService(int, String, int) temporary one}.
-     */
-    @Nullable
-    @GuardedBy("mLock")
-    protected final String getComponentNameForMultipleLocked(String serviceName) {
-        String[] services = mMaster.mServiceNameResolver.getServiceNameList(mUserId);
-        for (int i = 0; i < services.length; i++) {
-            if (serviceName.equals(services[i])) {
-                return services[i];
-            }
-        }
-        return null;
     }
 
     /**
      * Checks whether the current service for the user was temporarily set.
      */
-    @GuardedBy("mLock")
     public final boolean isTemporaryServiceSetLocked() {
         return mMaster.mServiceNameResolver.isTemporary(mUserId);
     }
@@ -292,7 +245,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Resets the temporary service implementation to the default component.
      */
-    @GuardedBy("mLock")
     protected final void resetTemporaryServiceLocked() {
         mMaster.mServiceNameResolver.resetTemporaryService(mUserId);
     }
@@ -316,7 +268,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
             return mServiceInfo == null ? null : mServiceInfo.getComponentName();
         }
     }
-
     /**
      * Gets the name of the of the app this service binds to, or {@code null} if the service is
      * disabled.
@@ -352,10 +303,8 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Removes the service from the main service's cache.
      */
-    protected final void removeSelfFromCache() {
-        synchronized (mMaster.mLock) {
-            mMaster.removeCachedServiceListLocked(mUserId);
-        }
+    protected final void removeSelfFromCacheLocked() {
+        mMaster.removeCachedServiceLocked(mUserId);
     }
 
     /**
@@ -378,7 +327,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
      * Gets the target SDK level of the service this service binds to,
      * or {@code 0} if the service is disabled.
      */
-    @GuardedBy("mLock")
     public final int getTargedSdkLocked() {
         return mServiceInfo == null ? 0 : mServiceInfo.applicationInfo.targetSdkVersion;
     }
@@ -386,7 +334,6 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     /**
      * Gets whether the device already finished setup.
      */
-    @GuardedBy("mLock")
     protected final boolean isSetupCompletedLocked() {
         return mSetupComplete;
     }
@@ -401,32 +348,19 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     // TODO(b/117779333): support proto
     @GuardedBy("mLock")
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
-        pw.print(prefix);
-        pw.print("User: ");
-        pw.println(mUserId);
+        pw.print(prefix); pw.print("User: "); pw.println(mUserId);
         if (mServiceInfo != null) {
-            pw.print(prefix);
-            pw.print("Service Label: ");
-            pw.println(getServiceLabelLocked());
-            pw.print(prefix);
-            pw.print("Target SDK: ");
-            pw.println(getTargedSdkLocked());
+            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabelLocked());
+            pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
         }
         if (mMaster.mServiceNameResolver != null) {
-            pw.print(prefix);
-            pw.print("Name resolver: ");
-            mMaster.mServiceNameResolver.dumpShort(pw, mUserId);
-            pw.println();
+            pw.print(prefix); pw.print("Name resolver: ");
+            mMaster.mServiceNameResolver.dumpShort(pw, mUserId); pw.println();
         }
-        pw.print(prefix);
-        pw.print("Disabled by UserManager: ");
-        pw.println(mDisabled);
-        pw.print(prefix);
-        pw.print("Setup complete: ");
-        pw.println(mSetupComplete);
+        pw.print(prefix); pw.print("Disabled by UserManager: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         if (mServiceInfo != null) {
-            pw.print(prefix);
-            pw.print("Service UID: ");
+            pw.print(prefix); pw.print("Service UID: ");
             pw.println(mServiceInfo.applicationInfo.uid);
         }
         pw.println();

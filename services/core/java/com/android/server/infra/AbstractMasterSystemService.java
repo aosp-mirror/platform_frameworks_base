@@ -48,7 +48,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -169,10 +168,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private final SparseBooleanArray mDisabledByUserRestriction;
 
     /**
-     * Cache of service list per user id.
+     * Cache of services per user id.
      */
     @GuardedBy("mLock")
-    private final SparseArray<List<S>> mServicesCacheList = new SparseArray<>();
+    private final SparseArray<S> mServicesCache = new SparseArray<>();
 
     /**
      * Value that determines whether the per-user service should be removed from the cache when its
@@ -253,7 +252,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
             mServiceNameResolver.setOnTemporaryServiceNameChangedCallback(
-                    this::onServiceNameChanged);
+                    (u, s, t) -> onServiceNameChanged(u, s, t));
+
         }
         if (disallowProperty == null) {
             mDisabledByUserRestriction = null;
@@ -308,7 +308,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     @Override // from SystemService
     public void onUserStopped(@NonNull TargetUser user) {
         synchronized (mLock) {
-            removeCachedServiceListLocked(user.getUserIdentifier());
+            removeCachedServiceLocked(user.getUserIdentifier());
         }
     }
 
@@ -386,47 +386,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         synchronized (mLock) {
             final S oldService = peekServiceForUserLocked(userId);
             if (oldService != null) {
-                oldService.removeSelfFromCache();
+                oldService.removeSelfFromCacheLocked();
             }
             mServiceNameResolver.setTemporaryService(userId, componentName, durationMs);
-        }
-    }
-
-    /**
-     * Temporarily sets the service implementation.
-     *
-     * <p>Typically used by Shell command and/or CTS tests.
-     *
-     * @param componentNames list of the names of the new component
-     * @param durationMs     how long the change will be valid (the service will be automatically
-     *                       reset
-     *                       to the default component after this timeout expires).
-     * @throws SecurityException        if caller is not allowed to manage this service's settings.
-     * @throws IllegalArgumentException if value of {@code durationMs} is higher than
-     *                                  {@link #getMaximumTemporaryServiceDurationMs()}.
-     */
-    public final void setTemporaryServices(@UserIdInt int userId, @NonNull String[] componentNames,
-            int durationMs) {
-        Slog.i(mTag, "setTemporaryService(" + userId + ") to " + Arrays.toString(componentNames)
-                + " for " + durationMs + "ms");
-        if (mServiceNameResolver == null) {
-            return;
-        }
-        enforceCallingPermissionForManagement();
-
-        Objects.requireNonNull(componentNames);
-        final int maxDurationMs = getMaximumTemporaryServiceDurationMs();
-        if (durationMs > maxDurationMs) {
-            throw new IllegalArgumentException(
-                    "Max duration is " + maxDurationMs + " (called with " + durationMs + ")");
-        }
-
-        synchronized (mLock) {
-            final S oldService = peekServiceForUserLocked(userId);
-            if (oldService != null) {
-                oldService.removeSelfFromCache();
-            }
-            mServiceNameResolver.setTemporaryServices(userId, componentNames, durationMs);
         }
     }
 
@@ -436,8 +398,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * <p>Typically used during CTS tests to make sure only the default service doesn't interfere
      * with the test results.
      *
-     * @return whether the enabled state changed.
      * @throws SecurityException if caller is not allowed to manage this service's settings.
+     *
+     * @return whether the enabled state changed.
      */
     public final boolean setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
         Slog.i(mTag, "setDefaultServiceEnabled() for userId " + userId + ": " + enabled);
@@ -457,7 +420,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
             final S oldService = peekServiceForUserLocked(userId);
             if (oldService != null) {
-                oldService.removeSelfFromCache();
+                oldService.removeSelfFromCacheLocked();
             }
 
             // Must update the service on cache so its initialization code is triggered
@@ -538,21 +501,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     protected abstract S newServiceLocked(@UserIdInt int resolvedUserId, boolean disabled);
 
     /**
-     * Creates a new service list that will be added to the cache.
-     *
-     * @param resolvedUserId the resolved user id for the service.
-     * @param disabled       whether the service is currently disabled (due to {@link UserManager}
-     *                       restrictions).
-     * @return a new instance.
-     */
-    @Nullable
-    @GuardedBy("mLock")
-    protected List<S> newServiceListLocked(@UserIdInt int resolvedUserId, boolean disabled,
-            String[] serviceNames) {
-        throw new UnsupportedOperationException("newServiceListLocked not implemented. ");
-    }
-
-    /**
      * Register the service for extra Settings changes (i.e., other than
      * {@link android.provider.Settings.Secure#USER_SETUP_COMPLETE} or
      * {@link #getServiceSettingsProperty()}, which are automatically handled).
@@ -568,6 +516,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * <p><b>NOTE: </p>it doesn't need to register for
      * {@link android.provider.Settings.Secure#USER_SETUP_COMPLETE} or
      * {@link #getServiceSettingsProperty()}.
+     *
      */
     @SuppressWarnings("unused")
     protected void registerForExtraSettingsChanges(@NonNull ContentResolver resolver,
@@ -578,7 +527,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * Callback for Settings changes that were registered though
      * {@link #registerForExtraSettingsChanges(ContentResolver, ContentObserver)}.
      *
-     * @param userId   user associated with the change
+     * @param userId user associated with the change
      * @param property Settings property changed.
      */
     protected void onSettingsChanged(@UserIdInt int userId, @NonNull String property) {
@@ -590,38 +539,18 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     @GuardedBy("mLock")
     @NonNull
     protected S getServiceForUserLocked(@UserIdInt int userId) {
-        List<S> services = getServiceListForUserLocked(userId);
-        return services == null || services.size() == 0 ? null : services.get(0);
-    }
-
-    /**
-     * Gets the service instance list for a user, creating instances if not present in the cache.
-     */
-    @GuardedBy("mLock")
-    protected List<S> getServiceListForUserLocked(@UserIdInt int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, false, null, null);
-        List<S> services = mServicesCacheList.get(resolvedUserId);
-        if (services == null || services.size() == 0) {
+        S service = mServicesCache.get(resolvedUserId);
+        if (service == null) {
             final boolean disabled = isDisabledLocked(userId);
-            if (mServiceNameResolver == null) {
-                return null;
-            }
-            if (mServiceNameResolver.isConfiguredInMultipleMode()) {
-                services = newServiceListLocked(resolvedUserId, disabled,
-                        mServiceNameResolver.getServiceNameList(userId));
-            } else {
-                services = new ArrayList<>();
-                services.add(newServiceLocked(resolvedUserId, disabled));
-            }
+            service = newServiceLocked(resolvedUserId, disabled);
             if (!disabled) {
-                for (int i = 0; i < services.size(); i++) {
-                    onServiceEnabledLocked(services.get(i), resolvedUserId);
-                }
+                onServiceEnabledLocked(service, resolvedUserId);
             }
-            mServicesCacheList.put(userId, services);
+            mServicesCache.put(userId, service);
         }
-        return services;
+        return service;
     }
 
     /**
@@ -631,20 +560,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     @GuardedBy("mLock")
     @Nullable
     protected S peekServiceForUserLocked(@UserIdInt int userId) {
-        List<S> serviceList = peekServiceListForUserLocked(userId);
-        return serviceList == null || serviceList.size() == 0 ? null : serviceList.get(0);
-    }
-
-    /**
-     * Gets the <b>existing</b> service instance for a user, returning {@code null} if not already
-     * present in the cache.
-     */
-    @GuardedBy("mLock")
-    @Nullable
-    protected List<S> peekServiceListForUserLocked(@UserIdInt int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, false, null, null);
-        return mServicesCacheList.get(resolvedUserId);
+        return mServicesCache.get(resolvedUserId);
     }
 
     /**
@@ -652,59 +570,36 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     protected void updateCachedServiceLocked(@UserIdInt int userId) {
-        updateCachedServiceListLocked(userId, isDisabledLocked(userId));
+        updateCachedServiceLocked(userId, isDisabledLocked(userId));
     }
 
     /**
      * Checks whether the service is disabled (through {@link UserManager} restrictions) for the
      * given user.
      */
-    @GuardedBy("mLock")
     protected boolean isDisabledLocked(@UserIdInt int userId) {
-        return mDisabledByUserRestriction != null && mDisabledByUserRestriction.get(userId);
+        return mDisabledByUserRestriction == null ? false : mDisabledByUserRestriction.get(userId);
     }
 
     /**
      * Updates a cached service for a given user.
      *
-     * @param userId   user handle.
+     * @param userId user handle.
      * @param disabled whether the user is disabled.
      * @return service for the user.
      */
     @GuardedBy("mLock")
     protected S updateCachedServiceLocked(@UserIdInt int userId, boolean disabled) {
         final S service = getServiceForUserLocked(userId);
-        updateCachedServiceListLocked(userId, disabled);
-        return service;
-    }
-
-    /**
-     * Updates a cached service for a given user.
-     *
-     * @param userId   user handle.
-     * @param disabled whether the user is disabled.
-     * @return service for the user.
-     */
-    @GuardedBy("mLock")
-    protected List<S> updateCachedServiceListLocked(@UserIdInt int userId, boolean disabled) {
-        final List<S> services = getServiceListForUserLocked(userId);
-        if (services == null) {
-            return null;
-        }
-        for (int i = 0; i < services.size(); i++) {
-            S service = services.get(i);
-            if (service != null) {
-                synchronized (service.mLock) {
-                    service.updateLocked(disabled);
-                    if (!service.isEnabledLocked()) {
-                        removeCachedServiceListLocked(userId);
-                    } else {
-                        onServiceEnabledLocked(services.get(i), userId);
-                    }
-                }
+        if (service != null) {
+            service.updateLocked(disabled);
+            if (!service.isEnabledLocked()) {
+                removeCachedServiceLocked(userId);
+            } else {
+                onServiceEnabledLocked(service, userId);
             }
         }
-        return services;
+        return service;
     }
 
     /**
@@ -724,32 +619,28 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * <p>By default doesn't do anything, but can be overridden by subclasses.
      */
     @SuppressWarnings("unused")
-    @GuardedBy("mLock")
     protected void onServiceEnabledLocked(@NonNull S service, @UserIdInt int userId) {
     }
 
     /**
-     * Removes a cached service list for a given user.
+     * Removes a cached service for a given user.
      *
      * @return the removed service.
      */
     @GuardedBy("mLock")
     @NonNull
-    protected final List<S> removeCachedServiceListLocked(@UserIdInt int userId) {
-        final List<S> services = peekServiceListForUserLocked(userId);
-        if (services != null) {
-            mServicesCacheList.delete(userId);
-            for (int i = 0; i < services.size(); i++) {
-                onServiceRemoved(services.get(i), userId);
-            }
+    protected final S removeCachedServiceLocked(@UserIdInt int userId) {
+        final S service = peekServiceForUserLocked(userId);
+        if (service != null) {
+            mServicesCache.delete(userId);
+            onServiceRemoved(service, userId);
         }
-        return services;
+        return service;
     }
 
     /**
      * Called before the package that provides the service for the given user is being updated.
      */
-    @GuardedBy("mLock")
     protected void onServicePackageUpdatingLocked(@UserIdInt int userId) {
         if (verbose) Slog.v(mTag, "onServicePackageUpdatingLocked(" + userId + ")");
     }
@@ -757,7 +648,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     /**
      * Called after the package that provides the service for the given user is being updated.
      */
-    @GuardedBy("mLock")
     protected void onServicePackageUpdatedLocked(@UserIdInt int userId) {
         if (verbose) Slog.v(mTag, "onServicePackageUpdated(" + userId + ")");
     }
@@ -765,7 +655,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     /**
      * Called after the package data that provides the service for the given user is cleared.
      */
-    @GuardedBy("mLock")
     protected void onServicePackageDataClearedLocked(@UserIdInt int userId) {
         if (verbose) Slog.v(mTag, "onServicePackageDataCleared(" + userId + ")");
     }
@@ -773,7 +662,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     /**
      * Called after the package that provides the service for the given user is restarted.
      */
-    @GuardedBy("mLock")
     protected void onServicePackageRestartedLocked(@UserIdInt int userId) {
         if (verbose) Slog.v(mTag, "onServicePackageRestarted(" + userId + ")");
     }
@@ -791,31 +679,14 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * <p>By default, it calls {@link #updateCachedServiceLocked(int)}; subclasses must either call
      * that same method, or {@code super.onServiceNameChanged()}.
      *
-     * @param userId      user handle.
+     * @param userId user handle.
      * @param serviceName the new service name.
      * @param isTemporary whether the new service is temporary.
      */
     protected void onServiceNameChanged(@UserIdInt int userId, @Nullable String serviceName,
             boolean isTemporary) {
         synchronized (mLock) {
-            updateCachedServiceListLocked(userId, isDisabledLocked(userId));
-        }
-    }
-
-    /**
-     * Called when the service name list has changed (typically when using temporary services).
-     *
-     * <p>By default, it calls {@link #updateCachedServiceLocked(int)}; subclasses must either call
-     * that same method, or {@code super.onServiceNameChanged()}.
-     *
-     * @param userId       user handle.
-     * @param serviceNames the new service name list.
-     * @param isTemporary  whether the new service is temporary.
-     */
-    protected void onServiceNameListChanged(@UserIdInt int userId, @Nullable String[] serviceNames,
-            boolean isTemporary) {
-        synchronized (mLock) {
-            updateCachedServiceListLocked(userId, isDisabledLocked(userId));
+            updateCachedServiceLocked(userId);
         }
     }
 
@@ -824,12 +695,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     protected void visitServicesLocked(@NonNull Visitor<S> visitor) {
-        final int size = mServicesCacheList.size();
+        final int size = mServicesCache.size();
         for (int i = 0; i < size; i++) {
-            List<S> services = mServicesCacheList.valueAt(i);
-            for (int j = 0; j < services.size(); j++) {
-                visitor.visit(services.get(j));
-            }
+            visitor.visit(mServicesCache.valueAt(i));
         }
     }
 
@@ -838,7 +706,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     protected void clearCacheLocked() {
-        mServicesCacheList.clear();
+        mServicesCache.clear();
     }
 
     /**
@@ -889,7 +757,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     // TODO(b/117779333): support proto
-    @GuardedBy("mLock")
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         boolean realDebug = debug;
         boolean realVerbose = verbose;
@@ -898,64 +765,40 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         try {
             // Temporarily turn on full logging;
             debug = verbose = true;
-            final int size = mServicesCacheList.size();
-            pw.print(prefix);
-            pw.print("Debug: ");
-            pw.print(realDebug);
-            pw.print(" Verbose: ");
-            pw.println(realVerbose);
-            pw.print("Package policy flags: ");
-            pw.println(mServicePackagePolicyFlags);
+            final int size = mServicesCache.size();
+            pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
+            pw.print(" Verbose: "); pw.println(realVerbose);
+            pw.print("Package policy flags: "); pw.println(mServicePackagePolicyFlags);
             if (mUpdatingPackageNames != null) {
-                pw.print("Packages being updated: ");
-                pw.println(mUpdatingPackageNames);
+                pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
             }
             dumpSupportedUsers(pw, prefix);
             if (mServiceNameResolver != null) {
-                pw.print(prefix);
-                pw.print("Name resolver: ");
-                mServiceNameResolver.dumpShort(pw);
-                pw.println();
+                pw.print(prefix); pw.print("Name resolver: ");
+                mServiceNameResolver.dumpShort(pw); pw.println();
                 final List<UserInfo> users = getSupportedUsers();
                 for (int i = 0; i < users.size(); i++) {
                     final int userId = users.get(i).id;
-                    pw.print(prefix2);
-                    pw.print(userId);
-                    pw.print(": ");
-                    mServiceNameResolver.dumpShort(pw, userId);
-                    pw.println();
+                    pw.print(prefix2); pw.print(userId); pw.print(": ");
+                    mServiceNameResolver.dumpShort(pw, userId); pw.println();
                 }
             }
-            pw.print(prefix);
-            pw.print("Users disabled by restriction: ");
+            pw.print(prefix); pw.print("Users disabled by restriction: ");
             pw.println(mDisabledByUserRestriction);
-            pw.print(prefix);
-            pw.print("Allow instant service: ");
-            pw.println(mAllowInstantService);
+            pw.print(prefix); pw.print("Allow instant service: "); pw.println(mAllowInstantService);
             final String settingsProperty = getServiceSettingsProperty();
             if (settingsProperty != null) {
-                pw.print(prefix);
-                pw.print("Settings property: ");
-                pw.println(settingsProperty);
+                pw.print(prefix); pw.print("Settings property: "); pw.println(settingsProperty);
             }
-            pw.print(prefix);
-            pw.print("Cached services: ");
+            pw.print(prefix); pw.print("Cached services: ");
             if (size == 0) {
                 pw.println("none");
             } else {
                 pw.println(size);
                 for (int i = 0; i < size; i++) {
-                    pw.print(prefix);
-                    pw.print("Service at ");
-                    pw.print(i);
-                    pw.println(": ");
-                    final List<S> services = mServicesCacheList.valueAt(i);
-                    for (int j = 0; j < services.size(); j++) {
-                        S service = services.get(i);
-                        synchronized (service.mLock) {
-                            service.dumpLocked(prefix2, pw);
-                        }
-                    }
+                    pw.print(prefix); pw.print("Service at "); pw.print(i); pw.println(": ");
+                    final S service = mServicesCache.valueAt(i);
+                    service.dumpLocked(prefix2, pw);
                     pw.println();
                 }
             }
@@ -977,7 +820,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 final int userId = getChangingUserId();
                 synchronized (mLock) {
                     if (mUpdatingPackageNames == null) {
-                        mUpdatingPackageNames = new SparseArray<String>(mServicesCacheList.size());
+                        mUpdatingPackageNames = new SparseArray<String>(mServicesCache.size());
                     }
                     mUpdatingPackageNames.put(userId, packageName);
                     onServicePackageUpdatingLocked(userId);
@@ -992,7 +835,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                                     + " because package " + activePackageName
                                     + " is being updated");
                         }
-                        removeCachedServiceListLocked(userId);
+                        removeCachedServiceLocked(userId);
 
                         if ((mServicePackagePolicyFlags & PACKAGE_UPDATE_POLICY_REFRESH_EAGER)
                                 != 0) {
@@ -1058,7 +901,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                             if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
                                 handleActiveServiceRestartedLocked(activePackageName, userId);
                             } else {
-                                removeCachedServiceListLocked(userId);
+                                removeCachedServiceLocked(userId);
                             }
                         } else {
                             handlePackageUpdateLocked(pkg);
@@ -1087,7 +930,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
             private void handleActiveServiceRemoved(@UserIdInt int userId) {
                 synchronized (mLock) {
-                    removeCachedServiceListLocked(userId);
+                    removeCachedServiceLocked(userId);
                 }
                 final String serviceSettingsProperty = getServiceSettingsProperty();
                 if (serviceSettingsProperty != null) {
@@ -1096,7 +939,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 }
             }
 
-            @GuardedBy("mLock")
             private void handleActiveServiceRestartedLocked(String activePackageName,
                     @UserIdInt int userId) {
                 if ((mServicePackagePolicyFlags & PACKAGE_RESTART_POLICY_NO_REFRESH) != 0) {
@@ -1110,7 +952,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                                 + " because package " + activePackageName
                                 + " is being restarted");
                     }
-                    removeCachedServiceListLocked(userId);
+                    removeCachedServiceLocked(userId);
 
                     if ((mServicePackagePolicyFlags & PACKAGE_RESTART_POLICY_REFRESH_EAGER) != 0) {
                         if (debug) {
@@ -1124,27 +966,14 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
             @Override
             public void onPackageModified(String packageName) {
-                synchronized (mLock) {
-                    if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
+                if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
 
-                    if (mServiceNameResolver == null) {
-                        return;
-                    }
-
-                    final int userId = getChangingUserId();
-                    final String[] serviceNames = mServiceNameResolver.getDefaultServiceNameList(
-                            userId);
-                    if (serviceNames != null) {
-                        for (int i = 0; i < serviceNames.length; i++) {
-                            peekAndUpdateCachedServiceLocked(packageName, userId, serviceNames[i]);
-                        }
-                    }
+                if (mServiceNameResolver == null) {
+                    return;
                 }
-            }
 
-            @GuardedBy("mLock")
-            private void peekAndUpdateCachedServiceLocked(String packageName, int userId,
-                    String serviceName) {
+                final int userId = getChangingUserId();
+                final String serviceName = mServiceNameResolver.getDefaultServiceName(userId);
                 if (serviceName == null) {
                     return;
                 }
@@ -1168,7 +997,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 }
             }
 
-            @GuardedBy("mLock")
             private String getActiveServicePackageNameLocked() {
                 final int userId = getChangingUserId();
                 final S service = peekServiceForUserLocked(userId);
@@ -1189,7 +1017,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         };
 
         // package changes
-        monitor.register(getContext(), null, UserHandle.ALL, true);
+        monitor.register(getContext(), null,  UserHandle.ALL, true);
     }
 
     /**
