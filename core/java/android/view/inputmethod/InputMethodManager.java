@@ -3251,10 +3251,11 @@ public final class InputMethodManager {
      * @return Something that is not well-defined.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 204906124, maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
+            publicAlternatives = "Use {@link android.view.WindowInsets} instead")
     public int getInputMethodWindowVisibleHeight() {
         try {
-            return mService.getInputMethodWindowVisibleHeight();
+            return mService.getInputMethodWindowVisibleHeight(mClient);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
