@@ -18,11 +18,13 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
 
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.systemui.R;
@@ -54,6 +56,9 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mQSScrollView;
     private View mQSContainer;
 
+    @Nullable
+    private Consumer<Configuration> mConfigurationChangedListener;
+
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -77,6 +82,18 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     @Override
     public void onHasViewsAboveShelfChanged(boolean hasViewsAboveShelf) {
         invalidate();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mConfigurationChangedListener != null) {
+            mConfigurationChangedListener.accept(newConfig);
+        }
+    }
+
+    public void setConfigurationChangedListener(Consumer<Configuration> listener) {
+        mConfigurationChangedListener = listener;
     }
 
     public void setNotificationsMarginBottom(int margin) {

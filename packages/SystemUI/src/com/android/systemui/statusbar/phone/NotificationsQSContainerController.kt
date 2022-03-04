@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.WindowInsets
+import com.android.systemui.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.navigationbar.NavigationModeController
@@ -41,6 +42,7 @@ class NotificationsQSContainerController @Inject constructor(
     private var isQSCustomizerAnimating = false
 
     private var notificationsBottomMargin = 0
+    private var scrimShadeBottomMargin = 0
     private var bottomStableInsets = 0
     private var bottomCutoutInsets = 0
 
@@ -67,17 +69,36 @@ class NotificationsQSContainerController @Inject constructor(
 
     public override fun onViewAttached() {
         updateMargins()
+        updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
         mView.setInsetsChangedListener(windowInsetsListener)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
+        mView.setConfigurationChangedListener { updateResources() }
     }
 
     override fun onViewDetached() {
         overviewProxyService.removeCallback(taskbarVisibilityListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
+        mView.setConfigurationChangedListener(null)
     }
 
+    private fun updateResources() {
+        val previousScrimShadeBottomMargin = scrimShadeBottomMargin
+        scrimShadeBottomMargin = resources.getDimensionPixelSize(
+            R.dimen.split_shade_notifications_scrim_margin_bottom
+        )
+
+        if (previousScrimShadeBottomMargin != scrimShadeBottomMargin) {
+            updateBottomSpacing()
+        }
+    }
+
+    /**
+     * Update the notification bottom margin.
+     *
+     * Will not call updateBottomSpacing
+     */
     fun updateMargins() {
         notificationsBottomMargin = mView.defaultNotificationsMarginBottom
     }
@@ -111,7 +132,11 @@ class NotificationsQSContainerController @Inject constructor(
             qsScrollPaddingBottom = bottomStableInsets
         } else if (newFooter && !(isQSCustomizing || isQSDetailShowing)) {
             // With the new footer, we also want this padding in the bottom in these cases
-            qsScrollPaddingBottom = bottomStableInsets
+            qsScrollPaddingBottom = if (splitShadeEnabled) {
+                notificationsMargin - scrimShadeBottomMargin
+            } else {
+                bottomStableInsets
+            }
         }
         mView.setPadding(0, 0, 0, containerPadding)
         mView.setNotificationsMarginBottom(notificationsMargin)
