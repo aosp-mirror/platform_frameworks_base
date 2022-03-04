@@ -201,7 +201,12 @@ interface IWindowManager
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void addKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
     void removeKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
