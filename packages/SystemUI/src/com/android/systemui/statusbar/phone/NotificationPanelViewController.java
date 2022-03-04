@@ -1860,14 +1860,14 @@ public class NotificationPanelViewController extends PanelViewController {
         mHeadsUpTouchHelper.notifyFling(!expand);
         mKeyguardStateController.notifyPanelFlingStart(!expand /* flingingToDismiss */);
         setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
-        mNotificationStackScrollLayoutController.setIsFlinging(true);
+        mAmbientState.setIsFlinging(true);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
     @Override
     protected void onFlingEnd(boolean cancelled) {
         super.onFlingEnd(cancelled);
-        mNotificationStackScrollLayoutController.setIsFlinging(false);
+        mAmbientState.setIsFlinging(false);
     }
 
     private boolean onQsIntercept(MotionEvent event) {
