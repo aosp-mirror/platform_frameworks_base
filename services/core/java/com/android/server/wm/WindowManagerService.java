@@ -141,6 +141,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.HARD_KEYBOARD_
 import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -6437,9 +6438,13 @@ public class WindowManagerService extends IWindowManager.Stub
             imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
         }
         proto.write(DISPLAY_FROZEN, mDisplayFrozen);
-        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
         proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
         proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
+
+        // This is always true for now since we still update the window frames at the server side.
+        // Once we move the window layout to the client side, this can be false when we are waiting
+        // for the frames.
+        proto.write(WINDOW_FRAMES_VALID, true);
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
