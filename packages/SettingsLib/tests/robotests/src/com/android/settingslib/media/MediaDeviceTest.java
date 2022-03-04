@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.os.Parcel;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -65,9 +66,9 @@ public class MediaDeviceTest {
     private static final String ROUTER_ID_3 = "RouterId_3";
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
     private final BluetoothClass mHeadreeClass =
-            new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass mCarkitClass =
-            new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO);
 
     @Mock
     private BluetoothDevice mDevice1;
@@ -117,6 +118,16 @@ public class MediaDeviceTest {
     private InfoMediaDevice mInfoMediaDevice3;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
     private PhoneMediaDevice mPhoneMediaDevice;
+
+    private BluetoothClass createBtClass(int deviceClass) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(deviceClass);
+        p.setDataPosition(0); // reset position of parcel before passing to constructor
+
+        BluetoothClass bluetoothClass = BluetoothClass.CREATOR.createFromParcel(p);
+        p.recycle();
+        return bluetoothClass;
+    }
 
     @Before
     public void setUp() {

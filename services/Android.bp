@@ -42,7 +42,9 @@ system_optimized_java_defaults {
         SYSTEM_OPTIMIZE_JAVA: {
             optimize: {
                 enabled: true,
-                optimize: true,
+                // TODO(b/210510433): Enable optimizations after improving
+                // retracing infra.
+                optimize: false,
                 shrink: true,
                 proguard_flags_files: ["proguard.flags"],
             },
@@ -176,10 +178,6 @@ cc_library_shared {
     name: "libandroid_servers",
     defaults: ["libservices.core-libs"],
     whole_static_libs: ["libservices.core"],
-    required: [
-        // TODO: remove after NetworkStatsService is moved to the mainline module.
-        "libcom_android_net_module_util_jni",
-    ],
 }
 
 platform_compat_config {

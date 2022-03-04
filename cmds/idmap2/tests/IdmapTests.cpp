@@ -37,7 +37,6 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/LogInfo.h"
 
-using android::Res_value;
 using ::testing::NotNull;
 
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;

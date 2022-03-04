@@ -15,6 +15,13 @@
  */
 package com.android.server.tracing;
 
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT;
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BEGIN;
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BIND_PERM_INCORRECT;
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_COMM_ERROR;
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_HANDOFF;
+import static com.android.internal.util.FrameworkStatsLog.TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_PERM_MISSING;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -39,6 +46,7 @@ import android.util.LruCache;
 import android.util.Slog;
 
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
 import java.io.IOException;
@@ -70,6 +78,17 @@ public class TracingServiceProxy extends SystemService {
             "com.android.traceur.NOTIFY_SESSION_STOPPED";
     private static final String INTENT_ACTION_NOTIFY_SESSION_STOLEN =
             "com.android.traceur.NOTIFY_SESSION_STOLEN";
+
+    private static final int REPORT_BEGIN =
+            TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BEGIN;
+    private static final int REPORT_SVC_HANDOFF =
+            TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_HANDOFF;
+    private static final int REPORT_BIND_PERM_INCORRECT =
+            TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BIND_PERM_INCORRECT;
+    private static final int REPORT_SVC_PERM_MISSING =
+            TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_PERM_MISSING;
+    private static final int REPORT_SVC_COMM_ERROR =
+            TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_COMM_ERROR;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -134,17 +153,24 @@ public class TracingServiceProxy extends SystemService {
     }
 
     private void reportTrace(@NonNull TraceReportParams params) {
+        FrameworkStatsLog.write(TRACING_SERVICE_REPORT_EVENT, REPORT_BEGIN,
+                params.uuidLsb, params.uuidMsb);
+
         // We don't need to do any permission checks on the caller because access
         // to this service is guarded by SELinux.
         ComponentName component = new ComponentName(params.reporterPackageName,
                 params.reporterClassName);
         if (!hasBindServicePermission(component)) {
+            FrameworkStatsLog.write(TRACING_SERVICE_REPORT_EVENT, REPORT_BIND_PERM_INCORRECT,
+                    params.uuidLsb, params.uuidMsb);
             return;
         }
         boolean hasDumpPermission = hasPermission(component, Manifest.permission.DUMP);
         boolean hasUsageStatsPermission = hasPermission(component,
                 Manifest.permission.PACKAGE_USAGE_STATS);
         if (!hasDumpPermission || !hasUsageStatsPermission) {
+            FrameworkStatsLog.write(TRACING_SERVICE_REPORT_EVENT, REPORT_SVC_PERM_MISSING,
+                    params.uuidLsb, params.uuidMsb);
             return;
         }
         final long ident = Binder.clearCallingIdentity();
@@ -178,8 +204,13 @@ public class TracingServiceProxy extends SystemService {
             message.what = TraceReportService.MSG_REPORT_TRACE;
             message.obj = params;
             messenger.send(message);
+
+            FrameworkStatsLog.write(TRACING_SERVICE_REPORT_EVENT, REPORT_SVC_HANDOFF,
+                    params.uuidLsb, params.uuidMsb);
         }).whenComplete((res, err) -> {
             if (err != null) {
+                FrameworkStatsLog.write(TRACING_SERVICE_REPORT_EVENT, REPORT_SVC_COMM_ERROR,
+                        params.uuidLsb, params.uuidMsb);
                 Slog.e(TAG, "Failed to report trace", err);
             }
             try {

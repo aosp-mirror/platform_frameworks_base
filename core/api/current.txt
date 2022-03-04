@@ -8339,62 +8339,6 @@ package android.app.usage {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.ExternalStorageStats> CREATOR;
   }
 
-  public final class NetworkStats implements java.lang.AutoCloseable {
-    method public void close();
-    method public boolean getNextBucket(android.app.usage.NetworkStats.Bucket);
-    method public boolean hasNextBucket();
-  }
-
-  public static class NetworkStats.Bucket {
-    ctor public NetworkStats.Bucket();
-    method public int getDefaultNetworkStatus();
-    method public long getEndTimeStamp();
-    method public int getMetered();
-    method public int getRoaming();
-    method public long getRxBytes();
-    method public long getRxPackets();
-    method public long getStartTimeStamp();
-    method public int getState();
-    method public int getTag();
-    method public long getTxBytes();
-    method public long getTxPackets();
-    method public int getUid();
-    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
-    field public static final int DEFAULT_NETWORK_NO = 1; // 0x1
-    field public static final int DEFAULT_NETWORK_YES = 2; // 0x2
-    field public static final int METERED_ALL = -1; // 0xffffffff
-    field public static final int METERED_NO = 1; // 0x1
-    field public static final int METERED_YES = 2; // 0x2
-    field public static final int ROAMING_ALL = -1; // 0xffffffff
-    field public static final int ROAMING_NO = 1; // 0x1
-    field public static final int ROAMING_YES = 2; // 0x2
-    field public static final int STATE_ALL = -1; // 0xffffffff
-    field public static final int STATE_DEFAULT = 1; // 0x1
-    field public static final int STATE_FOREGROUND = 2; // 0x2
-    field public static final int TAG_NONE = 0; // 0x0
-    field public static final int UID_ALL = -1; // 0xffffffff
-    field public static final int UID_REMOVED = -4; // 0xfffffffc
-    field public static final int UID_TETHERING = -5; // 0xfffffffb
-  }
-
-  public class NetworkStatsManager {
-    method @WorkerThread public android.app.usage.NetworkStats queryDetails(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUid(int, String, long, long, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTag(int, String, long, long, int, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(int, String, long, long, int, int, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats querySummary(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForDevice(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForUser(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method public void registerUsageCallback(int, String, long, android.app.usage.NetworkStatsManager.UsageCallback);
-    method public void registerUsageCallback(int, String, long, android.app.usage.NetworkStatsManager.UsageCallback, @Nullable android.os.Handler);
-    method public void unregisterUsageCallback(android.app.usage.NetworkStatsManager.UsageCallback);
-  }
-
-  public abstract static class NetworkStatsManager.UsageCallback {
-    ctor public NetworkStatsManager.UsageCallback();
-    method public abstract void onThresholdReached(int, String);
-  }
-
   public final class StorageStats implements android.os.Parcelable {
     method public int describeContents();
     method public long getAppBytes();
@@ -25199,6 +25143,14 @@ package android.net {
     method public int getUid();
   }
 
+  public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public EthernetNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method @Nullable public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
+  }
+
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
     method @NonNull public java.util.List<java.lang.String> getAllowedAlgorithms();
     method public int getMaxMtu();
@@ -25229,75 +25181,6 @@ package android.net {
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMetered(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setProxy(@Nullable android.net.ProxyInfo);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setRequiresInternetValidation(boolean);
-  }
-
-  public final class IpSecAlgorithm implements android.os.Parcelable {
-    ctor public IpSecAlgorithm(@NonNull String, @NonNull byte[]);
-    ctor public IpSecAlgorithm(@NonNull String, @NonNull byte[], int);
-    method public int describeContents();
-    method @NonNull public byte[] getKey();
-    method @NonNull public String getName();
-    method @NonNull public static java.util.Set<java.lang.String> getSupportedAlgorithms();
-    method public int getTruncationLengthBits();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final String AUTH_AES_CMAC = "cmac(aes)";
-    field public static final String AUTH_AES_XCBC = "xcbc(aes)";
-    field public static final String AUTH_CRYPT_AES_GCM = "rfc4106(gcm(aes))";
-    field public static final String AUTH_CRYPT_CHACHA20_POLY1305 = "rfc7539esp(chacha20,poly1305)";
-    field public static final String AUTH_HMAC_MD5 = "hmac(md5)";
-    field public static final String AUTH_HMAC_SHA1 = "hmac(sha1)";
-    field public static final String AUTH_HMAC_SHA256 = "hmac(sha256)";
-    field public static final String AUTH_HMAC_SHA384 = "hmac(sha384)";
-    field public static final String AUTH_HMAC_SHA512 = "hmac(sha512)";
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.IpSecAlgorithm> CREATOR;
-    field public static final String CRYPT_AES_CBC = "cbc(aes)";
-    field public static final String CRYPT_AES_CTR = "rfc3686(ctr(aes))";
-  }
-
-  public final class IpSecManager {
-    method @NonNull public android.net.IpSecManager.SecurityParameterIndex allocateSecurityParameterIndex(@NonNull java.net.InetAddress) throws android.net.IpSecManager.ResourceUnavailableException;
-    method @NonNull public android.net.IpSecManager.SecurityParameterIndex allocateSecurityParameterIndex(@NonNull java.net.InetAddress, int) throws android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-    method public void applyTransportModeTransform(@NonNull java.net.Socket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method public void applyTransportModeTransform(@NonNull java.net.DatagramSocket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method public void applyTransportModeTransform(@NonNull java.io.FileDescriptor, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket(int) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
-    method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket() throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
-    method public void removeTransportModeTransforms(@NonNull java.net.Socket) throws java.io.IOException;
-    method public void removeTransportModeTransforms(@NonNull java.net.DatagramSocket) throws java.io.IOException;
-    method public void removeTransportModeTransforms(@NonNull java.io.FileDescriptor) throws java.io.IOException;
-    field public static final int DIRECTION_IN = 0; // 0x0
-    field public static final int DIRECTION_OUT = 1; // 0x1
-  }
-
-  public static final class IpSecManager.ResourceUnavailableException extends android.util.AndroidException {
-  }
-
-  public static final class IpSecManager.SecurityParameterIndex implements java.lang.AutoCloseable {
-    method public void close();
-    method public int getSpi();
-  }
-
-  public static final class IpSecManager.SpiUnavailableException extends android.util.AndroidException {
-    method public int getSpi();
-  }
-
-  public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
-    method public void close() throws java.io.IOException;
-    method public java.io.FileDescriptor getFileDescriptor();
-    method public int getPort();
-  }
-
-  public final class IpSecTransform implements java.lang.AutoCloseable {
-    method public void close();
-  }
-
-  public static class IpSecTransform.Builder {
-    ctor public IpSecTransform.Builder(@NonNull android.content.Context);
-    method @NonNull public android.net.IpSecTransform buildTransportModeTransform(@NonNull java.net.InetAddress, @NonNull android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-    method @NonNull public android.net.IpSecTransform.Builder setAuthenticatedEncryption(@NonNull android.net.IpSecAlgorithm);
-    method @NonNull public android.net.IpSecTransform.Builder setAuthentication(@NonNull android.net.IpSecAlgorithm);
-    method @NonNull public android.net.IpSecTransform.Builder setEncryption(@NonNull android.net.IpSecAlgorithm);
-    method @NonNull public android.net.IpSecTransform.Builder setIpv4Encapsulation(@NonNull android.net.IpSecManager.UdpEncapsulationSocket, int);
   }
 
   public class LocalServerSocket implements java.io.Closeable {
@@ -25372,9 +25255,9 @@ package android.net {
 
   public abstract class PlatformVpnProfile {
     method public final boolean areLocalRoutesExcluded();
-    method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
+    method public final boolean isInternetValidationRequired();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
     field public static final int TYPE_IKEV2_IPSEC_RSA = 8; // 0x8
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
@@ -25425,50 +25308,6 @@ package android.net {
     ctor public TelephonyNetworkSpecifier.Builder();
     method @NonNull public android.net.TelephonyNetworkSpecifier build();
     method @NonNull public android.net.TelephonyNetworkSpecifier.Builder setSubscriptionId(int);
-  }
-
-  public class TrafficStats {
-    ctor public TrafficStats();
-    method public static void clearThreadStatsTag();
-    method public static void clearThreadStatsUid();
-    method public static int getAndSetThreadStatsTag(int);
-    method public static long getMobileRxBytes();
-    method public static long getMobileRxPackets();
-    method public static long getMobileTxBytes();
-    method public static long getMobileTxPackets();
-    method public static long getRxBytes(@NonNull String);
-    method public static long getRxPackets(@NonNull String);
-    method public static int getThreadStatsTag();
-    method public static int getThreadStatsUid();
-    method public static long getTotalRxBytes();
-    method public static long getTotalRxPackets();
-    method public static long getTotalTxBytes();
-    method public static long getTotalTxPackets();
-    method public static long getTxBytes(@NonNull String);
-    method public static long getTxPackets(@NonNull String);
-    method public static long getUidRxBytes(int);
-    method public static long getUidRxPackets(int);
-    method @Deprecated public static long getUidTcpRxBytes(int);
-    method @Deprecated public static long getUidTcpRxSegments(int);
-    method @Deprecated public static long getUidTcpTxBytes(int);
-    method @Deprecated public static long getUidTcpTxSegments(int);
-    method public static long getUidTxBytes(int);
-    method public static long getUidTxPackets(int);
-    method @Deprecated public static long getUidUdpRxBytes(int);
-    method @Deprecated public static long getUidUdpRxPackets(int);
-    method @Deprecated public static long getUidUdpTxBytes(int);
-    method @Deprecated public static long getUidUdpTxPackets(int);
-    method public static void incrementOperationCount(int);
-    method public static void incrementOperationCount(int, int);
-    method public static void setThreadStatsTag(int);
-    method public static void setThreadStatsUid(int);
-    method public static void tagDatagramSocket(java.net.DatagramSocket) throws java.net.SocketException;
-    method public static void tagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
-    method public static void untagDatagramSocket(java.net.DatagramSocket) throws java.net.SocketException;
-    method public static void untagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
-    field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
@@ -25612,6 +25451,23 @@ package android.net {
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
     method public void stopProvisionedVpnProfile();
+    field public static final String ACTION_VPN_MANAGER_EVENT = "android.net.action.VPN_MANAGER_EVENT";
+    field public static final String CATEGORY_EVENT_DEACTIVATED_BY_USER = "android.net.category.EVENT_DEACTIVATED_BY_USER";
+    field public static final String CATEGORY_EVENT_IKE_ERROR = "android.net.category.EVENT_IKE_ERROR";
+    field public static final String CATEGORY_EVENT_NETWORK_ERROR = "android.net.category.EVENT_NETWORK_ERROR";
+    field public static final int ERROR_CLASS_NOT_RECOVERABLE = 1; // 0x1
+    field public static final int ERROR_CLASS_RECOVERABLE = 2; // 0x2
+    field public static final int ERROR_CODE_NETWORK_IO = 3; // 0x3
+    field public static final int ERROR_CODE_NETWORK_LOST = 2; // 0x2
+    field public static final int ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT = 1; // 0x1
+    field public static final int ERROR_CODE_NETWORK_UNKNOWN_HOST = 0; // 0x0
+    field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
+    field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
+    field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
+    field public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
+    field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
+    field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
+    field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
   }
 
   public class VpnService extends android.app.Service {
@@ -26233,7 +26089,6 @@ package android.nfc.cardemulation {
     field public static final String CATEGORY_PAYMENT = "payment";
     field public static final String EXTRA_CATEGORY = "category";
     field public static final String EXTRA_SERVICE_COMPONENT = "component";
-    field public static final String EXTRA_USERID = "android.nfc.cardemulation.extra.USERID";
     field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
     field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
     field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
@@ -29468,7 +29323,7 @@ package android.os {
   public class BaseBundle {
     method public void clear();
     method public boolean containsKey(String);
-    method @Nullable public Object get(String);
+    method @Deprecated @Nullable public Object get(String);
     method public boolean getBoolean(String);
     method public boolean getBoolean(String, boolean);
     method @Nullable public boolean[] getBooleanArray(@Nullable String);
@@ -29640,6 +29495,7 @@ package android.os {
     field public static final int PREVIEW_SDK_INT;
     field public static final String RELEASE;
     field @NonNull public static final String RELEASE_OR_CODENAME;
+    field @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY;
     field @Deprecated public static final String SDK;
     field public static final int SDK_INT;
     field public static final String SECURITY_PATCH;
@@ -29709,16 +29565,21 @@ package android.os {
     method public float getFloat(String, float);
     method @Nullable public float[] getFloatArray(@Nullable String);
     method @Nullable public java.util.ArrayList<java.lang.Integer> getIntegerArrayList(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> T getParcelable(@Nullable String);
-    method @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
-    method @Nullable public java.io.Serializable getSerializable(@Nullable String);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> T getParcelable(@Nullable String);
+    method @Nullable public <T> T getParcelable(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
+    method @Nullable public <T> T[] getParcelableArray(@Nullable String, @NonNull Class<T>);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<? extends T>);
+    method @Deprecated @Nullable public java.io.Serializable getSerializable(@Nullable String);
+    method @Nullable public <T extends java.io.Serializable> T getSerializable(@Nullable String, @NonNull Class<T>);
     method public short getShort(String);
     method public short getShort(String, short);
     method @Nullable public short[] getShortArray(@Nullable String);
     method @Nullable public android.util.Size getSize(@Nullable String);
     method @Nullable public android.util.SizeF getSizeF(@Nullable String);
-    method @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
+    method @Deprecated @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
+    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<? extends T>);
     method @Nullable public java.util.ArrayList<java.lang.String> getStringArrayList(@Nullable String);
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);
@@ -30341,7 +30202,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
     method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
-    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<T>);
+    method @NonNull public <T> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader, @NonNull Class<? extends T>);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
@@ -40007,13 +39868,13 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Ims {
-    field public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY = "ims.key_capability_type_call_composer_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.key_capability_type_options_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.key_capability_type_presence_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.key_capability_type_sms_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.key_capability_type_ut_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.key_capability_type_video_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.key_capability_type_voice_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY = "ims.capability_type_call_composer_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.capability_type_options_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.capability_type_presence_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.capability_type_sms_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.capability_type_ut_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.capability_type_video_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.capability_type_voice_int_array";
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
@@ -40024,6 +39885,7 @@ package android.telephony {
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
     field public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE = "ims.rcs_requires_provisioning_bundle";
+    field public static final String KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL = "ims.use_sip_uri_for_presence_subscribe_bool";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
@@ -41100,16 +40962,16 @@ package android.telephony {
     ctor @Deprecated public ServiceState(android.os.Parcel);
     method protected void copyFrom(android.telephony.ServiceState);
     method public int describeContents();
-    method public int getCdmaNetworkId();
-    method public int getCdmaSystemId();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public int getCdmaNetworkId();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public int getCdmaSystemId();
     method public int[] getCellBandwidths();
     method public int getChannelNumber();
     method public int getDuplexMode();
     method public boolean getIsManualSelection();
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoList();
-    method public String getOperatorAlphaLong();
-    method public String getOperatorAlphaShort();
-    method public String getOperatorNumeric();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorAlphaLong();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorAlphaShort();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public String getOperatorNumeric();
     method public boolean getRoaming();
     method public int getState();
     method public boolean isSearching();

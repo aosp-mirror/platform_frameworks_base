@@ -509,6 +509,9 @@
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
+    <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
+         P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
+    <uses-permission android:name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
@@ -555,6 +558,9 @@
     <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
 
     <uses-permission android:name="android.permission.MANAGE_APP_HIBERNATION"/>
+
+    <!-- Permission required for CTS test - MediaCodecResourceTest -->
+    <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
 
     <!-- Permission required for CTS test - ResourceObserverNativeTest -->
     <uses-permission android:name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />

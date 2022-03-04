@@ -23,6 +23,7 @@ package {
 
 android_test {
     name: "BandwidthTests",
+    defaults: ["framework-connectivity-test-defaults"],
     // Include all test java files.
     srcs: ["src/**/*.java"],
     libs: [

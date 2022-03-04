@@ -112,17 +112,74 @@ public class SystemConfig {
         public final String name;
         public final String filename;
         public final String[] dependencies;
+
+        /**
+         * SDK version this library was added to the BOOTCLASSPATH.
+         *
+         * <p>At the SDK level specified in this field and higher, the apps' uses-library tags for
+         * this library will be ignored, since the library is always available on BOOTCLASSPATH.
+         *
+         * <p>0 means not specified.
+         */
+        public final int onBootclasspathSince;
+
+        /**
+         * SDK version this library was removed from the BOOTCLASSPATH.
+         *
+         * <p>At the SDK level specified in this field and higher, this library needs to be
+         * explicitly added by apps. For compatibility reasons, when an app
+         * targets an SDK less than the value of this attribute, this library is automatically
+         * added.
+         *
+         * <p>0 means not specified.
+         */
+        public final int onBootclasspathBefore;
+
+        /**
+         * Declares whether this library can be safely ignored from <uses-library> tags.
+         *
+         * <p> This can happen if the library initially had to be explicitly depended-on using that
+         * tag but has since been moved to the BOOTCLASSPATH which means now is always available
+         * and the tag is no longer required.
+         */
+        public final boolean canBeSafelyIgnored;
+
         public final boolean isNative;
 
-        SharedLibraryEntry(String name, String filename, String[] dependencies) {
-            this(name, filename, dependencies, false /* isNative */);
+
+        @VisibleForTesting
+        public SharedLibraryEntry(String name, String filename, String[] dependencies,
+                boolean isNative) {
+            this(name, filename, dependencies, 0 /* onBootclasspathSince */,
+                    0 /* onBootclasspathBefore */, isNative);
         }
 
-        SharedLibraryEntry(String name, String filename, String[] dependencies, boolean isNative) {
+        @VisibleForTesting
+        public SharedLibraryEntry(String name, String filename, String[] dependencies,
+                int onBootclasspathSince, int onBootclassPathBefore) {
+            this(name, filename, dependencies, onBootclasspathSince, onBootclassPathBefore,
+                    false /* isNative */);
+        }
+
+        SharedLibraryEntry(String name, String filename, String[] dependencies,
+                int onBootclasspathSince, int onBootclasspathBefore, boolean isNative) {
             this.name = name;
             this.filename = filename;
             this.dependencies = dependencies;
+            this.onBootclasspathSince = onBootclasspathSince;
+            this.onBootclasspathBefore = onBootclasspathBefore;
             this.isNative = isNative;
+
+            canBeSafelyIgnored = this.onBootclasspathSince != 0
+                    && isSdkAtLeast(this.onBootclasspathSince);
+        }
+
+        private static boolean isSdkAtLeast(int level) {
+            if ("REL".equals(Build.VERSION.CODENAME)) {
+                return Build.VERSION.SDK_INT >= level;
+            }
+            return level == Build.VERSION_CODES.CUR_DEVELOPMENT
+                    || Build.VERSION.SDK_INT >= level;
         }
     }
 
@@ -509,12 +566,14 @@ public class SystemConfig {
     }
 
     private void readAllPermissions() {
+        final XmlPullParser parser = Xml.newPullParser();
+
         // Read configuration from system
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "sysconfig"), ALLOW_ALL);
 
         // Read configuration from the old permissions dir
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
 
         // Vendors are only allowed to customize these
@@ -524,18 +583,18 @@ public class SystemConfig {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
         }
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
 
         String vendorSkuProperty = SystemProperties.get(VENDOR_SKU_PROPERTY, "");
         if (!vendorSkuProperty.isEmpty()) {
             String vendorSkuDir = "sku_" + vendorSkuProperty;
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getVendorDirectory(), "etc", "sysconfig", vendorSkuDir),
                     vendorPermissionFlag);
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getVendorDirectory(), "etc", "permissions", vendorSkuDir),
                     vendorPermissionFlag);
         }
@@ -543,18 +602,18 @@ public class SystemConfig {
         // Allow ODM to customize system configs as much as Vendor, because /odm is another
         // vendor partition other than /vendor.
         int odmPermissionFlag = vendorPermissionFlag;
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOdmDirectory(), "etc", "sysconfig"), odmPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOdmDirectory(), "etc", "permissions"), odmPermissionFlag);
 
         String skuProperty = SystemProperties.get(SKU_PROPERTY, "");
         if (!skuProperty.isEmpty()) {
             String skuDir = "sku_" + skuProperty;
 
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getOdmDirectory(), "etc", "sysconfig", skuDir), odmPermissionFlag);
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getOdmDirectory(), "etc", "permissions", skuDir),
                     odmPermissionFlag);
         }
@@ -562,9 +621,9 @@ public class SystemConfig {
         // Allow OEM to customize these
         int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS | ALLOW_ASSOCIATIONS
                 | ALLOW_VENDOR_APEX;
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "sysconfig"), oemPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
 
         // Allow Product to customize these configs
@@ -579,15 +638,15 @@ public class SystemConfig {
             // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
             productPermissionFlag = ALLOW_ALL;
         }
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
 
         // Allow /system_ext to customize all system configs
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
 
         // Skip loading configuration from apex if it is not a system process.
@@ -601,12 +660,14 @@ public class SystemConfig {
             if (f.isFile() || f.getPath().contains("@")) {
                 continue;
             }
-            readPermissions(Environment.buildPath(f, "etc", "permissions"), apexPermissionFlag);
+            readPermissions(parser, Environment.buildPath(f, "etc", "permissions"),
+                    apexPermissionFlag);
         }
+        pruneVendorApexPrivappAllowlists();
     }
 
     @VisibleForTesting
-    public void readPermissions(File libraryDir, int permissionFlag) {
+    public void readPermissions(final XmlPullParser parser, File libraryDir, int permissionFlag) {
         // Read permissions from given directory.
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
             if (permissionFlag == ALLOW_ALL) {
@@ -641,12 +702,12 @@ public class SystemConfig {
                 continue;
             }
 
-            readPermissionsFromXml(f, permissionFlag);
+            readPermissionsFromXml(parser, f, permissionFlag);
         }
 
         // Read platform permissions last so it will take precedence
         if (platformFile != null) {
-            readPermissionsFromXml(platformFile, permissionFlag);
+            readPermissionsFromXml(parser, platformFile, permissionFlag);
         }
     }
 
@@ -655,8 +716,9 @@ public class SystemConfig {
                 + permFile + " at " + parser.getPositionDescription());
     }
 
-    private void readPermissionsFromXml(File permFile, int permissionFlag) {
-        FileReader permReader = null;
+    private void readPermissionsFromXml(final XmlPullParser parser, File permFile,
+            int permissionFlag) {
+        final FileReader permReader;
         try {
             permReader = new FileReader(permFile);
         } catch (FileNotFoundException e) {
@@ -668,7 +730,6 @@ public class SystemConfig {
         final boolean lowRam = ActivityManager.isLowRamDeviceStatic();
 
         try {
-            XmlPullParser parser = Xml.newPullParser();
             parser.setInput(permReader);
 
             int type;
@@ -789,11 +850,17 @@ public class SystemConfig {
                             XmlUtils.skipCurrentTag(parser);
                         }
                     } break;
+                    case "apex-library":
+                        // "apex-library" is meant to behave exactly like "library"
                     case "library": {
                         if (allowLibs) {
                             String lname = parser.getAttributeValue(null, "name");
                             String lfile = parser.getAttributeValue(null, "file");
                             String ldependency = parser.getAttributeValue(null, "dependency");
+                            int minDeviceSdk = XmlUtils.readIntAttribute(parser, "min-device-sdk",
+                                    0);
+                            int maxDeviceSdk = XmlUtils.readIntAttribute(parser, "max-device-sdk",
+                                    0);
                             if (lname == null) {
                                 Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
                                         + parser.getPositionDescription());
@@ -801,10 +868,34 @@ public class SystemConfig {
                                 Slog.w(TAG, "<" + name + "> without file in " + permFile + " at "
                                         + parser.getPositionDescription());
                             } else {
-                                //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                                SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
-                                        ldependency == null ? new String[0] : ldependency.split(":"));
-                                mSharedLibraries.put(lname, entry);
+                                boolean allowedMinSdk = minDeviceSdk <= Build.VERSION.SDK_INT;
+                                boolean allowedMaxSdk =
+                                        maxDeviceSdk == 0 || maxDeviceSdk >= Build.VERSION.SDK_INT;
+                                final boolean exists = new File(lfile).exists();
+                                if (allowedMinSdk && allowedMaxSdk && exists) {
+                                    int bcpSince = XmlUtils.readIntAttribute(parser,
+                                            "on-bootclasspath-since", 0);
+                                    int bcpBefore = XmlUtils.readIntAttribute(parser,
+                                            "on-bootclasspath-before", 0);
+                                    SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
+                                            ldependency == null
+                                                    ? new String[0] : ldependency.split(":"),
+                                            bcpSince, bcpBefore);
+                                    mSharedLibraries.put(lname, entry);
+                                } else {
+                                    final StringBuilder msg = new StringBuilder(
+                                            "Ignore shared library ").append(lname).append(":");
+                                    if (!allowedMinSdk) {
+                                        msg.append(" min-device-sdk=").append(minDeviceSdk);
+                                    }
+                                    if (!allowedMaxSdk) {
+                                        msg.append(" max-device-sdk=").append(maxDeviceSdk);
+                                    }
+                                    if (!exists) {
+                                        msg.append(" ").append(lfile).append(" does not exist");
+                                    }
+                                    Slog.i(TAG, msg.toString());
+                                }
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1085,7 +1176,8 @@ public class SystemConfig {
                                 readPrivAppPermissions(parser, mSystemExtPrivAppPermissions,
                                         mSystemExtPrivAppDenyPermissions);
                             } else if (apex) {
-                                readApexPrivAppPermissions(parser, permFile);
+                                readApexPrivAppPermissions(parser, permFile,
+                                        Environment.getApexDirectory().toPath());
                             } else {
                                 readPrivAppPermissions(parser, mPrivAppPermissions,
                                         mPrivAppDenyPermissions);
@@ -1435,6 +1527,21 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * Prunes out any privileged permission allowlists bundled in vendor apexes.
+     */
+    @VisibleForTesting
+    public void pruneVendorApexPrivappAllowlists() {
+        for (String moduleName: mAllowedVendorApexes.keySet()) {
+            if (mApexPrivAppPermissions.containsKey(moduleName)
+                    || mApexPrivAppDenyPermissions.containsKey(moduleName)) {
+                Slog.w(TAG, moduleName + " is a vendor apex, ignore its priv-app allowlist");
+                mApexPrivAppPermissions.remove(moduleName);
+                mApexPrivAppDenyPermissions.remove(moduleName);
+            }
+        }
+    }
+
     private void readInstallInUserType(XmlPullParser parser,
             Map<String, Set<String>> doInstallMap,
             Map<String, Set<String>> nonInstallMap)
@@ -1645,8 +1752,7 @@ public class SystemConfig {
     /**
      * Returns the module name for a file in the apex module's partition.
      */
-    private String getApexModuleNameFromFilePath(Path path) {
-        final Path apexDirectoryPath = Environment.getApexDirectory().toPath();
+    private String getApexModuleNameFromFilePath(Path path, Path apexDirectoryPath) {
         if (!path.startsWith(apexDirectoryPath)) {
             throw new IllegalArgumentException("File " + path + " is not part of an APEX.");
         }
@@ -1658,9 +1764,14 @@ public class SystemConfig {
         return path.getName(apexDirectoryPath.getNameCount()).toString();
     }
 
-    private void readApexPrivAppPermissions(XmlPullParser parser, File permFile)
-            throws IOException, XmlPullParserException {
-        final String moduleName = getApexModuleNameFromFilePath(permFile.toPath());
+    /**
+     * Reads the contents of the privileged permission allowlist stored inside an APEX.
+     */
+    @VisibleForTesting
+    public void readApexPrivAppPermissions(XmlPullParser parser, File permFile,
+            Path apexDirectoryPath) throws IOException, XmlPullParserException {
+        final String moduleName =
+                getApexModuleNameFromFilePath(permFile.toPath(), apexDirectoryPath);
         final ArrayMap<String, ArraySet<String>> privAppPermissions;
         if (mApexPrivAppPermissions.containsKey(moduleName)) {
             privAppPermissions = mApexPrivAppPermissions.get(moduleName);

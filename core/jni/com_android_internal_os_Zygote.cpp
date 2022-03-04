@@ -1626,7 +1626,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
         }
         // Also prefetch standalone system server jars. The reason for doing this here is the same
         // as above.
-        env->CallStaticObjectMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
+        env->CallStaticVoidMethod(gZygoteInitClass, gPrefetchStandaloneSystemServerJars);
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
         }

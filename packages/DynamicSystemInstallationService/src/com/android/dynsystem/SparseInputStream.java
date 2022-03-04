@@ -177,7 +177,7 @@ public class SparseInputStream extends InputStream {
                 ret = 0;
                 break;
             case SparseChunk.FILL:
-                ret = mCur.fill[(4 - ((int) mLeft & 0x3)) & 0x3];
+                ret = Byte.toUnsignedInt(mCur.fill[(4 - ((int) mLeft & 0x3)) & 0x3]);
                 break;
             default:
                 throw new IOException("Unsupported Chunk:" + mCur.toString());
