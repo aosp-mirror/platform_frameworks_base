@@ -102,6 +102,10 @@ public class SystemServicesTestRule implements TestRule {
     static int sNextTaskId = 100;
 
     private static final int[] TEST_USER_PROFILE_IDS = {};
+    /** Use a real static object so there won't be NPE in finalize() after clearInlineMocks(). */
+    private static final PowerManager.WakeLock sWakeLock = getInstrumentation().getContext()
+            .getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+    private PowerManager.WakeLock mStubbedWakeLock;
 
     private Description mDescription;
     private Context mContext;
@@ -196,7 +200,8 @@ public class SystemServicesTestRule implements TestRule {
         // Prevent "WakeLock finalized while still held: SCREEN_FROZEN".
         final PowerManager pm = mock(PowerManager.class);
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
-        doReturn(mock(PowerManager.WakeLock.class)).when(pm).newWakeLock(anyInt(), anyString());
+        mStubbedWakeLock = createStubbedWakeLock(false /* needVerification */);
+        doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString());
 
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
@@ -402,6 +407,16 @@ public class SystemServicesTestRule implements TestRule {
         return mPowerManagerWrapper;
     }
 
+    /** Creates a no-op wakelock object. */
+    PowerManager.WakeLock createStubbedWakeLock(boolean needVerification) {
+        if (needVerification) {
+            return mock(PowerManager.WakeLock.class, Mockito.withSettings()
+                    .spiedInstance(sWakeLock).defaultAnswer(Mockito.RETURNS_DEFAULTS));
+        }
+        return mock(PowerManager.WakeLock.class, Mockito.withSettings()
+                .spiedInstance(sWakeLock).stubOnly());
+    }
+
     void setSurfaceFactory(Supplier<Surface> factory) {
         mSurfaceFactory = factory;
     }
@@ -557,7 +572,7 @@ public class SystemServicesTestRule implements TestRule {
             // unit test version does not handle launch wake lock
             doNothing().when(this).acquireLaunchWakelock();
 
-            mLaunchingActivityWakeLock = mock(PowerManager.WakeLock.class);
+            mLaunchingActivityWakeLock = mStubbedWakeLock;
 
             initialize();
 
