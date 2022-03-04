@@ -15,9 +15,6 @@
       "name": "CtsClassloaderSplitsHostTestCases"
     },
     {
-      "name": "CtsCompilationTestCases"
-    },
-    {
       "name": "CtsAppEnumerationTestCases"
     },
     {
@@ -52,6 +49,9 @@
       "options": [
         {
           "include-filter": "com.google.android.security.gts.PackageVerifierTest"
+        },
+        {
+          "exclude-filter": "com.google.android.security.gts.PackageVerifierTest#testAdbInstall_timeout_allowed"
         }
       ]
     },
@@ -111,6 +111,9 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
+    },
+    {
+      "name": "CtsCompilationTestCases"
     }
   ],
   "imports": [

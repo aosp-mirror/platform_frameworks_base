@@ -178,6 +178,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedAttribution;
+import com.android.server.policy.AppOpsPolicy;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -6231,8 +6232,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
-                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
-                needSep = mAudioRestrictionManager.dump(pw) | needSep ;
+                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers) {
+                needSep = mAudioRestrictionManager.dump(pw) || needSep;
             }
             if (needSep) {
                 pw.println();
@@ -6506,6 +6507,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                         ipw.decreaseIndent();
                     }
                     ipw.decreaseIndent();
+                }
+            }
+
+            if (!dumpHistory && !dumpWatchers) {
+                pw.println();
+                if (mCheckOpsDelegateDispatcher.mPolicy != null
+                        && mCheckOpsDelegateDispatcher.mPolicy instanceof AppOpsPolicy) {
+                    AppOpsPolicy policy = (AppOpsPolicy) mCheckOpsDelegateDispatcher.mPolicy;
+                    policy.dumpTags(pw);
+                } else {
+                    pw.println("  AppOps policy not set.");
                 }
             }
         }

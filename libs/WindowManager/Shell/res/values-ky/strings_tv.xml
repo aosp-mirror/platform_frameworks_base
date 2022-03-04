@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"PIP\'ти жабуу"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Толук экран"</string>
     <string name="pip_move" msgid="1544227837964635439">"PIP\'ти жылдыруу"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"PIP\'ти жайып көрсөтүү"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"PIP\'ти жыйыштыруу"</string>
 </resources>

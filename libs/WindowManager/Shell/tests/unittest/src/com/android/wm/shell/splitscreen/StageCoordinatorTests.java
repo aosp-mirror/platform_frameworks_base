@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
@@ -112,7 +113,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mStageCoordinator = spy(createStageCoordinator(/* splitLayout */ null));
+        mStageCoordinator = spy(createStageCoordinator(mSplitLayout));
         doNothing().when(mStageCoordinator).updateActivityOptions(any(), anyInt());
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
@@ -158,6 +159,9 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testDisplayAreaAppeared_initializesUnfoldControllers() {
+        // Create a stage coordinator with null split layout to test layout init flow.
+        mStageCoordinator = createStageCoordinator(null /* splitLayout */);
+
         mStageCoordinator.onDisplayAreaAppeared(mock(DisplayAreaInfo.class));
 
         verify(mMainUnfoldController).init();
@@ -166,7 +170,6 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testLayoutChanged_topLeftSplitPosition_updatesUnfoldStageBounds() {
-        mStageCoordinator = createStageCoordinator(mSplitLayout);
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
@@ -179,7 +182,6 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testLayoutChanged_bottomRightSplitPosition_updatesUnfoldStageBounds() {
-        mStageCoordinator = createStageCoordinator(mSplitLayout);
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
@@ -291,6 +293,13 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN, SPLIT_POSITION_UNDEFINED,
                 null /* options */, null /* wct */);
         assertEquals(mStageCoordinator.getMainStagePosition(), SPLIT_POSITION_BOTTOM_OR_RIGHT);
+    }
+
+    @Test
+    public void testFinishEnterSplitScreen_applySurfaceLayout() {
+        mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
+
+        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any());
     }
 
     private StageCoordinator createStageCoordinator(SplitLayout splitLayout) {

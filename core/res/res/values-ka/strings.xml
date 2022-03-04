@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"დარეკვის სამი გზა"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"არასასურველი მომაბეზრებელი ზარების უარყოფა"</string>
     <string name="CndMmi" msgid="185136449405618437">"დამრეკავი ნომრის მოწოდება"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"არ შემაწუხოთ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ნაგულისხმებად დაყენებულია ნომრის დაფარვა. შემდეგი ზარი: დაფარულია."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ნაგულისხმებად დაყენებულია ნომრის დაფარვა. შემდეგი ზარი: არ არის დაფარული."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: დაფარულია."</string>
@@ -541,7 +542,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"საშუალებას აძლევს აპს, აღმოაჩინოს ახლომახლო Bluetooth მოწყობილობები დასაწყვილებლად"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"დაწყვილებულ Bluetooth მოწყობილობებთან დაკავშირება"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"საშუალებას აძლევს აპს, დაუკავშირდეს დაწყვილებულ Bluetooth მოწყობილობებს"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე რეკლამის განთავსება"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე მონაცემების მაუწყებლობა"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"საშუალებას აძლევს აპს, რეკლამა განათავსოს ახლომახლო Bluetooth მოწყობილობებზე"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"შედარებითი პოზიციის დადგენა ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ნებას რთავს აპს, დაადგინოს შედარებითი პოზიცია ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"საშუალებას აძლევს მფლობელს შექმნას შეტყობინების გაცვლის მომსახურების უმახლესი დონის ინტერფეისი. არასდროს იქნება საჭირო ნორმალური აპლიკაციებისათვის."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ოპერატორის სერვისებთან დაკავშირება"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"მფლობელს აძლევს ოპერატორის სერვისებთან დაკავშირების საშუალებას. ჩვეულებრივი აპებისთვის არასოდეს იქნება საჭირო."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ფუნქციაზე „არ შემაწუხოთ“ წვდომა"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ნებართვის შესახებ გადაწყვეტილებების ნახვის დაწყება"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"გამოტოვება"</string>
     <string name="no_matches" msgid="6472699895759164599">"შესატყვისები არ არის."</string>
     <string name="find_on_page" msgid="5400537367077438198">"გვერდზე ძებნა"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# დამთხვევა}other{{total}-დან #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"დასრულდა"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"მიმდინარეობს ზიარი მეხსიერების ამოშლა…"</string>
     <string name="share" msgid="4157615043345227321">"გაზიარება"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-მდე"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-მდე (შემდეგი მაღვიძარა)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"გამორთვამდე"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"სანამ გამორთავთ „არ შემაწუხოთ“ ფუნქციას"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"აკეცვა"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"არ შემაწუხოთ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ავარიული პაუზა"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ზარების და შეტყობინებების მიღებისას ვიბრაცია ჩაირთვება"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ზარები და შეტყობინებები დადუმებული იქნება"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"სისტემის ცვლილებები"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"არ შემაწუხოთ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ახალი: „არ შემაწუხოთ“ რეჟიმი მალავს შეტყობინებებს"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"შეეხეთ მეტის გასაგებად და შესაცვლელად."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"სისტემა"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"პარამეტრები"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"კარგი"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"გამორთვა"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"შეიტყვეთ მეტი"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"გაფართოებულმა შეტყობინებებმა ჩაანაცვლა Android-ის ადაპტაციური შეტყობინებების ფუნქცია Android 12-ში. ეს ფუნქცია გაჩვენებთ შემოთავაზებულ მოქმედებებს და პასუხებს, ამასთანავე კი ახდენს თქვენი შეტყობინებების ორგანიზებას.\n\nგაფართოებულ შეტყობინებებს შეუძლია ყველა შეტყობინების კონტენტზე, მათ შორის, ისეთ პერსონალურ ინფორმაციაზე წვდომა, როგორიცაა კონტაქტების სახელები და შეტყობინებები. ამ ფუნქციას ასევე შეუძლია შეტყობინებათა დახურვა ან მათზე პასუხის გაცემა, მაგალითად, სატელეფონო ზარებზე პასუხი და „არ შემაწუხოთ“ რეჟიმის მართვა."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"რუტინის რეჟიმის საინფორმაციო შეტყობინება"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ბატარეა შეიძლება დაჯდეს დატენის ჩვეულ დრომდე"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ბატარეის დამზოგი გააქტიურდა ბატარეის მუშაობის გასახანგრძლივლებლად"</string>
@@ -2253,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"შეტყობინება ნათარგმნია <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-დან შემდეგ ენაზე: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"აქტივობა ფონურ რეჟიმში"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"აქტივობა ფონურ რეჟიმში"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> გაშვებულია ფონურ რეჟიმში და იყენებს ბატარეას. შეეხეთ გადასახედად."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> გაშვებულია ფონში და იყენებს ბატარეას. შეეხეთ გადასახედად."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ფონურ რეჟიმში დიდი ხანია გაშვებულია. შეეხეთ გადასახედად."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"კამერაზე წვდომა ამ მოწყობილობიდან ვერ მოხერხდება"</string>
 </resources>

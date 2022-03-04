@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"سه روش برقراری تماس"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"رد تماس‌های ناخواسته و آزار دهنده"</string>
     <string name="CndMmi" msgid="185136449405618437">"تحویل شماره تماس"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"مزاحم نشوید"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: محدود"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: بدون محدودیت"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: محدود"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ارسال و مشاهده پیامک‌ها"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"فایل‌ها و اسناد"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"دسترسی به فایل‌ها و اسناد موجود در دستگاه"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"موسیقی و فایل‌های صوتی دیگر"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"دسترسی به فایل‌های صوتی موجود در دستگاه"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"عکس‌ها و ویدیوها"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"بخشی از اثر انگشت شناسایی شد"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"حسگر اثر انگشت را تمیز و دوباره امتحان کنید"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"حسگر را تمیز و دوباره امتحان کنید"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"محکم روی حسگر فشار دهید"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"اثر انگشت دیگری را امتحان کنید"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"خیلی روشن است"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"هربار موقعیت انگشتتان را کمی تغییر دهید"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"اثر انگشت تشخیص داده نشد"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"محکم روی حسگر فشار دهید"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"اثر انگشت اصالت‌سنجی شد"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"چهره اصالت‌سنجی شد"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای میانای کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"اتصال به سرویس‌های شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"دسترسی به حالت «مزاحم نشوید»"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"شروع مشاهده استفاده از مجوز"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"به دارنده اجازه شروع استفاده از مجوز را برای برنامه می‌دهد. هرگز برای برنامه‌های معمول نیاز نیست."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"شروع مشاهده تصمیم‌های مربوط به اجازه‌ها"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"رد شدن"</string>
     <string name="no_matches" msgid="6472699895759164599">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="5400537367077438198">"یافتن در صفحه"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# مورد منطبق}one{# از {total}}other{# از {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"تمام"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"درحال پاک کردن فضای ذخیره‌سازی هم‌رسانی‌شده…"</string>
     <string name="share" msgid="4157615043345227321">"هم‌رسانی"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (زنگ بعدی)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"تا زمانی‌که آن را خاموش کنید"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"کوچک کردن"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"مزاحم نشوید"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"فرویش"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"شب آخر هفته"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"دستگاهتان برای تماس‌ها و اعلان‌ها می‌لرزد"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"دستگاهتان برای تماس‌ها و اعلان‌ها بی‌صدا خواهد شد"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"تغییرات سیستم"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"مزاحم نشوید"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"جدید: «مزاحم نشوید» اعلان‌ها را پنهان می‌کند"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"برای اطلاعات بیشتر و تغییر دادن، ضربه بزنید."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«مزاحم نشوید» تغییر کرده است"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"برای بررسی موارد مسدودشده ضربه بزنید."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سیستم"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"تنظیمات"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"تأیید"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"خاموش کردن"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"بیشتر بدانید"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏در Android نسخه ۱۲، اعلان‌های بهبودیافته جایگزین «اعلان‌های تطبیقی» شده است. این ویژگی پاسخ‌ها و کنش‌های پیشنهادی را نمایش می‌دهد و اعلان‌هایتان را سازمان‌دهی می‌کند.\n\nاعلان‌های بهبودیافته می‌توانند به محتوای اعلان، ازجمله اطلاعات شخصی مثل نام‌ها و پیام‌های مخاطبین دسترسی داشته باشند. این ویژگی همچنین می‌تواند اعلان‌ها را رد کند یا به آن‌ها پاسخ دهد؛ مثلاً پاسخ به تماس‌های تلفنی و کنترل کردن «مزاحم نشوید»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیام از <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> به <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ترجمه شد."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"فعالیت در پس‌زمینه"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"فعالیت در پس‌زمینه"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> در پس‌زمینه اجرا می‌شود و شارژ باتری را تخلیه می‌کند. برای مرور، ضربه بزنید."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"‫<xliff:g id="APP">%1$s</xliff:g> در پس‌زمینه اجرا می‌شود و شارژ باتری را تخلیه می‌کند. برای مرور، ضربه بزنید."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> برای مدتی طولانی در پس‌زمینه اجرا می‌شود. برای مرور، ضربه بزنید."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"بررسی برنامه‌های فعال"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"نمی‌توان از این دستگاه به دوربین دسترسی پیدا کرد"</string>
 </resources>

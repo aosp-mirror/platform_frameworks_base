@@ -16,6 +16,7 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -28,13 +29,16 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.SwipeDismissHandler;
 
+import java.util.function.Consumer;
+
 /**
  * ConstraintLayout that is draggable when touched in a specific region
  */
 public class DraggableConstraintLayout extends ConstraintLayout {
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
-    private Runnable mOnDismiss;
+    private Consumer<Animator> mOnDismissInitiated;
+    private Runnable mOnDismissComplete;
     private Runnable mOnInteraction;
 
     public DraggableConstraintLayout(Context context) {
@@ -58,9 +62,16 @@ public class DraggableConstraintLayout extends ConstraintLayout {
                     }
 
                     @Override
-                    public void onDismiss() {
-                        if (mOnDismiss != null) {
-                            mOnDismiss.run();
+                    public void onSwipeDismissInitiated(Animator animator) {
+                        if (mOnDismissInitiated != null) {
+                            mOnDismissInitiated.accept(animator);
+                        }
+                    }
+
+                    @Override
+                    public void onDismissComplete() {
+                        if (mOnDismissComplete != null) {
+                            mOnDismissComplete.run();
                         }
                     }
                 });
@@ -106,10 +117,18 @@ public class DraggableConstraintLayout extends ConstraintLayout {
     }
 
     /**
+     * Set the callback to be run after view is dismissed (before animation; receives animator as
+     * input)
+     */
+    public void setOnDismissStartCallback(Consumer<Animator> callback) {
+        mOnDismissInitiated = callback;
+    }
+
+    /**
      * Set the callback to be run after view is dismissed
      */
-    public void setOnDismissCallback(Runnable callback) {
-        mOnDismiss = callback;
+    public void setOnDismissEndCallback(Runnable callback) {
+        mOnDismissComplete = callback;
     }
 
     /**

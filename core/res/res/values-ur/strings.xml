@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"تین طرفہ کالنگ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"غیر مطلوبہ پریشان کن کالز کو مسترد کرنا"</string>
     <string name="CndMmi" msgid="185136449405618437">"کالنگ نمبر ڈیلیوری"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ڈسٹرب نہ کریں"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"حامل کو ایک کیریئر پیغام رسانی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"کیریئر سروسز کا پابند کریں"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"حامل کو کیریئر سروسز کا پابند کرنے کی اجازت دیتا ہے۔ معمول کی ایپس کیلئے کبھی درکار نہیں ہونا چاہیے۔"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ڈسٹرب نہ کریں تک رسائی حاصل کریں"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ایپ کو ڈسٹرب نہ کریں کنفیگریشن لکھنے اور پڑھنے کے قابل کرتا ہے۔"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"اجازت کی استعمال کا ملاحظہ شروع کریں"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"حامل کو ایپ کی اجازت کے استعمال کو شروع کرنے کی اجازت دیتا ہے۔ عام ایپس کے لیے کبھی بھی درکار نہیں ہونا چاہیے۔"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"اجازت کے فیصلوں کو دیکھنا شروع کریں"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"نظر انداز کریں"</string>
     <string name="no_matches" msgid="6472699895759164599">"کوئی مماثلتیں نہیں ہیں"</string>
     <string name="find_on_page" msgid="5400537367077438198">"صفحہ پر تلاش کریں"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# مماثلت}other{{total} میں سے #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ہو گیا"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"اشتراک کردہ اسٹوریج کو صاف کیا جا رہا ہے…"</string>
     <string name="share" msgid="4157615043345227321">"اشتراک کریں"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک (اگلا الارم)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"یہاں تک کہ آپ آف کر دیں"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"جب تک آپ ڈسڑب نہ کریں کو آف نہیں کر دیتے"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"سکیڑیں"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ڈاؤن ٹائم"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ویک نائٹ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ویک اینڈ"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"کالز اور اطلاعات پر وائبریٹ کرے گا"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"کالز اور اطلاعات کی آواز خاموش کر دی جائے گی"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"سسٹم کی تبدیلیاں"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ڈسٹرب نہ کریں"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"نئی: \'ڈسٹرب نہ کریں\' اطلاعات کو چھپا رہی ہے"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"مزید جاننے اور تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سسٹم"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ترتیبات"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ٹھیک ہے"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"آف کریں"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"مزید جانیں"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏Android 12 میں بہتر کردہ اطلاعات کو Android اڈاپٹیو کی اطلاعات سے تبدیل کیا گیا۔ یہ خصوصیت تجویز کردہ کارروائیاں اور جوابات دکھاتی ہے اور آپ کی اطلاعات کا نظم کرتی ہے۔\n\nبہتر کردہ اطلاعات رابطوں کے نام اور پیغامات جیسی ذاتی معلومات سمیت اطلاعات کے مواد تک رسائی حاصل کر سکتی ہیں۔ یہ خصوصیت اطلاعات کو برخاست کر سکتی ہے یا ان کا جواب بھی دے سکتی ہے جیسے فون کالز کا جواب دینا اور ڈسٹرب نہ کریں کو کنٹرول کرنا۔"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>
@@ -2253,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"پیغام کا ترجمہ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> سے<xliff:g id="TO_LANGUAGE">%2$s</xliff:g> میں کیا گیا۔"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"پس منظر کی سرگرمی"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"پس منظر کی سرگرمی"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> پس منظر میں چل رہی ہے اور بیٹری ختم ہو رہی ہے۔ جائزے کے لیے تھپتھپائیں۔"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"‫<xliff:g id="APP">%1$s</xliff:g> پس منظر میں چل رہی ہے اور بیٹری ختم ہو رہی ہے۔ جائزے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> کافی وقت سے پس منظر میں چل رہی ہے۔ جائزے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"اس آلہ سے کیمرا تک رسائی حاصل نہیں کر سکتے"</string>
 </resources>

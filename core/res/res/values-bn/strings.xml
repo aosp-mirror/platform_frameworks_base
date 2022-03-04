@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"তিন ভাবে কল করা"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"অবাঞ্ছিত বিরক্তিকর কলগুলি প্রত্যাখ্যান"</string>
     <string name="CndMmi" msgid="185136449405618437">"যে নম্বরটি থেকে কল করা হয় সেটি পাঠানো"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"বিরক্ত করবে না"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে৷ পরবর্তী কল: সীমাবদ্ধ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ"</string>
@@ -546,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করুন"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"অ্যাপকে আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করার অনুমতি দিন"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"আশপাশের ওয়াই-ফাই ডিভাইসের সাথে ইন্টার‍্যাক্ট করুন"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখাতে, তাদের সাথে কানেক্ট করতে এবং ত দূরত্বে আছে সেটি জানতে পারবে"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখতে, তাদের সাথে কানেক্ট করতে এবং তা কত দূরত্বে আছে সেটি জানতে পারবে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ধারককে, একটি ক্যারিয়ার মেসেজিং পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশনগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"পরিষেবা প্রদানকারীর সাথে যুক্ত হন"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"কোনো পরিষেবা প্রদানকারীর সাথে যুক্ত হতে ধারককে অনুমতি দিন। সাধারণ অ্যাপ্লিকেশানের জন্য প্র্রয়োজন হয় না।"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\'বিরক্ত করবে না\' -তে অ্যাক্সেস"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"অ্যাপটিকে \'বিরক্ত করবে না\' কনফিগারেশন পড়া এবং লেখার অনুমতি দেয়।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"দেখার অনুমতি কাজে লাগানো শুরু করুন"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"কোনও অ্যাপের কোনও নির্দিষ্ট অনুমতির ব্যবহার শুরু করার ক্ষেত্রে হোল্ডারকে সাহায্য করে। সাধারণ অ্যাপের জন্য এটির পরিবর্তন হওয়ার কথা নয়।"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"অনুমতি সংক্রান্ত সিদ্ধান্ত দেখা শুরু করুন"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"এড়িয়ে যান"</string>
     <string name="no_matches" msgid="6472699895759164599">"কোনো মিল নেই"</string>
     <string name="find_on_page" msgid="5400537367077438198">"পৃষ্ঠায় খুঁজুন"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{#টি ম্যাচ}one{{total}টির মধ্যে #টি}other{{total}টির মধ্যে #টি}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"সম্পন্ন হয়েছে"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"শেয়ার করা স্টোরেজ মুছে ফেলা হচ্ছে…"</string>
     <string name="share" msgid="4157615043345227321">"শেয়ার করুন"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত (পরবর্তী অ্যালার্ম)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"যতক্ষণ না আপনি বন্ধ করছেন"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"যতক্ষণ পর্যন্ত না আপনি বিরক্ত করবে না বন্ধ করছেন"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"সঙ্কুচিত করুন"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"বিরক্ত করবে না"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ডাউনটাইম"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"সপ্তাহান্তের রাত্রি"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহান্ত"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"কল এবং বিজ্ঞপ্তি আসলে ভাইব্রেট হবে"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"কল এবং বিজ্ঞপ্তিগুলি মিউট করা হবে"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"বিরক্ত করবে না"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"নতুন: \'বিরক্ত করবে না\' মোড চালু আছে, তাই বিজ্ঞপ্তি লুকিয়ে ফেলা হচ্ছে"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"আরও জানতে এবং পরিবর্তন করতে ট্যাপ করুন।"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"সিস্টেম"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"সেটিংস"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ঠিক আছে"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"বন্ধ করুন"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"আরও জানুন"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ভার্সনে Android অ্যাডাপ্টিভ বিজ্ঞপ্তির পরিবর্তে এনহ্যান্সড বিজ্ঞপ্তি এসেছে। এই ফিচারটি সাজেস্ট করা অ্যাকশন ও উত্তর দেখায় এবং আপনার বিজ্ঞপ্তিগুলি সাজিয়ে রাখে। \n\nএনহ্যান্সড বিজ্ঞপ্তি পরিচিতির নাম এবং মেসেজের মতো ব্যক্তিগত তথ্য সমেত বিজ্ঞপ্তির কন্টেন্টে অ্যাক্সেস করতে পারে। এছাড়া, এই ফিচার বিজ্ঞপ্তি খারিজ করতে বা তার উত্তর দিতে পারে, যেমন ফোন কলের উত্তর দেওয়া এবং \'বিরক্ত করবে না\' মোড নিয়ন্ত্রণ করা।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ব্যাকগ্রাউন্ডে চলছে এবং এর ফলে ব্যাটারির চার্জ কমে যাচ্ছে। পর্যালোচনা করতে ট্যাপ করুন।"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> অনেকক্ষণ ধরে ব্যাকগ্রাউন্ডে চলছে। পর্যালোচনা করতে ট্যাপ করুন।"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"অ্যাক্টিভ অ্যাপ চেক করুন"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"এই ডিভাইস থেকে ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
 </resources>

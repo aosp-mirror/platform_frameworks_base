@@ -83,6 +83,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -926,7 +927,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 mOnPreparedStylusHwCalled = true;
             }
             if (onStartStylusHandwriting()) {
-                mPrivOps.onStylusHandwritingReady(requestId);
+                mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
                 Log.i(TAG, "IME is not ready. Can't start Stylus Handwriting");
                 // TODO(b/210039666): see if it's valuable to propagate this back to IMM.

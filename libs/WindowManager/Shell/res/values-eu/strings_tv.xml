@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Itxi PIPa"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Pantaila osoa"</string>
     <string name="pip_move" msgid="1544227837964635439">"Mugitu pantaila txiki gainjarria"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Zabaldu pantaila txiki gainjarria"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Tolestu pantaila txiki gainjarria"</string>
 </resources>

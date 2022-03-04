@@ -263,6 +263,7 @@ import dalvik.annotation.optimization.NeverCompile;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -1034,10 +1035,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * The system is more careful about restricted ones and may apply restrictions to them, while
      * the unrestricted ones are considered safe.
      *
-     * @param outRestricted list to add restricted keep-clear areas to
-     * @param outUnrestricted list to add unrestricted keep-clear areas to
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      */
-    void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted) {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
         getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
@@ -1049,13 +1050,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * The system is more careful about restricted ones and may apply restrictions to them, while
      * the unrestricted ones are considered safe.
      *
-     * @param outRestricted list to add restricted keep-clear areas to
-     * @param outUnrestricted list to add unrestricted keep-clear areas to
+     * @param outRestricted collection to add restricted keep-clear areas to
+     * @param outUnrestricted collection to add unrestricted keep-clear areas to
      * @param tmpMatrix a temporary matrix to be used for transformations
      * @param float9 a temporary array of 9 floats
      */
-    void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted, Matrix tmpMatrix,
-            float[] float9) {
+    void getKeepClearAreas(Collection<Rect> outRestricted, Collection<Rect> outUnrestricted,
+            Matrix tmpMatrix, float[] float9) {
         outRestricted.addAll(getRectsInScreenSpace(mKeepClearAreas, tmpMatrix, float9));
         outUnrestricted.addAll(
                 getRectsInScreenSpace(mUnrestrictedKeepClearAreas, tmpMatrix, float9));

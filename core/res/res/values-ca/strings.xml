@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Trucada a tres bandes"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rebuig de trucades molestes no desitjades"</string>
     <string name="CndMmi" msgid="185136449405618437">"Lliurament de número que truca"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"No molestis"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: restringit"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: no restringit"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: restringit"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accedir al calendari"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar i llegir missatges SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Fitxers i documents"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"accedir als fitxers i documents del dispositiu"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música i altres fitxers d\'àudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"accedir a fitxers d\'àudio del dispositiu"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos i vídeos"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introdueix el teu bloqueig de pantalla per continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"S\'ha detectat una empremta digital parcial"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Neteja el sensor d\'empremtes digitals i torna-ho a provar"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Neteja el sensor i torna-ho a provar"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prem el sensor de manera ferma"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova una altra empremta digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit en cada intent"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"L\'empremta digital no s\'ha reconegut"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Prem el sensor de manera ferma"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permet que el propietari la pugui vincular a la interfície principal del servei de missatgeria d\'un operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular-la a serveis de l\'operador de telefonia mòbil"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permet que el propietari la vinculi a serveis de l\'operador de telefonia mòbil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accedir a No molestis"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet que l\'aplicació llegeixi la configuració No molestis i hi escrigui."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"comença a utilitzar el permís de visualització"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet que un propietari comenci a utilitzar el permís amb una aplicació. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"inicia la visualització de les decisions sobre permisos"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
     <string name="no_matches" msgid="6472699895759164599">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Troba-ho a la pàgina"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fet"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"S\'està esborrant l\'emmagatzematge compartit…"</string>
     <string name="share" msgid="4157615043345227321">"Comparteix"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"No molestis"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Temps d\'inactivitat"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Nit entre setmana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cap de setmana"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les trucades i les notificacions vibraran"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les trucades i les notificacions se silenciaran"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Canvis del sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No molestis"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novetat: el mode No molestis està amagant notificacions"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca per obtenir més informació i canviar la configuració."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"S\'ha canviat el mode No molestis"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca per consultar què s\'ha bloquejat."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Configuració"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"D\'acord"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Més informació"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notificacions millorades han substituït les notificacions adaptatives d\'Android a Android 12. Aquesta funció mostra les accions i respostes suggerides, i organitza les teves notificacions.\n\nLes notificacions millorades poden accedir al contingut de les notificacions, inclosa la informació personal com els noms dels contactes i els missatges. Aquesta funció també pot ignorar les notificacions o respondre-hi; per exemple, pot contestar a trucades i controlar el mode No molestis."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Missatge traduït de <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> a <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activitat en segon pla"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Activitat en segon pla"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla i consumeix bateria. Toca per revisar-ho."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla i esgotant la bateria. Toca per revisar-ho."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Fa molta estona que <xliff:g id="APP">%1$s</xliff:g> s\'està executant en segon pla. Toca per revisar-ho."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta les aplicacions actives"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"No es pot accedir a la càmera des d\'aquest dispositiu"</string>
 </resources>

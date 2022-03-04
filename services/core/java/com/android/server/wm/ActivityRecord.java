@@ -543,7 +543,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final RootWindowContainer mRootWindowContainer;
 
     // Tracking splash screen status from previous activity
-    boolean mSplashScreenStyleEmpty = false;
+    boolean mSplashScreenStyleSolidColor = false;
 
     Drawable mEnterpriseThumbnailDrawable;
 
@@ -826,7 +826,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private static final int SPLASH_SCREEN_BEHAVIOR_DEFAULT = 0;
     /**
-     * The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY.
+     * The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_SOLID_COLOR.
      *
      * @see android.R.attr#windowSplashScreenBehavior
      */
@@ -2182,7 +2182,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     boolean addStartingWindow(String pkg, int resolvedTheme, ActivityRecord from, boolean newTask,
             boolean taskSwitch, boolean processRunning, boolean allowTaskSnapshot,
-            boolean activityCreated, boolean useEmpty,
+            boolean activityCreated, boolean isSimple,
             boolean activityAllDrawn) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
@@ -2218,7 +2218,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final int typeParameter = StartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
-                        allowTaskSnapshot, activityCreated, useEmpty, useLegacy, activityAllDrawn,
+                        allowTaskSnapshot, activityCreated, isSimple, useLegacy, activityAllDrawn,
                         type, packageName, mUserId);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
@@ -6137,7 +6137,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onFirstWindowDrawn(WindowState win) {
         firstWindowDrawn = true;
         // stop tracking
-        mSplashScreenStyleEmpty = true;
+        mSplashScreenStyleSolidColor = true;
 
         // We now have a good window to show, remove dead placeholders
         removeDeadWindows();
@@ -6172,7 +6172,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void onStartingWindowDrawn() {
         boolean wasTaskVisible = false;
         if (task != null) {
-            mSplashScreenStyleEmpty = true;
+            mSplashScreenStyleSolidColor = true;
             wasTaskVisible = task.getHasBeenVisible();
             task.setHasBeenVisible(true);
         }
@@ -6646,10 +6646,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         return false;
     }
-    private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord, boolean startActivity,
-            ActivityOptions options, int resolvedTheme) {
+    private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
+            boolean startActivity, ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
-            // Use empty style if this activity is not top activity. This could happen when adding
+            // Use simple style if this activity is not top activity. This could happen when adding
             // a splash screen window to the warm start activity which is re-create because top is
             // finishing.
             final ActivityRecord above = task.getActivityAbove(this);
@@ -6661,7 +6661,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // setSplashScreenStyle decide in priority of windowSplashScreenBehavior.
         if (options != null) {
             final int optionsStyle = options.getSplashScreenStyle();
-            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
+            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
                 return true;
             } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
                     || isIconStylePreferred(resolvedTheme)) {
@@ -6682,11 +6682,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (sourceRecord != null && !sourceRecord.isActivityTypeHome()) {
-            return sourceRecord.mSplashScreenStyleEmpty;
+            return sourceRecord.mSplashScreenStyleSolidColor;
         }
 
-        // If this activity was launched from Launcher or System for first start, never use an
-        // empty splash screen.
+        // If this activity was launched from Launcher or System for first start, never use a
+        // solid color splash screen.
         // Need to check sourceRecord before in case this activity is launched from service.
         return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
                 || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME);
@@ -6752,7 +6752,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
 
-        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord, startActivity,
+        mSplashScreenStyleSolidColor = shouldUseSolidColorSplashScreen(sourceRecord, startActivity,
                 startOptions, resolvedTheme);
 
         final boolean activityCreated =
@@ -6764,7 +6764,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean scheduled = addStartingWindow(packageName, resolvedTheme,
                 prev, newTask || newSingleActivity, taskSwitch, processRunning,
-                allowTaskSnapshot(), activityCreated, mSplashScreenStyleEmpty, allDrawn);
+                allowTaskSnapshot(), activityCreated, mSplashScreenStyleSolidColor, allDrawn);
         if (DEBUG_STARTING_WINDOW_VERBOSE && scheduled) {
             Slog.d(TAG, "Scheduled starting window for " + this);
         }

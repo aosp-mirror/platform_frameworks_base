@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ సరిచేయడం"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"మీ పరికరంపై రంగులు కనిపించే విధానాన్ని అడ్జస్ట్ చేయండి. ఇటువంటి సందర్భాలలో ఇది మీకు సహాయకరంగా ఉంటుంది:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;మరింత ఖచ్చితంగా రంగులను చూడాలనుకున్నప్పుడు&lt;/li&gt; &lt;li&gt;&amp;nbsp; ఫోకస్ చేయడంలో మీకు సహాయపడటానికి రంగులను తీసివేయాలనుకున్నప్పుడు&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూడండి&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"కనెక్ట్ చేయబడింది, ఛార్జ్ చేయబడలేదు"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ఛార్జ్ చేయబడింది"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"పూర్తి ఛార్జ్ అయింది"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"నిర్వాహకుని ద్వారా నియంత్రించబడింది"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"పరిమితం చేసిన సెట్టింగ్ ద్వారా నియంత్రించబడుతుంది"</string>
     <string name="disabled" msgid="8017887509554714950">"డిజేబుల్ చేయబడింది"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"అలారాలను సెట్ చేయడానికి, సమయ-సునిశిత చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. ఇది యాప్‌ను బ్యాక్‌గ్రౌండ్‌లో రన్ అవడానికి అనుమతిస్తుంది, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు.\n\nఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ ద్వారా షెడ్యూల్ చేసిన ఇప్పటికే ఉన్న అలారాలు, సమయ-ఆధారిత ఈవెంట్‌లు పనిచేయవు."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ఎప్పటికీ వ‌ద్దు"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ການໂທສາມສາຍ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ປະຕິເສດສາຍທີ່ບໍ່ຕ້ອງການຮັບ"</string>
     <string name="CndMmi" msgid="185136449405618437">"ການສົ່ງໝາຍເລກທີ່ໂທ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ຫ້າມລົບກວນ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ໝາຍເລກຜູ່ໂທຖືກຕັ້ງຄ່າເລີ່ມຕົ້ນໃຫ້ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ຖືກຈຳກັດ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID ໂດຍເລີ່ມຕົ້ນຖືກປັບໃຫ້ບໍ່ມີການປິດກັ້ນ. ການໂທຕໍ່ໄປ:ປິດກັ້ນ"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ອະນຸຍາດໃຫ້ຜູ້ຖືຜູກ​ພັນ​ກັບຕົວ​ປະ​ສານລະດັບສູງສຸດຂອງບໍລິການສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ປະ​ຕິ​ບັດ​ຕາມ​ການ​ບໍ​ລິ​ການ​​ຂອງ​ບໍ​ລິ​ສັດ​ເຄືອ​ຂ່າຍ​ມື​ຖື"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ອະ​ນຸ​ຍາດ​ໃຫ້​ເຈົ້າ​ຂອງ​ປະ​ຕິ​ບັດ​ຕາມ​ການ​ບໍ​ລິ​ການ​​ຂອງ​ບໍ​ລິ​ສັດ​ເຄືອ​ຂ່າຍ​ມື​ຖື. ບໍ່​ຄວນ​ຈະໃຊ້​ໃນ​ແອັບ​ທົ່ວ​ໄປ."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"​ເຂົ້າ​ເຖິງ  ບໍ່​ລົບ​ກວນ"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ອະນຸຍາດ​​ໃຫ້​ແອັບ​ອ່ານ​ ​ແລະ​ຂຽນການກນຳ​ດຄ່າ ບໍ່​ລົບ​ກວນ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ເລີ່ມການໃຊ້ສິດອະນຸຍາດການເບິ່ງ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການໃຊ້ສິດອະນຸຍາດສຳລັບແອັບໃດໜຶ່ງໄດ້. ແອັບປົກກະຕິບໍ່ຄວນຕ້ອງໃຊ້."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ເລີ່ມເບິ່ງການຕັດສິນໃຈການອະນຸຍາດ"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ຂ້າມ"</string>
     <string name="no_matches" msgid="6472699895759164599">"ບໍ່ພົບຜົນການຊອກຫາ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ຊອກໃນໜ້າ"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{ກົງກັນ # ລາຍການ}other{# ຈາກທັງໝົດ {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ແລ້ວໆ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"ກຳລັງລຶບບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ…"</string>
     <string name="share" msgid="4157615043345227321">"ແບ່ງປັນ"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"ຈົນ​ກ​່​ວາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ສັນ​ຍານ​ເຕືອນ​ຕໍ່ໄປ​)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ຈົນກວ່າທ່ານຈະປິດ"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"ຈົນ​ກ່​ວາ​ທ່ານ​ປິດ​ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ຫຍໍ້"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ຄ່ຳ​ຄືນ​ໃນ​ອາ​ທິດ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ທ້າຍອາທິດ"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະສັ່ນ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະບໍ່ມີສຽງ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ການປ່ຽນແປງລະບົບ"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ຫ້າມລົບກວນ"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ໃໝ່: ໂໝດຫ້າມລົບກວນຈະເຊື່ອງການແຈ້ງເຕືອນໄວ້"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ ແລະ ປ່ຽນແປງ."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ປ່ຽນໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ການຕັ້ງຄ່າ"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ຕົກລົງ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ປິດໄວ້"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ຖືກແທນທີ່ດ້ວຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນໃນ Android 12 ແລ້ວ. ຄຸນສົມບັດນີ້ສະແດງຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳ ແລະ ຈັດລະບຽບການແຈ້ງເຕືອນຂອງທ່ານ.\n\nການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດເຂົ້າເຖິງເນື້ອຫາການແຈ້ງເຕືອນໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມ. ຄຸນສົມບັດນີ້ສາມາດປິດ ຫຼື ຕອບກັບຫາການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ ແລະ ຄວບຄຸມໂໝດຫ້າມລົບກວນ."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງ ແລະ ໃຊ້ແບັດເຕີຣີຫຼາຍ. ແຕະເພື່ອກວດສອບ."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງເປັນເວລາດົນແລ້ວ. ແຕະເພື່ອກວດສອບ."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ກວດສອບແອັບທີ່ເຄື່ອນໄຫວ"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຈາກອຸປະກອນນີ້ໄດ້"</string>
 </resources>

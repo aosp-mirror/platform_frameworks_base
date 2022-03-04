@@ -2035,7 +2035,7 @@
              {@link android.app.Activity#onBackPressed Activity.onBackPressed()}
              and related event will be forwarded to the Activities and View, otherwise those events
              will be replaced by a call to
-             {@link android.view.OnBackInvokedCallback#onBackInvoked
+             {@link android.window.OnBackInvokedCallback#onBackInvoked
              OnBackInvokedCallback.onBackInvoked()} on the focused window. -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
     </declare-styleable>

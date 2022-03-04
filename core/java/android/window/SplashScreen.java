@@ -52,7 +52,7 @@ public interface SplashScreen {
      * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to avoid showing the
      * splash screen icon of the launched activity
      */
-    int SPLASH_SCREEN_STYLE_EMPTY = 0;
+    int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0;
     /**
      * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to show the splash screen
      * icon of the launched activity.
@@ -62,7 +62,7 @@ public interface SplashScreen {
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
             SPLASH_SCREEN_STYLE_UNDEFINED,
-            SPLASH_SCREEN_STYLE_EMPTY,
+            SPLASH_SCREEN_STYLE_SOLID_COLOR,
             SPLASH_SCREEN_STYLE_ICON
     })
     @interface SplashScreenStyle {}

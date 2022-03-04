@@ -31,6 +31,7 @@ import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -65,7 +66,7 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
 
     @Override
     public boolean isEnabled(BooleanFlag flag) {
-        return isEnabled(flag.getId(), flag.getDefault());
+        return flag.getDefault();
     }
 
     @Override
@@ -120,10 +121,24 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
-        int numBooleans = mBooleanCache.size();
-        pw.println("booleans: " + numBooleans);
-        for (int i = 0; i < numBooleans; i++) {
-            pw.println("  sysui_flag_" + mBooleanCache.keyAt(i) + ": " + mBooleanCache.valueAt(i));
+        Map<Integer, Flag<?>> knownFlags = Flags.collectFlags();
+        for (Map.Entry<Integer, Flag<?>> idToFlag : knownFlags.entrySet()) {
+            int id = idToFlag.getKey();
+            Flag<?> flag = idToFlag.getValue();
+            boolean def = false;
+            if (mBooleanCache.indexOfKey(flag.getId()) < 0) {
+                if (flag instanceof SysPropBooleanFlag) {
+                    SysPropBooleanFlag f = (SysPropBooleanFlag) flag;
+                    def = mSystemProperties.getBoolean(f.getName(), f.getDefault());
+                } else if (flag instanceof ResourceBooleanFlag) {
+                    ResourceBooleanFlag f = (ResourceBooleanFlag) flag;
+                    def = mResources.getBoolean(f.getResourceId());
+                } else if (flag instanceof BooleanFlag) {
+                    BooleanFlag f = (BooleanFlag) flag;
+                    def = f.getDefault();
+                }
+            }
+            pw.println("  sysui_flag_" + id + ": " + (mBooleanCache.get(id, def)));
         }
         int numStrings = mStringCache.size();
         pw.println("Strings: " + numStrings);

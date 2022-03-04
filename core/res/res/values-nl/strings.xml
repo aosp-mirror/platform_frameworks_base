@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Driewegs bellen"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ongewenste, vervelende gesprekken weigeren"</string>
     <string name="CndMmi" msgid="185136449405618437">"Weergave van nummer van beller"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Niet storen"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: beperkt."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: onbeperkt."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: beperkt."</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"toegang krijgen tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sms\'jes verzenden en bekijken"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Bestanden en documenten"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"bestanden en documenten op je apparaat openen"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muziek en andere audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"toegang krijgen tot audiobestanden op je apparaat"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto\'s en video\'s"</string>
@@ -543,12 +542,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Hiermee kan de app bluetooth-apparaten in de buurt vinden en koppelen"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"verbinding maken met gekoppelde bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Hiermee kan de app verbinding maken met gekoppelde bluetooth-apparaten"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteren op bluetooth-apparaten in de buurt"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app adverteren op bluetooth-apparaten in de buurt"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"uitzenden naar bluetooth-apparaten in de buurt"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app uitzenden naar bluetooth-apparaten in de buurt"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"relatieve positie tussen ultrabreedbandapparaten in de buurt bepalen"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"De app toestaan om de relatieve positie tussen ultrabreedbandapparaten in de buurt te bepalen"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interactie met wifi-apparaten in de buurt"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Hiermee kan de app adverteren op, verbinding maken met en de relatieve positie bepalen van wifi-apparaten in de buurt"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Hiermee kan de app uitzenden, verbindingen maken en de relatieve positie bepalen van wifi-apparaten in de buurt"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer je schermvergrendeling in om door te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Gedeeltelijke vingerafdruk gedetecteerd"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinig de vingerafdruksensor en probeer het opnieuw"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinig de sensor en probeer het opnieuw"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Druk stevig op de sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vinger te langzaam bewogen. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probeer een andere vingerafdruk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Te veel licht"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Verander de positie van je vinger steeds een beetje"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Vingerafdruk niet herkend"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Druk stevig op de sensor"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Vingerafdruk geverifieerd"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Gezicht geverifieerd"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gezicht geverifieerd. Druk op Bevestigen."</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"toegang tot Niet storen"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bekijken van rechtenbeslissingen starten"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Overslaan"</string>
     <string name="no_matches" msgid="6472699895759164599">"Geen overeenkomsten"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Zoeken op pagina"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# overeenkomst}other{# van {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Klaar"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Gedeelde opslag wissen…"</string>
     <string name="share" msgid="4157615043345227321">"Delen"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Totdat je uitzet"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Totdat je Niet storen uitzet"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Samenvouwen"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Niet storen"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Trillen bij gesprekken en meldingen"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Telefoon- en meldingsgeluid wordt uitgezet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systeemwijzigingen"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Niet storen"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nieuw: \'Niet storen\' verbergt meldingen"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik voor meer informatie en om te wijzigen."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Instellingen"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Uitzetten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie laat voorgestelde acties en antwoorden zien en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen, en Niet storen beheren."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd op de achtergrond en verbruikt veel batterijlading. Tik om te bekijken."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> wordt al lange tijd uitgevoerd op de achtergrond. Tik om te bekijken."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Actieve apps checken"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Kan geen toegang krijgen tot de camera vanaf dit apparaat"</string>
 </resources>

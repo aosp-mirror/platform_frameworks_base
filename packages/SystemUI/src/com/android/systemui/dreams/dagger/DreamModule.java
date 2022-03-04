@@ -21,7 +21,6 @@ import android.content.Context;
 import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dreams.complication.dagger.DreamPreviewComplicationComponent;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
-import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -30,7 +29,6 @@ import dagger.Provides;
  * Dagger Module providing Communal-related functionality.
  */
 @Module(includes = {
-            DreamTouchModule.class,
             RegisteredComplicationsModule.class,
         },
         subcomponents = {

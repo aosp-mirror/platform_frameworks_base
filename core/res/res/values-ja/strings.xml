@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"三者間通話"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"迷惑な着信を拒否"</string>
     <string name="CndMmi" msgid="185136449405618437">"発呼者番号を配信"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"着信拒否"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"既定: 発信者番号非通知、次の発信: 非通知"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"既定: 発信者番号非通知、次の発信: 通知"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"既定: 発信者番号通知、次の発信: 非通知"</string>
@@ -545,7 +546,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"付近の Bluetooth デバイスへの広告の配信をアプリに許可します"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"付近の Ultra Wideband デバイス間の相対位置の特定"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"付近の Ultra Wideband デバイス間の相対位置の特定をアプリに許可します"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとのやり取り"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとの通信"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"付近の Wi-Fi デバイスについて、情報の表示、接続、相対位置の確認をアプリに許可します"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"サイレント モードの利用"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"閲覧権限の許可 / 拒否の開始"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"スキップ"</string>
     <string name="no_matches" msgid="6472699895759164599">"該当なし"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ページ内を検索"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{一致: # 件}other{#/{total} 件}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"完了"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"共有ストレージを消去しています…"</string>
     <string name="share" msgid="4157615043345227321">"共有"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"自分が OFF にするまで"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"サイレント モードを OFF にするまで"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"折りたたむ"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"サイレント モード"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ダウンタイム"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"平日の夜"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音が鳴りません"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"システムの変更"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"サイレント モード"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新機能: サイレント モードでは通知が非表示になります"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"タップすると、詳細を確認して設定を変更できます。"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"設定"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"OFF にする"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"詳細"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 では Android 通知の自動調整が拡張通知に切り替えられました。この機能により、操作や返信の候補が提示され、通知が整理されます。\n\n拡張通知は通知コンテンツにアクセスできます。これには、連絡先の名前などの個人情報やメッセージも含まれます。また、この機能は、通知を非表示にしたり通知に応答したりすることもできます。たとえば、電話に出ることやサイレント モードを管理することができます。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ルーティン モード情報の通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"通常の充電を行う前に電池が切れる可能性があります"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"電池を長持ちさせるため、バッテリー セーバーが有効になりました"</string>
@@ -2253,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"メッセージを<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>から<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>に翻訳しました。"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"バックグラウンド アクティビティ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行され、バッテリーを消費しています。タップしてご確認ください。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドでバッテリーを消費しています。タップして確認。"</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで長時間実行されています。タップしてご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"有効なアプリをチェック"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"このデバイスからはカメラにアクセスできません"</string>
 </resources>

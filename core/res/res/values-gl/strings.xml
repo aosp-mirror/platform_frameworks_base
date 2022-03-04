@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Chamada a tres"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rexeitamento de chamadas molestas non desexadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Entrega de número de chamada entrante"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Non molestar"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: restrinxido"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O valor predeterminado do identificador de chamada é non restrinxido. Próxima chamada: restrinxido"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar e consultar mensaxes de SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Ficheiros e documentos"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"acceder a ficheiros e documentos do dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Música e outro contido de audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"acceder a ficheiros de audio do teu dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos e vídeos"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Desbloquea a pantalla para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Detectouse unha impresión dixital parcial"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpa o sensor de impresión dixital e téntao de novo"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpa o sensor e téntao de novo"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Preme o sensor con firmeza"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O dedo moveuse demasiado lento. Téntao de novo."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proba con outra impresión dixital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hai demasiada luz"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Cambia lixeiramente a posición do dedo en cada intento"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Non se recoñeceu a impresión dixital"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Preme o sensor con firmeza"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autenticouse a impresión dixital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Autenticouse a cara"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autenticouse a cara, preme Confirmar"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxaría. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular aos servizos do operador"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite ao titular vincularse aos servizos do operador. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acceso a Non molestar"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"iniciar vista das decisións sobre os permisos"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omitir"</string>
     <string name="no_matches" msgid="6472699895759164599">"Non hai coincidencias"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Buscar na páxina"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidencia}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Feito"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Borrando almacenamento compartido…"</string>
     <string name="share" msgid="4157615043345227321">"Compartir"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Ata a desactivación"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Ata que desactives o modo Non molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Contraer"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Non molestar"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Tempo de descanso"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noite da semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"As chamadas e as notificacións vibrarán"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"As chamadas e as notificacións estarán silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios no sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non molestar"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novidade! O modo Non molestar oculta as notificacións"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca para obter máis información e facer cambios."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Non molestar cambiou"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para comprobar o contido bloqueado."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Configuración"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Máis información"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"En Android 12, as notificacións melloradas substitúen as notificacións intelixentes. Esta función ofréceche suxestións de accións e respostas, ademais de organizar as notificacións.\n\nEste servizo pode acceder ao contido das notificacións, mesmo á información persoal, como os nomes dos contactos e as mensaxes. Ademais, esta función pode ignorar ou responder as notificacións (por exemplo, coller chamadas telefónicas e controlar o modo Non molestar)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>
@@ -2102,11 +2103,11 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de atallos de accesibilidade en pantalla"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Atallo de accesibilidade"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ignorar panel despregable"</string>
-    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Botón direccional: arriba"</string>
-    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Botón direccional: abaixo"</string>
-    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Botón direccional: esquerda"</string>
-    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Botón direccional: dereita"</string>
-    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Botón direccional: centro"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Cruceta: arriba"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Cruceta: abaixo"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Cruceta: esquerda"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Cruceta: dereita"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Cruceta: centro"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> incluíuse no grupo RESTRINXIDO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> está executándose en segundo plano e consumindo batería. Toca para revisalo."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> leva moito tempo executándose en segundo plano. Toca para revisalo."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Comprobar aplicacións activas"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Non se pode acceder á cámara desde este dispositivo"</string>
 </resources>

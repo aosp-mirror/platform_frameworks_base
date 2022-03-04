@@ -385,6 +385,25 @@ import java.util.List;
  *   <li>{@link #getText()} - The text of the announcement.</li>
  * </ul>
  * </p>
+  * <p>
+ * <b>speechStateChanged</b>
+ * <em>Type:</em> {@link #TYPE_SPEECH_STATE_CHANGE}</br>
+ * Represents a change in the speech state defined by the
+ * bit mask of the speech state change types.
+ * A change in the speech state occurs when an application wants to signal that
+ * it is either speaking or listening for human speech.
+ * This event helps avoid conflicts where two applications want to speak or one listens
+ * when another speaks.
+ * When sending this event, the sender should ensure that  the accompanying state change types
+ * make sense. For example, the sender should not send
+ * {@link #SPEECH_STATE_SPEAKING_START} and {@link #SPEECH_STATE_SPEAKING_END} together.
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getSpeechStateChangeTypes()} - The type of state changes</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ * </ul>
+ * </p>
  *
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService
@@ -553,14 +572,20 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_ASSIST_READING_CONTEXT = 0x01000000;
 
     /**
-     * Represents a change in the speech state defined by the content-change types. A change in the
-     * speech state occurs when another service is either speaking or listening for human speech.
-     * This event helps avoid conflicts where two services want to speak or one listens
+     * Represents a change in the speech state defined by the speech state change types.
+     * A change in the speech state occurs when an application wants to signal that it is either
+     * speaking or listening for human speech.
+     * This event helps avoid conflicts where two applications want to speak or one listens
      * when another speaks.
+     * When sending this event, the sender should ensure that  the accompanying state change types
+     * make sense. For example, the sender should not send
+     * {@link #SPEECH_STATE_SPEAKING_START} and {@link #SPEECH_STATE_SPEAKING_END} together.
      * @see #SPEECH_STATE_SPEAKING_START
      * @see #SPEECH_STATE_SPEAKING_END
      * @see #SPEECH_STATE_LISTENING_START
      * @see #SPEECH_STATE_LISTENING_END
+     * @see #getSpeechStateChangeTypes
+     * @see #setSpeechStateChangeTypes
      */
     public static final int TYPE_SPEECH_STATE_CHANGE = 0x02000000;
 
@@ -1067,7 +1092,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Gets the speech state signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event
+     * Gets the bit mask of the speech state signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event
      *
      * @see #SPEECH_STATE_SPEAKING_START
      * @see #SPEECH_STATE_SPEAKING_END
@@ -1078,7 +1103,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         return mSpeechStateChangeTypes;
     }
 
-    private static String speechStateChangedTypesToString(int types) {
+    private static String speechStateChangeTypesToString(int types) {
         return BitUtils.flagsToString(
                 types, AccessibilityEvent::singleSpeechStateChangeTypeToString);
     }
@@ -1099,14 +1124,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Sets the speech state type signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event
+     * Sets the bit mask of the speech state change types
+     * signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event.
+     * The sender is responsible for ensuring that  the state change types  make sense. For example,
+     * the sender should not send
+     * {@link #SPEECH_STATE_SPEAKING_START} and {@link #SPEECH_STATE_SPEAKING_END} together.
      *
      * @see #SPEECH_STATE_SPEAKING_START
      * @see #SPEECH_STATE_SPEAKING_END
      * @see #SPEECH_STATE_LISTENING_START
      * @see #SPEECH_STATE_LISTENING_END
      */
-    public void setSpeechStateChangeTypes(int state) {
+    public void setSpeechStateChangeTypes(@SpeechStateChangeTypes int state) {
         enforceNotSealed();
         mSpeechStateChangeTypes = state;
     }

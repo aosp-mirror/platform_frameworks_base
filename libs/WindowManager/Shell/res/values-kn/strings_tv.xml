@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"PIP ಮುಚ್ಚಿ"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"ಪೂರ್ಣ ಪರದೆ"</string>
     <string name="pip_move" msgid="1544227837964635439">"PIP ಅನ್ನು ಸರಿಸಿ"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ವಿಸ್ತರಿಸಿ"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ಕುಗ್ಗಿಸಿ"</string>
 </resources>
