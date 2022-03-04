@@ -47,7 +47,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -103,7 +102,8 @@ public class SystemDataTransferRequestStore {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final SparseArray<List<SystemDataTransferRequest>> mCachedPerUser = new SparseArray<>();
+    private final SparseArray<ArrayList<SystemDataTransferRequest>> mCachedPerUser =
+            new SparseArray<>();
 
     public SystemDataTransferRequestStore() {
         mExecutor = Executors.newSingleThreadExecutor();
@@ -127,7 +127,7 @@ public class SystemDataTransferRequestStore {
     }
 
     void writeRequest(@UserIdInt int userId, SystemDataTransferRequest request) {
-        List<SystemDataTransferRequest> cachedRequests;
+        ArrayList<SystemDataTransferRequest> cachedRequests;
         synchronized (mLock) {
             // Write to cache
             cachedRequests = readRequestsFromCache(userId);
@@ -139,10 +139,10 @@ public class SystemDataTransferRequestStore {
     }
 
     @GuardedBy("mLock")
-    private List<SystemDataTransferRequest> readRequestsFromCache(@UserIdInt int userId) {
-        List<SystemDataTransferRequest> cachedRequests = mCachedPerUser.get(userId);
+    private ArrayList<SystemDataTransferRequest> readRequestsFromCache(@UserIdInt int userId) {
+        ArrayList<SystemDataTransferRequest> cachedRequests = mCachedPerUser.get(userId);
         if (cachedRequests == null) {
-            Future<List<SystemDataTransferRequest>> future =
+            Future<ArrayList<SystemDataTransferRequest>> future =
                     mExecutor.submit(() -> readRequestsFromStore(userId));
             try {
                 cachedRequests = future.get(READ_FROM_DISK_TIMEOUT, TimeUnit.SECONDS);
@@ -167,7 +167,7 @@ public class SystemDataTransferRequestStore {
      * @return a list of SystemDataTransferRequest
      */
     @NonNull
-    private List<SystemDataTransferRequest> readRequestsFromStore(@UserIdInt int userId) {
+    private ArrayList<SystemDataTransferRequest> readRequestsFromStore(@UserIdInt int userId) {
         final AtomicFile file = getStorageFileForUser(userId);
         Slog.i(LOG_TAG, "Reading SystemDataTransferRequests for user " + userId + " from "
                 + "file=" + file.getBaseFile().getPath());
@@ -177,7 +177,7 @@ public class SystemDataTransferRequestStore {
         synchronized (file) {
             if (!file.getBaseFile().exists()) {
                 Slog.d(LOG_TAG, "File does not exist -> Abort");
-                return Collections.emptyList();
+                return new ArrayList<>();
             }
             try (FileInputStream in = file.openRead()) {
                 final TypedXmlPullParser parser = Xml.resolvePullParser(in);
@@ -186,19 +186,19 @@ public class SystemDataTransferRequestStore {
                 return readRequestsFromXml(parser);
             } catch (XmlPullParserException | IOException e) {
                 Slog.e(LOG_TAG, "Error while reading requests file", e);
-                return Collections.emptyList();
+                return new ArrayList<>();
             }
         }
     }
 
     @NonNull
-    private List<SystemDataTransferRequest> readRequestsFromXml(@NonNull TypedXmlPullParser parser)
-            throws XmlPullParserException, IOException {
+    private ArrayList<SystemDataTransferRequest> readRequestsFromXml(
+            @NonNull TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         if (!isStartOfTag(parser, XML_TAG_REQUESTS)) {
             throw new XmlPullParserException("The XML doesn't have start tag: " + XML_TAG_REQUESTS);
         }
 
-        List<SystemDataTransferRequest> requests = new ArrayList<>();
+        ArrayList<SystemDataTransferRequest> requests = new ArrayList<>();
 
         while (true) {
             parser.nextTag();
@@ -286,7 +286,7 @@ public class SystemDataTransferRequestStore {
         writeIntAttribute(serializer, XML_ATTR_USER_ID, request.getUserId());
         writeBooleanAttribute(serializer, XML_ATTR_IS_USER_CONSENTED, request.isUserConsented());
         writeBooleanAttribute(serializer, XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES,
-                request.isPermissionSyncAllPackages());
+                request.getPermissionSyncAllPackages());
         try {
             writeListXml(request.getPermissionSyncPackages(), XML_ATTR_PERMISSION_SYNC_PACKAGES,
                     serializer);

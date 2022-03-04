@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Slog;
 
@@ -68,7 +69,7 @@ public class SystemDataTransferProcessor {
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
 
-    SystemDataTransferProcessor(CompanionDeviceManagerService service,
+    public SystemDataTransferProcessor(CompanionDeviceManagerService service,
             AssociationStore associationStore,
             SystemDataTransferRequestStore systemDataTransferRequestStore) {
         mContext = service.getContext();
@@ -80,14 +81,14 @@ public class SystemDataTransferProcessor {
      * Build a PendingIntent of user consent dialog
      */
     public PendingIntent buildSystemDataTransferConfirmationIntent(@UserIdInt int userId,
-            SystemDataTransferRequest request) throws DeviceNotAssociatedException {
+            SystemDataTransferRequest request) throws RemoteException {
         // The association must exist and either belong to the calling package,
         // or the calling package must hold REQUEST_SYSTEM_DATA_TRANSFER permission.
         int associationId = request.getAssociationId();
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         if (association == null) {
-            throw new DeviceNotAssociatedException(
-                    "Association id: " + associationId + " doesn't exist.");
+            throw new RemoteException(new DeviceNotAssociatedException(
+                    "Association id: " + associationId + " doesn't exist."));
         } else {
             // If the package is not the companion app which owns the association,
             // it must hold REQUEST_SYSTEM_DATA_TRANSFER permission.
