@@ -27,7 +27,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Dagger Module providing Communal-related functionality.
+ * Dagger Module providing Dream-related functionality.
  */
 @Module(includes = {
             DreamTouchModule.class,

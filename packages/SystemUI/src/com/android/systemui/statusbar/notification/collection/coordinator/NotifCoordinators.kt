@@ -45,7 +45,6 @@ class NotifCoordinatorsImpl @Inject constructor(
     bubbleCoordinator: BubbleCoordinator,
     headsUpCoordinator: HeadsUpCoordinator,
     gutsCoordinator: GutsCoordinator,
-    communalCoordinator: CommunalCoordinator,
     conversationCoordinator: ConversationCoordinator,
     debugModeCoordinator: DebugModeCoordinator,
     groupCountCoordinator: GroupCountCoordinator,
@@ -86,7 +85,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(appOpsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
-        mCoordinators.add(communalCoordinator)
         mCoordinators.add(debugModeCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(groupCountCoordinator)
