@@ -7041,7 +7041,7 @@ package android.net {
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.IpConfiguration getIpConfiguration();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method @Nullable public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
@@ -7051,7 +7051,7 @@ package android.net {
     ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
     method @NonNull public android.net.EthernetNetworkUpdateRequest build();
     method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
-    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
