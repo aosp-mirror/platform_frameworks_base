@@ -749,6 +749,8 @@ public class BubblesManager implements Dumpable {
             return;
         }
 
+        entry.setFlagBubble(shouldBubble);
+
         // Update the state in NotificationManagerService
         try {
             int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
