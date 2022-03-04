@@ -18,13 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.View.GONE;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static androidx.constraintlayout.widget.ConstraintSet.BOTTOM;
 import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
-import static androidx.constraintlayout.widget.ConstraintSet.START;
-import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
@@ -1070,13 +1066,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void updateResources() {
         mQuickQsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
-        mSplitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(mView.getContext());
         mSplitShadeNotificationsScrimMarginBottom =
                 mResources.getDimensionPixelSize(
                         R.dimen.split_shade_notifications_scrim_margin_bottom);
-
-        int panelMarginHorizontal = mResources.getDimensionPixelSize(
-                R.dimen.notification_panel_margin_horizontal);
 
         final boolean newShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mResources);
@@ -1087,49 +1079,12 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mQs != null) {
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
-
-        int notificationsBottomMargin = mResources.getDimensionPixelSize(
-                R.dimen.notification_panel_margin_bottom);
+        mSplitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(mView.getContext());
         int topMargin = mShouldUseSplitNotificationShade ? mSplitShadeStatusBarHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mSplitShadeHeaderController.setSplitShadeMode(mShouldUseSplitNotificationShade);
-
-        // To change the constraints at runtime, all children of the ConstraintLayout must have ids
-        ensureAllViewsHaveIds(mNotificationContainerParent);
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(mNotificationContainerParent);
-        int statusViewMarginHorizontal = mResources.getDimensionPixelSize(
-                R.dimen.status_view_margin_horizontal);
-        constraintSet.setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal);
-        constraintSet.setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal);
-        if (mShouldUseSplitNotificationShade) {
-            // width = 0 to take up all available space within constraints
-            constraintSet.connect(R.id.qs_frame, END, R.id.qs_edge_guideline, END);
-            constraintSet.connect(
-                    R.id.notification_stack_scroller, START,
-                    R.id.qs_edge_guideline, START);
-            constraintSet.constrainHeight(R.id.split_shade_status_bar, mSplitShadeStatusBarHeight);
-        } else {
-            constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
-            constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
-            if (mUseCombinedQSHeaders) {
-                constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT);
-            }
-        }
-        constraintSet.setMargin(R.id.notification_stack_scroller, START,
-                mShouldUseSplitNotificationShade ? 0 : panelMarginHorizontal);
-        constraintSet.setMargin(R.id.notification_stack_scroller, END, panelMarginHorizontal);
-        constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
-        constraintSet.setMargin(R.id.notification_stack_scroller, BOTTOM,
-                notificationsBottomMargin);
-        constraintSet.setMargin(R.id.qs_frame, START, panelMarginHorizontal);
-        constraintSet.setMargin(R.id.qs_frame, END,
-                mShouldUseSplitNotificationShade ? 0 : panelMarginHorizontal);
-        constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
-        constraintSet.applyTo(mNotificationContainerParent);
         mAmbientState.setStackTopMargin(topMargin);
-        mNotificationsQSContainerController.updateMargins();
-        mNotificationsQSContainerController.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
+        mNotificationsQSContainerController.updateResources();
 
         updateKeyguardStatusViewAlignment(/* animate= */false);
 
@@ -1137,15 +1092,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
         if (splitNotificationShadeChanged) {
             updateClockAppearance();
-        }
-    }
-
-    private static void ensureAllViewsHaveIds(ViewGroup parentView) {
-        for (int i = 0; i < parentView.getChildCount(); i++) {
-            View childView = parentView.getChildAt(i);
-            if (childView.getId() == View.NO_ID) {
-                childView.setId(View.generateViewId());
-            }
         }
     }
 
