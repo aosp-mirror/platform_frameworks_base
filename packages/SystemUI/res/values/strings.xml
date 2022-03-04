@@ -2226,6 +2226,8 @@
     <string name="media_output_dialog_launch_app_text">To cast this session, please open the app.</string>
     <!-- App name when can't get app name [CHAR LIMIT=60] -->
     <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
+    <!-- Button text for stopping casting [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_button_stop_casting">Stop casting</string>
 
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
