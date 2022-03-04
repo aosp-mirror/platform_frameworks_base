@@ -361,6 +361,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private SysUiState mSysUiState;
     @Mock
     private NotificationListContainer mNotificationListContainer;
+    private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -488,6 +489,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
         mMainHandler = new Handler(Looper.getMainLooper());
+        mPanelEventsEmitter = new NotificationPanelViewController.PanelEventsEmitter();
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
@@ -546,7 +548,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mQsFrameTranslateController,
                 mSysUiState,
                 mKeyguardUnlockAnimationController,
-                mNotificationListContainer);
+                mNotificationListContainer,
+                mPanelEventsEmitter);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

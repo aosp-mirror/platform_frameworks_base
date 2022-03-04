@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
+import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -53,10 +53,10 @@ import javax.inject.Inject;
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 public class VisualStabilityCoordinator implements Coordinator, Dumpable,
-        NotifPanelEventSource.Callbacks {
+        NotifPanelEvents.Listener {
     private final DelayableExecutor mDelayableExecutor;
     private final HeadsUpManager mHeadsUpManager;
-    private final NotifPanelEventSource mNotifPanelEventSource;
+    private final NotifPanelEvents mNotifPanelEvents;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -87,7 +87,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
             DelayableExecutor delayableExecutor,
             DumpManager dumpManager,
             HeadsUpManager headsUpManager,
-            NotifPanelEventSource notifPanelEventSource,
+            NotifPanelEvents notifPanelEvents,
             StatusBarStateController statusBarStateController,
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle) {
@@ -96,7 +96,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
-        mNotifPanelEventSource = notifPanelEventSource;
+        mNotifPanelEvents = notifPanelEvents;
 
         dumpManager.registerDumpable(this);
     }
@@ -109,7 +109,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
 
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mPulsing = mStatusBarStateController.isPulsing();
-        mNotifPanelEventSource.registerCallbacks(this);
+        mNotifPanelEvents.registerListener(this);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
