@@ -1436,20 +1436,20 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final Rect bounds = options.getLaunchBounds();
                 task.setBounds(bounds);
 
-                Task launchRootTask =
-                        mRootWindowContainer.getLaunchRootTask(null, options, task, ON_TOP);
+                Task targetRootTask =
+                        mRootWindowContainer.getOrCreateRootTask(null, options, task, ON_TOP);
 
-                if (launchRootTask != currentRootTask) {
-                    moveHomeRootTaskToFrontIfNeeded(flags, launchRootTask.getDisplayArea(), reason);
-                    task.reparent(launchRootTask, ON_TOP, REPARENT_KEEP_ROOT_TASK_AT_FRONT,
+                if (targetRootTask != currentRootTask) {
+                    moveHomeRootTaskToFrontIfNeeded(flags, targetRootTask.getDisplayArea(), reason);
+                    task.reparent(targetRootTask, ON_TOP, REPARENT_KEEP_ROOT_TASK_AT_FRONT,
                             !ANIMATE, DEFER_RESUME, reason);
-                    currentRootTask = launchRootTask;
+                    currentRootTask = targetRootTask;
                     reparented = true;
                     // task.reparent() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
                 }
-                if (launchRootTask.shouldResizeRootTaskWithLaunchBounds()) {
-                    launchRootTask.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
+                if (targetRootTask.shouldResizeRootTaskWithLaunchBounds()) {
+                    targetRootTask.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
                 } else {
                     // WM resizeTask must be done after the task is moved to the correct stack,
                     // because Task's setBounds() also updates dim layer's bounds, but that has
@@ -1693,7 +1693,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      */
     boolean restoreRecentTaskLocked(Task task, ActivityOptions aOptions, boolean onTop) {
         final Task rootTask =
-                mRootWindowContainer.getLaunchRootTask(null, aOptions, task, onTop);
+                mRootWindowContainer.getOrCreateRootTask(null, aOptions, task, onTop);
         final WindowContainer parent = task.getParent();
 
         if (parent == rootTask || task == rootTask) {
