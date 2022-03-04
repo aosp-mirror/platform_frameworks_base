@@ -94,6 +94,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 final FrameCallbackScheduler scheduler = new FrameCallbackScheduler() {
                     @Override
                     public void postFrameCallback(@androidx.annotation.NonNull Runnable runnable) {
+                        // TODO(b/222697646): remove getSfInstance usage and use vsyncId for
+                        //  transactions
                         Choreographer.getSfInstance().postFrameCallback(t -> runnable.run());
                     }
 
