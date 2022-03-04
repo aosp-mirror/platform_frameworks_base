@@ -51,6 +51,7 @@ final class PackageRemovedInfo {
     boolean mDataRemoved;
     boolean mRemovedForAllUsers;
     boolean mIsStaticSharedLib;
+    boolean mIsExternal;
     // a two dimensional array mapping userId to the set of appIds that can receive notice
     // of package changes
     SparseArray<int[]> mBroadcastAllowList;
