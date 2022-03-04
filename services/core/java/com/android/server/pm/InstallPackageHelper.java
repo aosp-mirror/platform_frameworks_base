@@ -60,6 +60,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
 import static com.android.server.pm.PackageManagerService.PRECOMPILE_LAYOUTS;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
@@ -306,6 +307,12 @@ final class InstallPackageHelper {
                 }
             }
             pkgSetting.setInstallSource(installSource);
+        }
+
+        if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+            boolean isFactory = (scanFlags & SCAN_AS_FACTORY) != 0;
+            pkgSetting.getPkgState().setApkInApex(true);
+            pkgSetting.getPkgState().setApkInUpdatedApex(!isFactory);
         }
 
         // TODO(toddke): Consider a method specifically for modifying the Package object
