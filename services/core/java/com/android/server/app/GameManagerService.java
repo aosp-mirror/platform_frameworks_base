@@ -359,6 +359,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public enum FrameRate {
         FPS_DEFAULT(0),
         FPS_30(30),
+        FPS_40(40),
         FPS_45(45),
         FPS_60(60),
         FPS_90(90),
@@ -378,6 +379,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         switch (raw) {
             case "30":
                 return FrameRate.FPS_30.fps;
+            case "40":
+                return FrameRate.FPS_40.fps;
             case "45":
                 return FrameRate.FPS_45.fps;
             case "60":
