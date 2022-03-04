@@ -846,6 +846,7 @@ public class CentralSurfacesTest extends SysuiTestCase {
     @Test
     public void testTransitionLaunch_noPreview_doesntGoUnlocked() {
         mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
@@ -868,6 +869,7 @@ public class CentralSurfacesTest extends SysuiTestCase {
     @Test
     public void testPulseWhileDozing_updatesScrimController() {
         mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
