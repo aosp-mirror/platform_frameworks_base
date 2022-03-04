@@ -26065,11 +26065,9 @@ package android.media.tv.interactive {
   public static final class AppLinkInfo.Builder {
     ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.media.tv.interactive.AppLinkInfo build();
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setClassName(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setPackageName(@NonNull String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@Nullable String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@Nullable String);
-    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@Nullable String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@NonNull String);
   }
 
   public final class TvInteractiveAppInfo implements android.os.Parcelable {
