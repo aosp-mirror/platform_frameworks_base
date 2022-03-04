@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"UI ប្រព័ន្ធ"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"អាចនឹងអស់ថ្មក្នុងពេលបន្តិចទៀត"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"មិន​អាច​សាក​តាម USB បានទេ"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"សូមប្រើ​ឆ្នាំង​សាក​ដែល​ភ្ជាប់​មក​ជាមួយ​ឧបករណ៍​របស់អ្នក"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"បានបញ្ជាក់"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ចុច \"បញ្ជាក់\" ដើម្បីបញ្ចប់"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"បាន​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ប្រើកូដ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ប្រើ​លំនាំ"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"បិទ"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"បិទសំឡេង​ទាំងស្រុង"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"សំឡេងរោទ៍​ប៉ុណ្ណោះ"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"កុំ​រំខាន។"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"ប៊្លូធូស"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"បើក​ប៊្លូធូស។"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"កំណត់​សំឡេង​រោទ៍​សម្រាប់ <xliff:g id="TIME">%s</xliff:g> ។"</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"ករណី Dessert"</string>
     <string name="start_dreams" msgid="9131802557946276718">"ធាតុរក្សាអេក្រង់"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"អ៊ីសឺរណិត"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"កុំ​រំខាន"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ប៊្លូធូស"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"មិន​មាន​ឧបករណ៍​ផ្គូផ្គង​ដែល​អាច​ប្រើ​បាន"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ការជូនដំណឹង"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"សម្អាត​ការជូនដំណឹង​ស្ងាត់ទាំងអស់"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ការជូនដំណឹង​បានផ្អាក​ដោយ​មុខងារកុំរំខាន"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ចាប់ផ្ដើម​ឥឡូវ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"គ្មាន​ការ​ជូនដំណឹង"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ឧបករណ៍​នេះ​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់មាតាបិតាអ្នក"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានចាត់ថ្នាក់ទាបជាងមុន"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ បង្ហាញជាពពុះ"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ បង្អាក់មុខងារកុំ​រំខាន"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"បង្ហាញនៅខាងលើ​ការជូនដំណឹងអំពីការសន្ទនា និងជារូបភាព​កម្រង​ព័ត៌មាននៅលើអេក្រង់ចាក់សោ បង្ហាញជាពពុះ បង្អាក់មុខងារកុំ​រំខាន"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​មុខងារ​សន្ទនា​បានទេ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
@@ -537,7 +549,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"ឈប់បញ្ជូន"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"សារ SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"តន្ត្រី"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ប្រតិទិន"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"កុំ​រំខាន"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ផ្លូវកាត់ប៊ូតុងកម្រិតសំឡេង"</string>
     <string name="battery" msgid="769686279459897127">"ថ្ម"</string>
     <string name="headset" msgid="4485892374984466437">"កាស"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ប៊្លូធូស​បាន​បិទ"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"មុខងារ​កុំរំខាន​បាន​បិទ"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយកម្មវិធី (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ ឬ​កម្មវិធី។"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"កម្មវិធីដែលកំពុងដំណើរការនៅផ្ទៃខាងក្រោយ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ចុចដើម្បីមើលព័ត៌មានលម្អិតអំពីការប្រើប្រាស់ទិន្នន័យ និងថ្ម"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"បិទទិន្នន័យទូរសព្ទចល័ត?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ការងារ)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ការហៅ​ទូរសព្ទ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(តាមរយៈ <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"កាមេរ៉ា"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ទីតាំង"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"មីក្រូហ្វូន"</string>
@@ -806,10 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(បាន​ដាច់)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"មិនអាចប្ដូរបានទេ។ សូមចុចដើម្បី​ព្យាយាម​ម្ដងទៀត។"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
-    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
-    <skip />
-    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
-    <skip />
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ដើម្បីភ្ជាប់វគ្គនេះ សូមបើកកម្មវិធី។"</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"កម្មវិធី​ដែលមិន​ស្គាល់"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
@@ -843,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"មើលព័ត៌មាន​ថ្មីៗ​អំពីស្ថានភាព ការខកខាន​ទទួល និងសារថ្មីៗ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ការ​សន្ទនា"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"បានផ្អាក​ដោយមុខងារ​កុំរំខាន"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> បានផ្ញើសារ៖ <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> បាន​ផ្ញើ​រូបភាព"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> មាន​បច្ចុប្បន្នភាព​ស្ថានភាព៖ <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -894,4 +912,11 @@
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ផ្ញើទៅ​ឧបករណ៍​នៅជិត"</string>
     <string name="add" msgid="81036585205287996">"បញ្ចូល"</string>
     <string name="manage_users" msgid="1823875311934643849">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"ការជូនដំណឹងនេះមិនអាចឱ្យអូសដើម្បីបំបែកអេក្រង់បានទេ។"</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ត្រូវបានបិទ"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"មុខងារ​អាទិភាព"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"រូបកំណត់​ម៉ោងរោទ៍"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"បានបើក​មុខងារភ្ញៀវរបស់ Assistant"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"កាមេរ៉ា និង​មីក្រូហ្វូន​ត្រូវបានបិទ"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{ការ​ជូន​ដំណឹង #}other{ការ​ជូនដំណឹង #}}"</string>
 </resources>

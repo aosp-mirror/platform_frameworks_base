@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"சாதனத்தின் UI"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"பேட்டரி விரைவில் தீர்ந்துவிடக்கூடும்"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> உள்ளது"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB மூலம், சார்ஜ் செய்ய முடியாது"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"உங்கள் சாதனத்துடன் வழங்கப்பட்ட சார்ஜரைப் பயன்படுத்தவும்"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"மூடு"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"முழு அமைதி"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"அலாரங்கள் மட்டும்"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"தொந்தரவு செய்ய வேண்டாம்."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"புளூடூத்."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"புளூடூத் இயக்கத்தில்."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g> மணிக்கு அலாரம் அமைக்கப்பட்டது."</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"இனிப்பு வடிவங்கள்"</string>
     <string name="start_dreams" msgid="9131802557946276718">"ஸ்கிரீன் சேவர்"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ஈதர்நெட்"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"புளூடூத்"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"இணைக்கப்பட்ட சாதனங்கள் இல்லை"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"சைலன்ட் அறிவிப்புகள் அனைத்தையும் அழிக்கும்"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"இந்தச் சாதனம் உங்கள் பெற்றோரால் நிர்வகிக்கப்படுகிறது"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் குறைக்கப்பட்டது"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும்"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், குமிழாகத் தோன்றும்"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், தொந்தரவு செய்ய வேண்டாம் அம்சம் இயக்கப்பட்டிருக்கும்போதும் காட்டப்படும்"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"உரையாடல் அறிவிப்புகளின் மேற்பகுதியில் காட்டப்படும், திரை பூட்டப்பட்டிருக்கும்போது சுயவிவரப் படமாகக் காட்டப்படும், குமிழாகத் தோன்றும், தொந்தரவு செய்ய வேண்டாம் அம்சம் இயக்கப்பட்டிருக்கும்போதும் காட்டப்படும்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"உரையாடல் அம்சங்களை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
@@ -537,7 +549,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"என்டர்"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"பேக்ஸ்பேஸ்"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"பிளே/பாஸ்"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"ஸ்டாப்"</string>
+    <string name="keyboard_key_media_stop" msgid="5344400947407134507">"அலைபரப்புவதை நிறுத்து"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"நெக்ஸ்ட்"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"ப்ரீவியஸ்"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"ரீவைன்ட்"</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"மியூசிக்"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ஒலியளவுப் பொத்தான்களுக்கான ஷார்ட்கட்"</string>
     <string name="battery" msgid="769686279459897127">"பேட்டரி"</string>
     <string name="headset" msgid="4485892374984466437">"ஹெட்செட்"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"வைஃபை முடக்கத்தில் உள்ளது"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"புளூடூத் முடக்கத்தில் உள்ளது"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"\"தொந்தரவு செய்ய வேண்டாம்\" முடக்கத்தில் உள்ளது"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, தானியங்கு விதி (<xliff:g id="ID_1">%s</xliff:g>) இயக்கியுள்ளது."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, ஆப்ஸ் (<xliff:g id="ID_1">%s</xliff:g>) இயக்கியுள்ளது."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"தொந்தரவு செய்ய வேண்டாம்\" எனும் பயன்முறையை, தானியங்கு விதி அல்லது ஆப்ஸ் இயக்கியுள்ளது."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"பின்னணியில் இயங்கும் ஆப்ஸ்"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(பணி)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"மொபைல் அழைப்பு"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> மூலம்)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"கேமரா"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"இருப்பிடம்"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"மைக்ரோஃபோன்"</string>
@@ -806,10 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(துண்டிக்கப்பட்டது)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"இணைக்க முடியவில்லை. மீண்டும் முயல தட்டவும்."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"புதிய சாதனத்தை இணைத்தல்"</string>
-    <!-- no translation found for media_output_dialog_launch_app_text (1527413319632586259) -->
-    <skip />
-    <!-- no translation found for media_output_dialog_unknown_launch_app_name (1084899329829371336) -->
-    <skip />
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"பதிப்பு எண்"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"பதிப்பு எண் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது."</string>
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
@@ -843,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"சமீபத்திய மெசேஜ்களையும் தவறிய அழைப்புகளையும் ஸ்டேட்டஸ் அப்டேட்களையும் பார்க்கலாம்"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"உரையாடல்"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தால் இடைநிறுத்தப்பட்டது"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு மெசேஜ் அனுப்பியுள்ளார்: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> ஒரு படம் அனுப்பியுள்ளார்"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> புதிய ஸ்டேட்டஸ் வைத்துள்ளார்: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -894,4 +912,12 @@
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"அருகிலுள்ள சாதனத்திற்கு அனுப்பு"</string>
     <string name="add" msgid="81036585205287996">"சேர்"</string>
     <string name="manage_users" msgid="1823875311934643849">"பயனர்களை நிர்வகித்தல்"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"பிரிக்கப்பட்ட திரைக்குள் இந்த அறிவிப்பை இழுத்துவிட முடியாது."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"வைஃபை கிடைக்கவில்லை"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"முன்னுரிமைப் பயன்முறை"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"அலாரம் அமைக்கப்பட்டுள்ளது"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Assistant கெஸ்ட் பயன்முறை இயக்கப்பட்டுள்ளது"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
+    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
+    <skip />
 </resources>
