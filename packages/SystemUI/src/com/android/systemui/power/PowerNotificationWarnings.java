@@ -120,8 +120,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
 
-    private static final String SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING =
-            "android.settings.BATTERY_SAVER_SETTINGS";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
             "com.android.settings.BATTERY_SAVER_SCHEDULE_SETTINGS";
 
@@ -140,6 +138,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
+    private final boolean mUseSevereDialog;
 
     private int mBatteryLevel;
     private int mBucket;
@@ -170,6 +169,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mKeyguard = mContext.getSystemService(KeyguardManager.class);
         mReceiver.init();
         mActivityStarter = activityStarter;
+        mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
     }
 
     @Override
@@ -283,7 +283,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(contentText)
                         .setContentTitle(title)
                         .setOnlyAlertOnce(true)
-                        .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
+                        .setOngoing(true)
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
@@ -298,6 +298,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
 
         if (!mPowerMan.isPowerSaveMode()) {
+            nb.addAction(0, mContext.getString(R.string.battery_saver_dismiss_action),
+                    pendingBroadcast(ACTION_DISMISSED_WARNING));
             nb.addAction(0,
                     mContext.getString(R.string.battery_saver_start_action),
                     pendingBroadcast(ACTION_START_SAVER));
@@ -312,9 +314,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private boolean showSevereLowBatteryDialog() {
         final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
-        final boolean useSevereDialog = mContext.getResources().getBoolean(
-                R.bool.config_severe_battery_dialog);
-        return isSevereState && useSevereDialog;
+        return isSevereState && mUseSevereDialog;
     }
 
     private void showAutoSaverSuggestionNotification() {
