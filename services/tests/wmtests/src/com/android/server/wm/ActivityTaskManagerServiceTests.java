@@ -287,7 +287,8 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     @Test
     public void testUpdateSleep() {
         doCallRealMethod().when(mWm.mRoot).hasAwakeDisplay();
-        mSupervisor.mGoingToSleepWakeLock = mock(PowerManager.WakeLock.class);
+        mSupervisor.mGoingToSleepWakeLock =
+                mSystemServicesTestRule.createStubbedWakeLock(true /* needVerification */);
         final Task rootHomeTask = mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm).setTask(rootHomeTask).build();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
