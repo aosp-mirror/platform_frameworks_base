@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -45,12 +46,12 @@ import android.util.LocalLog;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.NtpTrustedTime.TimeResult;
-import android.util.TimeUtils;
 
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.time.Duration;
 
 /**
  * Monitors the network time. If looking up the network time fails for some reason, it tries a few
@@ -189,6 +190,19 @@ public class NetworkTimeUpdateService extends Binder {
         }
 
         return success;
+    }
+
+    /**
+     * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
+     * test value, i.e. so the normal value will be used next time.
+     */
+    void setServerConfigForTests(@Nullable String hostname, @Nullable Duration timeout) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME, "set NTP server config for tests");
+
+        mLocalLog.log("Setting server config for tests: hostname=" + hostname
+                + ", timeout=" + timeout);
+        mTime.setServerConfigForTests(hostname, timeout);
     }
 
     private void onPollNetworkTime(int event) {
@@ -349,17 +363,14 @@ public class NetworkTimeUpdateService extends Binder {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-        pw.print("PollingIntervalMs: ");
-        TimeUtils.formatDuration(mPollingIntervalMs, pw);
-        pw.print("\nPollingIntervalShorterMs: ");
-        TimeUtils.formatDuration(mPollingIntervalShorterMs, pw);
-        pw.println("\nTryAgainTimesMax: " + mTryAgainTimesMax);
-        pw.println("\nTryAgainCounter: " + mTryAgainCounter);
-        NtpTrustedTime.TimeResult ntpResult = mTime.getCachedTimeResult();
-        pw.println("NTP cache result: " + ntpResult);
-        if (ntpResult != null) {
-            pw.println("NTP result age: " + ntpResult.getAgeMillis());
-        }
+        pw.println("mPollingIntervalMs=" + Duration.ofMillis(mPollingIntervalMs));
+        pw.println("mPollingIntervalShorterMs=" + Duration.ofMillis(mPollingIntervalShorterMs));
+        pw.println("mTryAgainTimesMax=" + mTryAgainTimesMax);
+        pw.println("mTryAgainCounter=" + mTryAgainCounter);
+        pw.println();
+        pw.println("NtpTrustedTime:");
+        mTime.dump(pw);
+        pw.println();
         pw.println("Local logs:");
         mLocalLog.dump(fd, pw, args);
         pw.println();
