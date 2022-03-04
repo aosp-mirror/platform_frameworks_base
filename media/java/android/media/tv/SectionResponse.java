@@ -74,14 +74,20 @@ public final class SectionResponse extends BroadcastInfoResponse implements Parc
     }
 
     /**
-     * Gets the Version number of requested session.
+     * Gets the Version number of requested session. If it is null, value will be -1.
+     * <p>The consistency of version numbers between request and response depends on
+     * {@link BroadcastInfoRequest.RequestOption}. If the request has RequestOption value
+     * REQUEST_OPTION_AUTO_UPDATE, then the response may be set to the latest version which may be
+     * different from the version of the request. Otherwise, response with a different version from
+     * its request will be considered invalid.
      */
     public int getVersion() {
         return mVersion;
     }
 
     /**
-     * Gets the raw data of session.
+     * Gets the raw data of session. The sessionData field represents payload data of the session
+     * after session header, which includes version and sessionId.
      */
     @NonNull
     public Bundle getSessionData() {

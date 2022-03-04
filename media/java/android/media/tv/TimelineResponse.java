@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -79,8 +80,8 @@ public final class TimelineResponse extends BroadcastInfoResponse implements Par
      * that conveys Time Values on it.
      */
     @Nullable
-    public String getSelector() {
-        return mSelector;
+    public Uri getSelector() {
+        return Uri.parse(mSelector);
     }
 
     /**
