@@ -2193,7 +2193,7 @@
     <!-- Remote server that can provide NTP responses. -->
     <string translatable="false" name="config_ntpServer">time.android.com</string>
     <!-- Normal polling frequency in milliseconds -->
-    <integer name="config_ntpPollingInterval">86400000</integer>
+    <integer name="config_ntpPollingInterval">64800000</integer>
     <!-- Try-again polling interval in milliseconds, in case the network request failed -->
     <integer name="config_ntpPollingIntervalShorter">60000</integer>
     <!-- Number of times to try again with the shorter interval, before backing
