@@ -1919,10 +1919,17 @@ public final class InputMethodManager {
         if (fallbackImm != null) {
             fallbackImm.startStylusHandwriting(view);
         }
+        Objects.requireNonNull(view);
+
+        if (Settings.Global.getInt(view.getContext().getContentResolver(),
+                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
+            Log.d(TAG, "Ignoring startStylusHandwriting(view) as stylus handwriting is disabled");
+            return;
+        }
 
         checkFocus();
         synchronized (mH) {
-            if (view == null || !hasServedByInputMethodLocked(view)) {
+            if (!hasServedByInputMethodLocked(view)) {
                 Log.w(TAG,
                         "Ignoring startStylusHandwriting() as view=" + view + " is not served.");
                 return;
