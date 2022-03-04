@@ -2428,8 +2428,6 @@
     <string name="dream_overlay_status_bar_priority_mode">Priority mode</string>
     <!-- Content description for the alarm set icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_alarm_set">Alarm set</string>
-    <!-- Content description for the assistant guest mode enabled icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled">Assistant guest mode enabled</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
