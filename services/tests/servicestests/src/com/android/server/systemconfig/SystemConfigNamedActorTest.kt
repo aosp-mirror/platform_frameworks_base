@@ -17,6 +17,7 @@
 package com.android.server.systemconfig
 
 import android.content.Context
+import android.util.Xml
 import androidx.test.InstrumentationRegistry
 import com.android.server.SystemConfig
 import com.google.common.truth.Truth.assertThat
@@ -227,6 +228,7 @@ class SystemConfigNamedActorTest {
             .writeText(this.trimIndent())
 
     private fun assertPermissions() = SystemConfig(false).apply {
-        readPermissions(tempFolder.root, 0)
+        val parser = Xml.newPullParser()
+        readPermissions(parser, tempFolder.root, 0)
     }. let { assertThat(it.namedActors) }
 }

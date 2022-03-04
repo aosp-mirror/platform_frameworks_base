@@ -16,7 +16,9 @@
 
 package com.android.internal.os;
 
-
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.ROAMING_NO;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -67,8 +69,10 @@ public class WifiPowerCalculatorTest {
                 new int[]{NetworkCapabilities.TRANSPORT_WIFI});
 
         NetworkStats networkStats = new NetworkStats(10000, 1)
-                .insertEntry("wifi", APP_UID, 0, 0, 1000, 100, 2000, 20, 100)
-                .insertEntry("wifi", Process.WIFI_UID, 0, 0, 1111, 111, 2222, 22, 111);
+                .addEntry(new NetworkStats.Entry("wifi", APP_UID, 0, 0, METERED_NO,
+                        ROAMING_NO, DEFAULT_NETWORK_NO, 1000, 100, 2000, 20, 100))
+                .addEntry(new NetworkStats.Entry("wifi", Process.WIFI_UID, 0, 0, METERED_NO,
+                        ROAMING_NO, DEFAULT_NETWORK_NO, 1111, 111, 2222, 22, 111));
         mStatsRule.setNetworkStats(networkStats);
 
         return batteryStats;

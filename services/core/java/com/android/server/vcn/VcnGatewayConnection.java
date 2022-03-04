@@ -78,6 +78,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -162,6 +163,14 @@ import java.util.function.Consumer;
  */
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
+
+    // Matches DataConnection.NETWORK_TYPE private constant, and magic string from
+    // ConnectivityManager#getNetworkTypeName()
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final String NETWORK_INFO_NETWORK_TYPE_STRING = "MOBILE";
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final String NETWORK_INFO_EXTRA_INFO = "VCN";
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final InetAddress DUMMY_ADDR = InetAddresses.parseNumericAddress("192.0.2.0");
@@ -1631,6 +1640,12 @@ public class VcnGatewayConnection extends StateMachine {
             final NetworkAgentConfig nac =
                     new NetworkAgentConfig.Builder()
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
+                            .setLegacyTypeName(NETWORK_INFO_NETWORK_TYPE_STRING)
+                            .setLegacySubType(TelephonyManager.NETWORK_TYPE_UNKNOWN)
+                            .setLegacySubTypeName(
+                                    TelephonyManager.getNetworkTypeName(
+                                            TelephonyManager.NETWORK_TYPE_UNKNOWN))
+                            .setLegacyExtraInfo(NETWORK_INFO_EXTRA_INFO)
                             .build();
 
             final VcnNetworkAgent agent =

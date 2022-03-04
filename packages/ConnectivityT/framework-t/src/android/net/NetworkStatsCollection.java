@@ -732,19 +732,19 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
         final long start = proto.start(tag);
 
         for (Key key : getSortedKeys()) {
-            final long startStats = proto.start(NetworkStatsCollectionProto.STATS);
+            final long startStats = proto.start(NetworkStatsCollectionProto.STATS_FIELD_NUMBER);
 
             // Key
-            final long startKey = proto.start(NetworkStatsCollectionStatsProto.KEY);
-            key.ident.dumpDebug(proto, NetworkStatsCollectionKeyProto.IDENTITY);
-            proto.write(NetworkStatsCollectionKeyProto.UID, key.uid);
-            proto.write(NetworkStatsCollectionKeyProto.SET, key.set);
-            proto.write(NetworkStatsCollectionKeyProto.TAG, key.tag);
+            final long startKey = proto.start(NetworkStatsCollectionStatsProto.KEY_FIELD_NUMBER);
+            key.ident.dumpDebug(proto, NetworkStatsCollectionKeyProto.IDENTITY_FIELD_NUMBER);
+            proto.write(NetworkStatsCollectionKeyProto.UID_FIELD_NUMBER, key.uid);
+            proto.write(NetworkStatsCollectionKeyProto.SET_FIELD_NUMBER, key.set);
+            proto.write(NetworkStatsCollectionKeyProto.TAG_FIELD_NUMBER, key.tag);
             proto.end(startKey);
 
             // Value
             final NetworkStatsHistory history = mStats.get(key);
-            history.dumpDebug(proto, NetworkStatsCollectionStatsProto.HISTORY);
+            history.dumpDebug(proto, NetworkStatsCollectionStatsProto.HISTORY_FIELD_NUMBER);
             proto.end(startStats);
         }
 

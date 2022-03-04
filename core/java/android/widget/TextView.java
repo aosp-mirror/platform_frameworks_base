@@ -12521,7 +12521,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Called when a context menu option for the text view is selected.  Currently
      * this will be one of {@link android.R.id#selectAll}, {@link android.R.id#cut},
-     * {@link android.R.id#copy}, {@link android.R.id#paste} or {@link android.R.id#shareText}.
+     * {@link android.R.id#copy}, {@link android.R.id#paste},
+     * {@link android.R.id#pasteAsPlainText} (starting at API level 23) or
+     * {@link android.R.id#shareText}.
      *
      * @return true if the context menu item action was performed.
      */
@@ -12712,6 +12714,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * method. The default actions can also be removed from the menu using
      * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
      * {@link android.R.id#cut}, {@link android.R.id#copy}, {@link android.R.id#paste},
+     * {@link android.R.id#pasteAsPlainText} (starting at API level 23),
      * {@link android.R.id#replaceText} or {@link android.R.id#shareText} ids as parameters.
      *
      * <p>Returning false from
@@ -12750,7 +12753,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.view.ActionMode.Callback#onPrepareActionMode(android.view.ActionMode,
      * android.view.Menu)} method. The default actions can also be removed from the menu using
      * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
-     * {@link android.R.id#paste} or {@link android.R.id#replaceText} ids as parameters.</p>
+     * {@link android.R.id#paste}, {@link android.R.id#pasteAsPlainText} (starting at API
+     * level 23) or {@link android.R.id#replaceText} ids as parameters.</p>
      *
      * <p>Returning false from
      * {@link android.view.ActionMode.Callback#onCreateActionMode(android.view.ActionMode,

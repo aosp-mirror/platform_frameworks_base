@@ -635,10 +635,6 @@ package android.app.prediction {
 
 package android.app.usage {
 
-  public class NetworkStatsManager {
-    method public void setPollForce(boolean);
-  }
-
   public class StorageStatsManager {
     method public boolean isQuotaSupported(@NonNull java.util.UUID);
     method public boolean isReservedSupported(@NonNull java.util.UUID);
@@ -1573,14 +1569,6 @@ package android.media.tv.tuner {
 
 package android.net {
 
-  public class EthernetManager {
-    method public void setIncludeTestInterfaces(boolean);
-  }
-
-  public final class IpSecManager {
-    field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
-  }
-
   public class NetworkPolicyManager {
     method public boolean getRestrictBackground();
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
@@ -1595,13 +1583,6 @@ package android.net {
 
   public class NetworkWatchlistManager {
     method @Nullable public byte[] getWatchlistConfigHash();
-  }
-
-  public class TrafficStats {
-    method public static long getLoopbackRxBytes();
-    method public static long getLoopbackRxPackets();
-    method public static long getLoopbackTxBytes();
-    method public static long getLoopbackTxPackets();
   }
 
 }

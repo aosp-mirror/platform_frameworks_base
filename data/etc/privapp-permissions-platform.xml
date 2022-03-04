@@ -20,13 +20,6 @@ This XML file declares which signature|privileged permissions should be granted 
 applications that come with the platform
 -->
 <permissions>
-    <privapp-permissions package="android.ext.services">
-        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
-        <permission name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
-        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
-        <permission name="android.permission.INTERACT_ACROSS_USERS" />
-    </privapp-permissions>
-
     <!-- Needed for Build.getSerial(), which is used to send a unique number for serial, per HUIG. -->
     <privapp-permissions package="android.car.usb.handler">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -274,6 +267,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.server.telecom">
         <permission name="android.permission.BIND_CONNECTION_SERVICE"/>
         <permission name="android.permission.BIND_INCALL_SERVICE"/>
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.HANDLE_CAR_MODE_CHANGES"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
@@ -464,6 +458,9 @@ applications that come with the platform
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.NEARBY_WIFI_DEVICES" />
         <permission name="android.permission.OVERRIDE_WIFI_CONFIG" />
+        <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
+             P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
+        <permission name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <!-- Permission required for CTS test - MusicRecognitionManagerTest -->
@@ -519,17 +516,6 @@ applications that come with the platform
         <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.traceur">
-        <!-- Permissions required to receive BUGREPORT_STARTED intent -->
-        <permission name="android.permission.DUMP"/>
-        <!-- Permissions required to start/stop tracing -->
-        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
-        <!-- Permissions required for quick settings tile -->
-        <permission name="android.permission.STATUS_BAR"/>
-        <!-- Permissions required to query Betterbug -->
-        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

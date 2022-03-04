@@ -1,1 +1,0 @@
-../test-base/jarjar-rules.txt

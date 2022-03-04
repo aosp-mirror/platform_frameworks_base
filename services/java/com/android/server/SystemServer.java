@@ -54,7 +54,6 @@ import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
-import android.net.TrafficStats;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -141,7 +140,6 @@ import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
-import com.android.server.net.NetworkStatsService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
@@ -379,6 +377,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.media.MediaResourceMonitorService";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
             "com.android.server.ConnectivityServiceInitializer";
+    private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
+            "com.android.server.NetworkStatsServiceInitializer";
     private static final String IP_CONNECTIVITY_METRICS_CLASS =
             "com.android.server.connectivity.IpConnectivityMetrics";
     private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
@@ -1334,10 +1334,8 @@ public final class SystemServer implements Dumpable {
         DynamicSystemService dynamicSystem = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
-        IpSecService ipSecService = null;
         VpnManagerService vpnManager = null;
         VcnManagementService vcnManagement = null;
-        NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         WindowManagerService wm = null;
         SerialService serial = null;
@@ -1806,16 +1804,6 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-
-            t.traceBegin("StartIpSecService");
-            try {
-                ipSecService = IpSecService.create(context);
-                ServiceManager.addService(Context.IPSEC_SERVICE, ipSecService);
-            } catch (Throwable e) {
-                reportWtf("starting IpSec Service", e);
-            }
-            t.traceEnd();
-
             t.traceBegin("StartFontManagerService");
             mSystemServiceManager.startService(new FontManagerService.Lifecycle(context, safeMode));
             t.traceEnd();
@@ -1836,13 +1824,10 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartNetworkStatsService");
-            try {
-                networkStats = NetworkStatsService.create(context);
-                ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
-                TrafficStats.init(context);
-            } catch (Throwable e) {
-                reportWtf("starting NetworkStats Service", e);
-            }
+            // This has to be called before NetworkPolicyManager because NetworkPolicyManager
+            // needs to take NetworkStatsService to initialize.
+            mSystemServiceManager.startServiceFromJar(NETWORK_STATS_SERVICE_INITIALIZER_CLASS,
+                    CONNECTIVITY_SERVICE_APEX_PATH);
             t.traceEnd();
 
             t.traceBegin("StartNetworkPolicyManagerService");
@@ -2659,7 +2644,6 @@ public final class SystemServer implements Dumpable {
 
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
-        final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
@@ -2667,7 +2651,6 @@ public final class SystemServer implements Dumpable {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
-        final IpSecService ipSecServiceF = ipSecService;
         final VpnManagerService vpnManagerF = vpnManager;
         final VcnManagementService vcnManagementF = vcnManagement;
         final WindowManagerService windowManagerF = wm;
@@ -2755,24 +2738,6 @@ public final class SystemServer implements Dumpable {
             if (networkPolicyF != null) {
                 networkPolicyInitReadySignal = networkPolicyF
                         .networkScoreAndNetworkManagementServiceReady();
-            }
-            t.traceEnd();
-            t.traceBegin("MakeIpSecServiceReady");
-            try {
-                if (ipSecServiceF != null) {
-                    ipSecServiceF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making IpSec Service ready", e);
-            }
-            t.traceEnd();
-            t.traceBegin("MakeNetworkStatsServiceReady");
-            try {
-                if (networkStatsF != null) {
-                    networkStatsF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making Network Stats Service ready", e);
             }
             t.traceEnd();
             t.traceBegin("MakeConnectivityServiceReady");

@@ -23,7 +23,9 @@ import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NS
 import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 
 import android.annotation.NonNull;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
@@ -43,6 +45,7 @@ import java.util.concurrent.Executor;
 /**
  * Helper class that watches for events that are triggered per subscription.
  */
+@TargetApi(Build.VERSION_CODES.TIRAMISU)
 public class NetworkStatsSubscriptionsMonitor extends
         SubscriptionManager.OnSubscriptionsChangedListener {
 

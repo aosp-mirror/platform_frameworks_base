@@ -1277,6 +1277,8 @@
   <java-symbol type="array" name="vendor_required_apps_managed_user" />
   <java-symbol type="array" name="vendor_required_apps_managed_profile" />
   <java-symbol type="array" name="vendor_required_apps_managed_device" />
+  <java-symbol type="array" name="vendor_required_attestation_certificates" />
+  <java-symbol type="string" name="vendor_required_attestation_revocation_list_url" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_user" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_profile" />
   <java-symbol type="array" name="vendor_disallowed_apps_managed_device" />

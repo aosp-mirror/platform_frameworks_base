@@ -112,7 +112,7 @@ combined_apis {
         "framework-appsearch",
         "framework-bluetooth",
         "framework-connectivity",
-        "framework-connectivity-tiramisu",
+        "framework-connectivity-t",
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
@@ -178,8 +178,10 @@ genrule {
     cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
         // Note: having "public" be the base of module-lib is not perfect -- it should
-        // ideally be a merged public+system), but this will  help when migrating from
-        // MODULE_LIBS -> public.
+        // ideally be a merged public+system (which metalava is not currently able to generate).
+        // This "base" will help when migrating from MODULE_LIBS -> public, but not when
+        // migrating from MODULE_LIBS -> system (where it needs to instead be listed as
+        // an incompatibility).
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +

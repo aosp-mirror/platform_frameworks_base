@@ -97,7 +97,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
-        ":android.hardware.security.keymint-V1-java-source",
+        ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
@@ -175,7 +175,6 @@ java_defaults {
             "sax/java",
             "telecomm/java",
 
-            "apex/media/aidl/stable",
             // TODO(b/147699819): remove this
             "telephony/java",
         ],
@@ -274,6 +273,7 @@ java_defaults {
             // TODO: remove when moved to the below package
             "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
         ],
     },
     dxflags: [
@@ -449,21 +449,28 @@ java_library {
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
-metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--hide-package com.android.server " +
-    "--hide-package android.audio.policy.configuration.V7_0 " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide CallbackInterface " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--error NoSettingsProvider " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+metalava_framework_docs_args = "" +
     "--api-lint-ignore-prefix android.icu. " +
     "--api-lint-ignore-prefix java. " +
     "--api-lint-ignore-prefix junit. " +
-    "--api-lint-ignore-prefix org. "
+    "--api-lint-ignore-prefix org. " +
+    "--error NoSettingsProvider " +
+    "--error UnhiddenSystemApi " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+    "--hide BroadcastBehavior " +
+    "--hide CallbackInterface " +
+    "--hide DeprecationMismatch " +
+    "--hide HiddenSuperclass " +
+    "--hide HiddenTypeParameter " +
+    "--hide MissingPermission " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
+    "--hide-package com.android.server " +
+    "--hide RequiresPermission " +
+    "--hide SdkConstant " +
+    "--hide Todo " +
+    "--hide Typo " +
+    "--hide UnavailableSymbol " +
+    "--manifest $(location core/res/AndroidManifest.xml) "
 
 packages_to_document = [
     "android",
@@ -549,16 +556,15 @@ stubs_defaults {
 stubs_defaults {
     name: "module-classpath-stubs-defaults",
     aidl: {
-        local_include_dirs: [
-            "apex/media/aidl/stable",
-        ],
         include_dirs: [
             "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
         ],
     },
     libs: [
         "art.module.public.api",
         "sdk_module-lib_current_framework-tethering",
+        "sdk_module-lib_current_framework-connectivity-t",
         "sdk_public_current_framework-bluetooth",
         // There are a few classes from modules used by the core that
         // need to be resolved by metalava. We use a prebuilt stub of the

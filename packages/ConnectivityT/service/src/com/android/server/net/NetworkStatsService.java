@@ -51,6 +51,7 @@ import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID;
 import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID_TAG;
 import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_XT;
 import static android.os.Trace.TRACE_TAG_NETWORK;
+import static android.system.OsConstants.ENOENT;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
@@ -62,6 +63,7 @@ import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.usage.NetworkStatsManager;
@@ -102,6 +104,7 @@ import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -120,7 +123,6 @@ import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
 import android.system.ErrnoException;
-import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionPlan;
 import android.text.TextUtils;
@@ -169,7 +171,12 @@ import java.util.concurrent.TimeUnit;
  * Collect and persist detailed network statistics, and provide this data to
  * other system services.
  */
+@TargetApi(Build.VERSION_CODES.TIRAMISU)
 public class NetworkStatsService extends INetworkStatsService.Stub {
+    static {
+        System.loadLibrary("service-connectivity");
+    }
+
     static final String TAG = "NetworkStats";
     static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
     static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
@@ -214,6 +221,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // This is current path but may be changed soon.
     private static final String UID_COUNTERSET_MAP_PATH =
             "/sys/fs/bpf/map_netd_uid_counterset_map";
+    private static final String COOKIE_TAG_MAP_PATH =
+            "/sys/fs/bpf/map_netd_cookie_tag_map";
+    private static final String APP_UID_STATS_MAP_PATH =
+            "/sys/fs/bpf/map_netd_app_uid_stats_map";
+    private static final String STATS_MAP_A_PATH =
+            "/sys/fs/bpf/map_netd_stats_map_A";
+    private static final String STATS_MAP_B_PATH =
+            "/sys/fs/bpf/map_netd_stats_map_B";
 
     private final Context mContext;
     private final NetworkStatsFactory mStatsFactory;
@@ -341,6 +356,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
     private final IBpfMap<U32, U8> mUidCounterSetMap;
+    private final IBpfMap<CookieTagMapKey, CookieTagMapValue> mCookieTagMap;
+    private final IBpfMap<StatsMapKey, StatsMapValue> mStatsMapA;
+    private final IBpfMap<StatsMapKey, StatsMapValue> mStatsMapB;
+    private final IBpfMap<UidStatsMapKey, StatsMapValue> mAppUidStatsMap;
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
@@ -474,6 +493,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
         mInterfaceMapUpdater.start();
         mUidCounterSetMap = mDeps.getUidCounterSetMap();
+        mCookieTagMap = mDeps.getCookieTagMap();
+        mStatsMapA = mDeps.getStatsMapA();
+        mStatsMapB = mDeps.getStatsMapB();
+        mAppUidStatsMap = mDeps.getAppUidStatsMap();
     }
 
     /**
@@ -547,8 +570,48 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
 
-        public TagStatsDeleter getTagStatsDeleter() {
-            return NetworkStatsService::nativeDeleteTagData;
+        /** Gets the cookie tag map */
+        public IBpfMap<CookieTagMapKey, CookieTagMapValue> getCookieTagMap() {
+            try {
+                return new BpfMap<CookieTagMapKey, CookieTagMapValue>(COOKIE_TAG_MAP_PATH,
+                        BpfMap.BPF_F_RDWR, CookieTagMapKey.class, CookieTagMapValue.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create cookie tag map: " + e);
+                return null;
+            }
+        }
+
+        /** Gets stats map A */
+        public IBpfMap<StatsMapKey, StatsMapValue> getStatsMapA() {
+            try {
+                return new BpfMap<StatsMapKey, StatsMapValue>(STATS_MAP_A_PATH,
+                        BpfMap.BPF_F_RDWR, StatsMapKey.class, StatsMapValue.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create stats map A: " + e);
+                return null;
+            }
+        }
+
+        /** Gets stats map B */
+        public IBpfMap<StatsMapKey, StatsMapValue> getStatsMapB() {
+            try {
+                return new BpfMap<StatsMapKey, StatsMapValue>(STATS_MAP_B_PATH,
+                        BpfMap.BPF_F_RDWR, StatsMapKey.class, StatsMapValue.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create stats map B: " + e);
+                return null;
+            }
+        }
+
+        /** Gets the uid stats map */
+        public IBpfMap<UidStatsMapKey, StatsMapValue> getAppUidStatsMap() {
+            try {
+                return new BpfMap<UidStatsMapKey, StatsMapValue>(APP_UID_STATS_MAP_PATH,
+                        BpfMap.BPF_F_RDWR, UidStatsMapKey.class, StatsMapValue.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create app uid stats map: " + e);
+                return null;
+            }
         }
     }
 
@@ -1060,7 +1123,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStats getUidStatsForTransport(int transport) {
-        enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             final String[] relevantIfaces =
                     transport == TRANSPORT_WIFI ? mWifiIfaces : mMobileIfaces;
@@ -1222,7 +1285,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(
+            normalizedRequest = mStatsObservers.register(mContext,
                     request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1477,10 +1540,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.isMetered()) {
 
                     // Copy the identify from IMS one but mark it as metered.
-                    NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
-                            ident.getRatType(), ident.getSubscriberId(), ident.getWifiNetworkKey(),
-                            ident.isRoaming(), true /* metered */,
-                            true /* onDefaultNetwork */, ident.getOemManaged());
+                    NetworkIdentity vtIdent = new NetworkIdentity.Builder()
+                            .setType(ident.getType())
+                            .setRatType(ident.getRatType())
+                            .setSubscriberId(ident.getSubscriberId())
+                            .setWifiNetworkKey(ident.getWifiNetworkKey())
+                            .setRoaming(ident.isRoaming()).setMetered(true)
+                            .setDefaultNetwork(true)
+                            .setOemManaged(ident.getOemManaged())
+                            .setSubId(ident.getSubId()).build();
                     final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
                     findOrCreateNetworkIdentitySet(mActiveIfaces, ifaceVt).add(vtIdent);
                     findOrCreateNetworkIdentitySet(mActiveUidIfaces, ifaceVt).add(vtIdent);
@@ -1790,6 +1858,69 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 currentTime);
     }
 
+    // deleteKernelTagData can ignore ENOENT; otherwise we should log an error
+    private void logErrorIfNotErrNoent(final ErrnoException e, final String msg) {
+        if (e.errno != ENOENT) Log.e(TAG, msg, e);
+    }
+
+    private <K extends StatsMapKey, V extends StatsMapValue> void deleteStatsMapTagData(
+            IBpfMap<K, V> statsMap, int uid) {
+        try {
+            statsMap.forEach((key, value) -> {
+                if (key.uid == uid) {
+                    try {
+                        statsMap.deleteEntry(key);
+                    } catch (ErrnoException e) {
+                        logErrorIfNotErrNoent(e, "Failed to delete data(uid = " + key.uid + ")");
+                    }
+                }
+            });
+        } catch (ErrnoException e) {
+            Log.e(TAG, "FAILED to delete tag data from stats map", e);
+        }
+    }
+
+    /**
+     * Deletes uid tag data from CookieTagMap, StatsMapA, StatsMapB, and UidStatsMap
+     * @param uid
+     */
+    private void deleteKernelTagData(int uid) {
+        try {
+            mCookieTagMap.forEach((key, value) -> {
+                // If SkDestroyListener deletes the socket tag while this code is running,
+                // forEach will either restart iteration from the beginning or return null,
+                // depending on when the deletion happens.
+                // If it returns null, continue iteration to delete the data and in fact it would
+                // just iterate from first key because BpfMap#getNextKey would return first key
+                // if the current key is not exist.
+                if (value != null && value.uid == uid) {
+                    try {
+                        mCookieTagMap.deleteEntry(key);
+                    } catch (ErrnoException e) {
+                        logErrorIfNotErrNoent(e, "Failed to delete data(cookie = " + key + ")");
+                    }
+                }
+            });
+        } catch (ErrnoException e) {
+            Log.e(TAG, "Failed to delete tag data from cookie tag map", e);
+        }
+
+        deleteStatsMapTagData(mStatsMapA, uid);
+        deleteStatsMapTagData(mStatsMapB, uid);
+
+        try {
+            mUidCounterSetMap.deleteEntry(new U32(uid));
+        } catch (ErrnoException e) {
+            logErrorIfNotErrNoent(e, "Failed to delete tag data from uid counter set map");
+        }
+
+        try {
+            mAppUidStatsMap.deleteEntry(new UidStatsMapKey(uid));
+        } catch (ErrnoException e) {
+            logErrorIfNotErrNoent(e, "Failed to delete tag data from app uid stats map");
+        }
+    }
+
     /**
      * Clean up {@link #mUidRecorder} after UID is removed.
      */
@@ -1805,10 +1936,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // Clear kernel stats associated with UID
         for (int uid : uids) {
-            final int ret = mDeps.getTagStatsDeleter().deleteTagData(uid);
-            if (ret < 0) {
-                Log.w(TAG, "problem clearing counters for uid " + uid + ": " + Os.strerror(-ret));
-            }
+            deleteKernelTagData(uid);
         }
     }
 
@@ -2004,12 +2132,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO Right now it writes all history.  Should it limit to the "since-boot" log?
 
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES, mActiveIfaces);
-        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES, mActiveUidIfaces);
-        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS);
-        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS);
-        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS);
-        mUidTagRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_TAG_STATS);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_INTERFACES_FIELD_NUMBER,
+                mActiveIfaces);
+        dumpInterfaces(proto, NetworkStatsServiceDumpProto.ACTIVE_UID_INTERFACES_FIELD_NUMBER,
+                mActiveUidIfaces);
+        mDevRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.DEV_STATS_FIELD_NUMBER);
+        mXtRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.XT_STATS_FIELD_NUMBER);
+        mUidRecorder.dumpDebugLocked(proto, NetworkStatsServiceDumpProto.UID_STATS_FIELD_NUMBER);
+        mUidTagRecorder.dumpDebugLocked(proto,
+                NetworkStatsServiceDumpProto.UID_TAG_STATS_FIELD_NUMBER);
 
         proto.flush();
     }
@@ -2019,8 +2150,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         for (int i = 0; i < ifaces.size(); i++) {
             final long start = proto.start(tag);
 
-            proto.write(NetworkInterfaceProto.INTERFACE, ifaces.keyAt(i));
-            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES);
+            proto.write(NetworkInterfaceProto.INTERFACE_FIELD_NUMBER, ifaces.keyAt(i));
+            ifaces.valueAt(i).dumpDebug(proto, NetworkInterfaceProto.IDENTITIES_FIELD_NUMBER);
 
             proto.end(start);
         }
@@ -2387,12 +2518,4 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);
     private static native long nativeGetUidStat(int uid, int type);
-
-    // TODO: use BpfNetMaps to delete tag data and remove this.
-    @VisibleForTesting
-    interface TagStatsDeleter {
-        int deleteTagData(int uid);
-    }
-
-    private static native int nativeDeleteTagData(int uid);
 }

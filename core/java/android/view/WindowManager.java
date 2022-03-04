@@ -3128,7 +3128,8 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The window is allowed to extend into the {@link DisplayCutout} area, only if the
-         * {@link DisplayCutout} is fully contained within a system bar. Otherwise, the window is
+         * {@link DisplayCutout} is fully contained within a system bar or the {@link DisplayCutout}
+         * is not deeper than 16 dp, but this depends on the OEM choice. Otherwise, the window is
          * laid out such that it does not overlap with the {@link DisplayCutout} area.
          *
          * <p>
@@ -3143,6 +3144,13 @@ public interface WindowManager extends ViewManager {
          * The usual precautions for not overlapping with the status and navigation bar are
          * sufficient for ensuring that no important content overlaps with the DisplayCutout.
          *
+         * <p>
+         * Note: OEMs can have an option to allow the window to always extend into the
+         * {@link DisplayCutout} area, no matter the cutout flag set, when the {@link DisplayCutout}
+         * is on the different side from system bars, only if the {@link DisplayCutout} overlaps at
+         * most 16dp with the windows.
+         * In such case, OEMs must provide an opt-in/out affordance for users.
+         *
          * @see DisplayCutout
          * @see WindowInsets
          * @see #layoutInDisplayCutoutMode
@@ -3155,8 +3163,16 @@ public interface WindowManager extends ViewManager {
          * The window is always allowed to extend into the {@link DisplayCutout} areas on the short
          * edges of the screen.
          *
+         * <p>
          * The window will never extend into a {@link DisplayCutout} area on the long edges of the
-         * screen.
+         * screen, unless the {@link DisplayCutout} is not deeper than 16 dp, but this depends on
+         * the OEM choice.
+         *
+         * <p>
+         * Note: OEMs can have an option to allow the window to extend into the
+         * {@link DisplayCutout} area on the long edge side, only if the cutout overlaps at most
+         * 16dp with the windows. In such case, OEMs must provide an opt-in/out affordance for
+         * users.
          *
          * <p>
          * The window must make sure that no important content overlaps with the

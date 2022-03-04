@@ -1,12 +1,6 @@
 // Baseline format: 1.0
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
 
-
-
-BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
-    Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
-
-
 ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
     Registration methods should have overload that accepts delivery Executor: `setOnRtpRxNoticeListener`
 
@@ -14,8 +8,6 @@ ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android
 GenericException: android.app.prediction.AppPredictor#finalize():
 
 GenericException: android.hardware.location.ContextHubClient#finalize():
-
-GenericException: android.net.IpSecManager.IpSecTunnelInterface#finalize():
 
 GenericException: android.service.autofill.augmented.FillWindow#finalize():
 

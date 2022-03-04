@@ -140,13 +140,6 @@ public class HeadsetProfile implements LocalBluetoothProfile {
         return (activeDevices.size() > 0) ? activeDevices.get(0) : null;
     }
 
-    public boolean isAudioOn() {
-        if (mService == null) {
-            return false;
-        }
-        return mService.isAudioOn();
-    }
-
     public int getAudioState(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothHeadset.STATE_AUDIO_DISCONNECTED;

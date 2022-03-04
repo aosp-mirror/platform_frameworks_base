@@ -17,6 +17,7 @@
 package android.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.NonNull;
 import android.service.NetworkIdentitySetProto;
@@ -42,6 +43,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
     private static final int VERSION_ADD_METERED = 4;
     private static final int VERSION_ADD_DEFAULT_NETWORK = 5;
     private static final int VERSION_ADD_OEM_MANAGED_NETWORK = 6;
+    private static final int VERSION_ADD_SUB_ID = 7;
 
     /**
      * Construct a {@link NetworkIdentitySet} object.
@@ -103,8 +105,15 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
                 oemNetCapabilities = NetworkIdentity.OEM_NONE;
             }
 
+            final int subId;
+            if (version >= VERSION_ADD_SUB_ID) {
+                subId = in.readInt();
+            } else {
+                subId = INVALID_SUBSCRIPTION_ID;
+            }
+
             add(new NetworkIdentity(type, ratType, subscriberId, networkId, roaming, metered,
-                    defaultNetwork, oemNetCapabilities));
+                    defaultNetwork, oemNetCapabilities, subId));
         }
     }
 
@@ -113,7 +122,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
      * @hide
      */
     public void writeToStream(DataOutput out) throws IOException {
-        out.writeInt(VERSION_ADD_OEM_MANAGED_NETWORK);
+        out.writeInt(VERSION_ADD_SUB_ID);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
             out.writeInt(ident.getType());
@@ -124,6 +133,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
             out.writeBoolean(ident.isMetered());
             out.writeBoolean(ident.isDefaultNetwork());
             out.writeInt(ident.getOemManaged());
+            out.writeInt(ident.getSubId());
         }
     }
 
@@ -212,7 +222,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
         final long start = proto.start(tag);
 
         for (NetworkIdentity ident : this) {
-            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES);
+            ident.dumpDebug(proto, NetworkIdentitySetProto.IDENTITIES_FIELD_NUMBER);
         }
 
         proto.end(start);
