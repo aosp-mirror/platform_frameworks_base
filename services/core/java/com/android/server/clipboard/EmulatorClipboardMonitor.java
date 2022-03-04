@@ -18,6 +18,7 @@ package com.android.server.clipboard;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -39,6 +40,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     private static final String PIPE_NAME = "pipe:clipboard";
     private static final int HOST_PORT = 5000;
     private final Thread mHostMonitorThread;
+    private static final boolean LOG_CLIBOARD_ACCESS =
+            SystemProperties.getBoolean("ro.boot.qemu.log_clipboard_access", false);
     private FileDescriptor mPipe = null;
 
     private static byte[] createOpenHandshake() {
@@ -132,6 +135,9 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                                                        new String[]{"text/plain"},
                                                        new ClipData.Item(str));
 
+                    if (LOG_CLIBOARD_ACCESS) {
+                        Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
+                    }
                     setAndroidClipboard.accept(clip);
                 } catch (ErrnoException | InterruptedIOException e) {
                     closePipe();
@@ -156,6 +162,10 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     }
 
     private void setHostClipboardImpl(final String value) {
+        if (LOG_CLIBOARD_ACCESS) {
+            Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
+        }
+
         try {
             if (isPipeOpened()) {
                 sendMessage(value.getBytes());
