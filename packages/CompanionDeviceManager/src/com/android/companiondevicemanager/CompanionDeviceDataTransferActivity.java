@@ -27,9 +27,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.text.Html;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -61,8 +59,6 @@ public class CompanionDeviceDataTransferActivity extends Activity {
 
         TextView titleView = findViewById(R.id.title);
         TextView summaryView = findViewById(R.id.summary);
-        ListView listView = findViewById(R.id.device_list);
-        listView.setVisibility(View.GONE);
         Button allowButton = findViewById(R.id.btn_positive);
         Button disallowButton = findViewById(R.id.btn_negative);
 
@@ -73,7 +69,7 @@ public class CompanionDeviceDataTransferActivity extends Activity {
         requireNonNull(mRequest);
         requireNonNull(mCdmServiceReceiver);
 
-        if (mRequest.isPermissionSyncAllPackages()
+        if (mRequest.getPermissionSyncAllPackages()
                 || !mRequest.getPermissionSyncPackages().isEmpty()) {
             titleView.setText(Html.fromHtml(getString(
                     R.string.permission_sync_confirmation_title), 0));

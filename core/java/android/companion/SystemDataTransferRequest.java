@@ -66,8 +66,7 @@ public final class SystemDataTransferRequest implements Parcelable {
         return mAssociationId;
     }
 
-    @NonNull
-    public boolean isPermissionSyncAllPackages() {
+    public boolean getPermissionSyncAllPackages() {
         return mPermissionSyncAllPackages;
     }
 
@@ -103,6 +102,7 @@ public final class SystemDataTransferRequest implements Parcelable {
                 + "associationId=" + mAssociationId
                 + ", isPermissionSyncAllPackages=" + mPermissionSyncAllPackages
                 + ", permissionSyncPackages=[" + String.join(",", mPermissionSyncPackages) + "]"
+                + ", userId=" + mUserId
                 + ", isUserConsented=" + mUserConsented
                 + ")";
     }
@@ -192,10 +192,10 @@ public final class SystemDataTransferRequest implements Parcelable {
     /**
      * Check if two requests have the same data type.
      */
-    public boolean hasSameDataType(SystemDataTransferRequest request) {
+    public boolean hasSameDataType(@NonNull SystemDataTransferRequest request) {
         // Check if they are permission sync requests.
-        if (this.isPermissionSyncAllPackages() || !this.getPermissionSyncPackages().isEmpty()) {
-            return request.isPermissionSyncAllPackages() || !request.getPermissionSyncPackages()
+        if (this.getPermissionSyncAllPackages() || !this.getPermissionSyncPackages().isEmpty()) {
+            return request.getPermissionSyncAllPackages() || !request.getPermissionSyncPackages()
                     .isEmpty();
         }
         return false;
