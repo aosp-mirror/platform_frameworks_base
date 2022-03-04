@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
 import android.os.Handler
+import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -64,6 +65,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var powerManager: PowerManager
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -97,6 +100,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             viewUtil,
             FakeExecutor(FakeSystemClock()),
             TapGestureDetector(context),
+            powerManager,
             Handler.getMain(),
             receiverUiEventLogger,
         )
