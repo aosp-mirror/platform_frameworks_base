@@ -54,8 +54,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return bits;
     }
 
-    private boolean isPipeOpened() {
-        return mPipe != null;
+    private synchronized FileDescriptor getPipeFD() {
+        return mPipe;
     }
 
     private synchronized boolean openPipe() {
@@ -107,14 +107,16 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return msg;
     }
 
-    private void sendMessage(final byte[] msg) throws ErrnoException, InterruptedIOException {
+    private static void sendMessage(
+            final FileDescriptor fd,
+            final byte[] msg) throws ErrnoException, InterruptedIOException {
         final byte[] lengthBits = new byte[4];
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(msg.length);
 
-        Os.write(mPipe, lengthBits, 0, lengthBits.length);
-        Os.write(mPipe, msg, 0, msg.length);
+        Os.write(fd, lengthBits, 0, lengthBits.length);
+        Os.write(fd, msg, 0, msg.length);
     }
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
@@ -162,17 +164,22 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     }
 
     private void setHostClipboardImpl(final String value) {
-        if (LOG_CLIBOARD_ACCESS) {
-            Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
-        }
+        final FileDescriptor pipeFD = getPipeFD();
 
-        try {
-            if (isPipeOpened()) {
-                sendMessage(value.getBytes());
-            }
-        } catch (ErrnoException | InterruptedIOException e) {
-            Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
-        } catch (IllegalArgumentException e) {
+        if (pipeFD != null) {
+            Thread t = new Thread(() -> {
+                if (LOG_CLIBOARD_ACCESS) {
+                    Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
+                }
+
+                try {
+                    sendMessage(pipeFD, value.getBytes());
+                } catch (ErrnoException | InterruptedIOException e) {
+                    Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
+                } catch (IllegalArgumentException e) {
+                }
+            });
+            t.start();
         }
     }
 }
