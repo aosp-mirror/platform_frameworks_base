@@ -50,7 +50,6 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -61,8 +60,10 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
@@ -757,7 +758,8 @@ public class PipTransition extends PipTransitionController {
         final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
         final TaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (leash == null || !leash.isValid() || taskInfo == null) {
-            Log.w(TAG, "Invalid leash on fadeExistingPip: " + leash);
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Invalid leash on fadeExistingPip: %s", TAG, leash);
             return;
         }
         final float alphaStart = show ? 0 : 1;
