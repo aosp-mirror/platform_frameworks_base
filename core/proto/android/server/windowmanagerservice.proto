@@ -53,6 +53,7 @@ message WindowManagerServiceDumpProto {
     optional int32 last_orientation = 8 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation", deprecated=true];
     optional int32 focused_display_id = 9;
     optional bool hard_keyboard_available = 10;
+    optional bool window_frames_valid = 11;
 }
 
 /* represents RootWindowContainer object */
