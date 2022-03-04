@@ -249,6 +249,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
 import android.window.IOnBackInvokedCallback;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -1083,9 +1084,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void setOnBackInvokedCallback(
             @Nullable IOnBackInvokedCallback onBackInvokedCallback, int priority) {
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s. Client IWindow %s",
-                this, onBackInvokedCallback, mClient);
-        if (priority >= 0) {
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "WindowState: Setting back callback %s (priority: %d) "
+                        + "(Client IWindow: %s). (WindowState: %s)",
+                onBackInvokedCallback, priority, mClient, this);
+        if (priority >= WindowOnBackInvokedDispatcher.PRIORITY_DEFAULT) {
             mApplicationOnBackInvokedCallback = onBackInvokedCallback;
             mSystemOnBackInvokedCallback = null;
         } else {
