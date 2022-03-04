@@ -103,7 +103,7 @@ class DeviceIdleModifier extends Modifier {
                     mIrs.onDeviceStateChanged();
                 }
             } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
-                if (mDeviceIdle != mPowerManager.isLightDeviceIdleMode()) {
+                if (mDeviceLightIdle != mPowerManager.isLightDeviceIdleMode()) {
                     mDeviceLightIdle = mPowerManager.isLightDeviceIdleMode();
                     mIrs.onDeviceStateChanged();
                 }
