@@ -35,7 +35,6 @@ import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
-import com.android.systemui.communal.CommunalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
@@ -119,7 +118,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             @Main Resources resources,
             ScreenLifecycle screenLifecycle,
             UserSwitcherController userSwitcherController,
-            CommunalStateController communalStateController,
             KeyguardStateController keyguardStateController,
             FalsingManager falsingManager,
             ConfigurationController configurationController,
@@ -138,10 +136,9 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mFalsingManager = falsingManager;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
-        mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, communalStateController,
+        mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                screenOffAnimationController,  /* animateYPos= */ false,
-                /* visibleOnCommunal= */ false);
+                screenOffAnimationController,  /* animateYPos= */ false);
         mUserSwitchDialogController = userSwitchDialogController;
         mUiEventLogger = uiEventLogger;
     }
