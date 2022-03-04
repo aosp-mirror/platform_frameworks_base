@@ -3085,7 +3085,7 @@
 
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
-                android:protectionLevel="signature|recents|role"/>
+                android:protectionLevel="signature|recents|role|installer"/>
 
     <!-- @deprecated Use {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
          @hide
