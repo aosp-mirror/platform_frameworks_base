@@ -1472,7 +1472,7 @@
     <!-- Name used to refer to the "Play/Pause" media key on the keyboard. -->
     <string name="keyboard_key_media_play_pause">Play/Pause</string>
     <!-- Name used to refer to the "Stop" media key on the keyboard. -->
-    <string name="keyboard_key_media_stop">Stop casting</string>
+    <string name="keyboard_key_media_stop">Stop</string>
     <!-- Name used to refer to the "Next" media key on the keyboard. -->
     <string name="keyboard_key_media_next">Next</string>
     <!-- Name used to refer to the "Previous" media key on the keyboard. -->
