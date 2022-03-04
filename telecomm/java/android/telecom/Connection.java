@@ -1400,6 +1400,18 @@ public abstract class Connection extends Conferenceable {
          * Session modify request rejected by remote user.
          */
         public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
+
+
+        /**@hide*/
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = "SESSION_MODIFY_REQUEST_", value = {
+                SESSION_MODIFY_REQUEST_SUCCESS,
+                SESSION_MODIFY_REQUEST_FAIL,
+                SESSION_MODIFY_REQUEST_INVALID,
+                SESSION_MODIFY_REQUEST_TIMED_OUT,
+                SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE
+        })
+        public @interface RttSessionModifyStatus {}
     }
 
     /**
