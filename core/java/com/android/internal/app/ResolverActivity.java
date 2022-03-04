@@ -1603,6 +1603,11 @@ public class ResolverActivity extends Activity implements
         List<DisplayResolveInfo> otherProfileList =
                 mMultiProfilePagerAdapter.getInactiveListAdapter().mDisplayList;
 
+        if (sameProfileList.isEmpty()) {
+            Log.d(TAG, "No targets in the current profile");
+            return false;
+        }
+
         if (otherProfileList.size() != 1) {
             Log.d(TAG, "Found " + otherProfileList.size() + " resolvers in the other profile");
             return false;
