@@ -37,9 +37,9 @@ import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.HearingAidProfile;
+import com.android.settingslib.bluetooth.LeAudioProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
-import com.android.settingslib.bluetooth.LeAudioProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -195,6 +195,14 @@ public class LocalMediaManager implements BluetoothCallback {
         for (DeviceCallback callback : getCallbacks()) {
             callback.onSelectedDeviceStateChanged(device, state);
         }
+    }
+
+    /**
+     * Returns if the media session is available for volume control.
+     * @return True if this media session is available for colume control, false otherwise.
+     */
+    public boolean isMediaSessionAvailableForVolumeControl() {
+        return mInfoMediaManager.isRoutingSessionAvailableForVolumeControl();
     }
 
     /**

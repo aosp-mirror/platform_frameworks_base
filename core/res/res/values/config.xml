@@ -4130,9 +4130,9 @@
           This service must be trusted, as it can be activated without explicit consent of the user.
           If no service with the specified name exists on the device, cloudsearch will be disabled.
           Example: "com.android.intelligence/.CloudSearchService"
-          config_defaultCloudSearchService is for the single provider case.
+          config_defaultCloudSearchServices is for the multiple provider case.
     -->
-    <string name="config_defaultCloudSearchService" translatable="false"></string>
+    <string-array name="config_defaultCloudSearchServices"></string-array>
 
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.
@@ -5191,6 +5191,10 @@
     <!-- The timeout value in milliseconds used by SelectionActionModeHelper for each selections
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
+
+    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
+         Set to -1 if Views should not set themselves as preferred to keep clear. -->
+    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
 
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>

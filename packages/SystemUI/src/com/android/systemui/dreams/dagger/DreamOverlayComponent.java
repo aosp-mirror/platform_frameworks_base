@@ -26,6 +26,7 @@ import com.android.systemui.dreams.DreamOverlayContainerViewController;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.dagger.ComplicationModule;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -39,6 +40,7 @@ import dagger.Subcomponent;
  * Dagger subcomponent for {@link DreamOverlayModule}.
  */
 @Subcomponent(modules = {
+        DreamTouchModule.class,
         DreamOverlayModule.class,
         ComplicationModule.class,
 })

@@ -404,7 +404,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer getTopActiveContainer() {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             TaskFragmentContainer container = mContainers.get(i);
-            if (!container.isFinished() && container.getTopNonFinishingActivity() != null) {
+            if (!container.isFinished() && container.getRunningActivityCount() > 0) {
                 return container;
             }
         }
@@ -499,6 +499,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     boolean launchPlaceholderIfNecessary(@NonNull Activity activity) {
         final  TaskFragmentContainer container = getContainerWithActivity(
                 activity.getActivityToken());
+        // Don't launch placeholder if the container is occluded.
+        if (container != getTopActiveContainer()) {
+            return false;
+        }
 
         SplitContainer splitContainer = container != null ? getActiveSplitForContainer(container)
                 : null;

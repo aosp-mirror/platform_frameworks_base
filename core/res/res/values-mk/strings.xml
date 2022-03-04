@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Повикување на три начини"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Одбивање несакани вознемирувачки повици"</string>
     <string name="CndMmi" msgid="185136449405618437">"Испорака на повикувачки број"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Не вознемирувај"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Стандардно, ID на повикувач е скриен. Следен повик: скриен"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Стандардно, ID на повикувач е скриен. Следен повик: не е скриен"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Стандардно, ID на повикувач не е скриен. Следен повик: скриен"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"испраќа и прикажува SMS-пораки"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Датотеки и документи"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"да пристапува до датотеки и документи на уредот"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика и друго аудио"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"да пристапува до аудиодатотеки на вашиот уред"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фотографии и видеа"</string>
@@ -391,7 +390,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Апликацијава може да се појави врз други апликации"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Апликацијава може да се појави врз други апликации или делови од екранот. Тоа може да го попречи нормалното користење на апликацијата и да го смени начинот на кој се појавуваат другите апликации."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"извршување во заднина"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да се извршува во заднина. Тоа може побрзо да ја троши батеријата."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да работи во заднина. Тоа може побрзо да ја троши батеријата."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"користење мобилен интернет во заднина"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Апликацијава може да користи мобилен интернет во заднина. Тоа може да го зголеми користењето мобилен интернет."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"направи апликацијата постојано да биде активна"</string>
@@ -548,7 +547,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозволува апликацијата да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"да има интеракција со уредите со Wi‑Fi во близина"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба уредите со Wi‑Fi во близина"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба на уреди со Wi‑Fi во близина"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Внесете го заклучувањето на екранот за да продолжите"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Откриен е делумен отпечаток"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатокот не може да се обработи. Обидете се повторно."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Исчистете го сензорот за отпечатоци и обидете се повторно"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Исчистете го сензорот и обидете се повторно"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Цврсто притиснете на сензорот"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте со друг отпечаток"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Премногу светло"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот по малку секој пат"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Цврсто притиснете на сензорот"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатокот е проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицето е проверено"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицето е проверено, притиснете го копчето „Потврди“"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Дозволува сопственикот да се сврзе со интерфејсот од највисоко ниво на давателот на услугата за пораки. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"поврзи се со услуги на операторот"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Дозволува сопственикот да се поврзе со услуги на операторот. Не треба да се користи за стандардни апликации."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"пристапи до Не вознемирувај"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дозволува апликацијата да чита и пишува конфигурација Не вознемирувај."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"започнете со користење на дозволата за приказ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозволува сопственикот да почне со користење на дозволата за апликација. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"да го стартува приказот за одлуки за дозволи"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Прескокни"</string>
     <string name="no_matches" msgid="6472699895759164599">"Нема совпаѓања"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Пронајди на страница"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# совпаѓање}one{# од {total}}other{# од {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Готово"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Бришење споделена меморија…"</string>
     <string name="share" msgid="4157615043345227321">"Сподели"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (следниот аларм)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Додека не го исклучите"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Додека не го исклучите Не вознемирувај"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Собери"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не вознемирувај"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Пауза"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Вечер од седмицата"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Викенд"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Повиците и известувањата ќе вибрираат"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Повиците и известувањата нема да имаат звук"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системски промени"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не вознемирувај"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Ново: режимот „Не вознемирувај“ ги крие известувањата"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Допрете за да дознаете повеќе и да ги промените поставките."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Поставките за „Не вознемирувај“ се изменија"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Допрете за да проверите што е блокирано."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Поставки"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Во ред"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Исклучи"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Дознајте повеќе"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"„Подобрените известувања“ ги заменија „Адаптивните известувања на Android“ во Android 12. Оваа функција прикажува предложени дејства и одговори и ги организира вашите известувања. \n\n„Подобрените известувања“ може да пристапуваат до содржините од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава може и да ги отфрла или да одговара на известувањата, како на пример, да одговара на телефонски повици и да го контролира режимот „Не вознемирувај“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Пораката е преведена од <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност во заднина"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Активност во заднина"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> се извршува во заднина и ја троши батеријата. Допрете за да прегледате."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> се извршува во заднина веќе долго време. Допрете за да прегледате."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> работи во заднина и ја троши батеријата. Допрете за да прегледате."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> работи во заднина веќе долго време. Допрете за да прегледате."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете ги активните апликации"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не може да се пристапи до камерата од уредов"</string>
 </resources>

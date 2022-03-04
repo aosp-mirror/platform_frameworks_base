@@ -9650,27 +9650,8 @@ public class NotificationManagerService extends SystemService {
         if (uid == Process.ROOT_UID && ROOT_PKG.equals(pkg)) {
             return;
         }
-        try {
-            ApplicationInfo ai = mPackageManager.getApplicationInfo(
-                    pkg, 0, userId);
-            if (ai == null) {
-                throw new SecurityException("Unknown package " + pkg);
-            }
-            if (!UserHandle.isSameApp(ai.uid, uid)) {
-                throw new SecurityException("Calling uid " + uid + " gave package "
-                        + pkg + " which is owned by uid " + ai.uid);
-            }
-        } catch (RemoteException re) {
-            throw new SecurityException("Unknown package " + pkg + "\n" + re);
-        }
-    }
-
-    private boolean isCallerSameApp(String pkg) {
-        try {
-            checkCallerIsSameApp(pkg);
-            return true;
-        } catch (SecurityException e) {
-            return false;
+        if (!mPackageManagerInternal.isSameApp(pkg, uid, userId)) {
+            throw new SecurityException("Package " + pkg + " is not owned by uid " + uid);
         }
     }
 

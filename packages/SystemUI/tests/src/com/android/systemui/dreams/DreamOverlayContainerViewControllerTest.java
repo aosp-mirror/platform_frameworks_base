@@ -33,7 +33,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
-import com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,12 +65,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ComplicationHostViewController mComplicationHostViewController;
 
     @Mock
-    ComplicationHostViewComponent.Factory mComplicationHostViewComponentFactory;
-
-    @Mock
-    ComplicationHostViewComponent mComplicationHostViewComponent;
-
-    @Mock
     ViewGroup mDreamOverlayContentView;
 
     @Mock
@@ -88,14 +81,10 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                         DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
-        when(mComplicationHostViewComponentFactory.create())
-                .thenReturn(mComplicationHostViewComponent);
-        when(mComplicationHostViewComponent.getController())
-                .thenReturn(mComplicationHostViewController);
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
-                mComplicationHostViewComponentFactory,
+                mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
                 mHandler,

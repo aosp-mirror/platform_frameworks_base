@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"PIPஐ மூடு"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"முழுத்திரை"</string>
     <string name="pip_move" msgid="1544227837964635439">"PIPபை நகர்த்து"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"PIPபை விரிவாக்கு"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"PIPபைச் சுருக்கு"</string>
 </resources>

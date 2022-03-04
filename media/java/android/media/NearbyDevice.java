@@ -81,6 +81,8 @@ public final class NearbyDevice implements Parcelable {
 
     /**
      * Gets a human-readable string of the range zone.
+     *
+     * @hide
      */
     @NonNull
     public static String rangeZoneToString(@RangeZone int rangeZone) {
@@ -103,13 +105,14 @@ public final class NearbyDevice implements Parcelable {
     @NonNull private final String mMediaRoute2Id;
     @RangeZone private final int mRangeZone;
 
-    public NearbyDevice(@NonNull String mediaRoute2Id, int rangeZone) {
+    /** Creates a device object with the given ID and range zone. */
+    public NearbyDevice(@NonNull String mediaRoute2Id, @RangeZone int rangeZone) {
         mMediaRoute2Id = mediaRoute2Id;
         mRangeZone = rangeZone;
     }
 
     private NearbyDevice(@NonNull Parcel in) {
-        mMediaRoute2Id = in.readString();
+        mMediaRoute2Id = in.readString8();
         mRangeZone = in.readInt();
     }
 

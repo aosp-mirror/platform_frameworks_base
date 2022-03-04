@@ -229,6 +229,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -747,6 +748,9 @@ public class WindowManagerService extends IWindowManager.Stub
             new WindowContextListenerController();
 
     private InputTarget mFocusedInputTarget;
+
+    @VisibleForTesting
+    final ContentRecordingController mContentRecordingController = new ContentRecordingController();
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -2894,6 +2898,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Updates the current content mirroring session.
+     */
+    @Override
+    public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
+        synchronized (mGlobalLock) {
+            mContentRecordingController.setContentRecordingSessionLocked(incomingSession, this);
+        }
+    }
+
     // TODO(multi-display): remove when no default display use case.
     void prepareAppTransitionNone() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
@@ -3920,7 +3934,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return null;
             }
 
+            // The bounds returned by the task represent the task's position on the screen. However,
+            // we need to specify a crop relative to the task's surface control. Therefore, shift
+            // the task's bounds to 0,0 so that we have the correct size and position within the
+            // task's surface control.
             task.getBounds(mTmpRect);
+            mTmpRect.offsetTo(0, 0);
+
             final SurfaceControl sc = task.getSurfaceControl();
             final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
                     layerCaptureArgsBuilder.setLayer(sc).setSourceCrop(mTmpRect).build());

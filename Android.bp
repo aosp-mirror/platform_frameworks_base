@@ -25,18 +25,6 @@
 //
 // READ ME: ########################################################
 
-// TODO(b/21090328): Remove filter after we are ready to.
-soong_config_module_type {
-    name: "java_library_with_nonpublic_deps",
-    module_type: "java_library",
-    config_namespace: "ANDROID",
-    bool_variables: ["include_nonpublic_framework_api"],
-    properties: [
-        "static_libs",
-        "libs",
-    ],
-}
-
 package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -151,7 +139,7 @@ filegroup {
     ],
 }
 
-java_library_with_nonpublic_deps {
+java_library {
     name: "framework-all",
     installable: false,
     static_libs: [
@@ -285,7 +273,7 @@ java_defaults {
             "frameworks/native/libs/permission/aidl",
             // TODO: remove when moved to the below package
             "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
-            "packages/modules/Bluetooth/system/binder",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/graphics/common/aidl",
@@ -543,7 +531,7 @@ stubs_defaults {
             "frameworks/native/libs/permission/aidl",
             // TODO: remove when moved to the below package
             "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
-            "packages/modules/Bluetooth/system/binder",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/graphics/common/aidl",
@@ -583,7 +571,7 @@ stubs_defaults {
     name: "module-classpath-stubs-defaults",
     aidl: {
         include_dirs: [
-            "packages/modules/Bluetooth/system/binder",
+            "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
         ],

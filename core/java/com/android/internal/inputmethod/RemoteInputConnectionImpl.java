@@ -935,17 +935,20 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
      * Dispatches {@link InputConnection#requestCursorUpdates(int)}.
      *
      * <p>This method is intended to be called only from {@link InputMethodManager}.</p>
-     * @param cursorUpdateMode the mode for {@link InputConnection#requestCursorUpdates(int)}
+     * @param cursorUpdateMode the mode for {@link InputConnection#requestCursorUpdates(int, int)}
+     * @param cursorUpdateFilter the filter for
+     *      {@link InputConnection#requestCursorUpdates(int, int)}
      * @param imeDisplayId displayId on which IME is displayed.
      */
     @Dispatching(cancellable = true)
-    public void requestCursorUpdatesFromImm(int cursorUpdateMode, int imeDisplayId) {
+    public void requestCursorUpdatesFromImm(int cursorUpdateMode, int cursorUpdateFilter,
+            int imeDisplayId) {
         final int currentSessionId = mCurrentSessionId.get();
         dispatchWithTracing("requestCursorUpdatesFromImm", () -> {
             if (currentSessionId != mCurrentSessionId.get()) {
                 return;  // cancelled
             }
-            requestCursorUpdatesInternal(cursorUpdateMode, imeDisplayId);
+            requestCursorUpdatesInternal(cursorUpdateMode, cursorUpdateFilter, imeDisplayId);
         });
     }
 
@@ -957,11 +960,28 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             if (header.mSessionId != mCurrentSessionId.get()) {
                 return false;  // cancelled
             }
-            return requestCursorUpdatesInternal(cursorUpdateMode, imeDisplayId);
+            return requestCursorUpdatesInternal(
+                    cursorUpdateMode, 0 /* cursorUpdateFilter */, imeDisplayId);
         });
     }
 
-    private boolean requestCursorUpdatesInternal(int cursorUpdateMode, int imeDisplayId) {
+    @Dispatching(cancellable = true)
+    @Override
+    public void requestCursorUpdatesWithFilter(InputConnectionCommandHeader header,
+            int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
+            AndroidFuture future /* T=Boolean */) {
+        dispatchWithTracing("requestCursorUpdates", future, () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                return false;  // cancelled
+            }
+            return requestCursorUpdatesInternal(
+                    cursorUpdateMode, cursorUpdateFilter, imeDisplayId);
+        });
+    }
+
+    private boolean requestCursorUpdatesInternal(
+            @InputConnection.CursorUpdateMode int cursorUpdateMode,
+            @InputConnection.CursorUpdateFilter int cursorUpdateFilter, int imeDisplayId) {
         final InputConnection ic = getInputConnection();
         if (ic == null || !isActive()) {
             Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
@@ -972,7 +992,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             return false;
         }
         try {
-            return ic.requestCursorUpdates(cursorUpdateMode);
+            return ic.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
         } catch (AbstractMethodError ignored) {
             // TODO(b/199934664): See if we can remove this by providing a default impl.
             return false;

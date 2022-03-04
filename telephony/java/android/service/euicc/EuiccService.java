@@ -746,7 +746,7 @@ public abstract class EuiccService extends Service {
                         result = EuiccService.this.onDownloadSubscription(
                                 slotId, portIndex, subscription, switchAfterDownload,
                                 forceDeactivateSim, resolvedBundle);
-                    } catch (AbstractMethodError e) {
+                    } catch (UnsupportedOperationException | AbstractMethodError e) {
                         Log.w(TAG, "The new onDownloadSubscription(int, int, "
                                 + "DownloadableSubscription, boolean, boolean, Bundle) is not "
                                 + "implemented. Fall back to the old one.", e);

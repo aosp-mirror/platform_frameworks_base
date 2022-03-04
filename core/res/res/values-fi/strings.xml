@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Kolmisuuntainen puhelu"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ei-toivottujen ja ärsyttävien puheluiden hylkääminen"</string>
     <string name="CndMmi" msgid="185136449405618437">"Soittajan numeron näyttäminen"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Älä häiritse"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Soittajan tunnukseksi muutetaan rajoitettu. Seuraava puhelu: rajoitettu"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Soittajan tunnukseksi muutetaan rajoitettu. Seuraava puhelu: ei rajoitettu"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Soittajan tunnukseksi muutetaan rajoittamaton. Seuraava puhelu: rajoitettu"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"käyttää kalenteria"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tekstiviestit"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"lähettää ja tarkastella tekstiviestejä"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Tiedostot ja dokumentit"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"pääsyn laitteesi tiedostoihin ja dokumentteihin"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiikki ja muu audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pääsy laitteesi audiotiedostoihin"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Kuvat ja videot"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jatka lisäämällä näytön lukituksen avaustapa"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Osittainen sormenjälki havaittu"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Liikuta sormeasi hieman joka kerralla"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Sormenjälkeä ei tunnistettu"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Paina anturia voimakkaasti"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sormenjälki tunnistettu"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Kasvot tunnistettu"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Kasvot tunnistettu, valitse Vahvista"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Antaa sovelluksen sitoutua operaattorin viestipalvelun ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"Luo sidos operaattorin palveluun"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Antaa sovelluksen luoda sidoksen operaattorin palveluun. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Älä häiritse -tilan käyttöoikeus"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"aloita katseluoikeuksien käyttö"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Antaa luvanhaltijan käynnistää sovelluksen käyttöoikeuksien käytön. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"aloita lupapäätösten tarkistaminen"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ohita"</string>
     <string name="no_matches" msgid="6472699895759164599">"Ei tuloksia"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Etsi sivulta"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# osuma}other{#/{total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Valmis"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Tyhjennetään jaettua tallennustilaa…"</string>
     <string name="share" msgid="4157615043345227321">"Jaa"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Kunnes kello on <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> asti (seuraava hälytys)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kunnes laitat pois päältä"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Kunnes poistat Varattu-tilan käytöstä."</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Kutista"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Älä häiritse"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Vapaalla"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Arki-iltaisin"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Viikonloppuna"</string>
@@ -1960,7 +1957,7 @@
     <string name="demo_restarting_message" msgid="1160053183701746766">"Palautetaan asetuksia…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> ei ole käytössä."</string>
     <string name="conference_call" msgid="5731633152336490471">"Puhelinneuvottelu"</string>
-    <string name="tooltip_popup_title" msgid="7863719020269945722">"Työkaluvinkki"</string>
+    <string name="tooltip_popup_title" msgid="7863719020269945722">"Vihjeteksti"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Pelit"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Musiikki ja ääni"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Elokuvat ja videot"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Puhelut ja ilmoitukset värisevät"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Puhelut ja ilmoitukset mykistetään"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Järjestelmän muutokset"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Älä häiritse"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Uutta: Älä häiritse ‑tila piilottaa ilmoitukset"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Napauta, jos haluat lukea lisää ja tehdä muutoksia."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Älä häiritse ‑tila muuttui"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Napauta niin näet, mitä on estetty."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Järjestelmä"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Asetukset"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Laita pois päältä"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lue lisää"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Parannetut ilmoitukset korvasivat Androidin mukautuvat ilmoitukset Android 12:ssa. Tämä ominaisuus näyttää toiminto- ja vastausehdotuksia ja järjestää ilmoituksesi.\n\nParannetuilla ilmoituksilla on pääsy kaikkeen ilmoitussisältöön, myös henkilökohtaisiin tietoihin (esim. kontaktien nimet ja viestit). Ominaisuus voi myös ohittaa ilmoituksia tai vastata niihin, esim. vastata puheluihin ja ohjata Älä häiritse ‑tilaa."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akku saattaa loppua ennen normaalia latausaikaa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Virransäästö otettu käyttöön akunkeston pidentämiseksi"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> on käynnissä taustalla ja kuluttaa akkua. Tarkista napauttamalla."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> on ollut käynnissä taustalla pitkän aikaa. Tarkista napauttamalla."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tarkista aktiiviset sovellukset"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ei pääsyä kameraan tältä laitteelta"</string>
 </resources>

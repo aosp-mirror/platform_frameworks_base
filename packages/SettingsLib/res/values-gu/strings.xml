@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"રંગ સુધારણા"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"તમારા ડિવાઇસ પર રંગો કેવી રીતે બતાવવામાં આવે તેની ગોઠવણી કરો. આ ત્યારે સહાયરૂપ થઈ શકે છે જ્યારે તમારે:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;રંગો વધુ યોગ્ય રીતે જોવા હોય&lt;/li&gt; &lt;li&gt;&amp;nbsp;તમને ફોકસ કરવામાં સહાયતા રહે તે માટે રંગો કાઢી નાખવા હોય&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"રંગમાં સુધારણા કરવાની સુવિધાનો ઉપયોગ ત્યારે સહાયરૂપ બની શકે છે કે જ્યારે તમે આ કરવા માગતા હો:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;વધુ સચોટપણે રંગ જોવા&lt;/li&gt; &lt;li&gt;&amp;nbsp;ફોકસ કરવામાં સહાય માટે અમુક રંગ કાઢી નાખવા&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"લગભગ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> બાકી છે"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"સંપૂર્ણપણે ચાર્જ છે"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"પ્રતિબંધિત સેટિંગ દ્વારા નિયંત્રિત"</string>
     <string name="disabled" msgid="8017887509554714950">"અક્ષમ કર્યો"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ક્યારેય નહીં"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"માત્ર પ્રાધાન્યતા"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

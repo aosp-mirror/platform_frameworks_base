@@ -129,10 +129,6 @@ combined_apis {
         "framework-wifi",
         "i18n.module.public.api",
     ],
-    conditional_bootclasspath: [
-        "framework-auxiliary",
-        "framework-supplementalapi",
-    ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",

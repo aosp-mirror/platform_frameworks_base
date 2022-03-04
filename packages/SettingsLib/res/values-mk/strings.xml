@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалија (слепило за црвена и зелена)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалија (слепило за сина и жолта)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Корекција на бои"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"Приспособете го приказот на боите на уредот. Ова е корисно кога сакате:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;да гледате попрецизни бои&lt;/li&gt; &lt;li&gt;&amp;nbsp;да отстраните бои за подобра концентрација&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Корекцијата на боите може да биде корисна кога сакате:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;да ги гледате боите попрецизно&lt;/li&gt; &lt;li&gt;&amp;nbsp;да ги отстраните боите за да се фокусирате подобро&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Прескокнато според <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не се полни"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Поврзана, не се полни"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Полна"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Целосно полна"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролирано од администраторот"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Контролирано со ограничени поставки"</string>
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дозволете ѝ на апликацијава да поставува аларми и да закажува дејства со временски рокови. Ова овозможува апликацијата да работи во заднина и така може повеќе да ја троши батеријата.\n\nАко дозволава е исклучена, нема да функционираат постојните аларми и настаните според време закажани од апликацијава."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"закажување, аларм, потсетник, часовник"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Вклучи"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Исклучување на „Не вознемирувај“"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Никогаш"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Само приоритетно"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

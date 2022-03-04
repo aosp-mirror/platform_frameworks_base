@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"កែតម្រូវ​របៀបដែលពណ៌​បង្ហាញនៅលើ​ឧបករណ៍​របស់អ្នក។ ចំណុចនេះ​អាចមានប្រយោជន៍ នៅពេលដែល​អ្នកចង់៖&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលឃើញពណ៌​កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ ដើម្បីជួយអ្នក​ក្នុងការផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្មពេញ"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"បានសាក​ថ្មពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"គ្រប់គ្រងដោយការកំណត់ដែលបានរឹតបន្តឹង"</string>
     <string name="disabled" msgid="8017887509554714950">"បិទ"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"អនុញ្ញាតឱ្យ​កម្មវិធីនេះ​កំណត់ម៉ោងរោទ៍ និងកំណត់កាលវិភាគសកម្មភាពដែលតម្រូវឱ្យទាន់ពេលវេលា។ ការធ្វើបែបនេះអនុញ្ញាតឱ្យកម្មវិធីនេះដំណើរការនៅផ្ទៃខាងក្រោយ ដែលអាចប្រើថ្មច្រើនជាងមុន។\n\nប្រសិនបើបិទការអនុញ្ញាតនេះ ម៉ោងរោទ៍ដែលមានស្រាប់ និងព្រឹត្តិការណ៍ផ្អែកលើពេលវេលាដែលកំណត់ដោយកម្មវិធីនេះ​នឹងមិនដំណើរការទេ។"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"កាលវិភាគ ម៉ោងរោទ៍ ការរំលឹក នាឡិកា"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"បើក"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"បើកមុខងារកុំរំខាន"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"កុំឱ្យសោះ"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"អាទិភាពប៉ុណ្ណោះ"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

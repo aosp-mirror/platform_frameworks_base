@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Гурван чиглэлт дуудлага"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Хүсээгүй тааламжгүй дуудлагаас татгалзах"</string>
     <string name="CndMmi" msgid="185136449405618437">"Дуудлага хийгчийн дугаарыг дамжуулах"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Бүү саад бол"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Дуудлага хийгчийн ID хязгаарлагдсан. Дараагийн дуудлага: Хязгаарлагдсан"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Дуудлага хийгчийн ID хязгаарлагдсан. Дараагийн дуудлага: Хязгаарлагдаагүй"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Дуудлага хийгчийн ID хязгаарлагдаагүй. Дараагийн дуудлага: Хязгаарлагдсан"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Эзэмшигчид зөөгч мессежийн үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"Үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбогдох"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Аливаа эзэмшигчийг үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбодог. Энгийн аппд шаардлагагүй."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Бүү саад бол тохируулгад хандалт хийх"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Апп-д Бүү саад бол тохируулгыг уншиж, бичихийг зөвшөөрөх"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"зөвшөөрлийн ашиглалтыг харж эхлэх"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Эзэмшигчид аппын зөвшөөрлөө ашиглаж эхлэхийг зөвшөөрдөг. Энгийн аппуудад шаардлагагүй."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"зөвшөөрлийн шийдвэрийг хянах дэлгэцийг эхлүүлэх"</string>
@@ -1501,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Алгасах"</string>
     <string name="no_matches" msgid="6472699895759164599">"Илэрц алга"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Хуудаснаас олох"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# тааруулах}other{{total}-н #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Дуусгах"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Хуваалцсан хадгалах санг устгаж байна…"</string>
     <string name="share" msgid="4157615043345227321">"Хуваалцах"</string>
@@ -1867,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл (дараагийн сэрүүлэг)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Таныг унтраах хүртэл"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\"Бүү саад бол\"-ыг унтраах хүртэл"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Хумих"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Бүү саад бол"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Сул зогсолт"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Ажлын өдрийн шөнө"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Амралтын өдөр"</string>
@@ -2033,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Дуудлага болон мэдэгдэл чичирнэ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Дуудлага болон мэдэгдлийн дууг хаана"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системийн өөрчлөлт"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Бүү саад бол"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Шинэ: Бүү саад бол горим мэдэгдлийг нууж байна"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Илүү ихийг мэдэж, өөрчлөхийн тулд товшино уу."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Тохиргоо"</string>
@@ -2050,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Унтраах"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Сайжруулсан мэдэгдэл нь Android 12 дахь Android-н Орчинтой тохирсон мэдэгдлийг орлосон. Энэ онцлог нь санал болгосон үйлдлүүд болон хариунуудыг харуулж, таны мэдэгдлийг цэгцэлнэ.\n\nСайжруулсан мэдэгдэл нь харилцагчийн нэр, мессеж зэрэг хувийн мэдээллийг оруулаад мэдэгдлийн контентод хандах боломжтой. Энэ онцлог мөн утасны дуудлагад хариулах болон Бүү саад бол горимыг хянах зэргээр мэдэгдлийг хаах эсвэл түүнд хариулах боломжтой."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
@@ -2256,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт ажиллаж байгаа бөгөөд батарейг дуусгаж байна. Хянахын тулд товшино уу."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт удаан хугацааны турш ажиллаж байна. Хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Энэ төхөөрөмжөөс камер луу нэвтрэх боломжгүй байна"</string>
 </resources>

@@ -456,7 +456,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"調整裝置顯示顏色嘅方式。呢項設定喺以下情況適用：&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;想令裝置更加準確咁顯示顏色&lt;/li&gt; &lt;li&gt;&amp;nbsp;移除顏色嚟提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"色彩校正喺以下情況下適用：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;睇到更加準確嘅顏色&lt;/li&gt; &lt;li&gt;&amp;nbsp;移除色彩嚟提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"還有大約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -493,6 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已連接，非充電中"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充滿電"</string>
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"充電完成"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由「受限設定」控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -538,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許此應用程式設定鬧鐘及安排具時效性的操作。這讓應用程式在背景中執行，因此可能會較耗電。\n\n如果關閉此權限，此應用程式將不會在預定時間響起已設定的鬧鐘，亦不會就特定時間的活動傳送通知。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"日程表, 鬧鐘, 提醒, 時鐘"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「請勿騷擾」模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"只限優先"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

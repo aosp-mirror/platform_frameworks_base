@@ -22,4 +22,6 @@
     <string name="pip_close" msgid="9135220303720555525">"Lukk PIP"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Fullskjerm"</string>
     <string name="pip_move" msgid="1544227837964635439">"Flytt BIB"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Vis BIB"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Skjul BIB"</string>
 </resources>

@@ -871,7 +871,7 @@
     <integer name="autofill_max_visible_datasets">3</integer>
 
     <!-- Size of an icon in the Autolfill fill dialog -->
-    <dimen name="autofill_dialog_icon_size">56dp</dimen>
+    <dimen name="autofill_dialog_icon_size">24dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>

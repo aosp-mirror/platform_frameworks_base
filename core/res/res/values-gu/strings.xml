@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"ત્રણ રીતે કૉલિંગ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"અનિચ્છિત પજવણીકારક કૉલ્સનો અસ્વીકાર"</string>
     <string name="CndMmi" msgid="185136449405618437">"કૉલિંગ નંબર વિતરણ"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"ખલેલ પાડશો નહીં"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત છે"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"કૉલર ID પ્રતિબંધિત પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ફાઇલો અને દસ્તાવેજો"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"તમારા ડિવાઇસ પર ફાઇલો અને દસ્તાવેજો ઍક્સેસ કરો"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"મ્યુઝિક અને અન્ય ઑડિયો"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"તમારા ડિવાઇસ પર ઑડિયો ફાઇલો ઍક્સેસ કરવા માટે"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ફોટા અને વીડિયો"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"આગળ વધવા માટે તમારું સ્ક્રીન લૉક દાખલ કરો"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"આંશિક ફિંગરપ્રિન્ટ મળી"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ફિંગરપ્રિન્ટ સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"સેન્સર સાફ કરો અને ફરી પ્રયાસ કરો"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"આંગળી બહુ જ ધીમેથી ખસેડી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"અન્ય ફિંગરપ્રિન્ટ અજમાવી જુઓ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"અતિશય પ્રકાશિત"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"દરેક વખતે સ્કૅનર પર તમારી આંગળીની સ્થિતિ સહેજ બદલતા રહો"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"સેન્સર પર જોરથી દબાવો"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ધારકને કેરીઅર મેસેજિંગ સેવાના ઉચ્ચ-સ્તર ઇન્ટરફેસથી પ્રતિબદ્ધ થવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો માટે ક્યારેય જરૂરી હોતું નથી."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"કેરીઅર સેવાઓથી પ્રતિબદ્ધ થાઓ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ધારકને કેરીઅર સેવાઓ સાથે પ્રતિબદ્ધ થવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો માટે ક્યારેય જરૂરી હોતું નથી."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"ખલેલ પાડશો નહીં ઍક્સેસ કરો"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"પરવાનગી સંબંધિત નિર્ણયો જોવાનું શરૂ કરો"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"છોડો"</string>
     <string name="no_matches" msgid="6472699895759164599">"કોઈ મેળ નથી"</string>
     <string name="find_on_page" msgid="5400537367077438198">"પૃષ્ઠ પર શોધો"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# મૅચ}one{{total}માંથી #}other{{total}માંથી #}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"થઈ ગયું"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"શેર કરેલ સ્ટોરેજ ભૂસી રહ્યાં છીએ…"</string>
     <string name="share" msgid="4157615043345227321">"શેર કરો"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> સુધી"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (આગલા એલાર્મ) સુધી"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"તમે બંધ ન કરો ત્યાં સુધી"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"તમે ખલેલ પાડશો નહીં બંધ ન કરો ત્યાં સુધી"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"સંકુચિત કરો"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ડાઉનટાઇમ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"સપ્તાહાંત રાત્રિ"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"સપ્તાહાંત"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"કૉલ અને નોટિફિકેશન માટે ઉપકરણ વાઇબ્રેટ થશે"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"કૉલ અને નોટિફિકેશન મ્યૂટ કરવામાં આવશે"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"સિસ્ટમના ફેરફારો"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ખલેલ પાડશો નહીં"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"નવું: ખલેલ પાડશો નહીં હવે નોટિફિકેશન છુપાવી શકે છે"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"સેટિંગ"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ઓકે"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"બંધ કરો"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> બૅકગ્રાઉન્ડમાં ચાલી રહી છે અને અતિશય બૅટરી વાપરી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> લાંબા સમયથી બૅકગ્રાઉન્ડમાં ચાલી રહી છે. રિવ્યૂ કરવા માટે ટૅપ કરો."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"સક્રિય ઍપ ચેક કરો"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"આ ડિવાઇસમાંથી કૅમેરા ઍક્સેસ કરી શકાતો નથી"</string>
 </resources>

@@ -713,6 +713,35 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     @Test
+    public void gameSessionServiceDies_severalActiveGameSessions_destroysGameSessions() {
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
+
+        mFakeGameSessionServiceConnector.killServiceProcess();
+
+        assertThat(gameSession10.mIsDestroyed).isTrue();
+        assertThat(gameSession11.mIsDestroyed).isTrue();
+        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
+        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
+    }
+
+    @Test
     public void stop_severalActiveGameSessions_destroysGameSessionsAndUnbinds() throws Exception {
         mGameServiceProviderInstance.start();
 

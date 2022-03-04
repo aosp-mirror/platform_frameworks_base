@@ -4702,7 +4702,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         return true;
                     }
                     final HandwritingModeController.HandwritingSession session =
-                            mHwController.startHandwritingSession(msg.arg1);
+                            mHwController.startHandwritingSession(
+                                    msg.arg1 /*requestId*/,
+                                    msg.arg2 /*pid*/,
+                                    mBindingController.getCurMethodUid());
                     if (session == null) {
                         Slog.e(TAG,
                                 "Failed to start handwriting session for requestId: " + msg.arg1);
@@ -4722,8 +4725,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void onStylusHandwritingReady(int requestId) {
-        mHandler.obtainMessage(MSG_START_HANDWRITING, requestId, 0 /* unused */).sendToTarget();
+    private void onStylusHandwritingReady(int requestId, int pid) {
+        mHandler.obtainMessage(MSG_START_HANDWRITING, requestId, pid).sendToTarget();
     }
 
     private void handleSetInteractive(final boolean interactive) {
@@ -6304,8 +6307,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void onStylusHandwritingReady(int requestId) {
-            mImms.onStylusHandwritingReady(requestId);
+        public void onStylusHandwritingReady(int requestId, int pid) {
+            mImms.onStylusHandwritingReady(requestId, pid);
         }
 
         @BinderThread

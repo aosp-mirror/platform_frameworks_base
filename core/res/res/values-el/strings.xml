@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Τριμερής κλήση"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Απόρριψη ανεπιθύμητων, ενοχλητικών κλήσεων"</string>
     <string name="CndMmi" msgid="185136449405618437">"Παράδοση καλούμενου αριθμού"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Μην ενοχλείτε"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Αρχεία και έγγραφα"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"πρόσβαση σε αρχεία και έγγραφα στη συσκευή σας"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Μουσική και άλλο ηχητικό περιεχόμενο"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"πρόσβαση σε αρχεία ήχου στη συσκευή σας"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Φωτογραφίες και βίντεο"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Χρησιμοποιήστε το κλείδωμα οθόνης για να συνεχίσετε"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Εντοπίστηκε μέρους του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Δεν ήταν δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Καθαρίστε τον αισθητήρα δακτυλικών αποτυπωμάτων και δοκιμάστε ξανά"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Καθαρίστε τον αισθητήρα και δοκιμάστε ξανά"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Πιέστε σταθερά τον αισθητήρα"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Πολύ αργή κίνηση δαχτύλου. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Δοκιμάστε άλλο δακτυλικό αποτύπωμα"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Πιέστε σταθερά τον αισθητήρα"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Η ταυτότητα του δακτυλικού αποτυπώματος ελέγχθηκε"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Έγινε έλεγχος ταυτότητας προσώπου, πατήστε \"Επιβεβαίωση\""</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"δεσμεύεται σε υπηρεσίες του παρόχου κινητής τηλεφωνίας"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Δίνει στον κάτοχο τη δυνατότητα δέσμευσης σε υπηρεσίες εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"έχει πρόσβαση στη λειτουργία \"Μην ενοχλείτε\""</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Επιτρέπει στην εφαρμογή την εγγραφή και τη σύνταξη διαμόρφωσης για τη λειτουργία \"Μην ενοχλείτε\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"έναρξη χρήσης άδειας προβολής"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Επιτρέπει στον κάτοχο να ξεκινήσει τη χρήση της άδειας για μια εφαρμογή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"έναρξη προβολής αποφάσεων για άδειες"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Παράβλεψη"</string>
     <string name="no_matches" msgid="6472699895759164599">"Δεν υπάρχουν αποτελέσματα"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Εύρεση στη σελίδα"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# αποτέλεσμα}other{# από {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Τέλος"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Διαγραφή κοινόχρηστου αποθηκευτικού χώρου…"</string>
     <string name="share" msgid="4157615043345227321">"Κοινή χρ."</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Μέχρι την απενεργοποίηση"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Σύμπτυξη"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Μην ενοχλείτε"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Διακοπή λειτουργίας"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Νύχτα καθημερινής"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Σαββατοκύριακο"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Θα υπάρχει δόνηση για κλήσεις και ειδοποιήσεις"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Οι κλήσεις και οι ειδοποιήσεις θα τεθούν σε παύση"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Αλλαγές στο σύστημα"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Μην ενοχλείτε"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Νέο: Η λειτουργία \"Μην ενοχλείτε\" αποκρύπτει ειδοποιήσεις"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Σύστημα"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ρυθμίσεις"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ΟΚ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Απενεργοποίηση"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Μάθετε περισσότερα"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Στο Android 12, οι Βελτιωμένες ειδοποιήσεις αντικατέστησαν τις Προσαρμοστικές ειδοποιήσεις Android. Αυτή η λειτουργία εμφανίζει προτεινόμενες ενέργειες και απαντήσεις και οργανώνει τις ειδοποιήσεις σας.\n\nΟι Βελτιωμένες ειδοποιήσεις μπορούν να αποκτήσουν πρόσβαση σε περιεχόμενο ειδοποιήσεων, συμπεριλαμβανομένων προσωπικών στοιχείων, όπως ονομάτων επαφών και μηνυμάτων Αυτή η λειτουργία παρέχει επίσης τη δυνατότητα παράβλεψης ειδοποιήσεων ή απάντησης σε αυτές, όπως η απάντηση σε τηλεφωνικές κλήσεις και ο έλεγχος της λειτουργίας Μην ενοχλείτε."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>
@@ -2260,9 +2261,8 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Μήνυμα που έχει μεταφραστεί από τα <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> στα <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Δραστηριότητα στο παρασκήνιο"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Δραστηριότητα στο παρασκήνιο"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Πατήστε για έλεγχο."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Το <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Έλεγχος."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Δεν είναι δυνατή η πρόσβαση στην κάμερα από αυτήν τη συσκευή."</string>
 </resources>

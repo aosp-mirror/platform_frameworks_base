@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Telefonkonferanse"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Avvisning av uønskede samtaler"</string>
     <string name="CndMmi" msgid="185136449405618437">"Levering av nummervisning"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ikke forstyrr"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Nummervisning er begrenset som standard. Neste anrop: Begrenset"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nummervisning er begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Nummervisning er ikke begrenset som standard. Neste anrop: Begrenset"</string>
@@ -304,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"åpne kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sende og lese SMS-meldinger"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Filer og dokumenter"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"åpne filer og dokumenter på enheten din"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musikk og annen lyd"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"få tilgang til lydfiler på enheten"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Bilder og videoer"</string>
@@ -588,12 +587,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Skriv inn skjermlåsen for å fortsette"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Et delvis fingeravtrykk er registrert"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kunne ikke registrere fingeravtrykket. Prøv på nytt."</string>
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1770676120848224250) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty_alt (9169582140486372897) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (1628459767349116104) -->
-    <skip />
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengjør fingeravtrykkssensoren og prøv igjen"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengjør sensoren og prøv igjen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Trykk godt på sensoren"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du flyttet fingeren for sakte. Prøv på nytt."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prøv et annet fingeravtrykk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"For lyst"</string>
@@ -601,10 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre posisjonen til fingeren litt hver gang"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_not_match (4599441812893438961) -->
-    <skip />
-    <!-- no translation found for fingerprint_udfps_error_not_match (4709197752023550709) -->
-    <skip />
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Trykk godt på sensoren"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrykket er godkjent"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet er autentisert"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet er autentisert. Trykk på Bekreft"</string>
@@ -743,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Tillater at innehaveren binder seg til det øverste nivået av grensesnittet til en operatørtjeneste. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bind til operatørtjenester"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Lar innehaveren binde seg til operatørtjenester. Det skal aldri være nødvendig for vanlige apper."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"tilgang til Ikke forstyrr"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lar appen lese og skrive konfigurasjon av Ikke forstyrr."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start visning av bruk av tillatelser"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lar innehaveren starte bruk av tillatelser for en app. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"starte visning av avgjørelser om tillatelser"</string>
@@ -1508,8 +1504,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Hopp over"</string>
     <string name="no_matches" msgid="6472699895759164599">"Ingen treff"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Finn på side"</string>
-    <!-- no translation found for matches_found (2296462299979507689) -->
-    <skip />
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# treff}other{# av {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Ferdig"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Sletter delt lagring …"</string>
     <string name="share" msgid="4157615043345227321">"Del"</string>
@@ -1874,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (neste alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Til du slår av"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Inntil du slår av Ikke forstyrr"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Skjul"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"«Ikke forstyrr»"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Pause"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Hverdagskveld"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Helg"</string>
@@ -2040,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Anrop og varsler vibrerer"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Anrop og varsler er lydløse"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systemendringer"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ikke forstyrr"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nytt: «Ikke forstyrr» skjuler varsler"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Trykk for å finne ut mer og endre."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trykk for å sjekke hva som er blokkert."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Innstillinger"</string>
@@ -2057,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slå av"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Finn ut mer"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Forbedrede varsler erstatter tilpassede Android-varsler i Android 12. Denne funksjonen viser foreslåtte handlinger og svar og organiserer varslene dine.\n\nForbedrede varsler har tilgang til varselinnhold, inkludert personopplysninger som kontaktnavn og meldinger. Funksjonen kan også avvise og svare på varsler, for eksempel svare på anrop og kontrollere «Ikke forstyrr»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>
@@ -2263,6 +2264,5 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> kjører i bakgrunnen og bruker batteri. Trykk for å gjennomgå."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> kjører lenge i bakgrunnen. Trykk for å gjennomgå."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sjekk aktive apper"</string>
-    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
-    <skip />
+    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Du har ikke tilgang til kameraet fra denne enheten"</string>
 </resources>

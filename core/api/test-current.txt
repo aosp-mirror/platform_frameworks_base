@@ -103,7 +103,7 @@ package android.animation {
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
     method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
@@ -372,8 +372,8 @@ package android.app {
   }
 
   public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
-    method @NonNull public static String createPropertyName(int, @NonNull String);
+    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method @NonNull public static String createPropertyName(@NonNull String, @NonNull String);
     method public final void disableForCurrentProcess();
     method public static void disableForTestMode();
     method public final void disableInstance();
@@ -381,14 +381,15 @@ package android.app {
     method public final void forgetDisableLocal();
     method public boolean getDisabledState();
     method public final void invalidateCache();
-    method public static void invalidateCache(int, @NonNull String);
+    method public static void invalidateCache(@NonNull String, @NonNull String);
     method public final boolean isDisabled();
     method @Nullable public final Result query(@NonNull Query);
     method public static void setTestMode(boolean);
     method public void testPropertyName();
-    field public static final int MODULE_BLUETOOTH = 2; // 0x2
-    field public static final int MODULE_SYSTEM = 1; // 0x1
-    field public static final int MODULE_TEST = 0; // 0x0
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TELEPHONY = "telephony";
+    field public static final String MODULE_TEST = "test";
   }
 
   public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
@@ -516,6 +517,7 @@ package android.app.admin {
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
+    method public boolean isRemovingAdmin(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
@@ -2831,10 +2833,6 @@ package android.view {
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
-  }
-
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
   }
@@ -3246,6 +3244,10 @@ package android.window {
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
     field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
+  }
+
+  public interface OnBackInvokedDispatcher {
+    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {

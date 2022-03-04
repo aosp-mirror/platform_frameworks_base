@@ -40,7 +40,7 @@ import android.util.ArraySet;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.OnBackInvokedCallback;
+import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
@@ -2582,7 +2582,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
-     * Returns whether the application will use the {@link android.view.OnBackInvokedCallback}
+     * Returns whether the application will use the {@link android.window.OnBackInvokedCallback}
      * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
      * callbacks.
      *
