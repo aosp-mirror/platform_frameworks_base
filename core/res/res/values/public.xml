@@ -3284,10 +3284,6 @@
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
-    <public name="accessibilityActionSwipeLeft" />
-    <public name="accessibilityActionSwipeRight" />
-    <public name="accessibilityActionSwipeUp" />
-    <public name="accessibilityActionSwipeDown" />
     <public name="accessibilityActionShowTextSuggestions" />
     <public name="inputExtractAction" />
     <public name="inputExtractAccessories" />

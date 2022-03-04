@@ -270,18 +270,6 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL}. -->
   <item type="id" name="accessibilityActionDragCancel" />
 
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_LEFT}. -->
-  <item type="id" name="accessibilityActionSwipeLeft" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_RIGHT}. -->
-  <item type="id" name="accessibilityActionSwipeRight" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_UP}. -->
-  <item type="id" name="accessibilityActionSwipeUp" />
-
-  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SWIPE_DOWN}. -->
-  <item type="id" name="accessibilityActionSwipeDown" />
-
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TEXT_SUGGESTIONS}. -->
   <item type="id" name="accessibilityActionShowTextSuggestions" />
 

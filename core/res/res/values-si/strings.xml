@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"තුන් මාර්ග ඇමතීම"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"අනවශ්‍ය හිරිහැරදායක ඇමතුම් ප්‍රතික්ෂේප කිරීම"</string>
     <string name="CndMmi" msgid="185136449405618437">"ඇමතීමේ අංකය භාරදීම"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"බාධා නොකරන්න"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"අමතන්නාගේ ID සුපුරුද්ද අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර නැත"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"වාහක සේවා වෙත බඳින්න"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"බාධා නොකරන්න ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"නව අවසර තීරණ ආරම්භ කරන්න"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක් (ඊළඟ එලාමය)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"ඔබ ක්‍රියාවිරහිත කරන තුරු"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"හකුළන්න"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"බාධා නොකරන්න"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"බිඳවැටුම් කාලය"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"සති අන්තය"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ඇමතුම් සහ දැනුම්දීම් නිහඬ වනු ඇත"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"පද්ධති වෙනස් කිරීම්"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"බාධා නොකරන්න"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"නව: බාධා නොකරන්න දැනුම්දීම් සඟවමින්"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"පද්ධතිය"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"සැකසීම්"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"හරි"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ක්‍රියාවිරහිත කරන්න"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"තව දැන ගන්න"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකිරීම පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>

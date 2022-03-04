@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"त्रिमार्गी कॉलिंग"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"अवांछित कष्टप्रद कॉल की अस्वीकृति"</string>
     <string name="CndMmi" msgid="185136449405618437">"कॉलिंग नंबर वितरण"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"परेशान न करें"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित है. अगली कॉल: सीमित"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित है. अगली कॉल: सीमित नहीं"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित नहीं है. अगली कॉल: सीमित"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी की मैसेज सेवा के सबसे बढ़िया इंटरफ़ेस से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जुड़ें"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\'परेशान न करें\' को ऐक्सेस करें"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"देखने की अनुमतियां चालू करें"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"अनुमतियों को देखना चालू करना"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अगले अलार्म) तक"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"जब तक आप बंद नहीं करते"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"जब तक कि आप परेशान ना करें को बंद नहीं कर देते"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"छोटा करें"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"परेशान ना करें"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"बंद रहने का समय"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"सिस्टम में हुए बदलाव"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"परेशान न करें"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नई सुविधा: परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ज़्यादा जानने और बदलाव करने के लिए टैप करें."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिंग"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"चालू करें"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करें"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ज़्यादा जानें"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को खारिज कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>

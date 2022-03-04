@@ -16,7 +16,7 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.SCOPED_COMPLICATIONS_LAYOUT;
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.SCOPED_COMPLICATIONS_MODEL;
 
 import android.graphics.Rect;

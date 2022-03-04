@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Llamada de tres direcciones"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rechazo de llamadas molestas no deseadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Entrega de número de llamada"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"No interrumpir"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"El identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: no restringido"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de mensajería del proveedor. Las aplicaciones regulares no lo necesitan."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"vincular con servicios de proveedores"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite al propietario vincular con servicios de proveedores. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Acceso a la función No interrumpir"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que el propietario inicie el uso de permisos para una app. No debería requerirse para apps normales."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"iniciar vista de las decisiones sobre permisos"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Hasta la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hasta la hora <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hasta que lo desactives"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hasta que desactives No interrumpir"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Contraer"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"No interrumpir"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Tiempo de inactividad"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noche, en la semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibrarán las llamadas y notificaciones"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Se silenciarán las llamadas y notificaciones"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios del sistema"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No interrumpir"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nuevo: No interrumpir oculta las notificaciones"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Presiona para obtener más información y realizar cambios."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Se modificó la opción No interrumpir"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Presiona para consultar lo que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Configuración"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También puede descartar o responder notificaciones (como atender llamadas) y controlar la función No interrumpir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Es posible que la batería se agote antes de la carga habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se activó el Ahorro de batería para extender la duración de la batería"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Se tradujo el mensaje del <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> al <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Actividad en segundo plano"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Actividad en segundo plano"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> se está ejecutando en segundo plano y está agotando la batería. Presiona para revisar esta actividad."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> se está ejecutando en segundo plano y está agotando la batería. Presiona para revisar."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Hace mucho tiempo que <xliff:g id="APP">%1$s</xliff:g> se está ejecutando en segundo plano. Presiona para revisar esta actividad."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta las apps activas"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"No se puede acceder a la cámara desde este dispositivo"</string>

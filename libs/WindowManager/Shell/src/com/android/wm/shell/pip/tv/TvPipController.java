@@ -37,6 +37,7 @@ import android.view.Gravity;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
@@ -50,12 +51,14 @@ import com.android.wm.shell.pip.PipTransitionController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Set;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
 public class TvPipController implements PipTransitionController.PipTransitionCallback,
-        TvPipMenuController.Delegate, TvPipNotificationController.Delegate {
+        TvPipMenuController.Delegate, TvPipNotificationController.Delegate,
+        DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "TvPipController";
     static final boolean DEBUG = false;
 
@@ -112,6 +115,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipMediaController pipMediaController,
             TvPipNotificationController pipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            DisplayController displayController,
             WindowManagerShellWrapper wmShell,
             ShellExecutor mainExecutor) {
         return new TvPipController(
@@ -124,6 +128,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 pipMediaController,
                 pipNotificationController,
                 taskStackListener,
+                displayController,
                 wmShell,
                 mainExecutor).mImpl;
     }
@@ -138,6 +143,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipMediaController pipMediaController,
             TvPipNotificationController pipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            DisplayController displayController,
             WindowManagerShellWrapper wmShell,
             ShellExecutor mainExecutor) {
         mContext = context;
@@ -163,6 +169,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
         registerTaskStackListenerCallback(taskStackListener);
         registerWmShellPinnedStackListener(wmShell);
+        displayController.addDisplayWindowListener(this);
     }
 
     private void onConfigurationChanged(Configuration newConfig) {
@@ -251,6 +258,15 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     public int getOrientation() {
         return mTvPipBoundsState.getTvFixedPipOrientation();
+    }
+
+    @Override
+    public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+            Set<Rect> unrestricted) {
+        if (mTvPipBoundsState.getDisplayId() == displayId) {
+            mTvPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+            movePinnedStack();
+        }
     }
 
     /**

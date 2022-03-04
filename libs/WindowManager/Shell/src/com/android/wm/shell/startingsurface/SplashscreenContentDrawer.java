@@ -18,8 +18,8 @@ package com.android.wm.shell.startingsurface;
 
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
@@ -270,7 +270,7 @@ public class SplashscreenContentDrawer {
                 .overlayDrawable(legacyDrawable)
                 .chooseStyle(suggestType)
                 .setUiThreadInitConsumer(uiThreadInitConsumer)
-                .setAllowHandleEmpty(info.allowHandleEmptySplashScreen())
+                .setAllowHandleSolidColor(info.allowHandleSolidColorSplashScreen())
                 .build();
     }
 
@@ -367,7 +367,7 @@ public class SplashscreenContentDrawer {
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
         private Consumer<Runnable> mUiThreadInitTask;
-        private boolean mAllowHandleEmpty;
+        private boolean mAllowHandleSolidColor;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
             mContext = context;
@@ -394,15 +394,15 @@ public class SplashscreenContentDrawer {
             return this;
         }
 
-        StartingWindowViewBuilder setAllowHandleEmpty(boolean allowHandleEmpty) {
-            mAllowHandleEmpty = allowHandleEmpty;
+        StartingWindowViewBuilder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
+            mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
         }
 
         SplashScreenView build() {
             Drawable iconDrawable;
             final long animationDuration;
-            if (mSuggestType == STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
+            if (mSuggestType == STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN
                     || mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                 // empty or legacy splash screen case
                 animationDuration = 0;
@@ -538,7 +538,7 @@ public class SplashscreenContentDrawer {
                     .setCenterViewDrawable(foreground)
                     .setAnimationDurationMillis(animationDuration)
                     .setUiThreadInitConsumer(uiThreadInitTask)
-                    .setAllowHandleEmpty(mAllowHandleEmpty);
+                    .setAllowHandleSolidColor(mAllowHandleSolidColor);
 
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {

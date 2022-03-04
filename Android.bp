@@ -25,18 +25,6 @@
 //
 // READ ME: ########################################################
 
-// TODO(b/21090328): Remove filter after we are ready to.
-soong_config_module_type {
-    name: "java_library_with_nonpublic_deps",
-    module_type: "java_library",
-    config_namespace: "ANDROID",
-    bool_variables: ["include_nonpublic_framework_api"],
-    properties: [
-        "static_libs",
-        "libs",
-    ],
-}
-
 package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -151,7 +139,7 @@ filegroup {
     ],
 }
 
-java_library_with_nonpublic_deps {
+java_library {
     name: "framework-all",
     installable: false,
     static_libs: [

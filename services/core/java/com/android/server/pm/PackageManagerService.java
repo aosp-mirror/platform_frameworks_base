@@ -203,6 +203,7 @@ import com.android.internal.util.Preconditions;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.PackageWatchdog;
@@ -1552,6 +1553,7 @@ public class PackageManagerService extends IPackageManager.Stub
         ServiceManager.addService("package", m);
         final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
+        LocalManagerRegistry.addManager(PackageManagerLocal.class, m.new PackageManagerLocalImpl());
         return m;
     }
 
@@ -6790,6 +6792,9 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.canQueryPackage(callingUid, targetPackageName);
     }
 
+    private class PackageManagerLocalImpl implements PackageManagerLocal {
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(
@@ -6962,6 +6967,19 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
             return PackageManagerService.this.getKnownPackageNamesInternal(knownPackage, userId);
+        }
+
+        @Override
+        public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            if (packageName == null) {
+                return false;
+            }
+
+            if (Process.isSdkSandboxUid(callingUid)) {
+                return packageName.equals(getSdkSandboxPackageName());
+            }
+            int uid = getPackageUid(packageName, 0, userId);
+            return UserHandle.isSameApp(uid, callingUid);
         }
 
         @Override

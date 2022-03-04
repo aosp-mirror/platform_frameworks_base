@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Three way na pagtawag"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Pagtanggi sa mga hindi ninanais na nakakaistorbong tawag"</string>
     <string name="CndMmi" msgid="185136449405618437">"Pagpapadala ng numero sa pagtawag"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Huwag istorbohin"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Pinaghihigpitan ang mga default ng Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nade-default sa pinaghihigpitan ang Caller ID. Susunod na tawag: hindi pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Naka-default sa hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"mag-bind sa mga serbisyo ng carrier"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Pinapayagan ang may-ari na mag-bind sa mga serbisyo ng carrier. Hindi dapat kailanganin sa mga normal na app."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"i-access ang Huwag Istorbohin"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"simulan ang mga desisyon sa pahintulot na tumingin"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (susunod na alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hanggang sa i-off mo"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hanggang sa i-off mo ang Huwag Istorbohin"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"I-collapse"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Huwag istorbohin"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Walang serbisyo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Magva-vibrate ang mga tawag at notification"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mga pagbabago sa system"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Huwag Istorbohin"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Bago: Itinatago ng Huwag Istorbohin ang mga notification"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"I-tap para matuto pa at baguhin."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Binago ang Huwag Istorbohin"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Mga Setting"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>

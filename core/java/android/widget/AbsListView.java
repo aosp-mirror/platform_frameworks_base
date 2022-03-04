@@ -6207,6 +6207,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         @Override
+        public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
+            return getTarget().requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
+        }
+
+        @Override
         public Handler getHandler() {
             return getTarget().getHandler();
         }

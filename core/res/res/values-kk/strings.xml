@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Қоңырау шалудың үш жолы"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Мазаны алатын, қалаусыз қоңыраулардан бас тарту"</string>
     <string name="CndMmi" msgid="185136449405618437">"Қоңырау шалған нөмірді жеткізу"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Мазаламау"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"оператор қызметтеріне қосылу"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Мазаламау режиміне кіру"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"рұқсаттарды пайдалану туралы деректерді көру"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Рұқсаттары бар әрекеттерді көру"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін (келесі дабыл)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Өшірілгенге дейін"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Мазаламау режимін өшіргенше"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Тасалау"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Мазаламау"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Бос тұру уақыты"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Жұмыс күндері кешке"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Демалыс күндері"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Қоңыраулар мен хабарландырулардың вибрациясы болады"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Жүйе өзгерістері"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Мазаламау режимі"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Жаңа: Мазаламау режимі хабарландыруларды жасыруда"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Толығырақ ақпарат алу және өзгерту үшін түртіңіз."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Мазаламау режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Параметрлер"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Жарайды"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өшіру"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және Мазаламау режимін басқару) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>

@@ -493,8 +493,7 @@
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, ne puni se"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napunjeno"</string>
-    <!-- no translation found for battery_info_status_full_charged (3536054261505567948) -->
-    <skip />
+    <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Posve puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolira administrator"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrolira ograničena postavka"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
@@ -540,6 +539,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Omogućite toj aplikaciji da postavlja alarme i zakazuje radnje u točno određeno vrijeme. To aplikaciji omogućuje da se izvodi u pozadini, pa je moguća dodatna potrošnja baterije.\n\nAko je to dopuštenje isključeno, postojeći alarmi i događaji zakazani putem te aplikacije neće funkcionirati."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključite opciju Ne uznemiravaj."</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nikada"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Samo prioritetno"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

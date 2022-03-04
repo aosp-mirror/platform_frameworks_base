@@ -50,10 +50,10 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public static final int STARTING_WINDOW_TYPE_SNAPSHOT = 2;
     /**
-     * Prefer empty splash screen starting window.
+     * Prefer solid color splash screen starting window.
      * @hide
      */
-    public static final int STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN = 3;
+    public static final int STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN = 3;
 
     /** @hide **/
     public static final int STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN = 4;
@@ -65,7 +65,7 @@ public final class StartingWindowInfo implements Parcelable {
             STARTING_WINDOW_TYPE_NONE,
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_SNAPSHOT,
-            STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN,
+            STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
@@ -115,8 +115,8 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_PROCESS_RUNNING,
             TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT,
             TYPE_PARAMETER_ACTIVITY_CREATED,
-            TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN,
-            TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN,
+            TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN,
+            TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN,
             TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
@@ -135,17 +135,17 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide */
     public static final int TYPE_PARAMETER_ACTIVITY_CREATED = 0x00000010;
     /** @hide */
-    public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
+    public static final int TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN = 0x00000020;
     /**
      * The parameter which indicates if the activity has finished drawing.
      * @hide
      */
     public static final int TYPE_PARAMETER_ACTIVITY_DRAWN = 0x00000040;
     /**
-     * Application is allowed to handle empty splash screen.
+     * Application is allowed to handle solid color splash screen.
      * @hide
      */
-    public static final int TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN = 0x00000080;
+    public static final int TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN = 0x00000080;
     /**
      * Application is allowed to use the legacy splash screen
      * @hide
@@ -192,10 +192,10 @@ public final class StartingWindowInfo implements Parcelable {
     }
 
     /**
-     * Return whether the application allow to handle the empty style splash screen.
+     * Return whether the application allow to handle the solid color style splash screen.
      */
-    public boolean allowHandleEmptySplashScreen() {
-        return (startingWindowTypeParameter & TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN) != 0;
+    public boolean allowHandleSolidColorSplashScreen() {
+        return (startingWindowTypeParameter & TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN) != 0;
     }
 
     @Override

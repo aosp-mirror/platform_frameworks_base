@@ -2265,13 +2265,12 @@ public final class DisplayManagerService extends SystemService {
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean ownContent = (info.flags & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
 
-        // Mirror the part of WM hierarchy that corresponds to the provided window token.
-        IBinder windowTokenClientToMirror = device.getWindowTokenClientToMirrorLocked();
-
         // Find the logical display that the display device is showing.
         // Certain displays only ever show their own content.
         LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
-        if (!ownContent && windowTokenClientToMirror == null) {
+        // Proceed with display-managed mirroring only if window manager will not be handling it.
+        if (!ownContent && !device.isWindowManagerMirroringLocked()) {
+            // Only mirror the display if content recording is not taking place in WM.
             if (display != null && !display.hasContentLocked()) {
                 // If the display does not have any content of its own, then
                 // automatically mirror the requested logical display contents if possible.
@@ -3864,23 +3863,11 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public IBinder getWindowTokenClientToMirror(int displayId) {
-            final DisplayDevice device;
-            synchronized (mSyncRoot) {
-                device = getDeviceForDisplayLocked(displayId);
-                if (device == null) {
-                    return null;
-                }
-            }
-            return device.getWindowTokenClientToMirrorLocked();
-        }
-
-        @Override
-        public void setWindowTokenClientToMirror(int displayId, IBinder windowToken) {
+        public void setWindowManagerMirroring(int displayId, boolean isMirroring) {
             synchronized (mSyncRoot) {
                 final DisplayDevice device = getDeviceForDisplayLocked(displayId);
                 if (device != null) {
-                    device.setWindowTokenClientToMirrorLocked(windowToken);
+                    device.setWindowManagerMirroringLocked(isMirroring);
                 }
             }
         }

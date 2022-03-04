@@ -27,15 +27,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
-import android.view.OnBackInvokedCallback;
-import android.view.OnBackInvokedDispatcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
- * Provides window based implementation of {@link android.view.OnBackInvokedDispatcher}.
+ * Provides window based implementation of {@link OnBackInvokedDispatcher}.
  *
  * Callbacks with higher priorities receive back dispatching first.
  * Within the same priority, callbacks receive back dispatching in the reverse order
@@ -43,7 +41,7 @@ import java.util.TreeMap;
  *
  * When the top priority callback is updated, the new callback is propagated to the Window Manager
  * if the window the instance is associated with has been attached. It is allowed to register /
- * unregister {@link android.view.OnBackInvokedCallback}s before the window is attached, although
+ * unregister {@link OnBackInvokedCallback}s before the window is attached, although
  * callbacks will not receive dispatches until window attachment.
  *
  * @hide
@@ -223,7 +221,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Returns if the legacy back behavior should be used.
      *
      * Legacy back behavior dispatches KEYCODE_BACK instead of invoking the application registered
-     * {@link android.view.OnBackInvokedCallback}.
+     * {@link OnBackInvokedCallback}.
      */
     public static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
         // new back is enabled if the app targets T AND the feature flag is enabled AND the app

@@ -243,6 +243,8 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+
         if name:
             assert variant is None, (
                 'No variant expected for LGC font %s.' % name)
@@ -259,6 +261,11 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+        ignore = ignoreAttr == 'true' or ignoreAttr == '1'
+
+        if ignore:
+            continue
 
         if langs:
             langs = langs.split()

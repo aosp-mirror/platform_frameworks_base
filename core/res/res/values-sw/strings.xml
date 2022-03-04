@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Upigaji simu kwa njia tatu"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ukataaji wa simu zinazokera zisizohitajika"</string>
     <string name="CndMmi" msgid="185136449405618437">"Kuonyeshwa kwa nambari inayopiga"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Usinisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Chaguomsingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Huruhusu kishikiliaji kushurutisha kwa kiolesura cha hali ya juu cha huduma ya ujumbe ya mtoa huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bandika kwenye huduma ya mtoa huduma"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Huruhusu mmiliki kubandika kwenye huduma ya mtoa huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"fikia kipengee cha Usinisumbue"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Inaruhusu programu kusoma na kuandika usanidi wa kipengee cha Usinisumbue."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"anzisha kipengele cha kuona matumizi ya ruhusa"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Huruhusu kishikiliaji kuanzisha matumizi ya ruhusa ya programu. Haipaswi kuhitajika kwa ajili ya programu za kawaida."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"kuanzisha uamuzi wa ruhusa za kuangalia"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Mpaka <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kengele inayofuata)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hadi utakapoizima"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hadi utakapozima Usinisumbue"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Kunja"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Usinisumbue"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Wakati wa hali tuli"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Usiku wa wiki"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Wikendi"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Itatetema arifa ikitumwa au simu ikipigwa"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Haitatoa mlio arifa ikitumwa au simu ikipigwa"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mabadiliko kwenye mfumo"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Usinisumbue"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mpya: Kipengele cha Usinisumbue kinaficha arifa"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Gusa ili upate maelezo zaidi na ubadilishe."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Mfumo"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Mipangilio"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Sawa"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Zima"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Pata maelezo zaidi"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Kipengele cha Arifa Zilizoboreshwa kilichukua nafasi ya Arifa Zinazojirekebisha za Android katika Android 12. Kipengele hiki kinaonyesha majibu na vitendo vinavyopendekezwa na kupanga arifa zako.\n\nKipengele cha Arifa zilizoboreshwa kinaweza kufikia maudhui ya arifa, ikiwa ni pamoja na taarifa binafsi kama vile majina ya anwani na ujumbe. Kipengele hiki kinaweza pia kuondoa au kujibu arifa, kama vile kujibu simu na kudhibiti kipengele cha Usinisumbue."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>

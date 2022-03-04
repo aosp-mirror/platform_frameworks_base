@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Conférence téléphonique à trois"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Rejeter les appels indésirables"</string>
     <string name="CndMmi" msgid="185136449405618437">"Livraison du numéro d\'appel"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ne pas déranger"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de messagerie d\'un fournisseur. Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"s\'associer aux services d\'un fournisseur"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permet à l\'application autorisée de s\'associer aux services d\'un fournisseur. Ne devrait pas être nécessaire pour les applications standards."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accéder au mode Ne pas déranger"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"démarrer l\'affichage de l\'usage des autorisations"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet au détenteur de démarrer l\'usage des autorisations pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"démarrer les décisions d\'autorisation de lecture"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarme suivante)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Jusqu\'à ce que vous désactiviez le mode « Ne pas déranger »"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Réduire"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ne pas déranger"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Temps d\'arrêt"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Soirs de semaine"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semaine"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les appels et les notifications vibreront"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Changements système"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Touchez ici pour en savoir plus et changer les paramètres"</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Les paramètres du mode Ne pas déranger ont changé"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Paramètres"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La pile pourrait s\'épuiser avant la charge habituelle"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Le mode Économiseur de pile est activé afin de prolonger l\'autonomie"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Message traduit : <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> vers <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activité en arrière-plan"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Activité en arrière-plan"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan et décharge rapidement la pile. Touchez pour examiner."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan et décharge la pile. Touchez pour examiner."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> s\'exécute en arrière-plan depuis longtemps. Touchez pour examiner."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vérifier les applications actives"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Impossible d\'accéder à l\'appareil photo à partir de cet appareil"</string>

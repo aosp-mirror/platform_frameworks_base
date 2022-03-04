@@ -18,11 +18,14 @@ package android.companion.virtual.audio;
 
 import static android.media.AudioTrack.PLAYSTATE_PLAYING;
 import static android.media.AudioTrack.PLAYSTATE_STOPPED;
+import static android.media.AudioTrack.STATE_INITIALIZED;
+import static android.media.AudioTrack.WRITE_BLOCKING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
@@ -42,7 +45,9 @@ import java.nio.ByteBuffer;
 public final class AudioInjection {
     private static final String TAG = "AudioInjection";
 
+    private final AudioFormat mAudioFormat;
     private final Object mLock = new Object();
+
     @GuardedBy("mLock")
     @Nullable
     private AudioTrack mAudioTrack;
@@ -70,12 +75,12 @@ public final class AudioInjection {
     void setAudioTrack(@Nullable AudioTrack audioTrack) {
         Log.d(TAG, "set AudioTrack with " + audioTrack);
         synchronized (mLock) {
-            // Release old reference.
-            if (mAudioTrack != null) {
-                mAudioTrack.release();
-            }
             // Sync play state for new reference.
             if (audioTrack != null) {
+                if (audioTrack.getState() != STATE_INITIALIZED) {
+                    throw new IllegalStateException("set an uninitialized AudioTrack.");
+                }
+
                 if (mPlayState == PLAYSTATE_PLAYING
                         && audioTrack.getPlayState() != PLAYSTATE_PLAYING) {
                     audioTrack.play();
@@ -85,8 +90,50 @@ public final class AudioInjection {
                     audioTrack.stop();
                 }
             }
+
+            // Release old reference before assigning the new reference.
+            if (mAudioTrack != null) {
+                mAudioTrack.release();
+            }
             mAudioTrack = audioTrack;
         }
+    }
+
+    AudioInjection(@NonNull AudioFormat audioFormat) {
+        mAudioFormat = audioFormat;
+    }
+
+    void close() {
+        synchronized (mLock) {
+            if (mAudioTrack != null) {
+                mAudioTrack.release();
+                mAudioTrack = null;
+            }
+        }
+    }
+
+    /** See {@link AudioTrack#getFormat()}. */
+    public @NonNull AudioFormat getFormat() {
+        return mAudioFormat;
+    }
+
+    /** See {@link AudioTrack#write(byte[], int, int)}. */
+    public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
+        return write(audioData, offsetInBytes, sizeInBytes, WRITE_BLOCKING);
+    }
+
+    /** See {@link AudioTrack#write(byte[], int, int, int)}. */
+    public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
+            @AudioTrack.WriteMode int writeMode) {
+        final int sizeWrite;
+        synchronized (mLock) {
+            if (mAudioTrack != null && !mIsSilent) {
+                sizeWrite = mAudioTrack.write(audioData, offsetInBytes, sizeInBytes, writeMode);
+            } else {
+                sizeWrite = 0;
+            }
+        }
+        return sizeWrite;
     }
 
     /** See {@link AudioTrack#write(ByteBuffer, int, int)}. */
@@ -95,6 +142,53 @@ public final class AudioInjection {
         synchronized (mLock) {
             if (mAudioTrack != null && !mIsSilent) {
                 sizeWrite = mAudioTrack.write(audioBuffer, sizeInBytes, writeMode);
+            } else {
+                sizeWrite = 0;
+            }
+        }
+        return sizeWrite;
+    }
+
+    /** See {@link AudioTrack#write(ByteBuffer, int, int, long)}. */
+    public int write(@NonNull ByteBuffer audioBuffer, int sizeInBytes,
+            @AudioTrack.WriteMode int writeMode, long timestamp) {
+        final int sizeWrite;
+        synchronized (mLock) {
+            if (mAudioTrack != null && !mIsSilent) {
+                sizeWrite = mAudioTrack.write(audioBuffer, sizeInBytes, writeMode, timestamp);
+            } else {
+                sizeWrite = 0;
+            }
+        }
+        return sizeWrite;
+    }
+
+    /** See {@link AudioTrack#write(float[], int, int, int)}. */
+    public int write(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
+            @AudioTrack.WriteMode int writeMode) {
+        final int sizeWrite;
+        synchronized (mLock) {
+            if (mAudioTrack != null && !mIsSilent) {
+                sizeWrite = mAudioTrack.write(audioData, offsetInFloats, sizeInFloats, writeMode);
+            } else {
+                sizeWrite = 0;
+            }
+        }
+        return sizeWrite;
+    }
+
+    /** See {@link AudioTrack#write(short[], int, int)}. */
+    public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
+        return write(audioData, offsetInShorts, sizeInShorts, WRITE_BLOCKING);
+    }
+
+    /** See {@link AudioTrack#write(short[], int, int, int)}. */
+    public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
+            @AudioTrack.WriteMode int writeMode) {
+        final int sizeWrite;
+        synchronized (mLock) {
+            if (mAudioTrack != null && !mIsSilent) {
+                sizeWrite = mAudioTrack.write(audioData, offsetInShorts, sizeInShorts, writeMode);
             } else {
                 sizeWrite = 0;
             }

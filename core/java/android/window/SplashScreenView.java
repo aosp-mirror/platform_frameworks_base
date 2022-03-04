@@ -152,7 +152,7 @@ public final class SplashScreenView extends FrameLayout {
         private Instant mIconAnimationStart;
         private Duration mIconAnimationDuration;
         private Consumer<Runnable> mUiThreadInitTask;
-        private boolean mAllowHandleEmpty = true;
+        private boolean mAllowHandleSolidColor = true;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -263,8 +263,8 @@ public final class SplashScreenView extends FrameLayout {
          * Sets whether this view can be copied and transferred to the client if the view is
          * empty style splash screen.
          */
-        public Builder setAllowHandleEmpty(boolean allowHandleEmpty) {
-            mAllowHandleEmpty = allowHandleEmpty;
+        public Builder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
+            mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
         }
 
@@ -314,7 +314,7 @@ public final class SplashScreenView extends FrameLayout {
                 }
                 view.mIconView = imageView;
             }
-            if (mOverlayDrawable != null || (view.mIconView == null && !mAllowHandleEmpty)) {
+            if (mOverlayDrawable != null || (view.mIconView == null && !mAllowHandleSolidColor)) {
                 view.setNotCopyable();
             }
 

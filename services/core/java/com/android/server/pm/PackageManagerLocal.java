@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.server.pm;
 
-import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 /**
- * A class that provides an {@link OnBackInvokedDispatcher} that allows you to register
- * an {@link OnBackInvokedCallback} for handling the system back invocation behavior.
+ * In-process API for server side PackageManager related infrastructure.
+ *
+ * For now, avoiding adding methods that rely on package data until we solve the snapshot
+ * consistency problem.
+ *
+ * @hide
  */
-public interface OnBackInvokedDispatcherOwner {
-    /**
-     * Returns the {@link OnBackInvokedDispatcher} that should dispatch the back invocation
-     * to its registered {@link OnBackInvokedCallback}s.
-     * Returns null when the root view is not attached to a window or a view tree with a decor.
-     */
-    @NonNull
-    OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface PackageManagerLocal {
 }

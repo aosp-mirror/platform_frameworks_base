@@ -212,10 +212,7 @@ public class BubblePositioner {
             mExpandedViewLargeScreenInsetFurthestEdge = mExpandedViewPadding;
         }
 
-        mOverflowWidth = mIsLargeScreen
-                ? mExpandedViewLargeScreenWidth
-                : res.getDimensionPixelSize(
-                        R.dimen.bubble_expanded_view_phone_landscape_overflow_width);
+        mOverflowWidth = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_overflow_width);
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
@@ -348,6 +345,15 @@ public class BubblePositioner {
         mImeHeight = height;
     }
 
+    private int getExpandedViewLargeScreenInsetFurthestEdge(boolean isOverflow) {
+        if (isOverflow && mIsLargeScreen) {
+            return mScreenRect.width()
+                    - mExpandedViewLargeScreenInsetClosestEdge
+                    - mOverflowWidth;
+        }
+        return mExpandedViewLargeScreenInsetFurthestEdge;
+    }
+
     /**
      * Calculates the padding for the bubble expanded view.
      *
@@ -362,6 +368,8 @@ public class BubblePositioner {
      */
     public int[] getExpandedViewContainerPadding(boolean onLeft, boolean isOverflow) {
         final int pointerTotalHeight = mPointerHeight - mPointerOverlap;
+        final int expandedViewLargeScreenInsetFurthestEdge =
+                getExpandedViewLargeScreenInsetFurthestEdge(isOverflow);
         if (mIsLargeScreen) {
             // Note:
             // If we're in portrait OR if we're a small tablet, then the two insets values will
@@ -369,10 +377,10 @@ public class BubblePositioner {
             // [left, top, right, bottom]
             mPaddings[0] = onLeft
                     ? mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight
-                    : mExpandedViewLargeScreenInsetFurthestEdge;
+                    : expandedViewLargeScreenInsetFurthestEdge;
             mPaddings[1] = 0;
             mPaddings[2] = onLeft
-                    ? mExpandedViewLargeScreenInsetFurthestEdge
+                    ? expandedViewLargeScreenInsetFurthestEdge
                     : mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight;
             // Overflow doesn't show manage button / get padding from it so add padding here
             mPaddings[3] = isOverflow ? mExpandedViewPadding : 0;

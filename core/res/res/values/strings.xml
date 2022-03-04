@@ -4894,6 +4894,8 @@
     <string name="user_logging_out_message">Logging out <xliff:g id="name" example="Bob">%1$s</xliff:g>\u2026</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
+    <!-- Default name of the guest user [CHAR LIMIT=35] -->
+    <string name="guest_name">Guest</string>
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that the change was disallowed by an administrator. [CHAR LIMIT=none] -->

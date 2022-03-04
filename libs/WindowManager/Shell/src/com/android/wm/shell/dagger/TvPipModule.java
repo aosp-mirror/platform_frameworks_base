@@ -68,6 +68,7 @@ public abstract class TvPipModule {
             PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
+            DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
@@ -81,6 +82,7 @@ public abstract class TvPipModule {
                         pipMediaController,
                         tvPipNotificationController,
                         taskStackListener,
+                        displayController,
                         windowManagerShellWrapper,
                         mainExecutor));
     }

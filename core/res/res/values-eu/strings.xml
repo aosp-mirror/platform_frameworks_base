@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Hiru hizlaritako deiak"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Nahigabeko dei gogaikarriak ukatzea"</string>
     <string name="CndMmi" msgid="185136449405618437">"Deitzailearen zenbakia ematea"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Ez molestatzeko modua"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenekin"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Operadore baten mezularitza-zerbitzuaren goi-mailako interfazeari lotzea baimentzen die erabiltzaileei. Aplikazio normalek ez lukete inoiz beharko."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"lotu operadorearen zerbitzuei"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Operadorearen zerbitzuei lotzea baimentzen die titularrei. Aplikazio normalek ez dute baimen hau behar."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"atzitu ez molestatzeko modua"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"hasi baimenen inguruko erabakiak ikusten"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte (hurrengo alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Zuk desaktibatu arte"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Ez molestatzeko modua desaktibatzen duzun arte"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Tolestu"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ez molestatzeko modua"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Jarduerarik gabeko denbora"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Lanegunetako gaua"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Asteburua"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Dar-dar egingo du deiak eta jakinarazpenak jasotzean"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistema-aldaketak"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ez molestatzeko modua"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Berria: Ez molestatzeko modua jakinarazpenak ezkutatzen ari da"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Sakatu informazio gehiago lortzeko eta portaera aldatzeko."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ez molestatzeko modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ezarpenak"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Ados"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desaktibatu"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-n, jakinarazpen hobetuek ordeztu dituzte Android-eko jakinarazpen egokituak. Eginbide horrek, iradokitako ekintzak eta erantzunak erakusten, eta zure jakinarazpenak antolatzen ditu.\n\nJakinarazpen hobetuek jakinarazpenen eduki osoa atzi dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, eginbideak jakinarazpenak baztertu, edo haiei erantzun diezaieke; adibidez, telefono-deiei erantzun diezaieke, eta ez molestatzeko modua kontrolatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>
@@ -2252,7 +2261,7 @@
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> hizkuntzatik <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> hizkuntzara itzuli da mezua."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Atzeko planoko jarduerak"</string>
     <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Atzeko planoko jarduerak"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> atzeko planoan exekutatzen eta bateria xahutzen ari da. Sakatu berrikusteko."</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g>, atzeko planoan exekutatzen, eta bateria xahutzen ari da. Sakatu berrikusteko."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> aplikazioak denbora asko darama atzeko planoan exekutatzen. Sakatu berrikusteko."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ikusi zer aplikazio dauden aktibo"</string>
     <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Ezin da atzitu kamera gailu honetatik"</string>

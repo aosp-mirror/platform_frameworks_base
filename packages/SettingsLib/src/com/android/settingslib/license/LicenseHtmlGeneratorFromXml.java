@@ -70,7 +70,7 @@ class LicenseHtmlGeneratorFromXml {
             + "</style>\n"
             + "</head>"
             + "<body topmargin=\"0\" leftmargin=\"0\" rightmargin=\"0\" bottommargin=\"0\">\n"
-            + "<div class=\"toc\">\n";
+            + "<div class=\"toc\">";
     private static final String LIBRARY_HEAD_STRING =
             "<strong>Libraries</strong>\n<ul class=\"libraries\">";
     private static final String LIBRARY_TAIL_STRING = "</ul>\n<strong>Files</strong>";
@@ -323,6 +323,8 @@ class LicenseHtmlGeneratorFromXml {
             }
             writer.println(LIBRARY_TAIL_STRING);
         }
+
+        writer.println(FILES_HEAD_STRING);
 
         // Prints all the file list with a link to its license file content.
         for (String fileName : fileNameList) {

@@ -70,6 +70,7 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Üç yollu zəng"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Xoşagəlməz zənglərdən imtina"</string>
     <string name="CndMmi" msgid="185136449405618437">"Çatdırılma zəngi"</string>
+    <string name="DndMmi" msgid="8797375819689129800">"Narahat etməyin"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Zəng edənin kimliyi defolt olaraq qadağandır. Növbəti zəng: Qadağandır"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Zəng edənin kimliyi defolt olaraq qadağan deyil. Növbəti zəng: Qadağan deyil"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Zəng edənin kimliyi defolt olaraq qadağan deyil. Növbəti zəng: Qadağandır"</string>
@@ -736,6 +737,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Sahibə operatorun mesajlaşma xidmətinin yüksək səviyyəli interfeysini əlaqələndirmək imkanı verir. Adi proqramlar üçün heç vaxt lazım olmur."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"operator xidmətləri ilə əlaqələndirin"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Sahibinə operator xidmətləri ilə əlaqələndirməyə icazə verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
+    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\"Narahat Etməyin\" funksiyasına daxil olun"</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Baxış icazəsinin istifadəsinə başlayın"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"icazə qərarlarına baxışı başladın"</string>
@@ -1866,8 +1869,10 @@
     <string name="zen_mode_until" msgid="2250286190237669079">"Saat <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> qədər"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> radəsinə qədər (növbəti siqnal)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Deaktiv edilənə qədər"</string>
+    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\"Narahat etməyin\" seçiminini deaktiv edənə kimi"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Dağıt"</string>
+    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Narahat etməyin"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Gözləmə müddəti"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Həftəiçi gecəsi"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Həftə sonu"</string>
@@ -2032,7 +2037,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Zəng və bildirişlər vibrasiya verəcək"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zəng və bildirişlər səssiz ediləcək"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistem dəyişiklikləri"</string>
+    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Narahat Etməyin"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Yenilik: \"Narahat etməyin\" rejimi bildirişləri gizlədir"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ətraflı məıumat əldə edərək dəyişmək üçün klikləyin."</string>
+    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Narahat Etməyin\" rejimi dəyişdirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nəyin blok edildiyini yoxlamaq üçün klikləyin."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ayarlar"</string>
@@ -2049,6 +2057,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Deaktiv edin"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ətraflı məlumat"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-də qabaqcıl bildirişlər var. Bu funksiya bütün bildirişləri qaydaya salır, cavab və əməliyyatlara dair tövsiyə verir.\n\nFunksiyanın kontaktlar, mesajlar və şəxsi məlumatlar daxil olmaqla bütün bildirişlərə girişi var. Zənglərə cavab verə, \"Narahat etməyin\" rejimini idarə edə, bildirişləri qapada və cavablaya bilər."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rejim üçün məlumat bildirişi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya həmişəki vaxtdan əvvəl bitə bilər"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Enerjiyə Qənaət rejimi batareya istifadəsinin müddətini artırmaq üçün aktiv edilir"</string>

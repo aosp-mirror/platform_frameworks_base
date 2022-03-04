@@ -88,10 +88,10 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LAYER_MIRRORING;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
@@ -197,6 +197,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -305,21 +306,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private SurfaceControl mWindowingLayer;
 
     /**
-     * The window token of the layer of the hierarchy to mirror, or null if this DisplayContent
-     * is not being used for layer mirroring.
+     * Delegate for handling all logic around content recording; decides if this DisplayContent is
+     * recording, and if so, applies necessary updates to SurfaceFlinger.
      */
-    @VisibleForTesting IBinder mTokenToMirror = null;
-
-    /**
-     * The surface for mirroring the contents of this hierarchy, or null if layer mirroring is
-     * temporarily disabled.
-     */
-    private SurfaceControl mMirroredSurface = null;
-
-    /**
-     * The last bounds of the DisplayArea to mirror.
-     */
-    private Rect mLastMirroredDisplayAreaBounds = null;
+    @Nullable
+    private ContentRecorder mContentRecorder;
 
     /**
      * The default per Display minimal size of tasks. Calculated at construction.
@@ -422,6 +413,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private boolean mSystemGestureExclusionWasRestricted = false;
     private final Region mSystemGestureExclusionUnrestricted = new Region();
     private int mSystemGestureExclusionLimit;
+
+    private Set<Rect> mRestrictedKeepClearAreas = new ArraySet<>();
+    private Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
 
     /**
      * For default display it contains real metrics, empty for others.
@@ -2535,46 +2529,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Update IME parent if needed.
         updateImeParent();
 
-        // Update mirroring surface for MediaProjection, if this DisplayContent is being used
-        // for layer mirroring.
-        if (isCurrentlyMirroring() && mLastMirroredDisplayAreaBounds != null) {
-            // Mirroring has already begun, but update mirroring since the display is now on.
-            final WindowContainer wc = mWmService.mWindowContextListenerController.getContainer(
-                    mTokenToMirror);
-            if (wc == null) {
-                ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                        "Unable to retrieve window container to update layer mirroring for "
-                                + "display %d",
-                        mDisplayId);
-                return;
-            }
-
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Display %d was already layer mirroring, so apply transformations if necessary",
-                    mDisplayId);
-            // Retrieve the size of the DisplayArea to mirror, and continue with the update
-            // if the bounds or orientation has changed.
-            final Rect displayAreaBounds = wc.getDisplayContent().getBounds();
-            int displayAreaOrientation = wc.getDisplayContent().getOrientation();
-            if (!mLastMirroredDisplayAreaBounds.equals(displayAreaBounds)
-                    || lastOrientation != displayAreaOrientation) {
-                Point surfaceSize = fetchSurfaceSizeIfPresent();
-                if (surfaceSize != null) {
-                    ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                            "Going ahead with updating layer mirroring for display %d to new "
-                                    + "bounds %s and/or orientation %d.",
-                            mDisplayId, displayAreaBounds, displayAreaOrientation);
-                    updateMirroredSurface(mWmService.mTransactionFactory.get(),
-                            displayAreaBounds, surfaceSize);
-                } else {
-                    // If the surface removed, do nothing. We will handle this via onDisplayChanged
-                    // (the display will be off if the surface is removed).
-                    ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                            "Unable to update layer mirroring for display %d to new bounds %s"
-                            + " and/or orientation %d, since the surface is not available.",
-                            mDisplayId, displayAreaBounds, displayAreaOrientation);
-                }
-            }
+        // Update surface for MediaProjection, if this DisplayContent is being used for recording.
+        if (mContentRecorder != null) {
+            mContentRecorder.onConfigurationChanged(lastOrientation);
         }
 
         if (lastOrientation != getConfiguration().orientation) {
@@ -3397,7 +3354,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             pw.println(mSystemGestureExclusion);
         }
 
-        final List<Rect> keepClearAreas = getKeepClearAreas();
+        final Set<Rect> keepClearAreas = getKeepClearAreas();
         if (!keepClearAreas.isEmpty()) {
             pw.println();
             pw.print("  keepClearAreas=");
@@ -4563,8 +4520,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
                     true /* inTraversal, must call performTraversalInTrans... below */);
         }
-        // If the display now has content, or no longer has content, update layer mirroring.
-        updateMirroring();
+        // If the display now has content, or no longer has content, update recording.
+        updateRecording();
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
         if (wallpaperVisible != mLastWallpaperVisible) {
@@ -5499,11 +5456,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateKeepClearAreas() {
-        final List<Rect> restrictedKeepClearAreas = new ArrayList();
-        final List<Rect> unrestrictedKeepClearAreas = new ArrayList();
+        final Set<Rect> restrictedKeepClearAreas = new ArraySet<>();
+        final Set<Rect> unrestrictedKeepClearAreas = new ArraySet<>();
         getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
-        mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
-                this, restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+
+        if (!mRestrictedKeepClearAreas.equals(restrictedKeepClearAreas)
+                || !mUnrestrictedKeepClearAreas.equals(unrestrictedKeepClearAreas)) {
+            mRestrictedKeepClearAreas = restrictedKeepClearAreas;
+            mUnrestrictedKeepClearAreas = unrestrictedKeepClearAreas;
+            mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
+                    this, restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+        }
     }
 
     /**
@@ -5515,7 +5478,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * For context on restricted vs unrestricted keep-clear areas, see
      * {@link android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS}.
      */
-    void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted) {
+    void getKeepClearAreas(Set<Rect> outRestricted, Set<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
         forAllWindows(w -> {
@@ -5532,8 +5495,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * Returns all keep-clear areas from visible, relevant windows on this display.
      */
-    ArrayList<Rect> getKeepClearAreas() {
-        final ArrayList<Rect> keepClearAreas = new ArrayList<Rect>();
+    Set<Rect> getKeepClearAreas() {
+        final Set<Rect> keepClearAreas = new ArraySet<>();
         getKeepClearAreas(keepClearAreas, keepClearAreas);
         return keepClearAreas;
     }
@@ -5558,13 +5521,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             } else if (displayState == Display.STATE_ON) {
                 mOffTokenAcquirer.release(mDisplayId);
             }
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Display %d state is now (%d), so update layer mirroring?",
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                    "Display %d state is now (%d), so update recording?",
                     mDisplayId, displayState);
             if (lastDisplayState != displayState) {
-                // If state is on due to surface being added, then start layer mirroring.
-                // If state is off due to surface being removed, then stop layer mirroring.
-                updateMirroring();
+                // If state is on due to surface being added, then start recording.
+                // If state is off due to surface being removed, then stop recording.
+                updateRecording();
             }
         }
         // Dispatch pending Configuration to WindowContext if the associated display changes to
@@ -5867,11 +5830,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mRemoved = true;
 
-        if (mMirroredSurface != null) {
-            // Do not wait for the mirrored surface to be garbage collected, but clean up
-            // immediately.
-            mWmService.mTransactionFactory.get().remove(mMirroredSurface).apply();
-            mMirroredSurface = null;
+        if (mContentRecorder != null) {
+            mContentRecorder.remove();
         }
 
         // Only update focus/visibility for the last one because there may be many root tasks are
@@ -6111,183 +6071,45 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mSandboxDisplayApis;
     }
 
-    /**
-     * Start mirroring to this DisplayContent if it does not have its own content. Captures the
-     * content of a WindowContainer indicated by a WindowToken. If unable to start mirroring, falls
-     * back to original MediaProjection approach.
-     */
-    private void startMirrorIfNeeded() {
-        // Only mirror if this display does not have its own content, is not mirroring already,
-        // and if this display is on (it has a surface to write output to).
-        if (mLastHasContent || isCurrentlyMirroring() || mDisplay.getState() == Display.STATE_OFF) {
-            return;
+    private ContentRecorder getContentRecorder() {
+        if (mContentRecorder == null) {
+            mContentRecorder = new ContentRecorder(this);
         }
-
-        // Given the WindowToken of the DisplayArea to mirror, retrieve the associated
-        // SurfaceControl.
-        IBinder tokenToMirror = mWmService.mDisplayManagerInternal.getWindowTokenClientToMirror(
-                mDisplayId);
-        if (tokenToMirror == null) {
-            // This DisplayContent instance is not involved in layer mirroring. If the display
-            // has been created for capturing, fall back to prior MediaProjection approach.
-            return;
-        }
-
-        final WindowContainer wc = mWmService.mWindowContextListenerController.getContainer(
-                tokenToMirror);
-        if (wc == null) {
-            // Un-set the window token to mirror for this VirtualDisplay, to fall back to the
-            // original MediaProjection approach.
-            mWmService.mDisplayManagerInternal.setWindowTokenClientToMirror(mDisplayId, null);
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Unable to retrieve window container to start layer mirroring for display %d",
-                    mDisplayId);
-            return;
-        }
-
-        Point surfaceSize = fetchSurfaceSizeIfPresent();
-        if (surfaceSize == null) {
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Unable to start layer mirroring for display %d since the surface is not "
-                            + "available.",
-                    mDisplayId);
-            return;
-        }
-        ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                "Display %d has no content and is on, so start layer mirroring for state %d",
-                mDisplayId, mDisplay.getState());
-
-        // Create a mirrored hierarchy for the SurfaceControl of the DisplayArea to capture.
-        SurfaceControl sc = wc.getDisplayContent().getSurfaceControl();
-        mMirroredSurface = SurfaceControl.mirrorSurface(sc);
-        SurfaceControl.Transaction transaction = mWmService.mTransactionFactory.get()
-                // Set the mMirroredSurface's parent to the root SurfaceControl for this
-                // DisplayContent. This brings the new mirrored hierarchy under this DisplayContent,
-                // so SurfaceControl will write the layers of this hierarchy to the output surface
-                // provided by the app.
-                .reparent(mMirroredSurface, mSurfaceControl)
-                // Reparent the SurfaceControl of this DisplayContent to null, to prevent content
-                // being added to it. This ensures that no app launched explicitly on the
-                // VirtualDisplay will show up as part of the mirrored content.
-                .reparent(mWindowingLayer, null)
-                .reparent(mOverlayLayer, null);
-        // Retrieve the size of the DisplayArea to mirror.
-        updateMirroredSurface(transaction, wc.getDisplayContent().getBounds(), surfaceSize);
-        mTokenToMirror = tokenToMirror;
-
-        // No need to clean up. In SurfaceFlinger, parents hold references to their children. The
-        // mirrored SurfaceControl is alive since the parent DisplayContent SurfaceControl is
-        // holding a reference to it. Therefore, the mirrored SurfaceControl will be cleaned up
-        // when the VirtualDisplay is destroyed - which will clean up this DisplayContent.
+        return mContentRecorder;
     }
 
     /**
-     * Start mirroring if this DisplayContent no longer has content. Stop mirroring if it now
+     * Pause the recording session.
+     */
+    @VisibleForTesting void pauseRecording() {
+        if (mContentRecorder != null) {
+            mContentRecorder.pauseRecording();
+        }
+    }
+
+    /**
+     * Sets the incoming recording session. Should only be used when starting to record on
+     * this display; stopping recording is handled separately when the display is destroyed.
+     *
+     * @param session the new session indicating recording will begin on this display.
+     */
+    void setContentRecordingSession(@Nullable ContentRecordingSession session) {
+        getContentRecorder().setContentRecordingSession(session);
+    }
+
+    /**
+     * Start recording if this DisplayContent no longer has content. Stop recording if it now
      * has content or the display is not on.
      */
-    private void updateMirroring() {
-        if (isCurrentlyMirroring() && (mLastHasContent
-                || mDisplay.getState() == Display.STATE_OFF)) {
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Display %d has content (%b) so disable layer mirroring", mDisplayId,
-                    mLastHasContent);
-            // If the display is not on and it is a virtual display, then it no longer has an
-            // associated surface to write output to.
-            // If the display now has content, stop mirroring to it.
-            mWmService.mTransactionFactory.get()
-                    // Remove the reference to mMirroredSurface, to clean up associated memory.
-                    .remove(mMirroredSurface)
-                    // Reparent the SurfaceControl of this DisplayContent back to mSurfaceControl,
-                    // to allow content to be added to it. This allows this DisplayContent to stop
-                    // mirroring and show content normally.
-                    .reparent(mWindowingLayer, mSurfaceControl)
-                    .reparent(mOverlayLayer, mSurfaceControl)
-                    .apply();
-            // Stop mirroring by destroying the reference to the mirrored layer.
-            mMirroredSurface = null;
-            // Do not un-set the token, in case content is removed and mirroring should begin again.
-        } else {
-            // Display no longer has content, or now has a surface to write to, so try to start
-            // mirroring to it.
-            startMirrorIfNeeded();
-        }
+    @VisibleForTesting void updateRecording() {
+        getContentRecorder().updateRecording();
     }
 
     /**
-     * Apply transformations to the mirrored surface to ensure the captured contents are scaled to
-     * fit and centred in the output surface.
-     *
-     * @param transaction       the transaction to include transformations of mMirroredSurface
-     *                          to. Transaction is not applied before returning.
-     * @param displayAreaBounds bounds of the DisplayArea to mirror to the surface provided by
-     *                          the app.
-     * @param surfaceSize       the default size of the surface to write the display area content to
+     * Returns {@code true} if this DisplayContent is currently recording.
      */
-    @VisibleForTesting
-    void updateMirroredSurface(SurfaceControl.Transaction transaction,
-            Rect displayAreaBounds, Point surfaceSize) {
-        // Calculate the scale to apply to the root mirror SurfaceControl to fit the size of the
-        // output surface.
-        float scaleX = surfaceSize.x / (float) displayAreaBounds.width();
-        float scaleY = surfaceSize.y / (float) displayAreaBounds.height();
-        float scale = Math.min(scaleX, scaleY);
-        int scaledWidth = Math.round(scale * (float) displayAreaBounds.width());
-        int scaledHeight = Math.round(scale * (float) displayAreaBounds.height());
-
-        // Calculate the shift to apply to the root mirror SurfaceControl to centre the mirrored
-        // contents in the output surface.
-        int shiftedX = 0;
-        if (scaledWidth != surfaceSize.x) {
-            shiftedX = (surfaceSize.x - scaledWidth) / 2;
-        }
-        int shiftedY = 0;
-        if (scaledHeight != surfaceSize.y) {
-            shiftedY = (surfaceSize.y - scaledHeight) / 2;
-        }
-
-        transaction
-                // Crop the area to capture to exclude the 'extra' wallpaper that is used
-                // for parallax (b/189930234).
-                .setWindowCrop(mMirroredSurface, displayAreaBounds.width(),
-                        displayAreaBounds.height())
-                // Scale the root mirror SurfaceControl, based upon the size difference between the
-                // source (DisplayArea to capture) and output (surface the app reads images from).
-                .setMatrix(mMirroredSurface, scale, 0 /* dtdx */, 0 /* dtdy */, scale)
-                // Position needs to be updated when the mirrored DisplayArea has changed, since
-                // the content will no longer be centered in the output surface.
-                .setPosition(mMirroredSurface, shiftedX /* x */, shiftedY /* y */)
-                .apply();
-        mLastMirroredDisplayAreaBounds = new Rect(displayAreaBounds);
-    }
-
-    /**
-     * Returns a non-null {@link Point} if the surface is present, or null otherwise
-     */
-    Point fetchSurfaceSizeIfPresent() {
-        // Retrieve the default size of the surface the app provided to
-        // MediaProjection#createVirtualDisplay. Note the app is the consumer of the surface,
-        // since it reads out buffers from the surface, and SurfaceFlinger is the producer since
-        // it writes the mirrored layers to the buffers.
-        Point surfaceSize = mWmService.mDisplayManagerInternal.getDisplaySurfaceDefaultSize(
-                mDisplayId);
-        if (surfaceSize == null) {
-            // Layer mirroring started with a null surface, so do not apply any transformations yet.
-            // State of virtual display will change to 'ON' when the surface is set.
-            // will get event DISPLAY_DEVICE_EVENT_CHANGED
-            ProtoLog.v(WM_DEBUG_LAYER_MIRRORING,
-                    "Provided surface for layer mirroring on display %d is not present, so do not"
-                            + " update the surface",
-                    mDisplayId);
-            return null;
-        }
-        return surfaceSize;
-    }
-
-    /**
-     * Returns {@code true} if this DisplayContent is currently layer mirroring.
-     */
-    boolean isCurrentlyMirroring() {
-        return mTokenToMirror != null && mMirroredSurface != null;
+    boolean isCurrentlyRecording() {
+        return mContentRecorder != null && mContentRecorder.isCurrentlyRecording();
     }
 
     /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */
