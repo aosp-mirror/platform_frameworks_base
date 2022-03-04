@@ -173,19 +173,19 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldShowComplicationsFalseByDefault() {
+    public void testShouldShowComplicationsTrueByDefault() {
         mService.onBind(new Intent());
 
-        assertThat(mService.shouldShowComplications()).isFalse();
+        assertThat(mService.shouldShowComplications()).isTrue();
     }
 
     @Test
     public void testShouldShowComplicationsSetByIntentExtra() {
         final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, true);
+        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, false);
         mService.onBind(intent);
 
-        assertThat(mService.shouldShowComplications()).isTrue();
+        assertThat(mService.shouldShowComplications()).isFalse();
     }
 
     @Test
