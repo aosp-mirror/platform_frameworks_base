@@ -35,7 +35,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.provider.DeviceConfig;
-import android.util.Log;
 import android.util.Size;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -46,6 +45,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -54,6 +54,7 @@ import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 
@@ -1010,7 +1011,8 @@ public class PipTouchHandler {
         }
         final Size estimatedMinMenuSize = mMenuController.getEstimatedMinMenuSize();
         if (estimatedMinMenuSize == null) {
-            Log.wtf(TAG, "Failed to get estimated menu size");
+            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to get estimated menu size", TAG);
             return false;
         }
         final Rect currentBounds = mPipBoundsState.getBounds();
