@@ -68,7 +68,6 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -84,9 +83,11 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.NotifActivityLaunchEventsModule;
+import com.android.systemui.statusbar.phone.NotifPanelEventsModule;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.wmshell.BubblesManager;
@@ -106,8 +107,9 @@ import dagger.Provides;
  */
 @Module(includes = {
         CoordinatorsModule.class,
+        NotifActivityLaunchEventsModule.class,
         NotifPipelineChoreographerModule.class,
-        NotifPanelEventSourceModule.class,
+        NotifPanelEventsModule.class,
         NotificationSectionHeadersModule.class,
 })
 public interface NotificationsModule {
