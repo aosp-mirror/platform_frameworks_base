@@ -750,7 +750,7 @@ public class OomAdjuster {
         }
         final long now = SystemClock.uptimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
-        final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
+        final long oldTime = now - mConstants.mMaxEmptyTimeMillis;
         final boolean fullUpdate = processes == null;
         ActiveUids activeUids = uids;
         ArrayList<ProcessRecord> activeProcesses = fullUpdate ? mProcessList.getLruProcessesLOSP()
@@ -1031,15 +1031,25 @@ public class OomAdjuster {
         }
     }
 
+    private long mNextNoKillDebugMessageTime;
+
     @GuardedBy({"mService", "mProcLock"})
     private boolean updateAndTrimProcessLSP(final long now, final long nowElapsed,
             final long oldTime, final ActiveUids activeUids) {
         ArrayList<ProcessRecord> lruList = mProcessList.getLruProcessesLOSP();
         final int numLru = lruList.size();
 
-        final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
-        final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES
-                - emptyProcessLimit;
+        final boolean doKillExcessiveProcesses = shouldKillExcessiveProcesses(now);
+        if (!doKillExcessiveProcesses) {
+            if (mNextNoKillDebugMessageTime < now) {
+                Slog.d(TAG, "Not killing cached processes"); // STOPSHIP Remove it b/222365734
+                mNextNoKillDebugMessageTime = now + 5000; // Every 5 seconds
+            }
+        }
+        final int emptyProcessLimit = doKillExcessiveProcesses
+                ? mConstants.CUR_MAX_EMPTY_PROCESSES : Integer.MAX_VALUE;
+        final int cachedProcessLimit = doKillExcessiveProcesses
+                ? (mConstants.CUR_MAX_CACHED_PROCESSES - emptyProcessLimit) : Integer.MAX_VALUE;
         int lastCachedGroup = 0;
         int lastCachedGroupUid = 0;
         int numCached = 0;
@@ -1089,7 +1099,7 @@ public class OomAdjuster {
                     case PROCESS_STATE_CACHED_EMPTY:
                         if (numEmpty > mConstants.CUR_TRIM_EMPTY_PROCESSES
                                 && app.getLastActivityTime() < oldTime) {
-                            app.killLocked("empty for " + ((oldTime + ProcessList.MAX_EMPTY_TIME
+                            app.killLocked("empty for " + ((now
                                     - app.getLastActivityTime()) / 1000) + "s",
                                     "empty for too long",
                                     ApplicationExitInfo.REASON_OTHER,
@@ -1256,6 +1266,25 @@ public class OomAdjuster {
                 mService.mServices.stopInBackgroundLocked(becameIdle.get(i).getUid());
             }
         }
+    }
+
+    /**
+     * Return true if we should kill excessive cached/empty processes.
+     */
+    private boolean shouldKillExcessiveProcesses(long nowUptime) {
+        final long lastUserUnlockingUptime = mService.mUserController.getLastUserUnlockingUptime();
+
+        if (lastUserUnlockingUptime == 0) {
+            // No users have been unlocked.
+            return !mConstants.mNoKillCachedProcessesUntilBootCompleted;
+        }
+        final long noKillCachedProcessesPostBootCompletedDurationMillis =
+                mConstants.mNoKillCachedProcessesPostBootCompletedDurationMillis;
+        if ((lastUserUnlockingUptime + noKillCachedProcessesPostBootCompletedDurationMillis)
+                > nowUptime) {
+            return false;
+        }
+        return true;
     }
 
     private final ComputeOomAdjWindowCallback mTmpComputeOomAdjWindowCallback =
