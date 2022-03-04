@@ -1325,14 +1325,18 @@ public class AudioService extends IAudioService.Stub
             mRm = (RoleManager) mContext.getSystemService(Context.ROLE_SERVICE);
             if (mRm != null) {
                 mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
-                updateAssistantUId(true);
+                synchronized (mSettingsLock) {
+                    updateAssistantUIdLocked(/* forceUpdate= */ true);
+                }
             }
         }
 
         @Override
         public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
             if (RoleManager.ROLE_ASSISTANT.equals(roleName)) {
-                updateAssistantUId(false);
+                synchronized (mSettingsLock) {
+                    updateAssistantUIdLocked(/* forceUpdate= */ false);
+                }
             }
         }
 
@@ -1431,7 +1435,7 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
             AudioSystem.setRttEnabled(mRttEnabled);
-            updateAssistantServicesUidsLocked();
+            resetAssistantServicesUidsLocked();
         }
 
         synchronized (mAccessibilityServiceUidsLock) {
@@ -1557,6 +1561,12 @@ public class AudioService extends IAudioService.Stub
         if (changed) {
             updateAssistantServicesUidsLocked();
         }
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void resetAssistantServicesUidsLocked() {
+        mAssistantUids.clear();
+        updateAssistantUIdLocked(/* forceUpdate= */ true);
     }
 
     @GuardedBy("mSettingsLock")
@@ -2343,7 +2353,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     @GuardedBy("mSettingsLock")
-    private void updateAssistantUId(boolean forceUpdate) {
+    private void updateAssistantUIdLocked(boolean forceUpdate) {
         int assistantUid = INVALID_UID;
         // Consider assistants in the following order of priority:
         // 1) apk in assistant role
@@ -2441,7 +2451,7 @@ public class AudioService extends IAudioService.Stub
             readDockAudioSettings(cr);
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
-            updateAssistantUId(true);
+            updateAssistantUIdLocked(/* forceUpdate= */ true);
             resetActiveAssistantUidsLocked();
             AudioSystem.setRttEnabled(mRttEnabled);
         }
@@ -8153,7 +8163,7 @@ public class AudioService extends IAudioService.Stub
                 updateMasterBalance(mContentResolver);
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
-                updateAssistantUId(false);
+                updateAssistantUIdLocked(/* forceUpdate= */ false);
             }
         }
 
