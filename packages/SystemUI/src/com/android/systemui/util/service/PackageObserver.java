@@ -24,8 +24,6 @@ import android.content.IntentFilter;
 import android.os.PatternMatcher;
 import android.util.Log;
 
-import com.android.systemui.communal.CommunalSource;
-
 import com.google.android.collect.Lists;
 
 import java.lang.ref.WeakReference;
@@ -36,8 +34,8 @@ import javax.inject.Inject;
 
 /**
  * {@link PackageObserver} allows for monitoring the system for changes relating to a particular
- * package. This can be used by {@link CommunalSource} clients to detect when a related package
- * has changed and reloading is necessary.
+ * package. This can be used by clients to detect when a related package has changed and reloading
+ * is necessary.
  */
 public class PackageObserver implements Observer {
     private static final String TAG = "PackageObserver";
