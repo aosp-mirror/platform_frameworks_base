@@ -44,7 +44,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 219749605)
 class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
