@@ -1670,6 +1670,7 @@ final class InstallPackageHelper {
                     final int userId = uninstalledUsers[i];
                     res.mRemovedInfo.mUninstallReasons.put(userId, ps.getUninstallReason(userId));
                 }
+                res.mRemovedInfo.mIsExternal = oldPackage.isExternalStorage();
 
                 sysPkg = oldPackage.isSystem();
                 if (sysPkg) {
@@ -1944,21 +1945,6 @@ final class InstallPackageHelper {
                         }
                     }
                     // Successfully deleted the old package; proceed with replace.
-
-                    // If deleted package lived in a container, give users a chance to
-                    // relinquish resources before killing.
-                    if (oldPackage.isExternalStorage()) {
-                        if (DEBUG_INSTALL) {
-                            Slog.i(TAG, "upgrading pkg " + oldPackage
-                                    + " is ASEC-hosted -> UNAVAILABLE");
-                        }
-                        final int[] uidArray = new int[]{oldPackage.getUid()};
-                        final ArrayList<String> pkgList = new ArrayList<>(1);
-                        pkgList.add(oldPackage.getPackageName());
-                        mBroadcastHelper.sendResourcesChangedBroadcast(
-                                false, true, pkgList, uidArray, null);
-                    }
-
                     // Update the in-memory copy of the previous code paths.
                     PackageSetting ps1 = mPm.mSettings.getPackageLPr(
                             reconciledPkg.mPrepareResult.mExistingPackage.getPackageName());
@@ -2654,6 +2640,17 @@ final class InstallPackageHelper {
 
             // Send the removed broadcasts
             if (res.mRemovedInfo != null) {
+                if (res.mRemovedInfo.mIsExternal) {
+                    if (DEBUG_INSTALL) {
+                        Slog.i(TAG, "upgrading pkg " + res.mRemovedInfo.mRemovedPackage
+                                + " is ASEC-hosted -> UNAVAILABLE");
+                    }
+                    final int[] uidArray = new int[]{res.mRemovedInfo.mUid};
+                    final ArrayList<String> pkgList = new ArrayList<>(1);
+                    pkgList.add(res.mRemovedInfo.mRemovedPackage);
+                    mBroadcastHelper.sendResourcesChangedBroadcast(
+                            false, true, pkgList, uidArray, null);
+                }
                 res.mRemovedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 

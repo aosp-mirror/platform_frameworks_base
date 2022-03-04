@@ -508,6 +508,7 @@ final class DeletePackageHelper {
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
+            outInfo.mIsExternal = ps.isExternalStorage();
         }
     }
 
