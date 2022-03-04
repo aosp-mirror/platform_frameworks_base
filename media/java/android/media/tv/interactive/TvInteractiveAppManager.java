@@ -626,6 +626,7 @@ public final class TvInteractiveAppManager {
         /**
          * This is called when the state of the interactive app service is changed.
          *
+         * @param iAppServiceId The ID of the TV Interactive App service.
          * @param type the interactive app type
          * @param state the current state of the service of the given type
          * @param err the error code for error state. {@link #ERROR_NONE} is used when the state is
@@ -805,8 +806,8 @@ public final class TvInteractiveAppManager {
      * @param executor A {@link Executor} that the status change will be delivered to.
      */
     public void registerCallback(
-            @NonNull TvInteractiveAppCallback callback,
-            @CallbackExecutor @NonNull Executor executor) {
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull TvInteractiveAppCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
         synchronized (mLock) {

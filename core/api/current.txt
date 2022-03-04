@@ -26087,7 +26087,7 @@ package android.media.tv.interactive {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
     method public void prepare(@NonNull String, int);
     method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
-    method public void registerCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback, @NonNull java.util.concurrent.Executor);
+    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
     method public void unregisterAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void unregisterCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
@@ -26157,10 +26157,10 @@ package android.media.tv.interactive {
 
   public abstract static class TvInteractiveAppService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
-    method public void layoutSurface(int, int, int, int);
-    method public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
-    method public void notifySessionStateChanged(int, int);
-    method public final void notifyTeletextAppStateChanged(int);
+    method @CallSuper public void layoutSurface(int, int, int, int);
+    method @CallSuper public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
+    method @CallSuper public void notifySessionStateChanged(int, int);
+    method @CallSuper public final void notifyTeletextAppStateChanged(int);
     method public void onAdResponse(@NonNull android.media.tv.AdResponse);
     method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
@@ -26194,17 +26194,17 @@ package android.media.tv.interactive {
     method public void onTuned(@NonNull android.net.Uri);
     method public void onVideoAvailable();
     method public void onVideoUnavailable(int);
-    method public void removeBroadcastInfo(int);
-    method public void requestAd(@NonNull android.media.tv.AdRequest);
-    method public void requestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
-    method public void requestCurrentChannelLcn();
-    method public void requestCurrentChannelUri();
-    method public void requestCurrentTvInputId();
-    method public void requestStreamVolume();
-    method public void requestTrackInfoList();
-    method public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
-    method public void setMediaViewEnabled(boolean);
-    method public void setVideoBounds(@NonNull android.graphics.Rect);
+    method @CallSuper public void removeBroadcastInfo(int);
+    method @CallSuper public void requestAd(@NonNull android.media.tv.AdRequest);
+    method @CallSuper public void requestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
+    method @CallSuper public void requestCurrentChannelLcn();
+    method @CallSuper public void requestCurrentChannelUri();
+    method @CallSuper public void requestCurrentTvInputId();
+    method @CallSuper public void requestStreamVolume();
+    method @CallSuper public void requestTrackInfoList();
+    method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
+    method @CallSuper public void setMediaViewEnabled(boolean);
+    method @CallSuper public void setVideoBounds(@NonNull android.graphics.Rect);
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {
