@@ -6286,9 +6286,9 @@ public class CarrierConfigManager {
                         "capabilities=eims, retry_interval=1000, maximum_retries=20",
                         "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|"
                                 + "2254, maximum_retries=0", // No retry for those causes
+                        "capabilities=mms|supl|cbs, retry_interval=2000",
                         "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2000, "
                                 + "backoff=true, maximum_retries=13",
-                        "capabilities=mms|supl|cbs, retry_interval=2000"
                 });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
