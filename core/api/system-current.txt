@@ -6943,7 +6943,7 @@ package android.media.tv.tuner {
   }
 
   public class Lnb implements java.lang.AutoCloseable {
-    method public void addCallback(@NonNull android.media.tv.tuner.LnbCallback, @NonNull java.util.concurrent.Executor);
+    method public void addCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method public void close();
     method public boolean removeCallback(@NonNull android.media.tv.tuner.LnbCallback);
     method public int sendDiseqcMessage(@NonNull byte[]);
