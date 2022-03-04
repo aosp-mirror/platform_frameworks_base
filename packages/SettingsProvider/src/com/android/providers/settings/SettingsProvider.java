@@ -5220,7 +5220,7 @@ public class SettingsProvider extends ContentProvider {
                                     .getResources()
                                     .getBoolean(R.bool.def_wearable_hotwordDetectionEnabled));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Global.Wearable.SMART_REPLIES_ENABLED, false);
+                            Global.Wearable.SMART_REPLIES_ENABLED, true);
                     Setting locationMode =
                             getSecureSettingsLocked(userId).getSettingLocked(Secure.LOCATION_MODE);
                     initGlobalSettingsDefaultValForWearLocked(
