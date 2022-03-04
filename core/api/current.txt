@@ -26195,12 +26195,12 @@ package android.media.tv.interactive {
     method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
     method public void onContentBlocked(@NonNull android.media.tv.TvContentRating);
-    method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void onCreateBiInteractiveAppRequest(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method @Nullable public android.view.View onCreateMediaView();
     method public void onCurrentChannelLcn(int);
     method public void onCurrentChannelUri(@Nullable android.net.Uri);
     method public void onCurrentTvInputId(@Nullable String);
-    method public void onDestroyBiInteractiveApp(@NonNull String);
+    method public void onDestroyBiInteractiveAppRequest(@NonNull String);
     method public boolean onGenericMotionEvent(@NonNull android.view.MotionEvent);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
@@ -26285,6 +26285,8 @@ package android.media.tv.interactive {
     method public void stopInteractiveApp();
     field public static final String BI_INTERACTIVE_APP_KEY_ALIAS = "alias";
     field public static final String BI_INTERACTIVE_APP_KEY_CERTIFICATE = "certificate";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_ADDITIONAL_HEADERS = "http_additional_headers";
+    field public static final String BI_INTERACTIVE_APP_KEY_HTTP_USER_AGENT = "http_user_agent";
     field public static final String BI_INTERACTIVE_APP_KEY_PRIVATE_KEY = "private_key";
   }
 
