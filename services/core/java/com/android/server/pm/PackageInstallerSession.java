@@ -2859,6 +2859,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 inheritFileLocked(mResolvedBaseFile);
                 // Collect the requiredSplitTypes from base
                 CollectionUtils.addAll(requiredSplitTypes, existing.getBaseRequiredSplitTypes());
+            } else {
+                // Installing base.apk. Make sure the app is restarted.
+                params.setDontKillApp(false);
             }
 
             // Inherit splits if not overridden.
@@ -3552,6 +3555,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public boolean isStaged() {
         return params.isStaged;
+    }
+
+    @Override
+    public int getInstallFlags() {
+        return params.installFlags;
     }
 
     @Override
