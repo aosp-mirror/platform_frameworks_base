@@ -1226,6 +1226,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return pkgState.isUpdatedSystemApp();
     }
 
+    @Override
+    public boolean isApkInUpdatedApex() {
+        return pkgState.isApkInUpdatedApex();
+    }
+
     public PackageSetting setDomainSetId(@NonNull UUID domainSetId) {
         mDomainSetId = domainSetId;
         onChanged();

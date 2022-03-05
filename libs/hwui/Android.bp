@@ -535,7 +535,10 @@ cc_defaults {
 
     target: {
         android: {
-            header_libs: ["libandroid_headers_private"],
+            header_libs: [
+                "libandroid_headers_private",
+                "libtonemap_headers",
+            ],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",

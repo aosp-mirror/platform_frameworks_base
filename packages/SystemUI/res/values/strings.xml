@@ -66,7 +66,10 @@
     <string name="battery_saver_confirmation_ok">Turn on</string>
 
     <!-- Battery saver notification action [CHAR LIMIT=NONE]-->
-    <string name="battery_saver_start_action">Turn on Battery Saver</string>
+    <string name="battery_saver_start_action">Turn on</string>
+
+    <!-- Battery saver notification dismiss action: Do not turn on battery saver. [CHAR LIMIT=NONE]-->
+    <string name="battery_saver_dismiss_action">No thanks</string>
 
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
 
@@ -1469,7 +1472,7 @@
     <!-- Name used to refer to the "Play/Pause" media key on the keyboard. -->
     <string name="keyboard_key_media_play_pause">Play/Pause</string>
     <!-- Name used to refer to the "Stop" media key on the keyboard. -->
-    <string name="keyboard_key_media_stop">Stop casting</string>
+    <string name="keyboard_key_media_stop">Stop</string>
     <!-- Name used to refer to the "Next" media key on the keyboard. -->
     <string name="keyboard_key_media_next">Next</string>
     <!-- Name used to refer to the "Previous" media key on the keyboard. -->
@@ -2425,8 +2428,6 @@
     <string name="dream_overlay_status_bar_priority_mode">Priority mode</string>
     <!-- Content description for the alarm set icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_alarm_set">Alarm set</string>
-    <!-- Content description for the assistant guest mode enabled icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
-    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled">Assistant guest mode enabled</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->

@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.CommunalStateController
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.user.UserSwitchDialogController
@@ -53,9 +52,6 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var userSwitcherController: UserSwitcherController
-
-    @Mock
-    private lateinit var communalStateController: CommunalStateController
 
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
@@ -99,7 +95,6 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
                 context.resources,
                 screenLifecycle,
                 userSwitcherController,
-                communalStateController,
                 keyguardStateController,
                 falsingManager,
                 configurationController,

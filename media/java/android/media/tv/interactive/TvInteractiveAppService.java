@@ -986,7 +986,7 @@ public abstract class TvInteractiveAppService extends Service {
             if (DEBUG) {
                 Log.d(TAG, "notifyContentAllowed");
             }
-            notifyContentAllowed();
+            onContentAllowed();
         }
 
         void notifyContentBlocked(TvContentRating rating) {

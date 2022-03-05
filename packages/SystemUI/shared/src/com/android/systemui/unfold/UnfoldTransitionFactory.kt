@@ -42,6 +42,7 @@ fun createUnfoldTransitionProgressProvider(
     sensorManager: SensorManager,
     mainHandler: Handler,
     mainExecutor: Executor,
+    backgroundExecutor: Executor,
     tracingTagPrefix: String
 ): UnfoldTransitionProgressProvider =
     DaggerUnfoldSharedComponent.factory()
@@ -53,6 +54,7 @@ fun createUnfoldTransitionProgressProvider(
             sensorManager,
             mainHandler,
             mainExecutor,
+            backgroundExecutor,
             tracingTagPrefix)
         .unfoldTransitionProvider
         .orElse(null)

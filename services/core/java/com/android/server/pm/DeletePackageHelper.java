@@ -66,6 +66,8 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import dalvik.system.VMRuntime;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -245,8 +247,11 @@ final class DeletePackageHelper {
                 info.sendSystemPackageUpdatedBroadcasts(disabledSystemPs.getAppId());
             }
         }
-        // Force a gc here.
-        Runtime.getRuntime().gc();
+
+        // Force a gc to clear up things.
+        // Ask for a background one, it's fine to go on and not block here.
+        VMRuntime.getRuntime().requestConcurrentGC();
+
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
@@ -508,6 +513,7 @@ final class DeletePackageHelper {
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
+            outInfo.mIsExternal = ps.isExternalStorage();
         }
     }
 

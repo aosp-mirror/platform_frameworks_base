@@ -60,6 +60,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
 import static com.android.server.pm.PackageManagerService.PRECOMPILE_LAYOUTS;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
@@ -306,6 +307,12 @@ final class InstallPackageHelper {
                 }
             }
             pkgSetting.setInstallSource(installSource);
+        }
+
+        if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
+            boolean isFactory = (scanFlags & SCAN_AS_FACTORY) != 0;
+            pkgSetting.getPkgState().setApkInApex(true);
+            pkgSetting.getPkgState().setApkInUpdatedApex(!isFactory);
         }
 
         // TODO(toddke): Consider a method specifically for modifying the Package object
@@ -1663,6 +1670,7 @@ final class InstallPackageHelper {
                     final int userId = uninstalledUsers[i];
                     res.mRemovedInfo.mUninstallReasons.put(userId, ps.getUninstallReason(userId));
                 }
+                res.mRemovedInfo.mIsExternal = oldPackage.isExternalStorage();
 
                 sysPkg = oldPackage.isSystem();
                 if (sysPkg) {
@@ -1937,21 +1945,6 @@ final class InstallPackageHelper {
                         }
                     }
                     // Successfully deleted the old package; proceed with replace.
-
-                    // If deleted package lived in a container, give users a chance to
-                    // relinquish resources before killing.
-                    if (oldPackage.isExternalStorage()) {
-                        if (DEBUG_INSTALL) {
-                            Slog.i(TAG, "upgrading pkg " + oldPackage
-                                    + " is ASEC-hosted -> UNAVAILABLE");
-                        }
-                        final int[] uidArray = new int[]{oldPackage.getUid()};
-                        final ArrayList<String> pkgList = new ArrayList<>(1);
-                        pkgList.add(oldPackage.getPackageName());
-                        mBroadcastHelper.sendResourcesChangedBroadcast(
-                                false, true, pkgList, uidArray, null);
-                    }
-
                     // Update the in-memory copy of the previous code paths.
                     PackageSetting ps1 = mPm.mSettings.getPackageLPr(
                             reconciledPkg.mPrepareResult.mExistingPackage.getPackageName());
@@ -2647,6 +2640,17 @@ final class InstallPackageHelper {
 
             // Send the removed broadcasts
             if (res.mRemovedInfo != null) {
+                if (res.mRemovedInfo.mIsExternal) {
+                    if (DEBUG_INSTALL) {
+                        Slog.i(TAG, "upgrading pkg " + res.mRemovedInfo.mRemovedPackage
+                                + " is ASEC-hosted -> UNAVAILABLE");
+                    }
+                    final int[] uidArray = new int[]{res.mRemovedInfo.mUid};
+                    final ArrayList<String> pkgList = new ArrayList<>(1);
+                    pkgList.add(res.mRemovedInfo.mRemovedPackage);
+                    mBroadcastHelper.sendResourcesChangedBroadcast(
+                            false, true, pkgList, uidArray, null);
+                }
                 res.mRemovedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
@@ -2991,7 +2995,6 @@ final class InstallPackageHelper {
      * APK will be installed and the package will be disabled. To recover from this situation,
      * the user will need to go into system settings and re-enable the package.
      */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     boolean enableCompressedPackage(AndroidPackage stubPkg,
             @NonNull PackageSetting stubPkgSetting) {
         final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
@@ -3001,8 +3004,8 @@ final class InstallPackageHelper {
             try (PackageFreezer freezer =
                          mPm.freezePackage(stubPkg.getPackageName(), "setEnabledSetting")) {
                 pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
+                mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                 synchronized (mPm.mLock) {
-                    mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                     try {
                         mSharedLibraries.updateSharedLibrariesLPw(
                                 pkg, stubPkgSetting, null, null,
@@ -3059,7 +3062,7 @@ final class InstallPackageHelper {
         return true;
     }
 
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
+    @GuardedBy("mPm.mInstallLock")
     private AndroidPackage installStubPackageLI(AndroidPackage stubPkg,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags)
@@ -3152,27 +3155,28 @@ final class InstallPackageHelper {
             mPm.mSettings.enableSystemPackageLPw(disabledPs.getPkg().getPackageName());
             // Remove any native libraries from the upgraded package.
             PackageManagerServiceUtils.removeNativeBinariesLI(deletedPs);
-
-            // Install the system package
-            if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-            try {
-                synchronized (mPm.mInstallLock) {
-                    final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-                    final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
-                            ? deletedPs.getAppId() : Process.INVALID_UID;
-                    installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                            origUsers, writeSettings, previousAppId);
-                }
-            } catch (PackageManagerException e) {
-                Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
-                        + e.getMessage());
-                // TODO(b/194319951): can we avoid this; throw would come from scan...
-                throw new SystemDeleteException(e);
-            } finally {
-                if (disabledPs.getPkg().isStub()) {
-                    // We've re-installed the stub; make sure it's disabled here. If package was
-                    // originally enabled, we'll install the compressed version of the application
-                    // and re-enable it afterward.
+        }
+        // Install the system package
+        if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
+        try {
+            synchronized (mPm.mInstallLock) {
+                final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
+                final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
+                        ? deletedPs.getAppId() : Process.INVALID_UID;
+                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                        origUsers, writeSettings, previousAppId);
+            }
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
+                    + e.getMessage());
+            // TODO(b/194319951): can we avoid this; throw would come from scan...
+            throw new SystemDeleteException(e);
+        } finally {
+            if (disabledPs.getPkg().isStub()) {
+                // We've re-installed the stub; make sure it's disabled here. If package was
+                // originally enabled, we'll install the compressed version of the application
+                // and re-enable it afterward.
+                synchronized (mPm.mLock) {
                     disableStubPackage(action, deletedPs, allUserHandles);
                 }
             }
@@ -3200,7 +3204,7 @@ final class InstallPackageHelper {
     /**
      * Installs a package that's already on the system partition.
      */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
+    @GuardedBy("mPm.mInstallLock")
     private void installPackageFromSystemLIF(@NonNull String codePathString,
             @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
             boolean writeSettings, int previousAppId)

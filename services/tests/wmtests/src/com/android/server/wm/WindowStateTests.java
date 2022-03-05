@@ -61,6 +61,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -489,6 +490,26 @@ public class WindowStateTests extends WindowTestsBase {
 
         assertThat(app.mInputWindowHandle.getDisplayId(), is(mDisplayContent.getDisplayId()));
         assertThat(app.getDisplayId(), is(mDisplayContent.getDisplayId()));
+    }
+
+    @Test
+    public void testApplyWithNextDraw() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION_OVERLAY, "app");
+        final SurfaceControl.Transaction[] handledT = { null };
+        // The normal case that the draw transaction is applied with finishing drawing.
+        win.applyWithNextDraw(t -> handledT[0] = t);
+        assertTrue(win.useBLASTSync());
+        final SurfaceControl.Transaction drawT = new StubTransaction();
+        win.prepareDrawHandlers();
+        assertTrue(win.finishDrawing(drawT));
+        assertEquals(drawT, handledT[0]);
+        assertFalse(win.useBLASTSync());
+
+        // If the window is gone before reporting drawn, the sync state should be cleared.
+        win.applyWithNextDraw(t -> handledT[0] = t);
+        win.destroySurfaceUnchecked();
+        assertFalse(win.useBLASTSync());
+        assertNotEquals(drawT, handledT[0]);
     }
 
     @Test

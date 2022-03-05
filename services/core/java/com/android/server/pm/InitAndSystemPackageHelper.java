@@ -21,6 +21,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
@@ -145,7 +146,11 @@ final class InitAndSystemPackageHelper {
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                         sp.getFolder().getAbsolutePath() + File.separator)) {
-                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
+                int additionalScanFlag = SCAN_AS_APK_IN_APEX;
+                if (apexInfo.isFactory) {
+                    additionalScanFlag |= SCAN_AS_FACTORY;
+                }
+                return new ScanPartition(apexInfo.apexDirectory, sp, additionalScanFlag);
             }
         }
         return null;

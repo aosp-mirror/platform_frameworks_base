@@ -663,7 +663,6 @@ public class CentralSurfaces extends CoreStartable implements
     protected final BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
-    protected boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
     protected final NotificationIconAreaController mNotificationIconAreaController;
     @Nullable private View mAmbientIndicationContainer;
@@ -1142,7 +1141,7 @@ public class CentralSurfaces extends CoreStartable implements
         }
         if (leaveOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-            if (mIsKeyguard) {
+            if (mKeyguardStateController.isShowing()) {
                 // When device state changes on keyguard we don't want to keep the state of
                 // the shade and instead we open clean state of keyguard with shade closed.
                 // Normally some parts of QS state (like expanded/collapsed) are persisted and
@@ -2890,7 +2889,8 @@ public class CentralSurfaces extends CoreStartable implements
         // late in the transition, so we also allow the device to start dozing once the screen has
         // turned off fully.
         boolean keyguardForDozing = mDozeServiceHost.getDozingRequested()
-                && (!mDeviceInteractive || isGoingToSleep() && (isScreenFullyOff() || mIsKeyguard));
+                && (!mDeviceInteractive || (isGoingToSleep()
+                    && (isScreenFullyOff() || mKeyguardStateController.isShowing())));
         boolean isWakingAndOccluded = isOccluded() && isWaking();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
                 || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
@@ -2923,7 +2923,6 @@ public class CentralSurfaces extends CoreStartable implements
 
     public void showKeyguardImpl() {
         Trace.beginSection("CentralSurfaces#showKeyguard");
-        mIsKeyguard = true;
         // In case we're locking while a smartspace transition is in progress, reset it.
         mKeyguardUnlockAnimationController.resetSmartspaceTransition();
         if (mKeyguardStateController.isLaunchTransitionFadingAway()) {
@@ -3044,7 +3043,6 @@ public class CentralSurfaces extends CoreStartable implements
      * @return true if we would like to stay in the shade, false if it should go away entirely
      */
     public boolean hideKeyguardImpl(boolean forceStateChange) {
-        mIsKeyguard = false;
         Trace.beginSection("CentralSurfaces#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
         int previousState = mStatusBarStateController.getState();
@@ -3771,7 +3769,7 @@ public class CentralSurfaces extends CoreStartable implements
             });
         } else if (mDozing && !unlocking) {
             mScrimController.transitionTo(ScrimState.AOD);
-        } else if (mIsKeyguard && !unlocking) {
+        } else if (mKeyguardStateController.isShowing() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);

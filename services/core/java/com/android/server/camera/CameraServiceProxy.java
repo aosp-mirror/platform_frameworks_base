@@ -467,7 +467,8 @@ public class CameraServiceProxy extends SystemService
             ParceledListSlice<ActivityManager.RecentTaskInfo> recentTasks = null;
 
             try {
-                recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/1,
+                // Get 2 recent tasks in case we are running in split mode
+                recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/2,
                         /*flags*/ 0, userId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to query recent tasks!");
@@ -475,23 +476,27 @@ public class CameraServiceProxy extends SystemService
             }
 
             if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
-                ActivityManager.RecentTaskInfo task = recentTasks.getList().get(0);
-                if (packageName.equals(task.topActivityInfo.packageName)) {
-                    taskInfo = new TaskInfo();
-                    taskInfo.frontTaskId = task.taskId;
-                    taskInfo.isResizeable =
-                            (task.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
-                    taskInfo.displayId = task.displayId;
-                    taskInfo.userId = task.userId;
-                    taskInfo.isFixedOrientationLandscape =
-                            ActivityInfo.isFixedOrientationLandscape(
-                                    task.topActivityInfo.screenOrientation);
-                    taskInfo.isFixedOrientationPortrait =
-                            ActivityInfo.isFixedOrientationPortrait(
-                                    task.topActivityInfo.screenOrientation);
-                } else {
-                    Log.e(TAG, "Recent task package name: " + task.topActivityInfo.packageName
-                            + " doesn't match with camera client package name: " + packageName);
+                for (ActivityManager.RecentTaskInfo task : recentTasks.getList()) {
+                    if (packageName.equals(task.topActivityInfo.packageName)) {
+                        taskInfo = new TaskInfo();
+                        taskInfo.frontTaskId = task.taskId;
+                        taskInfo.isResizeable =
+                                (task.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
+                        taskInfo.displayId = task.displayId;
+                        taskInfo.userId = task.userId;
+                        taskInfo.isFixedOrientationLandscape =
+                                ActivityInfo.isFixedOrientationLandscape(
+                                        task.topActivityInfo.screenOrientation);
+                        taskInfo.isFixedOrientationPortrait =
+                                ActivityInfo.isFixedOrientationPortrait(
+                                        task.topActivityInfo.screenOrientation);
+                        break;
+                    }
+                }
+
+                if (taskInfo == null) {
+                    Log.e(TAG, "Recent tasks don't include camera client package name: " +
+                            packageName);
                     return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
                 }
             } else {

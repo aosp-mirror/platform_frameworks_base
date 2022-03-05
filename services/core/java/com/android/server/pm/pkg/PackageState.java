@@ -303,6 +303,11 @@ public interface PackageState {
     boolean isUpdatedSystemApp();
 
     /**
+     * Whether this app is packaged in an updated apex.
+     */
+    boolean isApkInUpdatedApex();
+
+    /**
      * @see AndroidPackageApi#isVendor()
      */
     boolean isVendor();
