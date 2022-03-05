@@ -19,10 +19,12 @@ package com.android.systemui.clipboardoverlay;
 import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -34,7 +36,8 @@ import java.util.function.Consumer;
 /**
  * ConstraintLayout that is draggable when touched in a specific region
  */
-public class DraggableConstraintLayout extends ConstraintLayout {
+public class DraggableConstraintLayout extends ConstraintLayout
+        implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private final SwipeDismissHandler mSwipeDismissHandler;
     private final GestureDetector mSwipeDetector;
     private Consumer<Animator> mOnDismissInitiated;
@@ -95,11 +98,6 @@ public class DraggableConstraintLayout extends ConstraintLayout {
         mSwipeDetector.setIsLongpressEnabled(false);
     }
 
-    @Override // View
-    protected void onFinishInflate() {
-
-    }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -136,5 +134,30 @@ public class DraggableConstraintLayout extends ConstraintLayout {
      */
     public void setOnInteractionCallback(Runnable callback) {
         mOnInteraction = callback;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+    }
+
+    @Override
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+        // Only child views are touchable.
+        Region r = new Region();
+        Rect rect = new Rect();
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).getGlobalVisibleRect(rect);
+            r.op(rect, Region.Op.UNION);
+        }
+        inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        inoutInfo.touchableRegion.set(r);
     }
 }
