@@ -183,7 +183,7 @@ public class KeyguardPasswordViewController
     @Override
     void resetState() {
         mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
-        mMessageAreaController.setMessage("");
+        mMessageAreaController.setMessage(R.string.keyguard_enter_your_password);
         final boolean wasDisabled = mPasswordEntry.isEnabled();
         mView.setPasswordEntryEnabled(true);
         mView.setPasswordEntryInputEnabled(true);
