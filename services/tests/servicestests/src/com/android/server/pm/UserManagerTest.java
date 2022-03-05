@@ -1079,6 +1079,19 @@ public final class UserManagerTest {
     }
 
     @Test
+    public void testGetUserName_shouldReturnTranslatedTextForNullNamedGuestUser() throws Exception {
+        UserInfo guestWithNullName = createUser(null, UserManager.USER_TYPE_FULL_GUEST, 0);
+        assertThat(guestWithNullName).isNotNull();
+
+        UserManager um = (UserManager) mContext.createPackageContextAsUser(
+                "android", 0, guestWithNullName.getUserHandle())
+                .getSystemService(Context.USER_SERVICE);
+
+        assertThat(um.getUserName()).isEqualTo(
+                mContext.getString(com.android.internal.R.string.guest_name));
+    }
+
+    @Test
     public void testGetUserIcon_withContextUserId() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;

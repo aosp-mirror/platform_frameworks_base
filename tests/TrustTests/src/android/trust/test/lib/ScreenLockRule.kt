@@ -59,8 +59,14 @@ class ScreenLockRule : TestRule {
     }
 
     private fun verifyKeyguardDismissed() {
-        windowManager.dismissKeyguard(null, null)
-        Thread.sleep(250)
+        val maxWaits = 30
+        var waitCount = 0
+        while (windowManager.isKeyguardLocked && waitCount < maxWaits) {
+            Log.i(TAG, "Keyguard still showing; attempting to dismiss and wait 50ms ($waitCount)")
+            windowManager.dismissKeyguard(null, null)
+            Thread.sleep(50)
+            waitCount++
+        }
         assertWithMessage("Keyguard should be unlocked")
             .that(windowManager.isKeyguardLocked)
             .isFalse()

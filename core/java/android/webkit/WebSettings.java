@@ -1366,7 +1366,10 @@ public abstract class WebSettings {
      * Sets the WebView's user-agent string. If the string is {@code null} or empty,
      * the system default value will be used.
      *
-     * Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
+     * <p>If the user-agent is overridden in this way, the values of the User-Agent Client Hints
+     * headers and {@code navigator.userAgentData} for this WebView will be empty.
+     *
+     * <p>Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
      * version, changing the user-agent while loading a web page causes WebView
      * to initiate loading once again.
      *

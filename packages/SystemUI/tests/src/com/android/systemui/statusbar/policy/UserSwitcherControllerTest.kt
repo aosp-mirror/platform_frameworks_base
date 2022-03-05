@@ -64,7 +64,6 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -207,7 +206,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
-        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
+        `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, null)
         testableLooper.processAllMessages()
@@ -232,7 +231,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
-        `when`(userManager.createGuest(any(), anyString())).thenReturn(guestInfo)
+        `when`(userManager.createGuest(any())).thenReturn(guestInfo)
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord, dialogShower)
         testableLooper.processAllMessages()
