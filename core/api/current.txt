@@ -2094,12 +2094,8 @@ package android {
     field public static final int accessibilityActionScrollUp = 16908344; // 0x1020038
     field public static final int accessibilityActionSetProgress = 16908349; // 0x102003d
     field public static final int accessibilityActionShowOnScreen = 16908342; // 0x1020036
-    field public static final int accessibilityActionShowSuggestions;
+    field public static final int accessibilityActionShowTextSuggestions;
     field public static final int accessibilityActionShowTooltip = 16908356; // 0x1020044
-    field public static final int accessibilityActionSwipeDown;
-    field public static final int accessibilityActionSwipeLeft;
-    field public static final int accessibilityActionSwipeRight;
-    field public static final int accessibilityActionSwipeUp;
     field public static final int accessibilitySystemActionBack = 16908363; // 0x102004b
     field public static final int accessibilitySystemActionHome = 16908364; // 0x102004c
     field public static final int accessibilitySystemActionLockScreen = 16908370; // 0x1020052
@@ -51931,12 +51927,8 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_ON_SCREEN;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_SUGGESTIONS;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_TOOLTIP;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_DOWN;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_LEFT;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_RIGHT;
-    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_UP;
     field @NonNull public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> CREATOR;
   }
 

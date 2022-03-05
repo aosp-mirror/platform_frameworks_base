@@ -4487,8 +4487,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             case R.id.accessibilityActionDragDrop:
                 return "ACTION_DROP";
             default: {
-                if (action == R.id.accessibilityActionShowSuggestions) {
-                    return "ACTION_SHOW_SUGGESTIONS";
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
+                    return "ACTION_SHOW_TEXT_SUGGESTIONS";
                 }
                 return "ACTION_UNKNOWN";
             }
@@ -5189,34 +5189,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionDragCancel);
 
         /**
-         * Action to perform a left swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_LEFT =
-                new AccessibilityAction(R.id.accessibilityActionSwipeLeft);
-
-        /**
-         * Action to perform a right swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_RIGHT =
-            new AccessibilityAction(R.id.accessibilityActionSwipeRight);
-
-        /**
-         * Action to perform an up swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_UP =
-            new AccessibilityAction(R.id.accessibilityActionSwipeUp);
-
-        /**
-         * Action to perform a down swipe.
-         */
-        @NonNull public static final AccessibilityAction ACTION_SWIPE_DOWN =
-            new AccessibilityAction(R.id.accessibilityActionSwipeDown);
-
-        /**
          * Action to show suggestions for editable text.
          */
-        @NonNull public static final AccessibilityAction ACTION_SHOW_SUGGESTIONS =
-                new AccessibilityAction(R.id.accessibilityActionShowSuggestions);
+        @NonNull public static final AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS =
+                new AccessibilityAction(R.id.accessibilityActionShowTextSuggestions);
 
         private final int mActionId;
         private final CharSequence mLabel;
