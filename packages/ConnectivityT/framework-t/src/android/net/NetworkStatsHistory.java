@@ -915,18 +915,18 @@ public final class NetworkStatsHistory implements Parcelable {
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
-        proto.write(NetworkStatsHistoryProto.BUCKET_DURATION_MS_FIELD_NUMBER, bucketDuration);
+        proto.write(NetworkStatsHistoryProto.BUCKET_DURATION_MS, bucketDuration);
 
         for (int i = 0; i < bucketCount; i++) {
-            final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS_FIELD_NUMBER);
+            final long startBucket = proto.start(NetworkStatsHistoryProto.BUCKETS);
 
-            proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS_FIELD_NUMBER,
+            proto.write(NetworkStatsHistoryBucketProto.BUCKET_START_MS,
                     bucketStart[i]);
-            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_BYTES_FIELD_NUMBER, rxBytes, i);
-            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_PACKETS_FIELD_NUMBER, rxPackets, i);
-            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_BYTES_FIELD_NUMBER, txBytes, i);
-            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_PACKETS_FIELD_NUMBER, txPackets, i);
-            dumpDebug(proto, NetworkStatsHistoryBucketProto.OPERATIONS_FIELD_NUMBER, operations, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_BYTES, rxBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.RX_PACKETS, rxPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_BYTES, txBytes, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.TX_PACKETS, txPackets, i);
+            dumpDebug(proto, NetworkStatsHistoryBucketProto.OPERATIONS, operations, i);
 
             proto.end(startBucket);
         }
