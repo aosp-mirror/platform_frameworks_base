@@ -979,8 +979,8 @@ package android {
     field public static final int left = 16843181; // 0x10101ad
     field public static final int letterSpacing = 16843958; // 0x10104b6
     field public static final int level = 16844032; // 0x1010500
-    field public static final int lineBreakStyle = 16844365; // 0x101064d
-    field public static final int lineBreakWordStyle = 16844366; // 0x101064e
+    field public static final int lineBreakStyle;
+    field public static final int lineBreakWordStyle;
     field public static final int lineHeight = 16844159; // 0x101057f
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
