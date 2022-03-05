@@ -29,6 +29,8 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -81,6 +83,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
@@ -754,10 +757,15 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win0.canReceiveTouchInput());
     }
 
+    private boolean testFlag(int flags, int test) {
+        return (flags & test) == test;
+    }
+
     @Test
     public void testUpdateInputWindowHandle() {
         final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
         win.mAttrs.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+        win.mAttrs.flags = FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH;
         final InputWindowHandle handle = new InputWindowHandle(
                 win.mInputWindowHandle.getInputApplicationHandle(), win.getDisplayId());
         final InputWindowHandleWrapper handleWrapper = new InputWindowHandleWrapper(handle);
@@ -767,13 +775,14 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.getInputMonitor().populateInputWindowHandle(handleWrapper, win);
 
         assertTrue(handleWrapper.isChanged());
+        assertTrue(testFlag(handle.inputConfig, InputConfig.WATCH_OUTSIDE_TOUCH));
+        assertFalse(testFlag(handle.inputConfig, InputConfig.PREVENT_SPLITTING));
+        assertTrue(testFlag(handle.inputConfig, InputConfig.DISABLE_USER_ACTIVITY));
         // The window of standard resizable task should not use surface crop as touchable region.
         assertFalse(handle.replaceTouchableRegionWithCrop);
         assertEquals(inputChannelToken, handle.token);
         assertEquals(win.mActivityRecord.getInputApplicationHandle(false /* update */),
                 handle.inputApplicationHandle);
-        assertEquals(win.mAttrs.inputFeatures, handle.inputFeatures);
-        assertEquals(win.isVisible(), handle.visible);
 
         final SurfaceControl sc = mock(SurfaceControl.class);
         final SurfaceControl.Transaction transaction = mSystemServicesTestRule.mTransaction;
@@ -799,15 +808,13 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(rotatedBounds, handle.touchableRegion.getBounds());
 
         // Populate as an overlay to disable the input of window.
-        InputMonitor.populateOverlayInputInfo(handleWrapper, false /* isVisible */);
+        InputMonitor.populateOverlayInputInfo(handleWrapper);
         // The overlay attributes should be set.
         assertTrue(handleWrapper.isChanged());
-        assertFalse(handle.focusable);
-        assertFalse(handle.visible);
+        assertFalse(handleWrapper.isFocusable());
         assertNull(handle.token);
         assertEquals(0L, handle.dispatchingTimeoutMillis);
-        assertEquals(WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL,
-                handle.inputFeatures);
+        assertTrue(testFlag(handle.inputConfig, InputConfig.NO_INPUT_CHANNEL));
     }
 
     @Test

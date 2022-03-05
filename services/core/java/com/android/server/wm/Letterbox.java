@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Process;
 import android.view.GestureDetector;
 import android.view.InputChannel;
@@ -290,16 +291,12 @@ public class Letterbox {
                     win.getDisplayId());
             mWindowHandle.name = name;
             mWindowHandle.token = mToken;
-            mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                    | WindowManager.LayoutParams.FLAG_SLIPPERY;
             mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
             mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-            mWindowHandle.visible = true;
             mWindowHandle.ownerPid = Process.myPid();
             mWindowHandle.ownerUid = Process.myUid();
             mWindowHandle.scaleFactor = 1.0f;
+            mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.SLIPPERY;
         }
 
         void updateTouchableRegion(Rect frame) {

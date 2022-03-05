@@ -21,7 +21,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
@@ -53,6 +52,7 @@ import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -61,6 +61,7 @@ import android.util.Slog;
 import android.view.InputChannel;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -221,15 +222,13 @@ final class InputMonitor {
                 inputChannel, clientPid, clientUser, mDisplayId);
         switch (name) {
             case INPUT_CONSUMER_WALLPAPER:
-                consumer.mWindowHandle.hasWallpaper = true;
+                consumer.mWindowHandle.inputConfig |= InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER;
                 break;
             case INPUT_CONSUMER_PIP:
-                // The touchable region of the Pip input window is cropped to the bounds of the
-                // stack, and we need FLAG_NOT_TOUCH_MODAL to ensure other events fall through
-                consumer.mWindowHandle.layoutParamsFlags |= FLAG_NOT_TOUCH_MODAL;
+                // This is a valid consumer type, but we don't need any additional configurations.
                 break;
             case INPUT_CONSUMER_RECENTS_ANIMATION:
-                consumer.mWindowHandle.focusable = true;
+                consumer.mWindowHandle.inputConfig &= ~InputConfig.NOT_FOCUSABLE;
                 break;
             default:
                 throw new IllegalArgumentException("Illegal input consumer : " + name
@@ -247,10 +246,23 @@ final class InputMonitor {
         inputWindowHandle.setToken(w.mInputChannelToken);
         inputWindowHandle.setDispatchingTimeoutMillis(w.getInputDispatchingTimeoutMillis());
         inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
-        inputWindowHandle.setInputFeatures(w.mAttrs.inputFeatures);
         inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
-        inputWindowHandle.setVisible(w.isVisible());
         inputWindowHandle.setWindowToken(w.mClient);
+
+        // Update layout params flags to force the window to be not touch modal. We do this to
+        // restrict the window's touchable region to the task even if it requests touches outside
+        // its window bounds. An example is a dialog in primary split should get touches outside its
+        // window within the primary task but should not get any touches going to the secondary
+        // task.
+        int flags = w.mAttrs.flags;
+        if (w.mAttrs.isModal()) {
+            flags = flags | FLAG_NOT_TOUCH_MODAL;
+        }
+        inputWindowHandle.setLayoutParamsFlags(flags);
+        inputWindowHandle.setInputConfigMasked(
+                InputConfigAdapter.getInputConfigFromWindowParams(
+                        w.mAttrs.type, flags, w.mAttrs.inputFeatures),
+                InputConfigAdapter.getMask());
 
         final boolean focusable = w.canReceiveKeys()
                 && (mService.mPerDisplayFocusEnabled || mDisplayContent.isOnTop());
@@ -269,17 +281,6 @@ final class InputMonitor {
         // If we are scaling the window, input coordinates need to be inversely scaled to map from
         // what is on screen to what is actually being touched in the UI.
         inputWindowHandle.setScaleFactor(w.mGlobalScale != 1f ? (1f / w.mGlobalScale) : 1f);
-
-        // Update layout params flags to force the window to be not touch modal. We do this to
-        // restrict the window's touchable region to the task even if it request touches outside its
-        // window bounds. An example is a dialog in primary split should get touches outside its
-        // window within the primary task but should not get any touches going to the secondary
-        // task.
-        int flags = w.mAttrs.flags;
-        if (w.mAttrs.isModal()) {
-            flags = flags | FLAG_NOT_TOUCH_MODAL;
-        }
-        inputWindowHandle.setLayoutParamsFlags(flags);
 
         boolean useSurfaceBoundsAsTouchRegion = false;
         SurfaceControl touchableRegionCrop = null;
@@ -590,6 +591,8 @@ final class InputMonitor {
 
             if (mAddWallpaperInputConsumerHandle) {
                 if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisible()) {
+                    mWallpaperInputConsumer.mWindowHandle
+                            .replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
                     // Add the wallpaper input consumer above the first visible wallpaper.
                     mWallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;
@@ -631,24 +634,27 @@ final class InputMonitor {
 
     static void populateOverlayInputInfo(InputWindowHandleWrapper inputWindowHandle,
             WindowState w) {
-        populateOverlayInputInfo(inputWindowHandle, w.isVisible());
+        populateOverlayInputInfo(inputWindowHandle);
         inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
     }
 
     // This would reset InputWindowHandle fields to prevent it could be found by input event.
     // We need to check if any new field of InputWindowHandle could impact the result.
     @VisibleForTesting
-    static void populateOverlayInputInfo(InputWindowHandleWrapper inputWindowHandle,
-            boolean isVisible) {
+    static void populateOverlayInputInfo(InputWindowHandleWrapper inputWindowHandle) {
         inputWindowHandle.setDispatchingTimeoutMillis(0); // It should never receive input.
-        inputWindowHandle.setVisible(isVisible);
         inputWindowHandle.setFocusable(false);
-        inputWindowHandle.setInputFeatures(INPUT_FEATURE_NO_INPUT_CHANNEL);
         // The input window handle without input channel must not have a token.
         inputWindowHandle.setToken(null);
         inputWindowHandle.setScaleFactor(1f);
-        inputWindowHandle.setLayoutParamsFlags(
-                FLAG_NOT_TOUCH_MODAL | FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE);
+        final int defaultType = WindowManager.LayoutParams.TYPE_APPLICATION;
+        inputWindowHandle.setLayoutParamsType(defaultType);
+        inputWindowHandle.setInputConfigMasked(
+                InputConfigAdapter.getInputConfigFromWindowParams(
+                        defaultType,
+                        FLAG_NOT_TOUCHABLE,
+                        INPUT_FEATURE_NO_INPUT_CHANNEL),
+                InputConfigAdapter.getMask());
         inputWindowHandle.clearTouchableRegion();
         inputWindowHandle.setTouchableRegionCrop(null);
     }
@@ -666,7 +672,7 @@ final class InputMonitor {
         inputWindowHandle.setName(name);
         inputWindowHandle.setLayoutParamsType(TYPE_SECURE_SYSTEM_OVERLAY);
         inputWindowHandle.setTrustedOverlay(true);
-        populateOverlayInputInfo(inputWindowHandle, true /* isVisible */);
+        populateOverlayInputInfo(inputWindowHandle);
         setInputWindowInfoIfNeeded(t, sc, inputWindowHandle);
     }
 
