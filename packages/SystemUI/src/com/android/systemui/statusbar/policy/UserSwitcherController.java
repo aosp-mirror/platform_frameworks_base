@@ -584,13 +584,6 @@ public class UserSwitcherController implements Dumpable {
                 .setPackage(mCreateSupervisedUserPackage)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        // TODO(b/209659998): [to-be-removed] fallback activity for supervised user creation.
-        if (mContext.getPackageManager().resolveActivity(intent, 0) == null) {
-            intent.setPackage(null)
-                    .setClassName("com.android.settings",
-                        "com.android.settings.users.AddSupervisedUserActivity");
-        }
-
         mContext.startActivity(intent);
     }
 
@@ -855,8 +848,7 @@ public class UserSwitcherController implements Dumpable {
     public @UserIdInt int createGuest() {
         UserInfo guest;
         try {
-            guest = mUserManager.createGuest(mContext,
-                    mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            guest = mUserManager.createGuest(mContext);
         } catch (UserManager.UserOperationException e) {
             Log.e(TAG, "Couldn't create guest user", e);
             return UserHandle.USER_NULL;
