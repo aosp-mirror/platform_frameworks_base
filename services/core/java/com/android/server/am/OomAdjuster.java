@@ -2532,7 +2532,7 @@ public class OomAdjuster {
             if (app.getWaitingToKill() != null && app.mReceivers.numberOfCurReceivers() == 0
                     && state.getSetSchedGroup() == ProcessList.SCHED_GROUP_BACKGROUND) {
                 app.killLocked(app.getWaitingToKill(), ApplicationExitInfo.REASON_USER_REQUESTED,
-                        ApplicationExitInfo.SUBREASON_UNKNOWN, true);
+                        ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
                 success = false;
             } else {
                 int processGroup;
