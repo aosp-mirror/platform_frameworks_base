@@ -367,10 +367,20 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        if (mTaskInfo.taskId != taskId) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
+        if (mTaskInfo == null || mTaskLeash == null || mTaskInfo.taskId != taskId) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        b.setParent(mTaskLeash);
+        return mTaskLeash;
     }
 
     @Override
