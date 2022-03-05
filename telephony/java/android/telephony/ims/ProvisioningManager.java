@@ -55,6 +55,9 @@ import java.util.concurrent.Executor;
  * IMS provisioning keys are defined per carrier or OEM using OMA-DM or other provisioning
  * applications and may vary. It is up to the carrier and OEM applications to ensure that the
  * correct provisioning keys are being used when integrating with a vendor's ImsService.
+ *
+ * Use {@link android.telephony.ims.ImsManager#getProvisioningManager(int)} to get an instance of
+ * this manager.
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ProvisioningManager {
