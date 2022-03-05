@@ -4487,8 +4487,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             case R.id.accessibilityActionDragDrop:
                 return "ACTION_DROP";
             default: {
-                if (action == R.id.accessibilityActionShowSuggestions) {
-                    return "ACTION_SHOW_SUGGESTIONS";
+                if (action == R.id.accessibilityActionShowTextSuggestions) {
+                    return "ACTION_SHOW_TEXT_SUGGESTIONS";
                 }
                 return "ACTION_UNKNOWN";
             }
@@ -5191,8 +5191,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Action to show suggestions for editable text.
          */
-        @NonNull public static final AccessibilityAction ACTION_SHOW_SUGGESTIONS =
-                new AccessibilityAction(R.id.accessibilityActionShowSuggestions);
+        @NonNull public static final AccessibilityAction ACTION_SHOW_TEXT_SUGGESTIONS =
+                new AccessibilityAction(R.id.accessibilityActionShowTextSuggestions);
 
         private final int mActionId;
         private final CharSequence mLabel;
