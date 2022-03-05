@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
@@ -131,6 +132,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction setWindowCrop(SurfaceControl sc, int width, int height) {
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public SurfaceControl.Transaction setCrop(@NonNull SurfaceControl sc, @Nullable Rect crop) {
         return this;
     }
 
