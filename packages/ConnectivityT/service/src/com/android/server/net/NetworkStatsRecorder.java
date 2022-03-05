@@ -471,11 +471,11 @@ public class NetworkStatsRecorder {
     public void dumpDebugLocked(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
         if (mPending != null) {
-            proto.write(NetworkStatsRecorderProto.PENDING_TOTAL_BYTES_FIELD_NUMBER,
+            proto.write(NetworkStatsRecorderProto.PENDING_TOTAL_BYTES,
                     mPending.getTotalBytes());
         }
         getOrLoadCompleteLocked().dumpDebug(proto,
-                NetworkStatsRecorderProto.COMPLETE_HISTORY_FIELD_NUMBER);
+                NetworkStatsRecorderProto.COMPLETE_HISTORY);
         proto.end(start);
     }
 
