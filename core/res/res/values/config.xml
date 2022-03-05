@@ -2931,6 +2931,11 @@
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
+    <!-- Settings intelligence package name -->
+    <string name="config_settingsIntelligencePackageName" translatable="false">
+        com.android.settings.intelligence
+    </string>
+
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or global volumes. -->
     <bool name="config_useFixedVolume">false</bool>
