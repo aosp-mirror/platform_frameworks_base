@@ -112,7 +112,7 @@ combined_apis {
         "framework-appsearch",
         "framework-bluetooth",
         "framework-connectivity",
-        "framework-connectivity-tiramisu",
+        "framework-connectivity-t",
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",

@@ -7039,12 +7039,19 @@ package android.net {
   }
 
   public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
-    ctor public EthernetNetworkUpdateRequest(@NonNull android.net.StaticIpConfiguration, @NonNull android.net.NetworkCapabilities);
     method public int describeContents();
-    method @NonNull public android.net.StaticIpConfiguration getIpConfig();
+    method @NonNull public android.net.IpConfiguration getIpConfiguration();
     method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
+  }
+
+  public static final class EthernetNetworkUpdateRequest.Builder {
+    ctor public EthernetNetworkUpdateRequest.Builder();
+    ctor public EthernetNetworkUpdateRequest.Builder(@NonNull android.net.EthernetNetworkUpdateRequest);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest build();
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setIpConfiguration(@NonNull android.net.IpConfiguration);
+    method @NonNull public android.net.EthernetNetworkUpdateRequest.Builder setNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
@@ -8927,6 +8934,7 @@ package android.provider {
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
+    field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

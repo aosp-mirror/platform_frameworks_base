@@ -28,6 +28,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
 import android.os.PersistableBundle;
@@ -3777,30 +3778,42 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_ESIM_DOWNLOAD_VIA_WIFI_ONLY_BOOL =
             "opportunistic_esim_download_via_wifi_only_bool";
 
-    /**
-     * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
+/**
+     * Controls RSRP threshold, in dBm, at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT =
             "opportunistic_network_entry_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold at which OpportunisticNetworkService will decide whether
-     * the opportunistic network is good enough for internet data.
+     * Controls RSSNR threshold, in dB, at which OpportunisticNetworkService will
+     * decide whether the opportunistic network is good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT =
             "opportunistic_network_entry_threshold_rssnr_int";
 
     /**
-     * Controls RSRP threshold below which OpportunisticNetworkService will decide whether
+     * Controls RSRP threshold, in dBm, below which OpportunisticNetworkService will decide whether
      * the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRsrp()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT =
             "opportunistic_network_exit_threshold_rsrp_int";
 
     /**
-     * Controls RSSNR threshold below which OpportunisticNetworkService will decide whether
-     * the opportunistic network available is not good enough for internet data.
+     * Controls RSSNR threshold, in dB, below which OpportunisticNetworkService will
+     * decide whether the opportunistic network available is not good enough for internet data.
+     *
+     * <p>The value of {@link CellSignalStrengthLte#getRssnr()} will be compared with this
+     * threshold.
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT =
             "opportunistic_network_exit_threshold_rssnr_int";
@@ -3898,7 +3911,7 @@ public class CarrierConfigManager {
          * good enough for internet data. Note other factors may be considered for the final
          * decision.
          *
-         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp} will be compared with this
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
          * threshold.
          *
          * @hide
@@ -3925,7 +3938,7 @@ public class CarrierConfigManager {
          * good enough for internet data. Note other factors may be considered for the final
          * decision.
          *
-         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq} will be compared with this
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
          * threshold.
          *
          * @hide
@@ -3952,6 +3965,9 @@ public class CarrierConfigManager {
          * be considered good enough for internet data. Note other factors may be considered
          * for the final decision.
          *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp()} will be compared with this
+         * threshold.
+         *
          * @hide
          */
         public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT =
@@ -3974,6 +3990,9 @@ public class CarrierConfigManager {
          * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
          * be considered good enough for internet data. Note other factors may be considered
          * for the final decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq()} will be compared with this
+         * threshold.
          *
          * @hide
          */
@@ -5446,17 +5465,52 @@ public class CarrierConfigManager {
     public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
 
     /**
-     * Network capability priority for determine the satisfy order in telephony. This is used when
-     * the network only allows single PDN. The priority is from the lowest 0 to the highest 100.
-     * The long-lived network request usually has the lowest priority. This allows other short-lived
-     * requests like MMS requests to be established. Emergency request always has the highest
-     * priority.
+     * Network capability priority for determine the satisfy order in telephony. The priority is
+     * from the lowest 0 to the highest 100. The long-lived network shall have the lowest priority.
+     * This allows other short-lived requests like MMS requests to be established. Emergency request
+     * always has the highest priority.
      *
-     * // TODO: Remove KEY_APN_PRIORITY_STRING_ARRAY
      * @hide
      */
     public static final String KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY =
             "telephony_network_capability_priorities_string_array";
+
+    /**
+     * Defines the rules for data retry.
+     *
+     * The syntax of the retry rule:
+     * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
+     *    are supported.
+     * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * 2. Retry based on {@link DataFailCause}
+     * "fail_causes=[cause1|cause2|cause3|..], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * 3. Retry based on {@link NetworkCapabilities} and {@link DataFailCause}. Note that only
+     *    APN-type network capabilities are supported.
+     * "capabilities=[netCaps1|netCaps2|...], fail_causes=[cause1|cause2|cause3|...],
+     *     [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
+     *
+     * For example,
+     * "capabilities=eims, retry_interval=1000, maximum_retries=20" means if the attached
+     * network request is emergency, then retry data network setup every 1 second for up to 20
+     * times.
+     *
+     * "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|2254
+     * , maximum_retries=0" means for those fail causes, never retry with timers. Note that
+     * when environment changes, retry can still happen.
+     *
+     * "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
+     * "5000|10000|15000|20000|40000|60000|120000|240000|600000|1200000|1800000"
+     * "1800000, maximum_retries=20" means for those capabilities, retry happens in 2.5s, 3s, 5s,
+     * 10s, 15s, 20s, 40s, 1m, 2m, 4m, 10m, 20m, 30m, 30m, 30m, until reaching 20 retries.
+     *
+     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
+     * @hide
+     */
+    public static final String KEY_TELEPHONY_DATA_RETRY_RULES_STRING_ARRAY =
+            "telephony_data_retry_rules_string_array";
+
     /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
@@ -6147,9 +6201,9 @@ public class CarrierConfigManager {
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSRP_INT, -118);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_GOOD */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 45);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSSNR_INT, 5);
         /* Default value is minimum RSSNR level needed for SIGNAL_STRENGTH_MODERATE */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 10);
+        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_RSSNR_INT, 1);
         /* Default value is 1024 kbps */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_BANDWIDTH_INT, 1024);
         /* Default value is 10 seconds */
@@ -6225,10 +6279,23 @@ public class CarrierConfigManager {
                 "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
+
+        // Do not modify the priority unless you know what you are doing. This will have significant
+        // impacts on the order of data network setup.
         sDefaults.putStringArray(
                 KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY, new String[] {
                         "eims:90", "supl:80", "mms:70", "xcap:70", "cbs:50", "mcx:50", "fota:50",
                         "ims:40", "dun:30", "enterprise:20", "internet:20"
+                });
+        sDefaults.putStringArray(
+                KEY_TELEPHONY_DATA_RETRY_RULES_STRING_ARRAY, new String[] {
+                        "capabilities=eims, retry_interval=1000, maximum_retries=20",
+                        "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|"
+                                + "2254, maximum_retries=0", // No retry for those causes
+                        "capabilities=mms|supl|cbs, retry_interval=2000",
+                        "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
+                                + "5000|10000|15000|20000|40000|60000|120000|240000|"
+                                + "600000|1200000|1800000, maximum_retries=20"
                 });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);

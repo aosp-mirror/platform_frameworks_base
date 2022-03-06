@@ -46,11 +46,7 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
     protected static String OBB_FILE_1_CONTENTS_1 = "OneToOneThousandInts.bin";
     protected static String OBB_FILE_2 = "obb_file2.obb";
     protected static String OBB_FILE_3 = "obb_file3.obb";
-    protected static String OBB_FILE_1_PASSWORD = "password1";
-    protected static String OBB_FILE_1_ENCRYPTED = "obb_enc_file100_orig1.obb";
     protected static String OBB_FILE_2_UNSIGNED = "obb_file2_nosign.obb";
-    protected static String OBB_FILE_3_PASSWORD = "password3";
-    protected static String OBB_FILE_3_ENCRYPTED = "obb_enc_file100_orig3.obb";
     protected static String OBB_FILE_3_BAD_PACKAGENAME = "obb_file3_bad_packagename.obb";
 
     protected static boolean FORCE = true;
@@ -180,22 +176,21 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * Mounts an OBB file
      *
      * @param obbFilePath The full path to the OBB file to mount
-     * @param key (optional) The key to use to unencrypt the OBB; pass null for no encryption
      * @param expectedState The expected state resulting from trying to mount the OBB
      * @return A {@link String} representing the normalized path to OBB file that was mounted
      */
-    protected String mountObb(String obbFilePath, String key, int expectedState) {
-        return doMountObb(obbFilePath, key, expectedState);
+    protected String mountObb(String obbFilePath, int expectedState) {
+        return doMountObb(obbFilePath, expectedState);
     }
 
     /**
-     * Mounts an OBB file with default options (no encryption, mounting succeeds)
+     * Mounts an OBB file with default options.
      *
      * @param obbFilePath The full path to the OBB file to mount
      * @return A {@link String} representing the normalized path to OBB file that was mounted
      */
     protected String mountObb(String obbFilePath) {
-        return doMountObb(obbFilePath, null, OnObbStateChangeListener.MOUNTED);
+        return doMountObb(obbFilePath, OnObbStateChangeListener.MOUNTED);
     }
 
     /**
@@ -232,13 +227,13 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * @return true if the listener was signaled of a state change by the system; else a fail()
      *      is triggered if we timed out
      */
-    protected String doMountObb_noThrow(String obbFilePath, String key, int expectedState) {
-        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath + " using key: " + key);
+    protected String doMountObb_noThrow(String obbFilePath, int expectedState) {
+        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
 
         ObbListener obbListener = new ObbListener();
-        boolean success = mSm.mountObb(obbFilePath, key, obbListener);
+        boolean success = mSm.mountObb(obbFilePath, null, obbListener);
         success &= obbFilePath.equals(doWaitForObbStateChange(obbListener));
         success &= (expectedState == obbListener.state());
 
@@ -260,17 +255,16 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * Mounts an OBB file without throwing and synchronously waits for it to finish mounting
      *
      * @param obbFilePath The full path to the OBB file to mount
-     * @param key (optional) The key to use to unencrypt the OBB; pass null for no encryption
      * @param expectedState The expected state resulting from trying to mount the OBB
      * @return A {@link String} representing the actual normalized path to OBB file that was
      *      mounted, or null if the mounting failed
      */
-    protected String doMountObb(String obbFilePath, String key, int expectedState) {
-        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath + " using key: " + key);
+    protected String doMountObb(String obbFilePath, int expectedState) {
+        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
 
         ObbListener obbListener = new ObbListener();
-        assertTrue("mountObb call failed", mSm.mountObb(obbFilePath, key, obbListener));
+        assertTrue("mountObb call failed", mSm.mountObb(obbFilePath, null, obbListener));
         assertTrue("Failed to get OBB mount status change for file: " + obbFilePath,
                 doWaitForObbStateChange(obbListener));
         assertEquals("OBB mount state not what was expected!", expectedState,

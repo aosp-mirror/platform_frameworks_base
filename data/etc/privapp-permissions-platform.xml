@@ -20,13 +20,6 @@ This XML file declares which signature|privileged permissions should be granted 
 applications that come with the platform
 -->
 <permissions>
-    <privapp-permissions package="android.ext.services">
-        <permission name="android.permission.PROVIDE_RESOLVER_RANKER_SERVICE" />
-        <permission name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE" />
-        <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
-        <permission name="android.permission.INTERACT_ACROSS_USERS" />
-    </privapp-permissions>
-
     <!-- Needed for Build.getSerial(), which is used to send a unique number for serial, per HUIG. -->
     <privapp-permissions package="android.car.usb.handler">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>

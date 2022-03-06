@@ -21,6 +21,8 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_T
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.pm.parsing.ParsingPackage;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
@@ -180,6 +182,22 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
                 .setTargetSdkVersion(Build.VERSION_CODES.CUR_DEVELOPMENT);
 
         checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+    }
+
+    /**
+     * Ensures that ApexSharedLibraryUpdater is the last updater in the list of package updaters
+     * used by PackageBackwardCompatibility.
+     *
+     * This is required so mainline can add and remove libraries installed by the platform updaters.
+     */
+    @Test
+    public void testApexPackageUpdaterOrdering() {
+        PackageBackwardCompatibility instance =
+                (PackageBackwardCompatibility) PackageBackwardCompatibility.getInstance();
+        PackageSharedLibraryUpdater[] updaterArray = instance.getPackageUpdaters();
+
+        PackageSharedLibraryUpdater lastUpdater = updaterArray[updaterArray.length - 1];
+        assertThat(lastUpdater).isInstanceOf(ApexSharedLibraryUpdater.class);
     }
 
     private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
