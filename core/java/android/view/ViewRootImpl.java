@@ -845,7 +845,8 @@ public final class ViewRootImpl implements ViewParent,
      * integer back over relayout.
      */
     private Bundle mRelayoutBundle = new Bundle();
-    private int mSyncSeqId;
+    private int mSyncSeqId = 0;
+    private int mLastSyncSeqId = 0;
 
     private String mTag = TAG;
 
@@ -2918,7 +2919,8 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dockedResizing = (relayoutResult
                         & RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
                 final boolean dragResizing = freeformResizing || dockedResizing;
-                if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
+                if (mSyncSeqId > mLastSyncSeqId) {
+                    mLastSyncSeqId = mSyncSeqId;
                     if (DEBUG_BLAST) {
                         Log.d(mTag, "Relayout called with blastSync");
                     }
@@ -8086,6 +8088,7 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls, mRelayoutBundle);
+        mSyncSeqId = mRelayoutBundle.getInt("seqid");
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
