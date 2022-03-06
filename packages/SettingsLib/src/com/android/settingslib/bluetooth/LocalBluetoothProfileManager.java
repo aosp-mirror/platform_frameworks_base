@@ -24,9 +24,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothHearingAid;
-import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothHidDevice;
 import android.bluetooth.BluetoothHidHost;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
@@ -159,10 +159,8 @@ public class LocalBluetoothProfileManager {
         if (mHfpClientProfile == null && supportedList.contains(BluetoothProfile.HEADSET_CLIENT)) {
             if (DEBUG) Log.d(TAG, "Adding local HfpClient profile");
             mHfpClientProfile = new HfpClientProfile(mContext, mDeviceManager, this);
-            addHeadsetProfile(mHfpClientProfile, HfpClientProfile.NAME,
-                    BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED,
-                    BluetoothHeadsetClient.ACTION_AUDIO_STATE_CHANGED,
-                    BluetoothHeadsetClient.STATE_AUDIO_DISCONNECTED);
+            addProfile(mHfpClientProfile, HfpClientProfile.NAME,
+                    BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED);
         }
         if (mMapClientProfile == null && supportedList.contains(BluetoothProfile.MAP_CLIENT)) {
             if (DEBUG) Log.d(TAG, "Adding local MAP CLIENT profile");

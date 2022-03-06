@@ -19,6 +19,7 @@ package com.android.server.input;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputMonitor;
@@ -56,18 +57,13 @@ class GestureMonitorSpyWindow {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mWindowHandle.visible = true;
-        mWindowHandle.focusable = false;
-        mWindowHandle.hasWallpaper = false;
-        mWindowHandle.paused = false;
         mWindowHandle.ownerPid = pid;
         mWindowHandle.ownerUid = uid;
-        mWindowHandle.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.trustedOverlay = true;
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+        mWindowHandle.inputConfig =
+                InputConfig.NOT_FOCUSABLE | InputConfig.SPY | InputConfig.TRUSTED_OVERLAY;
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);

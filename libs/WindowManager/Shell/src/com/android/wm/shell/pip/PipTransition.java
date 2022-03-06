@@ -604,11 +604,18 @@ public class PipTransition extends PipTransitionController {
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
                 && mPipTransitionState.getInSwipePipToHomeTransition()) {
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
+            final SurfaceControl swipePipToHomeOverlay = mPipOrganizer.mSwipePipToHomeOverlay;
+            startTransaction.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
                     .setPosition(leash, destinationBounds.left, destinationBounds.top)
                     .setWindowCrop(leash, destinationBounds.width(), destinationBounds.height());
-            startTransaction.merge(tx);
+            if (swipePipToHomeOverlay != null) {
+                // Launcher fade in the overlay on top of the fullscreen Task. It is possible we
+                // reparent the PIP activity to a new PIP task (in case there are other activities
+                // in the original Task), so we should also reparent the overlay to the PIP task.
+                startTransaction.reparent(swipePipToHomeOverlay, leash)
+                        .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE);
+                mPipOrganizer.mSwipePipToHomeOverlay = null;
+            }
             startTransaction.apply();
             if (rotationDelta != Surface.ROTATION_0 && mInFixedRotation) {
                 // For fixed rotation, set the destination bounds to the new rotation coordinates
@@ -618,6 +625,10 @@ public class PipTransition extends PipTransitionController {
             mPipBoundsState.setBounds(destinationBounds);
             onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, null /* tx */);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+            if (swipePipToHomeOverlay != null) {
+                mPipOrganizer.fadeOutAndRemoveOverlay(swipePipToHomeOverlay,
+                        null /* callback */, false /* withStartDelay */);
+            }
             mPipTransitionState.setInSwipePipToHomeTransition(false);
             return true;
         }

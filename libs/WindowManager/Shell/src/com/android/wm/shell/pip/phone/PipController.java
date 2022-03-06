@@ -595,9 +595,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return entryBounds;
     }
 
-    private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+    private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
-        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds, overlay);
+        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
     }
 
     private String getTransitionTag(int direction) {
@@ -928,11 +928,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
-                SurfaceControl overlay) {
+        public void stopSwipePipToHome(int taskId, ComponentName componentName,
+                Rect destinationBounds, SurfaceControl overlay) {
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
-                        controller.stopSwipePipToHome(componentName, destinationBounds, overlay);
+                        controller.stopSwipePipToHome(taskId, componentName, destinationBounds,
+                                overlay);
                     });
         }
 
