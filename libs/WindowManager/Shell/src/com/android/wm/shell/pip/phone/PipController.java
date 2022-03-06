@@ -46,10 +46,8 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
-import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
@@ -61,6 +59,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -85,6 +84,7 @@ import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -282,7 +282,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
-            Slog.w(TAG, "Device doesn't support Pip feature");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Device doesn't support Pip feature", TAG);
             return null;
         }
 
@@ -375,7 +376,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedTaskListener);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to register pinned stack listener", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to register pinned stack listener, %s", TAG, e);
         }
 
         try {
@@ -387,7 +389,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 mPipInputConsumer.registerInputConsumer();
             }
         } catch (RemoteException | UnsupportedOperationException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to register pinned stack listener, %s", TAG, e);
             e.printStackTrace();
         }
 
@@ -592,9 +595,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         return entryBounds;
     }
 
-    private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+    private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
-        mPipTaskOrganizer.stopSwipePipToHome(componentName, destinationBounds, overlay);
+        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
     }
 
     private String getTransitionTag(int direction) {
@@ -724,7 +727,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     .getRootTaskInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedTaskInfo == null) return false;
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get RootTaskInfo for pinned task", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to get RootTaskInfo for pinned task, %s", TAG, e);
             return false;
         }
         final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
@@ -870,7 +874,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     PipController.this.dump(pw);
                 });
             } catch (InterruptedException e) {
-                Slog.e(TAG, "Failed to dump PipController in 2s");
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Failed to dump PipController in 2s", TAG);
             }
         }
     }
@@ -923,11 +928,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
-                SurfaceControl overlay) {
+        public void stopSwipePipToHome(int taskId, ComponentName componentName,
+                Rect destinationBounds, SurfaceControl overlay) {
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
-                        controller.stopSwipePipToHome(componentName, destinationBounds, overlay);
+                        controller.stopSwipePipToHome(taskId, componentName, destinationBounds,
+                                overlay);
                     });
         }
 

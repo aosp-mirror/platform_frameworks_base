@@ -211,10 +211,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 ColorFilter buttonColorFilter = new PorterDuffColorFilter(
                         mAdapter.getController().getColorButtonBackground(),
                         PorterDuff.Mode.SRC_IN);
-                ColorFilter onlineButtonColorFilter = new PorterDuffColorFilter(
-                        mAdapter.getController().getColorInactiveItem(), PorterDuff.Mode.SRC_IN);
                 mDoneButton.getBackground().setColorFilter(buttonColorFilter);
-                mStopButton.getBackground().setColorFilter(onlineButtonColorFilter);
+                mStopButton.getBackground().setColorFilter(buttonColorFilter);
             }
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageIcon(icon);

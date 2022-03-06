@@ -176,9 +176,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -197,10 +194,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 /**
  * Service responsible for various storage media. Connects to {@code vold} to
@@ -3130,8 +3123,8 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void mountObb(String rawPath, String canonicalPath, String key,
-            IObbActionListener token, int nonce, ObbInfo obbInfo) {
+    public void mountObb(String rawPath, String canonicalPath, IObbActionListener token,
+            int nonce, ObbInfo obbInfo) {
         Objects.requireNonNull(rawPath, "rawPath cannot be null");
         Objects.requireNonNull(canonicalPath, "canonicalPath cannot be null");
         Objects.requireNonNull(token, "token cannot be null");
@@ -3140,7 +3133,7 @@ class StorageManagerService extends IStorageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final ObbState obbState = new ObbState(rawPath, canonicalPath,
                 callingUid, token, nonce, null);
-        final ObbAction action = new MountObbAction(obbState, key, callingUid, obbInfo);
+        final ObbAction action = new MountObbAction(obbState, callingUid, obbInfo);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
         if (DEBUG_OBB)
@@ -4586,13 +4579,11 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     class MountObbAction extends ObbAction {
-        private final String mKey;
         private final int mCallingUid;
         private ObbInfo mObbInfo;
 
-        MountObbAction(ObbState obbState, String key, int callingUid, ObbInfo obbInfo) {
+        MountObbAction(ObbState obbState, int callingUid, ObbInfo obbInfo) {
             super(obbState);
-            mKey = key;
             mCallingUid = callingUid;
             mObbInfo = obbInfo;
         }
@@ -4615,29 +4606,8 @@ class StorageManagerService extends IStorageManager.Stub
                         "Attempt to mount OBB which is already mounted: " + mObbInfo.filename);
             }
 
-            final String hashedKey;
-            final String binderKey;
-            if (mKey == null) {
-                hashedKey = "none";
-                binderKey = "";
-            } else {
-                try {
-                    SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-
-                    KeySpec ks = new PBEKeySpec(mKey.toCharArray(), mObbInfo.salt,
-                            PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE);
-                    SecretKey key = factory.generateSecret(ks);
-                    BigInteger bi = new BigInteger(key.getEncoded());
-                    hashedKey = bi.toString(16);
-                    binderKey = hashedKey;
-                } catch (GeneralSecurityException e) {
-                    throw new ObbException(ERROR_INTERNAL, e);
-                }
-            }
-
             try {
-                mObbState.volId = mVold.createObb(mObbState.canonicalPath, binderKey,
-                        mObbState.ownerGid);
+                mObbState.volId = mVold.createObb(mObbState.canonicalPath, mObbState.ownerGid);
                 mVold.mount(mObbState.volId, 0, -1, null);
 
                 if (DEBUG_OBB)

@@ -27,6 +27,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
@@ -153,7 +154,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         final List<InputWindowHandle> tempVisibleWindows = new ArrayList<>();
 
         for (InputWindowHandle window : windowHandles) {
-            if (window.visible && window.getWindow() != null) {
+            final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
+            if (visible && window.getWindow() != null) {
                 tempVisibleWindows.add(window);
             }
         }
@@ -641,7 +643,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final RecentsAnimationController controller = service.getRecentsAnimationController();
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
-            instance.mIsTrustedOverlay = inputWindowHandle.trustedOverlay;
+            instance.mIsTrustedOverlay =
+                    (inputWindowHandle.inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
 
             // TODO (b/199358388) : gets the letterbox bounds of the window from other way.
             if (windowState != null && windowState.areAppWindowBoundsLetterboxed()) {

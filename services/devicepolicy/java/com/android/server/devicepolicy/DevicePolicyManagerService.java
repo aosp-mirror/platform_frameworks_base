@@ -9183,10 +9183,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setUserProvisioningState(int newState, int userHandle) {
+    public void setUserProvisioningState(int newState, int userId) {
         if (!mHasFeature) {
             logMissingFeatureAction("Cannot set provisioning state " + newState + " for user "
-                    + userHandle);
+                    + userId);
             return;
         }
 
@@ -9196,12 +9196,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
-                    && getManagedUserId(userHandle) == -1
-                    && newState != STATE_USER_UNMANAGED) {
-                // No managed device, user or profile, so setting provisioning state makes no sense.
-                throw new IllegalStateException("Not allowed to change provisioning state unless a "
-                        + "device or profile owner is set.");
+            int deviceOwnerUserId = mOwners.getDeviceOwnerUserId();
+            // NOTE: multiple if statements are nested below so it can log more info on error
+            if (userId != deviceOwnerUserId) {
+                boolean hasProfileOwner = mOwners.hasProfileOwner(userId);
+                if (!hasProfileOwner) {
+                    int managedUserId = getManagedUserId(userId);
+                    if (managedUserId == -1 && newState != STATE_USER_UNMANAGED) {
+                        // No managed device, user or profile, so setting provisioning state makes
+                        // no sense.
+                        String error = "Not allowed to change provisioning state unless a "
+                                + "device or profile owner is set.";
+                        Slogf.w(LOG_TAG, "setUserProvisioningState(newState=%d, userId=%d) failed: "
+                                + "deviceOwnerId=%d, hasProfileOwner=%b, managedUserId=%d, err=%s",
+                                newState, userId, deviceOwnerUserId, hasProfileOwner,
+                                managedUserId, error);
+                        throw new IllegalStateException(error);
+                    }
+                }
             }
 
             synchronized (getLockObject()) {
@@ -9211,7 +9223,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (isAdb(caller)) {
                     // ADB shell can only move directly from un-managed to finalized as part of
                     // directly setting profile-owner or device-owner.
-                    if (getUserProvisioningState(userHandle)
+                    if (getUserProvisioningState(userId)
                             != DevicePolicyManager.STATE_USER_UNMANAGED
                             || newState != DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
                         throw new IllegalStateException("Not allowed to change provisioning state "
@@ -9221,14 +9233,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     transitionCheckNeeded = false;
                 }
 
-                final DevicePolicyData policyData = getUserData(userHandle);
+                final DevicePolicyData policyData = getUserData(userId);
                 if (transitionCheckNeeded) {
                     // Optional state transition check for non-ADB case.
                     checkUserProvisioningStateTransition(policyData.mUserProvisioningState,
                             newState);
                 }
                 policyData.mUserProvisioningState = newState;
-                saveSettingsLocked(userHandle);
+                saveSettingsLocked(userId);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);

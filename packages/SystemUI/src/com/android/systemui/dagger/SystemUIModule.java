@@ -32,7 +32,6 @@ import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
-import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
@@ -66,8 +65,8 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -106,7 +105,6 @@ import dagger.Provides;
             AssistModule.class,
             BiometricsModule.class,
             ClockModule.class,
-            CommunalModule.class,
             DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,

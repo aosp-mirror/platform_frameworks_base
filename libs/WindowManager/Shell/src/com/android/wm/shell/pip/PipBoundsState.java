@@ -29,14 +29,15 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -223,7 +224,8 @@ public class PipBoundsState {
                     new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
             );
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to set alert PiP state change.");
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Unable to set alert PiP state change.", TAG);
         }
     }
 

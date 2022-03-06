@@ -44,6 +44,7 @@ import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -127,7 +128,7 @@ class DragState {
 
     @Nullable private ValueAnimator mAnimator;
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
-    private Point mDisplaySize = new Point();
+    private final Point mDisplaySize = new Point();
 
     // A surface used to catch input events for the drag-and-drop operation.
     SurfaceControl mInputSurface;
@@ -160,8 +161,7 @@ class DragState {
 
     private void showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(
-                    mService.mRoot.getDisplayContent(mDisplayContent.getDisplayId()).getSession())
+            mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")
@@ -174,17 +174,18 @@ class DragState {
             return;
         }
 
-        mTransaction.show(mInputSurface);
-        mTransaction.setInputWindowInfo(mInputSurface, h);
-        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
-
+        // Crop the input surface to the display size.
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+
+        mTransaction.show(mInputSurface)
+                .setInputWindowInfo(mInputSurface, h)
+                .setLayer(mInputSurface, Integer.MAX_VALUE)
+                .setCrop(mInputSurface, mTmpClipRect);
 
         // syncInputWindows here to ensure the input window info is sent before the
         // transferTouchFocus is called.
-        mTransaction.syncInputWindows();
-        mTransaction.apply(true);
+        mTransaction.syncInputWindows()
+                .apply(true /*sync*/);
     }
 
     /**
@@ -361,28 +362,19 @@ class DragState {
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.token = mClientChannel.getToken();
-            mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-            mDragWindowHandle.visible = true;
-            // Allows the system to consume keys when dragging is active. This can also be used to
-            // modify the drag state on key press. Example, cancel drag on escape key.
-            mDragWindowHandle.focusable = true;
-            mDragWindowHandle.hasWallpaper = false;
-            mDragWindowHandle.paused = false;
             mDragWindowHandle.ownerPid = Process.myPid();
             mDragWindowHandle.ownerUid = Process.myUid();
-            mDragWindowHandle.inputFeatures = 0;
             mDragWindowHandle.scaleFactor = 1.0f;
+
+            // Keep the default behavior of this window to be focusable, which allows the system
+            // to consume keys when dragging is active. This can also be used to modify the drag
+            // state on key press. For example, cancel drag on escape key.
+            mDragWindowHandle.inputConfig = InputConfig.PREVENT_SPLITTING;
 
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();
-
-            // The drag window covers the entire display
-            mDragWindowHandle.frameLeft = 0;
-            mDragWindowHandle.frameTop = 0;
-            mDragWindowHandle.frameRight = mDisplaySize.x;
-            mDragWindowHandle.frameBottom = mDisplaySize.y;
 
             // Pause rotations before a drag.
             ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during drag");

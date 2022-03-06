@@ -50,7 +50,6 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -61,8 +60,10 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
@@ -603,11 +604,18 @@ public class PipTransition extends PipTransitionController {
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
                 && mPipTransitionState.getInSwipePipToHomeTransition()) {
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
+            final SurfaceControl swipePipToHomeOverlay = mPipOrganizer.mSwipePipToHomeOverlay;
+            startTransaction.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
                     .setPosition(leash, destinationBounds.left, destinationBounds.top)
                     .setWindowCrop(leash, destinationBounds.width(), destinationBounds.height());
-            startTransaction.merge(tx);
+            if (swipePipToHomeOverlay != null) {
+                // Launcher fade in the overlay on top of the fullscreen Task. It is possible we
+                // reparent the PIP activity to a new PIP task (in case there are other activities
+                // in the original Task), so we should also reparent the overlay to the PIP task.
+                startTransaction.reparent(swipePipToHomeOverlay, leash)
+                        .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE);
+                mPipOrganizer.mSwipePipToHomeOverlay = null;
+            }
             startTransaction.apply();
             if (rotationDelta != Surface.ROTATION_0 && mInFixedRotation) {
                 // For fixed rotation, set the destination bounds to the new rotation coordinates
@@ -617,6 +625,10 @@ public class PipTransition extends PipTransitionController {
             mPipBoundsState.setBounds(destinationBounds);
             onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, null /* tx */);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
+            if (swipePipToHomeOverlay != null) {
+                mPipOrganizer.fadeOutAndRemoveOverlay(swipePipToHomeOverlay,
+                        null /* callback */, false /* withStartDelay */);
+            }
             mPipTransitionState.setInSwipePipToHomeTransition(false);
             return true;
         }
@@ -757,7 +769,8 @@ public class PipTransition extends PipTransitionController {
         final SurfaceControl leash = mPipOrganizer.getSurfaceControl();
         final TaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (leash == null || !leash.isValid() || taskInfo == null) {
-            Log.w(TAG, "Invalid leash on fadeExistingPip: " + leash);
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Invalid leash on fadeExistingPip: %s", TAG, leash);
             return;
         }
         final float alphaStart = show ? 0 : 1;

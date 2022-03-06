@@ -1190,6 +1190,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mActivityRecord != null
                         ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                 getDisplayId()));
+        mInputWindowHandle.setFocusable(false);
         mInputWindowHandle.setOwnerPid(s.mPid);
         mInputWindowHandle.setOwnerUid(s.mUid);
         mInputWindowHandle.setName(getName());

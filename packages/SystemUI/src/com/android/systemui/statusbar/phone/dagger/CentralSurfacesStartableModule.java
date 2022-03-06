@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui.statusbar.phone.dagger;
+
+import java.util.Set;
 
 import dagger.Module;
+import dagger.multibindings.Multibinds;
 
-/**
- * Dagger module for including the WMComponent.
- */
-@Module(subcomponents = {WMComponent.class})
-public abstract class WMModule {
+@Module
+interface CentralSurfacesStartableModule {
+    @Multibinds
+    Set<CentralSurfacesComponent.Startable> multibindStartables();
 }

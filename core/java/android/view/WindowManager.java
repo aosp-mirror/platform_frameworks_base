@@ -106,7 +106,6 @@ import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -3360,8 +3359,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL =
-                IInputConstants.InputFeature.NO_INPUT_CHANNEL;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 1 << 0;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3374,58 +3372,43 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY =
-                IInputConstants.InputFeature.DISABLE_USER_ACTIVITY;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 1 << 1;
 
         /**
          * An input spy window. This window will receive all pointer events within its touchable
-         * area, but will will not stop events from being sent to other windows below it in z-order.
+         * area, but will not stop events from being sent to other windows below it in z-order.
          * An input event will be dispatched to all spy windows above the top non-spy window at the
          * event's coordinates.
-         * @hide
-         */
-        public static final int INPUT_FEATURE_SPY =
-                IInputConstants.InputFeature.SPY;
-
-        /**
-         * When used with the window flag {@link #FLAG_NOT_TOUCHABLE}, this window will continue
-         * to receive events from a stylus device within its touchable region. All other pointer
-         * events, such as from a mouse or touchscreen, will be dispatched to the windows behind it.
-         *
-         * This input feature has no effect when the window flag {@link #FLAG_NOT_TOUCHABLE} is
-         * not set.
-         *
-         * The window must be a trusted overlay to use this input feature.
-         *
-         * @see #FLAG_NOT_TOUCHABLE
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS =
-                IInputConstants.InputFeature.INTERCEPTS_STYLUS;
+        @RequiresPermission(permission.MONITOR_INPUT)
+        public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
+         * NOTE: These are not the same as {@link android.os.InputConfig} flags.
+         *
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_NO_INPUT_CHANNEL,
-            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
-            INPUT_FEATURE_SPY,
-            INPUT_FEATURE_INTERCEPTS_STYLUS,
+        @IntDef(flag = true, prefix = {"INPUT_FEATURE_"}, value = {
+                INPUT_FEATURE_NO_INPUT_CHANNEL,
+                INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+                INPUT_FEATURE_SPY,
         })
-        public @interface InputFeatureFlags {}
+        public @interface InputFeatureFlags {
+        }
 
         /**
-         * Control special features of the input subsystem.
+         * Control a set of features of the input subsystem that are exposed to the app process.
          *
-         * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
-         * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
-         * @see #INPUT_FEATURE_SPY
-         * @see #INPUT_FEATURE_INTERCEPTS_STYLUS
+         * WARNING: Do NOT use {@link android.os.InputConfig} flags! This must be set to flag values
+         * included in {@link InputFeatureFlags}.
+         *
          * @hide
+         * @see InputFeatureFlags
          */
         @InputFeatureFlags
         @UnsupportedAppUsage
@@ -4844,10 +4827,6 @@ public interface WindowManager extends ViewManager {
             if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
                 inputFeatures &= ~INPUT_FEATURE_SPY;
                 features.add("INPUT_FEATURE_SPY");
-            }
-            if ((inputFeatures & INPUT_FEATURE_INTERCEPTS_STYLUS) != 0) {
-                inputFeatures &= ~INPUT_FEATURE_INTERCEPTS_STYLUS;
-                features.add("INPUT_FEATURE_INTERCEPTS_STYLUS");
             }
             if (inputFeatures != 0) {
                 features.add(Integer.toHexString(inputFeatures));
