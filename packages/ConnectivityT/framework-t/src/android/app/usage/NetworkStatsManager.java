@@ -699,7 +699,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getMobileUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_CELLULAR);
@@ -723,7 +725,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getWifiUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_WIFI);
@@ -740,8 +744,9 @@ public class NetworkStatsManager {
      * {@link #unregisterUsageCallback} is called.
      *
      * @param template Template used to match networks. See {@link NetworkTemplate}.
-     * @param thresholdBytes Threshold in bytes to be notified on. The provided value that lower
-     *                       than 2MiB will be clamped for non-privileged callers.
+     * @param thresholdBytes Threshold in bytes to be notified on. Provided values lower than 2MiB
+     *                       will be clamped for callers except callers with the NETWORK_STACK
+     *                       permission.
      * @param executor The executor on which callback will be invoked. The provided {@link Executor}
      *                 must run callback sequentially, otherwise the order of callbacks cannot be
      *                 guaranteed.
@@ -750,6 +755,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK}, conditional = true)
     public void registerUsageCallback(@NonNull NetworkTemplate template, long thresholdBytes,
             @NonNull @CallbackExecutor Executor executor, @NonNull UsageCallback callback) {
         Objects.requireNonNull(template, "NetworkTemplate cannot be null");

@@ -108,7 +108,7 @@ public class VpnManager {
      * <ul>
      *   <li>{@link #EXTRA_SESSION_KEY}, a {@code String} for the session key, as returned by
      *       {@link #startProvisionedVpnProfileSession}.
-     *   <li>{@link #EXTRA_TIMESTAMP}, a long for the timestamp at which the error occurred,
+     *   <li>{@link #EXTRA_TIMESTAMP_MILLIS}, a long for the timestamp at which the error occurred,
      *       in milliseconds since the epoch, as returned by
      *       {@link java.lang.System#currentTimeMillis}.
      *   <li>{@link #EXTRA_UNDERLYING_NETWORK}, a {@link Network} containing the underlying
@@ -196,7 +196,7 @@ public class VpnManager {
      * This is a number of milliseconds since the epoch, suitable to be compared with
      * {@link java.lang.System#currentTimeMillis}.
      */
-    public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
 
     /**
      * Extra for the error class, as an {@code int}.

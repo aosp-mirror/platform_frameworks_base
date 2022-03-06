@@ -564,7 +564,7 @@ stubs_defaults {
     libs: [
         "art.module.public.api",
         "sdk_module-lib_current_framework-tethering",
-        "sdk_module-lib_current_framework-connectivity-tiramisu",
+        "sdk_module-lib_current_framework-connectivity-t",
         "sdk_public_current_framework-bluetooth",
         // There are a few classes from modules used by the core that
         // need to be resolved by metalava. We use a prebuilt stub of the

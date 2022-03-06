@@ -25255,9 +25255,9 @@ package android.net {
 
   public abstract class PlatformVpnProfile {
     method public final boolean areLocalRoutesExcluded();
-    method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
+    method public final boolean isInternetValidationRequired();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
     field public static final int TYPE_IKEV2_IPSEC_RSA = 8; // 0x8
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
@@ -25464,7 +25464,7 @@ package android.net {
     field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
     field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
     field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
-    field public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    field public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
     field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
     field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
     field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
@@ -29495,6 +29495,7 @@ package android.os {
     field public static final int PREVIEW_SDK_INT;
     field public static final String RELEASE;
     field @NonNull public static final String RELEASE_OR_CODENAME;
+    field @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY;
     field @Deprecated public static final String SDK;
     field public static final int SDK_INT;
     field public static final String SECURITY_PATCH;
@@ -29569,7 +29570,7 @@ package android.os {
     method @Deprecated @Nullable public android.os.Parcelable[] getParcelableArray(@Nullable String);
     method @Nullable public <T> T[] getParcelableArray(@Nullable String, @NonNull Class<T>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> java.util.ArrayList<T> getParcelableArrayList(@Nullable String);
-    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> java.util.ArrayList<T> getParcelableArrayList(@Nullable String, @NonNull Class<? extends T>);
     method @Deprecated @Nullable public java.io.Serializable getSerializable(@Nullable String);
     method @Nullable public <T extends java.io.Serializable> T getSerializable(@Nullable String, @NonNull Class<T>);
     method public short getShort(String);
@@ -29578,7 +29579,7 @@ package android.os {
     method @Nullable public android.util.Size getSize(@Nullable String);
     method @Nullable public android.util.SizeF getSizeF(@Nullable String);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String);
-    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<T>);
+    method @Nullable public <T> android.util.SparseArray<T> getSparseParcelableArray(@Nullable String, @NonNull Class<? extends T>);
     method @Nullable public java.util.ArrayList<java.lang.String> getStringArrayList(@Nullable String);
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);

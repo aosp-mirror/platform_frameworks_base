@@ -2609,6 +2609,7 @@ public class StatsPullAtomService extends SystemService {
         StatFs statFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
         StatFs statFsSystem = new StatFs(Environment.getRootDirectory().getAbsolutePath());
         StatFs statFsCache = new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+        StatFs metadataFsSystem = new StatFs(Environment.getMetadataDirectory().getAbsolutePath());
 
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
                 FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__DATA, statFsData.getAvailableBytes(),
@@ -2621,6 +2622,10 @@ public class StatsPullAtomService extends SystemService {
         pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
                 FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM,
                 statFsSystem.getAvailableBytes(), statFsSystem.getTotalBytes()));
+
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__METADATA,
+                metadataFsSystem.getAvailableBytes(), metadataFsSystem.getTotalBytes()));
         return StatsManager.PULL_SUCCESS;
     }
 

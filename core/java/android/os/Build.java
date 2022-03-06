@@ -285,11 +285,18 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The version string we show to the user; may be {@link #RELEASE} or
-         * {@link #CODENAME} if not a final release build.
+         * The version string.  May be {@link #RELEASE} or {@link #CODENAME} if
+         * not a final release build.
          */
         @NonNull public static final String RELEASE_OR_CODENAME = getString(
                 "ro.build.version.release_or_codename");
+
+        /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * a descriptive string if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY = getString(
+                "ro.build.version.release_or_preview_display");
 
         /**
          * The base OS build the product is based on.
