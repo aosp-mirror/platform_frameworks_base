@@ -2988,7 +2988,6 @@ final class InstallPackageHelper {
      * APK will be installed and the package will be disabled. To recover from this situation,
      * the user will need to go into system settings and re-enable the package.
      */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     boolean enableCompressedPackage(AndroidPackage stubPkg,
             @NonNull PackageSetting stubPkgSetting) {
         final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
@@ -2998,8 +2997,8 @@ final class InstallPackageHelper {
             try (PackageFreezer freezer =
                          mPm.freezePackage(stubPkg.getPackageName(), "setEnabledSetting")) {
                 pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
+                mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                 synchronized (mPm.mLock) {
-                    mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                     try {
                         mSharedLibraries.updateSharedLibrariesLPw(
                                 pkg, stubPkgSetting, null, null,
@@ -3056,7 +3055,7 @@ final class InstallPackageHelper {
         return true;
     }
 
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
+    @GuardedBy("mPm.mInstallLock")
     private AndroidPackage installStubPackageLI(AndroidPackage stubPkg,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags)
@@ -3149,27 +3148,28 @@ final class InstallPackageHelper {
             mPm.mSettings.enableSystemPackageLPw(disabledPs.getPkg().getPackageName());
             // Remove any native libraries from the upgraded package.
             PackageManagerServiceUtils.removeNativeBinariesLI(deletedPs);
-
-            // Install the system package
-            if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
-            try {
-                synchronized (mPm.mInstallLock) {
-                    final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-                    final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
-                            ? deletedPs.getAppId() : Process.INVALID_UID;
-                    installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                            origUsers, writeSettings, previousAppId);
-                }
-            } catch (PackageManagerException e) {
-                Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
-                        + e.getMessage());
-                // TODO(b/194319951): can we avoid this; throw would come from scan...
-                throw new SystemDeleteException(e);
-            } finally {
-                if (disabledPs.getPkg().isStub()) {
-                    // We've re-installed the stub; make sure it's disabled here. If package was
-                    // originally enabled, we'll install the compressed version of the application
-                    // and re-enable it afterward.
+        }
+        // Install the system package
+        if (DEBUG_REMOVE) Slog.d(TAG, "Re-installing system package: " + disabledPs);
+        try {
+            synchronized (mPm.mInstallLock) {
+                final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
+                final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
+                        ? deletedPs.getAppId() : Process.INVALID_UID;
+                installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
+                        origUsers, writeSettings, previousAppId);
+            }
+        } catch (PackageManagerException e) {
+            Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
+                    + e.getMessage());
+            // TODO(b/194319951): can we avoid this; throw would come from scan...
+            throw new SystemDeleteException(e);
+        } finally {
+            if (disabledPs.getPkg().isStub()) {
+                // We've re-installed the stub; make sure it's disabled here. If package was
+                // originally enabled, we'll install the compressed version of the application
+                // and re-enable it afterward.
+                synchronized (mPm.mLock) {
                     disableStubPackage(action, deletedPs, allUserHandles);
                 }
             }
@@ -3197,7 +3197,7 @@ final class InstallPackageHelper {
     /**
      * Installs a package that's already on the system partition.
      */
-    @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
+    @GuardedBy("mPm.mInstallLock")
     private void installPackageFromSystemLIF(@NonNull String codePathString,
             @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
             boolean writeSettings, int previousAppId)

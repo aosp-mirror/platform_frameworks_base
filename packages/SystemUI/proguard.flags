@@ -41,6 +41,14 @@
 -keep,allowoptimization,allowaccessmodification class com.android.systemui.dagger.Dagger** { !synthetic *; }
 -keep,allowoptimization,allowaccessmodification class com.android.systemui.tv.Dagger** { !synthetic *; }
 
+# Prevent optimization or access modification of any referenced code that may
+# conflict with code in the bootclasspath.
+# TODO(b/222468116): Resolve such collisions in the build system.
+-keepnames class android.**.nano.** { *; }
+-keepnames class com.android.**.nano.** { *; }
+-keepnames class com.android.internal.protolog.** { *; }
+-keepnames class android.hardware.common.** { *; }
+
 # Allows proguard to make private and protected methods and fields public as
 # part of optimization. This lets proguard inline trivial getter/setter methods.
 -allowaccessmodification

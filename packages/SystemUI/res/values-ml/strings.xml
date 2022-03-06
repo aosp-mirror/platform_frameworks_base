@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"സിസ്റ്റം UI"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"ബാറ്ററി ഉടൻ തീർന്നേക്കാം"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB വഴി ചാർജ് ചെയ്യാനാകില്ല"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"ഉപകരണത്തിനൊപ്പം ലഭിച്ച ചാർജർ ഉപയോഗിക്കുക"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"സ്ഥിരീകരിച്ചു"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"പൂർത്തിയാക്കാൻ സ്ഥിരീകരിക്കുക ടാപ്പ് ചെയ്യൂ"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"പിൻ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"പാറ്റേൺ ഉപയോഗിക്കുക"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"അവസാനിപ്പിക്കുക"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"പൂർണ്ണ നിശബ്‌ദത"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"അലാറങ്ങൾ മാത്രം"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ശല്യപ്പെടുത്തരുത്."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"ബ്ലൂടൂത്ത് ഓണാണ്."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g>-ന് അലാറം സജ്ജീകരിച്ചു."</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"ഡെസേർട്ട് കെയ്സ്"</string>
     <string name="start_dreams" msgid="9131802557946276718">"സ്ക്രീൻ സേവർ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ഇതർനെറ്റ്"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"ജോടിയാക്കിയ ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ബാറ്ററി"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"അറിയിപ്പുകൾ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"സംഭാഷണങ്ങൾ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"എല്ലാ നിശബ്‌ദ അറിയിപ്പുകളും മായ്ക്കുക"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ശല്യപ്പെടുത്തരുത്\' വഴി അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ഇപ്പോൾ ആരംഭിക്കുക"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ഈ ഉപകരണം മാനേജ് ചെയ്യുന്നത് നിങ്ങളുടെ രക്ഷിതാവാണ്"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;നില:&lt;/b&gt; താഴ്ന്ന റാങ്കിംഗ് നൽകി"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും കാണിക്കുന്നു"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും കാണിക്കുന്നു, ഒരു ബബിൾ രൂപത്തിൽ ദൃശ്യമാകുന്നു"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും കാണിക്കുന്നു, ശല്യപ്പെടുത്തരുത് മോഡ് തടസ്സപ്പെടുത്തുന്നു"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും ബബിൾ രൂപത്തിൽ ദൃശ്യമാകുന്നു, ശല്യപ്പെടുത്തരുത് മോഡ് തടസ്സപ്പെടുത്തുന്നു"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"സംഭാഷണ ഫീച്ചറുകളെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്‌ക്കുന്നില്ല"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS:"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"സംഗീതം"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"വോളിയം ബട്ടൺ കുറുക്കുവഴി"</string>
     <string name="battery" msgid="769686279459897127">"ബാറ്ററി"</string>
     <string name="headset" msgid="4485892374984466437">"ഹെഡ്‌സെറ്റ്"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"വൈഫൈ ഓഫാണ്"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ഓഫാണ്"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"\'ശല്യപ്പെടുത്തരുത്\' ഓഫാണ്"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"സ്വയമേവയുള്ള ഒരു നയം (<xliff:g id="ID_1">%s</xliff:g>) \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ഒരു ആപ്പ് (<xliff:g id="ID_1">%s</xliff:g>) \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"സ്വയമേവയുള്ള ഒരു നയമോ ആപ്പോ \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ആപ്പുകൾ പശ്ചാത്തലത്തിൽ റൺ ചെയ്യുന്നു"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"മൊബൈൽ ഡാറ്റ ഓഫാക്കണോ?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ഔദ്യോഗികം)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ഫോൺ കോൾ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> എന്നതിലൂടെ)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ക്യാമറ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ലൊക്കേഷന്‍"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"മൈക്രോഫോൺ"</string>
@@ -806,6 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(വിച്ഛേദിച്ചു)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"മാറാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"പുതിയ ഉപകരണവുമായി ജോടിയാക്കുക"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ഈ സെഷൻ കാസ്റ്റ് ചെയ്യാൻ, ആപ്പ് തുറക്കുക."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"അജ്ഞാതമായ ആപ്പ്"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ബിൽഡ് നമ്പർ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ക്ലിപ്പ്ബോർഡിലേക്ക് ബിൽഡ് നമ്പർ പകർത്തി."</string>
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
@@ -839,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"അടുത്തിടെയുള്ള സന്ദേശങ്ങൾ, മിസ്‌ഡ് കോൾ, സ്റ്റാറ്റസ് അപ്‌ഡേറ്റുകൾ എന്നിവ കാണൂ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"സംഭാഷണം"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ശല്യപ്പെടുത്തരുത്\' ഓണായതിനാൽ തൽക്കാലം നിർത്തി"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ഒരു സന്ദേശം അയച്ചു: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g>, ഒരു ചിത്രം അയച്ചു"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> എന്നയാൾ സ്‌റ്റാറ്റസ് അപ്‌ഡേറ്റ് ചെയ്‌തു: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -877,8 +899,7 @@
       <item quantity="other">സജീവമായ <xliff:g id="COUNT_1">%s</xliff:g> ആപ്പുകൾ</item>
       <item quantity="one">സജീവമായ <xliff:g id="COUNT_0">%s</xliff:g> ആപ്പ്</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"പുതിയ വിവരങ്ങൾ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"സജീവമായ ആപ്പുകൾ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"നിർത്തുക"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"നിർത്തി"</string>
@@ -889,8 +910,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"പകർത്തിയ ടെക്സ്റ്റ് എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"പകർത്തിയ ചിത്രം എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"സമീപത്തുള്ള ഉപകരണത്തിലേക്ക് അയയ്ക്കുക"</string>
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
-    <skip />
+    <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
+    <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"വൈഫൈ ലഭ്യമല്ല"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"മുൻഗണനാ മോഡ്"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"അലാറം സജ്ജീകരിച്ചു"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"സഹായി അതിഥി മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ക്യാമറയും മൈക്കും ഓഫാണ്"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# അറിയിപ്പ്}other{# അറിയിപ്പുകൾ}}"</string>
 </resources>

@@ -218,8 +218,9 @@ final class AppDataHelper {
 
         final String seInfo = pkgSeInfo + seInfoUser;
         final int targetSdkVersion = pkg.getTargetSdkVersion();
+        final boolean usesSdk = !pkg.getUsesSdkLibraries().isEmpty();
         final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(volumeUuid, packageName,
-                userId, flags, appId, seInfo, targetSdkVersion);
+                userId, flags, appId, seInfo, targetSdkVersion, usesSdk);
         args.previousAppId = previousAppId;
 
         return batch.createAppData(args).whenComplete((ceDataInode, e) -> {

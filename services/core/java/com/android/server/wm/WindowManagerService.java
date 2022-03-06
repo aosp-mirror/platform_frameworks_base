@@ -141,6 +141,7 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.HARD_KEYBOARD_
 import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -191,6 +192,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.InputConfig;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -6437,9 +6439,13 @@ public class WindowManagerService extends IWindowManager.Stub
             imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
         }
         proto.write(DISPLAY_FROZEN, mDisplayFrozen);
-        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
         proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
         proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
+
+        // This is always true for now since we still update the window frames at the server side.
+        // Once we move the window layout to the client side, this can be false when we are waiting
+        // for the frames.
+        proto.write(WINDOW_FRAMES_VALID, true);
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
@@ -8447,43 +8453,48 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
-                                    int displayId, SurfaceControl surface, String name,
-                                    InputApplicationHandle applicationHandle, int flags,
-                                    int privateFlags, int type, Region region, IWindow window) {
-        InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
+            int displayId, SurfaceControl surface, String name,
+            InputApplicationHandle applicationHandle, int flags,
+            int privateFlags, int type, Region region, IWindow window) {
+        final InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.setWindowToken(window);
         h.name = name;
 
         flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
 
-        final int sanitizedFlags = flags & (FLAG_NOT_TOUCHABLE
-                | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
-        h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
+        final int sanitizedLpFlags =
+                (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
+                | LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = type;
-        h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        h.focusable = (flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0;
-        h.hasWallpaper = false;
-        h.paused = false;
-
-        h.ownerUid = callingUid;
-        h.ownerPid = callingPid;
+        h.layoutParamsFlags = sanitizedLpFlags;
 
         // Do not allow any input features to be set without sanitizing them first.
-        h.inputFeatures = 0;
+        h.inputConfig = InputConfigAdapter.getInputConfigFromWindowParams(
+                        type, sanitizedLpFlags, 0 /*inputFeatures*/);
 
-        if (region == null) {
-            h.replaceTouchableRegionWithCrop(null);
-        } else {
-            h.touchableRegion.set(region);
-            h.replaceTouchableRegionWithCrop = false;
-            h.setTouchableRegionCrop(surface);
+
+        if ((flags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            h.inputConfig |= InputConfig.NOT_FOCUSABLE;
         }
 
         //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
-        h.trustedOverlay = (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0;
+        if ((privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
+            h.inputConfig |= InputConfig.TRUSTED_OVERLAY;
+        }
 
-        SurfaceControl.Transaction t = mTransactionFactory.get();
+        h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+        h.ownerUid = callingUid;
+        h.ownerPid = callingPid;
+
+        if (region == null) {
+            h.replaceTouchableRegionWithCrop = true;
+        } else {
+            h.touchableRegion.set(region);
+        }
+        h.setTouchableRegionCrop(null /* use the input surface's bounds */);
+
+        final SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();

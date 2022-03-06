@@ -28,7 +28,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -88,12 +87,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.communal.CommunalHostView;
-import com.android.systemui.communal.CommunalHostViewController;
-import com.android.systemui.communal.CommunalSource;
-import com.android.systemui.communal.CommunalSourceMonitor;
-import com.android.systemui.communal.CommunalStateController;
-import com.android.systemui.communal.dagger.CommunalViewComponent;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
@@ -157,7 +150,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 
@@ -271,21 +263,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock
-    private CommunalViewComponent.Factory mCommunalViewComponentFactory;
-    @Mock
-    private CommunalViewComponent mCommunalViewComponent;
-    @Mock
-    private CommunalHostViewController mCommunalHostViewController;
-    @Mock
-    private CommunalSourceMonitor mCommunalSourceMonitor;
-    @Mock
-    private CommunalSource mCommunalSource;
-    @Mock
-    private CommunalHostView mCommunalHostView;
-    @Mock
-    private CommunalStateController mCommunalStateController;
-    private CommunalStateController.Callback mCommunalStateControllerCallback;
-    @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private KeyguardStatusViewController mKeyguardStatusViewController;
@@ -361,6 +338,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private SysUiState mSysUiState;
     @Mock
     private NotificationListContainer mNotificationListContainer;
+    private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -400,7 +378,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
-        when(mView.findViewById(R.id.communal_host)).thenReturn(mCommunalHostView);
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
         when(mNotificationStackScrollLayoutController.getHeadsUpCallback())
                 .thenReturn(mHeadsUpCallback);
@@ -466,10 +443,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusBarViewComponent);
         when(mKeyguardStatusBarViewComponent.getKeyguardStatusBarViewController())
                 .thenReturn(mKeyguardStatusBarViewController);
-        when(mCommunalViewComponentFactory.build(any()))
-                .thenReturn(mCommunalViewComponent);
-        when(mCommunalViewComponent.getCommunalHostViewController())
-                .thenReturn(mCommunalHostViewController);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_user_switcher), any(), anyBoolean()))
@@ -488,6 +461,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
         mMainHandler = new Handler(Looper.getMainLooper());
+        mPanelEventsEmitter = new NotificationPanelViewController.PanelEventsEmitter();
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
@@ -497,13 +471,13 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
-                mCommunalStateController, mKeyguardStateController,
+                mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarWindowStateController,
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
-                mCommunalSourceMonitor, mMetricsLogger, mActivityManager, mConfigurationController,
+                mMetricsLogger, mActivityManager, mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mStatusBarKeyguardViewManager,
@@ -513,7 +487,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardQsUserSwitchComponentFactory,
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
-                mCommunalViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mGroupManager,
                 mNotificationAreaController,
@@ -546,7 +519,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mQsFrameTranslateController,
                 mSysUiState,
                 mKeyguardUnlockAnimationController,
-                mNotificationListContainer);
+                mNotificationListContainer,
+                mPanelEventsEmitter);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
@@ -1016,81 +990,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL, true);
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);
-    }
-
-    @Test
-    public void testCommunalhostViewControllerInit() {
-        verify(mCommunalHostViewController, times(1)).init();
-        clearInvocations(mCommunalHostViewController);
-        givenViewAttached();
-        verify(mCommunalHostViewController, never()).init();
-    }
-
-    @Test
-    public void testCommunalSourceListening() {
-        final ArgumentCaptor<CommunalSourceMonitor.Callback> monitorCallback =
-                ArgumentCaptor.forClass(CommunalSourceMonitor.Callback.class);
-
-        givenViewAttached();
-        verify(mCommunalSourceMonitor).addCallback(monitorCallback.capture());
-
-        final ArgumentCaptor<WeakReference<CommunalSource>> sourceCapture =
-                ArgumentCaptor.forClass(WeakReference.class);
-
-        monitorCallback.getValue().onSourceAvailable(new WeakReference<>(mCommunalSource));
-        mExecutor.runAllReady();
-        verify(mCommunalHostViewController).show(sourceCapture.capture());
-        assertThat(sourceCapture.getValue().get()).isEqualTo(mCommunalSource);
-
-        clearInvocations(mCommunalHostViewController);
-        givenViewDetached();
-        verify(mCommunalSourceMonitor).removeCallback(any());
-    }
-
-    @Test
-    public void testKeyguardStatusViewUpdatedWithCommunalPresence() {
-        givenViewAttached();
-
-        when(mResources.getBoolean(
-                com.android.internal.R.bool.config_keyguardUserSwitcher)).thenReturn(true);
-        updateMultiUserSetting(true);
-
-        ArgumentCaptor<CommunalStateController.Callback> communalCallbackCapture =
-                ArgumentCaptor.forClass(CommunalStateController.Callback.class);
-        verify(mCommunalStateController).addCallback(communalCallbackCapture.capture());
-        final CommunalStateController.Callback communalStateControllerCallback =
-                communalCallbackCapture.getValue();
-
-        clearInvocations(mKeyguardStatusViewController, mKeyguardUserSwitcherController);
-        // Ensure changes in communal visibility leads to setting the keyguard status view
-        // visibility.
-        communalStateControllerCallback.onCommunalViewShowingChanged();
-        verify(mKeyguardStatusViewController).setKeyguardStatusViewVisibility(anyInt(),
-                anyBoolean(), anyBoolean(), anyInt());
-        verify(mKeyguardUserSwitcherController).setKeyguardUserSwitcherVisibility(anyInt(),
-                anyBoolean(), anyBoolean(), anyInt());
-    }
-
-    @Test
-    public void testCommunalAlphaUpdate() {
-        // Verify keyguard content alpha changes are propagate. Note the actual value set is not
-        // checked since an interpolation is applied to the incoming value.
-        mNotificationPanelViewController.setKeyguardOnlyContentAlpha(0.8f);
-        verify(mCommunalHostViewController).setAlpha(anyFloat());
-    }
-
-    @Test
-    public void testCommunalPositionUpdate() {
-        // Verify that the communal position is updated on interaction with the
-        // NotificationPanelViewController. Note that there a number of paths where the position
-        // might be updated and therefore the check isn't strictly on a single invocation.
-        clearInvocations(mCommunalHostViewController);
-        final View.OnLayoutChangeListener layoutChangeListener =
-                mNotificationPanelViewController.createLayoutChangeListener();
-        mNotificationPanelViewController.mStatusBarStateController.setState(KEYGUARD);
-        layoutChangeListener.onLayoutChange(mView, 0, 0, 200, 200, 0, 0, 200, 200);
-        verify(mCommunalHostViewController, atLeast(1))
-                .updatePosition(anyInt(), anyBoolean());
     }
 
     private void triggerPositionClockAndNotifications() {

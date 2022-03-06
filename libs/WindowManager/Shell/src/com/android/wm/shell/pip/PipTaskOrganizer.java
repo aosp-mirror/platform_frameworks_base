@@ -63,7 +63,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.Rational;
 import android.view.Display;
 import android.view.Surface;
@@ -73,6 +72,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -83,6 +83,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
@@ -249,7 +250,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * An optional overlay used to mask content changing between an app in/out of PiP, only set if
      * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true.
      */
-    private SurfaceControl mSwipePipToHomeOverlay;
+    @Nullable
+    SurfaceControl mSwipePipToHomeOverlay;
 
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
@@ -356,12 +358,24 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Callback when launcher finishes swipe-pip-to-home operation.
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
-    public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds,
+    public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
             SurfaceControl overlay) {
         // do nothing if there is no startSwipePipToHome being called before
-        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
-            mPipBoundsState.setBounds(destinationBounds);
-            mSwipePipToHomeOverlay = overlay;
+        if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
+            return;
+        }
+        mPipBoundsState.setBounds(destinationBounds);
+        mSwipePipToHomeOverlay = overlay;
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // With Shell transition, the overlay was attached to the remote transition leash, which
+            // will be removed when the current transition is finished, so we need to reparent it
+            // to the actual Task surface now.
+            // PipTransition is responsible to fade it out and cleanup when finishing the enter PIP
+            // transition.
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            mTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, t);
+            t.setLayer(overlay, Integer.MAX_VALUE);
+            t.apply();
         }
     }
 
@@ -395,8 +409,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
                 || mToken == null) {
-            Log.wtf(TAG, "Not allowed to exitPip in current state"
-                    + " mState=" + mPipTransitionState.getTransitionState() + " mToken=" + mToken);
+            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Not allowed to exitPip in current state"
+                            + " mState=%d mToken=%s", TAG, mPipTransitionState.getTransitionState(),
+                    mToken);
             return;
         }
 
@@ -500,9 +516,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Removes PiP immediately.
      */
     public void removePip() {
-        if (!mPipTransitionState.isInPip() ||  mToken == null) {
-            Log.wtf(TAG, "Not allowed to removePip in current state"
-                    + " mState=" + mPipTransitionState.getTransitionState() + " mToken=" + mToken);
+        if (!mPipTransitionState.isInPip() || mToken == null) {
+            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Not allowed to removePip in current state"
+                            + " mState=%d mToken=%s", TAG, mPipTransitionState.getTransitionState(),
+                    mToken);
             return;
         }
 
@@ -539,7 +557,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             ActivityTaskManager.getService().removeRootTasksInWindowingModes(
                     new int[]{ WINDOWING_MODE_PINNED });
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove PiP", e);
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to remove PiP, %s",
+                    TAG, e);
         }
     }
 
@@ -568,7 +588,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             if (!mWaitForFixedRotation) {
                 onEndOfSwipePipToHomeTransition();
             } else {
-                Log.d(TAG, "Defer onTaskAppeared-SwipePipToHome until end of fixed rotation.");
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Defer onTaskAppeared-SwipePipToHome until end of fixed rotation.",
+                        TAG);
             }
             return;
         }
@@ -576,7 +598,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (mOneShotAnimationType == ANIM_TYPE_ALPHA
                 && SystemClock.uptimeMillis() - mLastOneShotAlphaAnimationTime
                 > ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS) {
-            Log.d(TAG, "Alpha animation is expired. Use bounds animation.");
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Alpha animation is expired. Use bounds animation.", TAG);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         }
 
@@ -613,8 +636,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onTaskAppearedWithFixedRotation() {
         if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-            Log.d(TAG, "Defer entering PiP alpha animation, fixed rotation is ongoing");
-            // If deferred, hide the surface till fixed rotation is completed.
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Defer entering PiP alpha animation, fixed rotation is ongoing", TAG);
+            // If deferred, hside the surface till fixed rotation is completed.
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             tx.setAlpha(mLeash, 0f);
@@ -671,7 +695,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mSwipePipToHomeOverlay = null;
             return;
         }
 
@@ -763,7 +786,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final WindowContainerToken token = info.token;
         Objects.requireNonNull(token, "Requires valid WindowContainerToken");
         if (token.asBinder() != mToken.asBinder()) {
-            Log.wtf(TAG, "Unrecognized token: " + token);
+            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Unrecognized token: %s", TAG, token);
             return;
         }
         onExitPipFinished(info);
@@ -788,8 +812,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         if (mPipTransitionState.getTransitionState() != PipTransitionState.ENTERED_PIP
                 && mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP) {
-            Log.d(TAG, "Defer onTaskInfoChange in current state: "
-                    + mPipTransitionState.getTransitionState());
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Defer onTaskInfoChange in current state: %d", TAG,
+                    mPipTransitionState.getTransitionState());
             // Defer applying PiP parameters if the task is entering PiP to avoid disturbing
             // the animation.
             mDeferredTaskInfo = info;
@@ -800,7 +825,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mPipBoundsAlgorithm.getMinimalSize(info.topActivityInfo));
         final PictureInPictureParams newParams = info.pictureInPictureParams;
         if (newParams == null || !applyPictureInPictureParams(newParams)) {
-            Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Ignored onTaskInfoChanged with PiP param: %s", TAG, newParams);
             return;
         }
         // Aspect ratio changed, re-calculate bounds if valid.
@@ -820,6 +846,24 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public boolean supportCompatUI() {
         // PIP doesn't support compat.
         return false;
+    }
+
+    @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        b.setParent(findTaskSurface(taskId));
+    }
+
+    @Override
+    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
+            SurfaceControl.Transaction t) {
+        t.reparent(sc, findTaskSurface(taskId));
+    }
+
+    private SurfaceControl findTaskSurface(int taskId) {
+        if (mTaskInfo == null || mLeash == null || mTaskInfo.taskId != taskId) {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+        return mLeash;
     }
 
     @Override
@@ -877,9 +921,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         clearWaitForFixedRotation();
     }
 
-    /** Called when exiting PIP tranisiton is finished to do the state cleanup. */
+    /** Called when exiting PIP transition is finished to do the state cleanup. */
     void onExitPipFinished(TaskInfo info) {
         clearWaitForFixedRotation();
+        if (mSwipePipToHomeOverlay != null) {
+            removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
+            mSwipePipToHomeOverlay = null;
+        }
         mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
@@ -895,7 +943,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void fadeExistingPip(boolean show) {
         if (mLeash == null || !mLeash.isValid()) {
-            Log.w(TAG, "Invalid leash on fadeExistingPip: " + mLeash);
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Invalid leash on fadeExistingPip: %s", TAG, mLeash);
             return;
         }
         final float alphaStart = show ? 0 : 1;
@@ -942,11 +991,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if ((mPipTransitionState.getInSwipePipToHomeTransition()
                 || waitForFixedRotationOnEnteringPip) && fromRotation) {
             if (DEBUG) {
-                Log.d(TAG, "Skip onMovementBoundsChanged on rotation change"
-                        + " InSwipePipToHomeTransition="
-                        + mPipTransitionState.getInSwipePipToHomeTransition()
-                        + " mWaitForFixedRotation=" + mWaitForFixedRotation
-                        + " getTransitionState=" + mPipTransitionState.getTransitionState());
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Skip onMovementBoundsChanged on rotation change"
+                                + " InSwipePipToHomeTransition=%b"
+                                + " mWaitForFixedRotation=%b"
+                                + " getTransitionState=%d", TAG,
+                        mPipTransitionState.getInSwipePipToHomeTransition(), mWaitForFixedRotation,
+                        mPipTransitionState.getTransitionState());
             }
             return;
         }
@@ -1061,7 +1112,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @PipAnimationController.TransitionDirection int direction,
             Consumer<Rect> updateBoundsCallback) {
         if (mWaitForFixedRotation) {
-            Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: skip scheduleAnimateResizePip, entering pip deferred", TAG);
             return;
         }
         scheduleAnimateResizePip(mPipBoundsState.getBounds(), toBounds, 0 /* startingAngle */,
@@ -1075,7 +1127,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void scheduleAnimateResizePip(Rect fromBounds, Rect toBounds, int duration,
             float startingAngle, Consumer<Rect> updateBoundsCallback) {
         if (mWaitForFixedRotation) {
-            Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: skip scheduleAnimateResizePip, entering pip deferred", TAG);
             return;
         }
         scheduleAnimateResizePip(fromBounds, toBounds, startingAngle, null /* sourceHintRect */,
@@ -1113,7 +1166,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void scheduleResizePip(Rect toBounds, Consumer<Rect> updateBoundsCallback) {
         // Could happen when exitPip
         if (mToken == null || mLeash == null) {
-            Log.w(TAG, "Abort animation, invalid leash");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Abort animation, invalid leash", TAG);
             return;
         }
         mPipBoundsState.setBounds(toBounds);
@@ -1148,12 +1202,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Consumer<Rect> updateBoundsCallback) {
         // Could happen when exitPip
         if (mToken == null || mLeash == null) {
-            Log.w(TAG, "Abort animation, invalid leash");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Abort animation, invalid leash", TAG);
             return;
         }
 
         if (startBounds.isEmpty() || toBounds.isEmpty()) {
-            Log.w(TAG, "Attempted to user resize PIP to or from empty bounds, aborting.");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Attempted to user resize PIP to or from empty bounds, aborting.", TAG);
             return;
         }
 
@@ -1228,7 +1284,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         if (mWaitForFixedRotation) {
-            Log.d(TAG, "skip scheduleOffsetPip, entering pip deferred");
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: skip scheduleOffsetPip, entering pip deferred", TAG);
             return;
         }
         offsetPip(originalBounds, 0 /* xOffset */, offset, duration);
@@ -1241,7 +1298,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void offsetPip(Rect originalBounds, int xOffset, int yOffset, int durationMs) {
         if (mTaskInfo == null) {
-            Log.w(TAG, "mTaskInfo is not set");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: mTaskInfo is not set",
+                    TAG);
             return;
         }
         final Rect destinationBounds = new Rect(originalBounds);
@@ -1386,7 +1444,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             float startingAngle) {
         // Could happen when exitPip
         if (mToken == null || mLeash == null) {
-            Log.w(TAG, "Abort animation, invalid leash");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Abort animation, invalid leash", TAG);
             return null;
         }
         final int rotationDelta = mWaitForFixedRotation
@@ -1501,7 +1560,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
                 // Could happen if onTaskVanished happens during the animation since we may have
                 // set a start delay on this animation.
-                Log.d(TAG, "Task vanished, skip fadeOutAndRemoveOverlay");
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Task vanished, skip fadeOutAndRemoveOverlay", TAG);
                 animation.removeAllListeners();
                 animation.removeAllUpdateListeners();
                 animation.cancel();

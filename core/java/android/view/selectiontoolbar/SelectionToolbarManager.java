@@ -105,7 +105,7 @@ public final class SelectionToolbarManager {
 
     private boolean isRemoteSelectionToolbarEnabled() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SELECTION_TOOLBAR,
-                REMOTE_SELECTION_TOOLBAR_ENABLED, true);
+                REMOTE_SELECTION_TOOLBAR_ENABLED, false);
     }
 
     /**

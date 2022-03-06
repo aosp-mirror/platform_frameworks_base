@@ -20,7 +20,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Системен ПИ"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Батерията може скоро да се изтощи"</string>
+    <!-- no translation found for battery_low_title (5319680173344341779) -->
+    <skip />
+    <!-- no translation found for battery_low_description (3282977755476423966) -->
+    <skip />
+    <!-- no translation found for battery_low_intro (5148725009653088790) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Остава/т <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Зареждането през USB не е възможно"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Използвайте оригиналното зарядно устройство"</string>
@@ -111,7 +116,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Гласова помощ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Портфейл"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Инструмент за сканиране на QR кодове"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Скенер за QR кодове"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Отключване"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Устройството е заключено"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Извършва се сканиране на лице"</string>
@@ -128,6 +133,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицето е удостоверено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потвърдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Докоснете „Потвърждаване“ за завършване"</string>
+    <!-- no translation found for biometric_dialog_tap_confirm_with_face (1597899891472340950) -->
+    <skip />
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Удостоверено"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Използване на ПИН"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Използване на фигура"</string>
@@ -181,6 +188,7 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затваряне"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"пълна тишина"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"само будилници"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Не безпокойте."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Функцията за Bluetooth е включена."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Будилникът е навит за <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -205,6 +213,7 @@
     <string name="dessert_case" msgid="9104973640704357717">"Витрина с десерти"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Скрийнсейвър"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
+    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не безпокойте"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Няма налични сдвоени устройства"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -348,6 +357,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известия"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Изчистване на всички беззвучни известия"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известията са поставени на пауза от режима „Не безпокойте“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Стартиране сега"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Няма известия"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Това устройство се управлява от родителя ви"</string>
@@ -491,6 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Състояние:&lt;/b&gt; Класирано по-ниско"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, прекъсва режима „Не безпокойте“"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Показва се в горната част на известията за разговори и като снимка на потребителския профил на заключения екран, изглежда като балонче, прекъсва режима „Не безпокойте“"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Тези известия не могат да бъдат променяни."</string>
@@ -566,6 +578,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музика"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календар"</string>
+    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не безпокойте"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Пряк път към бутоните за силата на звука"</string>
     <string name="battery" msgid="769686279459897127">"Батерия"</string>
     <string name="headset" msgid="4485892374984466437">"Слушалки"</string>
@@ -684,6 +697,10 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Функцията за Wi‑Fi е изключена"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Функцията за Bluetooth е изключена"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"Режимът „Не безпокойте“ е изключен"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режимът „Не безпокойте“ бе включен от автоматично правило (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Режимът „Не безпокойте“ бе включен от приложение (<xliff:g id="ID_1">%s</xliff:g>)."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Режимът „Не безпокойте“ бе включен от автоматично правило или от приложение."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Приложения, работещи на заден план"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се изключат ли мобилните данни?"</string>
@@ -708,6 +725,8 @@
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(служебно)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонно обаждане"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(чрез <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
+    <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"камерата"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"местополож."</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофона"</string>
@@ -806,6 +825,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(връзката е прекратена)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не може да се превключи. Докоснете за нов опит."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Сдвояване на ново устройство"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"За да предавате тази сесия, моля, отворете приложението."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестно приложение"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
@@ -839,6 +860,7 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Над <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Преглеждайте скорошни съобщения, пропуснати обаждания и информация за състоянието"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Разговор"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Поставено на пауза от режима „Не безпокойте“"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> изпрати съобщение: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> изпрати изображение"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> има актуализация на състоянието: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -877,8 +899,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> активни приложения</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> активно приложение</item>
     </plurals>
-    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
-    <skip />
+    <string name="fgs_dot_content_description" msgid="2865071539464777240">"Нова информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активни приложения"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спиране"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спряно"</string>
@@ -886,14 +907,17 @@
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Копирано"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"От <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Отхвърляне на ПИ за копиране"</string>
-    <!-- no translation found for clipboard_edit_text_description (805254383912962103) -->
-    <skip />
-    <!-- no translation found for clipboard_edit_image_description (8904857948976041306) -->
-    <skip />
-    <!-- no translation found for clipboard_send_nearby_description (4629769637846717650) -->
-    <skip />
-    <!-- no translation found for add (81036585205287996) -->
-    <skip />
-    <!-- no translation found for manage_users (1823875311934643849) -->
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"Редактиране на копирания текст"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Редактиране на копираното изображение"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Изпращане до устройство в близост"</string>
+    <string name="add" msgid="81036585205287996">"Добавяне"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
+    <string name="drag_split_not_supported" msgid="4326847447699729722">"Това известие не поддържа плъзгане за разделяне на екрана."</string>
+    <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi не е налице"</string>
+    <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Приоритетен режим"</string>
+    <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будилникът е зададен"</string>
+    <string name="dream_overlay_status_bar_assistant_guest_mode_enabled" msgid="3715897096012469615">"Режимът на гост за Асистент е активиран"</string>
+    <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камерата и микрофонът са изключени"</string>
+    <!-- no translation found for dream_overlay_status_bar_notification_indicator (8091389255691081711) -->
     <skip />
 </resources>

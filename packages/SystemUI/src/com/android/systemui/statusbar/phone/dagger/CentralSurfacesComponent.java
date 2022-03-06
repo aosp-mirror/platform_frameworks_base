@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.render.StatusBarNotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
@@ -60,8 +59,8 @@ import dagger.Subcomponent;
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
 @Subcomponent(modules = {
+        CentralSurfacesStartableModule.class,
         NotificationStackScrollLayoutListContainerModule.class,
-        StatusBarNotifPanelEventSourceModule.class,
         StatusBarViewModule.class,
         StatusBarNotificationActivityStarterModule.class,
         StatusBarNotificationPresenterModule.class,
