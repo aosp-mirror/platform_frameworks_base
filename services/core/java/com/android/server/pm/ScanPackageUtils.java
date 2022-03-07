@@ -165,25 +165,15 @@ final class ScanPackageUtils {
             }
         }
 
-        int previousAppId = Process.INVALID_UID;
-
         if (pkgSetting != null && oldSharedUserSetting != sharedUserSetting) {
-            if (oldSharedUserSetting != null && sharedUserSetting == null) {
-                previousAppId = pkgSetting.getAppId();
-                // Log that something is leaving shareduid and keep going
-                Slog.i(TAG,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + oldSharedUserSetting.name + " to " + "<nothing>.");
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + (oldSharedUserSetting != null
-                                ? oldSharedUserSetting.name : "<nothing>")
-                                + " to "
-                                + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
-                                + "; replacing with new");
-                pkgSetting = null;
-            }
+            PackageManagerService.reportSettingsProblem(Log.WARN,
+                    "Package " + parsedPackage.getPackageName() + " shared user changed from "
+                            + (oldSharedUserSetting != null
+                            ? oldSharedUserSetting.name : "<nothing>")
+                            + " to "
+                            + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
+                            + "; replacing with new");
+            pkgSetting = null;
         }
 
         String[] usesSdkLibraries = null;
@@ -474,8 +464,8 @@ final class ScanPackageUtils {
 
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
-                previousAppId, sdkLibraryInfo, staticSharedLibraryInfo,
-                dynamicSharedLibraryInfos);
+                Process.INVALID_UID /* previousAppId */ , sdkLibraryInfo,
+                staticSharedLibraryInfo, dynamicSharedLibraryInfos);
     }
 
     /**
