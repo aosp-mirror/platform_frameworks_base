@@ -329,8 +329,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     void hideImmediately(WindowToken windowToken) {
         final boolean original = mHideImmediately;
         mHideImmediately = true;
+        final Operation op = new Operation(Operation.ACTION_FADE);
+        mTargetWindowTokens.put(windowToken, op);
         fadeWindowToken(false /* show */, windowToken, ANIMATION_TYPE_FIXED_TRANSFORM);
+        op.mLeash = windowToken.getAnimationLeash();
         mHideImmediately = original;
+        if (DEBUG) Slog.d(TAG, "hideImmediately " + windowToken.getTopChild());
     }
 
     /** Returns {@code true} if the window will rotate independently. */
