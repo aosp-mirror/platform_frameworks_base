@@ -29,6 +29,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -74,6 +75,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
+    private lateinit var uiEventLoggerFake: UiEventLoggerFake
+    private lateinit var senderUiEventLogger: MediaTttSenderUiEventLogger
 
     @Before
     fun setUp() {
@@ -89,6 +92,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
+        uiEventLoggerFake = UiEventLoggerFake()
+        senderUiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
 
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
@@ -97,7 +102,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             windowManager,
             viewUtil,
             fakeExecutor,
-            TapGestureDetector(context)
+            TapGestureDetector(context),
+            senderUiEventLogger
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -116,6 +122,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             almostCloseToStartCast().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST.id
+        )
     }
 
     @Test
@@ -128,6 +137,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         assertThat(getChipView().getChipText()).isEqualTo(
             almostCloseToEndCast().state.getChipTextString(context, OTHER_DEVICE_NAME)
+        )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST.id
         )
     }
 
@@ -142,6 +154,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToReceiverTriggered().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED.id
+        )
     }
 
     @Test
@@ -154,6 +169,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToThisDeviceTriggered().state.getChipTextString(context, OTHER_DEVICE_NAME)
+        )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED.id
         )
     }
 
@@ -168,6 +186,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToReceiverSucceeded().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id
+        )
     }
 
     @Test
@@ -180,6 +201,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToThisDeviceSucceeded().state.getChipTextString(context, OTHER_DEVICE_NAME)
+        )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED.id
         )
     }
 
@@ -194,6 +218,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToReceiverFailed().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED.id
+        )
     }
 
     @Test
@@ -207,6 +234,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToThisDeviceFailed().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED.id
+        )
     }
 
     @Test
@@ -218,6 +248,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         )
 
         verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_FAR_FROM_RECEIVER.id
+        )
     }
 
     @Test
@@ -376,6 +409,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToThisDeviceTriggered().state.getChipTextString(context, OTHER_DEVICE_NAME)
         )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_RECEIVER_CLICKED.id
+        )
     }
 
     @Test
@@ -439,6 +475,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         assertThat(getChipView().getChipText()).isEqualTo(
             transferToReceiverTriggered().state.getChipTextString(context, OTHER_DEVICE_NAME)
+        )
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttSenderUiEvents.MEDIA_TTT_SENDER_UNDO_TRANSFER_TO_THIS_DEVICE_CLICKED.id
         )
     }
 
