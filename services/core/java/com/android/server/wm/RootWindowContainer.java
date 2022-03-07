@@ -149,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
@@ -3329,6 +3330,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         mService.startLaunchPowerMode(reason);
+    }
+
+    /**
+     * Iterate over all task fragments, to see if there exists one that meets the
+     * PermissionPolicyService's criteria to show a permission dialog.
+     */
+    public int getTaskToShowPermissionDialogOn(String pkgName, int uid) {
+        PermissionPolicyInternal pPi = mService.getPermissionPolicyInternal();
+        if (pPi == null) {
+            return INVALID_TASK_ID;
+        }
+
+        final int[] validTaskId = {INVALID_TASK_ID};
+        forAllLeafTaskFragments(fragment -> {
+            ActivityRecord record = fragment.getActivity((r) -> {
+                // skip hidden (or about to hide) apps, or the permission dialog
+                return r.canBeTopRunning() && r.isVisibleRequested()
+                        && !pPi.isIntentToPermissionDialog(r.intent);
+            });
+            if (record != null && record.isUid(uid)
+                    && Objects.equals(pkgName, record.packageName)
+                    && pPi.shouldShowNotificationDialogForTask(record.getTask().getTaskInfo(),
+                    pkgName, record.intent)) {
+                validTaskId[0] = record.getTask().mTaskId;
+                return true;
+            }
+            return false;
+        });
+
+        return validTaskId[0];
     }
 
     /**

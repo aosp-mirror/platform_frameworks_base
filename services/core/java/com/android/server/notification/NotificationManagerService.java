@@ -3746,6 +3746,10 @@ public class NotificationManagerService extends SystemService {
                     if (!hadChannel && hasChannel && !hasRequestedNotificationPermission
                             && startingTaskId != ActivityTaskManager.INVALID_TASK_ID) {
                         hasRequestedNotificationPermission = true;
+                        if (mPermissionPolicyInternal == null) {
+                            mPermissionPolicyInternal =
+                                    LocalServices.getService(PermissionPolicyInternal.class);
+                        }
                         mHandler.post(new ShowNotificationPermissionPromptRunnable(pkg,
                                 UserHandle.getUserId(uid), startingTaskId,
                                 mPermissionPolicyInternal));
@@ -3764,19 +3768,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 int uid = mPackageManager.getPackageUid(pkg, 0,
                         UserHandle.getUserId(Binder.getCallingUid()));
-                List<ActivityManager.AppTask> tasks = mAtm.getAppTasks(pkg, uid);
-                for (int i = 0; i < tasks.size(); i++) {
-                    ActivityManager.RecentTaskInfo task = tasks.get(i).getTaskInfo();
-                    if (mPermissionPolicyInternal == null) {
-                        mPermissionPolicyInternal =
-                                LocalServices.getService(PermissionPolicyInternal.class);
-                    }
-                    if (mPermissionPolicyInternal != null
-                            && mPermissionPolicyInternal.canShowPermissionPromptForTask(task)) {
-                        taskId = task.taskId;
-                        break;
-                    }
-                }
+                taskId = mAtm.getTaskToShowPermissionDialogOn(pkg, uid);
             } catch (RemoteException e) {
                 // Do nothing
             }
