@@ -74,6 +74,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
 
     /**
+     * Namespace for activity manager, specific to the "component alias" feature. We needed a
+     * different namespace in order to avoid phonetype from resetting it.
+     * @hide
+     */
+    public static final String NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS = "activity_manager_ca";
+
+    /**
      * Namespace for all activity manager related features that are used at the native level.
      * These features are applied at reboot.
      *

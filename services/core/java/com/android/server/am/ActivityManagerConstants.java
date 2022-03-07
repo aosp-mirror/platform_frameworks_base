@@ -127,7 +127,15 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
             "kill_bg_restricted_cached_idle_settle_time";
+    /**
+     * Note this key is on {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS}.
+     * @see #mEnableComponentAlias
+     */
     static final String KEY_ENABLE_COMPONENT_ALIAS = "enable_experimental_component_alias";
+    /**
+     * Note this key is on {@link DeviceConfig#NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS}.
+     * @see #mComponentAliasOverrides
+     */
     static final String KEY_COMPONENT_ALIAS_OVERRIDES = "component_alias_overrides";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -899,10 +907,6 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
                                 updateEnableExtraServiceRestartDelayOnMemPressure();
                                 break;
-                            case KEY_ENABLE_COMPONENT_ALIAS:
-                            case KEY_COMPONENT_ALIAS_OVERRIDES:
-                                updateComponentAliases();
-                                break;
                             case KEY_PROCESS_KILL_TIMEOUT:
                                 updateProcessKillTimeout();
                                 break;
@@ -917,6 +921,26 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_MAX_EMPTY_TIME_MILLIS:
                                 updateMaxEmptyTimeMillis();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            };
+
+    private final OnPropertiesChangedListener mOnDeviceConfigChangedForComponentAliasListener =
+            new OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(Properties properties) {
+                    for (String name : properties.getKeyset()) {
+                        if (name == null) {
+                            return;
+                        }
+                        switch (name) {
+                            case KEY_ENABLE_COMPONENT_ALIAS:
+                            case KEY_COMPONENT_ALIAS_OVERRIDES:
+                                updateComponentAliases();
                                 break;
                             default:
                                 break;
@@ -991,6 +1015,10 @@ final class ActivityManagerConstants extends ContentObserver {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS,
+                ActivityThread.currentApplication().getMainExecutor(),
+                mOnDeviceConfigChangedForComponentAliasListener);
         loadDeviceConfigConstants();
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
@@ -1000,6 +1028,9 @@ final class ActivityManagerConstants extends ContentObserver {
     private void loadDeviceConfigConstants() {
         mOnDeviceConfigChangedListener.onPropertiesChanged(
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
+        mOnDeviceConfigChangedForComponentAliasListener.onPropertiesChanged(
+                DeviceConfig.getProperties(
+                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS));
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -1379,11 +1410,11 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private void updateComponentAliases() {
         mEnableComponentAlias = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS,
                 KEY_ENABLE_COMPONENT_ALIAS,
                 DEFAULT_ENABLE_COMPONENT_ALIAS);
         mComponentAliasOverrides = DeviceConfig.getString(
-                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS,
                 KEY_COMPONENT_ALIAS_OVERRIDES,
                 DEFAULT_COMPONENT_ALIAS_OVERRIDES);
         mService.mComponentAliasResolver.update(mEnableComponentAlias, mComponentAliasOverrides);
