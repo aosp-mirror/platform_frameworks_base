@@ -32,6 +32,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -328,6 +329,7 @@ public class TransitionTests extends WindowTestsBase {
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
             act.mVisibleRequested = (i % 2) == 0; // starts invisible
+            act.visibleIgnoringKeyguard = (i % 2) == 0;
             if (i == showWallpaperTask) {
                 doReturn(true).when(act).showWallpaper();
             }
@@ -487,6 +489,86 @@ public class TransitionTests extends WindowTestsBase {
         // open/close within a change are independent
         assertTrue(isIndependent(
                 info.getChange(openInChangeTask.mRemoteToken.toWindowContainerToken()), info));
+    }
+
+    @Test
+    public void testOpenOpaqueTask() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task newTask = createTask(mDisplayContent);
+        doReturn(false).when(newTask).isTranslucent(any());
+        final Task oldTask = createTask(mDisplayContent);
+        doReturn(false).when(oldTask).isTranslucent(any());
+
+        final ActivityRecord closing = createActivityRecord(oldTask);
+        closing.setOccludesParent(true);
+        final ActivityRecord opening = createActivityRecord(newTask);
+        opening.setOccludesParent(false);
+        // Start states.
+        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        fillChangeMap(changes, newTask);
+        // End states.
+        closing.mVisibleRequested = true;
+        opening.mVisibleRequested = true;
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(oldTask);
+        participants.add(newTask);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertTrue((info.getChanges().get(0).getFlags() & FLAG_TRANSLUCENT) == 0);
+        assertTrue((info.getChanges().get(1).getFlags() & FLAG_TRANSLUCENT) == 0);
+    }
+
+    @Test
+    public void testOpenTranslucentTask() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task newTask = createTask(mDisplayContent);
+        doReturn(true).when(newTask).isTranslucent(any());
+        final Task oldTask = createTask(mDisplayContent);
+        doReturn(false).when(oldTask).isTranslucent(any());
+
+        final ActivityRecord closing = createActivityRecord(oldTask);
+        closing.setOccludesParent(true);
+        final ActivityRecord opening = createActivityRecord(newTask);
+        opening.setOccludesParent(false);
+        // Start states.
+        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        fillChangeMap(changes, newTask);
+        // End states.
+        closing.mVisibleRequested = true;
+        opening.mVisibleRequested = true;
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(oldTask);
+        participants.add(newTask);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertTrue((info.getChanges().get(0).getFlags() & FLAG_TRANSLUCENT) != 0);
+        assertTrue((info.getChanges().get(1).getFlags() & FLAG_TRANSLUCENT) == 0);
     }
 
     @Test
