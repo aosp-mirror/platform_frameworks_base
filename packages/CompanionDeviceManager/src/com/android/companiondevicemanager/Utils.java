@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -119,6 +120,12 @@ class Utils {
                 packageName, flags, userId);
 
         return appInfo;
+    }
+
+    static @NonNull Drawable getIcon(@NonNull Context context, int resId) {
+        Drawable icon = context.getResources().getDrawable(resId, null);
+        icon.setTint(Color.DKGRAY);
+        return icon;
     }
 
     static void runOnMainThread(Runnable runnable) {
