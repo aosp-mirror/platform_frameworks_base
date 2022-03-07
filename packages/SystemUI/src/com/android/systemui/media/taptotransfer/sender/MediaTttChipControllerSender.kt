@@ -28,6 +28,7 @@ import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttRemovalReason
@@ -50,7 +51,7 @@ class MediaTttChipControllerSender @Inject constructor(
     viewUtil: ViewUtil,
     @Main mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
-) : MediaTttChipControllerCommon<ChipStateSender>(
+) : MediaTttChipControllerCommon<ChipSenderInfo>(
     context,
     logger,
     windowManager,
@@ -82,104 +83,82 @@ class MediaTttChipControllerSender @Inject constructor(
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?
     ) {
-        logger.logStateChange(stateIntToString(displayState), routeInfo.id)
-        val appPackageName = routeInfo.packageName
-        val otherDeviceName = routeInfo.name.toString()
-        val chipState = when(displayState) {
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST ->
-                AlmostCloseToStartCast(appPackageName, otherDeviceName)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST ->
-                AlmostCloseToEndCast(appPackageName, otherDeviceName)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED ->
-                TransferToReceiverTriggered(appPackageName, otherDeviceName)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED ->
-                TransferToThisDeviceTriggered(appPackageName)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED ->
-                TransferToReceiverSucceeded(appPackageName, otherDeviceName, undoCallback)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED ->
-                TransferToThisDeviceSucceeded(appPackageName, otherDeviceName, undoCallback)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
-                TransferFailed(appPackageName)
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER -> {
-                removeChip(removalReason = FAR_FROM_RECEIVER)
-                null
-            }
-            else -> {
-                Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
-                null
-            }
+        val chipState: ChipStateSender? = ChipStateSender.getSenderStateFromId(displayState)
+        val stateName = chipState?.name ?: "Invalid"
+        logger.logStateChange(stateName, routeInfo.id)
+
+        if (chipState == null) {
+            Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
+            return
         }
 
-        chipState?.let {
-            displayChip(it)
+        if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
+            removeChip(removalReason = ChipStateSender.FAR_FROM_RECEIVER::class.simpleName!!)
+        } else {
+            displayChip(ChipSenderInfo(chipState, routeInfo, undoCallback))
         }
     }
 
     /** Displays the chip view for the given state. */
-    override fun updateChipView(chipState: ChipStateSender, currentChipView: ViewGroup) {
+    override fun updateChipView(
+            chipInfo: ChipSenderInfo,
+            currentChipView: ViewGroup) {
+        val chipState = chipInfo.state
         currentlyDisplayedChipState = chipState
 
         // App icon
-        setIcon(chipState, currentChipView)
+        setIcon(currentChipView, chipInfo.routeInfo.packageName)
 
         // Text
+        val otherDeviceName = chipInfo.routeInfo.name.toString()
         currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = chipState.getChipTextString(context)
+            text = chipState.getChipTextString(context, otherDeviceName)
         }
 
         // Loading
         currentChipView.requireViewById<View>(R.id.loading).visibility =
-            if (chipState.showLoading()) { View.VISIBLE } else { View.GONE }
+            chipState.isMidTransfer.visibleIfTrue()
+
 
         // Undo
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
-        val undoClickListener = chipState.undoClickListener(this)
+        val undoClickListener = chipState.undoClickListener(
+                this, chipInfo.routeInfo, chipInfo.undoCallback
+        )
         undoView.setOnClickListener(undoClickListener)
-        undoView.visibility = if (undoClickListener != null) { View.VISIBLE } else { View.GONE }
+        undoView.visibility = (undoClickListener != null).visibleIfTrue()
 
         // Failure
-        val showFailure = chipState is TransferFailed
         currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
-            if (showFailure) { View.VISIBLE } else { View.GONE }
+            chipState.isTransferFailure.visibleIfTrue()
     }
 
     override fun removeChip(removalReason: String) {
         // Don't remove the chip if we're mid-transfer since the user should still be able to
         // see the status of the transfer. (But do remove it if it's finally timed out.)
-        if ((currentlyDisplayedChipState is TransferToReceiverTriggered ||
-                currentlyDisplayedChipState is TransferToThisDeviceTriggered)
-            && removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
+        if (currentlyDisplayedChipState?.isMidTransfer == true
+                && removalReason != MediaTttRemovalReason.REASON_TIMEOUT) {
             return
         }
         super.removeChip(removalReason)
         currentlyDisplayedChipState = null
     }
 
-    private fun stateIntToString(@StatusBarManager.MediaTransferSenderState state: Int): String {
-        return when(state) {
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST ->
-                "ALMOST_CLOSE_TO_START_CAST"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST ->
-                "ALMOST_CLOSE_TO_END_CAST"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED ->
-                "TRANSFER_TO_RECEIVER_TRIGGERED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED ->
-                "TRANSFER_TO_THIS_DEVICE_TRIGGERED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED ->
-                "TRANSFER_TO_RECEIVER_SUCCEEDED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED ->
-                "TRANSFER_TO_THIS_DEVICE_SUCCEEDED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED ->
-                "TRANSFER_TO_RECEIVER_FAILED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
-                "TRANSFER_TO_THIS_DEVICE_FAILED"
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER ->
-                FAR_FROM_RECEIVER
-            else -> "INVALID: $state"
+    private fun Boolean.visibleIfTrue(): Int {
+        return if (this) {
+            View.VISIBLE
+        } else {
+            View.GONE
         }
     }
 }
 
+data class ChipSenderInfo(
+    val state: ChipStateSender,
+    val routeInfo: MediaRoute2Info,
+    val undoCallback: IUndoMediaTransferCallback? = null
+) : ChipInfoCommon {
+    override fun getTimeoutMs() = state.timeout
+}
+
 const val SENDER_TAG = "MediaTapToTransferSender"
-private const val FAR_FROM_RECEIVER = "FAR_FROM_RECEIVER"
