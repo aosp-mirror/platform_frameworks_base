@@ -4060,13 +4060,12 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(
-                String pkg, int userId) {
+                String pkg, int uid) {
             checkCallerIsSystem();
-            if (!areNotificationsEnabledForPackage(pkg,
-                    mPackageManagerInternal.getPackageUid(pkg, 0, userId))) {
+            if (!areNotificationsEnabledForPackage(pkg, uid)) {
                 return ParceledListSlice.emptyList();
             }
-            return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, userId);
+            return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, uid);
         }
 
         @Override
