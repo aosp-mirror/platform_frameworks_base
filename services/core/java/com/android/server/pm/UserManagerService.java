@@ -1564,13 +1564,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isCredentialSharedWithParent(@UserIdInt int userId) {
+    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharedWithParent");
+                "isCredentialSharableWithParent");
         synchronized (mUsersLock) {
             UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
             return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharedWithParent();
+                    && userTypeDetails.isCredentialSharableWithParent();
         }
     }
 
