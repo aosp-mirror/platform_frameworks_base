@@ -17,8 +17,7 @@
 package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
-import com.android.systemui.media.taptotransfer.common.DEFAULT_TIMEOUT_MILLIS
-import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
+import com.android.internal.logging.UiEventLogger
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
@@ -26,12 +25,15 @@ import com.android.systemui.media.taptotransfer.common.ChipInfoCommon
  */
 enum class ChipStateReceiver(
     @StatusBarManager.MediaTransferSenderState val stateInt: Int,
+    val uiEvent: UiEventLogger.UiEventEnum,
 ) {
     CLOSE_TO_SENDER(
         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER,
     ),
     FAR_FROM_SENDER(
         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+        MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER,
     );
 
     companion object {
