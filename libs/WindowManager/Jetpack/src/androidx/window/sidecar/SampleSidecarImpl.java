@@ -30,9 +30,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
-import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.ResourceConfigDisplayFeatureProducer;
-import androidx.window.common.SettingsDevicePostureProducer;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.SettingsDisplayFeatureProducer;
 import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
@@ -48,36 +46,23 @@ import java.util.Optional;
  */
 class SampleSidecarImpl extends StubSidecar {
     private static final String TAG = "SampleSidecar";
-    private static final boolean DEBUG = false;
 
-    private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
-    private final DataProducer<Integer> mDevicePostureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
-    private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<CommonFoldingFeature>> mDisplayFeatureProducer;
+    private final SettingsDisplayFeatureProducer mSettingsFoldingFeatureProducer;
 
     SampleSidecarImpl(Context context) {
-        mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
-        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDevicePostureProducer,
-                new DeviceStateManagerPostureProducer(context)
+        mSettingsFoldingFeatureProducer = new SettingsDisplayFeatureProducer(context);
+        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
+                mSettingsFoldingFeatureProducer,
+                new DeviceStateManagerFoldingFeatureProducer(context)
         ));
 
-        mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDisplayFeatureProducer,
-                new ResourceConfigDisplayFeatureProducer(context)
-        ));
-
-        mDevicePostureProducer.addDataChangedCallback(this::onDevicePostureChanged);
-        mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-    }
-
-    private void onDevicePostureChanged() {
-        updateDeviceState(getDeviceState());
+        mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
     private void onDisplayFeaturesChanged() {
+        updateDeviceState(getDeviceState());
         for (IBinder windowToken : getWindowsListeningForLayoutChanges()) {
             SidecarWindowLayoutInfo newLayout = getWindowLayoutInfo(windowToken);
             updateWindowLayout(windowToken, newLayout);
@@ -87,23 +72,17 @@ class SampleSidecarImpl extends StubSidecar {
     @NonNull
     @Override
     public SidecarDeviceState getDeviceState() {
-        Optional<Integer> posture = mDevicePostureProducer.getData();
-
         SidecarDeviceState deviceState = new SidecarDeviceState();
-        deviceState.posture = posture.orElse(deviceStateFromFeature());
+        deviceState.posture = deviceStateFromFeature();
         return deviceState;
     }
 
     private int deviceStateFromFeature() {
-        List<CommonFoldingFeature> storedFeatures = mDisplayFeatureProducer.getData()
+        List<CommonFoldingFeature> storedFeatures = mFoldingFeatureProducer.getData()
                 .orElse(Collections.emptyList());
         for (int i = 0; i < storedFeatures.size(); i++) {
             CommonFoldingFeature feature = storedFeatures.get(i);
-            final int state = feature.getState() == null ? -1 : feature.getState();
-            if (DEBUG && feature.getState() == null) {
-                Log.d(TAG, "feature#getState was null for DisplayFeature: " + feature);
-            }
-
+            final int state = feature.getState();
             switch (state) {
                 case CommonFoldingFeature.COMMON_STATE_FLAT:
                     return SidecarDeviceState.POSTURE_OPENED;
@@ -127,20 +106,20 @@ class SampleSidecarImpl extends StubSidecar {
     }
 
     private List<SidecarDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
-        List<SidecarDisplayFeature> features = new ArrayList<>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
-            return features;
+            return Collections.emptyList();
         }
 
         if (activity.isInMultiWindowMode()) {
             // It is recommended not to report any display features in multi-window mode, since it
             // won't be possible to synchronize the display feature positions with window movement.
-            return features;
+            return Collections.emptyList();
         }
 
-        Optional<List<CommonFoldingFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mFoldingFeatureProducer.getData();
+        List<SidecarDisplayFeature> features = new ArrayList<>();
         if (storedFeatures.isPresent()) {
             for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
                 SidecarDisplayFeature feature = new SidecarDisplayFeature();
@@ -152,17 +131,15 @@ class SampleSidecarImpl extends StubSidecar {
                 features.add(feature);
             }
         }
-        return features;
+        return Collections.unmodifiableList(features);
     }
 
     @Override
     protected void onListenersChanged() {
         if (hasListeners()) {
-            mSettingsDevicePostureProducer.registerObserversIfNeeded();
-            mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
+            mSettingsFoldingFeatureProducer.registerObserversIfNeeded();
         } else {
-            mSettingsDevicePostureProducer.unregisterObserversIfNeeded();
-            mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
+            mSettingsFoldingFeatureProducer.unregisterObserversIfNeeded();
         }
     }
 }

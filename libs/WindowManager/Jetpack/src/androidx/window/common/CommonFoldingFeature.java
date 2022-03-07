@@ -21,11 +21,14 @@ import static androidx.window.util.ExtensionHelper.isZero;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +39,10 @@ import java.util.regex.Pattern;
  * {@link androidx.window.extensions.layout.FoldingFeature}.
  */
 public final class CommonFoldingFeature {
+
+    private static final boolean DEBUG = false;
+
+    public static final String TAG = CommonFoldingFeature.class.getSimpleName();
 
     /**
      * A common type to represent a hinge where the screen is continuous.
@@ -54,6 +61,12 @@ public final class CommonFoldingFeature {
     }
 
     /**
+     * A common state to represent when the state is not known. One example is if the device is
+     * closed. We do not emit this value for developers but is useful for implementation reasons.
+     */
+    public static final int COMMON_STATE_UNKNOWN = -1;
+
+    /**
      * A common state to represent a FLAT hinge. This is needed because the definitions in Sidecar
      * and Extensions do not match exactly.
      */
@@ -67,7 +80,7 @@ public final class CommonFoldingFeature {
     /**
      * The possible states for a folding hinge.
      */
-    @IntDef({COMMON_STATE_FLAT, COMMON_STATE_HALF_OPENED})
+    @IntDef({COMMON_STATE_UNKNOWN, COMMON_STATE_FLAT, COMMON_STATE_HALF_OPENED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
     }
@@ -82,14 +95,48 @@ public final class CommonFoldingFeature {
     private static final String PATTERN_STATE_HALF_OPENED = "half-opened";
 
     /**
+     * Parse a {@link List} of {@link CommonFoldingFeature} from a {@link String}.
+     * @param value a {@link String} representation of multiple {@link CommonFoldingFeature}
+     *              separated by a ":".
+     * @param hingeState a global fallback value for a {@link CommonFoldingFeature} if one is not
+     *                   specified in the input.
+     * @throws IllegalArgumentException if the provided string is improperly formatted or could not
+     * otherwise be parsed.
+     * @see #FEATURE_PATTERN
+     * @return {@link List} of {@link CommonFoldingFeature}.
+     */
+    static List<CommonFoldingFeature> parseListFromString(@NonNull String value,
+            @State int hingeState) {
+        List<CommonFoldingFeature> features = new ArrayList<>();
+        String[] featureStrings =  value.split(";");
+        for (String featureString : featureStrings) {
+            CommonFoldingFeature feature;
+            try {
+                feature = CommonFoldingFeature.parseFromString(featureString, hingeState);
+            } catch (IllegalArgumentException e) {
+                if (DEBUG) {
+                    Log.w(TAG, "Failed to parse display feature: " + featureString, e);
+                }
+                continue;
+            }
+            features.add(feature);
+        }
+        return features;
+    }
+
+    /**
      * Parses a display feature from a string.
      *
+     * @param string A {@link String} representation of a {@link CommonFoldingFeature}.
+     * @param hingeState A fallback value for the {@link State} if it is not specified in the input.
      * @throws IllegalArgumentException if the provided string is improperly formatted or could not
      *                                  otherwise be parsed.
+     * @return {@link CommonFoldingFeature} represented by the {@link String} value.
      * @see #FEATURE_PATTERN
      */
     @NonNull
-    static CommonFoldingFeature parseFromString(@NonNull String string) {
+    private static CommonFoldingFeature parseFromString(@NonNull String string,
+            @State int hingeState) {
         Matcher featureMatcher = FEATURE_PATTERN.matcher(string);
         if (!featureMatcher.matches()) {
             throw new IllegalArgumentException("Malformed feature description format: " + string);
@@ -120,7 +167,7 @@ public final class CommonFoldingFeature {
             }
             String stateString = featureMatcher.group(6);
             stateString = stateString == null ? "" : stateString;
-            Integer state;
+            final int state;
             switch (stateString) {
                 case PATTERN_STATE_FLAT:
                     state = COMMON_STATE_FLAT;
@@ -129,7 +176,7 @@ public final class CommonFoldingFeature {
                     state = COMMON_STATE_HALF_OPENED;
                     break;
                 default:
-                    state = null;
+                    state = hingeState;
                     break;
             }
             return new CommonFoldingFeature(type, state, featureRect);
@@ -140,11 +187,11 @@ public final class CommonFoldingFeature {
 
     private final int mType;
     @Nullable
-    private final Integer mState;
+    private final int mState;
     @NonNull
     private final Rect mRect;
 
-    CommonFoldingFeature(int type, @Nullable Integer state, @NonNull Rect rect) {
+    CommonFoldingFeature(int type, int state, @NonNull Rect rect) {
         assertValidState(state);
         this.mType = type;
         this.mState = state;
@@ -161,10 +208,9 @@ public final class CommonFoldingFeature {
         return mType;
     }
 
-    /** Returns the state of the feature, or {@code null} if the feature has no state. */
-    @Nullable
+    /** Returns the state of the feature.*/
     @State
-    public Integer getState() {
+    public int getState() {
         return mState;
     }
 
