@@ -1075,6 +1075,12 @@ public class CarrierConfigManager {
             "always_show_emergency_alert_onoff_bool";
 
     /**
+     * Default mobile network MTU value, in bytes.
+     * @hide
+     */
+    public static final String KEY_DEFAULT_MTU_INT = "default_mtu_int";
+
+    /**
      * The data call retry configuration for different types of APN.
      * @hide
      */
@@ -2931,19 +2937,37 @@ public class CarrierConfigManager {
             "signal_strength_nr_nsa_use_lte_as_primary_bool";
 
     /**
+     * String array of TCP buffer sizes per network type.
+     * The entries should be of the following form, with values in bytes:
+     * "network_name:read_min,read_default,read_max,write_min,write_default,write_max".
+     * For NR (5G), the following network names should be used:
+     * - NR_NSA: NR NSA, sub-6 frequencies
+     * - NR_NSA_MMWAVE: NR NSA, mmwave frequencies
+     * - NR_SA: NR SA, sub-6 frequencies
+     * - NR_SA_MMWAVE: NR SA, mmwave frequencies
+     * @hide
+     */
+    public static final String KEY_TCP_BUFFERS_STRING_ARRAY = "tcp_buffers_string_array";
+
+    /**
      * String array of default bandwidth values per network type.
-     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * The entries should be of form: "network_name:downlink,uplink", with values in Kbps.
+     * For NR (5G), the following network names should be used:
+     * - NR_NSA: NR NSA, sub-6 frequencies
+     * - NR_NSA_MMWAVE: NR NSA, mmwave frequencies
+     * - NR_SA: NR SA, sub-6 frequencies
+     * - NR_SA_MMWAVE: NR SA, mmwave frequencies
      * @hide
      */
     public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
 
     /**
      * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
-     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * uplink bandwidth. Downlink bandwidth will still use the NR value as the default.
      * @hide
      */
-    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
-            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_uplink_bool";
 
     /**
      * Key identifying if voice call barring notification is required to be shown to the user.
@@ -3643,6 +3667,18 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_ms_long";
+
+    /**
+     * Which NR types are unmetered. A string array containing the following keys:
+     * NR_NSA - NR NSA is unmetered for sub-6 frequencies
+     * NR_NSA_MMWAVE - NR NSA is unmetered for mmwave frequencies
+     * NR_SA - NR SA is unmetered for sub-6 frequencies
+     * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
+     * TODO: remove other unmetered keys and replace with this
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
+            "unmetered_network_types_string_array";
 
     /**
      * Whether NR (non-standalone) should be unmetered for all frequencies.
@@ -5832,6 +5868,7 @@ public class CarrierConfigManager {
 
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
+        sDefaults.putInt(KEY_DEFAULT_MTU_INT, 1500);
         sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
                 "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
                         + "320000:5000,640000:5000,1280000:5000,1800000:5000",
@@ -6150,12 +6187,35 @@ public class CarrierConfigManager {
                 CellSignalStrengthNr.USE_SSRSRP);
         sDefaults.putBoolean(KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);
         sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
-                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
-                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
-                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
-                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,18000",
-                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000"});
-        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA:14,14",
+                "1xRTT:30,30", "EvDo_0:750,48", "EvDo_A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo_B:1500,550", "eHRPD:750,48",
+                "iDEN:14,14", "LTE:30000,15000", "HSPA+:13000,3400", "GSM:24,24",
+                "TD_SCDMA:115,115", "LTE_CA:30000,15000", "NR_NSA:47000,18000",
+                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
+        sDefaults.putStringArray(KEY_TCP_BUFFERS_STRING_ARRAY, new String[]{
+                "GPRS:4092,8760,48000,4096,8760,48000", "EDGE:4093,26280,70800,4096,16384,70800",
+                "UMTS:58254,349525,1048576,58254,349525,1048576",
+                "CDMA:4094,87380,262144,4096,16384,262144",
+                "1xRTT:16384,32768,131072,4096,16384,102400",
+                "EvDo_0:4094,87380,262144,4096,16384,262144",
+                "EvDo_A:4094,87380,262144,4096,16384,262144",
+                "HSDPA:61167,367002,1101005,8738,52429,262114",
+                "HSUPA:40778,244668,734003,16777,100663,301990",
+                "HSPA:40778,244668,734003,16777,100663,301990",
+                "EvDo_B:4094,87380,262144,4096,16384,262144",
+                "eHRPD:131072,262144,1048576,4096,16384,524288",
+                "iDEN:4094,87380,262144,4096,16384,262144",
+                "LTE:524288,1048576,2097152,262144,524288,1048576",
+                "HSPA+:122334,734003,2202010,32040,192239,576717",
+                "GSM:4092,8760,48000,4096,8760,48000",
+                "TD_SCDMA:58254,349525,1048576,58254,349525,1048576",
+                "LTE_CA:4096,6291456,12582912,4096,1048576,2097152",
+                "NR_NSA:2097152,6291456,16777216,512000,2097152,8388608",
+                "NR_NSA_MMWAVE:2097152,6291456,16777216,512000,2097152,8388608",
+                "NR_SA:2097152,6291456,16777216,512000,2097152,8388608",
+                "NR_SA_MMWAVE:2097152,6291456,16777216,512000,2097152,8388608"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
@@ -6181,6 +6241,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_NR_ADVANCED_CAPABLE_PCO_ID_INT, 0);
         sDefaults.putBoolean(KEY_ENABLE_NR_ADVANCED_WHILE_ROAMING_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENDC_USING_USER_DATA_FOR_RRC_DETECTION_BOOL, false);
+        sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
