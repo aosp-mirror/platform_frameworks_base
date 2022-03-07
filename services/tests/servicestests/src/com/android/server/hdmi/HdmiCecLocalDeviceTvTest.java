@@ -89,6 +89,7 @@ public class HdmiCecLocalDeviceTvTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mTvPhysicalAddress;
     private int mTvLogicalAddress;
+    private boolean mWokenUp;
 
     @Mock
     private AudioManager mAudioManager;
@@ -103,6 +104,11 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.emptyList()) {
+                    @Override
+                    void wakeUp() {
+                        mWokenUp = true;
+                        super.wakeUp();
+                    }
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -305,6 +311,22 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
         assertThat(mPowerManager.isInteractive()).isFalse();
+    }
+
+    @Test
+    public void handleTextViewOn_Dreaming() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
+        mTestLooper.dispatchAll();
+        mPowerManager.setInteractive(true);
+        mWokenUp = false;
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(ADDR_PLAYBACK_1,
+                mTvLogicalAddress);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(textViewOn)).isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        assertThat(mWokenUp).isTrue();
     }
 
     @Test
