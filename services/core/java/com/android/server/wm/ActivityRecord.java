@@ -3642,6 +3642,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         finishing = true;
+
+        // Transfer the launch cookie to the next running activity above this in the same task.
+        if (mLaunchCookie != null && mState != RESUMED && task != null && !task.mInRemoveTask
+                && !task.isClearingToReuseTask()) {
+            final ActivityRecord nextCookieTarget = task.getActivity(
+                    // Intend to only associate the same app by checking uid.
+                    r -> r.mLaunchCookie == null && !r.finishing && r.isUid(getUid()),
+                    this, false /* includeBoundary */, false /* traverseTopToBottom */);
+            if (nextCookieTarget != null) {
+                nextCookieTarget.mLaunchCookie = mLaunchCookie;
+                mLaunchCookie = null;
+            }
+        }
+
         final TaskFragment taskFragment = getTaskFragment();
         if (taskFragment != null) {
             final Task task = taskFragment.getTask();
