@@ -18,7 +18,6 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Handler;
 import android.os.Looper;
@@ -137,6 +136,26 @@ import java.util.concurrent.atomic.AtomicLong;
  * With this cache, clients perform a binder call to birthdayd if asking for a user's birthday
  * for the first time; on subsequent queries, we return the already-known Birthday object.
  *
+ * The second parameter to the IpcDataCache constructor is a string that identifies the "module"
+ * that owns the cache. There are some well-known modules (such as {@code MODULE_SYSTEM} but any
+ * string is permitted.  The third parameters is the name of the API being cached; this, too, can
+ * any value.  The fourth is the name of the cache.  The cache is usually named after th API.
+ * Some things you must know about the three strings:
+ * <list>
+ * <ul> The system property that controls the cache is named {@code cache_key.<module>.<api>}.
+ * Usually, the SELinux rules permit a process to write a system property (and therefore
+ * invalidate a cache) based on the wildcard {@code cache_key.<module>.*}.  This means that
+ * although the cache can be constructed with any module string, whatever string is chosen must be
+ * consistent with the SELinux configuration.
+ * <ul> The API name can be any string of alphanumeric characters.  All caches with the same API
+ * are invalidated at the same time.  If a server supports several caches and all are invalidated
+ * in common, then it is most efficient to assign the same API string to every cache.
+ * <ul> The cache name can be any string.  In debug output, the name is used to distiguish between
+ * caches with the same API name.  The cache name is also used when disabling caches in the
+ * current process.  So, invalidation is based on the module+api but disabling (which is generally
+ * a once-per-process operation) is based on the cache name.
+ * </list>
+ *
  * User birthdays do occasionally change, so we have to modify the server to invalidate this
  * cache when necessary. That invalidation code looks like this:
  *
@@ -192,25 +211,23 @@ import java.util.concurrent.atomic.AtomicLong;
  * <pre>
  * public class ActivityThread {
  *   ...
- *   private static final int BDAY_CACHE_MAX = 8;  // Maximum birthdays to cache
- *   private static final String BDAY_CACHE_KEY = "cache_key.birthdayd";
- *   private final PropertyInvalidatedCache&lt;Integer, Birthday%&gt; mBirthdayCache = new
- *     PropertyInvalidatedCache&lt;Integer, Birthday%&gt;(BDAY_CACHE_MAX, BDAY_CACHE_KEY) {
- *       {@literal @}Override
- *       protected Birthday recompute(Integer userId) {
- *         return GetService("birthdayd").getUserBirthday(userId);
- *       }
- *       {@literal @}Override
- *       protected boolean bypass(Integer userId) {
- *         return userId == NEXT_BIRTHDAY;
- *       }
- *     };
+ *   private final IpcDataCache.QueryHandler&lt;Integer, Birthday&gt; mBirthdayQuery =
+ *       new IpcDataCache.QueryHandler&lt;Integer, Birthday&gt;() {
+ *           {@literal @}Override
+ *           public Birthday apply(Integer) {
+ *              return GetService("birthdayd").getUserBirthday(userId);
+ *           }
+ *           {@literal @}Override
+ *           public boolean shouldBypassQuery(Integer userId) {
+ *               return userId == NEXT_BIRTHDAY;
+ *           }
+ *       };
  *   ...
  * }
  * </pre>
  *
- * If the {@code bypass()} method returns true then the cache is not used for that
- * particular query.  The {@code bypass()} method is not abstract and the default
+ * If the {@code shouldBypassQuery()} method returns true then the cache is not used for that
+ * particular query.  The {@code shouldBypassQuery()} method is not abstract and the default
  * implementation returns false.
  *
  * For security, there is a allowlist of processes that are allowed to invalidate a cache.
@@ -231,14 +248,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * @param <Result> The class holding cache entries; use a boxed primitive if possible
  * @hide
  */
-@SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
 @TestApi
 public class PropertyInvalidatedCache<Query, Result> {
     /**
      * This is a configuration class that customizes a cache instance.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public static abstract class QueryHandler<Q,R> {
         /**
@@ -285,7 +300,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * The module used for bluetooth caches.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public static final String MODULE_BLUETOOTH = "bluetooth";
 
@@ -533,7 +547,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param computer The code to compute values that are not in the cache.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
@@ -792,7 +805,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * TODO(216112648) Remove this in favor of disableForCurrentProcess().
      * @hide
      */
-    public final void disableLocal() {
+    public void disableLocal() {
         disableForCurrentProcess();
     }
 
@@ -802,10 +815,15 @@ public class PropertyInvalidatedCache<Query, Result> {
      * property.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public final void disableForCurrentProcess() {
+    public void disableForCurrentProcess() {
         disableLocal(mCacheName);
+    }
+
+    /** @hide */
+    @TestApi
+    public static void disableForCurrentProcess(@NonNull String cacheName) {
+        disableLocal(cacheName);
     }
 
     /**
@@ -821,9 +839,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Get a value from the cache or recompute it.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public final @Nullable Result query(@NonNull Query query) {
+    public @Nullable Result query(@NonNull Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabled()) ? getCurrentNonce() : NONCE_DISABLED;
         if (bypass(query)) {
@@ -964,9 +981,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * PropertyInvalidatedCache is keyed on a particular property value.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public final void invalidateCache() {
+    public void invalidateCache() {
         invalidateCache(mPropertyName);
     }
 
@@ -974,7 +990,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Invalidate caches in all processes that are keyed for the module and api.
      * @hide
      */
-    @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public static void invalidateCache(@NonNull String module, @NonNull String api) {
         invalidateCache(createPropertyName(module, api));
