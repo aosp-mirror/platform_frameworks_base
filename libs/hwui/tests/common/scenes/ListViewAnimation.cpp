@@ -17,7 +17,16 @@
 #include "TestSceneBase.h"
 #include "tests/common/TestListViewSceneBase.h"
 #include "hwui/Paint.h"
+#include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkColor.h>
 #include <SkFont.h>
+#include <SkFontTypes.h>
+#include <SkPaint.h>
+#include <SkPoint.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkScalar.h>
 #include <cstdio>
 
 class ListViewAnimation;
@@ -48,7 +57,7 @@ class ListViewAnimation : public TestListViewSceneBase {
                 128 * 3;
         paint.setColor(bgDark ? Color::White : Color::Grey_700);
 
-	SkFont font;
+        SkFont font;
         font.setSize(size / 2);
         char charToShow = 'A' + (rand() % 26);
         const SkPoint pos = {SkIntToScalar(size / 2),

@@ -22,6 +22,11 @@
 
 #include "renderstate/RenderState.h"
 
+#include "SkRefCnt.h"
+
+class SkBitmap;
+struct SkRect;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {

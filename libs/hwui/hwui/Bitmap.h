@@ -19,9 +19,9 @@
 #include <SkColorFilter.h>
 #include <SkColorSpace.h>
 #include <SkImage.h>
-#include <SkImage.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
+#include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include <android/hardware_buffer.h>

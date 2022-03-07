@@ -1,12 +1,12 @@
 #ifndef _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
-#include "SkTypes.h"
-#include "SkStream.h"
 extern "C" {
     #include "jpeglib.h"
     #include "jerror.h"
 }
+
+class SkWStream;
 
 class YuvToJpegEncoder {
 public:

@@ -24,6 +24,7 @@
 #include "renderthread/CanvasContext.h"
 #include "renderthread/IRenderPipeline.h"
 
+class SkFILEWStream;
 class SkPictureRecorder;
 struct SkSharingSerialContext;
 

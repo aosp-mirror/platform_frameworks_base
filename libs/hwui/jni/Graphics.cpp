@@ -8,10 +8,18 @@
 #include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 
+#include "include/private/SkTemplates.h" // SkTAddOffset
+#include "SkBitmap.h"
 #include "SkCanvas.h"
+#include "SkColorSpace.h"
 #include "SkFontMetrics.h"
+#include "SkImageInfo.h"
 #include "SkMath.h"
+#include "SkPixelRef.h"
+#include "SkPoint.h"
+#include "SkRect.h"
 #include "SkRegion.h"
+#include "SkTypes.h"
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
 

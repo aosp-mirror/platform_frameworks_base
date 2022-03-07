@@ -16,15 +16,25 @@
 
 #include "SkiaPipeline.h"
 
+#include <SkCanvas.h>
+#include <SkColor.h>
+#include <SkColorSpace.h>
+#include <SkData.h>
+#include <SkImage.h>
 #include <SkImageEncoder.h>
 #include <SkImageInfo.h>
 #include <SkImagePriv.h>
+#include <SkMatrix.h>
 #include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <SkSerialProcs.h>
+#include <SkStream.h>
+#include <SkString.h>
 #include <SkTypeface.h>
 #include <android-base/properties.h>
 #include <unistd.h>

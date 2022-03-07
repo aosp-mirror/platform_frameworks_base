@@ -20,7 +20,11 @@
 #include "Rect.h"
 #include "renderthread/RenderThread.h"
 
-#include <SkBitmap.h>
+#include <SkRefCnt.h>
+
+class SkBitmap;
+class SkImage;
+struct SkRect;
 
 namespace android {
 class Bitmap;

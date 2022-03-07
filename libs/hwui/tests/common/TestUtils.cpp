@@ -26,7 +26,13 @@
 #include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
 
+#include "SkCanvas.h"
 #include "SkColorData.h"
+#include "SkMatrix.h"
+#include "SkPath.h"
+#include "SkPixmap.h"
+#include "SkRect.h"
+#include "SkSurface.h"
 #include "SkUnPreMultiply.h"
 
 namespace android {

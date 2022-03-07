@@ -24,12 +24,6 @@
 
 #include <log/log.h>
 
-#include <SkBitmap.h>
-#include <SkBlendMode.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-
 namespace {
 // Time to spend fading out the pointer completely.
 const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms

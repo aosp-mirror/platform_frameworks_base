@@ -17,6 +17,11 @@
 #include "TestSceneBase.h"
 #include "utils/Color.h"
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkColor.h>
+#include <SkRefCnt.h>
+
 class RecentsAnimation;
 
 static TestScene::Registrar _Recents(TestScene::Info{

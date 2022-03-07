@@ -24,6 +24,7 @@
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
+#include "SkStream.h"
 #include "SkTypeface.h"
 #include "Utils.h"
 #include "fonts/Font.h"
