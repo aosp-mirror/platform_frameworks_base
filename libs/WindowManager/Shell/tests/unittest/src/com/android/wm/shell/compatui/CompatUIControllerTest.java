@@ -325,17 +325,17 @@ public class CompatUIControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testChangeLayoutsVisibilityOnKeyguardOccludedChanged() {
+    public void testChangeLayoutsVisibilityOnKeyguardShowingChanged() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
                 /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
-        // Verify that the restart button is hidden after keyguard becomes occluded.
-        mController.onKeyguardOccludedChanged(true);
+        // Verify that the restart button is hidden after keyguard becomes showing.
+        mController.onKeyguardShowingChanged(true);
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
 
-        // Verify button remains hidden while keyguard is occluded.
+        // Verify button remains hidden while keyguard is showing.
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
@@ -345,20 +345,20 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
                 false);
 
-        // Verify button is shown after keyguard becomes not occluded.
-        mController.onKeyguardOccludedChanged(false);
+        // Verify button is shown after keyguard becomes not showing.
+        mController.onKeyguardShowingChanged(false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
     }
 
     @Test
-    public void testLayoutsRemainHiddenOnKeyguardOccludedFalseWhenImeIsShowing() {
+    public void testLayoutsRemainHiddenOnKeyguardShowingFalseWhenImeIsShowing() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
                 /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ true);
-        mController.onKeyguardOccludedChanged(true);
+        mController.onKeyguardShowingChanged(true);
 
         verify(mMockCompatLayout, times(2)).updateVisibility(false);
         verify(mMockLetterboxEduLayout, times(2)).updateVisibility(false);
@@ -366,8 +366,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         clearInvocations(mMockCompatLayout);
         clearInvocations(mMockLetterboxEduLayout);
 
-        // Verify button remains hidden after keyguard becomes not occluded since IME is showing.
-        mController.onKeyguardOccludedChanged(false);
+        // Verify button remains hidden after keyguard becomes not showing since IME is showing.
+        mController.onKeyguardShowingChanged(false);
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
@@ -380,12 +380,12 @@ public class CompatUIControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testLayoutsRemainHiddenOnImeHideWhenKeyguardIsOccluded() {
+    public void testLayoutsRemainHiddenOnImeHideWhenKeyguardIsShowing() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
                 /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ true);
-        mController.onKeyguardOccludedChanged(true);
+        mController.onKeyguardShowingChanged(true);
 
         verify(mMockCompatLayout, times(2)).updateVisibility(false);
         verify(mMockLetterboxEduLayout, times(2)).updateVisibility(false);
@@ -393,14 +393,14 @@ public class CompatUIControllerTest extends ShellTestCase {
         clearInvocations(mMockCompatLayout);
         clearInvocations(mMockLetterboxEduLayout);
 
-        // Verify button remains hidden after IME is hidden since keyguard is occluded.
+        // Verify button remains hidden after IME is hidden since keyguard is showing.
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
 
-        // Verify button is shown after keyguard becomes not occluded.
-        mController.onKeyguardOccludedChanged(false);
+        // Verify button is shown after keyguard becomes not showing.
+        mController.onKeyguardShowingChanged(false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
