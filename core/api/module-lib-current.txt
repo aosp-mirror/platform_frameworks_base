@@ -50,22 +50,6 @@ package android.app {
     method public void onCanceled(@NonNull android.app.PendingIntent);
   }
 
-  public class PropertyInvalidatedCache<Query, Result> {
-    ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
-    method public final void disableForCurrentProcess();
-    method public final void invalidateCache();
-    method public static void invalidateCache(@NonNull String, @NonNull String);
-    method @Nullable public final Result query(@NonNull Query);
-    field public static final String MODULE_BLUETOOTH = "bluetooth";
-    field public static final String MODULE_TELEPHONY = "telephony";
-  }
-
-  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
-    ctor public PropertyInvalidatedCache.QueryHandler();
-    method @Nullable public abstract R apply(@NonNull Q);
-    method public boolean shouldBypassCache(@NonNull Q);
-  }
-
   public class StatusBarManager {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
@@ -352,6 +336,22 @@ package android.os {
 
   public static class Build.VERSION {
     field public static final int DEVICE_INITIAL_SDK_INT;
+  }
+
+  public class IpcDataCache<Query, Result> {
+    ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public void disableForCurrentProcess();
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public void invalidateCache();
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    method @Nullable public Result query(@NonNull Query);
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+  }
+
+  public abstract static class IpcDataCache.QueryHandler<Q, R> {
+    ctor public IpcDataCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
   }
 
   public interface Parcelable {
