@@ -795,6 +795,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
+        loadAmbientLightSensor();
         loadBrightnessRampRates();
         loadProximitySensor();
         loadNitsRange(mContext.getResources());
@@ -924,9 +925,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             loadAmbientLightSensor();
-            if (mBrightnessTracker != null) {
-                mBrightnessTracker.setLightSensor(mLightSensor);
-            }
 
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.stop();
