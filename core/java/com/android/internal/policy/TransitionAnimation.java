@@ -312,9 +312,9 @@ public class TransitionAnimation {
 
     /** Load animation by attribute Id from android package. */
     @Nullable
-    public Animation loadDefaultAnimationAttr(int animAttr) {
+    public Animation loadDefaultAnimationAttr(int animAttr, boolean translucent) {
         return loadAnimationAttr(DEFAULT_PACKAGE, mDefaultWindowAnimationStyleResId, animAttr,
-                false /* translucent */);
+                translucent);
     }
 
     @Nullable
