@@ -19,6 +19,7 @@ package com.android.systemui.media.taptotransfer.sender
 import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
+import android.os.PowerManager
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -51,6 +52,7 @@ class MediaTttChipControllerSender @Inject constructor(
     viewUtil: ViewUtil,
     @Main mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
+    powerManager: PowerManager,
     private val uiEventLogger: MediaTttSenderUiEventLogger
 ) : MediaTttChipControllerCommon<ChipSenderInfo>(
     context,
@@ -59,6 +61,7 @@ class MediaTttChipControllerSender @Inject constructor(
     viewUtil,
     mainExecutor,
     tapGestureDetector,
+    powerManager,
     R.layout.media_ttt_chip
 ) {
     private var currentlyDisplayedChipState: ChipStateSender? = null
