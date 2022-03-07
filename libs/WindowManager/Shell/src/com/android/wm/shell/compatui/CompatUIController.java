@@ -109,9 +109,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     // Only show each hint once automatically in the process life.
     private final CompatUIHintsState mCompatUIHintsState;
 
-    // Indicates if the keyguard is currently occluded, in which case compat UIs shouldn't
+    // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
-    private boolean mKeyguardOccluded;
+    private boolean mKeyguardShowing;
 
     public CompatUIController(Context context,
             DisplayController displayController,
@@ -218,14 +218,14 @@ public class CompatUIController implements OnDisplaysChangedListener,
     }
 
     @VisibleForTesting
-    void onKeyguardOccludedChanged(boolean occluded) {
-        mKeyguardOccluded = occluded;
-        // Hide the compat UIs when keyguard is occluded.
+    void onKeyguardShowingChanged(boolean showing) {
+        mKeyguardShowing = showing;
+        // Hide the compat UIs when keyguard is showing.
         forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
     }
 
     private boolean showOnDisplay(int displayId) {
-        return !mKeyguardOccluded && !isImeShowingOnDisplay(displayId);
+        return !mKeyguardShowing && !isImeShowingOnDisplay(displayId);
     }
 
     private boolean isImeShowingOnDisplay(int displayId) {
@@ -372,9 +372,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @ExternalThread
     private class CompatUIImpl implements CompatUI {
         @Override
-        public void onKeyguardOccludedChanged(boolean occluded) {
+        public void onKeyguardShowingChanged(boolean showing) {
             mMainExecutor.execute(() -> {
-                CompatUIController.this.onKeyguardOccludedChanged(occluded);
+                CompatUIController.this.onKeyguardShowingChanged(showing);
             });
         }
     }
