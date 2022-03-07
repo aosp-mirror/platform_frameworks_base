@@ -65,6 +65,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
 
+    // True if the service has been destroyed.
+    private boolean mDestroyed;
+
     private final Complication.Host mHost = new Complication.Host() {
         @Override
         public void requestExitDream() {
@@ -134,6 +137,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mPreviewComplication.setDreamLabel(null);
         mStateController.removeComplication(mPreviewComplication);
         mStateController.setPreviewMode(false);
+        mDestroyed = true;
         super.onDestroy();
     }
 
@@ -141,6 +145,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
         setCurrentState(Lifecycle.State.STARTED);
         mExecutor.execute(() -> {
+            if (mDestroyed) {
+                // The task could still be executed after the service has been destroyed. Bail if
+                // that is the case.
+                return;
+            }
             mStateController.setShouldShowComplications(shouldShowComplications());
             mStateController.setPreviewMode(isPreviewMode());
             if (isPreviewMode()) {
