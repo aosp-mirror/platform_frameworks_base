@@ -2303,6 +2303,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mMinHeight = minHeight;
     }
 
+    boolean shouldRemoveSelfOnLastChildRemoval() {
+        return !mCreatedByOrganizer || mIsRemovalRequested;
+    }
+
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, true /* removeSelfIfPossible */);
@@ -2318,7 +2322,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mBackScreenshots.remove(r.mActivityComponent.flattenToString());
             }
         }
-        if (removeSelfIfPossible && (!mCreatedByOrganizer || mIsRemovalRequested) && !hasChild()) {
+        if (removeSelfIfPossible && shouldRemoveSelfOnLastChildRemoval() && !hasChild()) {
             removeImmediately("removeLastChild " + child);
         }
     }
@@ -2336,13 +2340,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mIsRemovalRequested = true;
-        forAllActivities(r -> {
-            if (withTransition) {
+        // The task order may be changed by finishIfPossible() for adjusting focus if there are
+        // nested tasks, so add all activities into a list to avoid missed removals.
+        final ArrayList<ActivityRecord> removingActivities = new ArrayList<>();
+        forAllActivities((Consumer<ActivityRecord>) removingActivities::add);
+        for (int i = removingActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = removingActivities.get(i);
+            if (withTransition && r.isVisible()) {
                 r.finishIfPossible(reason, false /* oomAdj */);
             } else {
                 r.destroyIfPossible(reason);
             }
-        });
+        }
     }
 
     void setDelayLastActivityRemoval(boolean delay) {

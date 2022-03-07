@@ -1530,7 +1530,7 @@ class Task extends TaskFragment {
                 mTaskSupervisor.removeTask(this, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
-        } else if (!mReuseTask && !mCreatedByOrganizer) {
+        } else if (!mReuseTask && shouldRemoveSelfOnLastChildRemoval()) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             // or created by task organizer.
             if (!isRootTask()) {
