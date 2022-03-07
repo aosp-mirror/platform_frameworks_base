@@ -18,8 +18,8 @@ package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static androidx.window.common.DisplayFeature.COMMON_STATE_FLAT;
-import static androidx.window.common.DisplayFeature.COMMON_STATE_HALF_OPENED;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
@@ -30,8 +30,8 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerPostureProducer;
-import androidx.window.common.DisplayFeature;
 import androidx.window.common.ResourceConfigDisplayFeatureProducer;
 import androidx.window.common.SettingsDevicePostureProducer;
 import androidx.window.common.SettingsDisplayFeatureProducer;
@@ -56,7 +56,6 @@ import java.util.function.Consumer;
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
-    private static WindowLayoutComponent sInstance;
 
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new HashMap<>();
@@ -65,7 +64,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final DataProducer<Integer> mDevicePostureProducer;
 
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
-    private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
+    private final DataProducer<List<CommonFoldingFeature>> mDisplayFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
@@ -123,17 +122,18 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     /**
-     * Calculate the {@link DisplayFeature.State} from the feature or the device posture producer.
-     * If the given {@link DisplayFeature.State} is not valid then {@code null} will be returned.
-     * The {@link FoldingFeature} should be ignored in the case of an invalid
-     * {@link DisplayFeature.State}.
+     * Calculate the {@link CommonFoldingFeature.State} from the feature or the device posture
+     * producer.
+     * If the given {@link CommonFoldingFeature.State} is not valid then {@code null} will be
+     * returned. The {@link FoldingFeature} should be ignored in the case of an invalid
+     * {@link CommonFoldingFeature.State}.
      *
-     * @param feature a {@link DisplayFeature} to provide the feature state if present.
-     * @return {@link DisplayFeature.State} of the hinge if present or the state from the posture
-     * produce if present.
+     * @param feature a {@link CommonFoldingFeature} to provide the feature state if present.
+     * @return {@link CommonFoldingFeature.State} of the hinge if present or the state from the
+     * posture produce if present.
      */
     @Nullable
-    private Integer getFeatureState(DisplayFeature feature) {
+    private Integer getFeatureState(CommonFoldingFeature feature) {
         Integer featureState = feature.getState();
         Optional<Integer> posture = mDevicePostureProducer.getData();
         Integer state = featureState == null ? posture.orElse(null) : featureState;
@@ -142,13 +142,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     /**
      * A convenience method to translate from the common feature state to the extensions feature
-     * state.  More specifically, translates from {@link DisplayFeature.State} to
+     * state.  More specifically, translates from {@link CommonFoldingFeature.State} to
      * {@link FoldingFeature.STATE_FLAT} or {@link FoldingFeature.STATE_HALF_OPENED}. If it is not
      * possible to translate, then we will return a {@code null} value.
      *
-     * @param state if it matches a value in {@link DisplayFeature.State}, {@code null} otherwise.
-     * @return a {@link FoldingFeature.STATE_FLAT} or {@link FoldingFeature.STATE_HALF_OPENED} if
-     * the given state matches a value in {@link DisplayFeature.State} and {@code null} otherwise.
+     * @param state if it matches a value in {@link CommonFoldingFeature.State}, {@code null}
+     * otherwise. @return a {@link FoldingFeature.STATE_FLAT} or
+     * {@link FoldingFeature.STATE_HALF_OPENED} if the given state matches a value in
+     * {@link CommonFoldingFeature.State} and {@code null} otherwise.
      */
     @Nullable
     private Integer convertToExtensionState(@Nullable Integer state) {
@@ -172,33 +173,32 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     @NonNull
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull Activity activity) {
-        List<androidx.window.extensions.layout.DisplayFeature> displayFeatures =
+        List<DisplayFeature> displayFeatures =
                 getDisplayFeatures(activity);
         return new WindowLayoutInfo(displayFeatures);
     }
 
     /**
-     * Translate from the {@link DisplayFeature} to
-     * {@link androidx.window.extensions.layout.DisplayFeature} for a given {@link Activity}. If a
-     * {@link DisplayFeature} is not valid then it will be omitted.
+     * Translate from the {@link CommonFoldingFeature} to
+     * {@link DisplayFeature} for a given {@link Activity}. If a
+     * {@link CommonFoldingFeature} is not valid then it will be omitted.
      *
      * For a {@link FoldingFeature} the bounds are localized into the {@link Activity} window
-     * coordinate space and the state is calculated either from {@link DisplayFeature#getState()} or
-     * {@link #mDisplayFeatureProducer}. The state from {@link #mDisplayFeatureProducer} may not be
-     * valid since {@link #mDisplayFeatureProducer} is a general state controller. If the state is
-     * not valid, the {@link FoldingFeature} is omitted from the {@link List} of
-     * {@link androidx.window.extensions.layout.DisplayFeature}. If the bounds are not valid,
-     * constructing a {@link FoldingFeature} will throw an {@link IllegalArgumentException} since
-     * this can cause negative UI effects down stream.
+     * coordinate space and the state is calculated either from
+     * {@link CommonFoldingFeature#getState()} or {@link #mDisplayFeatureProducer}. The state from
+     * {@link #mDisplayFeatureProducer} may not be valid since {@link #mDisplayFeatureProducer} is
+     * a general state controller. If the state is not valid, the {@link FoldingFeature} is omitted
+     * from the {@link List} of {@link DisplayFeature}. If the bounds are not valid, constructing a
+     * {@link FoldingFeature} will throw an {@link IllegalArgumentException} since this can cause
+     * negative UI effects down stream.
      *
      * @param activity a proxy for the {@link android.view.Window} that contains the
-     * {@link androidx.window.extensions.layout.DisplayFeature}.
-     * @return a {@link List} of valid {@link androidx.window.extensions.layout.DisplayFeature} that
+     * {@link DisplayFeature}.
+     * @return a {@link List} of valid {@link DisplayFeature} that
      * are within the {@link android.view.Window} of the {@link Activity}
      */
-    private List<androidx.window.extensions.layout.DisplayFeature> getDisplayFeatures(
-            @NonNull Activity activity) {
-        List<androidx.window.extensions.layout.DisplayFeature> features = new ArrayList<>();
+    private List<DisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
+        List<DisplayFeature> features = new ArrayList<>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
@@ -211,10 +211,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        Optional<List<DisplayFeature>> storedFeatures = mDisplayFeatureProducer.getData();
+        Optional<List<CommonFoldingFeature>> storedFeatures = mDisplayFeatureProducer.getData();
         if (storedFeatures.isPresent()) {
 
-            for (DisplayFeature baseFeature : storedFeatures.get()) {
+            for (CommonFoldingFeature baseFeature : storedFeatures.get()) {
                 Integer state = getFeatureState(baseFeature);
                 if (state == null) {
                     continue;

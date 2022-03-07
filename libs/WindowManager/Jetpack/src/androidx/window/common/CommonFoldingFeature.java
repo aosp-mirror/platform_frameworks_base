@@ -18,17 +18,60 @@ package androidx.window.common;
 
 import static androidx.window.util.ExtensionHelper.isZero;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Wrapper for both Extension and Sidecar versions of DisplayFeature. */
-final class CommonDisplayFeature implements DisplayFeature {
+/** A representation of a folding feature for both Extension and Sidecar.
+ * For Sidecar this is the same as combining {@link androidx.window.sidecar.SidecarDeviceState} and
+ * {@link androidx.window.sidecar.SidecarDisplayFeature}. For Extensions this is the mirror of
+ * {@link androidx.window.extensions.layout.FoldingFeature}.
+ */
+public final class CommonFoldingFeature {
+
+    /**
+     * A common type to represent a hinge where the screen is continuous.
+     */
+    public static final int COMMON_TYPE_FOLD = 1;
+
+    /**
+     * A common type to represent a hinge where there is a physical gap separating multiple
+     * displays.
+     */
+    public static final int COMMON_TYPE_HINGE = 2;
+
+    @IntDef({COMMON_TYPE_FOLD, COMMON_TYPE_HINGE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {
+    }
+
+    /**
+     * A common state to represent a FLAT hinge. This is needed because the definitions in Sidecar
+     * and Extensions do not match exactly.
+     */
+    public static final int COMMON_STATE_FLAT = 3;
+    /**
+     * A common state to represent a HALF_OPENED hinge. This is needed because the definitions in
+     * Sidecar and Extensions do not match exactly.
+     */
+    public static final int COMMON_STATE_HALF_OPENED = 2;
+
+    /**
+     * The possible states for a folding hinge.
+     */
+    @IntDef({COMMON_STATE_FLAT, COMMON_STATE_HALF_OPENED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {
+    }
+
     private static final Pattern FEATURE_PATTERN =
             Pattern.compile("([a-z]+)-\\[(\\d+),(\\d+),(\\d+),(\\d+)]-?(flat|half-opened)?");
 
@@ -38,8 +81,6 @@ final class CommonDisplayFeature implements DisplayFeature {
     private static final String PATTERN_STATE_FLAT = "flat";
     private static final String PATTERN_STATE_HALF_OPENED = "half-opened";
 
-    // TODO(b/183049815): Support feature strings that include the state of the feature.
-
     /**
      * Parses a display feature from a string.
      *
@@ -48,7 +89,7 @@ final class CommonDisplayFeature implements DisplayFeature {
      * @see #FEATURE_PATTERN
      */
     @NonNull
-    static CommonDisplayFeature parseFromString(@NonNull String string) {
+    static CommonFoldingFeature parseFromString(@NonNull String string) {
         Matcher featureMatcher = FEATURE_PATTERN.matcher(string);
         if (!featureMatcher.matches()) {
             throw new IllegalArgumentException("Malformed feature description format: " + string);
@@ -59,10 +100,10 @@ final class CommonDisplayFeature implements DisplayFeature {
             int type;
             switch (featureType) {
                 case FEATURE_TYPE_FOLD:
-                    type = 1 /* TYPE_FOLD */;
+                    type = COMMON_TYPE_FOLD;
                     break;
                 case FEATURE_TYPE_HINGE:
-                    type = 2 /* TYPE_HINGE */;
+                    type = COMMON_TYPE_HINGE;
                     break;
                 default: {
                     throw new IllegalArgumentException("Malformed feature type: " + featureType);
@@ -91,7 +132,7 @@ final class CommonDisplayFeature implements DisplayFeature {
                     state = null;
                     break;
             }
-            return new CommonDisplayFeature(type, state, featureRect);
+            return new CommonFoldingFeature(type, state, featureRect);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Malformed feature description: " + string, e);
         }
@@ -103,7 +144,7 @@ final class CommonDisplayFeature implements DisplayFeature {
     @NonNull
     private final Rect mRect;
 
-    CommonDisplayFeature(int type, @Nullable Integer state, @NonNull Rect rect) {
+    CommonFoldingFeature(int type, @Nullable Integer state, @NonNull Rect rect) {
         assertValidState(state);
         this.mType = type;
         this.mState = state;
@@ -114,16 +155,20 @@ final class CommonDisplayFeature implements DisplayFeature {
         this.mRect = rect;
     }
 
+    /** Returns the type of the feature. */
+    @Type
     public int getType() {
         return mType;
     }
 
     /** Returns the state of the feature, or {@code null} if the feature has no state. */
     @Nullable
+    @State
     public Integer getState() {
         return mState;
     }
 
+    /** Returns the bounds of the feature. */
     @NonNull
     public Rect getRect() {
         return mRect;
@@ -133,7 +178,7 @@ final class CommonDisplayFeature implements DisplayFeature {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CommonDisplayFeature that = (CommonDisplayFeature) o;
+        CommonFoldingFeature that = (CommonFoldingFeature) o;
         return mType == that.mType
                 && Objects.equals(mState, that.mState)
                 && mRect.equals(that.mRect);
