@@ -22,6 +22,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
+import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -53,6 +55,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
     private val tapGestureDetector: TapGestureDetector,
+    private val powerManager: PowerManager,
     @LayoutRes private val chipLayoutRes: Int
 ) {
     /** The window layout parameters we'll use when attaching the view to a window. */
@@ -95,6 +98,12 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         if (oldChipView == null) {
             tapGestureDetector.addOnGestureDetectedCallback(TAG, this::onScreenTapped)
             windowManager.addView(chipView, windowLayoutParams)
+            // Wake the screen so the user will see the chip
+            powerManager.wakeUp(
+                SystemClock.uptimeMillis(),
+                PowerManager.WAKE_REASON_APPLICATION,
+                "com.android.systemui:media_tap_to_transfer_activated"
+            )
         }
 
         // Cancel and re-set the chip timeout each time we get a new state.

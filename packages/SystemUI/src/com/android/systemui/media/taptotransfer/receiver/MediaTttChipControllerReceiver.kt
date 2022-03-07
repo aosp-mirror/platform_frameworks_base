@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.os.Handler
+import android.os.PowerManager
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -52,6 +53,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     viewUtil: ViewUtil,
     mainExecutor: DelayableExecutor,
     tapGestureDetector: TapGestureDetector,
+    powerManager: PowerManager,
     @Main private val mainHandler: Handler,
     private val uiEventLogger: MediaTttReceiverUiEventLogger,
 ) : MediaTttChipControllerCommon<ChipReceiverInfo>(
@@ -61,6 +63,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     viewUtil,
     mainExecutor,
     tapGestureDetector,
+    powerManager,
     R.layout.media_ttt_chip_receiver
 ) {
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
