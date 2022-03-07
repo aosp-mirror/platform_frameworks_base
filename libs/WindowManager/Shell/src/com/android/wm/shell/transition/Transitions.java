@@ -363,7 +363,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
 
-        // apply transfer starting window directly if there is no other task change.
+        // apply transfer starting window directly if there is no other task change. Since this
+        // is an activity->activity situation, we can detect it by selecting transitions with only
+        // 2 changes where neither are tasks and one is a starting-window recipient.
         final int changeSize = info.getChanges().size();
         if (changeSize == 2) {
             boolean nonTaskChange = true;
@@ -380,7 +382,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             if (nonTaskChange && transferStartingWindow) {
                 t.apply();
-                onFinish(transitionToken, null /* wct */, null /* wctCB */);
+                // Treat this as an abort since we are bypassing any merge logic and effectively
+                // finishing immediately.
+                onAbort(transitionToken);
                 return;
             }
         }
