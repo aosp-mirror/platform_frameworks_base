@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:src="@drawable/overlay_actions_background_protection"/>
-    <com.android.systemui.clipboardoverlay.DraggableConstraintLayout
+    <com.android.systemui.screenshot.DraggableConstraintLayout
         android:id="@+id/clipboard_ui"
         android:theme="@style/FloatingOverlay"
         android:layout_width="match_parent"
@@ -146,5 +146,5 @@
                 android:layout_margin="@dimen/overlay_dismiss_button_margin"
                 android:src="@drawable/overlay_cancel"/>
         </FrameLayout>
-    </com.android.systemui.clipboardoverlay.DraggableConstraintLayout>
+    </com.android.systemui.screenshot.DraggableConstraintLayout>
 </FrameLayout>
