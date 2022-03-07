@@ -69,11 +69,11 @@ import com.android.systemui.statusbar.notification.collection.render.SectionHead
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -278,18 +278,17 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mStateListenerArgumentCaptor.capture(), anyInt());
         StatusBarStateController.StateListener stateListener =
                 mStateListenerArgumentCaptor.getValue();
-        when(mNotificationStackScrollLayout.isUsingSplitNotificationShade()).thenReturn(true);
         stateListener.onStateChanged(SHADE);
         mController.getView().removeAllViews();
 
-        mController.setQsExpanded(false);
+        mController.setQsFullScreen(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
                 /* notifVisibleInShade= */ false);
 
-        mController.setQsExpanded(true);
+        mController.setQsFullScreen(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
@@ -411,11 +410,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
             boolean toShow) {
         if (toShow) {
             statusBarStateListener.onStateChanged(SHADE);
-            mController.setQsExpanded(false);
+            mController.setQsFullScreen(false);
             mController.getView().removeAllViews();
         } else {
             statusBarStateListener.onStateChanged(KEYGUARD);
-            mController.setQsExpanded(true);
+            mController.setQsFullScreen(true);
             mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
         }
     }
