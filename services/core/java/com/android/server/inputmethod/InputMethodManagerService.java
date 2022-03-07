@@ -336,6 +336,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private final HandwritingModeController mHwController;
 
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private OverlayableSystemBooleanResourceWrapper mImeDrawsImeNavBarRes;
+
     static class SessionState {
         final ClientState client;
         final IInputMethodInvoker method;
@@ -1724,10 +1728,42 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    private void recreateImeDrawsImeNavBarResIfNecessary(@UserIdInt int targetUserId) {
+        // Currently, com.android.internal.R.bool.config_imeDrawsImeNavBar is overlaid only for the
+        // profile parent user.
+        // TODO(b/221443458): See if we can make OverlayManager be aware of profile groups.
+        final int profileParentUserId = mUserManagerInternal.getProfileParentId(targetUserId);
+        if (mImeDrawsImeNavBarRes != null
+                && mImeDrawsImeNavBarRes.getUserId() != profileParentUserId) {
+            mImeDrawsImeNavBarRes.close();
+            mImeDrawsImeNavBarRes = null;
+        }
+        if (mImeDrawsImeNavBarRes == null) {
+            final Context userContext;
+            if (mContext.getUserId() == profileParentUserId) {
+                userContext = mContext;
+            } else {
+                userContext = mContext.createContextAsUser(UserHandle.of(profileParentUserId),
+                        0 /* flags */);
+            }
+            mImeDrawsImeNavBarRes = OverlayableSystemBooleanResourceWrapper.create(userContext,
+                    com.android.internal.R.bool.config_imeDrawsImeNavBar, mHandler, resource -> {
+                        synchronized (ImfLock.class) {
+                            if (resource == mImeDrawsImeNavBarRes) {
+                                sendOnNavButtonFlagsChangedLocked();
+                            }
+                        }
+                    });
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
     private void switchUserOnHandlerLocked(@UserIdInt int newUserId,
             IInputMethodClient clientToBeReset) {
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
+
+        recreateImeDrawsImeNavBarResIfNecessary(newUserId);
 
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
@@ -1832,6 +1868,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 available ? 1 : 0, 0 /* unused */).sendToTarget();
                     });
                 }
+
+                recreateImeDrawsImeNavBarResIfNecessary(currentUserId);
 
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
@@ -2941,10 +2979,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @InputMethodNavButtonFlags
     private int getInputMethodNavButtonFlagsLocked() {
+        final boolean canImeDrawsImeNavBar =
+                mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get();
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
                 InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE);
-        return shouldShowImeSwitcherWhenImeIsShown
-                ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0;
+        return (canImeDrawsImeNavBar ? InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR : 0)
+                | (shouldShowImeSwitcherWhenImeIsShown
+                        ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0);
     }
 
     @GuardedBy("ImfLock.class")
