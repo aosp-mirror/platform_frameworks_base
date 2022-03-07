@@ -70,7 +70,7 @@ class RampAnimator<T> {
                 mRate = 0;
                 mTargetValue = target;
                 mCurrentValue = target;
-                setPropertyValue(target);
+                mProperty.setValue(mObject, target);
                 if (mAnimating) {
                     mAnimating = false;
                     cancelAnimationCallback();
@@ -125,15 +125,6 @@ class RampAnimator<T> {
         mListener = listener;
     }
 
-    /**
-     * Sets the brightness property by converting the given value from HLG space
-     * into linear space.
-     */
-    private void setPropertyValue(float val) {
-        final float linearVal = BrightnessUtils.convertGammaToLinear(val);
-        mProperty.setValue(mObject, linearVal);
-    }
-
     private void postAnimationCallback() {
         mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimationCallback, null);
     }
@@ -169,7 +160,9 @@ class RampAnimator<T> {
             final float oldCurrentValue = mCurrentValue;
             mCurrentValue = mAnimatedValue;
             if (oldCurrentValue != mCurrentValue) {
-                setPropertyValue(mCurrentValue);
+                // Convert value from HLG into linear space for the property.
+                final float linearCurrentVal = BrightnessUtils.convertGammaToLinear(mCurrentValue);
+                mProperty.setValue(mObject, linearCurrentVal);
             }
             if (mTargetValue != mCurrentValue) {
                 postAnimationCallback();
