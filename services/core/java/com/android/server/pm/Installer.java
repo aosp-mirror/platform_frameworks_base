@@ -220,6 +220,8 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) {
             return buildPlaceholderCreateAppDataResult();
         }
+        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+        args.previousAppId = 0;
         try {
             return mInstalld.createAppData(args);
         } catch (Exception e) {
@@ -233,6 +235,10 @@ public class Installer extends SystemService {
             final CreateAppDataResult[] results = new CreateAppDataResult[args.length];
             Arrays.fill(results, buildPlaceholderCreateAppDataResult());
             return results;
+        }
+        // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+        for (final CreateAppDataArgs arg : args) {
+            arg.previousAppId = 0;
         }
         try {
             return mInstalld.createAppDataBatched(args);
