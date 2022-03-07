@@ -29,6 +29,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
@@ -70,6 +71,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
+    private lateinit var uiEventLoggerFake: UiEventLoggerFake
+    private lateinit var receiverUiEventLogger: MediaTttReceiverUiEventLogger
 
     @Before
     fun setUp() {
@@ -83,6 +86,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        uiEventLoggerFake = UiEventLoggerFake()
+        receiverUiEventLogger = MediaTttReceiverUiEventLogger(uiEventLoggerFake)
+
         controllerReceiver = MediaTttChipControllerReceiver(
             commandQueue,
             context,
@@ -92,6 +98,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             FakeExecutor(FakeSystemClock()),
             TapGestureDetector(context),
             Handler.getMain(),
+            receiverUiEventLogger,
         )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -110,6 +117,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )
 
         assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER.id
+        )
     }
 
     @Test
@@ -122,6 +132,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )
 
         verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+            MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER.id
+        )
     }
 
     @Test
