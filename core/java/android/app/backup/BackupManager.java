@@ -246,6 +246,9 @@ public class BackupManager {
      * new changes to its data.  A backup operation using your application's
      * {@link android.app.backup.BackupAgent} subclass will be scheduled when you
      * call this method.
+     *
+     * <p>
+     * Note: This only works if your application is performing Key/Value backups.
      */
     public void dataChanged() {
         checkServiceBinder();
@@ -268,6 +271,8 @@ public class BackupManager {
      * as the caller.
      *
      * @param packageName The package name identifying the application to back up.
+     * <p>
+     * Note: Only works for packages performing Key/Value backups.
      */
     public static void dataChanged(String packageName) {
         checkServiceBinder();
