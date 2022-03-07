@@ -3661,6 +3661,17 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * Returns {@code true} is the activity in this Task can be resumed.
+     *
+     * @param starting The currently starting activity or {@code null} if there is none.
+     */
+    boolean canBeResumed(@Nullable ActivityRecord starting) {
+        // No need to resume activity in Task that is not visible.
+        return isTopActivityFocusable()
+                && getVisibility(starting) == STACK_VISIBILITY_VISIBLE;
+    }
+
+    /**
      * Returns true if the task should be visible.
      *
      * @param starting The currently starting activity or null if there is none.
