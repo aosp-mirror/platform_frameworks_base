@@ -880,14 +880,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_ambientDarkeningThresholds);
             int[] ambientThresholdLevels = resources.getIntArray(
                     com.android.internal.R.array.config_ambientThresholdLevels);
-            float ambientDarkeningMinThreshold =
-                    mDisplayDeviceConfig.getAmbientLuxDarkeningMinThreshold();
-            float ambientBrighteningMinThreshold =
-                    mDisplayDeviceConfig.getAmbientLuxBrighteningMinThreshold();
             HysteresisLevels ambientBrightnessThresholds = new HysteresisLevels(
                     ambientBrighteningThresholds, ambientDarkeningThresholds,
-                    ambientThresholdLevels, ambientDarkeningMinThreshold,
-                    ambientBrighteningMinThreshold);
+                    ambientThresholdLevels);
 
             int[] screenBrighteningThresholds = resources.getIntArray(
                     com.android.internal.R.array.config_screenBrighteningThresholds);
@@ -895,13 +890,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_screenDarkeningThresholds);
             int[] screenThresholdLevels = resources.getIntArray(
                     com.android.internal.R.array.config_screenThresholdLevels);
-            float screenDarkeningMinThreshold =
-                    mDisplayDeviceConfig.getScreenDarkeningMinThreshold();
-            float screenBrighteningMinThreshold =
-                    mDisplayDeviceConfig.getScreenBrighteningMinThreshold();
             HysteresisLevels screenBrightnessThresholds = new HysteresisLevels(
-                    screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels,
-                    screenDarkeningMinThreshold, screenBrighteningMinThreshold);
+                    screenBrighteningThresholds, screenDarkeningThresholds, screenThresholdLevels);
 
             long brighteningLightDebounce = resources.getInteger(
                     com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
