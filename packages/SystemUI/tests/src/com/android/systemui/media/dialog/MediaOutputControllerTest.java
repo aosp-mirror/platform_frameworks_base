@@ -33,9 +33,11 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
+import android.media.NearbyDevice;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
+import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
@@ -51,10 +53,13 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.ShadeController;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +67,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -86,6 +92,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private MediaOutputController.Callback mCb = mock(MediaOutputController.Callback.class);
     private MediaDevice mMediaDevice1 = mock(MediaDevice.class);
     private MediaDevice mMediaDevice2 = mock(MediaDevice.class);
+    private NearbyDevice mNearbyDevice1 = mock(NearbyDevice.class);
+    private NearbyDevice mNearbyDevice2 = mock(NearbyDevice.class);
     private MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
     private ShadeController mShadeController = mock(ShadeController.class);
@@ -93,12 +101,15 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
+            NearbyMediaDevicesManager.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
     private LocalMediaManager mLocalMediaManager;
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
+    private List<NearbyDevice> mNearbyDevices = new ArrayList<>();
     private MediaDescription mMediaDescription;
     private List<RoutingSessionInfo> mRoutingSessionInfos = new ArrayList<>();
 
@@ -115,7 +126,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
+                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -127,6 +139,13 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         when(mMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
         mMediaDevices.add(mMediaDevice1);
         mMediaDevices.add(mMediaDevice2);
+
+        when(mNearbyDevice1.getMediaRoute2Id()).thenReturn(TEST_DEVICE_1_ID);
+        when(mNearbyDevice1.getRangeZone()).thenReturn(NearbyDevice.RANGE_CLOSE);
+        when(mNearbyDevice2.getMediaRoute2Id()).thenReturn(TEST_DEVICE_2_ID);
+        when(mNearbyDevice2.getRangeZone()).thenReturn(NearbyDevice.RANGE_FAR);
+        mNearbyDevices.add(mNearbyDevice1);
+        mNearbyDevices.add(mNearbyDevice2);
     }
 
     @Test
@@ -159,11 +178,19 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void start_withoutPackageName_verifyMediaControllerInit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
+                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
 
         mMediaOutputController.start(mCb);
 
         verify(mMediaController, never()).registerCallback(any());
+    }
+
+    @Test
+    public void start_nearbyMediaDevicesManagerNotNull_registersNearbyDevicesCallback() {
+        mMediaOutputController.start(mCb);
+
+        verify(mNearbyMediaDevicesManager).registerNearbyDevicesCallback(any());
     }
 
     @Test
@@ -180,13 +207,47 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
+                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
 
         mMediaOutputController.start(mCb);
 
         mMediaOutputController.stop();
 
         verify(mMediaController, never()).unregisterCallback(any());
+    }
+
+
+    @Test
+    public void stop_nearbyMediaDevicesManagerNotNull_unregistersNearbyDevicesCallback() {
+        mMediaOutputController.start(mCb);
+        reset(mMediaController);
+
+        mMediaOutputController.stop();
+
+        verify(mNearbyMediaDevicesManager).unregisterNearbyDevicesCallback(any());
+    }
+
+    @Test
+    public void onDevicesUpdated_unregistersNearbyDevicesCallback() throws RemoteException {
+        mMediaOutputController.start(mCb);
+
+        mMediaOutputController.onDevicesUpdated(ImmutableList.of());
+
+        verify(mNearbyMediaDevicesManager).unregisterNearbyDevicesCallback(any());
+    }
+
+    @Test
+    public void onDeviceListUpdate_withNearbyDevices_updatesRangeInformation()
+            throws RemoteException {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDevicesUpdated(mNearbyDevices);
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        verify(mMediaDevice1).setRangeZone(NearbyDevice.RANGE_CLOSE);
+        verify(mMediaDevice2).setRangeZone(NearbyDevice.RANGE_FAR);
     }
 
     @Test
@@ -451,7 +512,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
+                mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
