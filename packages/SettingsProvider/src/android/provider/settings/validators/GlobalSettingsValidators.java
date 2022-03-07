@@ -315,6 +315,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_WIDTH, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WET_MODE_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.COOLDOWN_MODE_ON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.TOUCH_AND_HOLD_WATCH_FACE, BOOLEAN_VALIDATOR);
     }
 }
 
