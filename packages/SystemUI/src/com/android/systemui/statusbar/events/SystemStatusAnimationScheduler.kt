@@ -116,7 +116,10 @@ class SystemStatusAnimationScheduler @Inject constructor(
             scheduledEvent?.updateFromEvent(event)
             if (event.forceVisible) {
                 hasPersistentDot = true
-                notifyTransitionToPersistentDot()
+                // If we missed the chance to show the persistent dot, do it now
+                if (animationState == IDLE) {
+                    notifyTransitionToPersistentDot()
+                }
             }
         } else {
             if (DEBUG) {
