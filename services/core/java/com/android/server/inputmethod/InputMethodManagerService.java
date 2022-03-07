@@ -156,6 +156,7 @@ import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -2412,12 +2413,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     true /* direct */);
         }
 
-        final boolean shouldShowImeSwitcherWhenImeIsShown =
-                shouldShowImeSwitcherWhenImeIsShownLocked();
+        @InputMethodNavButtonFlags
+        final int navButtonFlags = getInputMethodNavButtonFlagsLocked();
         final SessionState session = mCurClient.curSession;
         setEnabledSessionLocked(session);
         session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting,
-                shouldShowImeSwitcherWhenImeIsShown);
+                navButtonFlags);
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(mCurFocusedWindow, getAppShowFlagsLocked(), null,
@@ -2681,7 +2682,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + mCurTokenDisplayId);
         }
         inputMethod.initializeInternal(token, new InputMethodPrivilegedOperationsImpl(this, token),
-                configChanges, supportStylusHw, shouldShowImeSwitcherWhenImeIsShownLocked());
+                configChanges, supportStylusHw, getInputMethodNavButtonFlagsLocked());
     }
 
     @AnyThread
@@ -2938,9 +2939,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    boolean shouldShowImeSwitcherWhenImeIsShownLocked() {
-        return shouldShowImeSwitcherLocked(
+    @InputMethodNavButtonFlags
+    private int getInputMethodNavButtonFlagsLocked() {
+        final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
                 InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE);
+        return shouldShowImeSwitcherWhenImeIsShown
+                ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0;
     }
 
     @GuardedBy("ImfLock.class")
@@ -3203,7 +3207,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
 
-        sendShouldShowImeSwitcherWhenImeIsShownLocked();
+        sendOnNavButtonFlagsChangedLocked();
     }
 
     @GuardedBy("ImfLock.class")
@@ -4680,7 +4684,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
                 mMenuController.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 synchronized (ImfLock.class) {
-                    sendShouldShowImeSwitcherWhenImeIsShownLocked();
+                    sendOnNavButtonFlagsChangedLocked();
                 }
                 return true;
             case MSG_SYSTEM_UNLOCK_USER: {
@@ -4950,7 +4954,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
 
-        sendShouldShowImeSwitcherWhenImeIsShownLocked();
+        sendOnNavButtonFlagsChangedLocked();
 
         // Notify InputMethodListListeners of the new installed InputMethods.
         final List<InputMethodInfo> inputMethodList = new ArrayList<>(mMethodList);
@@ -4959,14 +4963,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    void sendShouldShowImeSwitcherWhenImeIsShownLocked() {
+    void sendOnNavButtonFlagsChangedLocked() {
         final IInputMethodInvoker curMethod = mBindingController.getCurMethod();
         if (curMethod == null) {
             // No need to send the data if the IME is not yet bound.
             return;
         }
-        curMethod.onShouldShowImeSwitcherWhenImeIsShownChanged(
-                shouldShowImeSwitcherWhenImeIsShownLocked());
+        curMethod.onNavButtonFlagsChanged(getInputMethodNavButtonFlagsLocked());
     }
 
     @GuardedBy("ImfLock.class")
