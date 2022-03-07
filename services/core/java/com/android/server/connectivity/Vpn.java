@@ -1305,6 +1305,7 @@ public class Vpn {
                 .setLegacyTypeName("VPN")
                 .setBypassableVpn(mConfig.allowBypass && !mLockdown)
                 .setVpnRequiresValidation(mConfig.requiresInternetValidation)
+                .setLocalRoutesExcludedForVpn(mConfig.excludeLocalRoutes)
                 .build();
 
         capsBuilder.setOwnerUid(mOwnerUID);
@@ -3371,6 +3372,7 @@ public class Vpn {
             mConfig.startTime = SystemClock.elapsedRealtime();
             mConfig.proxyInfo = profile.proxy;
             mConfig.requiresInternetValidation = profile.requiresInternetValidation;
+            mConfig.excludeLocalRoutes = profile.excludeLocalRoutes;
 
             switch (profile.type) {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
