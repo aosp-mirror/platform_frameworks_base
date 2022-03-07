@@ -49,6 +49,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
+
 import java.util.Objects;
 
 /**
@@ -77,8 +79,7 @@ final class NavigationBarController {
         default void onDestroy() {
         }
 
-        default void setShouldShowImeSwitcherWhenImeIsShown(
-                boolean shouldShowImeSwitcherWhenImeIsShown) {
+        default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         }
 
         default String toDebugString() {
@@ -117,8 +118,8 @@ final class NavigationBarController {
         mImpl.onDestroy();
     }
 
-    void setShouldShowImeSwitcherWhenImeIsShown(boolean shouldShowImeSwitcherWhenImeIsShown) {
-        mImpl.setShouldShowImeSwitcherWhenImeIsShown(shouldShowImeSwitcherWhenImeIsShown);
+    void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
+        mImpl.onNavButtonFlagsChanged(navButtonFlags);
     }
 
     String toDebugString() {
@@ -448,11 +449,14 @@ final class NavigationBarController {
         }
 
         @Override
-        public void setShouldShowImeSwitcherWhenImeIsShown(
-                boolean shouldShowImeSwitcherWhenImeIsShown) {
+        public void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
             if (mDestroyed) {
                 return;
             }
+
+            final boolean shouldShowImeSwitcherWhenImeIsShown =
+                    (navButtonFlags & InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN)
+                    != 0;
             if (mShouldShowImeSwitcherWhenImeIsShown == shouldShowImeSwitcherWhenImeIsShown) {
                 return;
             }
