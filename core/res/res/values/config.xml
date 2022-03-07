@@ -5267,9 +5267,9 @@
 
     <bool name="config_cecPowerStateChangeOnActiveSourceLost_userConfigurable">true</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">false</bool>
     <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed">true</bool>
-    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">false</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">true</bool>
 
     <bool name="config_cecSystemAudioControl_userConfigurable">true</bool>
     <bool name="config_cecSystemAudioControlEnabled_allowed">true</bool>
