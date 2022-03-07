@@ -24,6 +24,9 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
+import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_APPS;
+import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_NOTIFICATION;
+import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_STORAGE;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderIcon;
@@ -61,6 +64,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -122,8 +126,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     // The recycler view is only shown for multiple-device regular association request, after
     // at least one matching device is found.
-    private @Nullable RecyclerView mRecyclerView;
-    private @Nullable DeviceListAdapter mAdapter;
+    private @Nullable RecyclerView mDeviceListRecyclerView;
+    private @Nullable DeviceListAdapter mDeviceAdapter;
+
+    // The recycler view is only shown for selfManaged association request.
+    private @Nullable RecyclerView mPermissionListRecyclerView;
+    private @Nullable PermissionListAdapter mPermissionListAdapter;
 
     // The flag used to prevent double taps, that may lead to sending several requests for creating
     // an association to CDM.
@@ -132,6 +140,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // A reference to the device selected by the user, to be sent back to the application via
     // onActivityResult() after the association is created.
     private @Nullable DeviceFilterPair<?> mSelectedDevice;
+
+    private @Nullable List<Integer> mPermissionTypes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -242,8 +252,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mVendorHeaderName = findViewById(R.id.vendor_header_name);
         mVendorHeaderButton = findViewById(R.id.vendor_header_button);
 
-        mRecyclerView = findViewById(R.id.device_list);
-        mAdapter = new DeviceListAdapter(this, this::onListItemClick);
+        mDeviceListRecyclerView = findViewById(R.id.device_list);
+        mDeviceAdapter = new DeviceListAdapter(this, this::onListItemClick);
+
+        mPermissionListRecyclerView = findViewById(R.id.permission_list);
+        mPermissionListAdapter = new PermissionListAdapter(this);
 
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonNotAllow = findViewById(R.id.btn_negative);
@@ -359,7 +372,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final Drawable vendorIcon;
         final CharSequence vendorName;
         final Spanned title;
-        final Spanned summary;
+
+        mPermissionTypes = new ArrayList<>();
 
         try {
             vendorIcon = getVendorHeaderIcon(this, packageName, userId);
@@ -372,33 +386,36 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         switch (deviceProfile) {
             case DEVICE_PROFILE_APP_STREAMING:
-                title = getHtmlFromResources(this, R.string.title_app_streaming, appLabel);
-                summary = getHtmlFromResources(
-                        this, R.string.summary_app_streaming, appLabel, deviceName);
+                title = getHtmlFromResources(this, R.string.title_app_streaming, deviceName);
+                mPermissionTypes.add(TYPE_APPS);
                 break;
 
             case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
-                title = getHtmlFromResources(this, R.string.title_automotive_projection, appLabel);
-                summary = getHtmlFromResources(
-                        this, R.string.summary_automotive_projection, appLabel, deviceName);
+                title = getHtmlFromResources(
+                        this, R.string.title_automotive_projection, deviceName);
                 break;
 
             case DEVICE_PROFILE_COMPUTER:
-                title = getHtmlFromResources(this, R.string.title_computer, appLabel);
-                summary = getHtmlFromResources(
-                        this, R.string.summary_computer, appLabel, deviceName);
+                title = getHtmlFromResources(this, R.string.title_computer, deviceName);
+                mPermissionTypes.add(TYPE_NOTIFICATION);
+                mPermissionTypes.add(TYPE_STORAGE);
                 break;
 
             default:
                 throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
+        mSummary.setVisibility(View.GONE);
+
+        mPermissionListAdapter.setPermissionType(mPermissionTypes);
+        mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
+        mPermissionListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         mTitle.setText(title);
-        mSummary.setText(summary);
         mVendorHeaderImage.setImageDrawable(vendorIcon);
         mVendorHeaderName.setText(vendorName);
 
-        mRecyclerView.setVisibility(View.GONE);
+        mDeviceListRecyclerView.setVisibility(View.GONE);
         mVendorHeader.setVisibility(View.VISIBLE);
     }
 
@@ -411,7 +428,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 deviceFilterPairs -> updateSingleDeviceUi(
                         deviceFilterPairs, deviceProfile, appLabel));
 
-        mRecyclerView.setVisibility(View.GONE);
+        mPermissionListRecyclerView.setVisibility(View.GONE);
+        mDeviceListRecyclerView.setVisibility(View.GONE);
     }
 
     private void updateSingleDeviceUi(List<DeviceFilterPair<?>> deviceFilterPairs,
@@ -460,15 +478,15 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mTitle.setText(title);
         mSummary.setText(summary);
 
-        mAdapter = new DeviceListAdapter(this, this::onListItemClick);
+        mDeviceAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         // TODO: hide the list and show a spinner until a first device matching device is found.
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mDeviceListRecyclerView.setAdapter(mDeviceAdapter);
+        mDeviceListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         CompanionDeviceDiscoveryService.getScanResult().observe(
                 /* lifecycleOwner */ this,
-                /* observer */ mAdapter);
+                /* observer */ mDeviceAdapter);
 
         // "Remove" consent button: users would need to click on the list item.
         mButtonAllow.setVisibility(View.GONE);
@@ -477,14 +495,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private void onListItemClick(int position) {
         if (DEBUG) Log.d(TAG, "onListItemClick() " + position);
 
-        final DeviceFilterPair<?> selectedDevice = mAdapter.getItem(position);
+        final DeviceFilterPair<?> selectedDevice = mDeviceAdapter.getItem(position);
 
         if (mSelectedDevice != null) {
             if (DEBUG) Log.w(TAG, "Already selected.");
             return;
         }
         // Notify the adapter to highlight the selected item.
-        mAdapter.setSelectedPosition(position);
+        mDeviceAdapter.setSelectedPosition(position);
 
         mSelectedDevice = requireNonNull(selectedDevice);
 
