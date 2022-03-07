@@ -41,9 +41,11 @@ import android.testing.AndroidTestingRunner;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.SurfaceControlViewHost;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 
 import androidx.test.filters.SmallTest;
 
@@ -173,13 +175,19 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         verifyLayout(layout, mWindowAttrsCaptor.getValue(), /* expectedWidth= */ TASK_WIDTH,
                 /* expectedHeight= */ TASK_HEIGHT, /* expectedExtraTopMargin= */ DISPLAY_CUTOUT_TOP,
                 /* expectedExtraBottomMargin= */ DISPLAY_CUTOUT_BOTTOM);
+        View dialogTitle = layout.getDialogTitle();
+        assertNotNull(dialogTitle);
+        spyOn(dialogTitle);
 
         // Clicking the layout does nothing until enter animation is done.
         layout.performClick();
         verify(mAnimationController, never()).startExitAnimation(any(), any());
+        // The dialog title shouldn't be focused for Accessibility until enter animation is done.
+        verify(dialogTitle, never()).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
 
         verifyAndFinishEnterAnimation(layout);
 
+        verify(dialogTitle).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         // Exit animation should start following a click on the layout.
         layout.performClick();
 
