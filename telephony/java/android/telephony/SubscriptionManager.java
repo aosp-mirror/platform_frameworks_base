@@ -1904,7 +1904,7 @@ public class SubscriptionManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void addSubscriptionInfoRecord(@NonNull String uniqueId, @Nullable String displayName,
-            int slotIndex, int subscriptionType) {
+            int slotIndex, @SubscriptionType int subscriptionType) {
         if (VDBG) {
             logd("[addSubscriptionInfoRecord]+ uniqueId:" + uniqueId
                     + ", displayName:" + displayName + ", slotIndex:" + slotIndex
@@ -1940,7 +1940,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void removeSubscriptionInfoRecord(@NonNull String uniqueId, int subscriptionType) {
+    public void removeSubscriptionInfoRecord(@NonNull String uniqueId,
+            @SubscriptionType int subscriptionType) {
         if (VDBG) {
             logd("[removeSubscriptionInfoRecord]+ uniqueId:" + uniqueId
                     + ", subscriptionType: " + subscriptionType);
