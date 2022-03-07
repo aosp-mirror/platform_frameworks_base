@@ -2937,7 +2937,7 @@
     <!-- @SystemApi @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
-        android:protectionLevel="signature|role|setup"
+        android:protectionLevel="signature|role"
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
 
@@ -2945,6 +2945,10 @@
          the device.-->
     <permission android:name="android.permission.QUERY_ADMIN_POLICY"
                 android:protectionLevel="signature|role" />
+
+    <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
+    <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
+                android:protectionLevel="signature|setup" />
 
     <!-- @TestApi @hide Allows an application to reset the record of previous system update freeze
          periods. -->
