@@ -35,6 +35,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.Collections;
@@ -178,13 +179,16 @@ public final class PermissionHelper {
             boolean userSet, boolean reviewRequired) {
         assertFlag();
         final long callingId = Binder.clearCallingIdentity();
-        // Do not change fixed permissions, and do not change non-user set permissions that are
-        // granted by default, or granted by role.
-        if (isPermissionFixed(packageName, userId)
-                || (isPermissionGrantedByDefaultOrRole(packageName, userId) && !userSet)) {
-            return;
-        }
         try {
+            // Do not change the permission if the package doesn't request it, do not change fixed
+            // permissions, and do not change non-user set permissions that are granted by default,
+            // or granted by role.
+            if (!packageRequestsNotificationPermission(packageName, userId)
+                    || isPermissionFixed(packageName, userId)
+                    || (isPermissionGrantedByDefaultOrRole(packageName, userId) && !userSet)) {
+                return;
+            }
+
             boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
                     userId) != PackageManager.PERMISSION_DENIED;
             if (grant && !reviewRequired && !currentlyGranted) {
@@ -276,6 +280,19 @@ public final class PermissionHelper {
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    private boolean packageRequestsNotificationPermission(String packageName,
+            @UserIdInt int userId) {
+        assertFlag();
+        try {
+            String[] permissions = mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS,
+                    userId).requestedPermissions;
+            return ArrayUtils.contains(permissions, NOTIFICATION_PERMISSION);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not reach system server", e);
+        }
+        return false;
     }
 
     private void assertFlag() {
