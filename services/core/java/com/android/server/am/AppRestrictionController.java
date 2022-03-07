@@ -241,7 +241,7 @@ public final class AppRestrictionController {
     /**
      * The pre-config packages that are exempted from the background restrictions.
      */
-    private ArraySet<String> mBgRestrictionExemptioFromSysConfig;
+    ArraySet<String> mBgRestrictionExemptioFromSysConfig;
 
     /**
      * Lock specifically for bookkeeping around the carrier-privileged app set.
