@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -117,7 +118,11 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
 
     @Override
     public void destroy() {
-        stopRecognition();
+        try {
+            stopRecognition();
+        } catch (Exception e) {
+            Log.i(TAG, "failed to stopRecognition in destroy", e);
+        }
         maybeCloseExistingSession();
 
         try {

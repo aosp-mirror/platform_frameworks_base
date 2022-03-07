@@ -1215,7 +1215,11 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public void destroy() {
         synchronized (mLock) {
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
-                stopRecognition();
+                try {
+                    stopRecognition();
+                } catch (Exception e) {
+                    Log.i(TAG, "failed to stopRecognition in destroy", e);
+                }
             }
 
             mAvailability = STATE_INVALID;
