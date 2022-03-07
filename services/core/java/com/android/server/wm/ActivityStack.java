@@ -2147,7 +2147,9 @@ class ActivityStack extends ConfigurationContainer {
             boolean aboveTop = top != null;
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
-            boolean resumeNextActivity = isFocusable() && isInStackLocked(starting) == null;
+            boolean resumeNextActivity = isFocusable()
+                    && getVisibility(starting) == STACK_VISIBILITY_VISIBLE
+                    && isInStackLocked(starting) == null;
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
