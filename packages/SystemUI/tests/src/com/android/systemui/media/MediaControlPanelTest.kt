@@ -40,6 +40,7 @@ import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -85,6 +86,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var bgExecutor: FakeExecutor
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var broadcastSender: BroadcastSender
 
     @Mock private lateinit var holder: PlayerViewHolder
     @Mock private lateinit var sessionHolder: PlayerSessionViewHolder
@@ -144,8 +146,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
-        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
-            seekBarViewModel, Lazy { mediaDataManager },
+        player = MediaControlPanel(context, bgExecutor, activityStarter, broadcastSender,
+            mediaViewController, seekBarViewModel, Lazy { mediaDataManager },
             mediaOutputDialogFactory, mediaCarouselController, falsingManager, mediaFlags, clock)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 

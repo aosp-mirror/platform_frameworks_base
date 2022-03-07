@@ -53,7 +53,6 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.mediarouter.media.MediaRouter;
 import androidx.mediarouter.media.MediaRouterParams;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -70,7 +69,6 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -95,12 +93,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final String mPackageName;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
-    private final LocalBluetoothManager mLocalBluetoothManager;
-    private final ShadeController mShadeController;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
-    private final boolean mAboveStatusbar;
     private final CommonNotifCollection mNotifCollection;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
@@ -114,7 +109,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     LocalMediaManager mLocalMediaManager;
 
     private MediaOutputMetricLogger mMetricLogger;
-    private UiEventLogger mUiEventLogger;
 
     private int mColorActiveItem;
     private int mColorInactiveItem;
@@ -124,23 +118,19 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     @Inject
     public MediaOutputController(@NonNull Context context, String packageName,
-            boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
-            lbm, ShadeController shadeController, ActivityStarter starter,
-            CommonNotifCollection notifCollection, UiEventLogger uiEventLogger,
+            MediaSessionManager mediaSessionManager, LocalBluetoothManager
+            lbm, ActivityStarter starter,
+            CommonNotifCollection notifCollection,
             DialogLaunchAnimator dialogLaunchAnimator,
             Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
-        mLocalBluetoothManager = lbm;
-        mShadeController = shadeController;
         mActivityStarter = starter;
-        mAboveStatusbar = aboveStatusbar;
         mNotifCollection = notifCollection;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
-        mUiEventLogger = uiEventLogger;
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
         mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
@@ -628,18 +618,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             return;
         }
         mActivityStarter.startActivity(launchIntent, true, controller);
-    }
-
-    void launchMediaOutputGroupDialog(View mediaOutputDialog) {
-        // We show the output group dialog from the output dialog.
-        MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
-                mAboveStatusbar, mMediaSessionManager, mLocalBluetoothManager, mShadeController,
-                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
-
-        MediaOutputGroupDialog dialog = new MediaOutputGroupDialog(mContext, mAboveStatusbar,
-                controller);
-        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
