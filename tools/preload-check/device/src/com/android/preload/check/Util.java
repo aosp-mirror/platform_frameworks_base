@@ -25,8 +25,8 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Util {
@@ -48,7 +48,7 @@ public class Util {
         Class<?> vmClassLoaderClass = Class.forName("java.lang.VMClassLoader");
         Method getResources = vmClassLoaderClass.getDeclaredMethod("getResources", String.class);
         getResources.setAccessible(true);
-        LinkedList<DexFile> res = new LinkedList<>();
+        ArrayList<DexFile> res = new ArrayList<>();
         for (int i = 1;; i++) {
             try {
                 String name = "classes" + (i > 1 ? String.valueOf(i) : "") + ".dex";
