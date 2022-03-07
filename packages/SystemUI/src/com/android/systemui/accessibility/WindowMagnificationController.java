@@ -1072,6 +1072,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         pw.println("WindowMagnificationController (displayId=" + mDisplayId + "):");
         pw.println("      mOverlapWithGestureInsets:" + mOverlapWithGestureInsets);
         pw.println("      mScale:" + mScale);
+        pw.println("      mWindowBounds:" + mWindowBounds);
         pw.println("      mMirrorViewBounds:" + (isWindowVisible() ? mMirrorViewBounds : "empty"));
         pw.println("      mMagnificationFrameBoundary:"
                 + (isWindowVisible() ? mMagnificationFrameBoundary : "empty"));
