@@ -979,6 +979,10 @@
     <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
     <dimen name="qs_media_session_height_expanded">184dp</dimen>
     <dimen name="qs_media_session_height_collapsed">128dp</dimen>
+    <dimen name="qs_media_seekbar_progress_wavelength">20dp</dimen>
+    <dimen name="qs_media_seekbar_progress_amplitude">1.5dp</dimen>
+    <dimen name="qs_media_seekbar_progress_phase">8dp</dimen>
+    <dimen name="qs_media_seekbar_progress_stroke_width">2dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
