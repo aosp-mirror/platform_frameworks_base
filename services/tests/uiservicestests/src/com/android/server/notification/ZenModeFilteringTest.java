@@ -121,7 +121,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
 
     // Create a notification record with the people String array as the
     // bundled extras, and the numbers ArraySet as additional phone numbers.
-    private NotificationRecord getRecordWithPeopleInfo(String[] people,
+    private NotificationRecord getCallRecordWithPeopleInfo(String[] people,
             ArraySet<String> numbers) {
         // set up notification record
         NotificationRecord r = mock(NotificationRecord.class);
@@ -131,6 +131,8 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(sbn.getNotification()).thenReturn(notification);
         when(r.getSbn()).thenReturn(sbn);
         when(r.getPhoneNumbers()).thenReturn(numbers);
+        when(r.getCriticality()).thenReturn(CriticalNotificationExtractor.NORMAL);
+        when(r.isCategory(CATEGORY_CALL)).thenReturn(true);
         return r;
     }
 
@@ -350,11 +352,41 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRepeatCallers_checksPhoneNumbers() {
+        // set up telephony manager behavior
+        when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
+
+        // first, record a phone call from a telephone number
+        String[] callNumber = new String[]{"tel:12345678910"};
+        mZenModeFiltering.recordCall(getCallRecordWithPeopleInfo(callNumber, null));
+
+        // set up policy to only allow repeat callers
+        Policy policy = new Policy(
+                PRIORITY_CATEGORY_REPEAT_CALLERS, 0, 0, 0, CONVERSATION_SENDERS_NONE);
+
+        // make sure that a record with the phone number in extras is correctly allowed through
+        NotificationRecord r = getCallRecordWithPeopleInfo(callNumber, null);
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
+
+        // make sure that a record with the phone number in the phone numbers array is also
+        // allowed through
+        NotificationRecord r2 = getCallRecordWithPeopleInfo(new String[]{"some_contact_uri"},
+                new ArraySet<>(new String[]{"12345678910"}));
+        assertFalse(mZenModeFiltering.shouldIntercept(
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r2));
+
+        // A record with the phone number in neither of the above should be intercepted
+        NotificationRecord r3 = getCallRecordWithPeopleInfo(new String[]{"tel:10987654321"},
+                new ArraySet<>(new String[]{"15555555555"}));
+        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r3));
+    }
+
+    @Test
     public void testMatchesCallFilter_repeatCallers_directMatch() {
         // after calls given an email with an exact string match, make sure that
         // matchesCallFilter returns the right thing
         String[] mailSource = new String[]{"mailto:hello.world"};
-        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(mailSource, null));
+        mZenModeFiltering.recordCall(getCallRecordWithPeopleInfo(mailSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -377,7 +409,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
 
         String[] telSource = new String[]{"tel:+1-617-555-1212"};
-        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(telSource, null));
+        mZenModeFiltering.recordCall(getCallRecordWithPeopleInfo(telSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -421,7 +453,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
 
         String[] telSource = new String[]{"tel:%2B16175551212"};
-        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(telSource, null));
+        mZenModeFiltering.recordCall(getCallRecordWithPeopleInfo(telSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -468,7 +500,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         String[] contactSource = new String[]{"content://contacts/lookup/uri-here"};
         ArraySet<String> contactNumbers = new ArraySet<>(
                 new String[]{"1-617-555-1212", "1-617-555-3434"});
-        NotificationRecord record = getRecordWithPeopleInfo(contactSource, contactNumbers);
+        NotificationRecord record = getCallRecordWithPeopleInfo(contactSource, contactNumbers);
         record.mergePhoneNumbers(contactNumbers);
         mZenModeFiltering.recordCall(record);
 
