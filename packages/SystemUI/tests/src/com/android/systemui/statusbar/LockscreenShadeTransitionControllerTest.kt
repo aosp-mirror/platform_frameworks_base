@@ -87,6 +87,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         row = helper.createRow()
         context.getOrCreateTestableResources()
                 .addOverride(R.bool.config_use_split_notification_shade, false)
+        context.getOrCreateTestableResources()
+            .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 100)
         transitionController = LockscreenShadeTransitionController(
             statusBarStateController = statusbarStateController,
             logger = logger,
@@ -244,6 +246,17 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 anyBoolean(), anyLong())
         verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(depthController).transitionToFullShadeProgress = anyFloat()
+    }
+
+    @Test
+    fun testDragDownAmount_depthDistanceIsZero_doesNotSetProgress() {
+        context.getOrCreateTestableResources()
+            .addOverride(R.dimen.lockscreen_shade_depth_controller_transition_distance, 0)
+        configurationController.notifyConfigurationChanged()
+
+        transitionController.dragDownAmount = 10f
+
+        verify(depthController, never()).transitionToFullShadeProgress
     }
 
     @Test
