@@ -9752,7 +9752,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (info.deniedPermissions != null) {
                         for (int j = 0; j < info.deniedPermissions.size(); j++) {
                             pw.print("      deny: ");
-                            pw.println(info.deniedPermissions.valueAt(i));
+                            pw.println(info.deniedPermissions.valueAt(j));
                         }
                     }
                 }
