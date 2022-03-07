@@ -157,44 +157,6 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         verify(logger).logStateChange(any(), any())
     }
 
-    @Test
-    fun displayChip_nullAppIconDrawable_iconIsFromPackageName() {
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, "appName")
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
-    }
-
-    @Test
-    fun displayChip_hasAppIconDrawable_iconIsDrawable() {
-        val drawable = context.getDrawable(R.drawable.ic_alarm)!!
-        val state = ChipStateReceiver(PACKAGE_NAME, drawable, "appName")
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
-    }
-
-    @Test
-    fun displayChip_nullAppName_iconContentDescriptionIsFromPackageName() {
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName = null)
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(APP_NAME)
-    }
-
-    @Test
-    fun displayChip_hasAppName_iconContentDescriptionIsAppNameOverride() {
-        val appName = "Override App Name"
-        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName)
-
-        controllerReceiver.displayChip(state)
-
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
-    }
-
     private fun getChipView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())

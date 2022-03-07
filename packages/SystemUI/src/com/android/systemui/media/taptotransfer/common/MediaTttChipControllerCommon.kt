@@ -19,14 +19,16 @@ package com.android.systemui.media.taptotransfer.common
 import android.annotation.LayoutRes
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
@@ -40,8 +42,11 @@ import com.android.systemui.util.view.ViewUtil
  *
  * Subclasses need to override and implement [updateChipView], which is where they can control what
  * gets displayed to the user.
+ *
+ * The generic type T is expected to contain all the information necessary for the subclasses to
+ * display the chip in a certain state, since they receive <T> in [updateChipView].
  */
-abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
+abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     internal val context: Context,
     internal val logger: MediaTttLogger,
     private val windowManager: WindowManager,
@@ -64,10 +69,10 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     }
 
     /** The chip view currently being displayed. Null if the chip is not being displayed. */
-    var chipView: ViewGroup? = null
+    private var chipView: ViewGroup? = null
 
     /** A [Runnable] that, when run, will cancel the pending timeout of the chip. */
-    var cancelChipViewTimeout: Runnable? = null
+    private var cancelChipViewTimeout: Runnable? = null
 
     /**
      * Displays the chip with the current state.
@@ -75,7 +80,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
      * This method handles inflating and attaching the view, then delegates to [updateChipView] to
      * display the correct information in the chip.
      */
-    fun displayChip(chipState: T) {
+    fun displayChip(chipInfo: T) {
         val oldChipView = chipView
         if (chipView == null) {
             chipView = LayoutInflater
@@ -84,7 +89,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         }
         val currentChipView = chipView!!
 
-        updateChipView(chipState, currentChipView)
+        updateChipView(chipInfo, currentChipView)
 
         // Add view if necessary
         if (oldChipView == null) {
@@ -96,7 +101,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         cancelChipViewTimeout?.run()
         cancelChipViewTimeout = mainExecutor.executeDelayed(
             { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
-            chipState.getTimeoutMs()
+            chipInfo.getTimeoutMs()
         )
     }
 
@@ -117,20 +122,28 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
     }
 
     /**
-     * A method implemented by subclasses to update [currentChipView] based on [chipState].
+     * A method implemented by subclasses to update [currentChipView] based on [chipInfo].
      */
-    abstract fun updateChipView(chipState: T, currentChipView: ViewGroup)
+    abstract fun updateChipView(chipInfo: T, currentChipView: ViewGroup)
 
     /**
      * An internal method to set the icon on the view.
      *
      * This is in the common superclass since both the sender and the receiver show an icon.
+     *
+     * @param appPackageName the package name of the app playing the media. Will be used to fetch
+     *   the app icon and app name if overrides aren't provided.
      */
-    internal fun setIcon(chipState: T, currentChipView: ViewGroup) {
+    internal fun setIcon(
+        currentChipView: ViewGroup,
+        appPackageName: String?,
+        appIconDrawableOverride: Drawable? = null,
+        appNameOverride: CharSequence? = null,
+    ) {
         val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
-        appIconView.contentDescription = chipState.getAppName(context)
+        appIconView.contentDescription = appNameOverride ?: getAppName(appPackageName)
 
-        val appIcon = chipState.getAppIcon(context)
+        val appIcon = appIconDrawableOverride ?: getAppIcon(appPackageName)
         val visibility = if (appIcon != null) {
             View.VISIBLE
         } else {
@@ -138,6 +151,30 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         }
         appIconView.setImageDrawable(appIcon)
         appIconView.visibility = visibility
+    }
+
+    /** Returns the icon of the app playing the media or null if we can't find it. */
+    private fun getAppIcon(appPackageName: String?): Drawable? {
+        appPackageName ?: return null
+        return try {
+            context.packageManager.getApplicationIcon(appPackageName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Cannot find icon for package $appPackageName", e)
+            null
+        }
+    }
+
+    /** Returns the name of the app playing the media or null if we can't find it. */
+    private fun getAppName(appPackageName: String?): String? {
+        appPackageName ?: return null
+        return try {
+            context.packageManager.getApplicationInfo(
+                    appPackageName, PackageManager.ApplicationInfoFlags.of(0)
+            ).loadLabel(context.packageManager).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Cannot find name for package $appPackageName", e)
+            null
+        }
     }
 
     private fun onScreenTapped(e: MotionEvent) {
@@ -159,4 +196,3 @@ object MediaTttRemovalReason {
     const val REASON_TIMEOUT = "TIMEOUT"
     const val REASON_SCREEN_TAP = "SCREEN_TAP"
 }
-
