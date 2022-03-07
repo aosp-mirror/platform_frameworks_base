@@ -132,6 +132,8 @@ class SeekBarViewModel @Inject constructor(
 
     lateinit var logSmartspaceClick: () -> Unit
 
+    fun getEnabled() = _data.enabled
+
     /**
      * Event indicating that the user has started interacting with the seek bar.
      */

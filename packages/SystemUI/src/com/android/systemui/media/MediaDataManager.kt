@@ -752,8 +752,8 @@ class MediaDataManager(
                 null
             }
 
-            actions.startCustom = customActions[customIdx++]
-            actions.endCustom = customActions[customIdx++]
+            actions.custom0 = customActions[customIdx++]
+            actions.custom1 = customActions[customIdx++]
         }
         return actions
     }
