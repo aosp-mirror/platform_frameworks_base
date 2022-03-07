@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
@@ -35,6 +36,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.nullable;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -57,6 +61,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.Surface;
@@ -83,10 +88,12 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -105,6 +112,13 @@ public class SystemServicesTestRule implements TestRule {
     private static final PowerManager.WakeLock sWakeLock = getInstrumentation().getContext()
             .getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     private PowerManager.WakeLock mStubbedWakeLock;
+
+    /**
+     * The captured listeners will be unregistered in {@link #tearDown()} to avoid keeping static
+     * references of test instances from DeviceConfig.
+     */
+    private final ArrayList<DeviceConfig.OnPropertiesChangedListener> mDeviceConfigListeners =
+            new ArrayList<>();
 
     private Description mDescription;
     private Context mContext;
@@ -141,20 +155,29 @@ public class SystemServicesTestRule implements TestRule {
                             Log.e("SystemServicesTestRule", "Suppressed: ", throwable);
                             t.addSuppressed(throwable);
                         }
-                        throw t;
+                        throwable = t;
                     }
-                    if (throwable != null) throw throwable;
                 }
+                if (throwable != null) throw throwable;
             }
         };
     }
 
     private void setUp() {
+        // Use stubOnly() to reduce memory usage if it doesn't need verification.
+        final MockSettings spyStubOnly = withSettings().stubOnly()
+                .defaultAnswer(CALLS_REAL_METHODS);
+        final MockSettings mockStubOnly = withSettings().stubOnly();
+        // Return mocked services: LocalServices.getService
+        // Avoid real operation: SurfaceControl.mirrorSurface
+        // Avoid leakage: DeviceConfig.addOnPropertiesChangedListener, LockGuard.installLock
+        //                Watchdog.getInstance/addMonitor
         mMockitoSession = mockitoSession()
-                .spyStatic(LocalServices.class)
-                .spyStatic(SurfaceControl.class)
-                .mockStatic(LockGuard.class)
-                .mockStatic(Watchdog.class)
+                .mockStatic(LocalServices.class, spyStubOnly)
+                .mockStatic(DeviceConfig.class, spyStubOnly)
+                .mockStatic(SurfaceControl.class, mockStubOnly)
+                .mockStatic(LockGuard.class, mockStubOnly)
+                .mockStatic(Watchdog.class, mockStubOnly)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -166,6 +189,12 @@ public class SystemServicesTestRule implements TestRule {
 
     private void setUpSystemCore() {
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
+        doAnswer(invocation -> {
+            mDeviceConfigListeners.add(invocation.getArgument(2));
+            // SizeCompatTests uses setNeverConstrainDisplayApisFlag, and ActivityRecordTests
+            // uses splash_screen_exception_list. So still execute real registration.
+            return invocation.callRealMethod();
+        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(anyString(), any(), any()));
 
         mContext = getInstrumentation().getTargetContext();
         spyOn(mContext);
@@ -345,11 +374,10 @@ public class SystemServicesTestRule implements TestRule {
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
                 .unregisterDisplayListener(mAtmService.mRootWindowContainer);
-        // The constructor of WindowManagerService registers WindowManagerConstants and
-        // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
-        // leaking mWmService.
-        mWmService.mConstants.dispose();
-        mWmService.mHighRefreshRateDenylist.dispose();
+
+        for (int i = mDeviceConfigListeners.size() - 1; i >= 0; i--) {
+            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListeners.get(i));
+        }
 
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.
