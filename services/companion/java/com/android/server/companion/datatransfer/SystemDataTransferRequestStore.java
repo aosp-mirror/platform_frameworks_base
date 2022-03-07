@@ -16,12 +16,12 @@
 
 package com.android.server.companion.datatransfer;
 
+import static android.companion.datatransfer.SystemDataTransferRequest.DATA_TYPE_PERMISSION_SYNC;
+
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readThisListXml;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeListXml;
 import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
 import static com.android.server.companion.DataStoreUtils.isEndOfTag;
 import static com.android.server.companion.DataStoreUtils.isStartOfTag;
@@ -30,7 +30,8 @@ import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.companion.SystemDataTransferRequest;
+import android.companion.datatransfer.PermissionSyncRequest;
+import android.companion.datatransfer.SystemDataTransferRequest;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -65,13 +66,9 @@ import java.util.concurrent.TimeoutException;
  * <requests>
  *   <request
  *     association_id="1"
+ *     data_type="1"
  *     user_id="12"
  *     is_user_consented="true"
- *     is_permission_sync_all_packages="false">
- *     <list name="permission_sync_packages">
- *       <string>com.sample.app1</string>
- *       <string>com.sample.app2</string>
- *     </list>
  *   </request>
  * </requests>
  * }</pre>
@@ -87,11 +84,9 @@ public class SystemDataTransferRequestStore {
     private static final String XML_TAG_LIST = "list";
 
     private static final String XML_ATTR_ASSOCIATION_ID = "association_id";
+    private static final String XML_ATTR_DATA_TYPE = "data_type";
     private static final String XML_ATTR_USER_ID = "user_id";
     private static final String XML_ATTR_IS_USER_CONSENTED = "is_user_consented";
-    private static final String XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES =
-            "is_permission_sync_all_packages";
-    private static final String XML_ATTR_PERMISSION_SYNC_PACKAGES = "permission_sync_packages";
 
     private static final int READ_FROM_DISK_TIMEOUT = 5; // in seconds
 
@@ -220,25 +215,19 @@ public class SystemDataTransferRequestStore {
         }
 
         final int associationId = readIntAttribute(parser, XML_ATTR_ASSOCIATION_ID);
+        final int dataType = readIntAttribute(parser, XML_ATTR_DATA_TYPE);
         final int userId = readIntAttribute(parser, XML_ATTR_USER_ID);
         final boolean isUserConsented = readBooleanAttribute(parser, XML_ATTR_IS_USER_CONSENTED);
-        final boolean isPermissionSyncAllPackages = readBooleanAttribute(parser,
-                XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES);
-        parser.nextTag();
-        List<String> permissionSyncPackages = new ArrayList<>();
-        if (isStartOfTag(parser, XML_TAG_LIST)) {
-            parser.nextTag();
-            permissionSyncPackages = readThisListXml(parser, XML_TAG_LIST,
-                    new String[1]);
+
+        switch (dataType) {
+            case DATA_TYPE_PERMISSION_SYNC:
+                PermissionSyncRequest request = new PermissionSyncRequest(associationId);
+                request.setUserId(userId);
+                request.setUserConsented(isUserConsented);
+                return request;
+            default:
+                return null;
         }
-
-        SystemDataTransferRequest request =
-                new SystemDataTransferRequest(associationId, isPermissionSyncAllPackages,
-                        permissionSyncPackages);
-        request.setUserId(userId);
-        request.setUserConsented(isUserConsented);
-
-        return request;
     }
 
     /**
@@ -283,17 +272,9 @@ public class SystemDataTransferRequestStore {
         serializer.startTag(null, XML_TAG_REQUEST);
 
         writeIntAttribute(serializer, XML_ATTR_ASSOCIATION_ID, request.getAssociationId());
+        writeIntAttribute(serializer, XML_ATTR_DATA_TYPE, request.getDataType());
         writeIntAttribute(serializer, XML_ATTR_USER_ID, request.getUserId());
         writeBooleanAttribute(serializer, XML_ATTR_IS_USER_CONSENTED, request.isUserConsented());
-        writeBooleanAttribute(serializer, XML_ATTR_IS_PERMISSION_SYNC_ALL_PACKAGES,
-                request.getPermissionSyncAllPackages());
-        try {
-            writeListXml(request.getPermissionSyncPackages(), XML_ATTR_PERMISSION_SYNC_PACKAGES,
-                    serializer);
-        } catch (XmlPullParserException e) {
-            Slog.e(LOG_TAG, "Error writing permission sync packages into XML. "
-                    + request.getPermissionSyncPackages().toString());
-        }
 
         serializer.endTag(null, XML_TAG_REQUEST);
     }
