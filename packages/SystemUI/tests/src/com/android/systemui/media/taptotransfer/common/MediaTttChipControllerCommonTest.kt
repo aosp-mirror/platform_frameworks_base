@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.media.MediaRoute2Info
+import android.os.PowerManager
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +30,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.receiver.ChipReceiverInfo
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -71,6 +70,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var tapGestureDetector: TapGestureDetector
+    @Mock
+    private lateinit var powerManager: PowerManager
 
     @Before
     fun setUp() {
@@ -88,16 +89,17 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         fakeExecutor = FakeExecutor(fakeClock)
 
         controllerCommon = TestControllerCommon(
-            context, logger, windowManager, viewUtil, fakeExecutor, tapGestureDetector
+            context, logger, windowManager, viewUtil, fakeExecutor, tapGestureDetector, powerManager
         )
     }
 
     @Test
-    fun displayChip_chipAddedAndGestureDetectionStarted() {
+    fun displayChip_chipAddedAndGestureDetectionStartedAndScreenOn() {
         controllerCommon.displayChip(getState())
 
         verify(windowManager).addView(any(), any())
         verify(tapGestureDetector).addOnGestureDetectedCallback(any(), any())
+        verify(powerManager).wakeUp(any(), any(), any())
     }
 
     @Test
@@ -281,6 +283,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
         tapGestureDetector: TapGestureDetector,
+        powerManager: PowerManager
     ) : MediaTttChipControllerCommon<ChipInfo>(
         context,
         logger,
@@ -288,6 +291,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         viewUtil,
         mainExecutor,
         tapGestureDetector,
+        powerManager,
         R.layout.media_ttt_chip
     ) {
         override fun updateChipView(chipInfo: ChipInfo, currentChipView: ViewGroup) {
