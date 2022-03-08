@@ -2783,7 +2783,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             @Nullable IAppOpsCallback permissionPolicyCallback) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return;
+        }
 
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
@@ -3218,7 +3220,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int checkOperationImpl(int code, int uid, String packageName,
             @Nullable String attributionTag, boolean raw) {
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return AppOpsManager.opToDefaultMode(code);
+        }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3330,8 +3334,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isPackageExisted(String packageName) {
-        return LocalServices.getService(PackageManagerInternal.class)
-                .getPackageStateInternal(packageName) != null;
+        return getPackageManagerInternal().getPackageStateInternal(packageName) != null;
     }
 
     /**
@@ -3366,8 +3369,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
-        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
-        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
+        if (!isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))
+                || !isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))) {
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, proxiedAttributionTag,
+                    proxiedPackageName);
+        }
 
         skipProxyOperation = skipProxyOperation
                 && isCallerAndAttributionTrusted(attributionSource);
@@ -3424,7 +3430,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             @Nullable String message, boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                    packageName);
+        }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3830,7 +3839,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             int attributionChainId) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                    packageName);
+        }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -3884,8 +3896,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
-        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
-        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+        if (!isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))
+                || !isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))) {
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, proxiedAttributionTag,
+                    proxiedPackageName);
+        }
 
         boolean isCallerTrusted = isCallerAndAttributionTrusted(attributionSource);
         skipProxyOperation = isCallerTrusted && skipProxyOperation;
@@ -4070,7 +4085,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             String attributionTag) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return;
+        }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -4103,8 +4120,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
-        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
-        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+        if (!isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))
+                || !isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))) {
+            return null;
+        }
 
         String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
                 proxyPackageName);
@@ -4377,12 +4396,32 @@ public class AppOpsService extends IAppOpsService.Stub {
         throw new IllegalArgumentException("Bad operation #" + op);
     }
 
-    private void verifyIncomingPackage(@Nullable String packageName, @UserIdInt int userId) {
-        if (packageName != null && getPackageManagerInternal().filterAppAccess(packageName,
-                Binder.getCallingUid(), userId)) {
-            throw new IllegalArgumentException(
-                    packageName + " not found from " + Binder.getCallingUid());
+    private boolean isIncomingPackageValid(@Nullable String packageName, @UserIdInt int userId) {
+        final int callingUid = Binder.getCallingUid();
+        // Handle the special UIDs that don't have actual packages (audioserver, cameraserver, etc).
+        if (packageName == null || isSpecialPackage(callingUid, packageName)) {
+            return true;
         }
+
+        // If the package doesn't exist, #verifyAndGetBypass would throw a SecurityException in
+        // the end. Although that exception would be caught and return, we could make it return
+        // early.
+        if (!isPackageExisted(packageName)) {
+            return false;
+        }
+
+        if (getPackageManagerInternal().filterAppAccess(packageName, callingUid, userId)) {
+            Slog.w(TAG, packageName + " not found from " + callingUid);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isSpecialPackage(int callingUid, @Nullable String packageName) {
+        final String resolvedPackage = AppOpsManager.resolvePackageName(callingUid, packageName);
+        return callingUid == Process.SYSTEM_UID
+                || resolveUid(resolvedPackage) != Process.INVALID_UID;
     }
 
     private boolean isCallerAndAttributionTrusted(@NonNull AttributionSource attributionSource) {
@@ -6672,7 +6711,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         verifyIncomingOp(code);
-        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+        if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+            return false;
+        }
 
         final String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
@@ -7077,7 +7118,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private static int resolveUid(String packageName)  {
         if (packageName == null) {
-            return -1;
+            return Process.INVALID_UID;
         }
         switch (packageName) {
             case "root":
@@ -7092,7 +7133,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             case "cameraserver":
                 return Process.CAMERASERVER_UID;
         }
-        return -1;
+        return Process.INVALID_UID;
     }
 
     private static String[] getPackagesForUid(int uid) {
