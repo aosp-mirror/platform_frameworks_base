@@ -73,12 +73,14 @@ class NumPadAnimator {
         ValueAnimator expandBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
                 mNormalColor, mHighlightColor);
         expandBackgroundColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
+        expandBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
         expandBackgroundColorAnimator.addUpdateListener(
                 animator -> mBackground.setColor((int) animator.getAnimatedValue()));
 
         ValueAnimator expandTextColorAnimator =
                 ValueAnimator.ofObject(new ArgbEvaluator(),
                 textColorPrimary, textColorPrimaryInverse);
+        expandTextColorAnimator.setInterpolator(Interpolators.LINEAR);
         expandTextColorAnimator.setDuration(EXPAND_COLOR_ANIMATION_MS);
         expandTextColorAnimator.addUpdateListener(valueAnimator -> {
             if (digitTextView != null) {
@@ -98,6 +100,7 @@ class NumPadAnimator {
                 anim -> mBackground.setCornerRadius((float) anim.getAnimatedValue()));
         ValueAnimator contractBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(),
                 mHighlightColor, mNormalColor);
+        contractBackgroundColorAnimator.setInterpolator(Interpolators.LINEAR);
         contractBackgroundColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
         contractBackgroundColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
         contractBackgroundColorAnimator.addUpdateListener(
@@ -106,6 +109,7 @@ class NumPadAnimator {
         ValueAnimator contractTextColorAnimator =
                 ValueAnimator.ofObject(new ArgbEvaluator(), textColorPrimaryInverse,
                 textColorPrimary);
+        contractTextColorAnimator.setInterpolator(Interpolators.LINEAR);
         contractTextColorAnimator.setStartDelay(CONTRACT_ANIMATION_DELAY_MS);
         contractTextColorAnimator.setDuration(CONTRACT_ANIMATION_MS);
         contractTextColorAnimator.addUpdateListener(valueAnimator -> {
