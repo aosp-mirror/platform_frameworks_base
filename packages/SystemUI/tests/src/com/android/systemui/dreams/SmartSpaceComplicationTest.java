@@ -15,25 +15,30 @@
  */
 package com.android.systemui.dreams;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
+import com.android.systemui.dreams.smartspace.DreamsSmartspaceController;
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -42,7 +47,7 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     private Context mContext;
 
     @Mock
-    private LockscreenSmartspaceController mSmartspaceController;
+    private DreamsSmartspaceController mSmartspaceController;
 
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
@@ -60,7 +65,6 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
      */
     @Test
     public void testAvailability() {
-        when(mSmartspaceController.isEnabled()).thenReturn(false);
 
         final SmartSpaceComplication.Registrant registrant = new SmartSpaceComplication.Registrant(
                 mContext,
@@ -68,10 +72,22 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
                 mComplication,
                 mSmartspaceController);
         registrant.start();
-        verify(mDreamOverlayStateController, never()).addComplication(any());
+        verify(mDreamOverlayStateController, never()).addComplication(eq(mComplication));
 
-        when(mSmartspaceController.isEnabled()).thenReturn(true);
-        registrant.start();
+
+        final ArgumentCaptor<DreamOverlayStateController.Callback> dreamCallbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(dreamCallbackCaptor.capture());
+
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        dreamCallbackCaptor.getValue().onStateChanged();
+
+        final ArgumentCaptor<BcSmartspaceDataPlugin.SmartspaceTargetListener> listenerCaptor =
+                ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
+        verify(mSmartspaceController).addListener(listenerCaptor.capture());
+
+        final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
     }
 }

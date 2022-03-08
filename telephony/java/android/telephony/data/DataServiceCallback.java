@@ -50,12 +50,13 @@ public class DataServiceCallback {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESULT_SUCCESS, RESULT_ERROR_UNSUPPORTED, RESULT_ERROR_INVALID_ARG, RESULT_ERROR_BUSY,
-            RESULT_ERROR_ILLEGAL_STATE})
+            RESULT_ERROR_ILLEGAL_STATE, RESULT_ERROR_TEMPORARILY_UNAVAILABLE,
+            RESULT_ERROR_RADIO_NOT_AVAILABLE})
     public @interface ResultCode {}
 
     /** Request is completed successfully */
     public static final int RESULT_SUCCESS              = 0;
-    /** Request is not support */
+    /** Request is not supported */
     public static final int RESULT_ERROR_UNSUPPORTED    = 1;
     /** Request contains invalid arguments */
     public static final int RESULT_ERROR_INVALID_ARG    = 2;
@@ -68,6 +69,11 @@ public class DataServiceCallback {
      * @hide
      */
     public static final int RESULT_ERROR_TEMPORARILY_UNAVAILABLE = 5;
+    /**
+     * Request failed to complete due to radio not available.
+     * @hide
+     */
+    public static final int RESULT_ERROR_RADIO_NOT_AVAILABLE = 6;
 
     private final IDataServiceCallback mCallback;
 
@@ -255,6 +261,8 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_ILLEGAL_STATE";
             case RESULT_ERROR_TEMPORARILY_UNAVAILABLE:
                 return "RESULT_ERROR_TEMPORARILY_UNAVAILABLE";
+            case RESULT_ERROR_RADIO_NOT_AVAILABLE:
+                return "RESULT_ERROR_RADIO_NOT_AVAILABLE";
             default:
                 return "Unknown(" + resultCode + ")";
         }

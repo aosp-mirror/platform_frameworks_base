@@ -33,11 +33,17 @@ import java.lang.annotation.Retention;
  */
 @Retention(SOURCE)
 @IntDef(flag = true, value = {
+        InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR,
         InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN,
 })
 public @interface InputMethodNavButtonFlags {
     /**
+     * When set, the IME process needs to render and handle the navigation bar buttons such as the
+     * back button and the IME switcher button.
+     */
+    int IME_DRAWS_IME_NAV_BAR = 1;
+    /**
      * When set, the IME switcher icon needs to be shown on the navigation bar.
      */
-    int SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN = 1;
+    int SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN = 2;
 }
