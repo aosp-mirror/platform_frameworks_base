@@ -21,8 +21,11 @@
 #include <sys/stat.h>
 #include <utils/Log.h>
 
+#include "SkData.h"
 #include "SkFontMgr.h"
+#include "SkRefCnt.h"
 #include "SkStream.h"
+#include "SkTypeface.h"
 
 #include "hwui/MinikinSkia.h"
 #include "hwui/Typeface.h"

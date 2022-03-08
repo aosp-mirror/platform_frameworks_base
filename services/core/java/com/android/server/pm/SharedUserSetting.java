@@ -221,6 +221,25 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     }
 
     /**
+     * A shared user is considered "single user" if there is exactly one single package
+     * currently using it. In the case when that package is also a system app, the APK on
+     * the system partition has to also leave shared UID.
+     */
+    public boolean isSingleUser() {
+        if (mPackages.size() != 1) {
+            return false;
+        }
+        if (mDisabledPackages.size() > 1) {
+            return false;
+        }
+        if (mDisabledPackages.size() == 1) {
+            final AndroidPackage pkg = mDisabledPackages.valueAt(0).getPkg();
+            return pkg != null && pkg.isLeavingSharedUid();
+        }
+        return true;
+    }
+
+    /**
      * Determine the targetSdkVersion for a sharedUser and update pkg.applicationInfo.seInfo
      * to ensure that all apps within the sharedUser share an SELinux domain. Use the lowest
      * targetSdkVersion of all apps within the shared user, which corresponds to the least

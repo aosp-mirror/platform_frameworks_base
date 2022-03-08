@@ -23,8 +23,16 @@
 #include <Picture.h>
 #include <Properties.h>
 #include <RootRenderNode.h>
+#include <SkBitmap.h>
+#include <SkColorSpace.h>
+#include <SkData.h>
+#include <SkImage.h>
 #include <SkImagePriv.h>
+#include <SkPicture.h>
+#include <SkPixmap.h>
 #include <SkSerialProcs.h>
+#include <SkStream.h>
+#include <SkTypeface.h>
 #include <dlfcn.h>
 #include <gui/TraceUtils.h>
 #include <inttypes.h>
@@ -444,7 +452,7 @@ struct PictureCaptureState {
 };
 
 // TODO: This & Multi-SKP & Single-SKP should all be de-duped into
-// a single "make a SkPicture serailizable-safe" utility somewhere
+// a single "make a SkPicture serializable-safe" utility somewhere
 class PictureWrapper : public Picture {
 public:
     PictureWrapper(sk_sp<SkPicture>&& src, const std::shared_ptr<PictureCaptureState>& state)

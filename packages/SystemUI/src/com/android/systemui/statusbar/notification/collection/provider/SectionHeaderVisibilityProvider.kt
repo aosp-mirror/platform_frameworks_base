@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification
+package com.android.systemui.statusbar.notification.collection.provider
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
@@ -34,7 +34,7 @@ import javax.inject.Inject
 class SectionHeaderVisibilityProvider @Inject constructor(
     context: Context
 ) {
-    var neverShowSectionHeaders = context.resources.getBoolean(R.bool.config_notification_never_show_section_headers)
-        private set
+    val neverShowSectionHeaders =
+        context.resources.getBoolean(R.bool.config_notification_never_show_section_headers)
     var sectionHeadersVisible = true
 }

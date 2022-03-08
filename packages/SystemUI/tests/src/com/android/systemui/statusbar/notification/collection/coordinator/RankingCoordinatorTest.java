@@ -40,7 +40,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
-import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -48,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 
@@ -68,7 +68,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private SectionClassifier mSectionClassifier;
+    @Mock private SectionStyleProvider mSectionStyleProvider;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NodeController mAlertingHeaderController;
     @Mock private NodeController mSilentNodeController;
@@ -92,7 +92,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mRankingCoordinator = new RankingCoordinator(
                 mStatusBarStateController,
                 mHighPriorityProvider,
-                mSectionClassifier,
+                mSectionStyleProvider,
                 mAlertingHeaderController,
                 mSilentHeaderController,
                 mSilentNodeController);
@@ -100,7 +100,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mEntry.setRanking(getRankingForUnfilteredNotif().build());
 
         mRankingCoordinator.attach(mNotifPipeline);
-        verify(mSectionClassifier).setMinimizedSections(any());
+        verify(mSectionStyleProvider).setMinimizedSections(any());
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);

@@ -25,6 +25,8 @@
 #include <cstdint>
 #include "FileBlobCache.h"
 #include "pipeline/skia/ShaderCache.h"
+#include <SkData.h>
+#include <SkRefCnt.h>
 
 using namespace android::uirenderer::skiapipeline;
 

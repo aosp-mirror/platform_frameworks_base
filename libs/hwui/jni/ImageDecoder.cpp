@@ -29,8 +29,12 @@
 
 #include <FrontBufferedStream.h>
 #include <SkAndroidCodec.h>
-#include <SkEncodedImageFormat.h>
+#include <SkBitmap.h>
+#include <SkColorSpace.h>
+#include <SkImageInfo.h>
+#include <SkRect.h>
 #include <SkStream.h>
+#include <SkString.h>
 
 #include <androidfw/Asset.h>
 #include <fcntl.h>

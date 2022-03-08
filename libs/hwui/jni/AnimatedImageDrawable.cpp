@@ -21,8 +21,11 @@
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>
 #include <SkColorFilter.h>
+#include <SkEncodedImageFormat.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <hwui/AnimatedImageDrawable.h>
 #include <hwui/ImageDecoder.h>
 #include <hwui/Canvas.h>

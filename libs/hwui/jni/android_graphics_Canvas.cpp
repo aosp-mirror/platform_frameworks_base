@@ -32,10 +32,22 @@
 
 #include "FontUtils.h"
 #include "Bitmap.h"
+#include "SkBitmap.h"
+#include "SkBlendMode.h"
+#include "SkClipOp.h"
+#include "SkColor.h"
+#include "SkColorSpace.h"
 #include "SkGraphics.h"
+#include "SkImageInfo.h"
+#include "SkMatrix.h"
+#include "SkPath.h"
+#include "SkPoint.h"
+#include "SkRect.h"
+#include "SkRefCnt.h"
 #include "SkRegion.h"
-#include "SkVertices.h"
 #include "SkRRect.h"
+#include "SkScalar.h"
+#include "SkVertices.h"
 
 namespace minikin {
 class MeasuredText;

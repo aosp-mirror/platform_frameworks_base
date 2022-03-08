@@ -5,11 +5,12 @@
  * found in the LICENSE file.
  */
 #include "Movie.h"
-#include "SkCanvas.h"
-#include "SkPaint.h"
+#include "SkBitmap.h"
+#include "SkStream.h"
+#include "SkTypes.h"
 
 // We should never see this in normal operation since our time values are
-// 0-based. So we use it as a sentinal.
+// 0-based. So we use it as a sentinel.
 #define UNINITIALIZED_MSEC ((SkMSec)-1)
 
 Movie::Movie()
@@ -80,8 +81,6 @@ const SkBitmap& Movie::bitmap()
 }
 
 ////////////////////////////////////////////////////////////////////
-
-#include "SkStream.h"
 
 Movie* Movie::DecodeMemory(const void* data, size_t length) {
     SkMemoryStream stream(data, length, false);

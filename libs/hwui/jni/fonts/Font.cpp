@@ -22,7 +22,10 @@
 #include "SkFont.h"
 #include "SkFontMetrics.h"
 #include "SkFontMgr.h"
+#include "SkRect.h"
 #include "SkRefCnt.h"
+#include "SkScalar.h"
+#include "SkStream.h"
 #include "SkTypeface.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedUtfChars.h>

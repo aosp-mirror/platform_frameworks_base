@@ -21,13 +21,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.AssistantFeedbackController
 import com.android.systemui.statusbar.notification.FeedbackIcon
-import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.collection.render.NotifRowController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -53,7 +53,7 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
 
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var assistantFeedbackController: AssistantFeedbackController
-    @Mock private lateinit var sectionClassifier: SectionClassifier
+    @Mock private lateinit var sectionStyleProvider: SectionStyleProvider
 
     @Mock private lateinit var section1: NotifSection
     @Mock private lateinit var section2: NotifSection
@@ -66,7 +66,7 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
         coordinator = RowAppearanceCoordinator(
             mContext,
             assistantFeedbackController,
-            sectionClassifier
+            sectionStyleProvider
         )
         coordinator.attach(pipeline)
         beforeRenderListListener = withArgCaptor {
@@ -82,8 +82,8 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testSetSystemExpandedOnlyOnFirst() {
-        whenever(sectionClassifier.isMinimizedSection(eq(section1))).thenReturn(false)
-        whenever(sectionClassifier.isMinimizedSection(eq(section1))).thenReturn(false)
+        whenever(sectionStyleProvider.isMinimizedSection(eq(section1))).thenReturn(false)
+        whenever(sectionStyleProvider.isMinimizedSection(eq(section1))).thenReturn(false)
         beforeRenderListListener.onBeforeRenderList(listOf(entry1, entry2))
         afterRenderEntryListener.onAfterRenderEntry(entry1, controller1)
         verify(controller1).setSystemExpanded(eq(true))
@@ -93,8 +93,8 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testSetSystemExpandedNeverIfMinimized() {
-        whenever(sectionClassifier.isMinimizedSection(eq(section1))).thenReturn(true)
-        whenever(sectionClassifier.isMinimizedSection(eq(section1))).thenReturn(true)
+        whenever(sectionStyleProvider.isMinimizedSection(eq(section1))).thenReturn(true)
+        whenever(sectionStyleProvider.isMinimizedSection(eq(section1))).thenReturn(true)
         beforeRenderListListener.onBeforeRenderList(listOf(entry1, entry2))
         afterRenderEntryListener.onAfterRenderEntry(entry1, controller1)
         verify(controller1).setSystemExpanded(eq(false))

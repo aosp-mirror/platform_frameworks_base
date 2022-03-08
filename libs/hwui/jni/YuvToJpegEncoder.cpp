@@ -1,5 +1,7 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "SkJPEGWriteUtility.h"
+#include "SkStream.h"
+#include "SkTypes.h"
 #include "YuvToJpegEncoder.h"
 #include <ui/PixelFormat.h>
 #include <hardware/hardware.h>

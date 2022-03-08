@@ -16,11 +16,20 @@
 
 #include "SkiaRecordingCanvas.h"
 #include "hwui/Paint.h"
+#include <include/private/SkTemplates.h> // SkAutoSTMalloc
+#include <SkBlendMode.h>
+#include <SkData.h>
+#include <SkDrawable.h>
 #include <SkImage.h>
 #include <SkImagePriv.h>
+#include <SkMatrix.h>
 #include <SkPaint.h>
-#include <SkRRect.h>
+#include <SkPoint.h>
 #include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkRRect.h>
+#include <SkSamplingOptions.h>
+#include <SkTypes.h>
 #include "CanvasTransform.h"
 #ifdef __ANDROID__ // Layoutlib does not support Layers
 #include "Layer.h"

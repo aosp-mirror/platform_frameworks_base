@@ -29,6 +29,10 @@
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
+#include <SkBitmap.h>
+#include <SkImage.h>
+#include <SkPicture.h>
+
 #include <pthread.h>
 
 namespace android {

@@ -19,6 +19,10 @@
 #include "utils/Color.h"
 #include "hwui/Paint.h"
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkFont.h>
+
 class MagnifierAnimation;
 
 static TestScene::Registrar _Magnifier(TestScene::Info{

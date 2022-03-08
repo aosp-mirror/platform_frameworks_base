@@ -355,10 +355,10 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
-        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
+        if ((aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0
+                || !mService.mAmInternal.shouldConfirmCredentials(userId)) {
             return null;
         }
-        // TODO(b/28935539): should allow certain activities to bypass work challenge
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext

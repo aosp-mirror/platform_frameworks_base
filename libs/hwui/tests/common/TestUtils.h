@@ -27,9 +27,19 @@
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 
+#include <SkBitmap.h>
+#include <SkColor.h>
+#include <SkImageInfo.h>
+#include <SkRefCnt.h>
+
 #include <gtest/gtest.h>
 #include <memory>
 #include <unordered_map>
+
+class SkCanvas;
+class SkMatrix;
+class SkPath;
+struct SkRect;
 
 namespace android {
 namespace uirenderer {

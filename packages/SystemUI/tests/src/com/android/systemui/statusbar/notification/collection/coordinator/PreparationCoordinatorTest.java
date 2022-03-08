@@ -41,7 +41,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -56,6 +55,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 
@@ -96,9 +96,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    private final SectionClassifier mSectionClassifier = new SectionClassifier();
+    private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
     private final NotifUiAdjustmentProvider mAdjustmentProvider =
-            new NotifUiAdjustmentProvider(mSectionClassifier);
+            new NotifUiAdjustmentProvider(mSectionStyleProvider);
 
     @NonNull
     private NotificationEntryBuilder getNotificationEntryBuilder() {
@@ -487,7 +487,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     private static final int TEST_MAX_GROUP_DELAY = 100;
 
     private void setSectionIsLowPriority(boolean minimized) {
-        mSectionClassifier.setMinimizedSections(minimized
+        mSectionStyleProvider.setMinimizedSections(minimized
                 ? Collections.singleton(mNotifSection.getSectioner())
                 : Collections.emptyList());
     }
