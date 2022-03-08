@@ -725,17 +725,18 @@ public abstract class WindowManagerInternal {
     public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
-     * Tell window manager about a package that should not be running with high refresh rate
-     * setting until removeNonHighRefreshRatePackage is called for the same package.
+     * Tell window manager about a package that should be running with a restricted range of
+     * refresh rate setting until removeRefreshRateRangeForPackage is called for the same package.
      *
      * This must not be called again for the same package.
      */
-    public abstract void addNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void addRefreshRateRangeForPackage(@NonNull String packageName,
+            float minRefreshRate, float maxRefreshRate);
 
     /**
      * Tell window manager to stop constraining refresh rate for the given package.
      */
-    public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
+    public abstract void removeRefreshRateRangeForPackage(@NonNull String packageName);
 
     /**
      * Checks if the device supports touch or faketouch.
