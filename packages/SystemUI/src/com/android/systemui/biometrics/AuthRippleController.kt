@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PointF
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricSourceType
 import android.util.DisplayMetrics
 import android.util.Log
@@ -39,8 +40,8 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -256,6 +257,16 @@ class AuthRippleController @Inject constructor(
 
         override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType?) {
             mView.retractRipple()
+        }
+
+        override fun onBiometricAcquired(
+            biometricSourceType: BiometricSourceType?,
+            acquireInfo: Int
+        ) {
+            if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
+                    acquireInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_PARTIAL) {
+                mView.retractRipple()
+            }
         }
     }
 

@@ -206,8 +206,10 @@ public class KeyguardUpdateMonitorCallback {
      * It is guaranteed that either {@link #onBiometricAuthenticated} or
      * {@link #onBiometricAuthFailed(BiometricSourceType)} is called after this method eventually.
      * @param biometricSourceType
+     * @param acquireInfo see {@link android.hardware.biometrics.BiometricFaceConstants} and
+     *                    {@link android.hardware.biometrics.BiometricFingerprintConstants}
      */
-    public void onBiometricAcquired(BiometricSourceType biometricSourceType) { }
+    public void onBiometricAcquired(BiometricSourceType biometricSourceType, int acquireInfo) { }
 
     /**
      * Called when a biometric couldn't be authenticated.
