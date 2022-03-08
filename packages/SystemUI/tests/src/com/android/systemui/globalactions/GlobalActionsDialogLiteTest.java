@@ -341,6 +341,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     public void testCreateActionItems_lockdownEnabled_doesShowLockdown() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         String[] actions = {
@@ -365,8 +366,10 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     public void testCreateActionItems_lockdownDisabled_doesNotShowLockdown() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
         // make sure lockdown action will NOT be shown
         doReturn(false).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 // lockdown action not allowed
@@ -379,6 +382,32 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
         assertItemsOfType(mGlobalActionsDialogLite.mItems,
                 GlobalActionsDialogLite.EmergencyAction.class,
+                GlobalActionsDialogLite.ShutDownAction.class,
+                GlobalActionsDialogLite.RestartAction.class);
+        assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
+    }
+
+    @Test
+    public void testCreateActionItems_emergencyDisabled_doesNotShowEmergency() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        // make sure emergency action will NOT be shown
+        doReturn(false).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        String[] actions = {
+                // emergency action not allowed
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+        mGlobalActionsDialogLite.createActionItems();
+
+        assertItemsOfType(mGlobalActionsDialogLite.mItems,
+                GlobalActionsDialogLite.LockDownAction.class,
                 GlobalActionsDialogLite.ShutDownAction.class,
                 GlobalActionsDialogLite.RestartAction.class);
         assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
