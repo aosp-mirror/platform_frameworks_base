@@ -39,7 +39,7 @@
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
-    <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information for your phone</string>
+    <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_app_streaming" product="default">Let &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to provide &lt;strong&gt;<xliff:g id="device_name" example="Pixelbook Go">%2$s</xliff:g>&lt;/strong&gt; remote access to access to applications installed on this phone when connected.</string>
