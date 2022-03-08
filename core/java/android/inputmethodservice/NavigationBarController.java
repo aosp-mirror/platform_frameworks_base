@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
 import android.animation.ValueAnimator;
@@ -24,18 +23,12 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.navigationbar.NavigationBarFrame;
 import android.inputmethodservice.navigationbar.NavigationBarView;
-import android.os.PatternMatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -144,9 +137,6 @@ final class NavigationBarController {
         private NavigationBarFrame mNavigationBarFrame;
         @Nullable
         Insets mLastInsets;
-
-        @Nullable
-        private BroadcastReceiver mSystemOverlayChangedReceiver;
 
         private boolean mShouldShowImeSwitcherWhenImeIsShown;
 
@@ -360,14 +350,6 @@ final class NavigationBarController {
             });
         }
 
-        private boolean imeDrawsImeNavBar() {
-            final Resources resources = mService.getResources();
-            if (resources == null) {
-                return false;
-            }
-            return resources.getBoolean(com.android.internal.R.bool.config_imeDrawsImeNavBar);
-        }
-
         @Override
         public void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
             final Window window = softInputWindow.getWindow();
@@ -380,27 +362,6 @@ final class NavigationBarController {
             if (mDestroyed) {
                 return;
             }
-            mImeDrawsImeNavBar = imeDrawsImeNavBar();
-            if (mSystemOverlayChangedReceiver == null) {
-                final IntentFilter intentFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
-                intentFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
-                intentFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
-                mSystemOverlayChangedReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (mDestroyed) {
-                            return;
-                        }
-                        mImeDrawsImeNavBar = imeDrawsImeNavBar();
-                        if (mImeDrawsImeNavBar) {
-                            installNavigationBarFrameIfNecessary();
-                        } else {
-                            uninstallNavigationBarFrameIfNecessary();
-                        }
-                    }
-                };
-                mService.registerReceiver(mSystemOverlayChangedReceiver, intentFilter);
-            }
             installNavigationBarFrameIfNecessary();
         }
 
@@ -412,10 +373,6 @@ final class NavigationBarController {
             if (mTintAnimator != null) {
                 mTintAnimator.cancel();
                 mTintAnimator = null;
-            }
-            if (mSystemOverlayChangedReceiver != null) {
-                mService.unregisterReceiver(mSystemOverlayChangedReceiver);
-                mSystemOverlayChangedReceiver = null;
             }
             mDestroyed = true;
         }
@@ -454,26 +411,38 @@ final class NavigationBarController {
                 return;
             }
 
+            final boolean imeDrawsImeNavBar =
+                    (navButtonFlags & InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR) != 0;
             final boolean shouldShowImeSwitcherWhenImeIsShown =
                     (navButtonFlags & InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN)
                     != 0;
-            if (mShouldShowImeSwitcherWhenImeIsShown == shouldShowImeSwitcherWhenImeIsShown) {
-                return;
-            }
+
+            mImeDrawsImeNavBar = imeDrawsImeNavBar;
+            final boolean prevShouldShowImeSwitcherWhenImeIsShown =
+                    mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
 
-            if (mNavigationBarFrame == null) {
-                return;
+            if (imeDrawsImeNavBar) {
+                installNavigationBarFrameIfNecessary();
+                if (mNavigationBarFrame == null) {
+                    return;
+                }
+                if (mShouldShowImeSwitcherWhenImeIsShown
+                        == prevShouldShowImeSwitcherWhenImeIsShown) {
+                    return;
+                }
+                final NavigationBarView navigationBarView = mNavigationBarFrame.findViewByPredicate(
+                        NavigationBarView.class::isInstance);
+                if (navigationBarView == null) {
+                    return;
+                }
+                final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
+                        | (shouldShowImeSwitcherWhenImeIsShown
+                                ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
+                navigationBarView.setNavigationIconHints(hints);
+            } else {
+                uninstallNavigationBarFrameIfNecessary();
             }
-            final NavigationBarView navigationBarView =
-                    mNavigationBarFrame.findViewByPredicate(NavigationBarView.class::isInstance);
-            if (navigationBarView == null) {
-                return;
-            }
-            final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
-                    | (shouldShowImeSwitcherWhenImeIsShown
-                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
-            navigationBarView.setNavigationIconHints(hints);
         }
 
         @Override
