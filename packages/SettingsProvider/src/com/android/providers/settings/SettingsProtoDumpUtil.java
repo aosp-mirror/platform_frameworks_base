@@ -2252,12 +2252,14 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
 
+        final long navBar = p.start(SecureSettingsProto.NAV_BAR);
         dumpSetting(s, p,
                 Settings.Secure.NAV_BAR_FORCE_VISIBLE,
                 SecureSettingsProto.NavBar.NAV_BAR_FORCE_VISIBLE);
         dumpSetting(s, p,
                 Settings.Secure.NAV_BAR_KIDS_MODE,
                 SecureSettingsProto.NavBar.NAV_BAR_KIDS_MODE);
+        p.end(navBar);
 
         dumpSetting(s, p,
                 Settings.Secure.NAVIGATION_MODE,
