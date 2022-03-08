@@ -17402,7 +17402,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
-    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<long[]> SCALER_AVAILABLE_STREAM_USE_CASES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
@@ -18187,7 +18187,7 @@ package android.hardware.camera2.params {
     method public int get10BitFormat();
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
-    method public int getStreamUseCase();
+    method public long getStreamUseCase();
     method public boolean is10BitCapable();
     method public boolean isInput();
     method public boolean isMaximumSize();
@@ -18245,7 +18245,7 @@ package android.hardware.camera2.params {
     method public long getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
     method public int getMirrorMode();
-    method public int getStreamUseCase();
+    method public long getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
@@ -18255,7 +18255,7 @@ package android.hardware.camera2.params {
     method public void setDynamicRangeProfile(long);
     method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
-    method public void setStreamUseCase(int);
+    method public void setStreamUseCase(long);
     method public void setTimestampBase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
