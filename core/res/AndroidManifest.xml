@@ -5013,6 +5013,10 @@
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
     <permission android:name="android.permission.MONITOR_INPUT"
                 android:protectionLevel="signature" />
+    <!-- Allows the use of FLAG_SLIPPERY, which permits touch events to slip from the current
+         window to the window where the touch currently is on top of.  @hide -->
+    <permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES"
+                android:protectionLevel="signature" />
     <!--  Allows the caller to change the associations between input devices and displays.
         Very dangerous! @hide -->
     <permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY_BY_PORT"
