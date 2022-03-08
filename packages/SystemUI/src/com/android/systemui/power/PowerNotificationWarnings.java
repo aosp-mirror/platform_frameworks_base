@@ -97,7 +97,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         "SHOWING_AUTO_SAVER_SUGGESTION",
     };
 
-    private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
+    private static final String ACTION_SHOW_BATTERY_SAVER_SETTINGS = "PNW.batterySaverSettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
     private static final String ACTION_DISMISSED_WARNING = "PNW.dismissedWarning";
     private static final String ACTION_CLICKED_TEMP_WARNING = "PNW.clickedTempWarning";
@@ -138,6 +138,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
+    private final Intent mOpenBatterySaverSettings =
+            settings(Settings.ACTION_BATTERY_SAVER_SETTINGS);
     private final boolean mUseSevereDialog;
 
     private int mBatteryLevel;
@@ -287,7 +289,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
-            nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
+            nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SAVER_SETTINGS));
         }
         // Make the notification red if the percentage goes below a certain amount or the time
         // remaining estimate is disabled
@@ -748,7 +750,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
         public void init() {
             IntentFilter filter = new IntentFilter();
-            filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
+            filter.addAction(ACTION_SHOW_BATTERY_SAVER_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_DISMISSED_WARNING);
             filter.addAction(ACTION_CLICKED_TEMP_WARNING);
@@ -768,9 +770,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             Slog.i(TAG, "Received " + action);
-            if (action.equals(ACTION_SHOW_BATTERY_SETTINGS)) {
+            if (action.equals(ACTION_SHOW_BATTERY_SAVER_SETTINGS)) {
                 dismissLowBatteryNotification();
-                mContext.startActivityAsUser(mOpenBatterySettings, UserHandle.CURRENT);
+                mContext.startActivityAsUser(mOpenBatterySaverSettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
                 setSaverMode(true, true);
                 dismissLowBatteryNotification();

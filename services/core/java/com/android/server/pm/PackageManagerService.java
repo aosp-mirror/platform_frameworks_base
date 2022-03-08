@@ -958,6 +958,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final ResolveIntentHelper mResolveIntentHelper;
     private final DexOptHelper mDexOptHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
+    private final IntentResolverInterceptor mIntentResolverInterceptor;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1712,6 +1713,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
+        mIntentResolverInterceptor = null;
+
         registerObservers(false);
         invalidatePackageInfoCache();
     }
@@ -2239,6 +2242,8 @@ public class PackageManagerService extends IPackageManager.Stub
         ParsingPackageUtils.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
+
+        mIntentResolverInterceptor = new IntentResolverInterceptor(mContext);
 
         Slog.i(TAG, "Fix for b/169414761 is applied");
     }
@@ -6397,6 +6402,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
+
+        // TODO(b/222706900): Remove this intent interceptor before T launch
+        if (mIntentResolverInterceptor != null) {
+            mIntentResolverInterceptor.registerListeners();
+        }
     }
 
     /**

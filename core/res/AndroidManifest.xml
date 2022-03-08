@@ -2937,7 +2937,7 @@
     <!-- @SystemApi @hide Allows an application to set the profile owners and the device owner.
          This permission is not available to third party applications.-->
     <permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"
-        android:protectionLevel="signature|role|setup"
+        android:protectionLevel="signature|role"
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
 
@@ -2945,6 +2945,10 @@
          the device.-->
     <permission android:name="android.permission.QUERY_ADMIN_POLICY"
                 android:protectionLevel="signature|role" />
+
+    <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
+    <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
+                android:protectionLevel="signature|setup" />
 
     <!-- @TestApi @hide Allows an application to reset the record of previous system update freeze
          periods. -->
@@ -3714,15 +3718,26 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- ========================================= -->
-    <!-- Permissions for SupplementalApi -->
+    <!-- Permissions for AdServices -->
     <!-- ========================================= -->
     <eat-comment />
 
-    <!-- TODO(b/213488783): Update with correct names. -->
-    <!-- Allows an application to access SupplementalApis. -->
-    <permission android:name="android.permission.ACCESS_SUPPLEMENTAL_APIS"
-        android:label="@string/permlab_accessSupplementalApi"
-        android:description="@string/permdesc_accessSupplementalApi"
+    <!-- Allows an application to access AdServices Topics API. -->
+    <permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS"
+        android:label="@string/permlab_accessAdServicesTopics"
+        android:description="@string/permdesc_accessAdServicesTopics"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an application to access AdServices Attribution APIs. -->
+    <permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
+        android:label="@string/permlab_accessAdServicesAttribution"
+        android:description="@string/permdesc_accessAdServicesAttribution"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an application to access AdServices Custom Audiences APIs. -->
+    <permission android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCES"
+        android:label="@string/permlab_accessAdServicesCustomAudiences"
+        android:description="@string/permdesc_accessAdServicesCustomAudiences"
         android:protectionLevel="normal" />
 
     <!-- ==================================== -->

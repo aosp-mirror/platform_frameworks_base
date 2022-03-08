@@ -154,7 +154,6 @@ package android.app {
   }
 
   public class ActivityOptions {
-    method @NonNull public static android.app.ActivityOptions fromBundle(@NonNull android.os.Bundle);
     method public boolean isEligibleForLegacyPermissionPrompt();
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
@@ -374,16 +373,17 @@ package android.app {
   public class PropertyInvalidatedCache<Query, Result> {
     ctor public PropertyInvalidatedCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
     method @NonNull public static String createPropertyName(@NonNull String, @NonNull String);
-    method public final void disableForCurrentProcess();
+    method public void disableForCurrentProcess();
+    method public static void disableForCurrentProcess(@NonNull String);
     method public static void disableForTestMode();
     method public final void disableInstance();
     method public final void disableSystemWide();
     method public final void forgetDisableLocal();
     method public boolean getDisabledState();
-    method public final void invalidateCache();
+    method public void invalidateCache();
     method public static void invalidateCache(@NonNull String, @NonNull String);
     method public final boolean isDisabled();
-    method @Nullable public final Result query(@NonNull Query);
+    method @Nullable public Result query(@NonNull Query);
     method public static void setTestMode(boolean);
     method public void testPropertyName();
     field public static final String MODULE_BLUETOOTH = "bluetooth";
@@ -1727,6 +1727,19 @@ package android.os {
     method @NonNull public static byte[] digest(@NonNull java.io.InputStream, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
   }
 
+  public class IpcDataCache<Query, Result> extends android.app.PropertyInvalidatedCache<Query,Result> {
+    ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
+    method public static void disableForCurrentProcess(@NonNull String);
+    method public static void invalidateCache(@NonNull String, @NonNull String);
+    field public static final String MODULE_BLUETOOTH = "bluetooth";
+    field public static final String MODULE_SYSTEM = "system_server";
+    field public static final String MODULE_TEST = "test";
+  }
+
+  public abstract static class IpcDataCache.QueryHandler<Q, R> extends android.app.PropertyInvalidatedCache.QueryHandler<Q,R> {
+    ctor public IpcDataCache.QueryHandler();
+  }
+
   public final class MessageQueue {
     method public int postSyncBarrier();
     method public void removeSyncBarrier(int);
@@ -2878,6 +2891,7 @@ package android.view {
     method public static int getHoverTooltipHideTimeout();
     method public static int getHoverTooltipShowTimeout();
     method public static int getLongPressTooltipHideTimeout();
+    method public int getPreferKeepClearForFocusDelay();
   }
 
   public class ViewDebug {

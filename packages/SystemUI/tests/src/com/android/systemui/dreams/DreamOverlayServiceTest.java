@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -221,5 +222,26 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).removeCallback(any());
         verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
         verify(mStateController).setOverlayActive(false);
+    }
+
+    @Test
+    public void testDecorViewNotAddedToWindowAfterDestroy() throws Exception {
+        when(mDreamOverlayContainerView.getParent())
+                .thenReturn(mDreamOverlayContainerViewParent)
+                .thenReturn(null);
+
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+
+        // Destroy the service.
+        mService.onDestroy();
+
+        // Run executor tasks.
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager, never()).addView(any(), any());
     }
 }

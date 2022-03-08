@@ -954,7 +954,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // This is the first time we failed -- restart process and
                 // retry.
                 r.launchFailed = true;
-                proc.removeActivity(r, true /* keepAssociation */);
+                r.detachFromProcess();
                 throw e;
             }
         } finally {
@@ -1046,6 +1046,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // If a dead object exception was thrown -- fall through to
             // restart the application.
             knownToBeDead = true;
+            // Remove the process record so it won't be considered as alive.
+            mService.mProcessNames.remove(wpc.mName, wpc.mUid);
+            mService.mProcessMap.remove(wpc.getPid());
         }
 
         r.notifyUnknownVisibilityLaunchedForKeyguardTransition();

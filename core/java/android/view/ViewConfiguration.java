@@ -1104,6 +1104,7 @@ public class ViewConfiguration {
      *         clear, or -1 if Views should not set themselves as preferred to keep clear.
      * @hide
      */
+    @TestApi
     public int getPreferKeepClearForFocusDelay() {
         return mPreferKeepClearForFocusDelay;
     }
