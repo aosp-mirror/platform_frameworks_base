@@ -2403,6 +2403,9 @@
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
 
+    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
+    <string name ="config_loggable_dream_prefix" translatable="false"></string>
+
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
          try to start this dream if possible.  The dream should typically call startDozing()
