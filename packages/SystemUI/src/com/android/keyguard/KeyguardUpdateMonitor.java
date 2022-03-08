@@ -52,6 +52,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -752,15 +753,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private void handleFingerprintAcquired(int acquireInfo) {
+    private void handleFingerprintAcquired(
+            @BiometricFingerprintConstants.FingerprintAcquired int acquireInfo) {
         Assert.isMainThread();
-        if (acquireInfo != FingerprintManager.FINGERPRINT_ACQUIRED_GOOD) {
-            return;
-        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onBiometricAcquired(BiometricSourceType.FINGERPRINT);
+                cb.onBiometricAcquired(BiometricSourceType.FINGERPRINT, acquireInfo);
             }
         }
     }
@@ -960,14 +959,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFaceAcquired(int acquireInfo) {
         Assert.isMainThread();
-        if (acquireInfo != FaceManager.FACE_ACQUIRED_GOOD) {
-            return;
-        }
-        if (DEBUG_FACE) Log.d(TAG, "Face acquired");
+        if (DEBUG_FACE) Log.d(TAG, "Face acquired acquireInfo=" + acquireInfo);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onBiometricAcquired(BiometricSourceType.FACE);
+                cb.onBiometricAcquired(BiometricSourceType.FACE, acquireInfo);
             }
         }
     }

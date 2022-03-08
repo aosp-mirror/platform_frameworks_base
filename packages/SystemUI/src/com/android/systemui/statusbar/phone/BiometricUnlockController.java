@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 
 import android.annotation.IntDef;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
@@ -344,7 +346,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     @Override
-    public void onBiometricAcquired(BiometricSourceType biometricSourceType) {
+    public void onBiometricAcquired(BiometricSourceType biometricSourceType,
+            int acquireInfo) {
+        if (BiometricSourceType.FINGERPRINT == biometricSourceType
+                && acquireInfo != BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD) {
+            return;
+        } else if (BiometricSourceType.FACE == biometricSourceType
+                && acquireInfo != BiometricFaceConstants.FACE_ACQUIRED_GOOD) {
+            return;
+        }
         Trace.beginSection("BiometricUnlockController#onBiometricAcquired");
         releaseBiometricWakeLock();
         if (isWakeAndUnlock()) {
