@@ -491,7 +491,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                             // Avoid commit visibility to false here, or else we will get a sudden
                             // "flash" / surface going invisible for a split second.
                             commitVisibility = false;
-                        } else {
+                        } else if (ar.getDeferHidingClient()) {
+                            // Legacy PIP-enter requires pause event with user-leaving.
                             mController.mAtm.mTaskSupervisor.mUserLeaving = true;
                             ar.getTaskFragment().startPausing(false /* uiSleeping */,
                                     null /* resuming */, "finishTransition");
