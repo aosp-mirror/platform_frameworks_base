@@ -5731,16 +5731,17 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_title">System log access request</string>
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
     <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_allow">Only this time</string>
     <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body"><xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> requests system logs for functional debugging.
-        These logs might contain information that apps and services on your device have written.</string>
+    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs, and your device manufacturer may still be able to access some logs or info on your device. Learn more
+    </string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
     <string name="log_access_do_not_show_again">Don\u2019t show again</string>
