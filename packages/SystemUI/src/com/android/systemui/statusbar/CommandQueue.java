@@ -163,6 +163,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_MEDIA_TRANSFER_RECEIVER_STATE = 65 << MSG_SHIFT;
     private static final int MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 66 << MSG_SHIFT;
     private static final int MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 67 << MSG_SHIFT;
+    private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -431,6 +432,11 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
          */
         default void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {}
+
+        /**
+         * @see IStatusBar#requestTileServiceListeningState
+         */
+        default void requestTileServiceListeningState(@NonNull ComponentName componentName) {}
 
         /**
          * @see IStatusBar#requestAddTile
@@ -1190,6 +1196,12 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void requestTileServiceListeningState(@NonNull ComponentName componentName) {
+        mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_LISTENING_STATE, componentName)
+                .sendToTarget();
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1684,6 +1696,12 @@ public class CommandQueue extends IStatusBar.Stub implements
                     provider = (INearbyMediaDevicesProvider) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).unregisterNearbyMediaDevicesProvider(provider);
+                    }
+                    break;
+                case MSG_TILE_SERVICE_REQUEST_LISTENING_STATE:
+                    ComponentName component = (ComponentName) msg.obj;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).requestTileServiceListeningState(component);
                     }
                     break;
             }
