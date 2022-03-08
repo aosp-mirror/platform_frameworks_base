@@ -304,7 +304,8 @@ final class DexOptHelper {
     /*package*/ boolean performDexOpt(DexoptOptions options) {
         if (mPm.getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
-        } else if (mPm.isInstantApp(options.getPackageName(), UserHandle.getCallingUserId())) {
+        } else if (mPm.mIPackageManager.isInstantApp(options.getPackageName(),
+                UserHandle.getCallingUserId())) {
             return false;
         }
 

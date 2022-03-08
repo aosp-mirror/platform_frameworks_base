@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioAttributes;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -525,8 +526,7 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceBegin("ShutdownPackageManager");
         metricStarted(METRIC_PM);
 
-        final PackageManagerService pm = (PackageManagerService)
-            ServiceManager.getService("package");
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         if (pm != null) {
             pm.shutdown();
         }

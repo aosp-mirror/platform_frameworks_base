@@ -320,8 +320,12 @@ public class LauncherAppsService extends SystemService {
 
         private PackageInstallerService getPackageInstallerService() {
             if (mPackageInstallerService == null) {
-                mPackageInstallerService = ((PackageInstallerService) ((PackageManagerService)
-                        ServiceManager.getService("package")).getPackageInstaller());
+                try {
+                    mPackageInstallerService = ((PackageInstallerService) ((IPackageManager)
+                            ServiceManager.getService("package")).getPackageInstaller());
+                } catch (RemoteException e) {
+                    Slog.wtf(TAG, "Error gettig IPackageInstaller", e);
+                }
             }
             return mPackageInstallerService;
         }
