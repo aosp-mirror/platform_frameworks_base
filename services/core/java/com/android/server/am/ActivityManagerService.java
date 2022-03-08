@@ -16998,8 +16998,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void addPendingTopUid(int uid, int pid) {
-            mPendingStartActivityUids.add(uid, pid);
-
             // If the next top activity is in cached and frozen mode, WM should raise its priority
             // to unfreeze it. This is done by calling AMS.updateOomAdj that will lower its oom adj.
             // However, WM cannot hold the AMS clock here so the updateOomAdj operation is performed
@@ -17007,7 +17005,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // next top activity on time. This race will fail the following binder transactions WM
             // sends to the activity. After this race issue between WM/ATMS and AMS is solved, this
             // workaround can be removed. (b/213288355)
-            mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
+            if (!isPendingTopUid(uid)) {
+                mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(pid);
+            }
+
+            mPendingStartActivityUids.add(uid, pid);
         }
 
         @Override
