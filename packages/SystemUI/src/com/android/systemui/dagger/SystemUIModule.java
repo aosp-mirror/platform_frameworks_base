@@ -48,6 +48,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
+import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -119,6 +120,7 @@ import dagger.Provides;
             SettingsModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
+            SmartspaceModule.class,
             StatusBarPolicyModule.class,
             StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,
