@@ -139,7 +139,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/qs_media_padding"
         app:layout_constrainedWidth="true"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="0dp"
         app:layout_constraintTop_toBottomOf="@id/header_title"
         app:layout_constraintStart_toStartOf="@id/header_title"
         app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
