@@ -3031,7 +3031,7 @@ public final class ProcessList {
                             Slog.i(TAG_UID_OBSERVERS, "No more processes in " + uidRecord);
                         }
                         mService.enqueueUidChangeLocked(uidRecord, -1,
-                                UidRecord.CHANGE_GONE);
+                                UidRecord.CHANGE_GONE | UidRecord.CHANGE_PROCSTATE);
                         EventLogTags.writeAmUidStopped(uid);
                         mActiveUids.remove(uid);
                         mService.mFgsStartTempAllowList.removeUid(record.info.uid);
