@@ -1204,7 +1204,7 @@ public class LockPatternUtils {
     public List<ComponentName> getEnabledTrustAgents(int userId) {
         String serialized = getString(ENABLED_TRUST_AGENTS, userId);
         if (TextUtils.isEmpty(serialized)) {
-            return null;
+            return new ArrayList<ComponentName>();
         }
         String[] split = serialized.split(",");
         ArrayList<ComponentName> activeTrustAgents = new ArrayList<ComponentName>(split.length);
