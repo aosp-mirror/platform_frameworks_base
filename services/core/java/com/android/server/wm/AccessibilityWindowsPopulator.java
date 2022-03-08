@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IWindow;
@@ -94,8 +95,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         mService = service;
         mAccessibilityController = accessibilityController;
         mHandler = new MyHandler(mService.mH.getLooper());
-
-        register();
     }
 
     /**
@@ -219,8 +218,10 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
             mWindowsNotificationEnabled = register;
             if (mWindowsNotificationEnabled) {
-                populateVisibleWindowHandlesAndNotifyWindowsChangeIfNeeded();
+                Pair<InputWindowHandle[], DisplayInfo[]> info = register();
+                onWindowInfosChangedInternal(info.first, info.second);
             } else {
+                unregister();
                 releaseResources();
             }
         }
