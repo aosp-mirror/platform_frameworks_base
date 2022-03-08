@@ -1623,18 +1623,6 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    @VisibleForTesting
-    final IAppOpsCallback mAppOpsCallback = new IAppOpsCallback.Stub() {
-        @Override public void opChanged(int op, int uid, String packageName) {
-            if (mEnableAppSettingMigration) {
-                int opValue = mAppOps.checkOpNoThrow(
-                        AppOpsManager.OP_POST_NOTIFICATION, uid, packageName);
-                boolean blocked = op != MODE_ALLOWED;
-                sendAppBlockStateChangedBroadcast(packageName, uid, blocked);
-            }
-        }
-    };
-
     private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -2133,12 +2121,6 @@ public class NotificationManagerService extends SystemService {
         mUsageStatsManagerInternal = usageStatsManagerInternal;
         mAppOps = appOps;
         mAppOpsService = iAppOps;
-        try {
-            mAppOpsService.startWatchingMode(
-                    AppOpsManager.OP_POST_NOTIFICATION, null, mAppOpsCallback);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register OP_POST_NOTIFICATION listener");
-        }
         mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
@@ -3409,6 +3391,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mPermissionHelper.setNotificationPermission(
                         pkg, UserHandle.getUserId(uid), enabled, true);
+                sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
             } else {
                 synchronized (mNotificationLock) {
                     boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
