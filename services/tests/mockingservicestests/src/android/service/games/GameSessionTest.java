@@ -28,7 +28,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
-import android.graphics.Bitmap;
 import android.platform.test.annotations.Presubmit;
 import android.service.games.GameSession.ScreenshotCallback;
 import android.testing.AndroidTestingRunner;
@@ -61,7 +60,6 @@ import java.util.concurrent.TimeUnit;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public final class GameSessionTest {
     private static final long WAIT_FOR_CALLBACK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(1);
-    private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
 
     @Mock
     private IGameSessionController mMockGameSessionController;
@@ -101,7 +99,7 @@ public final class GameSessionTest {
                         }
 
                         @Override
-                        public void onSuccess(Bitmap bitmap) {
+                        public void onSuccess() {
                             fail();
                         }
                     });
@@ -131,7 +129,7 @@ public final class GameSessionTest {
                     }
 
                     @Override
-                    public void onSuccess(Bitmap bitmap) {
+                    public void onSuccess() {
                         fail();
                     }
                 });
@@ -160,7 +158,7 @@ public final class GameSessionTest {
                     }
 
                     @Override
-                    public void onSuccess(Bitmap bitmap) {
+                    public void onSuccess() {
                         fail();
                     }
                 });
@@ -170,10 +168,10 @@ public final class GameSessionTest {
     }
 
     @Test
-    public void takeScreenshot_gameManagerSuccess_returnsBitmap() throws Exception {
+    public void takeScreenshot_gameManagerSuccess() throws Exception {
         doAnswer(invocation -> {
             AndroidFuture result = invocation.getArgument(1);
-            result.complete(GameScreenshotResult.createSuccessResult(TEST_BITMAP));
+            result.complete(GameScreenshotResult.createSuccessResult());
             return null;
         }).when(mMockGameSessionController).takeScreenshot(anyInt(), any());
 
@@ -187,8 +185,7 @@ public final class GameSessionTest {
                     }
 
                     @Override
-                    public void onSuccess(Bitmap bitmap) {
-                        assertEquals(TEST_BITMAP, bitmap);
+                    public void onSuccess() {
                         countDownLatch.countDown();
                     }
                 });
