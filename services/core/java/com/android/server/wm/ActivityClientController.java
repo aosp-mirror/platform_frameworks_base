@@ -757,12 +757,12 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setPreferDockBigOverlays(IBinder token, boolean preferDockBigOverlays) {
+    public void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                r.setPreferDockBigOverlays(preferDockBigOverlays);
+                r.setShouldDockBigOverlays(shouldDockBigOverlays);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
