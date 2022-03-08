@@ -24,6 +24,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.GlobalActions;
+import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -32,6 +33,7 @@ import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Module for binding Plugin implementations.
@@ -39,36 +41,40 @@ import dagger.Module;
  * TODO(b/166258224): Many of these should be moved closer to their implementations.
  */
 @Module
-public interface PluginModule {
+public abstract class PluginModule {
+
+    /** */
+    @Provides
+    static ActivityStarter provideActivityStarter(ActivityStarterDelegate delegate,
+            PluginDependencyProvider dependencyProvider) {
+        dependencyProvider.allowPluginDependency(ActivityStarter.class, delegate);
+        return delegate;
+    }
 
     /** */
     @Binds
-    ActivityStarter provideActivityStarter(ActivityStarterDelegate delegate);
+    abstract DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherImpl controllerImpl);
 
     /** */
     @Binds
-    DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherImpl controllerImpl);
+    abstract FalsingManager provideFalsingManager(FalsingManagerProxy falsingManagerImpl);
 
     /** */
     @Binds
-    FalsingManager provideFalsingManager(FalsingManagerProxy falsingManagerImpl);
+    abstract GlobalActions provideGlobalActions(GlobalActionsImpl controllerImpl);
 
     /** */
     @Binds
-    GlobalActions provideGlobalActions(GlobalActionsImpl controllerImpl);
-
-    /** */
-    @Binds
-    GlobalActions.GlobalActionsManager provideGlobalActionsManager(
+    abstract GlobalActions.GlobalActionsManager provideGlobalActionsManager(
             GlobalActionsComponent controllerImpl);
 
     /** */
     @Binds
-    StatusBarStateController provideStatusBarStateController(
+    abstract StatusBarStateController provideStatusBarStateController(
             StatusBarStateControllerImpl controllerImpl);
 
     /** */
     @Binds
-    VolumeDialogController provideVolumeDialogController(VolumeDialogControllerImpl controllerImpl);
-
+    abstract VolumeDialogController provideVolumeDialogController(
+            VolumeDialogControllerImpl controllerImpl);
 }

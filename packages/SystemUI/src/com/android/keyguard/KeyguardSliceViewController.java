@@ -43,9 +43,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.AnimatableProperty;
-import com.android.systemui.statusbar.notification.PropertyAnimator;
-import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
@@ -73,7 +70,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     private Uri mKeyguardSliceUri;
     private Slice mSlice;
     private Map<View, PendingIntent> mClickActions;
-    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     TunerService.Tunable mTunable = (key, newValue) -> setupUri(newValue);
 
@@ -84,7 +80,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
             mView.onDensityOrFontScaleChanged();
         }
         @Override
-        public void onOverlayChanged() {
+        public void onThemeChanged() {
             mView.onOverlayChanged();
         }
     };
@@ -137,7 +133,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
                 TAG + "@" + Integer.toHexString(
                         KeyguardSliceViewController.this.hashCode()),
                 KeyguardSliceViewController.this);
-        mView.updateLockScreenMode(mLockScreenMode);
     }
 
     @Override
@@ -157,14 +152,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
         lp.topMargin = (int) clockTopTextPadding;
         mView.setLayoutParams(lp);
-    }
-
-    /**
-     * Updates the lockscreen mode which may change the layout of the keyguard slice view.
-     */
-    public void updateLockScreenMode(int mode) {
-        mLockScreenMode = mode;
-        mView.updateLockScreenMode(mLockScreenMode);
     }
 
     /**
@@ -213,13 +200,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         Trace.endSection();
     }
 
-    /**
-     * Update position of the view, with optional animation
-     */
-    void updatePosition(int x, AnimationProperties props, boolean animate) {
-        PropertyAnimator.setProperty(mView, AnimatableProperty.TRANSLATION_X, x, props, animate);
-    }
-
     void showSlice(Slice slice) {
         Trace.beginSection("KeyguardSliceViewController#showSlice");
         if (slice == null) {
@@ -249,6 +229,5 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
-        pw.println("  mLockScreenMode: " + mLockScreenMode);
     }
 }

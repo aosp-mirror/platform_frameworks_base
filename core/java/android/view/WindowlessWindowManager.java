@@ -135,7 +135,7 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState requestedVisibility,
+            int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
@@ -181,10 +181,10 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
+            int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
-        return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibility,
+        return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibilities,
                 outInputChannel, outInsetsState, outActiveControls);
     }
 
@@ -454,7 +454,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void insetsModified(android.view.IWindow window, android.view.InsetsState state) {
+    public void updateRequestedVisibilities(IWindow window, InsetsVisibilities visibilities)  {
     }
 
     @Override
@@ -497,5 +497,10 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {
+    }
+
+    @Override
+    public boolean dropForAccessibility(IWindow window, int x, int y) {
+        return false;
     }
 }

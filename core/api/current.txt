@@ -99,6 +99,7 @@ package android {
     field public static final String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final String INTERNET = "android.permission.INTERNET";
     field public static final String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
+    field public static final String LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
@@ -1299,6 +1300,7 @@ package android {
     field public static final int shortcutLongLabel = 16844074; // 0x101052a
     field public static final int shortcutShortLabel = 16844073; // 0x1010529
     field public static final int shouldDisableView = 16843246; // 0x10101ee
+    field public static final int shouldUseDefaultUnfoldTransition = 16844364; // 0x101064c
     field public static final int showAsAction = 16843481; // 0x10102d9
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -2014,6 +2016,9 @@ package android {
   public static final class R.id {
     ctor public R.id();
     field public static final int accessibilityActionContextClick = 16908348; // 0x102003c
+    field public static final int accessibilityActionDragCancel = 16908375; // 0x1020057
+    field public static final int accessibilityActionDragDrop = 16908374; // 0x1020056
+    field public static final int accessibilityActionDragStart = 16908373; // 0x1020055
     field public static final int accessibilityActionHideTooltip = 16908357; // 0x1020045
     field public static final int accessibilityActionImeEnter = 16908372; // 0x1020054
     field public static final int accessibilityActionMoveWindow = 16908354; // 0x1020042
@@ -6709,6 +6714,7 @@ package android.app {
   }
 
   public class TaskInfo {
+    method public boolean isVisible();
     field @Nullable public android.content.ComponentName baseActivity;
     field @NonNull public android.content.Intent baseIntent;
     field public boolean isRunning;
@@ -6924,6 +6930,7 @@ package android.app {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadThumbnail(android.content.pm.PackageManager);
+    method public boolean shouldUseDefaultUnfoldTransition();
     method public boolean supportsMultipleDisplays();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperInfo> CREATOR;
@@ -16747,6 +16754,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> EDGE_AVAILABLE_EDGE_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> FLASH_INFO_AVAILABLE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.DeviceStateSensorOrientationMap> INFO_DEVICE_STATE_SENSOR_ORIENTATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> INFO_SUPPORTED_HARDWARE_LEVEL;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.String> INFO_VERSION;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES;
@@ -17439,6 +17447,12 @@ package android.hardware.camera2.params {
     method public void copyElements(android.util.Rational[], int);
     method public void copyElements(int[], int);
     method public android.util.Rational getElement(int, int);
+  }
+
+  public final class DeviceStateSensorOrientationMap {
+    method public int getSensorOrientation(long);
+    field public static final long FOLDED = 4L; // 0x4L
+    field public static final long NORMAL = 0L; // 0x0L
   }
 
   public final class ExtensionSessionConfiguration {
@@ -18982,8 +18996,10 @@ package android.media {
     method public int getAllowedCapturePolicy();
     method public int getContentType();
     method public int getFlags();
+    method public int getSpatializationBehavior();
     method public int getUsage();
     method public int getVolumeControlStream();
+    method public boolean isContentSpatialized();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALLOW_CAPTURE_BY_ALL = 1; // 0x1
     field public static final int ALLOW_CAPTURE_BY_NONE = 3; // 0x3
@@ -18997,6 +19013,8 @@ package android.media {
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
     field @Deprecated public static final int FLAG_LOW_LATENCY = 256; // 0x100
+    field public static final int SPATIALIZATION_BEHAVIOR_AUTO = 0; // 0x0
+    field public static final int SPATIALIZATION_BEHAVIOR_NEVER = 1; // 0x1
     field public static final int USAGE_ALARM = 4; // 0x4
     field public static final int USAGE_ASSISTANCE_ACCESSIBILITY = 11; // 0xb
     field public static final int USAGE_ASSISTANCE_NAVIGATION_GUIDANCE = 12; // 0xc
@@ -19023,7 +19041,9 @@ package android.media {
     method public android.media.AudioAttributes.Builder setContentType(int);
     method public android.media.AudioAttributes.Builder setFlags(int);
     method @NonNull public android.media.AudioAttributes.Builder setHapticChannelsMuted(boolean);
+    method @NonNull public android.media.AudioAttributes.Builder setIsContentSpatialized(boolean);
     method public android.media.AudioAttributes.Builder setLegacyStreamType(int);
+    method @NonNull public android.media.AudioAttributes.Builder setSpatializationBehavior(int);
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
@@ -19141,24 +19161,45 @@ package android.media {
     field public static final int CHANNEL_IN_Y_AXIS = 4096; // 0x1000
     field public static final int CHANNEL_IN_Z_AXIS = 8192; // 0x2000
     field public static final int CHANNEL_OUT_5POINT1 = 252; // 0xfc
+    field public static final int CHANNEL_OUT_5POINT1POINT2 = 3145980; // 0x3000fc
+    field public static final int CHANNEL_OUT_5POINT1POINT4 = 737532; // 0xb40fc
     field @Deprecated public static final int CHANNEL_OUT_7POINT1 = 1020; // 0x3fc
+    field public static final int CHANNEL_OUT_7POINT1POINT2 = 3152124; // 0x3018fc
+    field public static final int CHANNEL_OUT_7POINT1POINT4 = 743676; // 0xb58fc
     field public static final int CHANNEL_OUT_7POINT1_SURROUND = 6396; // 0x18fc
+    field public static final int CHANNEL_OUT_9POINT1POINT4 = 202070268; // 0xc0b58fc
+    field public static final int CHANNEL_OUT_9POINT1POINT6 = 205215996; // 0xc3b58fc
     field public static final int CHANNEL_OUT_BACK_CENTER = 1024; // 0x400
     field public static final int CHANNEL_OUT_BACK_LEFT = 64; // 0x40
     field public static final int CHANNEL_OUT_BACK_RIGHT = 128; // 0x80
+    field public static final int CHANNEL_OUT_BOTTOM_FRONT_CENTER = 8388608; // 0x800000
+    field public static final int CHANNEL_OUT_BOTTOM_FRONT_LEFT = 4194304; // 0x400000
+    field public static final int CHANNEL_OUT_BOTTOM_FRONT_RIGHT = 16777216; // 0x1000000
     field public static final int CHANNEL_OUT_DEFAULT = 1; // 0x1
     field public static final int CHANNEL_OUT_FRONT_CENTER = 16; // 0x10
     field public static final int CHANNEL_OUT_FRONT_LEFT = 4; // 0x4
     field public static final int CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 256; // 0x100
     field public static final int CHANNEL_OUT_FRONT_RIGHT = 8; // 0x8
     field public static final int CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 512; // 0x200
+    field public static final int CHANNEL_OUT_FRONT_WIDE_LEFT = 67108864; // 0x4000000
+    field public static final int CHANNEL_OUT_FRONT_WIDE_RIGHT = 134217728; // 0x8000000
     field public static final int CHANNEL_OUT_LOW_FREQUENCY = 32; // 0x20
+    field public static final int CHANNEL_OUT_LOW_FREQUENCY_2 = 33554432; // 0x2000000
     field public static final int CHANNEL_OUT_MONO = 4; // 0x4
     field public static final int CHANNEL_OUT_QUAD = 204; // 0xcc
     field public static final int CHANNEL_OUT_SIDE_LEFT = 2048; // 0x800
     field public static final int CHANNEL_OUT_SIDE_RIGHT = 4096; // 0x1000
     field public static final int CHANNEL_OUT_STEREO = 12; // 0xc
     field public static final int CHANNEL_OUT_SURROUND = 1052; // 0x41c
+    field public static final int CHANNEL_OUT_TOP_BACK_CENTER = 262144; // 0x40000
+    field public static final int CHANNEL_OUT_TOP_BACK_LEFT = 131072; // 0x20000
+    field public static final int CHANNEL_OUT_TOP_BACK_RIGHT = 524288; // 0x80000
+    field public static final int CHANNEL_OUT_TOP_CENTER = 8192; // 0x2000
+    field public static final int CHANNEL_OUT_TOP_FRONT_CENTER = 32768; // 0x8000
+    field public static final int CHANNEL_OUT_TOP_FRONT_LEFT = 16384; // 0x4000
+    field public static final int CHANNEL_OUT_TOP_FRONT_RIGHT = 65536; // 0x10000
+    field public static final int CHANNEL_OUT_TOP_SIDE_LEFT = 1048576; // 0x100000
+    field public static final int CHANNEL_OUT_TOP_SIDE_RIGHT = 2097152; // 0x200000
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioFormat> CREATOR;
     field public static final int ENCODING_AAC_ELD = 15; // 0xf
     field public static final int ENCODING_AAC_HE_V1 = 11; // 0xb
@@ -19228,6 +19269,7 @@ package android.media {
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
+    method @NonNull public android.media.Spatializer getSpatializer();
     method public int getStreamMaxVolume(int);
     method public int getStreamMinVolume(int);
     method public int getStreamVolume(int);
@@ -21353,6 +21395,7 @@ package android.media {
     field public static final String KEY_MAX_FPS_TO_ENCODER = "max-fps-to-encoder";
     field public static final String KEY_MAX_HEIGHT = "max-height";
     field public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
+    field public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT = "max-output-channel-count";
     field public static final String KEY_MAX_PTS_GAP_TO_ENCODER = "max-pts-gap-to-encoder";
     field public static final String KEY_MAX_WIDTH = "max-width";
     field public static final String KEY_MIME = "mime";
@@ -22639,6 +22682,23 @@ package android.media {
 
   public static interface SoundPool.OnLoadCompleteListener {
     method public void onLoadComplete(android.media.SoundPool, int, int);
+  }
+
+  public class Spatializer {
+    method public void addOnSpatializerStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
+    method public boolean canBeSpatialized(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioFormat);
+    method public int getImmersiveAudioLevel();
+    method public boolean isAvailable();
+    method public boolean isEnabled();
+    method public void removeOnSpatializerStateChangedListener(@NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1; // 0x1
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_NONE = 0; // 0x0
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_OTHER = -1; // 0xffffffff
+  }
+
+  public static interface Spatializer.OnSpatializerStateChangedListener {
+    method public void onSpatializerAvailableChanged(@NonNull android.media.Spatializer, boolean);
+    method public void onSpatializerEnabledChanged(@NonNull android.media.Spatializer, boolean);
   }
 
   public final class SubtitleData {
@@ -29815,8 +29875,8 @@ package android.os {
     ctor public Environment();
     method public static java.io.File getDataDirectory();
     method public static java.io.File getDownloadCacheDirectory();
-    method @Deprecated public static java.io.File getExternalStorageDirectory();
-    method @Deprecated public static java.io.File getExternalStoragePublicDirectory(String);
+    method public static java.io.File getExternalStorageDirectory();
+    method public static java.io.File getExternalStoragePublicDirectory(String);
     method public static String getExternalStorageState();
     method public static String getExternalStorageState(java.io.File);
     method @NonNull public static java.io.File getRootDirectory();
@@ -33958,6 +34018,7 @@ package android.provider {
     field public static final String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
     field public static final String ACTION_SECURITY_SETTINGS = "android.settings.SECURITY_SETTINGS";
     field public static final String ACTION_SETTINGS = "android.settings.SETTINGS";
+    field public static final String ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY = "android.settings.SETTINGS_EMBED_DEEP_LINK_ACTIVITY";
     field public static final String ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
     field public static final String ACTION_SHOW_WORK_POLICY_INFO = "android.settings.SHOW_WORK_POLICY_INFO";
     field public static final String ACTION_SOUND_SETTINGS = "android.settings.SOUND_SETTINGS";
@@ -33998,6 +34059,8 @@ package android.provider {
     field public static final String EXTRA_EASY_CONNECT_ERROR_CODE = "android.provider.extra.EASY_CONNECT_ERROR_CODE";
     field public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     field public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME = "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
+    field public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY";
+    field public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI";
     field public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
     field public static final String EXTRA_WIFI_NETWORK_LIST = "android.provider.extra.WIFI_NETWORK_LIST";
     field public static final String EXTRA_WIFI_NETWORK_RESULT_LIST = "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
@@ -37800,6 +37863,13 @@ package android.service.textservice {
 
 package android.service.voice {
 
+  public final class VisibleActivityInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.service.voice.VoiceInteractionSession.ActivityId getActivityId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisibleActivityInfo> CREATOR;
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
     method public int getDisabledShowContext();
@@ -37861,6 +37931,7 @@ package android.service.voice {
     method public void onTaskStarted(android.content.Intent, int);
     method public void onTrimMemory(int);
     method public final void performDirectAction(@NonNull android.app.DirectAction, @Nullable android.os.Bundle, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.os.Bundle>);
+    method public final void registerVisibleActivityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     method public final void requestDirectActions(@NonNull android.service.voice.VoiceInteractionSession.ActivityId, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.DirectAction>>);
     method public void setContentView(android.view.View);
     method public void setDisabledShowContext(int);
@@ -37870,6 +37941,7 @@ package android.service.voice {
     method public void show(android.os.Bundle, int);
     method public void startAssistantActivity(android.content.Intent);
     method public void startVoiceActivity(android.content.Intent);
+    method public final void unregisterVisibleActivityCallback(@NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
@@ -37941,6 +38013,11 @@ package android.service.voice {
     method public int getCallingUid();
     method public android.os.Bundle getExtras();
     method public boolean isActive();
+  }
+
+  public static interface VoiceInteractionSession.VisibleActivityCallback {
+    method public default void onInvisible(@NonNull android.service.voice.VoiceInteractionSession.ActivityId);
+    method public default void onVisible(@NonNull android.service.voice.VisibleActivityInfo);
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {
@@ -45830,8 +45907,15 @@ package android.view {
   }
 
   @UiThread public interface AttachedSurfaceControl {
+    method public default void addOnBufferTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnBufferTransformHintChangedListener);
     method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+    method public default int getBufferTransformHint();
+    method public default void removeOnBufferTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnBufferTransformHintChangedListener);
+  }
+
+  @UiThread public static interface AttachedSurfaceControl.OnBufferTransformHintChangedListener {
+    method public void onBufferTransformHintChanged(int);
   }
 
   public final class Choreographer {
@@ -47337,6 +47421,12 @@ package android.view {
     method public void readFromParcel(android.os.Parcel);
     method public void release();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BUFFER_TRANSFORM_IDENTITY = 0; // 0x0
+    field public static final int BUFFER_TRANSFORM_MIRROR_HORIZONTAL = 1; // 0x1
+    field public static final int BUFFER_TRANSFORM_MIRROR_VERTICAL = 2; // 0x2
+    field public static final int BUFFER_TRANSFORM_ROTATE_180 = 3; // 0x3
+    field public static final int BUFFER_TRANSFORM_ROTATE_270 = 7; // 0x7
+    field public static final int BUFFER_TRANSFORM_ROTATE_90 = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControl> CREATOR;
   }
 
@@ -48199,6 +48289,7 @@ package android.view {
     field public static final int AUTOFILL_TYPE_NONE = 0; // 0x0
     field public static final int AUTOFILL_TYPE_TEXT = 1; // 0x1
     field public static final int AUTOFILL_TYPE_TOGGLE = 2; // 0x2
+    field public static final int DRAG_FLAG_ACCESSIBILITY_ACTION = 1024; // 0x400
     field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
     field public static final int DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION = 64; // 0x40
     field public static final int DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION = 128; // 0x80
@@ -49625,6 +49716,9 @@ package android.view.accessibility {
     method public void setPackageName(CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_DROPPED = 256; // 0x100
+    field public static final int CONTENT_CHANGE_TYPE_DRAG_STARTED = 128; // 0x80
     field public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 16; // 0x10
     field public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 32; // 0x20
     field public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 8; // 0x8
@@ -49923,6 +50017,9 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_COPY;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_CUT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DISMISS;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_CANCEL;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_DROP;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_DRAG_START;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_EXPAND;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_FOCUS;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_HIDE_TOOLTIP;

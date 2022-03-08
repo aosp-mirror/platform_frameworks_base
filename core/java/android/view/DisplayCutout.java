@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Path;
@@ -38,6 +39,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.DisplayUtils;
 import android.util.Pair;
 import android.util.RotationUtils;
 import android.util.proto.ProtoOutputStream;
@@ -873,18 +875,122 @@ public final class DisplayCutout {
     }
 
     /**
+     * Gets the display cutout by the given display unique id.
+     *
+     * Loads the default config {@link R.string#config_mainBuiltInDisplayCutout) if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     */
+    private static String getDisplayCutoutPath(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final String[] array = res.getStringArray(R.array.config_displayCutoutPathArray);
+        if (index >= 0 && index < array.length) {
+            return array[index];
+        }
+        return res.getString(R.string.config_mainBuiltInDisplayCutout);
+    }
+
+    /**
+     * Gets the display cutout approximation rect by the given display unique id.
+     *
+     * Loads the default config {@link R.string#config_mainBuiltInDisplayCutoutRectApproximation} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     */
+    private static String getDisplayCutoutApproximationRect(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final String[] array = res.getStringArray(
+                R.array.config_displayCutoutApproximationRectArray);
+        if (index >= 0 && index < array.length) {
+            return array[index];
+        }
+        return res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation);
+    }
+
+    /**
+     * Gets whether to mask a built-in display cutout of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default config {@link R.bool#config_maskMainBuiltInDisplayCutout} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static boolean getMaskBuiltInDisplayCutout(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_maskBuiltInDisplayCutoutArray);
+        boolean maskCutout;
+        if (index >= 0 && index < array.length()) {
+            maskCutout = array.getBoolean(index, false);
+        } else {
+            maskCutout = res.getBoolean(R.bool.config_maskMainBuiltInDisplayCutout);
+        }
+        array.recycle();
+        return maskCutout;
+    }
+
+    /**
+     * Gets whether to fill a built-in display cutout of a display which is determined by the
+     * given display unique id.
+     *
+     * Loads the default config{@link R.bool#config_fillMainBuiltInDisplayCutout} if
+     * {@link R.array#config_displayUniqueIdArray} is not set.
+     *
+     * @hide
+     */
+    public static boolean getFillBuiltInDisplayCutout(Resources res, String displayUniqueId) {
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_fillBuiltInDisplayCutoutArray);
+        boolean fillCutout;
+        if (index >= 0 && index < array.length()) {
+            fillCutout = array.getBoolean(index, false);
+        } else {
+            fillCutout = res.getBoolean(R.bool.config_fillMainBuiltInDisplayCutout);
+        }
+        array.recycle();
+        return fillCutout;
+    }
+
+    /**
+     * Gets the waterfall cutout by the given display unique id.
+     *
+     * Loads the default waterfall dimens if {@link R.array#config_displayUniqueIdArray} is not set.
+     * {@link R.dimen#waterfall_display_left_edge_size},
+     * {@link R.dimen#waterfall_display_top_edge_size},
+     * {@link R.dimen#waterfall_display_right_edge_size},
+     * {@link R.dimen#waterfall_display_bottom_edge_size}
+     */
+    private static Insets getWaterfallInsets(Resources res, String displayUniqueId) {
+        Insets insets;
+        final int index = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId);
+        final TypedArray array = res.obtainTypedArray(R.array.config_waterfallCutoutArray);
+        if (index >= 0 && index < array.length() && array.getResourceId(index, 0) > 0) {
+            final int resourceId = array.getResourceId(index, 0);
+            final TypedArray waterfall = res.obtainTypedArray(resourceId);
+            insets = Insets.of(
+                    waterfall.getDimensionPixelSize(0 /* waterfall left edge size */, 0),
+                    waterfall.getDimensionPixelSize(1 /* waterfall top edge size */, 0),
+                    waterfall.getDimensionPixelSize(2 /* waterfall right edge size */, 0),
+                    waterfall.getDimensionPixelSize(3 /* waterfall bottom edge size */, 0));
+            waterfall.recycle();
+        } else {
+            insets = loadWaterfallInset(res);
+        }
+        array.recycle();
+        return insets;
+    }
+
+    /**
      * Creates the display cutout according to
      * @android:string/config_mainBuiltInDisplayCutoutRectApproximation, which is the closest
      * rectangle-base approximation of the cutout.
      *
      * @hide
      */
-    public static DisplayCutout fromResourcesRectApproximation(Resources res, int displayWidth,
-            int displayHeight) {
-        return pathAndDisplayCutoutFromSpec(res.getString(R.string.config_mainBuiltInDisplayCutout),
-                res.getString(R.string.config_mainBuiltInDisplayCutoutRectApproximation),
+    public static DisplayCutout fromResourcesRectApproximation(Resources res,
+            String displayUniqueId, int displayWidth, int displayHeight) {
+        return pathAndDisplayCutoutFromSpec(getDisplayCutoutPath(res, displayUniqueId),
+                getDisplayCutoutApproximationRect(res, displayUniqueId),
                 displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
-                loadWaterfallInset(res)).second;
+                getWaterfallInsets(res, displayUniqueId)).second;
     }
 
     /**
@@ -892,11 +998,11 @@ public final class DisplayCutout {
      *
      * @hide
      */
-    public static Path pathFromResources(Resources res, int displayWidth, int displayHeight) {
-        return pathAndDisplayCutoutFromSpec(
-                res.getString(R.string.config_mainBuiltInDisplayCutout), null,
+    public static Path pathFromResources(Resources res, String displayUniqueId, int displayWidth,
+            int displayHeight) {
+        return pathAndDisplayCutoutFromSpec(getDisplayCutoutPath(res, displayUniqueId), null,
                 displayWidth, displayHeight, DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
-                loadWaterfallInset(res)).first;
+                getWaterfallInsets(res, displayUniqueId)).first;
     }
 
     /**

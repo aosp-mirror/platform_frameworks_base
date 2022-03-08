@@ -19,6 +19,8 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.SensorPrivacyManager;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.ISession;
@@ -41,6 +43,7 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
 
     private final boolean mIsStrongBiometric;
     @Nullable private ICancellationSignal mCancellationSignal;
+    @Nullable private SensorPrivacyManager mSensorPrivacyManager;
 
     public FaceDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token, long requestId,
@@ -51,6 +54,7 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
+        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
     }
 
     @Override
@@ -73,6 +77,14 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
 
     @Override
     protected void startHalOperation() {
+        if (mSensorPrivacyManager != null
+                && mSensorPrivacyManager
+                .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, getTargetUserId())) {
+            onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+            mCallback.onClientFinished(this, false /* success */);
+            return;
+        }
+
         try {
             mCancellationSignal = getFreshDaemon().detectInteraction();
         } catch (RemoteException e) {

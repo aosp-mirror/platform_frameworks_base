@@ -8387,6 +8387,19 @@
              @hide @SystemApi -->
         <attr name="supportsAmbientMode" format="boolean" />
 
+        <!-- Indicates that this wallpaper service should receive zoom transition updates when
+             changing the structural state of the device (e.g. when folding or unfolding
+             a foldable device). When this value is set to true
+             {@link android.service.wallpaper.WallpaperService.Engine} could receive zoom updates
+             before or after changing the device state. Wallpapers receive zoom updates using
+             {@link android.service.wallpaper.WallpaperService.Engine#onZoomChanged(float)} and
+             zoom rendering should be handled manually. Zoom updates are delivered only when
+             {@link android.service.wallpaper.WallpaperService.Engine} is created and not destroyed.
+             Default value is true.
+             Corresponds to
+             {@link android.app.WallpaperInfo#shouldUseDefaultUnfoldTransition()} -->
+        <attr name="shouldUseDefaultUnfoldTransition" format="boolean" />
+
         <!-- Uri that specifies a settings Slice for this wallpaper. -->
         <attr name="settingsSliceUri" format="string"/>
 
@@ -8720,9 +8733,14 @@
     <declare-styleable name="VoiceInteractionService">
         <!-- The service that hosts active voice interaction sessions.  This is required. -->
         <attr name="sessionService" format="string" />
-        <!-- The service that provides voice recognition.  This is required.  When the user
-             selects this voice interaction service, they will also be implicitly selecting
-             the component here for their recognition service. -->
+        <!-- The service that provides voice recognition. This is required. On Android 11 and
+             earlier, this must be a valid RecognitionService.
+             <p>
+             From Android 12 onward, this attribute does nothing. However, we still require it to
+             be set to something to reduce the risk that an app with an unspecified value gets
+             pushed to older platform versions, where it will cause a boot loop. To make sure
+             developers don't miss it, the system will reset the current assistant if this isn't
+             specified.-->
         <attr name="recognitionService" format="string" />
         <attr name="settingsActivity" />
         <!-- Flag indicating whether this voice interaction service is capable of handling the

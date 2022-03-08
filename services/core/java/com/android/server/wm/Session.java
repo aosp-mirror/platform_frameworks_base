@@ -69,6 +69,7 @@ import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -113,7 +114,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
-    private final InsetsState mDummyRequestedVisibility = new InsetsState();
+    private final InsetsVisibilities mDummyRequestedVisibilities = new InsetsVisibilities();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
@@ -187,29 +188,28 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState requestedVisibility,
+            int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), requestedVisibility, outInputChannel, outInsetsState,
+                UserHandle.getUserId(mUid), requestedVisibilities, outInputChannel, outInsetsState,
                 outActiveControls);
     }
 
-
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
+            int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibility, outInputChannel, outInsetsState, outActiveControls);
+                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsState outInsetsState) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), mDummyRequestedVisibility, null /* outInputChannel */,
+                UserHandle.getUserId(mUid), mDummyRequestedVisibilities, null /* outInputChannel */,
                 outInsetsState, mDummyControls);
     }
 
@@ -299,6 +299,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+
+    @Override
+    public boolean dropForAccessibility(IWindow window, int x, int y) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDragDropController.dropForAccessibility(window, x, y);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     /**
      * Validates the given drag data.
      */
@@ -380,7 +391,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 final ShortcutServiceInternal shortcutService =
                         LocalServices.getService(ShortcutServiceInternal.class);
                 final Intent[] shortcutIntents = shortcutService.createShortcutIntents(
-                        callingUid, callingPackage, packageName, shortcutId,
+                        UserHandle.getUserId(callingUid), callingPackage, packageName, shortcutId,
                         user.getIdentifier(), callingPid, callingUid);
                 if (shortcutIntents == null || shortcutIntents.length == 0) {
                     throw new IllegalArgumentException("Invalid shortcut id");
@@ -624,12 +635,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void insetsModified(IWindow window, InsetsState state) {
+    public void updateRequestedVisibilities(IWindow window, InsetsVisibilities visibilities) {
         synchronized (mService.mGlobalLock) {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {
-                windowState.updateRequestedVisibility(state);
+                windowState.setRequestedVisibilities(visibilities);
                 windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(windowState);
             }
         }

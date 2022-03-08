@@ -47,8 +47,8 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
 
     @Test
     fun initFrom_doesntCrash() {
-        val other = LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_bottom_area, null, false) as KeyguardBottomAreaView
+        val other = LayoutInflater.from(mContext).inflate(R.layout.keyguard_bottom_area,
+                null, false) as KeyguardBottomAreaView
 
         other.initFrom(mKeyguardBottomArea)
         other.launchVoiceAssist()

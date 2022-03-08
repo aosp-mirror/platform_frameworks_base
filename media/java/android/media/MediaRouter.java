@@ -654,12 +654,9 @@ public class MediaRouter {
         final class Client extends IMediaRouterClient.Stub {
             @Override
             public void onStateChanged() {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (Client.this == mClient) {
-                            updateClientState();
-                        }
+                mHandler.post(() -> {
+                    if (Client.this == mClient) {
+                        updateClientState();
                     }
                 });
             }
@@ -690,6 +687,26 @@ public class MediaRouter {
                 mHandler.post(() -> {
                     if (Client.this == mClient) {
                         handleGroupRouteSelected(groupRouteId);
+                    }
+                });
+            }
+
+            // Called when the selection of a connected device (phone speaker or BT devices)
+            // is changed.
+            @Override
+            public void onGlobalA2dpChanged(boolean a2dpOn) {
+                mHandler.post(() -> {
+                    if (mSelectedRoute == null || mBluetoothA2dpRoute == null) {
+                        return;
+                    }
+                    if (mSelectedRoute.isDefault() && a2dpOn) {
+                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                    } else if (mSelectedRoute.isBluetooth() && !a2dpOn) {
+                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/ false);
+                        dispatchRouteUnselected(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute);
+                        dispatchRouteSelected(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo);
                     }
                 });
             }
@@ -1070,7 +1087,8 @@ public class MediaRouter {
                 && (types & ROUTE_TYPE_LIVE_AUDIO) != 0
                 && (route.isBluetooth() || route.isDefault())) {
             try {
-                sStatic.mAudioService.setBluetoothA2dpOn(route.isBluetooth());
+                sStatic.mMediaRouterService.setBluetoothA2dpOn(sStatic.mClient,
+                        route.isBluetooth());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
@@ -1350,6 +1368,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteSelected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route selected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteSelected(cbi.router, type, info);
@@ -1358,6 +1379,9 @@ public class MediaRouter {
     }
 
     static void dispatchRouteUnselected(int type, RouteInfo info) {
+        if (DEBUG) {
+            Log.d(TAG, "Dispatching route unselected: " + info);
+        }
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             if (cbi.filterRouteEvent(info)) {
                 cbi.cb.onRouteUnselected(cbi.router, type, info);

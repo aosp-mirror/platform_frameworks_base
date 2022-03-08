@@ -36,6 +36,9 @@
         <Button
             android:id="@+id/button3"
             style="@style/CarAction1"
+            android:minWidth="@dimen/car_touch_target_size"
+            android:paddingStart="@dimen/car_padding_2"
+            android:paddingEnd="@dimen/car_padding_2"
             android:background="@drawable/car_dialog_button_background"
             android:layout_marginRight="@dimen/button_end_margin"
             android:layout_width="wrap_content"
@@ -44,6 +47,9 @@
         <Button
             android:id="@+id/button2"
             style="@style/CarAction1"
+            android:minWidth="@dimen/car_touch_target_size"
+            android:paddingStart="@dimen/car_padding_2"
+            android:paddingEnd="@dimen/car_padding_2"
             android:background="@drawable/car_dialog_button_background"
             android:layout_marginRight="@dimen/button_end_margin"
             android:layout_width="wrap_content"
@@ -52,6 +58,9 @@
         <Button
             android:id="@+id/button1"
             style="@style/CarAction1"
+            android:minWidth="@dimen/car_touch_target_size"
+            android:paddingStart="@dimen/car_padding_2"
+            android:paddingEnd="@dimen/car_padding_2"
             android:background="@drawable/car_dialog_button_background"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/button_layout_height" />

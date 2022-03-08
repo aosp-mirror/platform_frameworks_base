@@ -42,6 +42,7 @@ import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -394,5 +395,14 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * Set the view to have recently visibly alerted.
      */
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
+    }
+
+    /**
+     * Apply the faded state as a layer type change to the views which need to have overlapping
+     * contents render precisely.
+     */
+    public void setNotificationFaded(boolean faded) {
+        NotificationFadeAware.setLayerTypeForFaded(getIcon(), faded);
+        NotificationFadeAware.setLayerTypeForFaded(getExpandButton(), faded);
     }
 }

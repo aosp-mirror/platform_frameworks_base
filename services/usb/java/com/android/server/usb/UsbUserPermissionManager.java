@@ -688,6 +688,8 @@ class UsbUserPermissionManager {
             String packageName,
             PendingIntent pi,
             int uid) {
+        boolean throwException = false;
+
         // compare uid with packageName to foil apps pretending to be someone else
         try {
             ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
@@ -695,11 +697,13 @@ class UsbUserPermissionManager {
                 Slog.w(TAG, "package " + packageName
                         + " does not match caller's uid " + uid);
                 EventLog.writeEvent(SNET_EVENT_LOG_ID, "180104273", -1, "");
-                throw new IllegalArgumentException("package " + packageName
-                        + " not found");
+                throwException = true;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("package " + packageName + " not found");
+            throwException = true;
+        } finally {
+            if (throwException)
+                throw new IllegalArgumentException("package " + packageName + " not found");
         }
 
         requestPermissionDialog(device, accessory, canBeDefault, packageName, uid, mContext, pi);

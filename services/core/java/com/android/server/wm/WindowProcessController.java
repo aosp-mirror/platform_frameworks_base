@@ -25,6 +25,13 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STARTED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
@@ -32,13 +39,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STARTED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -57,6 +57,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -75,6 +76,7 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -219,6 +221,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
+    /** List of "chained" processes that are running remote animations for this process */
+    private final ArrayList<WeakReference<WindowProcessController>> mRemoteAnimationDelegates =
+            new ArrayList<>();
+
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
     private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
@@ -258,7 +264,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChanged(atm.getGlobalConfiguration());
-        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mName);
+        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
     public void setPid(int pid) {
@@ -506,19 +512,19 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
-        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed(),
+        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState(),
                 true /* isCheckingForFgsStart */);
     }
 
-    boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed) {
-        return areBackgroundActivityStartsAllowed(appSwitchAllowed,
+    boolean areBackgroundActivityStartsAllowed(int appSwitchState) {
+        return areBackgroundActivityStartsAllowed(appSwitchState,
                 false /* isCheckingForFgsStart */);
     }
 
-    private boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed,
+    private boolean areBackgroundActivityStartsAllowed(int appSwitchState,
             boolean isCheckingForFgsStart) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
-                appSwitchAllowed, isCheckingForFgsStart, hasActivityInVisibleTask(),
+                appSwitchState, isCheckingForFgsStart, hasActivityInVisibleTask(),
                 mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -725,20 +731,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             canUpdate = true;
         }
 
-        // Compare the z-order of ActivityStacks if both activities landed on same display.
-        if (display == topDisplay
-                && mPreQTopResumedActivity.getRootTask().compareTo(
-                        activity.getRootTask()) <= 0) {
-            canUpdate = true;
+        // Update the topmost activity if the activity has higher z-order than the current
+        // top-resumed activity.
+        if (!canUpdate) {
+            final ActivityRecord ar = topDisplay.getActivity(r -> r == activity,
+                    true /* traverseTopToBottom */, mPreQTopResumedActivity);
+            if (ar != null && ar != mPreQTopResumedActivity) {
+                canUpdate = true;
+            }
         }
 
         if (canUpdate) {
             // Make sure the previous top activity in the process no longer be resumed.
             if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
-                final Task task = mPreQTopResumedActivity.getTask();
-                if (task != null) {
-                    boolean userLeaving = task.shouldBeVisible(null);
-                    task.startPausingLocked(userLeaving, false /* uiSleeping */,
+                final TaskFragment taskFrag = mPreQTopResumedActivity.getTaskFragment();
+                if (taskFrag != null) {
+                    boolean userLeaving = taskFrag.shouldBeVisible(null);
+                    taskFrag.startPausing(userLeaving, false /* uiSleeping */,
                             activity, "top-resumed-changed");
                 }
             }
@@ -809,10 +818,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
-    void updateNightModeForAllActivities(int nightMode) {
+    // TODO(b/199277065): Re-assess how app-specific locales are applied based on UXR
+    // TODO(b/199277729): Consider whether we need to add special casing for edge cases like
+    //  activity-embeddings etc.
+    void updateAppSpecificSettingsForAllActivities(Integer nightMode, LocaleList localesOverride) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.setOverrideNightMode(nightMode) && r.mVisibleRequested) {
+            if (r.applyAppSpecificConfig(nightMode, localesOverride) && r.mVisibleRequested) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }
         }
@@ -991,7 +1003,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Since there could be more than one activities in a process record, we don't need to
         // compute the OomAdj with each of them, just need to find out the activity with the
         // "best" state, the order would be visible, pausing, stopping...
-        Task.ActivityState bestInvisibleState = DESTROYED;
+        ActivityRecord.State bestInvisibleState = DESTROYED;
         boolean allStoppingFinishing = true;
         boolean visible = false;
         int minTaskLayer = Integer.MAX_VALUE;
@@ -1098,7 +1110,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
             boolean updateOomAdj, boolean addPendingTopUid) {
         if (addPendingTopUid) {
-            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+            addToPendingTop();
         }
         if (updateOomAdj) {
             prepareOomAdjustment();
@@ -1107,6 +1119,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
                 mListener, updateServiceConnectionActivities, activityChange, updateOomAdj);
         mAtm.mH.sendMessage(m);
+    }
+
+    /** Makes the process have top state before oom-adj is computed from a posted message. */
+    void addToPendingTop() {
+        mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
     }
 
     void updateServiceConnectionActivities() {
@@ -1215,12 +1232,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 hasVisibleActivities = true;
             }
 
-            final Task task = r.getTask();
-            if (task != null) {
+            final TaskFragment taskFragment = r.getTaskFragment();
+            if (taskFragment != null) {
                 // There may be a pausing activity that hasn't shown any window and was requested
                 // to be hidden. But pausing is also a visible state, it should be regarded as
                 // visible, so the caller can know the next activity should be resumed.
-                hasVisibleActivities |= task.handleAppDied(this);
+                hasVisibleActivities |= taskFragment.handleAppDied(this);
             }
             r.handleAppDied();
         }
@@ -1598,11 +1615,38 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         updateRunningRemoteOrRecentsAnimation();
     }
 
+    /**
+     * Marks another process as a "delegate" animator. This means that process is doing some part
+     * of a remote animation on behalf of this process.
+     */
+    void addRemoteAnimationDelegate(WindowProcessController delegate) {
+        if (!isRunningRemoteTransition()) {
+            throw new IllegalStateException("Can't add a delegate to a process which isn't itself"
+                    + " running a remote animation");
+        }
+        mRemoteAnimationDelegates.add(new WeakReference<>(delegate));
+    }
+
     void updateRunningRemoteOrRecentsAnimation() {
+        if (!isRunningRemoteTransition()) {
+            // Clean-up any delegates
+            for (int i = 0; i < mRemoteAnimationDelegates.size(); ++i) {
+                final WindowProcessController delegate = mRemoteAnimationDelegates.get(i).get();
+                if (delegate == null) continue;
+                delegate.setRunningRemoteAnimation(false);
+                delegate.setRunningRecentsAnimation(false);
+            }
+            mRemoteAnimationDelegates.clear();
+        }
+
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::setRunningRemoteAnimation, mListener,
-                mRunningRecentsAnimation || mRunningRemoteAnimation));
+                isRunningRemoteTransition()));
+    }
+
+    boolean isRunningRemoteTransition() {
+        return mRunningRecentsAnimation || mRunningRemoteAnimation;
     }
 
     /** Adjusts scheduling group for animation. This method MUST NOT be called inside WM lock. */

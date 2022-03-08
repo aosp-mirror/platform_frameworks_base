@@ -13,13 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.qs.QSContainerImpl
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.qs.QSContainerImpl xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    android:clipChildren="false" >
+    android:clipChildren="false">
 
     <com.android.systemui.qs.NonInterceptingScrollView
         android:id="@+id/expanded_qs_scroll_view"
@@ -40,15 +40,20 @@
             android:accessibilityTraversalBefore="@android:id/edit"
             android:clipToPadding="false"
             android:clipChildren="false">
+
             <include layout="@layout/qs_footer_impl" />
         </com.android.systemui.qs.QSPanel>
     </com.android.systemui.qs.NonInterceptingScrollView>
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 
-    <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
+    <include
+        android:id="@+id/qs_detail"
+        layout="@layout/qs_detail" />
 
-    <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
+    <include
+        android:id="@+id/qs_customize"
+        layout="@layout/qs_customize_panel"
         android:visibility="gone" />
 
 </com.android.systemui.qs.QSContainerImpl>

@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -512,6 +514,11 @@ final class LogicalDisplay {
             boolean isBlanked) {
         // Set the layer stack.
         device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
+        // Also inform whether the device is the same one sent to inputflinger for its layerstack.
+        // TODO(b/188914255): Remove once input can dispatch against device vs layerstack.
+        device.setDisplayFlagsLocked(t,
+                device.getDisplayDeviceInfoLocked().touch != TOUCH_NONE
+                        ? SurfaceControl.DISPLAY_RECEIVES_INPUT : 0);
 
         // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {

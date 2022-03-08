@@ -21,12 +21,8 @@ import android.annotation.IdRes;
 import android.content.Context;
 import android.view.View;
 
-import com.android.systemui.navigationbar.RotationButton;
-import com.android.systemui.navigationbar.RotationButtonController;
-import com.android.systemui.navigationbar.buttons.ContextualButton;
-import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
-
-import java.util.function.Consumer;
+import com.android.systemui.shared.rotation.RotationButton;
+import com.android.systemui.shared.rotation.RotationButtonController;
 
 /** Containing logic for the rotation button in nav bar. */
 public class RotationContextButton extends ContextualButton implements RotationButton {
@@ -48,13 +44,10 @@ public class RotationContextButton extends ContextualButton implements RotationB
     }
 
     @Override
-    public void setVisibilityChangedCallback(Consumer<Boolean> visibilityChangedCallback) {
-        setListener(new ContextButtonListener() {
-            @Override
-            public void onVisibilityChanged(ContextualButton button, boolean visible) {
-                if (visibilityChangedCallback != null) {
-                    visibilityChangedCallback.accept(visible);
-                }
+    public void setUpdatesCallback(RotationButtonUpdatesCallback updatesCallback) {
+        setListener((button, visible) -> {
+            if (updatesCallback != null) {
+                updatesCallback.onVisibilityChanged(visible);
             }
         });
     }

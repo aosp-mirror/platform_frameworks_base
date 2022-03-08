@@ -16,11 +16,13 @@
 
 package com.android.systemui.biometrics
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.PointF
 import android.hardware.biometrics.BiometricSourceType
+import android.util.DisplayMetrics
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -29,7 +31,9 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.CircleReveal
+import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.Command
@@ -41,12 +45,10 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent.StatusBarS
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
+import com.android.systemui.util.leak.RotationUtils
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-
-private const val WAKE_AND_UNLOCK_FADE_DURATION = 180L
 
 /***
  * Controls the ripple effect that shows when authentication is successful.
@@ -78,11 +80,6 @@ class AuthRippleController @Inject constructor(
     private var circleReveal: LightRevealEffect? = null
 
     private var udfpsController: UdfpsController? = null
-
-    private var dwellScale = 2f
-    private var expandedDwellScale = 2.5f
-    private var aodDwellScale = 1.9f
-    private var aodExpandedDwellScale = 2.3f
     private var udfpsRadius: Float = -1f
 
     override fun onInit() {
@@ -123,9 +120,10 @@ class AuthRippleController @Inject constructor(
             return
         }
 
+        updateSensorLocation()
         if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
             fingerprintSensorLocation != null) {
-            mView.setSensorLocation(fingerprintSensorLocation!!)
+            mView.setFingerprintSensorLocation(fingerprintSensorLocation!!, udfpsRadius)
             showUnlockedRipple()
         } else if (biometricSourceType == BiometricSourceType.FACE &&
             faceSensorLocation != null) {
@@ -139,11 +137,12 @@ class AuthRippleController @Inject constructor(
 
     private fun showUnlockedRipple() {
         notificationShadeWindowController.setForcePluginOpen(true, this)
-        val useCircleReveal = circleReveal != null && biometricUnlockController.isWakeAndUnlock
         val lightRevealScrim = statusBar.lightRevealScrim
-        if (useCircleReveal) {
-            lightRevealScrim?.revealEffect = circleReveal!!
-            startLightRevealScrimOnKeyguardFadingAway = true
+        if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
+            circleReveal?.let {
+                lightRevealScrim?.revealEffect = it
+                startLightRevealScrimOnKeyguardFadingAway = true
+            }
         }
 
         mView.startUnlockedRipple(
@@ -158,19 +157,29 @@ class AuthRippleController @Inject constructor(
         if (keyguardStateController.isKeyguardFadingAway) {
             val lightRevealScrim = statusBar.lightRevealScrim
             if (startLightRevealScrimOnKeyguardFadingAway && lightRevealScrim != null) {
-                val revealAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
+                ValueAnimator.ofFloat(.1f, 1f).apply {
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN
                     duration = RIPPLE_ANIMATION_DURATION
                     startDelay = keyguardStateController.keyguardFadingAwayDelay
                     addUpdateListener { animator ->
                         if (lightRevealScrim.revealEffect != circleReveal) {
-                            // if the something else took over the reveal, let's do nothing.
+                            // if something else took over the reveal, let's do nothing.
                             return@addUpdateListener
                         }
                         lightRevealScrim.revealAmount = animator.animatedValue as Float
                     }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            // Reset light reveal scrim to the default, so the StatusBar
+                            // can handle any subsequent light reveal changes
+                            // (ie: from dozing changes)
+                            if (lightRevealScrim.revealEffect == circleReveal) {
+                                lightRevealScrim.revealEffect = LiftReveal
+                            }
+                        }
+                    })
+                    start()
                 }
-                revealAnimator.start()
                 startLightRevealScrimOnKeyguardFadingAway = false
             }
         }
@@ -182,7 +191,7 @@ class AuthRippleController @Inject constructor(
     }
 
     fun updateSensorLocation() {
-        fingerprintSensorLocation = authController.fingerprintSensorLocation
+        updateFingerprintLocation()
         faceSensorLocation = authController.faceAuthSensorLocation
         fingerprintSensorLocation?.let {
             circleReveal = CircleReveal(
@@ -197,25 +206,42 @@ class AuthRippleController @Inject constructor(
         }
     }
 
+    private fun updateFingerprintLocation() {
+        val displayMetrics = DisplayMetrics()
+        sysuiContext.display?.getRealMetrics(displayMetrics)
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
+
+        authController.fingerprintSensorLocation?.let {
+            fingerprintSensorLocation = when (RotationUtils.getRotation(sysuiContext)) {
+                RotationUtils.ROTATION_LANDSCAPE -> {
+                    val normalizedYPos: Float = it.y / width
+                    val normalizedXPos: Float = it.x / height
+                    PointF(width * normalizedYPos, height * (1 - normalizedXPos))
+                }
+                RotationUtils.ROTATION_UPSIDE_DOWN -> {
+                    PointF(width - it.x, height - it.y)
+                }
+                RotationUtils.ROTATION_SEASCAPE -> {
+                    val normalizedYPos: Float = it.y / width
+                    val normalizedXPos: Float = it.x / height
+                    PointF(width * (1 - normalizedYPos), height * normalizedXPos)
+                }
+                else -> {
+                    // ROTATION_NONE
+                    PointF(it.x, it.y)
+                }
+            }
+        }
+    }
+
     private fun updateRippleColor() {
-        mView.setColor(
-            Utils.getColorAttr(sysuiContext, android.R.attr.colorAccent).defaultColor)
+        mView.setLockScreenColor(Utils.getColorAttrDefaultColor(sysuiContext,
+                R.attr.wallpaperTextColorAccent))
     }
 
     private fun showDwellRipple() {
-        if (statusBarStateController.isDozing) {
-            mView.startDwellRipple(
-                    /* startRadius */ udfpsRadius,
-                    /* endRadius */ udfpsRadius * aodDwellScale,
-                    /* expandedRadius */ udfpsRadius * aodExpandedDwellScale,
-                    /* isDozing */ true)
-        } else {
-            mView.startDwellRipple(
-                    /* startRadius */ udfpsRadius,
-                    /* endRadius */ udfpsRadius * dwellScale,
-                    /* expandedRadius */ udfpsRadius * expandedDwellScale,
-                    /* isDozing */ false)
-        }
+        mView.startDwellRipple(statusBarStateController.isDozing)
     }
 
     private val keyguardUpdateMonitorCallback =
@@ -235,16 +261,10 @@ class AuthRippleController @Inject constructor(
 
     private val configurationChangedListener =
         object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateSensorLocation()
-            }
             override fun onUiModeChanged() {
                 updateRippleColor()
             }
             override fun onThemeChanged() {
-                updateRippleColor()
-            }
-            override fun onOverlayChanged() {
                 updateRippleColor()
             }
     }
@@ -258,7 +278,7 @@ class AuthRippleController @Inject constructor(
                     return
                 }
 
-                mView.setSensorLocation(fingerprintSensorLocation!!)
+                mView.setFingerprintSensorLocation(fingerprintSensorLocation!!, udfpsRadius)
                 showDwellRipple()
             }
 
@@ -267,15 +287,21 @@ class AuthRippleController @Inject constructor(
             }
         }
 
-    private val authControllerCallback = AuthController.Callback {
-        updateSensorLocation()
-        updateUdfpsDependentParams()
-    }
+    private val authControllerCallback =
+        object : AuthController.Callback {
+            override fun onAllAuthenticatorsRegistered() {
+                updateUdfpsDependentParams()
+                updateSensorLocation()
+            }
+
+            override fun onEnrollmentsChanged() {
+            }
+        }
 
     private fun updateUdfpsDependentParams() {
         authController.udfpsProps?.let {
             if (it.size > 0) {
-                udfpsRadius = it[0].sensorRadius.toFloat()
+                udfpsRadius = it[0].location.sensorRadius.toFloat()
                 udfpsController = udfpsControllerProvider.get()
 
                 if (mView.isAttachedToWindow) {
@@ -286,20 +312,6 @@ class AuthRippleController @Inject constructor(
     }
 
     inner class AuthRippleCommand : Command {
-        fun printLockScreenDwellInfo(pw: PrintWriter) {
-            pw.println("lock screen dwell ripple: " +
-                    "\n\tsensorLocation=$fingerprintSensorLocation" +
-                    "\n\tdwellScale=$dwellScale" +
-                    "\n\tdwellExpand=$expandedDwellScale")
-        }
-
-        fun printAodDwellInfo(pw: PrintWriter) {
-            pw.println("aod dwell ripple: " +
-                    "\n\tsensorLocation=$fingerprintSensorLocation" +
-                    "\n\tdwellScale=$aodDwellScale" +
-                    "\n\tdwellExpand=$aodExpandedDwellScale")
-        }
-
         override fun execute(pw: PrintWriter, args: List<String>) {
             if (args.isEmpty()) {
                 invalidCommand(pw)
@@ -307,17 +319,17 @@ class AuthRippleController @Inject constructor(
                 when (args[0]) {
                     "dwell" -> {
                         showDwellRipple()
-                        if (statusBarStateController.isDozing) {
-                            printAodDwellInfo(pw)
-                        } else {
-                            printLockScreenDwellInfo(pw)
-                        }
+                        pw.println("lock screen dwell ripple: " +
+                                "\n\tsensorLocation=$fingerprintSensorLocation" +
+                                "\n\tudfpsRadius=$udfpsRadius")
                     }
                     "fingerprint" -> {
+                        updateSensorLocation()
                         pw.println("fingerprint ripple sensorLocation=$fingerprintSensorLocation")
                         showRipple(BiometricSourceType.FINGERPRINT)
                     }
                     "face" -> {
+                        updateSensorLocation()
                         pw.println("face ripple sensorLocation=$faceSensorLocation")
                         showRipple(BiometricSourceType.FACE)
                     }

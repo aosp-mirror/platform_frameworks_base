@@ -50,7 +50,8 @@ bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
 bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
-bool Properties::enableRenderEffectCache = false;
+// Default true unless otherwise specified in RenderThread Configuration
+bool Properties::enableRenderEffectCache = true;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;

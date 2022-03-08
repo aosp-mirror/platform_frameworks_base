@@ -40,10 +40,12 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessController;
-import com.android.systemui.settings.brightness.BrightnessSlider;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
+import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -60,28 +62,26 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final QSCustomizerController mQsCustomizerController;
     private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final FalsingManager mFalsingManager;
+    private final CommandQueue mCommandQueue;
     private final BrightnessController mBrightnessController;
-    private final BrightnessSlider.Factory mBrightnessSliderFactory;
-    private final BrightnessSlider mBrightnessSlider;
+    private final BrightnessSliderController mBrightnessSliderController;
+    private final BrightnessMirrorHandler mBrightnessMirrorHandler;
 
-    private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mGridContentVisible = true;
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
         @Override
         public void onConfigurationChange(Configuration newConfig) {
+            updateMediaExpansion();
             mView.updateResources();
             mQsSecurityFooter.onConfigurationChanged();
             if (mView.isListening()) {
                 refreshAllTiles();
             }
-            updateBrightnessMirror();
+            mView.switchSecurityFooter(mShouldUseSplitNotificationShade);
         }
     };
-
-    private final BrightnessMirrorController.BrightnessMirrorListener mBrightnessMirrorListener =
-            mirror -> updateBrightnessMirror();
 
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
@@ -101,32 +101,37 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
-            BrightnessSlider.Factory brightnessSliderFactory, FalsingManager falsingManager,
-            FeatureFlags featureFlags) {
+            BrightnessSliderController.Factory brightnessSliderFactory,
+            FalsingManager falsingManager, CommandQueue commandQueue) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
-                metricsLogger, uiEventLogger, qsLogger, dumpManager, featureFlags);
+                metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mFalsingManager = falsingManager;
+        mCommandQueue = commandQueue;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
-        mBrightnessSliderFactory = brightnessSliderFactory;
 
-        mBrightnessSlider = mBrightnessSliderFactory.create(getContext(), mView);
-        mView.setBrightnessView(mBrightnessSlider.getRootView());
+        mBrightnessSliderController = brightnessSliderFactory.create(getContext(), mView);
+        mView.setBrightnessView(mBrightnessSliderController.getRootView());
 
-        mBrightnessController = brightnessControllerFactory.create(mBrightnessSlider);
+        mBrightnessController = brightnessControllerFactory.create(mBrightnessSliderController);
+        mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
     }
 
     @Override
     public void onInit() {
         super.onInit();
-        mMediaHost.setExpansion(1);
+        updateMediaExpansion();
         mMediaHost.setShowsOnlyActiveMedia(false);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mQsCustomizerController.init();
-        mBrightnessSlider.init();
+        mBrightnessSliderController.init();
+    }
+
+    private void updateMediaExpansion() {
+        mMediaHost.setExpansion(Utils.shouldUseSplitNotificationShade(getResources()) ? 0 : 1);
     }
 
     @Override
@@ -141,11 +146,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mView.setSecurityFooter(mQsSecurityFooter.getView());
+        mView.setSecurityFooter(mQsSecurityFooter.getView(), mShouldUseSplitNotificationShade);
         switchTileLayout(true);
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
-        }
+        mBrightnessMirrorHandler.onQsPanelAttached();
 
         ((PagedTileLayout) mView.getOrCreateTileLayout())
                 .setOnTouchListener(mTileLayoutTouchListener);
@@ -161,9 +164,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     protected void onViewDetached() {
         mTunerService.removeTunable(mView);
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(mBrightnessMirrorListener);
-        }
+        mBrightnessMirrorHandler.onQsPanelDettached();
         super.onViewDetached();
     }
 
@@ -197,23 +198,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
     }
 
-    /** */
     public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
-        mBrightnessMirrorController = brightnessMirrorController;
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(mBrightnessMirrorListener);
-        }
-        mBrightnessMirrorController = brightnessMirrorController;
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
-        }
-        updateBrightnessMirror();
-    }
-
-    private void updateBrightnessMirror() {
-        if (mBrightnessMirrorController != null) {
-            mBrightnessSlider.setMirrorControllerAndMirror(mBrightnessMirrorController);
-        }
+        mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
 
     /** Get the QSTileHost this panel uses. */
@@ -278,10 +264,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mView.isLayoutRtl();
     }
 
-    public View getBrightnessView() {
-        return mView.getBrightnessView();
-    }
-
     /** */
     public void setPageListener(PagedTileLayout.PageListener listener) {
         mView.setPageListener(listener);
@@ -298,6 +280,14 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void showDetailAdapter(DetailAdapter detailAdapter, int x, int y) {
+        // TODO(b/199296365)
+        // Workaround for opening detail from QQS, when there might not be enough space to
+        // display e.g. in case of multiuser detail from split shade. Currently showing detail works
+        // only for QS (mView below) and that's why expanding panel (thus showing QS instead of QQS)
+        // makes it displayed correctly.
+        if (!isExpanded()) {
+            mCommandQueue.animateExpandSettingsPanel(null);
+        }
         mView.showDetailAdapter(true, detailAdapter, new int[]{x, y});
     }
 

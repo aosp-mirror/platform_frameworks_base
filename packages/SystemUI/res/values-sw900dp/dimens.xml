@@ -20,7 +20,6 @@
     <dimen name="button_size">80dp</dimen>
     <dimen name="navigation_side_padding">@dimen/button_size</dimen>
     <dimen name="navigation_key_width">@dimen/button_size</dimen>
-    <dimen name="navigation_extra_key_width">@dimen/button_size</dimen>
 
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">76dp</dimen>

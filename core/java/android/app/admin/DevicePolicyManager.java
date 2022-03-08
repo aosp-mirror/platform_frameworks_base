@@ -679,8 +679,9 @@ public class DevicePolicyManager {
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
         = "android.app.extra.PROVISIONING_TIME_ZONE";
@@ -689,8 +690,9 @@ public class DevicePolicyManager {
      * A Long extra holding the wall clock time (in milliseconds) to be set on the device's
      * {@link android.app.AlarmManager}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
         = "android.app.extra.PROVISIONING_LOCAL_TIME";
@@ -699,8 +701,9 @@ public class DevicePolicyManager {
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
      * Format: xx_yy, where xx is the language code, and yy the country code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
         = "android.app.extra.PROVISIONING_LOCALE";
@@ -996,7 +999,10 @@ public class DevicePolicyManager {
      * The default for this extra is {@code false} - by default, the admin of a fully-managed
      * device has the ability to grant sensors-related permissions.
      *
-     * <p>Use only for device owner provisioning.
+     * <p>Use only for device owner provisioning. This extra can be returned by the
+     * admin app when performing the admin-integrated provisioning flow as a result of the
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
      * @see #ACTION_GET_PROVISIONING_MODE
      */
     public static final String EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT =
@@ -1065,6 +1071,9 @@ public class DevicePolicyManager {
      *
      * <p>From {@link android.os.Build.VERSION_CODES#N} onwards, this is also supported for an
      * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     *
+     * <p>This extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -1104,8 +1113,9 @@ public class DevicePolicyManager {
      *
      * <p> Maximum 3 key-value pairs can be specified. The rest will be ignored.
      *
-     * <p> Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     * <p> Can be used in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}. This
+     * extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_DISCLAIMERS =
             "android.app.extra.PROVISIONING_DISCLAIMERS";
@@ -3437,6 +3447,9 @@ public class DevicePolicyManager {
      * set on the primary {@link DevicePolicyManager} must be cleared first by calling
      * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
+     *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
      * password requirement.
@@ -3527,11 +3540,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3610,11 +3625,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3700,11 +3717,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3790,11 +3809,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3879,11 +3900,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3968,11 +3991,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -4056,11 +4081,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -7726,27 +7753,64 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Sets the given package as the device owner. The package must already be installed. There
-     * must not already be a device owner.
-     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
-     * this method.
-     * Calling this after the setup phase of the primary user has completed is allowed only if
-     * the caller is the shell uid, and there are no additional users and no accounts.
+     * Sets the given package as the device owner.
+     *
+     * <p>Preconditions:
+     * <ul>
+     *   <li>The package must already be installed.
+     *   <li>There must not already be a device owner.
+     *   <li>Only apps with the {@code MANAGE_PROFILE_AND_DEVICE_OWNERS} permission or the
+     *       {@link Process#SHELL_UID Shell UID} can call this method.
+     * </ul>
+     *
+     * <p>Calling this after the setup phase of the device owner user has completed is allowed only
+     * if the caller is the {@link Process#SHELL_UID Shell UID}, and there are no additional users
+     * (except when the device runs on headless system user mode, in which case it could have exact
+     * one extra user, which is the current user - the device owner will be set in the
+     * {@link UserHandle#SYSTEM system} user and a profile owner will be set in the current user)
+     * and no accounts.
+     *
      * @param who the component name to be registered as device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
+     *
      * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
+     *
+     * @throws IllegalArgumentException if the package name is {@code null} or invalid.
      * @throws IllegalStateException If the preconditions mentioned are not met.
+     *
+     * @hide
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public boolean setDeviceOwner(
+    public boolean setDeviceOwner(@NonNull ComponentName who, @Nullable String ownerName,
+            @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Same as {@link #setDeviceOwner(ComponentName, String, int)}, but without setting the profile
+     * owner on current user when running on headless system user mode - should be used only by
+     * testing infra.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean setDeviceOwnerOnly(
             @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId);
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ false);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -9528,7 +9592,14 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary.
+     * calling user and switch back to primary user.
+     *
+     * <p>Notice that on devices running with
+     * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
+     * user, so it switches back to the user that was in the foreground before the first call to
+     * {@link #switchUser(ComponentName, UserHandle)} (or fails with
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN} if that method was not called prior to this
+     * call).
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:
@@ -9543,6 +9614,37 @@ public class DevicePolicyManager {
         throwIfParentInstance("logoutUser");
         try {
             return mService.logoutUser(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
+     * or {@link UserHandle#USER_NULL} if the current user is not in a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @UserIdInt int getLogoutUserId() {
+        try {
+            return mService.getLogoutUserId();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the user that {@link #logoutUser(ComponentName)} would switch to.
+     *
+     * <p>Typically used by system UI after it logout a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void clearLogoutUser() {
+        try {
+            mService.clearLogoutUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -13808,6 +13910,23 @@ public class DevicePolicyManager {
         }
         try {
             mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears organization ID set by the DPC and resets the precomputed enrollment specific ID.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void clearOrganizationId() {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.clearOrganizationIdForUser(myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

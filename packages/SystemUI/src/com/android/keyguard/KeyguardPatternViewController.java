@@ -38,6 +38,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 
 import java.util.List;
 
@@ -56,6 +57,9 @@ public class KeyguardPatternViewController
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
     private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
+    private final DevicePostureController mPostureController;
+    private final DevicePostureController.Callback mPostureCallback =
+            posture -> mView.onDevicePostureChanged(posture);
 
     private KeyguardMessageAreaController mMessageAreaController;
     private LockPatternView mLockPatternView;
@@ -192,7 +196,8 @@ public class KeyguardPatternViewController
             LatencyTracker latencyTracker,
             FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
-            KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
+            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
+            DevicePostureController postureController) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -203,6 +208,7 @@ public class KeyguardPatternViewController
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = mMessageAreaControllerFactory.create(kma);
         mLockPatternView = mView.findViewById(R.id.lockPatternView);
+        mPostureController = postureController;
     }
 
     @Override
@@ -235,6 +241,7 @@ public class KeyguardPatternViewController
                 getKeyguardSecurityCallback().onCancelClicked();
             });
         }
+        mPostureController.addCallback(mPostureCallback);
     }
 
     @Override
@@ -247,6 +254,7 @@ public class KeyguardPatternViewController
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(null);
         }
+        mPostureController.removeCallback(mPostureCallback);
     }
 
     @Override

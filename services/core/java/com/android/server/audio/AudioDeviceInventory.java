@@ -237,6 +237,9 @@ public class AudioDeviceInventory {
 
     //------------------------------------------------------------
     /*package*/ void dump(PrintWriter pw, String prefix) {
+        pw.println("\n" + prefix + "BECOMING_NOISY_INTENT_DEVICES_SET=");
+        BECOMING_NOISY_INTENT_DEVICES_SET.forEach(device -> {
+            pw.print(" 0x" +  Integer.toHexString(device)); });
         pw.println("\n" + prefix + "Preferred devices for strategy:");
         mPreferredDevices.forEach((strategy, device) -> {
             pw.println("  " + prefix + "strategy:" + strategy + " device:" + device); });
@@ -1177,10 +1180,13 @@ public class AudioDeviceInventory {
                         state == AudioService.CONNECTION_STATE_CONNECTED
                                 ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED);
         if (state != AudioService.CONNECTION_STATE_DISCONNECTED) {
+            Log.i(TAG, "not sending NOISY: state=" + state);
             mmi.set(MediaMetrics.Property.DELAY_MS, 0).record(); // OK to return
             return 0;
         }
         if (!BECOMING_NOISY_INTENT_DEVICES_SET.contains(device)) {
+            Log.i(TAG, "not sending NOISY: device=0x" + Integer.toHexString(device)
+                    + " not in set " + BECOMING_NOISY_INTENT_DEVICES_SET);
             mmi.set(MediaMetrics.Property.DELAY_MS, 0).record(); // OK to return
             return 0;
         }
@@ -1190,18 +1196,24 @@ public class AudioDeviceInventory {
             if (((di.mDeviceType & AudioSystem.DEVICE_BIT_IN) == 0)
                     && BECOMING_NOISY_INTENT_DEVICES_SET.contains(di.mDeviceType)) {
                 devices.add(di.mDeviceType);
+                Log.i(TAG, "NOISY: adding 0x" + Integer.toHexString(di.mDeviceType));
             }
         }
         if (musicDevice == AudioSystem.DEVICE_NONE) {
             musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
+            Log.i(TAG, "NOISY: musicDevice changing from NONE to 0x"
+                    + Integer.toHexString(musicDevice));
         }
 
         // always ignore condition on device being actually used for music when in communication
         // because music routing is altered in this case.
         // also checks whether media routing if affected by a dynamic policy or mirroring
-        if (((device == musicDevice) || mDeviceBroker.isInCommunication())
-                && AudioSystem.isSingleAudioDeviceType(devices, device)
-                && !mDeviceBroker.hasMediaDynamicPolicy()
+        final boolean inCommunication = mDeviceBroker.isInCommunication();
+        final boolean singleAudioDeviceType = AudioSystem.isSingleAudioDeviceType(devices, device);
+        final boolean hasMediaDynamicPolicy = mDeviceBroker.hasMediaDynamicPolicy();
+        if (((device == musicDevice) || inCommunication)
+                && singleAudioDeviceType
+                && !hasMediaDynamicPolicy
                 && (musicDevice != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)) {
             if (!mAudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
                     && !mDeviceBroker.hasAudioFocusUsers()) {
@@ -1214,6 +1226,12 @@ public class AudioDeviceInventory {
             }
             mDeviceBroker.postBroadcastBecomingNoisy();
             delay = AudioService.BECOMING_NOISY_DELAY_MS;
+        } else {
+            Log.i(TAG, "not sending NOISY: device:0x" + Integer.toHexString(device)
+                    + " musicDevice:0x" + Integer.toHexString(musicDevice)
+                    + " inComm:" + inCommunication
+                    + " mediaPolicy:" + hasMediaDynamicPolicy
+                    + " singleDevice:" + singleAudioDeviceType);
         }
 
         mmi.set(MediaMetrics.Property.DELAY_MS, delay).record();

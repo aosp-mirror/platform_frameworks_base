@@ -20,6 +20,7 @@ import android.view.SurfaceControl;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
 import android.window.WindowContainerToken;
 
 /**
@@ -39,12 +40,9 @@ oneway interface ITaskOrganizer {
 
     /**
      * Called when the Task want to remove the starting window.
-     * @param leash A persistent leash for the top window in this task.
-     * @param frame Window frame of the top window.
-     * @param playRevealAnimation Play vanish animation.
+     * @param removalInfo The information used to remove the starting window.
      */
-    void removeStartingWindow(int taskId, in SurfaceControl leash, in Rect frame,
-            in boolean playRevealAnimation);
+    void removeStartingWindow(in StartingWindowRemovalInfo removalInfo);
 
     /**
      * Called when the Task want to copy the splash screen.

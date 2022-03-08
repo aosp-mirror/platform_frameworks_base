@@ -35,6 +35,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -50,6 +51,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -60,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -67,7 +70,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
@@ -76,6 +79,7 @@ import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoa
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -106,6 +110,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotifCollectionLogger mLogger;
     @Mock private LogBufferEulogizer mEulogizer;
+    @Mock private Handler mMainHandler;
 
     @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
@@ -151,6 +156,7 @@ public class NotifCollectionTest extends SysuiTestCase {
                 mClock,
                 mFeatureFlags,
                 mLogger,
+                mMainHandler,
                 mEulogizer,
                 mock(DumpManager.class));
         mCollection.attach(mGroupCoalescer);
@@ -1321,6 +1327,78 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener, never()).onEntryRemoved(any(NotificationEntry.class), anyInt());
     }
 
+    private Runnable getInternalNotifUpdateRunnable(StatusBarNotification sbn) {
+        InternalNotifUpdater updater = mCollection.getInternalNotifUpdater("Test");
+        updater.onInternalNotificationUpdate(sbn, "reason");
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMainHandler).post(runnableCaptor.capture());
+        return runnableCaptor.getValue();
+    }
+
+    @Test
+    public void testGetInternalNotifUpdaterPostsToMainHandler() {
+        InternalNotifUpdater updater = mCollection.getInternalNotifUpdater("Test");
+        updater.onInternalNotificationUpdate(mock(StatusBarNotification.class), "reason");
+        verify(mMainHandler).post(any());
+    }
+
+    @Test
+    public void testSecondPostCallsUpdateWithTrue() {
+        // GIVEN a pipeline with one notification
+        NotifEvent notifEvent = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notifEvent.key);
+
+        // KNOWING that it already called listener methods once
+        verify(mCollectionListener).onEntryAdded(eq(entry));
+        verify(mCollectionListener).onRankingApplied();
+
+        // WHEN we update the notification via the system
+        mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+
+        // THEN entry updated gets called, added does not, and ranking is called again
+        verify(mCollectionListener).onEntryUpdated(eq(entry));
+        verify(mCollectionListener).onEntryUpdated(eq(entry), eq(true));
+        verify(mCollectionListener).onEntryAdded((entry));
+        verify(mCollectionListener, times(2)).onRankingApplied();
+    }
+
+    @Test
+    public void testInternalNotifUpdaterCallsUpdate() {
+        // GIVEN a pipeline with one notification
+        NotifEvent notifEvent = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notifEvent.key);
+
+        // KNOWING that it will call listener methods once
+        verify(mCollectionListener).onEntryAdded(eq(entry));
+        verify(mCollectionListener).onRankingApplied();
+
+        // WHEN we update that notification internally
+        StatusBarNotification sbn = notifEvent.sbn;
+        getInternalNotifUpdateRunnable(sbn).run();
+
+        // THEN only entry updated gets called a second time
+        verify(mCollectionListener).onEntryAdded(eq(entry));
+        verify(mCollectionListener).onRankingApplied();
+        verify(mCollectionListener).onEntryUpdated(eq(entry));
+        verify(mCollectionListener).onEntryUpdated(eq(entry), eq(false));
+    }
+
+    @Test
+    public void testInternalNotifUpdaterIgnoresNew() {
+        // GIVEN a pipeline without any notifications
+        StatusBarNotification sbn = buildNotif(TEST_PACKAGE, 47, "myTag").build().getSbn();
+
+        // WHEN we internally update an unknown notification
+        getInternalNotifUpdateRunnable(sbn).run();
+
+        // THEN only entry updated gets called a second time
+        verify(mCollectionListener, never()).onEntryAdded(any());
+        verify(mCollectionListener, never()).onRankingUpdate(any());
+        verify(mCollectionListener, never()).onRankingApplied();
+        verify(mCollectionListener, never()).onEntryUpdated(any());
+        verify(mCollectionListener, never()).onEntryUpdated(any(), anyBoolean());
+    }
+
     private static NotificationEntryBuilder buildNotif(String pkg, int id, String tag) {
         return new NotificationEntryBuilder()
                 .setPkg(pkg)
@@ -1371,6 +1449,11 @@ public class NotifCollectionTest extends SysuiTestCase {
         }
 
         @Override
+        public void onEntryUpdated(NotificationEntry entry, boolean fromSystem) {
+            onEntryUpdated(entry);
+        }
+
+        @Override
         public void onEntryRemoved(NotificationEntry entry, int reason) {
         }
 
@@ -1405,25 +1488,26 @@ public class NotifCollectionTest extends SysuiTestCase {
             mName = name;
         }
 
+        @NonNull
         @Override
         public String getName() {
             return mName;
         }
 
         @Override
-        public void setCallback(OnEndLifetimeExtensionCallback callback) {
+        public void setCallback(@NonNull OnEndLifetimeExtensionCallback callback) {
             this.callback = callback;
         }
 
         @Override
         public boolean shouldExtendLifetime(
-                NotificationEntry entry,
+                @NonNull NotificationEntry entry,
                 @CancellationReason int reason) {
             return shouldExtendLifetime;
         }
 
         @Override
-        public void cancelLifetimeExtension(NotificationEntry entry) {
+        public void cancelLifetimeExtension(@NonNull NotificationEntry entry) {
             if (onCancelLifetimeExtension != null) {
                 onCancelLifetimeExtension.run();
             }

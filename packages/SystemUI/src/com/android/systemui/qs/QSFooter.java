@@ -35,11 +35,6 @@ public interface QSFooter {
     void setExpanded(boolean expanded);
 
     /**
-     * Returns the full height of the footer.
-     */
-    int getHeight();
-
-    /**
      * Sets the percentage amount that the quick settings has been expanded.
      *
      * @param expansion A value from 1 to 0 that indicates how much the quick settings have been

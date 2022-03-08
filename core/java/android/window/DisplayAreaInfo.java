@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
+
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.content.res.Configuration;
@@ -43,7 +45,16 @@ public final class DisplayAreaInfo implements Parcelable {
      */
     public final int displayId;
 
+    /**
+     * The feature id of this display area.
+     */
     public final int featureId;
+
+    /**
+     * The feature id of the root display area this display area is associated with.
+     * @hide
+     */
+    public int rootDisplayAreaId = FEATURE_UNDEFINED;
 
     public DisplayAreaInfo(@NonNull WindowContainerToken token, int displayId, int featureId) {
         this.token = token;
@@ -56,6 +67,7 @@ public final class DisplayAreaInfo implements Parcelable {
         configuration.readFromParcel(in);
         displayId = in.readInt();
         featureId = in.readInt();
+        rootDisplayAreaId = in.readInt();
     }
 
     @Override
@@ -64,6 +76,7 @@ public final class DisplayAreaInfo implements Parcelable {
         configuration.writeToParcel(dest, flags);
         dest.writeInt(displayId);
         dest.writeInt(featureId);
+        dest.writeInt(rootDisplayAreaId);
     }
 
     @NonNull

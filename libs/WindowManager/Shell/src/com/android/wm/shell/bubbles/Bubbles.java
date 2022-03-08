@@ -24,12 +24,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Looper;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.View;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -43,7 +41,6 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -159,14 +156,6 @@ public interface Bubbles {
 
     /** Set the proxy to commnuicate with SysUi side components. */
     void setSysuiProxy(SysuiProxy proxy);
-
-    /**
-     * Set the scrim view for bubbles.
-     *
-     * @param callback The callback made with the executor and the executor's looper that the view
-     *                 will be running on.
-     **/
-    void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback);
 
     /** Set a listener to be notified of bubble expand events. */
     void setExpandListener(BubbleExpandListener listener);
@@ -294,6 +283,8 @@ public interface Bubbles {
         void updateNotificationSuppression(String key);
 
         void onStackExpandChanged(boolean shouldExpand);
+
+        void onManageMenuExpandChanged(boolean menuExpanded);
 
         void onUnbubbleConversation(String key);
     }

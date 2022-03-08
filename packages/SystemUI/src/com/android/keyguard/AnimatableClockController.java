@@ -31,7 +31,6 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
@@ -49,7 +48,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final StatusBarStateController mStatusBarStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final KeyguardBypassController mBypassController;
     private final BatteryController mBatteryController;
     private final int mDozingColor = Color.WHITE;
     private int mLockScreenColor;
@@ -71,14 +69,12 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
             BroadcastDispatcher broadcastDispatcher,
             BatteryController batteryController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController bypassController,
             @Main Resources resources
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mBypassController = bypassController;
         mBatteryController = batteryController;
 
         mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);

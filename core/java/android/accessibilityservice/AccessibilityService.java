@@ -16,6 +16,8 @@
 
 package android.accessibilityservice;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
@@ -27,6 +29,7 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
@@ -36,6 +39,7 @@ import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -514,7 +518,9 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_POWER_DIALOG = 6;
 
     /**
-     * Action to toggle docking the current app's window
+     * Action to toggle docking the current app's window.
+     * <p>
+     * <strong>Note:</strong>  It is effective only if it appears in {@link #getSystemActions()}.
      */
     public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7;
 
@@ -961,30 +967,31 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    @NonNull
     @Override
     public Context createDisplayContext(Display display) {
-        final Context context = super.createDisplayContext(display);
-        final int displayId = display.getDisplayId();
-        setDefaultTokenInternal(context, displayId);
-        return context;
+        return new AccessibilityContext(super.createDisplayContext(display), mConnectionId);
     }
 
-    private void setDefaultTokenInternal(Context context, int displayId) {
-        final WindowManagerImpl wm = (WindowManagerImpl) context.getSystemService(WINDOW_SERVICE);
-        final IAccessibilityServiceConnection connection =
-                AccessibilityInteractionClient.getInstance(this).getConnection(mConnectionId);
-        IBinder token = null;
-        if (connection != null) {
-            synchronized (mLock) {
-                try {
-                    token = connection.getOverlayWindowToken(displayId);
-                } catch (RemoteException re) {
-                    Log.w(LOG_TAG, "Failed to get window token", re);
-                    re.rethrowFromSystemServer();
-                }
-            }
-            wm.setDefaultToken(token);
+    @NonNull
+    @Override
+    public Context createWindowContext(int type, @Nullable Bundle options) {
+        final Context context = super.createWindowContext(type, options);
+        if (type != TYPE_ACCESSIBILITY_OVERLAY) {
+            return context;
         }
+        return new AccessibilityContext(context, mConnectionId);
+    }
+
+    @NonNull
+    @Override
+    public Context createWindowContext(@NonNull Display display, int type,
+            @Nullable Bundle options) {
+        final Context context = super.createWindowContext(display, type, options);
+        if (type != TYPE_ACCESSIBILITY_OVERLAY) {
+            return context;
+        }
+        return new AccessibilityContext(context, mConnectionId);
     }
 
     /**
@@ -2069,6 +2076,10 @@ public abstract class AccessibilityService extends Service {
         if (WINDOW_SERVICE.equals(name)) {
             if (mWindowManager == null) {
                 mWindowManager = (WindowManager) getBaseContext().getSystemService(name);
+                final WindowManagerImpl wm = (WindowManagerImpl) mWindowManager;
+                // Set e default token obtained from the connection to ensure client could use
+                // accessibility overlay.
+                wm.setDefaultToken(mWindowToken);
             }
             return mWindowManager;
         }
@@ -2177,8 +2188,10 @@ public abstract class AccessibilityService extends Service {
 
                 // The client may have already obtained the window manager, so
                 // update the default token on whatever manager we gave them.
-                final WindowManagerImpl wm = (WindowManagerImpl) getSystemService(WINDOW_SERVICE);
-                wm.setDefaultToken(windowToken);
+                if (mWindowManager != null) {
+                    final WindowManagerImpl wm = (WindowManagerImpl) mWindowManager;
+                    wm.setDefaultToken(mWindowToken);
+                }
             }
 
             @Override
@@ -2672,6 +2685,60 @@ public abstract class AccessibilityService extends Service {
                 connection.setTouchExplorationPassthroughRegion(displayId, region);
             } catch (RemoteException re) {
                 throw new RuntimeException(re);
+            }
+        }
+    }
+
+    private static class AccessibilityContext extends ContextWrapper {
+        private final int mConnectionId;
+
+        private AccessibilityContext(Context base, int connectionId) {
+            super(base);
+            mConnectionId = connectionId;
+            setDefaultTokenInternal(this, getDisplayId());
+        }
+
+        @NonNull
+        @Override
+        public Context createDisplayContext(Display display) {
+            return new AccessibilityContext(super.createDisplayContext(display), mConnectionId);
+        }
+
+        @NonNull
+        @Override
+        public Context createWindowContext(int type, @Nullable Bundle options) {
+            final Context context = super.createWindowContext(type, options);
+            if (type != TYPE_ACCESSIBILITY_OVERLAY) {
+                return context;
+            }
+            return new AccessibilityContext(context, mConnectionId);
+        }
+
+        @NonNull
+        @Override
+        public Context createWindowContext(@NonNull Display display, int type,
+                @Nullable Bundle options) {
+            final Context context = super.createWindowContext(display, type, options);
+            if (type != TYPE_ACCESSIBILITY_OVERLAY) {
+                return context;
+            }
+            return new AccessibilityContext(context, mConnectionId);
+        }
+
+        private void setDefaultTokenInternal(Context context, int displayId) {
+            final WindowManagerImpl wm = (WindowManagerImpl) context.getSystemService(
+                    WINDOW_SERVICE);
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getConnection(mConnectionId);
+            IBinder token = null;
+            if (connection != null) {
+                try {
+                    token = connection.getOverlayWindowToken(displayId);
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to get window token", re);
+                    re.rethrowFromSystemServer();
+                }
+                wm.setDefaultToken(token);
             }
         }
     }

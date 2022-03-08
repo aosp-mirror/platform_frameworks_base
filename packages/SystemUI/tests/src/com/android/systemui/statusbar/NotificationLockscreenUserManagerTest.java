@@ -20,10 +20,10 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_MEDIA_CONTROLS;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_PEOPLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -56,6 +56,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -423,7 +424,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mStatusBarStateController,
                     Handler.createAsync(Looper.myLooper()),
                     mDeviceProvisionedController,
-                    mKeyguardStateController);
+                    mKeyguardStateController,
+                    mock(DumpManager.class));
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

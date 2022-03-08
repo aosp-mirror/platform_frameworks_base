@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="8016145283189546017">"इनपुट डिभाइस"</string>
+    <string name="app_label" msgid="8016145283189546017">"इनपुट उपकरणहरु"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android किबोर्ड"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"अङ्ग्रेजी (बेलायत)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"अङ्ग्रेजी (अमेरिकी)"</string>

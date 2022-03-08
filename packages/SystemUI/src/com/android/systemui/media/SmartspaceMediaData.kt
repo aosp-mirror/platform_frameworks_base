@@ -52,5 +52,9 @@ data class SmartspaceMediaData(
     /**
      * View's background color.
      */
-    val backgroundColor: Int
+    val backgroundColor: Int,
+    /**
+     * The timestamp in milliseconds that headphone is connected.
+     */
+    val headphoneConnectionTimeMillis: Long
 )

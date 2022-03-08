@@ -131,8 +131,8 @@ public class GeofenceManager extends
             return mPermitted;
         }
 
-        boolean onLocationPermissionsChanged(String packageName) {
-            if (getIdentity().getPackageName().equals(packageName)) {
+        boolean onLocationPermissionsChanged(@Nullable String packageName) {
+            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -242,7 +242,7 @@ public class GeofenceManager extends
             mLocationPermissionsListener =
             new LocationPermissionsHelper.LocationPermissionsListener() {
                 @Override
-                public void onLocationPermissionsChanged(String packageName) {
+                public void onLocationPermissionsChanged(@Nullable String packageName) {
                     GeofenceManager.this.onLocationPermissionsChanged(packageName);
                 }
 
@@ -494,7 +494,7 @@ public class GeofenceManager extends
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    void onLocationPermissionsChanged(String packageName) {
+    void onLocationPermissionsChanged(@Nullable String packageName) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
     }
 

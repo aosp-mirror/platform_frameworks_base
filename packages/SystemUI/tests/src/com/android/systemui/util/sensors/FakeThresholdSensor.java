@@ -59,6 +59,16 @@ public class FakeThresholdSensor implements ThresholdSensor {
         mListeners.remove(listener);
     }
 
+    @Override
+    public String getName() {
+        return "FakeThresholdSensorName";
+    }
+
+    @Override
+    public String getType() {
+        return "FakeThresholdSensorType";
+    }
+
     public void setLoaded(boolean loaded) {
         mIsLoaded = loaded;
     }
