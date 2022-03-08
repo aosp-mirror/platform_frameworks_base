@@ -1757,6 +1757,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @NonNull
+    private static PackageManager getPackageManagerForUser(@NonNull Context context,
+            @UserIdInt int userId) {
+        return context.getUserId() == userId
+                ? context.getPackageManager()
+                : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */)
+                        .getPackageManager();
+    }
+
     @GuardedBy("ImfLock.class")
     private void switchUserOnHandlerLocked(@UserIdInt int newUserId,
             IInputMethodClient clientToBeReset) {
@@ -1801,9 +1810,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         updateFromSettingsLocked(true);
 
         if (initialUserSwitch) {
-            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                    mSettings.getEnabledInputMethodListLocked(), newUserId,
-                    mContext.getBasePackageName());
+            InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                    getPackageManagerForUser(mContext, newUserId),
+                    mSettings.getEnabledInputMethodListLocked());
         }
 
         if (DEBUG) Slog.d(TAG, "Switching user stage 3/3. newUserId=" + newUserId
@@ -1892,9 +1901,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
                 buildInputMethodListLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */);
                 updateFromSettingsLocked(true);
-                InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                        mSettings.getEnabledInputMethodListLocked(), currentUserId,
-                        mContext.getBasePackageName());
+                InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                        getPackageManagerForUser(mContext, currentUserId),
+                        mSettings.getEnabledInputMethodListLocked());
             }
         }
     }
@@ -6122,10 +6131,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         setInputMethodEnabledLocked(imi.getId(), true);
                     }
                     updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
-                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                            mSettings.getEnabledInputMethodListLocked(),
-                            mSettings.getCurrentUserId(),
-                            mContext.getBasePackageName());
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
+                            getPackageManagerForUser(mContext, mSettings.getCurrentUserId()),
+                            mSettings.getEnabledInputMethodListLocked());
                     nextIme = mSettings.getSelectedInputMethod();
                     nextEnabledImes = mSettings.getEnabledInputMethodListLocked();
                 } else {
