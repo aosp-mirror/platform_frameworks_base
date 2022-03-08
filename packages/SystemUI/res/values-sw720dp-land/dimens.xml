@@ -26,4 +26,6 @@
     <dimen name="notification_panel_margin_horizontal">24dp</dimen>
 
     <dimen name="split_shade_header_height">56dp</dimen>
+
+    <dimen name="qs_media_session_height_expanded">184dp</dimen>
 </resources>
