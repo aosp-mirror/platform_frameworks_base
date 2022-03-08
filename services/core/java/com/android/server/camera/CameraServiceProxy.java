@@ -239,6 +239,8 @@ public class CameraServiceProxy extends SystemService
         public long mResultErrorCount;
         public boolean mDeviceError;
         public List<CameraStreamStats> mStreamStats;
+        public String mUserTag;
+
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
         CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
@@ -257,7 +259,7 @@ public class CameraServiceProxy extends SystemService
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
-                List<CameraStreamStats>  streamStats) {
+                List<CameraStreamStats>  streamStats, String userTag) {
             if (mCompleted) {
                 return;
             }
@@ -268,6 +270,7 @@ public class CameraServiceProxy extends SystemService
             mResultErrorCount = resultErrorCount;
             mDeviceError = deviceError;
             mStreamStats = streamStats;
+            mUserTag = userTag;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -794,7 +797,8 @@ public class CameraServiceProxy extends SystemService
                         + ", requestCount " + e.mRequestCount
                         + ", resultErrorCount " + e.mResultErrorCount
                         + ", deviceError " + e.mDeviceError
-                        + ", streamCount is " + streamCount);
+                        + ", streamCount is " + streamCount
+                        + ", userTag is " + e.mUserTag);
             }
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
@@ -851,7 +855,8 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[1]),
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
-                    MessageNano.toByteArray(streamProtos[4]));
+                    MessageNano.toByteArray(streamProtos[4]),
+                    e.mUserTag);
         }
     }
 
@@ -1038,6 +1043,7 @@ public class CameraServiceProxy extends SystemService
         long resultErrorCount = cameraState.getResultErrorCount();
         boolean deviceError = cameraState.getDeviceErrorFlag();
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
+        String userTag = cameraState.getUserTag();
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1091,7 +1097,8 @@ public class CameraServiceProxy extends SystemService
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
-                                /*resultErrorCount*/0, /*deviceError*/false, streamStats);
+                                /*resultErrorCount*/0, /*deviceError*/false, streamStats,
+                                /*userTag*/"");
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1101,7 +1108,7 @@ public class CameraServiceProxy extends SystemService
                     if (doneEvent != null) {
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
-                                resultErrorCount, deviceError, streamStats);
+                                resultErrorCount, deviceError, streamStats, userTag);
                         mCameraUsageHistory.add(doneEvent);
 
                         // Check current active camera IDs to see if this package is still
