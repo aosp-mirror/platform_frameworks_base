@@ -272,8 +272,6 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
@@ -531,8 +529,6 @@ stubs_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            // TODO: remove when moved to the below package
-            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
