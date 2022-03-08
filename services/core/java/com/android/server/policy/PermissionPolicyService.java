@@ -56,6 +56,8 @@ import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -111,6 +113,7 @@ public final class PermissionPolicyService extends SystemService {
     private static final String SYSTEM_PKG = "android";
     private static final boolean DEBUG = false;
     private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
+    private static final long ACTIVITY_START_DELAY_MS = 200;
 
     private final Object mLock = new Object();
 
@@ -151,6 +154,7 @@ public final class PermissionPolicyService extends SystemService {
     private List<String> mAppOpPermissions;
 
     private Context mContext;
+    private Handler mHandler;
     private PackageManagerInternal mPackageManagerInternal;
     private NotificationManagerInternal mNotificationManager;
     private final KeyguardManager mKeyguardManager;
@@ -160,6 +164,7 @@ public final class PermissionPolicyService extends SystemService {
         super(context);
 
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mPackageManager = context.getPackageManager();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         LocalServices.addService(PermissionPolicyInternal.class, new Internal());
@@ -1183,7 +1188,8 @@ public final class PermissionPolicyService extends SystemService {
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
             try {
-                mContext.startActivityAsUser(grantPermission, options.toBundle(), user);
+                mHandler.postDelayed(() -> mContext.startActivityAsUser(
+                        grantPermission, options.toBundle(), user), ACTIVITY_START_DELAY_MS);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "couldn't start grant permission dialog"
                         + "for other package " + pkgName, e);
