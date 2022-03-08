@@ -221,11 +221,14 @@ class PackageManagerComponentLabelIconOverrideTest {
     @After
     fun verifyExpectedResult() {
         assertServiceInitialized() ?: return
-        if (params.componentName != null) {
-            val activityInfo = service.getActivityInfo(params.componentName, 0, userId)
-            if (activityInfo != null) {
-                assertThat(activityInfo.nonLocalizedLabel).isEqualTo(params.expectedLabel)
-                assertThat(activityInfo.icon).isEqualTo(params.expectedIcon)
+        if (params.componentName != null && params.result !is Result.Exception) {
+            // Suppress so that failures in @After don't override the actual test failure
+            @Suppress("UNNECESSARY_SAFE_CALL")
+            service?.let {
+                val activityInfo = it.snapshotComputer()
+                    .getActivityInfo(params.componentName, 0, userId)
+                assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(params.expectedLabel)
+                assertThat(activityInfo?.icon).isEqualTo(params.expectedIcon)
             }
         }
     }
@@ -237,9 +240,12 @@ class PackageManagerComponentLabelIconOverrideTest {
             Result.Changed, Result.ChangedWithoutNotify -> {
                 // Suppress so that failures in @After don't override the actual test failure
                 @Suppress("UNNECESSARY_SAFE_CALL")
-                val activityInfo = service?.getActivityInfo(params.componentName, 0, userIdDifferent)
-                assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
-                assertThat(activityInfo?.icon).isEqualTo(DEFAULT_ICON)
+                service?.let {
+                    val activityInfo = it.snapshotComputer()
+                        ?.getActivityInfo(params.componentName, 0, userIdDifferent)
+                    assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
+                    assertThat(activityInfo?.icon).isEqualTo(DEFAULT_ICON)
+                }
             }
             Result.NotChanged, is Result.Exception -> {}
         }.run { /*exhaust*/ }

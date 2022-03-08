@@ -2874,13 +2874,14 @@ final class InstallPackageHelper {
                 VMRuntime.getRuntime().requestConcurrentGC();
             }
 
+            final Computer snapshot = mPm.snapshotComputer();
             // Notify DexManager that the package was installed for new users.
             // The updated users should already be indexed and the package code paths
             // should not change.
             // Don't notify the manager for ephemeral apps as they are not expected to
             // survive long enough to benefit of background optimizations.
             for (int userId : firstUserIds) {
-                PackageInfo info = mPm.getPackageInfo(packageName, /*flags*/ 0, userId);
+                PackageInfo info = snapshot.getPackageInfo(packageName, /*flags*/ 0, userId);
                 // There's a race currently where some install events may interleave with an
                 // uninstall. This can lead to package info being null (b/36642664).
                 if (info != null) {

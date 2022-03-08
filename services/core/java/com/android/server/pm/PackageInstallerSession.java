@@ -816,25 +816,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         // It is safe to access mInstallerUid and mInstallSource without lock
         // because they are immutable after sealing.
+        final Computer snapshot = mPm.snapshotComputer();
         final boolean isInstallPermissionGranted =
-                (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
+                (snapshot.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
         final boolean isSelfUpdatePermissionGranted =
-                (mPm.checkUidPermission(android.Manifest.permission.INSTALL_SELF_UPDATES,
+                (snapshot.checkUidPermission(android.Manifest.permission.INSTALL_SELF_UPDATES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
         final boolean isUpdatePermissionGranted =
-                (mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGE_UPDATES,
+                (snapshot.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGE_UPDATES,
                         mInstallerUid) == PackageManager.PERMISSION_GRANTED);
-        final boolean isUpdateWithoutUserActionPermissionGranted = (mPm.checkUidPermission(
+        final boolean isUpdateWithoutUserActionPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
-        final boolean isInstallDpcPackagesPermissionGranted = (mPm.checkUidPermission(
+        final boolean isInstallDpcPackagesPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
-        final int targetPackageUid = mPm.getPackageUid(packageName, 0, userId);
+        final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
-                ? mPm.getInstallSourceInfo(packageName)
+                ? snapshot.getInstallSourceInfo(packageName)
                 : null;
         final String existingInstallerPackageName = existingInstallSourceInfo != null
                 ? existingInstallSourceInfo.getInstallingPackageName()
@@ -2008,12 +2009,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void transfer(String packageName) {
         Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
-        ApplicationInfo newOwnerAppInfo = mPm.getApplicationInfo(packageName, 0, userId);
+        final Computer snapshot = mPm.snapshotComputer();
+        ApplicationInfo newOwnerAppInfo = snapshot.getApplicationInfo(packageName, 0, userId);
         if (newOwnerAppInfo == null) {
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
-        if (PackageManager.PERMISSION_GRANTED != mPm.checkUidPermission(
+        if (PackageManager.PERMISSION_GRANTED != snapshot.checkUidPermission(
                 Manifest.permission.INSTALL_PACKAGES, newOwnerAppInfo.uid)) {
             throw new SecurityException("Destination package " + packageName + " does not have "
                     + "the " + Manifest.permission.INSTALL_PACKAGES + " permission");
@@ -2508,7 +2510,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Package didn't install; no valid uid
             packageUid = Process.INVALID_UID;
         } else {
-            packageUid = mPm.getPackageUid(packageName, 0, userId);
+            packageUid = mPm.snapshotComputer().getPackageUid(packageName, 0, userId);
         }
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
@@ -2666,7 +2668,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
 
-        final PackageInfo pkgInfo = mPm.getPackageInfo(
+        final PackageInfo pkgInfo = mPm.snapshotComputer().getPackageInfo(
                 params.appPackageName, PackageManager.GET_SIGNATURES
                         | PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES /*flags*/, userId);
 
@@ -3785,8 +3787,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             };
 
             try {
-                final PackageInfo pkgInfo = mPm.getPackageInfo(this.params.appPackageName, 0,
-                        userId);
+                final PackageInfo pkgInfo = mPm.snapshotComputer()
+                        .getPackageInfo(this.params.appPackageName, 0, userId);
                 final File inheritedDir =
                         (pkgInfo != null && pkgInfo.applicationInfo != null) ? new File(
                                 pkgInfo.applicationInfo.getCodePath()).getParentFile() : null;
@@ -4530,8 +4532,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
         final String installerAttributionTag = readStringAttribute(in,
                 ATTR_INSTALLER_ATTRIBUTION_TAG);
-        final int installerUid = in.getAttributeInt(null, ATTR_INSTALLER_UID, pm.getPackageUid(
-                installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
+        final int installerUid = in.getAttributeInt(null, ATTR_INSTALLER_UID, pm.snapshotComputer()
+                .getPackageUid(installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                        userId));
         final String installInitiatingPackageName =
                 readStringAttribute(in, ATTR_INITIATING_PACKAGE_NAME);
         final String installOriginatingPackageName =

@@ -45,6 +45,7 @@ import android.util.SparseArray;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
@@ -68,6 +69,7 @@ import java.util.function.Consumer;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
+
     @IntDef(prefix = "PACKAGE_", value = {
             PACKAGE_SYSTEM,
             PACKAGE_SETUP_WIZARD,
@@ -902,6 +904,11 @@ public abstract class PackageManagerInternal {
     public abstract void freeStorage(String volumeUuid, long bytes,
             @StorageManager.AllocateFlags int flags) throws IOException;
 
+    /**
+     * Blocking call to clear all cached app data above quota.
+     */
+    public abstract void freeAllAppCacheAboveQuota(@NonNull String volumeUuid) throws IOException;
+
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
     public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component,
             @PackageManager.ComponentInfoFlagsBits long flags, int userId);
@@ -1362,4 +1369,8 @@ public abstract class PackageManagerInternal {
      */
     @NonNull
     public abstract PackageDataSnapshot snapshot();
+
+    public abstract void shutdown();
+
+    public abstract DynamicCodeLogger getDynamicCodeLogger();
 }
