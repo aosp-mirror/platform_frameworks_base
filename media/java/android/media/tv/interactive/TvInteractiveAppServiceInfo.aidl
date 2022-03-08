@@ -16,4 +16,4 @@
 
 package android.media.tv.interactive;
 
-parcelable TvInteractiveAppInfo;
+parcelable TvInteractiveAppServiceInfo;

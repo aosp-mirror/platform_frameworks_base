@@ -16,7 +16,7 @@
 
 package android.media.tv.interactive;
 
-import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo;
 
 /**
  * Interface to receive callbacks from ITvInteractiveAppManager regardless of sessions.
@@ -26,6 +26,6 @@ interface ITvInteractiveAppManagerCallback {
     void onInteractiveAppServiceAdded(in String iAppServiceId);
     void onInteractiveAppServiceRemoved(in String iAppServiceId);
     void onInteractiveAppServiceUpdated(in String iAppServiceId);
-    void onTvInteractiveAppInfoUpdated(in TvInteractiveAppInfo tvIAppInfo);
+    void onTvInteractiveAppServiceInfoUpdated(in TvInteractiveAppServiceInfo tvIAppInfo);
     void onStateChanged(in String iAppServiceId, int type, int state, int err);
 }

@@ -17,7 +17,7 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
-import android.media.tv.interactive.TvInteractiveAppInfo;
+import android.media.tv.interactive.TvInteractiveAppServiceInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -50,7 +50,7 @@ public final class AitInfo implements Parcelable {
     /**
      * Constructs AIT info.
      */
-    public AitInfo(@TvInteractiveAppInfo.InteractiveAppType int type, int version) {
+    public AitInfo(@TvInteractiveAppServiceInfo.InteractiveAppType int type, int version) {
         mType = type;
         mVersion = version;
     }
@@ -58,7 +58,7 @@ public final class AitInfo implements Parcelable {
     /**
      * Gets interactive app type.
      */
-    @TvInteractiveAppInfo.InteractiveAppType
+    @TvInteractiveAppServiceInfo.InteractiveAppType
     public int getType() {
         return mType;
     }

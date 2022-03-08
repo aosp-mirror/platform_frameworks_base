@@ -45,9 +45,9 @@ import java.util.List;
 /**
  * This class is used to specify meta information of a TV interactive app.
  */
-public final class TvInteractiveAppInfo implements Parcelable {
+public final class TvInteractiveAppServiceInfo implements Parcelable {
     private static final boolean DEBUG = false;
-    private static final String TAG = "TvInteractiveAppInfo";
+    private static final String TAG = "TvInteractiveAppServiceInfo";
 
     private static final String XML_START_TAG_NAME = "tv-interactive-app";
 
@@ -71,7 +71,7 @@ public final class TvInteractiveAppInfo implements Parcelable {
     private final String mId;
     private int mTypes;
 
-    public TvInteractiveAppInfo(@NonNull Context context, @NonNull ComponentName component) {
+    public TvInteractiveAppServiceInfo(@NonNull Context context, @NonNull ComponentName component) {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null.");
         }
@@ -94,28 +94,28 @@ public final class TvInteractiveAppInfo implements Parcelable {
         mId = id;
         mTypes = toTypesFlag(types);
     }
-    private TvInteractiveAppInfo(ResolveInfo service, String id, int types) {
+    private TvInteractiveAppServiceInfo(ResolveInfo service, String id, int types) {
         mService = service;
         mId = id;
         mTypes = types;
     }
 
-    private TvInteractiveAppInfo(@NonNull Parcel in) {
+    private TvInteractiveAppServiceInfo(@NonNull Parcel in) {
         mService = ResolveInfo.CREATOR.createFromParcel(in);
         mId = in.readString();
         mTypes = in.readInt();
     }
 
-    public static final @NonNull Creator<TvInteractiveAppInfo> CREATOR =
-            new Creator<TvInteractiveAppInfo>() {
+    public static final @NonNull Creator<TvInteractiveAppServiceInfo> CREATOR =
+            new Creator<TvInteractiveAppServiceInfo>() {
                 @Override
-                public TvInteractiveAppInfo createFromParcel(Parcel in) {
-                    return new TvInteractiveAppInfo(in);
+                public TvInteractiveAppServiceInfo createFromParcel(Parcel in) {
+                    return new TvInteractiveAppServiceInfo(in);
                 }
 
                 @Override
-                public TvInteractiveAppInfo[] newArray(int size) {
-                    return new TvInteractiveAppInfo[size];
+                public TvInteractiveAppServiceInfo[] newArray(int size) {
+                    return new TvInteractiveAppServiceInfo[size];
                 }
             };
 

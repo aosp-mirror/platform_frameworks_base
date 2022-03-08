@@ -148,12 +148,14 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Sets the callback to be invoked when an event is dispatched to this TvInteractiveAppView.
      *
-     * @param callback The callback to receive events. A value of {@code null} removes the existing
-     *                 callback.
+     * @param callback the callback to receive events. MUST NOT be {@code null}.
+     *
+     * @see #clearCallback()
      */
     public void setCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull TvInteractiveAppCallback callback) {
+        com.android.internal.util.AnnotationValidations.validate(NonNull.class, null, callback);
         synchronized (mCallbackLock) {
             mCallbackExecutor = executor;
             mCallback = callback;
@@ -162,6 +164,8 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Clears the callback.
+     *
+     * @see #setCallback(Executor, TvInteractiveAppCallback)
      */
     public void clearCallback() {
         synchronized (mCallbackLock) {
@@ -389,13 +393,13 @@ public class TvInteractiveAppView extends ViewGroup {
      * Prepares the interactive application.
      *
      * @param iAppServiceId the interactive app service ID, which can be found in
-     *                      {@link TvInteractiveAppInfo#getId()}.
+     *                      {@link TvInteractiveAppServiceInfo#getId()}.
      *
      * @see android.media.tv.interactive.TvInteractiveAppManager#getTvInteractiveAppServiceList()
      */
     public void prepareInteractiveApp(
             @NonNull String iAppServiceId,
-            @TvInteractiveAppInfo.InteractiveAppType int type) {
+            @TvInteractiveAppServiceInfo.InteractiveAppType int type) {
         // TODO: document and handle the cases that this method is called multiple times.
         if (DEBUG) {
             Log.d(TAG, "prepareInteractiveApp");
