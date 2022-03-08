@@ -67,6 +67,7 @@
         <permission name="android.car.permission.CAR_INSTRUMENT_CLUSTER_CONTROL"/>
         <permission name="android.car.permission.CAR_MILEAGE"/>
         <permission name="android.car.permission.CAR_MOCK_VEHICLE_HAL"/>
+        <permission name="android.car.permission.CAR_MONITOR_CLUSTER_NAVIGATION_STATE"/>
         <permission name="android.car.permission.CAR_NAVIGATION_MANAGER"/>
         <permission name="android.car.permission.CAR_POWER"/>
         <permission name="android.car.permission.CAR_PROJECTION"/>
@@ -74,6 +75,8 @@
         <permission name="android.car.permission.CAR_TEST_SERVICE"/>
         <permission name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION"/>
         <permission name="android.car.permission.CAR_VENDOR_EXTENSION"/>
+        <!-- use for AndroidCarApiTest -->
+        <permission name="android.car.permission.CONTROL_CAR_APP_LAUNCH"/>
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
         <permission name="android.car.permission.CONTROL_CAR_DOORS"/>
         <permission name="android.car.permission.CONTROL_CAR_EXTERIOR_LIGHTS"/>
@@ -92,5 +95,6 @@
         <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
         <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
         <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
+        <permission name="android.car.permission.USE_CAR_TELEMETRY_SERVICE" />
     </privapp-permissions>
 </permissions>

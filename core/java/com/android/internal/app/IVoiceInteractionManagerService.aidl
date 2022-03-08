@@ -272,4 +272,14 @@ interface IVoiceInteractionManagerService {
     void triggerHardwareRecognitionEventForTest(
             in SoundTrigger.KeyphraseRecognitionEvent event,
             in IHotwordRecognitionStatusCallback callback);
+
+    /**
+     * Starts to listen the status of visible activity.
+     */
+    void startListeningVisibleActivityChanged(in IBinder token);
+
+    /**
+     * Stops to listen the status of visible activity.
+     */
+    void stopListeningVisibleActivityChanged(in IBinder token);
 }

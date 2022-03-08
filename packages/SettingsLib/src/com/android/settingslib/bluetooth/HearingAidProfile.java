@@ -16,7 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
-import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
@@ -29,6 +30,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.settingslib.R;
+import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,9 +164,12 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         if (mBluetoothAdapter == null) {
             return false;
         }
+        int profiles = Utils.isAudioModeOngoingCall(mContext)
+                ? ACTIVE_DEVICE_PHONE_CALL
+                : ACTIVE_DEVICE_AUDIO;
         return device == null
-                ? mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_ALL)
-                : mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_ALL);
+                ? mBluetoothAdapter.removeActiveDevice(profiles)
+                : mBluetoothAdapter.setActiveDevice(device, profiles);
     }
 
     public List<BluetoothDevice> getActiveDevices() {

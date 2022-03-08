@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -47,6 +48,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -165,6 +167,7 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky, b/189031816")
     public void testModeUpdated_onSoftError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onAuthenticationFailed(TYPE_FACE, "no face");
@@ -181,6 +184,7 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky, b/189031816")
     public void testModeUpdated_onHardError_whenSwitchToFingerprint() {
         mFaceToFpView.onDialogAnimatedIn();
         mFaceToFpView.onError(TYPE_FACE, "oh no!");
@@ -254,9 +258,10 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */,
-                540 /* sensorLocationX */,
-                1600 /* sensorLocationY */,
-                100 /* sensorRadius */);
+                List.of(new SensorLocationInternal("" /* displayId */,
+                        540 /* sensorLocationX */,
+                        1600 /* sensorLocationY */,
+                        100 /* sensorRadius */)));
     }
 
     public class TestableView extends AuthBiometricFaceToFingerprintView {

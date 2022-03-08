@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
@@ -83,7 +84,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 initResources();
             }
         });
@@ -172,8 +173,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         Resources resources = mContext.getResources();
         mDisplayCutoutTouchableRegionSize = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.display_cutout_touchable_region_size);
-        mStatusBarHeight =
-                resources.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
     }
 
     /**

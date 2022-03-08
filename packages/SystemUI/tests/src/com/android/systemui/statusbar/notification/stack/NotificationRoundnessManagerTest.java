@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -61,6 +62,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private ExpandableNotificationRow mSecond;
     @Mock
     private KeyguardBypassController mBypassController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     private float mSmallRadiusRatio;
 
     @Before
@@ -71,7 +74,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 / resources.getDimension(R.dimen.notification_corner_radius);
         mRoundnessManager = new NotificationRoundnessManager(
                 mBypassController,
-                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
+                new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext),
+                mFeatureFlags);
         allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(
                 mContext,

@@ -44,6 +44,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.util.Utils;
@@ -80,8 +81,11 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
     @Inject
-    public ZenModeControllerImpl(Context context, @Main Handler handler,
-            BroadcastDispatcher broadcastDispatcher) {
+    public ZenModeControllerImpl(
+            Context context,
+            @Main Handler handler,
+            BroadcastDispatcher broadcastDispatcher,
+            DumpManager dumpManager) {
         super(broadcastDispatcher);
         mContext = context;
         mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
@@ -108,6 +112,8 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         mSetupObserver.register();
         mUserManager = context.getSystemService(UserManager.class);
         startTracking();
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     @Override

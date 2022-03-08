@@ -44,6 +44,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,12 +60,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -126,8 +129,15 @@ public class TaskTests extends WindowTestsBase {
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
-        task.removeIfPossible();
-        // Assert that the container was removed.
+        task.remove(false /* withTransition */, "testRemoveContainer");
+        // There is still an activity to be destroyed, so the task is not removed immediately.
+        assertNotNull(task.getParent());
+        assertTrue(rootTask.hasChild());
+        assertTrue(task.hasChild());
+        assertTrue(activity.finishing);
+
+        activity.destroyed("testRemoveContainer");
+        // Assert that the container was removed after the activity is destroyed.
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
         assertNull(activity.getParent());
@@ -420,7 +430,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -750,7 +760,7 @@ public class TaskTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -895,10 +905,10 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testFindRootIndex_effectiveRoot_finishingAndRelinquishing() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Add extra two activities. Mark the one on the bottom with "relinquishTaskIdentity" and
         // one above as finishing.
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.finishing = true;
@@ -930,9 +940,9 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Set relinquishTaskIdentity for all activities in the task
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
@@ -1082,9 +1092,9 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Make the current root activity relinquish task identity
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1180,6 +1190,46 @@ public class TaskTests extends WindowTestsBase {
         verify(task).setIntent(eq(activity0));
     }
 
+    /**
+     * Test {@link Task#updateEffectiveIntent()} when activity with relinquishTaskIdentity but
+     * another with different uid. This should make the task use the root activity when updating the
+     * intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingWithDifferentUid() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+
+        // Add an extra activity on top
+        new ActivityBuilder(mAtm).setUid(11).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} with activities set as relinquishTaskIdentity.
+     * This should make the task use the topmost activity when updating the intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingMultipleActivities() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+        // Add an extra activity on top
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        // Add an extra activity on top
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity2));
+    }
+
     @Test
     public void testSaveLaunchingStateWhenConfigurationChanged() {
         LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
@@ -1257,7 +1307,8 @@ public class TaskTests extends WindowTestsBase {
         LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
-        final Task task = getTestTask();
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setCreateParentTask(true).build().getRootTask();
         task.setHasBeenVisible(false);
         task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
         task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -1356,6 +1407,48 @@ public class TaskTests extends WindowTestsBase {
         assertNotNull(activity.getTask().getDimmer());
     }
 
+    @Test
+    public void testMoveToFront_moveAdjacentTask() {
+        final Task task1 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final Task task2 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        spyOn(task2);
+
+        task1.setAdjacentTaskFragment(task2, false /* moveTogether */);
+        task1.moveToFront("" /* reason */);
+        verify(task2, never()).moveToFrontInner(anyString(), isNull());
+
+        // Reset adjacent tasks to move together.
+        task1.setAdjacentTaskFragment(null, false /* moveTogether */);
+        task1.setAdjacentTaskFragment(task2, true /* moveTogether */);
+        task1.moveToFront("" /* reason */);
+        verify(task2).moveToFrontInner(anyString(), isNull());
+    }
+
+    @Test
+    public void testResumeTask_doNotResumeTaskFragmentBehindTranslucent() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tfBehind = createTaskFragmentWithParentTask(
+                task, false /* createEmbeddedTask */);
+        final TaskFragment tfFront = createTaskFragmentWithParentTask(
+                task, false /* createEmbeddedTask */);
+        spyOn(tfFront);
+        doReturn(true).when(tfFront).isTranslucent(any());
+
+        // TaskFragment behind another translucent TaskFragment should not be resumed.
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+                tfBehind.getVisibility(null /* starting */));
+        assertTrue(tfBehind.isFocusable());
+        assertFalse(tfBehind.canBeResumed(null /* starting */));
+
+        spyOn(tfBehind);
+        task.resumeTopActivityUncheckedLocked(null /* prev */, ActivityOptions.makeBasic(),
+                false /* deferPause */);
+
+        verify(tfBehind, never()).resumeTopActivity(any(), any(), anyBoolean());
+    }
+
     private Task getTestTask() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         return task.getBottomMostTask();
@@ -1367,7 +1460,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
 
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);

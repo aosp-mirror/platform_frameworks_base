@@ -52,7 +52,8 @@ interface IFingerprintService {
     // permission. This is effectively deprecated, since it only comes through FingerprintManager
     // now. A requestId is returned that can be used to cancel this operation.
     long authenticate(IBinder token, long operationId, int sensorId, int userId,
-            IFingerprintServiceReceiver receiver, String opPackageName);
+            IFingerprintServiceReceiver receiver, String opPackageName,
+            boolean shouldIgnoreEnrollmentState);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
     // about accept/reject/lockout. A requestId is returned that can be used to cancel this

@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
+import android.view.SurfaceControl;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -165,10 +166,8 @@ public abstract class ClientTransactionHandler {
 
     /** Attach a splash screen window view to the top of the activity */
     public abstract void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
-            @NonNull SplashScreenViewParcelable parcelable);
-
-    /** Hand over the splash screen window view to the activity */
-    public abstract void handOverSplashScreenView(@NonNull ActivityClientRecord r);
+            @NonNull SplashScreenViewParcelable parcelable,
+            @NonNull SurfaceControl startingWindowLeash);
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(@NonNull ActivityClientRecord r,

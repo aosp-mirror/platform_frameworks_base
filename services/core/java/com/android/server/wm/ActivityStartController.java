@@ -27,6 +27,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -38,6 +39,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -486,6 +488,32 @@ public class ActivityStartController {
         }
 
         return START_SUCCESS;
+    }
+
+    /**
+     * Starts an activity in the TaskFragment.
+     * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
+     * @param activityIntent intent to start the activity.
+     * @param activityOptions ActivityOptions to start the activity with.
+     * @param resultTo the caller activity
+     * @param callingUid the caller uid
+     * @param callingPid the caller pid
+     * @return the start result.
+     */
+    int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
+            @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
+            @Nullable IBinder resultTo, int callingUid, int callingPid) {
+        final ActivityRecord caller =
+                resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
+        return obtainStarter(activityIntent, "startActivityInTaskFragment")
+                .setActivityOptions(activityOptions)
+                .setInTaskFragment(taskFragment)
+                .setResultTo(resultTo)
+                .setRequestCode(-1)
+                .setCallingUid(callingUid)
+                .setCallingPid(callingPid)
+                .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
+                .execute();
     }
 
     void registerRemoteAnimationForNextActivityStart(String packageName,

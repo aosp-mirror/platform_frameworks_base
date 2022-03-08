@@ -155,6 +155,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                                                    event->getYPrecision(),
                                                    event->getRawXCursorPosition(),
                                                    event->getRawYCursorPosition(),
+                                                   event->getDisplayOrientation(),
                                                    event->getDisplaySize().x,
                                                    event->getDisplaySize().y, event->getDownTime(),
                                                    event->getHistoricalEventTime(i),

@@ -180,6 +180,7 @@
     <assign-permission name="android.permission.WATCH_APPOPS" uid="cameraserver" />
     <assign-permission name="android.permission.MANAGE_APP_OPS_MODES" uid="cameraserver" />
     <assign-permission name="android.permission.OBSERVE_SENSOR_PRIVACY" uid="cameraserver" />
+    <assign-permission name="android.permission.REAL_GET_TASKS" uid="cameraserver" />
 
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
 

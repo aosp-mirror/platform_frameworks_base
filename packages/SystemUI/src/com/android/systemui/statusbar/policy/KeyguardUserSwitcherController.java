@@ -245,6 +245,10 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         return mUserSwitcherController.isSimpleUserSwitcher();
     }
 
+    public int getHeight() {
+        return mListView.getHeight();
+    }
+
     /**
      * @param animate if the transition should be animated
      * @return true if the switcher state changed

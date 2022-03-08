@@ -41,6 +41,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -95,6 +96,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
+    @Mock private lateinit var falsingManager: FalsingManager
     private lateinit var appIcon: ImageView
     private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
@@ -120,7 +122,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
-    private val disabledDevice = MediaDeviceData(false, null, null)
+    private val disabledDevice = MediaDeviceData(false, null, "Disabled Device")
+    private val clock = FakeSystemClock()
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -131,8 +134,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
-                seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
-                mediaOutputDialogFactory, mediaCarouselController)
+            seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
+            mediaOutputDialogFactory, mediaCarouselController, falsingManager, clock)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.

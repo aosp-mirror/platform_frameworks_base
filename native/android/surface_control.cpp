@@ -298,7 +298,7 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
-        for (const auto& [surfaceControl, latchTime, acquireTime, presentFence, previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
+        for (const auto& [surfaceControl, latchTime, acquireTime, presentFence, previousReleaseFence, transformHint, frameEvents, ignore] : surfaceControlStats) {
             ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
             aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
             aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
@@ -650,7 +650,7 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
                 for (const auto&
                              [surfaceControl, latchTime, acquireTime, presentFence,
                               previousReleaseFence, transformHint,
-                              frameEvents] : surfaceControlStats) {
+                              frameEvents, ignore] : surfaceControlStats) {
                     ASurfaceControl* aSurfaceControl =
                             reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
                     aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;

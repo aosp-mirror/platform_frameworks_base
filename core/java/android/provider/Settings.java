@@ -28,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
@@ -390,6 +391,21 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REDUCE_BRIGHT_COLORS_SETTINGS =
             "android.settings.REDUCE_BRIGHT_COLORS_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of Color inversion.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COLOR_INVERSION_SETTINGS =
+            "android.settings.COLOR_INVERSION_SETTINGS";
 
     /**
      * Activity Action: Show settings to control access to usage information.
@@ -949,6 +965,22 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_LOCKSCREEN_SETTINGS = "android.settings.LOCK_SCREEN_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow pairing bluetooth devices.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BLUETOOTH_PAIRING_SETTINGS =
+            "android.settings.BLUETOOTH_PAIRING_SETTINGS";
 
     /**
      * Activity Action: Show settings to configure input methods, in particular
@@ -6345,6 +6377,27 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
+         * This is used by Bluetooth Manager to store adapter name
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_NAME = "bluetooth_name";
+
+        /**
+         * This is used by Bluetooth Manager to store adapter address
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
+
+        /**
+         * This is used by Bluetooth Manager to store whether adapter address is valid
+         * @hide
+         */
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
+
+        /**
          * Setting to indicate that on device captions are enabled.
          *
          * @hide
@@ -8992,6 +9045,15 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
+         * Indicates whether the spatial audio feature was enabled for this user.
+         *
+         * Type : int (0 disabled, 1 enabled)
+         *
+         * @hide
+         */
+        public static final String SPATIAL_AUDIO_ENABLED = "spatial_audio_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -9607,6 +9669,14 @@ public final class Settings {
         public static final String LOCKSCREEN_SHOW_WALLET = "lockscreen_show_wallet";
 
         /**
+         * Whether to use the lockscreen double-line clock
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_USE_DOUBLE_LINE_CLOCK =
+                "lockscreen_use_double_line_clock";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
@@ -9992,15 +10062,18 @@ public final class Settings {
 
         /**
          * Controls the accessibility button mode. System will force-set the value to {@link
-         * #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU} if {@link #NAVIGATION_MODE} is fully
-         * gestural.
+         * #ACCESSIBILITY_BUTTON_MODE_GESTURE} if {@link #NAVIGATION_MODE} is button; force-set the
+         * value to {@link ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} if {@link #NAVIGATION_MODE} is
+         * gestural; otherwise, remain the option.
          * <ul>
          *    <li> 0 = button in navigation bar </li>
          *    <li> 1 = button floating on the display </li>
+         *    <li> 2 = button using gesture to trigger </li>
          * </ul>
          *
          * @see #ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
          * @see #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
+         * @see #ACCESSIBILITY_BUTTON_MODE_GESTURE
          * @hide
          */
         public static final String ACCESSIBILITY_BUTTON_MODE =
@@ -10021,6 +10094,14 @@ public final class Settings {
          * @hide
          */
         public static final int ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU = 0x1;
+
+        /**
+         * Accessibility button mode value that specifying the accessibility service or feature to
+         * be toggled via the gesture.
+         *
+         * @hide
+         */
+        public static final int ACCESSIBILITY_BUTTON_MODE_GESTURE = 0x2;
 
         /**
          * The size of the accessibility floating menu.
@@ -10135,6 +10216,61 @@ public final class Settings {
          */
         @Readable
         public static final String GAME_DASHBOARD_ALWAYS_ON = "game_dashboard_always_on";
+
+
+        /**
+         * For this device state, no specific auto-rotation lock setting should be applied.
+         * If the user toggles the auto-rotate lock in this state, the setting will apply to the
+         * previously valid device state.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_IGNORED = 0;
+        /**
+         * For this device state, the setting for auto-rotation is locked.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_LOCKED = 1;
+        /**
+         * For this device state, the setting for auto-rotation is unlocked.
+         * @hide
+         */
+        public static final int DEVICE_STATE_ROTATION_LOCK_UNLOCKED = 2;
+
+        /**
+         * The different settings that can be used as values with
+         * {@link #DEVICE_STATE_ROTATION_LOCK}.
+         * @hide
+         */
+        @IntDef(prefix = {"DEVICE_STATE_ROTATION_LOCK_"}, value = {
+                DEVICE_STATE_ROTATION_LOCK_IGNORED,
+                DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface DeviceStateRotationLockSetting {
+        }
+
+        /**
+         * Rotation lock setting keyed on device state.
+         *
+         * This holds a serialized map using int keys that represent Device States and value of
+         * {@link DeviceStateRotationLockSetting} representing the rotation lock setting for that
+         * device state.
+         *
+         * Serialized as key0:value0:key1:value1:...:keyN:valueN.
+         *
+         * Example: "0:1:1:2:2:1"
+         * This example represents a map of:
+         * <ul>
+         *     <li>0 -> DEVICE_STATE_ROTATION_LOCK_LOCKED</li>
+         *     <li>1 -> DEVICE_STATE_ROTATION_LOCK_UNLOCKED</li>
+         *     <li>2 -> DEVICE_STATE_ROTATION_LOCK_IGNORED</li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String DEVICE_STATE_ROTATION_LOCK =
+                "device_state_rotation_lock";
 
         /**
          * These entries are considered common between the personal and the managed profile,
@@ -16910,6 +17046,44 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION =
             "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
+
+    /**
+     * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
+     * in Settings app on large screen devices.
+     * <p>
+     *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI} must be included to
+     * specify the intent for the activity which will be embedded in Settings app.
+     * It's an intent URI string from {@code intent.toUri(Intent.URI_INTENT_SCHEME)}.
+     *
+     *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY} must be included to
+     * specify a key that indicates the menu item which will be highlighted on settings home menu.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY =
+            "android.settings.SETTINGS_EMBED_DEEP_LINK_ACTIVITY";
+
+    /**
+     * Activity Extra: Specify the intent for the {@link Activity} which will be embedded in
+     * Settings app. It's an intent URI string from
+     * {@code intent.toUri(Intent.URI_INTENT_SCHEME)}.
+     * <p>
+     * This must be passed as an extra field to
+     * {@link #ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY}.
+     */
+    public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI =
+            "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI";
+
+    /**
+     * Activity Extra: Specify a key that indicates the menu item which should be highlighted on
+     * settings home menu.
+     * <p>
+     * This must be passed as an extra field to
+     * {@link #ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY}.
+     */
+    public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY =
+            "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY";
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to

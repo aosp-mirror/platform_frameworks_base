@@ -32,6 +32,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
@@ -477,7 +478,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord splitSecondActivity =
                 new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
-                .setParentTask(splitOrg.mPrimary)
+                .setParentTaskFragment(splitOrg.mPrimary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
@@ -755,12 +756,12 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     /**
-     * This test ensures that {@link ActivityStarter#setTargetStackAndMoveToFrontIfNeeded} will
-     * move the existing task to front if the current focused stack doesn't have running task.
+     * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will
+     * move the existing task to front if the current focused root task doesn't have running task.
      */
     @Test
-    public void testBringTaskToFrontWhenFocusedStackIsFinising() {
-        // Put 2 tasks in the same stack (simulate the behavior of home stack).
+    public void testBringTaskToFrontWhenFocusedTaskIsFinishing() {
+        // Put 2 tasks in the same root task (simulate the behavior of home root task).
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setParentTask(rootTask)
@@ -777,13 +778,16 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertEquals(finishingTopActivity, mRootWindowContainer.topRunningActivity());
         finishingTopActivity.finishing = true;
 
-        // Launch the bottom task of the target stack.
+        // Launch the bottom task of the target root task.
         prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetLaunchStack */)
-                .setReason("testBringTaskToFrontWhenTopStackIsFinising")
-                .setIntent(activity.intent)
+                .setReason("testBringTaskToFrontWhenFocusedTaskIsFinishing")
+                .setIntent(activity.intent.addFlags(
+                        FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                 .execute();
+        verify(activity.getRootTask()).startActivityLocked(any(), any(), anyBoolean(),
+                eq(true) /* isTaskSwitch */, any(), any());
         // The hierarchies of the activity should move to front.
-        assertEquals(activity, mRootWindowContainer.topRunningActivity());
+        assertEquals(activity.getTask(), mRootWindowContainer.topRunningActivity().getTask());
     }
 
     /**
@@ -852,7 +856,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setParentTaskFragment(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
         doReturn(mActivityMetricsLogger).when(mSupervisor).getActivityMetricsLogger();
@@ -916,7 +920,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
         final Task task = new TaskBuilder(mSupervisor)
                 .setComponent(componentName)
-                .setParentTask(stack)
+                .setParentTaskFragment(stack)
                 .build();
         return new ActivityBuilder(mAtm)
                 .setComponent(componentName)
@@ -1052,8 +1056,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTask(mAtm.mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
+                .setParentTaskFragment(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+                        ACTIVITY_TYPE_STANDARD))
                 .setUserId(10)
                 .build();
 
@@ -1136,6 +1140,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 /* doResume */true,
                 /* options */null,
                 /* inTask */null,
+                /* inTaskFragment */ null,
                 /* restrictedBgActivity */false,
                 /* intentGrants */null);
 
@@ -1143,6 +1148,31 @@ public class ActivityStarterTests extends WindowTestsBase {
         verify(stack).ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         verify(targetRecord).makeVisibleIfNeeded(null, true);
         assertTrue(targetRecord.mVisibleRequested);
+    }
+
+    @Test
+    public void testStartActivityInner_inTaskFragment() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        starter.startActivityInner(
+                /* r */targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ taskFragment,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertTrue(taskFragment.hasChild());
     }
 
     @Test

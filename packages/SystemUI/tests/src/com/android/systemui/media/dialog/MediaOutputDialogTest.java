@@ -36,9 +36,11 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,6 +67,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
+    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final SystemUIDialogManager mDialogManager = mock(SystemUIDialogManager.class);
 
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
@@ -74,10 +78,11 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger);
+                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = new MediaOutputDialog(mContext, false,
-                mMediaOutputController, mUiEventLogger);
+                mMediaOutputController, mUiEventLogger, mDialogManager);
+        mMediaOutputDialog.show();
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
         when(mMediaDevice.getFeatures()).thenReturn(mFeatures);
@@ -122,7 +127,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     // and verify if the calling times increases.
     public void onCreate_ShouldLogVisibility() {
         MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false,
-                mMediaOutputController, mUiEventLogger);
+                mMediaOutputController, mUiEventLogger, mDialogManager);
+        testDialog.show();
 
         testDialog.dismissDialog();
 

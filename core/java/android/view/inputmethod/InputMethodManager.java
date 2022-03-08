@@ -2154,6 +2154,7 @@ public final class InputMethodManager {
      * @hide
      */
     public boolean requestImeShow(IBinder windowToken) {
+        checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {

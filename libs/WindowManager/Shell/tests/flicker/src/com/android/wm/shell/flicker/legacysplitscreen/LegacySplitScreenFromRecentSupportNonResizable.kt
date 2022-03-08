@@ -23,14 +23,12 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -71,11 +69,11 @@ class LegacySplitScreenFromRecentSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME, LETTERBOX_NAME, TOAST_NAME,
-                splitScreenApp.defaultWindowName, nonResizeableApp.defaultWindowName,
-                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<FlickerComponentName>
+        get() = listOf(DOCKED_STACK_DIVIDER_COMPONENT, LAUNCHER_COMPONENT, LETTERBOX_COMPONENT,
+            TOAST_COMPONENT, splitScreenApp.component, nonResizeableApp.component,
+            FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Before
     override fun setup() {
@@ -91,26 +89,59 @@ class LegacySplitScreenFromRecentSupportNonResizable(
 
     @Presubmit
     @Test
-    fun nonResizableAppLayerBecomesVisible() =
-            testSpec.layerBecomesVisible(nonResizeableApp.defaultWindowName)
+    fun nonResizableAppLayerBecomesVisible() {
+        testSpec.assertLayers {
+            this.isInvisible(nonResizeableApp.component)
+                    .then()
+                    .isVisible(nonResizeableApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun nonResizableAppWindowBecomesVisible() =
-        testSpec.appWindowBecomesVisible(nonResizeableApp.defaultWindowName)
+    fun nonResizableAppWindowBecomesVisible() {
+        testSpec.assertWm {
+            // when the app is launched, first the activity becomes visible, then the
+            // SnapshotStartingWindow appears and then the app window becomes visible.
+            // Because we log WM once per frame, sometimes the activity and the window
+            // become visible in the same entry, sometimes not, thus it is not possible to
+            // assert the visibility of the activity here
+            this.isAppWindowInvisible(nonResizeableApp.component)
+                    .then()
+                    // during re-parenting, the window may disappear and reappear from the
+                    // trace, this occurs because we log only 1x per frame
+                    .notContains(nonResizeableApp.component, isOptional = true)
+                    .then()
+                    // if the window reappears after re-parenting it will most likely not
+                    // be visible in the first log entry (because we log only 1x per frame)
+                    .isAppWindowInvisible(nonResizeableApp.component, isOptional = true)
+                    .then()
+                    .isAppWindowVisible(nonResizeableApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisible()
+    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
 
     @Presubmit
     @Test
     fun bothAppsWindowsAreVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.defaultWindowName)
-            isVisible(nonResizeableApp.defaultWindowName)
+            isAppWindowVisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

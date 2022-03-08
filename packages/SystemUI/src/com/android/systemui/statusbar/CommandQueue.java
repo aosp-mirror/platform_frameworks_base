@@ -51,6 +51,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -78,7 +79,8 @@ import java.util.ArrayList;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks>,
+public class CommandQueue extends IStatusBar.Stub implements
+        CallbackController<Callbacks>,
         DisplayManager.DisplayListener {
     private static final String TAG = CommandQueue.class.getSimpleName();
 
@@ -337,12 +339,21 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          */
         default void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, boolean isFullscreen) { }
+                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                String packageName) { }
 
         /**
-         * @see IStatusBar#showTransient(int, int[]).
+         * @see IStatusBar#showTransient(int, int[], boolean).
          */
         default void showTransient(int displayId, @InternalInsetsType int[] types) { }
+
+        /**
+         * @see IStatusBar#showTransient(int, int[], boolean).
+         */
+        default void showTransient(int displayId, @InternalInsetsType int[] types,
+                boolean isGestureOnSystemBar) {
+            showTransient(displayId, types);
+        }
 
         /**
          * @see IStatusBar#abortTransient(int, int[]).
@@ -510,9 +521,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
      * @param animate {@code true} to show animations.
      */
     public void recomputeDisableFlags(int displayId, boolean animate) {
-        int disabled1 = getDisabled1(displayId);
-        int disabled2 = getDisabled2(displayId);
-        disable(displayId, disabled1, disabled2, animate);
+        // This must update holding the lock otherwise it can clobber the disabled flags set on the
+        // binder thread from the disable() call
+        synchronized (mLock) {
+            int disabled1 = getDisabled1(displayId);
+            int disabled2 = getDisabled2(displayId);
+            disable(displayId, disabled1, disabled2, animate);
+        }
     }
 
     private void setDisabled(int displayId, int disabled1, int disabled2) {
@@ -997,7 +1012,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, boolean isFullscreen) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = displayId;
@@ -1005,15 +1020,17 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             args.argi3 = navbarColorManagedByIme ? 1 : 0;
             args.arg1 = appearanceRegions;
             args.argi4 = behavior;
-            args.argi5 = isFullscreen ? 1 : 0;
+            args.arg2 = requestedVisibilities;
+            args.arg3 = packageName;
             mHandler.obtainMessage(MSG_SYSTEM_BAR_CHANGED, args).sendToTarget();
         }
     }
 
     @Override
-    public void showTransient(int displayId, int[] types) {
+    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, 0, types).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, isGestureOnSystemBar ? 1 : 0,
+                    types).sendToTarget();
         }
     }
 
@@ -1389,15 +1406,16 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onSystemBarAttributesChanged(args.argi1, args.argi2,
                                 (AppearanceRegion[]) args.arg1, args.argi3 == 1, args.argi4,
-                                args.argi5 == 1);
+                                (InsetsVisibilities) args.arg2, (String) args.arg3);
                     }
                     args.recycle();
                     break;
                 case MSG_SHOW_TRANSIENT: {
                     final int displayId = msg.arg1;
                     final int[] types = (int[]) msg.obj;
+                    final boolean isGestureOnSystemBar = msg.arg2 != 0;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showTransient(displayId, types);
+                        mCallbacks.get(i).showTransient(displayId, types, isGestureOnSystemBar);
                     }
                     break;
                 }

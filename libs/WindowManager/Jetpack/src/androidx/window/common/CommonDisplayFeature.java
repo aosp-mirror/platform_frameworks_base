@@ -30,18 +30,21 @@ import java.util.regex.Pattern;
 /** Wrapper for both Extension and Sidecar versions of DisplayFeature. */
 final class CommonDisplayFeature implements DisplayFeature {
     private static final Pattern FEATURE_PATTERN =
-            Pattern.compile("([a-z]+)-\\[(\\d+),(\\d+),(\\d+),(\\d+)]");
+            Pattern.compile("([a-z]+)-\\[(\\d+),(\\d+),(\\d+),(\\d+)]-?(flat|half-opened)?");
 
     private static final String FEATURE_TYPE_FOLD = "fold";
     private static final String FEATURE_TYPE_HINGE = "hinge";
 
+    private static final String PATTERN_STATE_FLAT = "flat";
+    private static final String PATTERN_STATE_HALF_OPENED = "half-opened";
+
     // TODO(b/183049815): Support feature strings that include the state of the feature.
+
     /**
      * Parses a display feature from a string.
      *
      * @throws IllegalArgumentException if the provided string is improperly formatted or could not
-     * otherwise be parsed.
-     *
+     *                                  otherwise be parsed.
      * @see #FEATURE_PATTERN
      */
     @NonNull
@@ -52,6 +55,7 @@ final class CommonDisplayFeature implements DisplayFeature {
         }
         try {
             String featureType = featureMatcher.group(1);
+            featureType = featureType == null ? "" : featureType;
             int type;
             switch (featureType) {
                 case FEATURE_TYPE_FOLD:
@@ -73,8 +77,21 @@ final class CommonDisplayFeature implements DisplayFeature {
             if (isZero(featureRect)) {
                 throw new IllegalArgumentException("Feature has empty bounds: " + string);
             }
-
-            return new CommonDisplayFeature(type, null, featureRect);
+            String stateString = featureMatcher.group(6);
+            stateString = stateString == null ? "" : stateString;
+            Integer state;
+            switch (stateString) {
+                case PATTERN_STATE_FLAT:
+                    state = COMMON_STATE_FLAT;
+                    break;
+                case PATTERN_STATE_HALF_OPENED:
+                    state = COMMON_STATE_HALF_OPENED;
+                    break;
+                default:
+                    state = null;
+                    break;
+            }
+            return new CommonDisplayFeature(type, state, featureRect);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Malformed feature description: " + string, e);
         }
@@ -87,6 +104,7 @@ final class CommonDisplayFeature implements DisplayFeature {
     private final Rect mRect;
 
     CommonDisplayFeature(int type, @Nullable Integer state, @NonNull Rect rect) {
+        assertValidState(state);
         this.mType = type;
         this.mState = state;
         if (rect.width() == 0 && rect.height() == 0) {
@@ -124,5 +142,12 @@ final class CommonDisplayFeature implements DisplayFeature {
     @Override
     public int hashCode() {
         return Objects.hash(mType, mState, mRect);
+    }
+
+    private static void assertValidState(@Nullable Integer state) {
+        if (state != null && state != COMMON_STATE_FLAT && state != COMMON_STATE_HALF_OPENED) {
+            throw new IllegalArgumentException("Invalid state: " + state
+                    + "must be either COMMON_STATE_FLAT or COMMON_STATE_HALF_OPENED");
+        }
     }
 }

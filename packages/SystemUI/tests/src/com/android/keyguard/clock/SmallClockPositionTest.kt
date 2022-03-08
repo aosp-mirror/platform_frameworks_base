@@ -43,7 +43,7 @@ class SmallClockPositionTest : SysuiTestCase() {
     @Test
     fun loadResources() {
         // Cover constructor taking Resources object.
-        position = SmallClockPosition(context.resources)
+        position = SmallClockPosition(context)
         position.setDarkAmount(1f)
         assertThat(position.preferredY).isGreaterThan(0)
     }

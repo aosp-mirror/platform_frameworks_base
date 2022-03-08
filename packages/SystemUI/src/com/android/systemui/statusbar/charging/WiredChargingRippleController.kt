@@ -29,7 +29,7 @@ import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.Utils
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
@@ -93,9 +93,8 @@ class WiredChargingRippleController @Inject constructor(
                 nowPluggedIn: Boolean,
                 charging: Boolean
             ) {
-                // Suppresses the ripple when it's disabled, or when the state change comes
-                // from wireless charging.
-                if (!rippleEnabled || batteryController.isPluggedInWireless) {
+                // Suppresses the ripple when the state change comes from wireless charging.
+                if (batteryController.isPluggedInWireless) {
                     return
                 }
                 val wasPluggedIn = pluggedIn
@@ -112,9 +111,6 @@ class WiredChargingRippleController @Inject constructor(
                 updateRippleColor()
             }
             override fun onThemeChanged() {
-                updateRippleColor()
-            }
-            override fun onOverlayChanged() {
                 updateRippleColor()
             }
 
@@ -148,7 +144,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (!rippleEnabled || rippleView.rippleInProgress || rippleView.parent != null) {
+        if (rippleView.rippleInProgress || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)

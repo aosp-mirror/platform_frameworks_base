@@ -19,8 +19,10 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.util.MathUtils.constrain;
 import static android.util.MathUtils.sq;
+import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static java.util.Objects.requireNonNull;
 
@@ -41,7 +43,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -95,7 +96,6 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private boolean mIsShowing;
     private boolean mIsDownInEnlargedTouchArea;
     private boolean mIsDragging = false;
-    private boolean mImeVisibility;
     @Alignment
     private int mAlignment;
     @SizeType
@@ -108,8 +108,10 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private int mRadiusType;
     private int mMargin;
     private int mPadding;
-    private int mScreenHeight;
-    private int mScreenWidth;
+    // The display width excludes the window insets of the system bar and display cutout.
+    private int mDisplayHeight;
+    // The display Height excludes the window insets of the system bar and display cutout.
+    private int mDisplayWidth;
     private int mIconWidth;
     private int mIconHeight;
     private int mInset;
@@ -118,6 +120,8 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private int mRelativeToPointerDownX;
     private int mRelativeToPointerDownY;
     private float mRadius;
+    private final Rect mDisplayInsetsRect = new Rect();
+    private final Rect mImeInsetsRect = new Rect();
     private final Position mPosition;
     private float mSquareScaledTouchSlop;
     private final Configuration mLastConfiguration;
@@ -506,9 +510,21 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private WindowInsets onWindowInsetsApplied(WindowInsets insets) {
-        final boolean currentImeVisibility = insets.isVisible(ime());
-        if (currentImeVisibility != mImeVisibility) {
-            mImeVisibility = currentImeVisibility;
+        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        final Rect displayWindowInsetsRect = getDisplayInsets(windowMetrics).toRect();
+        if (!displayWindowInsetsRect.equals(mDisplayInsetsRect)) {
+            updateDisplaySizeWith(windowMetrics);
+            updateLocationWith(mPosition);
+        }
+
+        final Rect imeInsetsRect = windowMetrics.getWindowInsets().getInsets(ime()).toRect();
+        if (!imeInsetsRect.equals(mImeInsetsRect)) {
+            if (isImeVisible(imeInsetsRect)) {
+                mImeInsetsRect.set(imeInsetsRect);
+            } else {
+                mImeInsetsRect.setEmpty();
+            }
+
             updateLocationWith(mPosition);
         }
 
@@ -518,6 +534,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     private boolean isMovingTowardsScreenEdge(@Alignment int side, int currentRawX, int downX) {
         return (side == Alignment.RIGHT && currentRawX > downX)
                 || (side == Alignment.LEFT && downX > currentRawX);
+    }
+
+    private boolean isImeVisible(Rect imeInsetsRect) {
+        return imeInsetsRect.left != 0 || imeInsetsRect.top != 0 || imeInsetsRect.right != 0
+                || imeInsetsRect.bottom != 0;
     }
 
     private boolean hasExceededTouchSlop(int startX, int startY, int endX, int endY) {
@@ -546,9 +567,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     private void updateDimensions() {
         final Resources res = getResources();
-        final DisplayMetrics dm = res.getDisplayMetrics();
-        mScreenWidth = dm.widthPixels;
-        mScreenHeight = dm.heightPixels;
+
+        updateDisplaySizeWith(mWindowManager.getCurrentWindowMetrics());
+
         mMargin =
                 res.getDimensionPixelSize(R.dimen.accessibility_floating_menu_margin);
         mInset =
@@ -558,6 +579,15 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                 sq(ViewConfiguration.get(getContext()).getScaledTouchSlop());
 
         updateItemViewDimensionsWith(mSizeType);
+    }
+
+    private void updateDisplaySizeWith(WindowMetrics metrics) {
+        final Rect displayBounds = metrics.getBounds();
+        final Insets displayInsets = getDisplayInsets(metrics);
+        mDisplayInsetsRect.set(displayInsets.toRect());
+        displayBounds.inset(displayInsets);
+        mDisplayWidth = displayBounds.width();
+        mDisplayHeight = displayBounds.height();
     }
 
     private void updateItemViewDimensionsWith(@SizeType int sizeType) {
@@ -630,6 +660,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         params.receiveInsetsIgnoringZOrder = true;
+        params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
         params.gravity = Gravity.START | Gravity.TOP;
         params.x = (mAlignment == Alignment.RIGHT) ? getMaxWindowX() : getMinWindowX();
@@ -684,11 +715,11 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getMaxWindowX() {
-        return mScreenWidth - getMarginStartEndWith(mLastConfiguration) - getLayoutWidth();
+        return mDisplayWidth - getMarginStartEndWith(mLastConfiguration) - getLayoutWidth();
     }
 
     private int getMaxWindowY() {
-        return mScreenHeight - getWindowHeight();
+        return mDisplayHeight - getWindowHeight();
     }
 
     private InstantInsetLayerDrawable getMenuLayerDrawable() {
@@ -699,8 +730,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout
         return (GradientDrawable) getMenuLayerDrawable().getDrawable(INDEX_MENU_ITEM);
     }
 
+    private Insets getDisplayInsets(WindowMetrics metrics) {
+        return metrics.getWindowInsets().getInsetsIgnoringVisibility(
+                systemBars() | displayCutout());
+    }
+
     /**
-     * Updates the floating menu to be fixed at the side of the screen.
+     * Updates the floating menu to be fixed at the side of the display.
      */
     private void updateLocationWith(Position position) {
         final @Alignment int alignment = transformToAlignment(position.getPercentageX());
@@ -716,15 +752,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout
      * @return the moving interval if they overlap each other, otherwise 0.
      */
     private int getInterval() {
-        if (!mImeVisibility) {
-            return 0;
-        }
-
-        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
-        final Insets imeInsets = windowMetrics.getWindowInsets().getInsets(
-                ime() | navigationBars());
-        final int imeY = mScreenHeight - imeInsets.bottom;
-        final int layoutBottomY = mCurrentLayoutParams.y + getWindowHeight();
+        final int currentLayoutY = (int) (mPosition.getPercentageY() * getMaxWindowY());
+        final int imeY = mDisplayHeight - mImeInsetsRect.bottom;
+        final int layoutBottomY = currentLayoutY + getWindowHeight();
 
         return layoutBottomY > imeY ? (layoutBottomY - imeY) : 0;
     }
@@ -855,11 +885,12 @@ public class AccessibilityFloatingMenuView extends FrameLayout
 
     @VisibleForTesting
     Rect getAvailableBounds() {
-        return new Rect(0, 0, mScreenWidth - getWindowWidth(), mScreenHeight - getWindowHeight());
+        return new Rect(0, 0, mDisplayWidth - getWindowWidth(),
+                mDisplayHeight - getWindowHeight());
     }
 
     private int getMaxLayoutHeight() {
-        return mScreenHeight - mMargin * 2;
+        return mDisplayHeight - mMargin * 2;
     }
 
     private int getLayoutWidth() {
@@ -875,7 +906,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout
     }
 
     private int getWindowHeight() {
-        return Math.min(mScreenHeight, mMargin * 2 + getLayoutHeight());
+        return Math.min(mDisplayHeight, mMargin * 2 + getLayoutHeight());
     }
 
     private void setSystemGestureExclusion() {
