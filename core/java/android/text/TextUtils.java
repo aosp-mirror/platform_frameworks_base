@@ -70,7 +70,6 @@ import android.util.Log;
 import android.util.Printer;
 import android.view.View;
 
-import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
@@ -1183,8 +1182,8 @@ public class TextUtils {
 
     /**
      * Transforms a CharSequences to uppercase, copying the sources spans and keeping them spans as
-     * much as possible close to their relative original places. In the case the the uppercase
-     * string is identical to the sources, the source itself is returned instead of being copied.
+     * much as possible close to their relative original places. If uppercase string is identical
+     * to the sources, the source itself is returned instead of being copied.
      *
      * If copySpans is set, source must be an instance of Spanned.
      *
