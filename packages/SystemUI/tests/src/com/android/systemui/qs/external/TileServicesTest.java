@@ -32,7 +32,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.service.quicksettings.TileService;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -68,6 +67,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.inject.Provider;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -75,6 +76,7 @@ public class TileServicesTest extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
     private TileServices mTileService;
+    private TestableLooper mTestableLooper;
     private ArrayList<TileServiceManager> mManagers;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
@@ -116,17 +118,20 @@ public class TileServicesTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
+        mTestableLooper = TestableLooper.get(this);
 
         when(mTileServiceRequestControllerBuilder.create(any()))
                 .thenReturn(mTileServiceRequestController);
         when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
                 .thenReturn(mTileLifecycleManager);
 
+        Provider<Handler> provider = () -> new Handler(mTestableLooper.getLooper());
+
         QSTileHost host = new QSTileHost(mContext,
                 mStatusBarIconController,
                 mQSFactory,
-                new Handler(),
-                Looper.myLooper(),
+                provider.get(),
+                mTestableLooper.getLooper(),
                 mPluginManager,
                 mTunerService,
                 () -> mAutoTileManager,
@@ -140,7 +145,7 @@ public class TileServicesTest extends SysuiTestCase {
                 mock(CustomTileStatePersister.class),
                 mTileServiceRequestControllerBuilder,
                 mTileLifecycleManagerFactory);
-        mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
+        mTileService = new TestTileServices(host, provider, mBroadcastDispatcher,
                 mUserTracker, mKeyguardStateController);
     }
 
@@ -226,10 +231,10 @@ public class TileServicesTest extends SysuiTestCase {
     }
 
     private class TestTileServices extends TileServices {
-        TestTileServices(QSTileHost host, Looper looper,
+        TestTileServices(QSTileHost host, Provider<Handler> handlerProvider,
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
                 KeyguardStateController keyguardStateController) {
-            super(host, looper, broadcastDispatcher, userTracker, keyguardStateController);
+            super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController);
         }
 
         @Override
