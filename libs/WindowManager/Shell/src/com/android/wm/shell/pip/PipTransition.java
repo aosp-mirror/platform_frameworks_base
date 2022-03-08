@@ -152,7 +152,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final TransitionInfo.Change currentPipChange = findCurrentPipChange(info);
+        final TransitionInfo.Change currentPipTaskChange = findCurrentPipTaskChange(info);
         final TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
         mInFixedRotation = fixedRotationChange != null;
         mEndFixedRotation = mInFixedRotation
@@ -172,22 +172,29 @@ public class PipTransition extends PipTransitionController {
                 throw new RuntimeException("Previous callback not called, aborting exit PIP.");
             }
 
-            if (currentPipChange == null) {
-                throw new RuntimeException("Cannot find the pip window for exit-pip transition.");
+            // PipTaskChange can be null if the PIP task has been detached, for example, when the
+            // task contains multiple activities, the PIP will be moved to a new PIP task when
+            // entering, and be moved back when exiting. In that case, the PIP task will be removed
+            // immediately.
+            final TaskInfo pipTaskInfo = currentPipTaskChange != null
+                    ? currentPipTaskChange.getTaskInfo()
+                    : mPipOrganizer.getTaskInfo();
+            if (pipTaskInfo == null) {
+                throw new RuntimeException("Cannot find the pip task for exit-pip transition.");
             }
 
             switch (type) {
                 case TRANSIT_EXIT_PIP:
                     startExitAnimation(info, startTransaction, finishTransaction, finishCallback,
-                            currentPipChange);
+                            pipTaskInfo, currentPipTaskChange);
                     break;
                 case TRANSIT_EXIT_PIP_TO_SPLIT:
                     startExitToSplitAnimation(info, startTransaction, finishTransaction,
-                            finishCallback, currentPipChange);
+                            finishCallback, pipTaskInfo);
                     break;
                 case TRANSIT_REMOVE_PIP:
                     removePipImmediately(info, startTransaction, finishTransaction, finishCallback,
-                            currentPipChange);
+                            pipTaskInfo);
                     break;
                 default:
                     throw new IllegalStateException("mExitTransition with unexpected transit type="
@@ -200,9 +207,9 @@ public class PipTransition extends PipTransitionController {
         // The previous PIP Task is no longer in PIP, but this is not an exit transition (This can
         // happen when a new activity requests enter PIP). In this case, we just show this Task in
         // its end state, and play other animation as normal.
-        if (currentPipChange != null
-                && currentPipChange.getTaskInfo().getWindowingMode() != WINDOWING_MODE_PINNED) {
-            resetPrevPip(currentPipChange, startTransaction);
+        if (currentPipTaskChange != null
+                && currentPipTaskChange.getTaskInfo().getWindowingMode() != WINDOWING_MODE_PINNED) {
+            resetPrevPip(currentPipTaskChange, startTransaction);
         }
 
         // Entering PIP.
@@ -212,8 +219,9 @@ public class PipTransition extends PipTransitionController {
 
         // For transition that we don't animate, but contains the PIP leash, we need to update the
         // PIP surface, otherwise it will be reset after the transition.
-        if (currentPipChange != null) {
-            updatePipForUnhandledTransition(currentPipChange, startTransaction, finishTransaction);
+        if (currentPipTaskChange != null) {
+            updatePipForUnhandledTransition(currentPipTaskChange, startTransaction,
+                    finishTransaction);
         }
 
         // Fade in the fadeout PIP when the fixed rotation is finished.
@@ -322,7 +330,7 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Nullable
-    private TransitionInfo.Change findCurrentPipChange(@NonNull TransitionInfo info) {
+    private TransitionInfo.Change findCurrentPipTaskChange(@NonNull TransitionInfo info) {
         if (mCurrentPipTaskToken == null) {
             return null;
         }
@@ -350,9 +358,30 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull TransitionInfo.Change pipChange) {
+            @NonNull TaskInfo taskInfo, @Nullable TransitionInfo.Change pipTaskChange) {
+        TransitionInfo.Change pipChange = pipTaskChange;
+        if (pipChange == null) {
+            // The pipTaskChange is null, this can happen if we are reparenting the PIP activity
+            // back to its original Task. In that case, we should animate the activity leash
+            // instead, which should be the only non-task, independent, TRANSIT_CHANGE window.
+            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (change.getTaskInfo() == null && change.getMode() == TRANSIT_CHANGE
+                        && TransitionInfo.isIndependent(change, info)) {
+                    pipChange = change;
+                    break;
+                }
+            }
+        }
+        if (pipChange == null) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: No window of exiting PIP is found. Can't play expand animation", TAG);
+            removePipImmediately(info, startTransaction, finishTransaction, finishCallback,
+                    taskInfo);
+            return;
+        }
         mFinishCallback = (wct, wctCB) -> {
-            mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
+            mPipOrganizer.onExitPipFinished(taskInfo);
             finishCallback.onTransitionFinished(wct, wctCB);
         };
         mFinishTransaction = finishTransaction;
@@ -372,7 +401,7 @@ public class PipTransition extends PipTransitionController {
             if (displayRotationChange != null) {
                 // Exiting PIP to fullscreen with orientation change.
                 startExpandAndRotationAnimation(info, startTransaction, finishTransaction,
-                        displayRotationChange, pipChange);
+                        displayRotationChange, taskInfo, pipChange);
                 return;
             }
         }
@@ -413,15 +442,14 @@ public class PipTransition extends PipTransitionController {
         } else {
             rotationDelta = Surface.ROTATION_0;
         }
-        startExpandAnimation(pipChange.getTaskInfo(), pipChange.getLeash(), destinationBounds,
-                rotationDelta);
+        startExpandAnimation(taskInfo, pipChange.getLeash(), destinationBounds, rotationDelta);
     }
 
     private void startExpandAndRotationAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionInfo.Change displayRotationChange,
-            @NonNull TransitionInfo.Change pipChange) {
+            @NonNull TaskInfo taskInfo, @NonNull TransitionInfo.Change pipChange) {
         final int rotateDelta = deltaRotation(displayRotationChange.getStartRotation(),
                 displayRotationChange.getEndRotation());
 
@@ -459,7 +487,7 @@ public class PipTransition extends PipTransitionController {
 
         // Expand and rotate the pip window to fullscreen.
         final PipAnimationController.PipTransitionAnimator animator =
-                mPipAnimationController.getAnimator(pipChange.getTaskInfo(), pipChange.getLeash(),
+                mPipAnimationController.getAnimator(taskInfo, pipChange.getLeash(),
                         startBounds, startBounds, endBounds, null, TRANSITION_DIRECTION_LEAVE_PIP,
                         0 /* startingAngle */, pipRotateDelta);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
@@ -485,11 +513,11 @@ public class PipTransition extends PipTransitionController {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull TransitionInfo.Change pipChange) {
+            @NonNull TaskInfo taskInfo) {
         startTransaction.apply();
         finishTransaction.setWindowCrop(info.getChanges().get(0).getLeash(),
                 mPipBoundsState.getDisplayBounds());
-        mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
+        mPipOrganizer.onExitPipFinished(taskInfo);
         finishCallback.onTransitionFinished(null, null);
     }
 
@@ -689,11 +717,11 @@ public class PipTransition extends PipTransitionController {
         }
     }
 
-    private void startExitToSplitAnimation(TransitionInfo info,
-            SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction,
-            Transitions.TransitionFinishCallback finishCallback,
-            TransitionInfo.Change pipChange) {
+    private void startExitToSplitAnimation(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull TaskInfo taskInfo) {
         final int changeSize = info.getChanges().size();
         if (changeSize < 4) {
             throw new RuntimeException(
@@ -721,15 +749,15 @@ public class PipTransition extends PipTransitionController {
         mSplitScreenOptional.get().finishEnterSplitScreen(startTransaction);
         startTransaction.apply();
 
-        mPipOrganizer.onExitPipFinished(pipChange.getTaskInfo());
+        mPipOrganizer.onExitPipFinished(taskInfo);
         finishCallback.onTransitionFinished(null, null);
     }
 
-    private void resetPrevPip(@NonNull TransitionInfo.Change prevPipChange,
+    private void resetPrevPip(@NonNull TransitionInfo.Change prevPipTaskChange,
             @NonNull SurfaceControl.Transaction startTransaction) {
-        final SurfaceControl leash = prevPipChange.getLeash();
-        final Rect bounds = prevPipChange.getEndAbsBounds();
-        final Point offset = prevPipChange.getEndRelOffset();
+        final SurfaceControl leash = prevPipTaskChange.getLeash();
+        final Rect bounds = prevPipTaskChange.getEndAbsBounds();
+        final Point offset = prevPipTaskChange.getEndRelOffset();
         bounds.offset(-offset.x, -offset.y);
 
         startTransaction.setWindowCrop(leash, null);
@@ -737,7 +765,7 @@ public class PipTransition extends PipTransitionController {
         startTransaction.setCornerRadius(leash, 0);
         startTransaction.setPosition(leash, bounds.left, bounds.top);
 
-        if (mHasFadeOut && prevPipChange.getTaskInfo().isVisible()) {
+        if (mHasFadeOut && prevPipTaskChange.getTaskInfo().isVisible()) {
             if (mPipAnimationController.getCurrentAnimator() != null) {
                 mPipAnimationController.getCurrentAnimator().cancel();
             }
@@ -745,7 +773,7 @@ public class PipTransition extends PipTransitionController {
         }
         mHasFadeOut = false;
         mCurrentPipTaskToken = null;
-        mPipOrganizer.onExitPipFinished(prevPipChange.getTaskInfo());
+        mPipOrganizer.onExitPipFinished(prevPipTaskChange.getTaskInfo());
     }
 
     private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,
