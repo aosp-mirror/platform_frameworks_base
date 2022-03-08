@@ -1068,7 +1068,9 @@ public class CameraServiceProxy extends SystemService
                     if (!alreadyActivePackage) {
                         WindowManagerInternal wmi =
                                 LocalServices.getService(WindowManagerInternal.class);
-                        wmi.addNonHighRefreshRatePackage(clientName);
+                        // TODO(b/209669709): populate min.max refreshRate based on
+                        //  the camera capture speed
+                        wmi.addRefreshRateRangeForPackage(clientName, 60.0f, 60.0f);
                     }
 
                     // Update activity events
@@ -1107,7 +1109,7 @@ public class CameraServiceProxy extends SystemService
                         if (!stillActivePackage) {
                             WindowManagerInternal wmi =
                                     LocalServices.getService(WindowManagerInternal.class);
-                            wmi.removeNonHighRefreshRatePackage(clientName);
+                            wmi.removeRefreshRateRangeForPackage(clientName);
                         }
                     }
 
