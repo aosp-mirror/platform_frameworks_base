@@ -131,6 +131,7 @@ import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_CONTENT;
@@ -626,9 +627,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** The surface parent of the IME container. */
     @VisibleForTesting
     SurfaceControl mInputMethodSurfaceParent;
-
-    /** The screenshot IME surface to place on the task while transitioning to the next task. */
-    SurfaceControl mImeScreenshot;
 
     private final PointerEventDispatcher mPointerEventDispatcher;
 
@@ -3974,10 +3972,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // If the IME target is the input target, before it changes, prepare the IME screenshot
         // for the last IME target when its task is applying app transition. This is for the
         // better IME transition to keep IME visibility when transitioning to the next task.
-        if (mImeLayeringTarget != null && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
-                && mImeLayeringTarget == mImeInputTarget) {
-            attachAndShowImeScreenshotOnTarget();
+        if (mImeLayeringTarget != null && mImeLayeringTarget == mImeInputTarget) {
+            boolean nonAppImeTargetAnimatingExit = mImeLayeringTarget.mAnimatingExit
+                    && mImeLayeringTarget.mAttrs.type != TYPE_BASE_APPLICATION
+                    && mImeLayeringTarget.isSelfAnimating(0, ANIMATION_TYPE_WINDOW_ANIMATION);
+            if (mImeLayeringTarget.inAppOrRecentsTransition() || nonAppImeTargetAnimatingExit) {
+                showImeScreenshot();
+            }
         }
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
@@ -4025,8 +4026,117 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mImeControlTarget = target;
     }
 
-    @VisibleForTesting
-    void attachAndShowImeScreenshotOnTarget() {
+    // ========== Begin of ImeScreenshot stuff ==========
+    /** The screenshot IME surface to place on the task while transitioning to the next task. */
+    ImeScreenshot mImeScreenshot;
+
+    static final class ImeScreenshot {
+        private WindowState mImeTarget;
+        private SurfaceControl.Builder mSurfaceBuilder;
+        private SurfaceControl mImeSurface;
+
+        ImeScreenshot(SurfaceControl.Builder surfaceBuilder, @NonNull WindowState imeTarget) {
+            mSurfaceBuilder = surfaceBuilder;
+            mImeTarget = imeTarget;
+        }
+
+        WindowState getImeTarget() {
+            return mImeTarget;
+        }
+
+        private SurfaceControl createImeSurface(SurfaceControl.ScreenshotHardwareBuffer b,
+                Transaction t) {
+            final HardwareBuffer buffer = b.getHardwareBuffer();
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "create IME snapshot for "
+                        + mImeTarget + ", buff width=" + buffer.getWidth()
+                        + ", height=" + buffer.getHeight());
+            }
+            final WindowState imeWindow = mImeTarget.getDisplayContent().mInputMethodWindow;
+            final ActivityRecord activity = mImeTarget.mActivityRecord;
+            final SurfaceControl imeParent = mImeTarget.mAttrs.type == TYPE_BASE_APPLICATION
+                    ? activity.getSurfaceControl()
+                    : mImeTarget.getSurfaceControl();
+            final SurfaceControl imeSurface = mSurfaceBuilder
+                    .setName("IME-snapshot-surface")
+                    .setBLASTLayer()
+                    .setFormat(buffer.getFormat())
+                    // Attaching IME snapshot to the associated IME layering target on the
+                    // activity when:
+                    // - The target is activity main window: attaching on top of the activity.
+                    // - The target is non-activity main window (e.g. activity overlay or
+                    // dialog-themed activity): attaching on top of the target since the layer has
+                    // already above the activity.
+                    .setParent(imeParent)
+                    .setCallsite("DisplayContent.attachAndShowImeScreenshotOnTarget")
+                    .build();
+            // Make IME snapshot as trusted overlay
+            InputMonitor.setTrustedOverlayInputInfo(imeSurface, t, imeWindow.getDisplayId(),
+                    "IME-snapshot-surface");
+            t.setBuffer(imeSurface, buffer);
+            t.setColorSpace(activity.mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
+            t.setLayer(imeSurface, 1);
+
+            final Point surfacePosition = new Point(
+                    imeWindow.getFrame().left - mImeTarget.getFrame().left,
+                    imeWindow.getFrame().top - mImeTarget.getFrame().top);
+            if (imeParent == activity.getSurfaceControl()) {
+                t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
+            } else {
+                surfacePosition.offset(mImeTarget.mAttrs.surfaceInsets.left,
+                        mImeTarget.mAttrs.surfaceInsets.top);
+                t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
+            }
+            return imeSurface;
+        }
+
+        private void removeImeSurface(Transaction t) {
+            if (mImeSurface != null) {
+                if (DEBUG_INPUT_METHOD) Slog.d(TAG, "remove IME snapshot");
+                t.remove(mImeSurface);
+                mImeSurface = null;
+            }
+        }
+
+        void attachAndShow(Transaction t) {
+            final DisplayContent dc = mImeTarget.getDisplayContent();
+            // Prepare IME screenshot for the target if it allows to attach into.
+            final Task task = mImeTarget.getTask();
+            // Re-new the IME screenshot when it does not exist or the size changed.
+            final boolean renewImeSurface = mImeSurface == null
+                    || mImeSurface.getWidth() != dc.mInputMethodWindow.getFrame().width()
+                    || mImeSurface.getHeight() != dc.mInputMethodWindow.getFrame().height();
+            if (task != null && !task.isActivityTypeHomeOrRecents()) {
+                SurfaceControl.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
+                        ? dc.mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
+                        : null;
+                if (imeBuffer != null) {
+                    // Remove the last IME surface when the surface needs to renew.
+                    removeImeSurface(t);
+                    mImeSurface = createImeSurface(imeBuffer, t);
+                }
+            }
+            final boolean isValidSnapshot = mImeSurface != null && mImeSurface.isValid();
+            // Showing the IME screenshot if the target has already in app transition stage.
+            // Note that if the current IME insets is not showing, no need to show IME screenshot
+            // to reflect the true IME insets visibility and the app task layout as possible.
+            if (isValidSnapshot
+                    && dc.getInsetsStateController().getImeSourceProvider().isImeShowing()) {
+                if (DEBUG_INPUT_METHOD) {
+                    Slog.d(TAG, "show IME snapshot, ime target=" + mImeTarget);
+                }
+                t.show(mImeSurface);
+            } else if (!isValidSnapshot) {
+                removeImeSurface(t);
+            }
+        }
+
+        void detach(Transaction t) {
+            removeImeSurface(t);
+        }
+    }
+
+    private void attachAndShowImeScreenshotOnTarget() {
         // No need to attach screenshot if the IME target not exists or screen is off.
         if (!shouldImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
             return;
@@ -4035,61 +4145,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
-            final Task task = mImeLayeringTarget.getTask();
-            // Re-new the IME screenshot when it does not exist or the size changed.
-            final boolean renewImeSurface = mImeScreenshot == null
-                    || mImeScreenshot.getWidth() != mInputMethodWindow.getFrame().width()
-                    || mImeScreenshot.getHeight() != mInputMethodWindow.getFrame().height();
-            if (task != null && !task.isActivityTypeHomeOrRecents()) {
-                SurfaceControl.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
-                        ? mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
-                        : null;
-                if (imeBuffer != null) {
-                    // Remove the last IME surface when the surface needs to renew.
-                    removeImeSurfaceImmediately();
-                    mImeScreenshot = createImeSurface(imeBuffer, t);
-                }
-            }
+            mImeScreenshot = new ImeScreenshot(
+                    mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
+            mImeScreenshot.attachAndShow(t);
         }
-
-        final boolean isValidSnapshot = mImeScreenshot != null && mImeScreenshot.isValid();
-        // Showing the IME screenshot if the target has already in app transition stage.
-        // Note that if the current IME insets is not showing, no need to show IME screenshot
-        // to reflect the true IME insets visibility and the app task layout as possible.
-        if (isValidSnapshot && getInsetsStateController().getImeSourceProvider().isImeShowing()) {
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "show IME snapshot, ime target=" + mImeLayeringTarget);
-            }
-            t.show(mImeScreenshot);
-        } else if (!isValidSnapshot) {
-            removeImeSurfaceImmediately();
-        }
-    }
-
-    @VisibleForTesting
-    SurfaceControl createImeSurface(SurfaceControl.ScreenshotHardwareBuffer imeBuffer,
-            Transaction t) {
-        final HardwareBuffer buffer = imeBuffer.getHardwareBuffer();
-        if (DEBUG_INPUT_METHOD) Slog.d(TAG, "create IME snapshot for "
-                + mImeLayeringTarget + ", buff width=" + buffer.getWidth()
-                + ", height=" + buffer.getHeight());
-        final ActivityRecord activity = mImeLayeringTarget.mActivityRecord;
-        final SurfaceControl imeSurface = mWmService.mSurfaceControlFactory.apply(null)
-                .setName("IME-snapshot-surface")
-                .setBLASTLayer()
-                .setFormat(buffer.getFormat())
-                .setParent(activity.getSurfaceControl())
-                .setCallsite("DisplayContent.attachAndShowImeScreenshotOnTarget")
-                .build();
-        // Make IME snapshot as trusted overlay
-        InputMonitor.setTrustedOverlayInputInfo(imeSurface, t, getDisplayId(),
-                "IME-snapshot-surface");
-        t.setBuffer(imeSurface, buffer);
-        t.setColorSpace(mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
-        t.setLayer(imeSurface, 1);
-        t.setPosition(imeSurface, mInputMethodWindow.getDisplayFrame().left,
-                mInputMethodWindow.getDisplayFrame().top);
-        return imeSurface;
     }
 
     /**
@@ -4111,8 +4170,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void removeImeScreenshotIfPossible() {
         if (mImeLayeringTarget == null
                 || mImeLayeringTarget.mAttrs.type != TYPE_APPLICATION_STARTING
-                && !mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                && !mImeLayeringTarget.inAppOrRecentsTransition()) {
             removeImeSurfaceImmediately();
         }
     }
@@ -4120,11 +4178,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Removes the IME screenshot immediately. */
     void removeImeSurfaceImmediately() {
         if (mImeScreenshot != null) {
-            if (DEBUG_INPUT_METHOD) Slog.d(TAG, "remove IME snapshot");
-            getSyncTransaction().remove(mImeScreenshot);
+            mImeScreenshot.detach(getSyncTransaction());
             mImeScreenshot = null;
         }
     }
+ // ========== End of ImeScreenshot stuff ==========
 
     /**
      * The IME input target is the window which receives input from IME. It is also a candidate
@@ -4433,7 +4491,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * hierarchy.
      */
     void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
-        if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
+        if (mImeScreenshot != null && (wc == mImeScreenshot.getImeTarget()
+                || wc.getWindow(w -> w == mImeScreenshot.getImeTarget()) != null)
+                && (type & WindowState.EXIT_ANIMATING_TYPES) != 0) {
             removeImeSurfaceImmediately();
         }
     }

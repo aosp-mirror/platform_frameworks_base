@@ -23,6 +23,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.view.InputWindowHandle;
@@ -278,6 +279,13 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction setBuffer(SurfaceControl sc, GraphicBuffer buffer) {
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public SurfaceControl.Transaction setBuffer(@NonNull SurfaceControl sc,
+            @Nullable HardwareBuffer buffer) {
         return this;
     }
 
