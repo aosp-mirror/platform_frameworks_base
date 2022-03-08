@@ -287,9 +287,6 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setInstallLocation(int installLocation);
 
-    /** @see R#styleable.AndroidManifest_inheritKeyStoreKeys */
-    ParsingPackage setInheritKeyStoreKeys(boolean inheritKeyStoreKeys);
-
     /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
     ParsingPackage setLeavingSharedUid(boolean leavingSharedUid);
 
