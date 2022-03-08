@@ -93,7 +93,7 @@ class EnsureActivitiesVisibleHelper {
         // activities are actually behind other fullscreen activities, but still required
         // to be visible (such as performing Recents animation).
         final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
-                && mContiner.isTopActivityFocusable()
+                && mContiner.canBeResumed(starting)
                 && (starting == null || !starting.isDescendantOf(mContiner));
 
         final PooledConsumer f = PooledLambda.obtainConsumer(
