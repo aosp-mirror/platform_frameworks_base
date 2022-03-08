@@ -73,8 +73,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final SurfaceControlProxy mSurfaceControlProxy;
 
-    private final boolean mIsBootDisplayModeSupported;
-
     // Called with SyncRoot lock held.
     public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
@@ -87,7 +85,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         super(syncRoot, context, handler, listener, TAG);
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
-        mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
     }
 
     @Override
@@ -352,7 +349,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 if (preferredRecord != null) {
                     int preferredModeId = preferredRecord.mMode.getModeId();
-                    if (mIsBootDisplayModeSupported && mSystemPreferredModeId != preferredModeId) {
+                    if (mSurfaceControlProxy.getBootDisplayModeSupport()
+                            && mSystemPreferredModeId != preferredModeId) {
                         mSystemPreferredModeId = preferredModeId;
                         preferredModeChanged = true;
                     }
@@ -902,7 +900,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             updateDeviceInfoLocked();
 
-            if (!mIsBootDisplayModeSupported) {
+            if (!mSurfaceControlProxy.getBootDisplayModeSupport()) {
                 return;
             }
             if (mUserPreferredModeId == INVALID_MODE_ID) {
