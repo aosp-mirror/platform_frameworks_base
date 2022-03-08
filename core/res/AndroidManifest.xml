@@ -6668,10 +6668,9 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.server.logcat.LogAccessConfirmationActivity"
-                  android:theme="@style/Theme.Dialog.Confirmation"
+        <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
+                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:excludeFromRecents="true"
-                  android:process=":ui"
                   android:label="@string/log_access_confirmation_title"
                   android:exported="false">
         </activity>
