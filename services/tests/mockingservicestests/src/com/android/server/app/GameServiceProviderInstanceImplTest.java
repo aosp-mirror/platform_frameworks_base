@@ -46,7 +46,12 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Picture;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -71,6 +76,7 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -87,6 +93,7 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 
 /**
@@ -114,7 +121,16 @@ public final class GameServiceProviderInstanceImplTest {
             new ComponentName(GAME_B_PACKAGE, "com.package.game.b.MainActivity");
 
 
-    private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
+    private static final Bitmap TEST_BITMAP;
+    static {
+        Picture picture = new Picture();
+        Canvas canvas = picture.beginRecording(200, 100);
+        Paint p = new Paint();
+        p.setColor(Color.BLACK);
+        canvas.drawCircle(10, 10, 10, p);
+        picture.endRecording();
+        TEST_BITMAP = Bitmap.createBitmap(picture);
+    }
 
     private MockitoSession mMockingSession;
     private GameServiceProviderInstance mGameServiceProviderInstance;
@@ -126,6 +142,8 @@ public final class GameServiceProviderInstanceImplTest {
     private WindowManagerInternal mMockWindowManagerInternal;
     @Mock
     private IActivityManager mMockActivityManager;
+    @Mock
+    private ScreenshotHelper mMockScreenshotHelper;
     private MockContext mMockContext;
     private FakeGameClassifier mFakeGameClassifier;
     private FakeGameService mFakeGameService;
@@ -192,7 +210,8 @@ public final class GameServiceProviderInstanceImplTest {
                 mMockWindowManagerService,
                 mMockWindowManagerInternal,
                 mFakeGameServiceConnector,
-                mFakeGameSessionServiceConnector);
+                mFakeGameSessionServiceConnector,
+                mMockScreenshotHelper);
     }
 
     @After
@@ -425,6 +444,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void systemBarsTransientShownDueToGesture_hasGameSession_propagatesToGameSession() {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -446,6 +466,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void systemBarsTransientShownButNotGesture_hasGameSession_notPropagatedToGameSession() {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -799,27 +820,32 @@ public final class GameServiceProviderInstanceImplTest {
         SurfaceControl mockOverlaySurfaceControl = Mockito.mock(SurfaceControl.class);
         SurfaceControl[] excludeLayers = new SurfaceControl[1];
         excludeLayers[0] = mockOverlaySurfaceControl;
+        int taskId = 10;
         when(mMockWindowManagerService.captureTaskBitmap(eq(10), any())).thenReturn(TEST_BITMAP);
-
+        doAnswer(invocation -> {
+            Consumer<Uri> consumer = invocation.getArgument(invocation.getArguments().length - 1);
+            consumer.accept(Uri.parse("a/b.png"));
+            return null;
+        }).when(mMockScreenshotHelper).provideScreenshot(
+                any(), any(), any(), anyInt(), anyInt(), any(), anyInt(), any(), any());
         mGameServiceProviderInstance.start();
-        startTask(10, GAME_A_MAIN_ACTIVITY);
+        startTask(taskId, GAME_A_MAIN_ACTIVITY);
         mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
-        mFakeGameService.requestCreateGameSession(10);
+        mFakeGameService.requestCreateGameSession(taskId);
 
         FakeGameSession gameSession10 = new FakeGameSession();
         SurfacePackage mockOverlaySurfacePackage = Mockito.mock(SurfacePackage.class);
         when(mockOverlaySurfacePackage.getSurfaceControl()).thenReturn(mockOverlaySurfaceControl);
-        mFakeGameSessionService.removePendingFutureForTaskId(10)
+        mFakeGameSessionService.removePendingFutureForTaskId(taskId)
                 .complete(new CreateGameSessionResult(gameSession10, mockOverlaySurfacePackage));
 
         IGameSessionController gameSessionController = getOnlyElement(
                 mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
         AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
-        gameSessionController.takeScreenshot(10, resultFuture);
+        gameSessionController.takeScreenshot(taskId, resultFuture);
 
         GameScreenshotResult result = resultFuture.get();
         assertEquals(GameScreenshotResult.GAME_SCREENSHOT_SUCCESS, result.getStatus());
-        assertEquals(TEST_BITMAP, result.getBitmap());
     }
 
     @Test
