@@ -920,7 +920,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
-    public static final int sdkSandboxToAppUid(int uid) {
+    public static final int getAppUidForSdkSandboxUid(int uid) {
         return uid - (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 
