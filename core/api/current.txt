@@ -7437,7 +7437,7 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getPermittedInputMethods(@NonNull android.content.ComponentName);
     method public int getPersonalAppsSuspendedReasons(@NonNull android.content.ComponentName);
-    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
+    method @NonNull public java.util.List<android.app.admin.PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
@@ -7582,7 +7582,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
-    method public void setPreferentialNetworkServiceConfig(@NonNull android.app.admin.PreferentialNetworkServiceConfig);
+    method public void setPreferentialNetworkServiceConfigs(@NonNull java.util.List<android.app.admin.PreferentialNetworkServiceConfig>);
     method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
