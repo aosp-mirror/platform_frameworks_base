@@ -56,6 +56,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -1682,6 +1683,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
+            attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
             win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
@@ -2244,6 +2246,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs);
                 win.mToken.adjustWindowParams(win, attrs);
+                attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
                 int disableFlags =
                         (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
                 if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
@@ -8235,6 +8238,23 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * You need ALLOW_SLIPPERY_TOUCHES permission to be able to set FLAG_SLIPPERY.
+     */
+    private int sanitizeFlagSlippery(int flags, String windowName, int callingUid, int callingPid) {
+        if ((flags & FLAG_SLIPPERY) == 0) {
+            return flags;
+        }
+        final int permissionResult = mContext.checkPermission(
+                    android.Manifest.permission.ALLOW_SLIPPERY_TOUCHES, callingPid, callingUid);
+        if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+            Slog.w(TAG, "Removing FLAG_SLIPPERY from '" + windowName
+                    + "' because it doesn't have ALLOW_SLIPPERY_TOUCHES permission");
+            return flags & ~FLAG_SLIPPERY;
+        }
+        return flags;
+    }
+
+    /**
      * Assigns an InputChannel to a SurfaceControl and configures it to receive
      * touch input according to it's on-screen geometry.
      *
@@ -8272,8 +8292,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.token = channelToken;
         h.name = name;
 
+        flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
+
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
-                | LayoutParams.FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
+                | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = type;
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;

@@ -895,10 +895,10 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testFindRootIndex_effectiveRoot_finishingAndRelinquishing() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Add extra two activities. Mark the one on the bottom with "relinquishTaskIdentity" and
         // one above as finishing.
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.finishing = true;
@@ -930,9 +930,9 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testFindRootIndex_effectiveRoot_relinquishingMultipleActivities() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Set relinquishTaskIdentity for all activities in the task
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
@@ -1082,9 +1082,9 @@ public class TaskTests extends WindowTestsBase {
      */
     @Test
     public void testGetTaskForActivity_onlyRoot_relinquishTaskIdentity() {
-        final Task task = getTestTask();
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity0.getTask();
         // Make the current root activity relinquish task identity
-        final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1178,6 +1178,46 @@ public class TaskTests extends WindowTestsBase {
         spyOn(task);
         task.updateEffectiveIntent();
         verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} when activity with relinquishTaskIdentity but
+     * another with different uid. This should make the task use the root activity when updating the
+     * intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingWithDifferentUid() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+
+        // Add an extra activity on top
+        new ActivityBuilder(mAtm).setUid(11).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} with activities set as relinquishTaskIdentity.
+     * This should make the task use the topmost activity when updating the intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingMultipleActivities() {
+        final ActivityRecord activity0 = new ActivityBuilder(mAtm)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+        // Add an extra activity on top
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        // Add an extra activity on top
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity2));
     }
 
     @Test
