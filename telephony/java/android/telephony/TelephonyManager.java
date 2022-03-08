@@ -5985,6 +5985,7 @@ public class TelephonyManager {
             DATA_CONNECTED,
             DATA_SUSPENDED,
             DATA_DISCONNECTING,
+            DATA_HANDOVER_IN_PROGRESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataState{}
@@ -6009,6 +6010,12 @@ public class TelephonyManager {
     public static final int DATA_DISCONNECTING = 4;
 
     /**
+     * Data connection state: Handover in progress. The connection is being transited from cellular
+     * network to IWLAN, or from IWLAN to cellular network.
+     */
+    public static final int DATA_HANDOVER_IN_PROGRESS = 5;
+
+    /**
      * Used for checking if the SDK version for {@link TelephonyManager#getDataState} is above Q.
      */
     @ChangeId
@@ -6024,6 +6031,7 @@ public class TelephonyManager {
      * @see #DATA_CONNECTED
      * @see #DATA_SUSPENDED
      * @see #DATA_DISCONNECTING
+     * @see #DATA_HANDOVER_IN_PROGRESS
      */
     public int getDataState() {
         try {
