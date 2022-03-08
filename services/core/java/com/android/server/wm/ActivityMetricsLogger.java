@@ -657,7 +657,7 @@ class ActivityMetricsLogger {
         for (int i = mTransitionInfoList.size() - 2; i >= 0; i--) {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
             if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.mVisibleRequested) {
-                abort(prevInfo, "nothing will be drawn");
+                scheduleCheckActivityToBeDrawn(prevInfo.mLastLaunchedActivity, 0 /* delay */);
             }
         }
     }
@@ -757,6 +757,10 @@ class ActivityMetricsLogger {
     /** Makes sure that the reference to the removed activity is cleared. */
     void notifyActivityRemoved(@NonNull ActivityRecord r) {
         mLastTransitionInfo.remove(r);
+        final TransitionInfo info = getActiveTransitionInfo(r);
+        if (info != null) {
+            abort(info, "removed");
+        }
 
         final int packageUid = r.info.applicationInfo.uid;
         final PackageCompatStateInfo compatStateInfo = mPackageUidToCompatStateInfo.get(packageUid);
