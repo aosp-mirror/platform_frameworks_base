@@ -894,9 +894,7 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setInheritKeyStoreKeys(bool(false,
-                        R.styleable.AndroidManifest_inheritKeyStoreKeys, sa));
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
