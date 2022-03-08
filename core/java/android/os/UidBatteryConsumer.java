@@ -119,6 +119,8 @@ public final class UidBatteryConsumer extends BatteryConsumer {
                     skipEmptyComponents);
             appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
                     skipEmptyComponents);
+            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_CACHED,
+                    skipEmptyComponents);
             pw.print(sb);
         }
 

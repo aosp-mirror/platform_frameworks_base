@@ -680,6 +680,8 @@ public abstract class BatteryStats implements Parcelable {
                 return BatteryConsumer.PROCESS_STATE_BACKGROUND;
             case BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE:
                 return BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
+            case BatteryStats.Uid.PROCESS_STATE_CACHED:
+                return BatteryConsumer.PROCESS_STATE_CACHED;
             default:
                 return BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
         }
