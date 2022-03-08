@@ -516,12 +516,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
      */
     boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
-        if ((a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
-                == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING) {
-            return true;
-        }
+        return isAllowedToEmbedActivityInUntrustedMode(a)
+                || isAllowedToEmbedActivityInTrustedMode(a);
+    }
 
-        return isAllowedToEmbedActivityInTrustedMode(a);
+    boolean isAllowedToEmbedActivityInUntrustedMode(@NonNull ActivityRecord a) {
+        return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
+                == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
 
     /**
@@ -531,7 +532,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * <li>the activity has declared the organizer host as trusted explicitly via known
      * certificate.</li>
      */
-    private boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
+    boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
         if (UserHandle.getAppId(mTaskFragmentOrganizerUid) == SYSTEM_UID) {
             // The system is trusted to embed other apps securely and for all users.
             return true;

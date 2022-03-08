@@ -701,6 +701,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(tf.getTaskFragmentOrganizer(),
                             errorCallbackToken,
                             convertStartFailureToThrowable(result, activityIntent));
+                } else {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
