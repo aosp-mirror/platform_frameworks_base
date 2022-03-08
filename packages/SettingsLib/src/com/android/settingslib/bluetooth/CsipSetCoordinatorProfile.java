@@ -59,7 +59,7 @@ public class CsipSetCoordinatorProfile implements LocalBluetoothProfile {
 
     // These callbacks run on the main thread.
     private final class CoordinatedSetServiceListener implements BluetoothProfile.ServiceListener {
-        @RequiresApi(32)
+        @RequiresApi(33)
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (VDBG) {
                 Log.d(TAG, "Bluetooth service connected");
@@ -233,7 +233,7 @@ public class CsipSetCoordinatorProfile implements LocalBluetoothProfile {
         return NAME;
     }
 
-    @RequiresApi(32)
+    @RequiresApi(33)
     protected void finalize() {
         if (VDBG) {
             Log.d(TAG, "finalize()");
