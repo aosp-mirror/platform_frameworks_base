@@ -1006,12 +1006,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 }
                 break;
             case ACTION_POINTER_UP:
-                if (event.getPointerId(GestureUtils.getActionIndex(event)) == mDraggingPointerId) {
                     mDraggingPointerId = INVALID_POINTER_ID;
                     // Send an event to the end of the drag gesture.
                     mDispatcher.sendMotionEvent(
                             event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
-                }
                 break;
             case ACTION_UP:
                 if (event.getPointerId(GestureUtils.getActionIndex(event)) == mDraggingPointerId) {
@@ -1146,6 +1144,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
      * closet to an edge of the screen.
      */
     private void computeDraggingPointerIdIfNeeded(MotionEvent event) {
+        if (event.getPointerCount() != 2) {
+            mDraggingPointerId = INVALID_POINTER_ID;
+            return;
+        }
         if (mDraggingPointerId != INVALID_POINTER_ID) {
             // If we have a valid pointer ID, we should be good
             final int pointerIndex = event.findPointerIndex(mDraggingPointerId);
