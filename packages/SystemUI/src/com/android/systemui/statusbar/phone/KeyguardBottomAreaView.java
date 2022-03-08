@@ -32,7 +32,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1109,8 +1108,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         Intent intent = mQRCodeScannerController.getIntent();
         if (intent != null) {
             try {
-                mContext.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
+                ActivityTaskManager.getService().startActivityAsUser(
+                                null, getContext().getBasePackageName(),
+                                getContext().getAttributionTag(), intent,
+                                intent.resolveTypeIfNeeded(getContext().getContentResolver()),
+                                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null,
+                                UserHandle.CURRENT.getIdentifier());
+            } catch (RemoteException e) {
                 // This is unexpected. Nonetheless, just log the error and prevent the UI from
                 // crashing
                 Log.e(TAG, "Unexpected intent: " + intent

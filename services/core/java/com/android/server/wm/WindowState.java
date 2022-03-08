@@ -5988,15 +5988,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         finishDrawing(null);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (!useBLASTSync()) return;
-
-        final Task task = getTask();
-        if (task != null) {
-            final SurfaceControl.Transaction t = task.getMainWindowSizeChangeTransaction();
-            if (t != null) {
-                mSyncTransaction.merge(t);
-            }
-            task.setMainWindowSizeChangeTransaction(null);
-        }
     }
 
     @Override
@@ -6032,10 +6023,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean shouldSendRedrawForSync() {
         if (mRedrawForSyncReported) {
             return false;
-        }
-        final Task task = getTask();
-        if (task != null && task.getMainWindowSizeChangeTransaction() != null) {
-            return true;
         }
         return useBLASTSync();
     }

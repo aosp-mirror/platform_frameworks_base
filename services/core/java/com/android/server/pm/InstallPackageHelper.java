@@ -86,6 +86,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
 import static com.android.server.pm.PackageManagerServiceUtils.deriveAbiOverride;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -287,6 +288,12 @@ final class InstallPackageHelper {
         SharedUserSetting sharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(pkgSetting);
         if (sharedUserSetting != null) {
             sharedUserSetting.addPackage(pkgSetting);
+            if (parsedPackage.isLeavingSharedUid()
+                    && SharedUidMigration.applyStrategy(BEST_EFFORT)
+                    && sharedUserSetting.isSingleUser()) {
+                // Attempt the transparent shared UID migration
+                mPm.mSettings.convertSharedUserSettingsLPw(sharedUserSetting);
+            }
         }
         if (reconciledPkg.mInstallArgs != null
                 && reconciledPkg.mInstallArgs.mForceQueryableOverride) {
@@ -2216,23 +2223,8 @@ final class InstallPackageHelper {
                 }
                 incrementalStorages.add(storage);
             }
-            int previousAppId = 0;
-            if (reconciledPkg.mScanResult.needsNewAppId()) {
-                // Only set previousAppId if the app is migrating out of shared UID
-                previousAppId = reconciledPkg.mScanResult.mPreviousAppId;
-
-                if (pkg.shouldInheritKeyStoreKeys()) {
-                    // Migrate keystore data
-                    mAppDataHelper.migrateKeyStoreData(
-                            previousAppId, reconciledPkg.mPkgSetting.getAppId());
-                }
-
-                if (reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId == previousAppId) {
-                    // If the previous app ID is removed, clear the keys
-                    mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, previousAppId);
-                }
-            }
-            mAppDataHelper.prepareAppDataPostCommitLIF(pkg, previousAppId);
+            // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
+            mAppDataHelper.prepareAppDataPostCommitLIF(pkg, 0);
             if (reconciledPkg.mPrepareResult.mClearCodeCache) {
                 mAppDataHelper.clearAppDataLIF(pkg, UserHandle.USER_ALL,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
@@ -3026,8 +3018,7 @@ final class InstallPackageHelper {
                     installPackageFromSystemLIF(stubPkg.getPath(),
                             mPm.mUserManager.getUserIds() /*allUserHandles*/,
                             null /*origUserHandles*/,
-                            true /*writeSettings*/,
-                            Process.INVALID_UID /*previousAppId*/);
+                            true /*writeSettings*/);
                 } catch (PackageManagerException pme) {
                     // Serious WTF; we have to be able to install the stub
                     Slog.wtf(TAG, "Failed to restore system package:" + stubPkg.getPackageName(),
@@ -3154,10 +3145,8 @@ final class InstallPackageHelper {
         try {
             synchronized (mPm.mInstallLock) {
                 final int[] origUsers = outInfo == null ? null : outInfo.mOrigUsers;
-                final int previousAppId = disabledPs.getAppId() != deletedPs.getAppId()
-                        ? deletedPs.getAppId() : Process.INVALID_UID;
                 installPackageFromSystemLIF(disabledPs.getPathString(), allUserHandles,
-                        origUsers, writeSettings, previousAppId);
+                        origUsers, writeSettings);
             }
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
@@ -3200,7 +3189,7 @@ final class InstallPackageHelper {
     @GuardedBy("mPm.mInstallLock")
     private void installPackageFromSystemLIF(@NonNull String codePathString,
             @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
-            boolean writeSettings, int previousAppId)
+            boolean writeSettings)
             throws PackageManagerException {
         final File codePath = new File(codePathString);
         @ParsingPackageUtils.ParseFlags int parseFlags =
@@ -3223,13 +3212,12 @@ final class InstallPackageHelper {
 
         mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
 
-        setPackageInstalledForSystemPackage(pkg, allUserHandles,
-                origUserHandles, writeSettings, previousAppId);
+        setPackageInstalledForSystemPackage(pkg, allUserHandles, origUserHandles, writeSettings);
     }
 
     private void setPackageInstalledForSystemPackage(@NonNull AndroidPackage pkg,
             @NonNull int[] allUserHandles, @Nullable int[] origUserHandles,
-            boolean writeSettings, int previousAppId) {
+            boolean writeSettings) {
         // writer
         synchronized (mPm.mLock) {
             PackageSetting ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
@@ -3263,7 +3251,7 @@ final class InstallPackageHelper {
 
             // The method below will take care of removing obsolete permissions and granting
             // install permissions.
-            mPm.mPermissionManager.onPackageInstalled(pkg, previousAppId,
+            mPm.mPermissionManager.onPackageInstalled(pkg, Process.INVALID_UID,
                     PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
                     UserHandle.USER_ALL);
             for (final int userId : allUserHandles) {
@@ -3701,7 +3689,14 @@ final class InstallPackageHelper {
             }
             disabledPkgSetting = mPm.mSettings.getDisabledSystemPkgLPr(
                     parsedPackage.getPackageName());
-            if (parsedPackage.getSharedUserId() != null && !parsedPackage.isLeavingSharedUid()) {
+
+            boolean ignoreSharedUserId = false;
+            if (installedPkgSetting == null) {
+                // We can directly ignore sharedUserSetting for new installs
+                ignoreSharedUserId = parsedPackage.isLeavingSharedUid();
+            }
+
+            if (!ignoreSharedUserId && parsedPackage.getSharedUserId() != null) {
                 sharedUserSetting = mPm.mSettings.getSharedUserLPw(
                         parsedPackage.getSharedUserId(),
                         0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);

@@ -21,6 +21,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -116,7 +117,8 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         if (mView != null) {
             mView.updateEmergencyCallButton(
                     mTelecomManager != null && mTelecomManager.isInCall(),
-                    mTelephonyManager.isVoiceCapable(),
+                    getContext().getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_TELEPHONY),
                     mKeyguardUpdateMonitor.isSimPinVoiceSecure());
         }
     }

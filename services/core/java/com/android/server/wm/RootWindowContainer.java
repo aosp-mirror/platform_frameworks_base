@@ -149,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
@@ -2750,57 +2751,62 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             @Nullable ActivityOptions options, @Nullable Task candidateTask,
             @Nullable Task sourceTask, boolean onTop,
             @Nullable LaunchParamsController.LaunchParams launchParams, int launchFlags) {
-        int taskId = INVALID_TASK_ID;
-        int displayId = INVALID_DISPLAY;
-        TaskDisplayArea taskDisplayArea = null;
-
-        // We give preference to the launch preference in activity options.
+        // First preference goes to the launch root task set in the activity options.
         if (options != null) {
-            taskId = options.getLaunchTaskId();
-            displayId = options.getLaunchDisplayId();
-            final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
-            taskDisplayArea = daToken != null
-                    ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
-
-            final Task rootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
-            if (rootTask != null) {
-                return rootTask;
+            final Task candidateRoot = Task.fromWindowContainerToken(options.getLaunchRootTask());
+            if (canLaunchOnDisplay(r, candidateRoot)) {
+                return candidateRoot;
             }
         }
 
-        // First preference for root task goes to the task Id set in the activity options. Use
-        // the root task associated with that if possible.
-        if (taskId != INVALID_TASK_ID) {
-            // Temporarily set the task id to invalid in case in re-entry.
-            options.setLaunchTaskId(INVALID_TASK_ID);
-            final Task task = anyTaskForId(taskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
-            options.setLaunchTaskId(taskId);
-            if (task != null) {
-                return task.getRootTask();
+        // Next preference goes to the task id set in the activity options.
+        if (options != null) {
+            final int candidateTaskId = options.getLaunchTaskId();
+            if (candidateTaskId != INVALID_TASK_ID) {
+                // Temporarily set the task id to invalid in case in re-entry.
+                options.setLaunchTaskId(INVALID_TASK_ID);
+                final Task task = anyTaskForId(candidateTaskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
+                options.setLaunchTaskId(candidateTaskId);
+                if (canLaunchOnDisplay(r, task)) {
+                    return task.getRootTask();
+                }
+            }
+        }
+
+        // Next preference goes to the TaskDisplayArea candidate from launchParams
+        // or activity options.
+        TaskDisplayArea taskDisplayArea = null;
+        if (launchParams != null && launchParams.mPreferredTaskDisplayArea != null) {
+            taskDisplayArea = launchParams.mPreferredTaskDisplayArea;
+        } else if (options != null) {
+            final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
+            taskDisplayArea = daToken != null
+                    ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+            if (taskDisplayArea == null) {
+                final int launchDisplayId = options.getLaunchDisplayId();
+                if (launchDisplayId != INVALID_DISPLAY) {
+                    final DisplayContent displayContent = getDisplayContent(launchDisplayId);
+                    if (displayContent != null) {
+                        taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
+                    }
+                }
             }
         }
 
         final int activityType = resolveActivityType(r, options, candidateTask);
-        Task rootTask = null;
-
-        // Next preference for root task goes to the taskDisplayArea candidate.
-        if (launchParams != null && launchParams.mPreferredTaskDisplayArea != null
-                && canLaunchOnDisplay(r, launchParams.mPreferredTaskDisplayArea.getDisplayId())) {
-            taskDisplayArea = launchParams.mPreferredTaskDisplayArea;
-        }
-        if (taskDisplayArea == null && displayId != INVALID_DISPLAY
-                && canLaunchOnDisplay(r, displayId)) {
-            taskDisplayArea = getDisplayContent(displayId).getDefaultTaskDisplayArea();
-        }
         if (taskDisplayArea != null) {
-            return taskDisplayArea.getOrCreateRootTask(r, options, candidateTask,
-                    sourceTask, launchParams, launchFlags, activityType, onTop);
+            if (canLaunchOnDisplay(r, taskDisplayArea.getDisplayId())) {
+                return taskDisplayArea.getOrCreateRootTask(r, options, candidateTask,
+                        sourceTask, launchParams, launchFlags, activityType, onTop);
+            } else {
+                taskDisplayArea = null;
+            }
         }
 
         // Give preference to the root task and display of the input task and activity if they
         // match the mode we want to launch into.
-        TaskDisplayArea container = null;
+        Task rootTask = null;
         if (candidateTask != null) {
             rootTask = candidateTask.getRootTask();
         }
@@ -2810,10 +2816,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         int windowingMode = launchParams != null ? launchParams.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         if (rootTask != null) {
-            container = rootTask.getDisplayArea();
-            if (container != null && canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
+            taskDisplayArea = rootTask.getDisplayArea();
+            if (taskDisplayArea != null
+                    && canLaunchOnDisplay(r, taskDisplayArea.mDisplayContent.mDisplayId)) {
                 if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    windowingMode = container.resolveWindowingMode(r, options, candidateTask);
+                    windowingMode = taskDisplayArea.resolveWindowingMode(r, options, candidateTask);
                 }
                 // Always allow organized tasks that created by organizer since the activity type
                 // of an organized task is decided by the activity type of its top child, which
@@ -2822,19 +2829,32 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         || rootTask.mCreatedByOrganizer) {
                     return rootTask;
                 }
+            } else {
+                taskDisplayArea = null;
             }
+
         }
 
-        if (container == null
-                || !canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
-            container = getDefaultTaskDisplayArea();
-            if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                windowingMode = container.resolveWindowingMode(r, options, candidateTask);
-            }
+        // Falling back to default task container
+        if (taskDisplayArea == null) {
+            taskDisplayArea = getDefaultTaskDisplayArea();
+        }
+        return taskDisplayArea.getOrCreateRootTask(r, options, candidateTask, sourceTask,
+                launchParams, launchFlags, activityType, onTop);
+    }
+
+    private boolean canLaunchOnDisplay(ActivityRecord r, Task task) {
+        if (task == null) {
+            Slog.w(TAG, "canLaunchOnDisplay(), invalid task: " + task);
+            return false;
         }
 
-        return container.getOrCreateRootTask(r, options, candidateTask, sourceTask, launchParams,
-                launchFlags, activityType, onTop);
+        if (!task.isAttached()) {
+            Slog.w(TAG, "canLaunchOnDisplay(), Task is not attached: " + task);
+            return false;
+        }
+
+        return canLaunchOnDisplay(r, task.getTaskDisplayArea().getDisplayId());
     }
 
     /** @return true if activity record is null or can be launched on provided display. */
@@ -2842,7 +2862,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (r == null) {
             return true;
         }
-        return r.canBeLaunchedOnDisplay(displayId);
+        if (!r.canBeLaunchedOnDisplay(displayId)) {
+            Slog.w(TAG, "Not allow to launch " + r + " on display " + displayId);
+            return false;
+        }
+        return true;
     }
 
     int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
@@ -3306,6 +3330,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         mService.startLaunchPowerMode(reason);
+    }
+
+    /**
+     * Iterate over all task fragments, to see if there exists one that meets the
+     * PermissionPolicyService's criteria to show a permission dialog.
+     */
+    public int getTaskToShowPermissionDialogOn(String pkgName, int uid) {
+        PermissionPolicyInternal pPi = mService.getPermissionPolicyInternal();
+        if (pPi == null) {
+            return INVALID_TASK_ID;
+        }
+
+        final int[] validTaskId = {INVALID_TASK_ID};
+        forAllLeafTaskFragments(fragment -> {
+            ActivityRecord record = fragment.getActivity((r) -> {
+                // skip hidden (or about to hide) apps, or the permission dialog
+                return r.canBeTopRunning() && r.isVisibleRequested()
+                        && !pPi.isIntentToPermissionDialog(r.intent);
+            });
+            if (record != null && record.isUid(uid)
+                    && Objects.equals(pkgName, record.packageName)
+                    && pPi.shouldShowNotificationDialogForTask(record.getTask().getTaskInfo(),
+                    pkgName, record.intent)) {
+                validTaskId[0] = record.getTask().mTaskId;
+                return true;
+            }
+            return false;
+        });
+
+        return validTaskId[0];
     }
 
     /**

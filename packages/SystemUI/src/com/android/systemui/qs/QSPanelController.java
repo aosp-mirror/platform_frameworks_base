@@ -199,9 +199,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     /** */
     public void setListening(boolean listening, boolean expanded) {
-        // TODO(218268829): checking for split shade is workaround but when proper fix lands
-        //  "|| mShouldUseSplitNotificationShade" should be removed
-        setListening(listening && (expanded || mShouldUseSplitNotificationShade));
+        setListening(listening && expanded);
         if (mView.isListening()) {
             refreshAllTiles();
         }

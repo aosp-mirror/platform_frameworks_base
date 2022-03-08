@@ -38,6 +38,12 @@
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
+    <!-- Apps permission will be granted of APP_STREAMING profile [CHAR LIMIT=30] -->
+    <string name="permission_apps">Apps</string>
+
+    <!-- Description of apps permission of APP_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="permission_apps_summary">Stream your phone\u2019s apps</string>
+
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information for your phone</string>
 
@@ -71,6 +77,18 @@
 
     <!-- Description of the privileges the application will get if associated with the companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_computer"></string>
+
+    <!-- Notification permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
+    <string name="permission_notification">Notifications</string>
+
+    <!-- Description of notification permission of COMPUTER profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notification_summary">Can read all notifications, including information like contracts, messages, and photos</string>
+
+    <!-- Storage permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
+    <string name="permission_storage">Photos and media</string>
+
+    <!-- Description of storage permission of COMPUTER profile [CHAR LIMIT=NONE] -->
+    <string name="permission_storage_summary"></string>
 
     <!-- Title of the helper dialog for COMPUTER profile [CHAR LIMIT=30]. -->
     <string name="helper_title_computer">Google Play services</string>

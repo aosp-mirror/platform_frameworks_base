@@ -1421,17 +1421,9 @@ public class ActivityOptions extends ComponentOptions {
         return mRemoteTransition;
     }
 
-    /**
-     * Creates an ActivityOptions from the Bundle generated from {@link ActivityOptions#toBundle()}.
-     * Returns an instance of ActivityOptions populated with options with known keys from the
-     * provided Bundle, stripping out unknown entries.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    @NonNull
-    public static ActivityOptions fromBundle(@NonNull Bundle bOptions) {
-        return new ActivityOptions(bOptions);
+    /** @hide */
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
 
     /** @hide */

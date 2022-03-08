@@ -183,6 +183,8 @@ public final class CachedAppOptimizer {
 
     private final ActivityManagerGlobalLock mProcLock;
 
+    private final Object mFreezerLock = new Object();
+
     private final OnPropertiesChangedListener mOnFlagsChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -949,8 +951,8 @@ public final class CachedAppOptimizer {
         }
     }
 
-    @GuardedBy({"mAm", "mProcLock"})
-    void unfreezeAppLSP(ProcessRecord app) {
+    @GuardedBy({"mAm", "mProcLock", "mFreezerLock"})
+    void unfreezeAppInternalLSP(ProcessRecord app) {
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
@@ -1032,6 +1034,42 @@ public final class CachedAppOptimizer {
                         pid,
                         (int) Math.min(opt.getFreezeUnfreezeTime() - freezeTime, Integer.MAX_VALUE),
                         app.processName));
+        }
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
+    void unfreezeAppLSP(ProcessRecord app) {
+        synchronized (mFreezerLock) {
+            unfreezeAppInternalLSP(app);
+        }
+    }
+
+    /**
+     * This quick function works around the race condition between WM/ATMS and AMS, allowing
+     * the former to directly unfreeze a frozen process before the latter runs updateOomAdj.
+     * After the race issue is solved, this workaround can be removed. (b/213288355)
+     * @param pid pid of the process to be unfrozen
+     */
+    @GuardedBy({"mFreezerLock"})
+    void unfreezeProcess(int pid) {
+        synchronized (mFreezerLock) {
+            ProcessRecord app = mFrozenProcesses.get(pid);
+            if (app == null) {
+                return;
+            }
+            Slog.i(TAG_AM, "quick sync unfreeze " + pid);
+            try {
+                freezeBinder(pid, false);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze binder for " + pid);
+                return;
+            }
+
+            try {
+                Process.setProcessFrozen(pid, app.uid, false);
+            } catch (Exception e) {
+                Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
+            }
         }
     }
 
@@ -1463,8 +1501,6 @@ public final class CachedAppOptimizer {
             if (!frozen) {
                 return;
             }
-
-            Slog.d(TAG_AM, "froze " + pid + " " + name);
 
             EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
 

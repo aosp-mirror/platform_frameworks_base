@@ -1136,19 +1136,23 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void onExternalVibration_setsExternalControl() {
+    public void onExternalVibration_setsExternalControl() throws Exception {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
         createSystemReadyService();
 
+        IBinder binderToken = mock(IBinder.class);
         ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
-                mock(IExternalVibrationController.class));
+                mock(IExternalVibrationController.class), binderToken);
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
         assertEquals(Arrays.asList(false, true, false),
                 mVibratorProviders.get(1).getExternalControlStates());
+
+        verify(binderToken).linkToDeath(any(), eq(0));
+        verify(binderToken).unlinkToDeath(any(), eq(0));
     }
 
     @Test
@@ -1160,17 +1164,19 @@ public class VibratorManagerServiceTest {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         createSystemReadyService();
 
+        IBinder firstToken = mock(IBinder.class);
+        IBinder secondToken = mock(IBinder.class);
         IExternalVibrationController firstController = mock(IExternalVibrationController.class);
         IExternalVibrationController secondController = mock(IExternalVibrationController.class);
         ExternalVibration firstVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
-                firstController);
+                firstController, firstToken);
         int firstScale = mExternalVibratorService.onExternalVibrationStart(firstVibration);
 
         AudioAttributes ringtoneAudioAttrs = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .build();
         ExternalVibration secondVibration = new ExternalVibration(UID, PACKAGE_NAME,
-                ringtoneAudioAttrs, secondController);
+                ringtoneAudioAttrs, secondController, secondToken);
         int secondScale = mExternalVibratorService.onExternalVibrationStart(secondVibration);
 
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, firstScale);
@@ -1180,6 +1186,17 @@ public class VibratorManagerServiceTest {
         // Set external control called only once.
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
+
+        mExternalVibratorService.onExternalVibrationStop(secondVibration);
+        mExternalVibratorService.onExternalVibrationStop(firstVibration);
+        assertEquals(Arrays.asList(false, true, false),
+                mVibratorProviders.get(1).getExternalControlStates());
+
+        verify(firstToken).linkToDeath(any(), eq(0));
+        verify(firstToken).unlinkToDeath(any(), eq(0));
+
+        verify(secondToken).linkToDeath(any(), eq(0));
+        verify(secondToken).unlinkToDeath(any(), eq(0));
     }
 
     @Test

@@ -30,12 +30,16 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.media.INearbyMediaDevicesUpdateCallback;
 import android.media.MediaMetadata;
 import android.media.MediaRoute2Info;
+import android.media.NearbyDevice;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -61,6 +65,7 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -70,6 +75,9 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
@@ -77,7 +85,8 @@ import javax.inject.Inject;
 /**
  * Controller for media output dialog
  */
-public class MediaOutputController implements LocalMediaManager.DeviceCallback {
+public class MediaOutputController implements LocalMediaManager.DeviceCallback,
+        INearbyMediaDevicesUpdateCallback {
 
     private static final String TAG = "MediaOutputController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -95,6 +104,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final CommonNotifCollection mNotifCollection;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
+    private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
     private MediaController mMediaController;
     @VisibleForTesting
@@ -116,7 +127,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
             CommonNotifCollection notifCollection, UiEventLogger uiEventLogger,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogLaunchAnimator dialogLaunchAnimator,
+            Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -130,6 +142,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
         mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_active_item_main_content);
         mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
@@ -144,6 +157,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
 
     void start(@NonNull Callback cb) {
         mMediaDevices.clear();
+        mNearbyDeviceInfoMap.clear();
+        if (mNearbyMediaDevicesManager != null) {
+            mNearbyMediaDevicesManager.registerNearbyDevicesCallback(this);
+        }
         if (!TextUtils.isEmpty(mPackageName)) {
             for (MediaController controller : mMediaSessionManager.getActiveSessions(null)) {
                 if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
@@ -187,6 +204,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             mLocalMediaManager.stopScan();
         }
         mMediaDevices.clear();
+        if (mNearbyMediaDevicesManager != null) {
+            mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
+        }
+        mNearbyDeviceInfoMap.clear();
     }
 
     @Override
@@ -417,6 +438,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         }
         mMediaDevices.clear();
         mMediaDevices.addAll(targetMediaDevices);
+        attachRangeInfo();
+    }
+
+    private void attachRangeInfo() {
+        for (MediaDevice mediaDevice : mMediaDevices) {
+            if (mNearbyDeviceInfoMap.containsKey(mediaDevice.getId())) {
+                mediaDevice.setRangeZone(mNearbyDeviceInfoMap.get(mediaDevice.getId()));
+            }
+        }
     }
 
     List<MediaDevice> getGroupMediaDevices() {
@@ -604,7 +634,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         // We show the output group dialog from the output dialog.
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mAboveStatusbar, mMediaSessionManager, mLocalBluetoothManager, mShadeController,
-                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator);
+                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager));
+
         MediaOutputGroupDialog dialog = new MediaOutputGroupDialog(mContext, mAboveStatusbar,
                 controller);
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
@@ -627,6 +659,20 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     boolean isVolumeControlEnabled(@NonNull MediaDevice device) {
         return isPlayBackInfoLocal()
                 || mLocalMediaManager.isMediaSessionAvailableForVolumeControl();
+    }
+
+    @Override
+    public void onDevicesUpdated(List<NearbyDevice> nearbyDevices) throws RemoteException {
+        mNearbyDeviceInfoMap.clear();
+        for (NearbyDevice nearbyDevice : nearbyDevices) {
+            mNearbyDeviceInfoMap.put(nearbyDevice.getMediaRoute2Id(), nearbyDevice.getRangeZone());
+        }
+        mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
+    }
+
+    @Override
+    public IBinder asBinder() {
+        return null;
     }
 
     private final MediaController.Callback mCb = new MediaController.Callback() {
