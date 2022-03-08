@@ -1217,7 +1217,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mDefaultBgCurrentDrainBgRestrictedThreshold =
                     isLowRamDeviceStatic() ? val[1] : val[0];
             mDefaultBgCurrentDrainWindowMs = resources.getInteger(
-                    R.integer.config_bg_current_drain_window);
+                    R.integer.config_bg_current_drain_window) * 1_000;
             val = getFloatArray(resources.obtainTypedArray(
                     R.array.config_bg_current_drain_high_threshold_to_restricted_bucket));
             mDefaultBgCurrentDrainRestrictedBucketHighThreshold =
@@ -1227,9 +1227,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mDefaultBgCurrentDrainBgRestrictedHighThreshold =
                     isLowRamDeviceStatic() ? val[1] : val[0];
             mDefaultBgCurrentDrainMediaPlaybackMinDuration = resources.getInteger(
-                    R.integer.config_bg_current_drain_media_playback_min_duration);
+                    R.integer.config_bg_current_drain_media_playback_min_duration) * 1_000;
             mDefaultBgCurrentDrainLocationMinDuration = resources.getInteger(
-                    R.integer.config_bg_current_drain_location_min_duration);
+                    R.integer.config_bg_current_drain_location_min_duration) * 1_000;
             mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled = resources.getBoolean(
                     R.bool.config_bg_current_drain_event_duration_based_threshold_enabled);
             mDefaultCurrentDrainTypesToRestrictedBucket = resources.getInteger(
