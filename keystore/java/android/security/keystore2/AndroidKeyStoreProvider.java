@@ -83,10 +83,12 @@ public class AndroidKeyStoreProvider extends Provider {
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyStoreKeyPairGeneratorSpi$EC");
         put("KeyPairGenerator.RSA", PACKAGE_NAME +  ".AndroidKeyStoreKeyPairGeneratorSpi$RSA");
+        put("KeyPairGenerator.XDH", PACKAGE_NAME +  ".AndroidKeyStoreKeyPairGeneratorSpi$XDH");
 
         // java.security.KeyFactory
         putKeyFactoryImpl("EC");
         putKeyFactoryImpl("RSA");
+        putKeyFactoryImpl("XDH");
 
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$AES");
