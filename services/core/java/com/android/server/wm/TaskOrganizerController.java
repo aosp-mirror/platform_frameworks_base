@@ -250,7 +250,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // possible.
             while (!mOrganizedTasks.isEmpty()) {
                 final Task t = mOrganizedTasks.get(0);
-                t.updateTaskOrganizerState(true /* forceUpdate */);
+                if (t.mCreatedByOrganizer) {
+                    // The tasks created by this organizer should ideally be deleted when this
+                    // organizer is disposed off to avoid inconsistent behavior.
+                    t.removeImmediately();
+                } else {
+                    t.updateTaskOrganizerState(true /* forceUpdate */);
+                }
                 if (mOrganizedTasks.contains(t)) {
                     // updateTaskOrganizerState should remove the task from the list, but still
                     // check it again to avoid while-loop isn't terminate.
