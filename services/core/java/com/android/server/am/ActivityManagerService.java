@@ -13804,14 +13804,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return false;
             }
 
-            if (!Build.IS_DEBUGGABLE) {
-                int match = mContext.getPackageManager().checkSignatures(
-                        ii.targetPackage, ii.packageName);
-                if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
+            int match = mContext.getPackageManager().checkSignatures(
+                    ii.targetPackage, ii.packageName);
+            if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
+                if (Build.IS_DEBUGGABLE) {
+                    String message = "Instrumentation test " + ii.packageName
+                            + " doesn't have a signature matching the target "
+                            + ii.targetPackage
+                            + ", which would not be allowed on the production Android builds";
+                    if (callingUid != Process.ROOT_UID) {
+                        Slog.e(TAG, message
+                                + ". THIS WILL BE DISALLOWED ON FUTURE ANDROID VERSIONS"
+                                + " unless from a rooted ADB shell.");
+                    } else {
+                        Slog.w(TAG, message);
+                    }
+                } else {
                     String msg = "Permission Denial: starting instrumentation "
                             + className + " from pid="
                             + Binder.getCallingPid()
-                            + ", uid=" + Binder.getCallingPid()
+                            + ", uid=" + Binder.getCallingUid()
                             + " not allowed because package " + ii.packageName
                             + " does not have a signature matching the target "
                             + ii.targetPackage;
