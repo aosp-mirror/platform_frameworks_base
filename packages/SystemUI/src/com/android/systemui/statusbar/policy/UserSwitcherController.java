@@ -982,9 +982,9 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                iconRes = R.drawable.ic_account_circle;
-            } else if (item.isGuest) {
                 iconRes = R.drawable.ic_account_circle_filled;
+            } else if (item.isGuest) {
+                iconRes = R.drawable.ic_account_circle;
             } else if (item.isAddSupervisedUser) {
                 iconRes = R.drawable.ic_add_supervised_user;
             } else {
