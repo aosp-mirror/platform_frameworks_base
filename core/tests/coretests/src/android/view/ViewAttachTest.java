@@ -92,4 +92,43 @@ public class ViewAttachTest extends
             assertFalse(shouldDrawRoundScrollbars);
         }
     }
+
+    /**
+     * Make sure that on any attached view, if the view is full-screen and hosted
+     * on a round device, the round scrollbars will be displayed even if the activity
+     * window is offset.
+     *
+     * @throws Throwable
+     */
+    @UiThreadTest
+    public void testRoundScrollbarsWithMargins() throws Throwable {
+        final ViewAttachTestActivity activity = getActivity();
+        final View rootView = activity.getWindow().getDecorView();
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                    rootView.getWidth(),
+                    rootView.getHeight(),
+                    50, /* xPosition */
+                    0, /* yPosition */
+                    WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                    PixelFormat.TRANSLUCENT);
+
+        rootView.setLayoutParams(params);
+
+        // Configure margins to make sure they don't cause issues configuring rounded scrollbars.
+        final ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(1, 1);
+        lp.setMargins(1, 2, 3, 4);
+        rootView.setLayoutParams(lp);
+
+        View contentView = activity.findViewById(R.id.view_attach_view);
+        boolean shouldDrawRoundScrollbars = contentView.shouldDrawRoundScrollbar();
+
+        if (activity.getResources().getConfiguration().isScreenRound()) {
+            assertTrue(shouldDrawRoundScrollbars);
+        } else {
+            // Never draw round scrollbars on non-round devices.
+            assertFalse(shouldDrawRoundScrollbars);
+        }
+    }
 }
