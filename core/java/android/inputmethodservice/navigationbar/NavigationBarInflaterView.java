@@ -398,7 +398,7 @@ public final class NavigationBarInflaterView extends FrameLayout {
                 mButtonDispatchers.valueAt(indexOfKey).addView(v);
             }
             if (v instanceof ViewGroup) {
-                final ViewGroup viewGroup = (ViewGroup)v;
+                final ViewGroup viewGroup = (ViewGroup) v;
                 final int N = viewGroup.getChildCount();
                 for (int i = 0; i < N; i++) {
                     addToDispatchers(viewGroup.getChildAt(i));

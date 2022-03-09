@@ -200,8 +200,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int)ev.getRawX();
-                y = (int)ev.getRawY();
+                x = (int) ev.getRawX();
+                y = (int) ev.getRawY();
 
                 float slop = getQuickStepTouchSlopPx(getContext());
                 if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {

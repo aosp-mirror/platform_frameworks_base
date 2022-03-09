@@ -211,7 +211,7 @@ public final class NavigationBarView extends FrameLayout {
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
         float targetY = useAltBack
-                ? - dpToPx(NAVBAR_BACK_BUTTON_IME_OFFSET, getResources())
+                ? -dpToPx(NAVBAR_BACK_BUTTON_IME_OFFSET, getResources())
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
                 PropertyValuesHolder.ofFloat(KeyButtonDrawable.KEY_DRAWABLE_ROTATE, degrees),
