@@ -146,6 +146,27 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveContainer_multipleNestedTasks() {
+        final Task rootTask = createTask(mDisplayContent);
+        rootTask.mCreatedByOrganizer = true;
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final ActivityRecord activity1 = createActivityRecord(task1);
+        final ActivityRecord activity2 = createActivityRecord(task2);
+        activity1.setVisible(false);
+
+        // All activities under the root task should be finishing.
+        rootTask.remove(true /* withTransition */, "test");
+        assertTrue(activity1.finishing);
+        assertTrue(activity2.finishing);
+
+        // After all activities activities are destroyed, the root task should also be removed.
+        activity1.removeImmediately();
+        activity2.removeImmediately();
+        assertFalse(rootTask.isAttached());
+    }
+
+    @Test
     public void testRemoveContainer_deferRemoval() {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
