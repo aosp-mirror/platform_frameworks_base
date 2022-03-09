@@ -895,7 +895,7 @@ void SetThreadName(const std::string& thread_name) {
 
   // pthread_setname_np fails rather than truncating long strings.
   char buf[16];       // MAX_TASK_COMM_LEN=16 is hard-coded into bionic
-  strlcpy(buf, name_start_ptr, sizeof(buf) - 1);
+  strlcpy(buf, name_start_ptr, sizeof(buf));
   errno = pthread_setname_np(pthread_self(), buf);
   if (errno != 0) {
     ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
