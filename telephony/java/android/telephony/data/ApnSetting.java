@@ -118,11 +118,9 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_VSIM = 1 << 12;  // TODO: Refer to ApnTypes.VSIM
     /** APN type for BIP. */
     public static final int TYPE_BIP = 1 << 13;   // TODO: Refer to ApnTypes.BIP
-    /**
-     * APN type for ENTERPRISE.
-     * @hide
-     */
-    public static final int TYPE_ENTERPRISE = TYPE_BIP << 1;
+    /** APN type for ENTERPRISE. */
+    public static final int TYPE_ENTERPRISE = 1 << 14; //TODO: In future should be referenced from
+    // hardware.interfaces.radio.data.ApnTypes
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
@@ -355,6 +353,7 @@ public class ApnSetting implements Parcelable {
      * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_ENTERPRISE_STRING = "enterprise";
 
 
