@@ -47,6 +47,9 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void sendMessage(SipMessage sipMessage, long configVersion) {
             SipDelegate d = mDelegate;
+            if (d == null) {
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.sendMessage(sipMessage, configVersion));
@@ -58,6 +61,9 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void notifyMessageReceived(String viaTransactionId)  {
             SipDelegate d = mDelegate;
+            if (d == null) {
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.notifyMessageReceived(viaTransactionId));
@@ -70,6 +76,9 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void notifyMessageReceiveError(String viaTransactionId, int reason) {
             SipDelegate d = mDelegate;
+            if (d == null) {
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.notifyMessageReceiveError(viaTransactionId, reason));
@@ -82,6 +91,9 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
         @Override
         public void cleanupSession(String callId)  {
             SipDelegate d = mDelegate;
+            if (d == null) {
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> d.cleanupSession(callId));
