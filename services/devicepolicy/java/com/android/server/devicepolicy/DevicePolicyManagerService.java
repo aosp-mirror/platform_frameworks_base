@@ -8469,20 +8469,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.getPackageName(), userId, "set-device-owner");
 
             Slogf.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
-
-            if (setProfileOwnerOnCurrentUserIfNecessary
-                    && mInjector.userManagerIsHeadlessSystemUserMode()) {
-                int currentForegroundUser = getCurrentForegroundUserId();
-                Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
-                        + " as profile owner on user " + currentForegroundUser);
-                // Sets profile owner on current foreground user since
-                // the human user will complete the DO setup workflow from there.
-                manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                        /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
-                        /* showDisclaimer= */ false);
-            }
-            return true;
         }
+
+        if (setProfileOwnerOnCurrentUserIfNecessary
+                && mInjector.userManagerIsHeadlessSystemUserMode()) {
+            int currentForegroundUser;
+            synchronized (getLockObject()) {
+                currentForegroundUser = getCurrentForegroundUserId();
+            }
+            Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
+                    + " as profile owner on user " + currentForegroundUser);
+            // Sets profile owner on current foreground user since
+            // the human user will complete the DO setup workflow from there.
+            manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                    /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
+                    /* showDisclaimer= */ false);
+        }
+        return true;
     }
 
     @Override
