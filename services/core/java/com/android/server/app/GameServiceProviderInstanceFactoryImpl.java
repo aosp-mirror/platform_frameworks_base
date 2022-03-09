@@ -18,6 +18,7 @@ package com.android.server.app;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +53,7 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
                 mContext,
                 new GameClassifierImpl(mContext.getPackageManager()),
                 ActivityManager.getService(),
+                LocalServices.getService(ActivityManagerInternal.class),
                 ActivityTaskManager.getService(),
                 (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
                 LocalServices.getService(WindowManagerInternal.class),
