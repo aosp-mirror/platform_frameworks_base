@@ -21,6 +21,7 @@ import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STA
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateRequest;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
@@ -51,11 +52,15 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private final ArraySet<Consumer<Integer>> mRearDisplayStatusListeners = new ArraySet<>();
     private final int mRearDisplayState;
+    @WindowAreaSessionState
+    private int mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
 
     @GuardedBy("mLock")
     private int mCurrentDeviceState = INVALID_DEVICE_STATE;
     @GuardedBy("mLock")
     private int mCurrentDeviceBaseState = INVALID_DEVICE_STATE;
+    @GuardedBy("mLock")
+    private DeviceStateRequest mDeviceStateRequest;
 
     public WindowAreaComponentImpl(@NonNull Context context) {
         mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
@@ -77,8 +82,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      * Depending on the initial state of the device, we will return either
      * {@link WindowAreaComponent#STATUS_AVAILABLE} or
      * {@link WindowAreaComponent#STATUS_UNAVAILABLE} if the feature is supported or not in that
-     * state respectively. When the RearDisplay feature is triggered, we update the status to be
-     * {@link WindowAreaComponent#STATUS_UNAVAILABLE}.
+     * state respectively. When the rear display feature is triggered, we update the status to be
+     * {@link WindowAreaComponent#STATUS_UNAVAILABLE}. TODO(b/240727590) Prefix with AREA_
      *
      * TODO(b/239833099) Add a STATUS_ACTIVE option to let apps know if a feature is currently
      * enabled.
@@ -111,7 +116,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     }
 
     /**
-     * Creates and starts a RearDisplaySession and provides updates to the
+     * Creates and starts a rear display session and provides updates to the
      * callback provided. Because this is being called from the OEM provided
      * extensions, we will post the result of the listener on the executor
      * provided by the developer at the initial call site.
@@ -129,23 +134,46 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      */
     public void startRearDisplaySession(@NonNull Activity activity,
             @NonNull Consumer<@WindowAreaSessionState Integer> rearDisplaySessionCallback) {
-        // Todo("Adding in chained cl")
+        synchronized (mLock) {
+            if (mDeviceStateRequest != null) {
+                // Rear display session is already active
+                throw new IllegalStateException(
+                        "Unable to start new rear display session as one is already active");
+            }
+            mDeviceStateRequest = DeviceStateRequest.newBuilder(mRearDisplayState).build();
+            mDeviceStateManager.requestState(
+                    mDeviceStateRequest,
+                    mExecutor,
+                    new DeviceStateRequestCallbackAdapter(rearDisplaySessionCallback)
+            );
+        }
     }
 
     /**
-     * Ends the current RearDisplaySession and provides updates to the
+     * Ends the current rear display session and provides updates to the
      * callback provided. Because this is being called from the OEM provided
      * extensions, we will post the result of the listener on the executor
      * provided by the developer.
      */
     public void endRearDisplaySession() {
-        // Todo("Adding in chained cl")
+        synchronized (mLock) {
+            if (mDeviceStateRequest != null || isRearDisplayActive()) {
+                mDeviceStateRequest = null;
+                mDeviceStateManager.cancelStateRequest();
+            } else {
+                throw new IllegalStateException(
+                        "Unable to cancel a rear display session as there is no active session");
+            }
+        }
     }
 
     @Override
     public void onBaseStateChanged(int state) {
         synchronized (mLock) {
             mCurrentDeviceBaseState = state;
+            if (state == mCurrentDeviceState) {
+                updateStatusConsumers(getCurrentStatus());
+            }
         }
     }
 
@@ -159,7 +187,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentStatus() {
-        if (isRearDisplayActive()) {
+        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
+                || isRearDisplayActive()) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
         return WindowAreaComponent.STATUS_AVAILABLE;
@@ -183,6 +212,43 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         synchronized (mLock) {
             for (int i = 0; i < mRearDisplayStatusListeners.size(); i++) {
                 mRearDisplayStatusListeners.valueAt(i).accept(windowAreaStatus);
+            }
+        }
+    }
+
+    /**
+     * Callback for the {@link DeviceStateRequest} to be notified of when the request has been
+     * activated or cancelled. This callback provides information to the client library
+     * on the status of the RearDisplay session through {@code mRearDisplaySessionCallback}
+     */
+    private class DeviceStateRequestCallbackAdapter implements DeviceStateRequest.Callback {
+
+        private final Consumer<Integer> mRearDisplaySessionCallback;
+
+        DeviceStateRequestCallbackAdapter(@NonNull Consumer<Integer> callback) {
+            mRearDisplaySessionCallback = callback;
+        }
+
+        @Override
+        public void onRequestActivated(@NonNull DeviceStateRequest request) {
+            synchronized (mLock) {
+                if (request.equals(mDeviceStateRequest)) {
+                    mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_ACTIVE;
+                    mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
+                    updateStatusConsumers(getCurrentStatus());
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCanceled(DeviceStateRequest request) {
+            synchronized (mLock) {
+                if (request.equals(mDeviceStateRequest)) {
+                    mDeviceStateRequest = null;
+                }
+                mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
+                mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
+                updateStatusConsumers(getCurrentStatus());
             }
         }
     }
