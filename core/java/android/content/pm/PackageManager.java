@@ -4262,8 +4262,9 @@ public abstract class PackageManager {
      * for more details.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String EXTRA_VERIFICATION_ROOT_HASH =
-            "android.content.pm.extra.EXTRA_VERIFICATION_ROOT_HASH";
+            "android.content.pm.extra.VERIFICATION_ROOT_HASH";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.
