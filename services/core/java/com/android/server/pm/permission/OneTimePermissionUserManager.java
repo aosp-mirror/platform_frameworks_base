@@ -272,6 +272,10 @@ public class OneTimePermissionUserManager {
                 mHandler.removeCallbacksAndMessages(mToken);
 
                 if (importance > IMPORTANCE_CACHED) {
+                    if (mRevokeAfterKilledDelay == 0) {
+                        onPackageInactiveLocked();
+                        return;
+                    }
                     // Delay revocation in case app is restarting
                     mHandler.postDelayed(() -> {
                         int imp = mActivityManager.getUidImportance(mUid);
