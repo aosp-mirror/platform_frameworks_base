@@ -1329,8 +1329,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Once the pending enter transition got merged, make sure to bring divider bar visible and
         // clear the pending transition from cache to prevent mess-up the following state.
         if (transition == mSplitTransitions.mPendingEnter) {
-            finishEnterSplitScreen(null);
+            final SurfaceControl.Transaction t = mTransactionPool.acquire();
+            finishEnterSplitScreen(t);
             mSplitTransitions.mPendingEnter = null;
+            t.apply();
+            mTransactionPool.release(t);
         }
     }
 
