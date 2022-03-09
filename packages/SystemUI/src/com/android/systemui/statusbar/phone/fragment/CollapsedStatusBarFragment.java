@@ -20,12 +20,10 @@ import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
-import android.animation.ValueAnimator;
+import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -136,6 +134,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
+    private StatusBarSystemEventAnimator mSystemEventAnimator;
 
     @SuppressLint("ValidFragment")
     public CollapsedStatusBarFragment(
@@ -210,7 +209,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         initEmergencyCryptkeeperText();
         initOperatorName();
         initNotificationIconArea();
-        mAnimationScheduler.addCallback(this);
+        mSystemEventAnimator =
+                new StatusBarSystemEventAnimator(mSystemIconArea, getResources());
     }
 
     @VisibleForTesting
@@ -245,6 +245,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCommandQueue.addCallback(this);
         mStatusBarStateController.addCallback(this);
         initOngoingCallChip();
+        mAnimationScheduler.addCallback(this);
 
         mSecureSettings.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON),
@@ -258,6 +259,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
         mOngoingCallController.removeCallback(mOngoingCallListener);
+        mAnimationScheduler.removeCallback(this);
         mSecureSettings.unregisterContentObserver(mVolumeSettingObserver);
     }
 
@@ -265,7 +267,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroyView() {
         super.onDestroyView();
         mStatusBarIconController.removeIconGroup(mDarkIconManager);
-        mAnimationScheduler.removeCallback(this);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
         }
@@ -576,35 +577,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         disable(getContext().getDisplayId(), mDisabled1, mDisabled2, false /* animate */);
     }
 
+    @Nullable
     @Override
-    public void onSystemChromeAnimationStart() {
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_OUT
-                && !isSystemIconAreaDisabled()) {
-            mSystemIconArea.setVisibility(View.VISIBLE);
-            mSystemIconArea.setAlpha(0f);
-        }
+    public Animator onSystemEventAnimationBegin() {
+        return mSystemEventAnimator.onSystemEventAnimationBegin();
     }
 
+    @Nullable
     @Override
-    public void onSystemChromeAnimationEnd() {
-        // Make sure the system icons are out of the way
-        if (mAnimationScheduler.getAnimationState() == ANIMATING_IN) {
-            mSystemIconArea.setVisibility(View.INVISIBLE);
-            mSystemIconArea.setAlpha(0f);
-        } else {
-            if (isSystemIconAreaDisabled()) {
-                // don't unhide
-                return;
-            }
-
-            mSystemIconArea.setAlpha(1f);
-            mSystemIconArea.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onSystemChromeAnimationUpdate(@NonNull ValueAnimator animator) {
-        mSystemIconArea.setAlpha((float) animator.getAnimatedValue());
+    public Animator onSystemEventAnimationFinish(boolean hasPersistentDot) {
+        return mSystemEventAnimator.onSystemEventAnimationFinish(hasPersistentDot);
     }
 
     private boolean isSystemIconAreaDisabled() {

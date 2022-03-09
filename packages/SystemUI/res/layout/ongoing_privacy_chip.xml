@@ -37,7 +37,5 @@
             android:layout_gravity="center"
             android:minWidth="@dimen/ongoing_appops_chip_min_width"
             android:maxWidth="@dimen/ongoing_appops_chip_max_width"
-            android:clipChildren="false"
-            android:clipToPadding="false"
             />
 </com.android.systemui.privacy.OngoingPrivacyChip>

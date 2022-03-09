@@ -174,7 +174,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateKeyguardStatusBarHeight() {
-        MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
+        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
         lp.height = getStatusBarHeaderHeightKeyguard(mContext);
         setLayoutParams(lp);
     }
@@ -508,28 +508,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
         if (mBatteryView != null) {
             mBatteryView.dump(fd, pw, args);
         }
-    }
-
-    void onSystemChromeAnimationStart(boolean isAnimatingOut) {
-        if (isAnimatingOut) {
-            mSystemIconsContainer.setVisibility(View.VISIBLE);
-            mSystemIconsContainer.setAlpha(0f);
-        }
-    }
-
-    void onSystemChromeAnimationEnd(boolean isAnimatingIn) {
-        // Make sure the system icons are out of the way
-        if (isAnimatingIn) {
-            mSystemIconsContainer.setVisibility(View.INVISIBLE);
-            mSystemIconsContainer.setAlpha(0f);
-        } else {
-            mSystemIconsContainer.setAlpha(1f);
-            mSystemIconsContainer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    void onSystemChromeAnimationUpdate(float animatedValue) {
-        mSystemIconsContainer.setAlpha(animatedValue);
     }
 
     @Override
