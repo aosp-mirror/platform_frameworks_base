@@ -1233,10 +1233,6 @@ public class NotificationStackScrollLayoutController {
         mView.forceNoOverlappingRendering(force);
     }
 
-    public void setTranslationX(float translation) {
-        mView.setTranslationX(translation);
-    }
-
     public void setExpandingVelocity(float velocity) {
         mView.setExpandingVelocity(velocity);
     }
