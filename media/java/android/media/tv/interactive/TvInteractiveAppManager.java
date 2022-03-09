@@ -1813,8 +1813,8 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#notifyTeletextAppStateChanged} is
-         * called.
+         * This is called when {@link TvInteractiveAppService.Session#notifyTeletextAppStateChanged}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          * @param state the current state.
