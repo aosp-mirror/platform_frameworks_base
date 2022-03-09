@@ -182,7 +182,7 @@ public final class AppRestrictionController {
     /**
      * Whether or not to show the foreground service manager on tapping notifications.
      */
-    private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = false;
+    private static final boolean ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER = true;
 
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
@@ -1595,8 +1595,8 @@ public final class AppRestrictionController {
                         cancelRequestBgRestrictedIfNecessary(packageName, uid);
                         final Intent newIntent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
                         newIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                        mContext.sendBroadcastAsUser(newIntent,
-                                UserHandle.of(UserHandle.getUserId(uid)));
+                        // Task manager runs in SystemUI, which is SYSTEM user only.
+                        mContext.sendBroadcastAsUser(newIntent, UserHandle.SYSTEM);
                         break;
                 }
             }
@@ -1670,9 +1670,10 @@ public final class AppRestrictionController {
             if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER) {
                 final Intent intent = new Intent(ACTION_SHOW_FOREGROUND_SERVICE_MANAGER);
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                // Task manager runs in SystemUI, which is SYSTEM user only.
                 pendingIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
                         intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                        UserHandle.of(UserHandle.getUserId(uid)));
+                        UserHandle.SYSTEM);
             } else {
                 final Intent intent = new Intent(Settings.ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL);
                 intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
@@ -1750,7 +1751,7 @@ public final class AppRestrictionController {
                     SYSTEM_UID, UserHandle.getUserId(uid));
             final String title = mContext.getString(titleRes);
             final String message = mContext.getString(messageRes,
-                    ai != null ? pm.getText(packageName, ai.labelRes, ai) : packageName);
+                    ai != null ? ai.loadLabel(pm) : packageName);
             final Icon icon = ai != null ? Icon.createWithResource(packageName, ai.icon) : null;
 
             postNotification(notificationId, packageName, uid, title, message, icon, pendingIntent,
