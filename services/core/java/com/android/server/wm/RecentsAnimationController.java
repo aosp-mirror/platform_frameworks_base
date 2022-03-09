@@ -281,6 +281,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             task.setCanAffectSystemUiFlags(behindSystemBars);
                         }
                     }
+                    InputMethodManagerInternal.get().maybeFinishStylusHandwriting();
                     if (!behindSystemBars) {
                         // Hiding IME if IME window is not attached to app.
                         // Since some windowing mode is not proper to snapshot Task with IME window
